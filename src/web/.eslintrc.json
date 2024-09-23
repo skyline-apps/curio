@@ -1,0 +1,73 @@
+{
+  "extends": [
+    "next",
+    "plugin:import/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "import",
+    "unused-imports",
+    "react",
+    "prettier"
+  ],
+  "root": true,
+  "rules": {
+    "@typescript-eslint/explicit-function-return-type": [
+      "error",
+      {
+        "allowExpressions": true
+      }
+    ],
+    "@typescript-eslint/explicit-module-boundary-types": [
+      "error",
+      {
+        "allowDirectConstAssertionInArrowFunctions": true
+      }
+    ],
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
+    "import/order": [
+      "error",
+      {
+        "groups": [
+          "external",
+          "index",
+          "sibling",
+          "parent",
+          "internal",
+          "builtin",
+          "object",
+          "type"
+        ],
+        "newlines-between": "always"
+      }
+    ],
+    "prettier/prettier": "error",
+    "react/function-component-definition": [
+        2,
+        {
+            "namedComponents": "arrow-function",
+            "unnamedComponents": "arrow-function"
+        }
+    ],
+    "react/prop-types": "error",
+    "sort-imports": [
+      "error",
+      { "ignoreCase": true, "allowSeparatedGroups": true }
+    ],
+    "unused-imports/no-unused-imports": "error"
+  }
+}

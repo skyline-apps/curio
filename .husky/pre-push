@@ -1,0 +1,7 @@
+. "$(dirname -- "$0")/_/husky.sh"
+
+declare ROOT_DIR=$(git rev-parse --show-toplevel)
+
+cd ${ROOT_DIR}/src/web
+npm run lint
+npm run build
