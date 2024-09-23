@@ -1,0 +1,21 @@
+{
+  "name": "curio",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kimberli/curio.git"
+  },
+  "author": "kimberli",
+  "license": "GPL-2.0",
+  "bugs": {
+    "url": "https://github.com/kimberli/curio/issues"
+  },
+  "homepage": "https://github.com/kimberli/curio#readme",
+  "devDependencies": {
+    "husky": "^8.0.3"
+  }
+}
