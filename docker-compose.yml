@@ -1,0 +1,10 @@
+name: curio
+services:
+  web:
+    image: node:22.9-slim
+    container_name: curio-web
+    ports:
+      - 3000
+
+include:
+  - ./docker/supabase.yml
