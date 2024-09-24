@@ -1,10 +1,16 @@
 name: curio
+include:
+  - ./docker/supabase.yml
+
 services:
   web:
     image: node:22.9-slim
     container_name: curio-web
     ports:
-      - 3000
-
-include:
-  - ./docker/supabase.yml
+      - 3000:3000
+    volumes:
+      - ./src/web:/app
+    working_dir: /app
+    command: npm run dev
+    depends_on:
+      - db
