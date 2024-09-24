@@ -19,8 +19,8 @@ services:
       POSTGRES_URL: "postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
       NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_PUBLIC_URL}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
-    mem_limit: "6G"
-    cpus: 4
+    # mem_limit: "6G"
+    # cpus: 4
     develop:
       watch:
         - action: sync
