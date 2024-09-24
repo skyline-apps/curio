@@ -14,6 +14,7 @@ out/
 build
 
 # misc
+.vscode
 .DS_Store
 *.pem
 
@@ -34,6 +35,3 @@ next-env.d.ts
 
 # db
 docker/volumes/db/data
-
-# secrets
-docker/config.toml

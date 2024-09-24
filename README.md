@@ -3,7 +3,6 @@
 ## Local development
 First, set up environment variables and secrets.
 1. Copy `.env.template` to `.env` and populate values.
-2. Copy `docker/config.toml.template` to `docker/config.toml` and populate values.
 
 To start the local development environment:
 1. Run `docker compose up -d` to start containers in detached mode.
