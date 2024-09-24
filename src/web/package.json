@@ -6,11 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate": "npx drizzle-kit generate --name",
+    "db:migrate": "npx drizzle-kit migrate"
   },
   "dependencies": {
     "@next/third-parties": "^14.1.4",
+    "drizzle-orm": "^0.33.0",
     "next": "14.2.13",
+    "postgres": "^3.4.4",
     "react": "^18",
     "react-dom": "^18",
     "react-icons": "^5.0.1"
@@ -24,6 +28,7 @@
     "@typescript-eslint/parser": "^6.19.0",
     "autoprefixer": "^10.4.17",
     "dotenv-cli": "^7.3.0",
+    "drizzle-kit": "^0.24.2",
     "eslint": "^8.56.0",
     "eslint-config-next": "^14.0.4",
     "eslint-config-prettier": "^9.1.0",
