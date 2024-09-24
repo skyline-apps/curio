@@ -3,7 +3,8 @@
     "target": "es6",
     "lib": ["dom", "dom.iterable", "esnext"],
     "baseUrl": ".",
-    "allowJs": true,
+    "rootDir": ".",
+    "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -20,7 +21,7 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
