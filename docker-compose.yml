@@ -5,12 +5,15 @@ include:
 services:
   web:
     image: node:22.9-slim
-    container_name: curio-web
+    container_name: curio
     ports:
       - 3000:3000
     volumes:
       - ./src/web:/app
     working_dir: /app
-    command: npm run dev
+    command: >
+      bash -c "npm install && npm run dev"
     depends_on:
       - db
+    environment:
+      POSTGRES_URL: "postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
