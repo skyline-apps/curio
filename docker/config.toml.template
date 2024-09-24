@@ -1,7 +1,0 @@
-[auth]
-external_providers = ["google"]
-
-[auth.external.google]
-client_id = "XXXXXX"
-client_secret = "XXXXXX"
-redirect_uri = "http://localhost:8000/auth/callback"
