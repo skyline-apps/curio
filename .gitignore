@@ -34,3 +34,6 @@ next-env.d.ts
 
 # db
 docker/volumes/db/data
+
+# secrets
+docker/config.toml
