@@ -3,11 +3,18 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 
 const HomePage: React.FC = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
+  const session = await supabase.auth.getSession();
+  console.log("Current session:", session);
 
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
+
+  if (error) {
+    console.error(error);
+  }
 
   if (!user) {
     return redirect("/login");
