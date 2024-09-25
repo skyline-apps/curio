@@ -9,8 +9,6 @@ services:
       dockerfile: ./docker/dev/Dockerfile
     container_name: curio
     network_mode: host
-    ports:
-      - 3000:3000
     working_dir: /app
     command: >
       npm run dev
