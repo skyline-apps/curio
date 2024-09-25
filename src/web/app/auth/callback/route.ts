@@ -42,7 +42,7 @@ export async function GET(request: Request): Promise<NextResponse> {
       const profile = await getOrCreateProfile(supabase);
       if (!profile) {
         return NextResponse.redirect(
-          `${origin}/auth/auth-code-error?message=Profile creation failed.`,
+          `${origin}/auth/auth-code-error?error=Profile creation failed.`,
         );
       }
       const forwardedHost = request.headers.get("x-forwarded-host"); // original origin before load balancer
@@ -62,6 +62,6 @@ export async function GET(request: Request): Promise<NextResponse> {
 
   // return the user to an error page with instructions
   return NextResponse.redirect(
-    `${origin}/auth/auth-code-error?message=Invalid authentication code.`,
+    `${origin}/auth/auth-code-error?error=Invalid authentication code.`,
   );
 }
