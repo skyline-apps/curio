@@ -1,58 +1,34 @@
-"use client";
+import { useState } from "react";
 
-import { useEffect, useState } from "react";
-
+import Button from "@/components/Button";
 import { createClient } from "@/utils/supabase/client";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-globalThis.handleSignInWithGoogle = async function (
-  response: any,
-): Promise<void> {
+interface GoogleOAuthButtonProps {
+  nextUrl?: string;
+}
+
+const GoogleOAuthButton: React.FC<GoogleOAuthButtonProps> = ({
+  nextUrl,
+}: GoogleOAuthButtonProps) => {
   const supabase = createClient();
-  const { data, error } = await supabase.auth.signInWithIdToken({
-    provider: "google",
-    token: response.credential,
-  });
-  if (error) {
-    console.error(error);
-  }
-  if (data) {
-    window.location.href = "/home";
-  }
-};
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-const GoogleOAuthButton: React.FC = () => {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
+  const handleSignInWithGoogle = async (): Promise<void> => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${location.origin}/auth/callback?next=${nextUrl || ""}`,
+      },
+    });
+    if (error) {
+      setErrorMessage(error.message);
+    }
+  };
 
   return (
     <div id="google-signin-button">
-      <div
-        id="g_id_onload"
-        data-client_id="900658872079-sos9stfq83hhh3vk2fumfmrp3m9qai8o.apps.googleusercontent.com"
-        data-context="signin"
-        data-ux_mode="popup"
-        data-callback="handleSignInWithGoogle"
-        data-auto_prompt="false"
-        data-use_fedcm_for_prompt="true"
-      ></div>
-
-      <div
-        className="g_id_signin"
-        data-type="standard"
-        data-shape="rectangular"
-        data-theme="outline"
-        data-text="signin_with"
-        data-size="large"
-        data-logo_alignment="left"
-      ></div>
+      <Button onClick={handleSignInWithGoogle}>Sign in with Google</Button>
+      <p className="text-red-500">{errorMessage}</p>
     </div>
   );
 };

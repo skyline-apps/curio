@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, ButtonProps } from "@nextui-org/react";
+import Link from "next/link";
 import { useFormStatus } from "react-dom";
 
 interface FormButtonProps extends ButtonProps {
@@ -20,4 +21,22 @@ export const FormButton: React.FC<FormButtonProps> = ({
   );
 };
 
-export default Button;
+interface CurioButtonProps extends ButtonProps {
+  href?: string;
+}
+
+const CurioButton: React.FC<CurioButtonProps> = ({
+  href,
+  ...props
+}: CurioButtonProps) => {
+  if (href) {
+    return (
+      <Link href={href}>
+        <Button {...props} />
+      </Link>
+    );
+  }
+  return <Button {...props} />;
+};
+
+export default CurioButton;

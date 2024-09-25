@@ -4,8 +4,9 @@ import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+export type { SupabaseClient } from "@supabase/supabase-js";
 
-export const createClient = (): SupabaseClient => {
+export const createClient = async (): Promise<SupabaseClient> => {
   const cookieStore = cookies();
 
   return createServerClient(
@@ -27,6 +28,11 @@ export const createClient = (): SupabaseClient => {
             // user sessions.
           }
         },
+      },
+      cookieOptions: {
+        secure: process.env.NODE_ENV === "production",
+        // sameSite: "lax",
+        // domain: undefined,
       },
     },
   );

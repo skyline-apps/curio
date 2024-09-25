@@ -7,7 +7,6 @@ export const updateSession = async (
   let supabaseResponse = NextResponse.next({
     request,
   });
-  console.log("MIDDLE", request.url);
 
   const supabase = createServerClient(
     process.env.SERVER_SUPABASE_URL!,
