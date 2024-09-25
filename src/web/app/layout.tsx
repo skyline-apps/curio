@@ -1,5 +1,4 @@
 import React from "react";
-import Script from "next/script";
 
 import Navbar from "@/components/Navbar";
 import Providers from "@/providers";
@@ -27,10 +26,6 @@ const RootLayout: React.FC<RootLayoutProps> = ({
           <Navbar />
           <main className="w-full p-4">{children}</main>
         </Providers>
-        <Script
-          src="https://accounts.google.com/gsi/client"
-          strategy="lazyOnload"
-        />
       </body>
     </html>
   );

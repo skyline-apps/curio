@@ -1,18 +1,21 @@
 import {
   foreignKey,
+  pgSchema,
   pgTable,
   text,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
+const authSchema = pgSchema("auth");
+
 // Incomplete table definition for auth.users, which is managed by Supabase.
-export const authUsersTable = pgTable("auth.users", {
+const authUsers = authSchema.table("users", {
   id: uuid("id").primaryKey(),
   email: text("email").notNull().unique(),
 });
 
-export const profilesTable = pgTable(
+export const profiles = pgTable(
   "profiles",
   {
     id: uuid("id").defaultRandom().primaryKey(),
@@ -23,10 +26,10 @@ export const profilesTable = pgTable(
     usernameIndex: uniqueIndex("username_index").on(table.username),
     userForeignKey: foreignKey({
       columns: [table.userId],
-      foreignColumns: [authUsersTable.id],
+      foreignColumns: [authUsers.id],
     }),
   }),
 );
 
-export type InsertProfile = typeof profilesTable.$inferInsert;
-export type SelectProfile = typeof profilesTable.$inferSelect;
+export type InsertProfile = typeof profiles.$inferInsert;
+export type SelectProfile = typeof profiles.$inferSelect;

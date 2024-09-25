@@ -1,6 +1,5 @@
 import { LuBookMarked, LuBookOpen, LuStar } from "react-icons/lu";
 import { Card } from "@nextui-org/react";
-import Link from "next/link";
 import React from "react";
 
 import Button from "@/components/Button";
@@ -51,11 +50,9 @@ const Home: React.FC = () => {
         </div>
 
         <div className="text-center">
-          <Link href="/login">
-            <Button color="primary" size="lg" className="px-8 py-2">
-              Get Started
-            </Button>
-          </Link>
+          <Button href="/login" color="primary" size="lg" className="px-8 py-2">
+            Get Started
+          </Button>
         </div>
       </main>
     </div>
