@@ -17,7 +17,8 @@ services:
       - db
     environment:
       POSTGRES_URL: "postgres://postgres:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
-      NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_PUBLIC_URL}
+      SERVER_SUPABASE_URL: http://supabase-kong:8000  # In local dev, this needs to be the address of the Supabase API Docker container.
+      NEXT_PUBLIC_SUPABASE_URL: ${API_EXTERNAL_URL}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
     # mem_limit: "6G"
     # cpus: 4
