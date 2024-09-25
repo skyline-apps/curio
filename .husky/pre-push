@@ -1,7 +1,9 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
-declare ROOT_DIR=$(git rev-parse --show-toplevel)
+ROOT_DIR=$(git rev-parse --show-toplevel)
 
-cd ${ROOT_DIR}/src/web
-npm run lint
-npm run build
+cd ${ROOT_DIR}
+docker start curio
+
+docker exec curio npm run lint
+docker exec curio npm run build
