@@ -12,6 +12,7 @@ import {
 } from "@/components/Dropdown";
 import Button from "@/components/Button";
 import { createClient } from "@/utils/supabase/client";
+import CurioColored from "@/public/logo/curio_colored.svg";
 import { UserContext } from "@/providers/UserProvider";
 
 const CurioNavbar: React.FC = () => {
@@ -41,7 +42,7 @@ const CurioNavbar: React.FC = () => {
     <Navbar isBordered maxWidth="full">
       <NavbarBrand>
         <Link href={homeLink}>
-          <h1 className="text-2xl font-bold">Curio</h1>
+          <CurioColored height="56px" />
         </Link>
       </NavbarBrand>
       <NavbarContent justify="end">
