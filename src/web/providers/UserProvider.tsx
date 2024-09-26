@@ -32,9 +32,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({
 }: UserProviderProps): React.ReactNode => {
   const [currentUser, setCurrentUser] = useState<User>(user);
 
-  const clearUser = () => {
+  const clearUser = (): void => {
     setCurrentUser({ id: null, username: null, email: null });
   };
+
   return (
     <UserContext.Provider value={{ user: currentUser, clearUser }}>
       {children}
