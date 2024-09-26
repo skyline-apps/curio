@@ -20,6 +20,13 @@ const HomePage: React.FC = () => {
           {JSON.stringify(user, null, 2)}
         </pre>
       </div>
+      <div className="flex flex-row gap-2 items-start">
+        <div className="w-48 h-48 bg-primary">Primary</div>
+        <div className="w-48 h-48 bg-secondary">Secondary</div>
+        <div className="w-48 h-48 bg-success">Success</div>
+        <div className="w-48 h-48 bg-warning">Warning</div>
+        <div className="w-48 h-48 bg-danger">Danger</div>
+      </div>
     </div>
   );
 };
