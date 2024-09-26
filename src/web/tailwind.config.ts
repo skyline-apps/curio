@@ -11,6 +11,11 @@ const config: Config = {
     "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+    fontFamily: {
+      sans: ["var(--font-sans)", "sans-serif"],
+      serif: ["var(--font-serif)", "sans-serif"],
+      mono: ["var(--font-mono)", "monospace"],
+    },
     extend: {},
   },
   darkMode: "class",

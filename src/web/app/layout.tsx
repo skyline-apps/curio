@@ -1,4 +1,6 @@
 import React from "react";
+import { Noto_Sans, Noto_Serif, Noto_Sans_Mono } from 'next/font/google'
+
 
 import Navbar from "@/components/Navbar";
 import Providers from "@/providers";
@@ -15,11 +17,29 @@ export const metadata: Metadata = {
 
 interface RootLayoutProps extends React.PropsWithChildren { }
 
+const sans = Noto_Sans({
+  display: 'swap',
+  subsets: ['latin'],
+  variable: '--font-sans',
+})
+
+const serif = Noto_Serif({
+  display: 'swap',
+  subsets: ['latin'],
+  variable: '--font-serif',
+})
+
+const mono = Noto_Sans_Mono({
+  display: 'swap',
+  subsets: ['latin'],
+  variable: '--font-mono',
+})
+
 const RootLayout: React.FC<RootLayoutProps> = ({
   children,
 }: RootLayoutProps) => {
   return (
-    <html lang="en">
+    <html lang="en" className={`${sans.variable} ${serif.variable} ${mono.variable}`}>
       <head></head>
       <body className="text-foreground">
         <Providers>
