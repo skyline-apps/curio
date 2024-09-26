@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  eslint: {
+    dirs: ["."],
+    ignoreDuringBuilds: false,
+  },
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   webpack(config) {
     // Grab the existing rule that handles SVG imports
