@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description: "Curate your inspirations",
 };
 
-interface RootLayoutProps extends React.PropsWithChildren {}
+interface RootLayoutProps extends React.PropsWithChildren { }
 
 const RootLayout: React.FC<RootLayoutProps> = ({
   children,
@@ -21,7 +21,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({
   return (
     <html lang="en">
       <head></head>
-      <body>
+      <body className="text-foreground">
         <Providers>
           <Navbar />
           <main className="w-full p-4">{children}</main>

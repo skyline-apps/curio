@@ -1,6 +1,7 @@
 import { LuBookMarked, LuBookOpen, LuStar } from "react-icons/lu";
 import { Card } from "@nextui-org/react";
 import React from "react";
+import CurioName from "@/public/logo/curio_name.svg";
 
 import Button from "@/components/Button";
 
@@ -28,7 +29,7 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-grow container mx-auto px-4 py-12">
-        <h1 className="text-4xl font-bold text-center mb-4">Curio</h1>
+        <CurioName className="h-24 mx-auto" />
         <h2 className="text-2xl text-center mb-8">Curate your inspirations</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
