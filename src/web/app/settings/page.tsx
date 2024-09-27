@@ -1,14 +1,14 @@
 "use client";
 import React, { useContext, useState } from "react";
 
-import Card from "@/components/Card";
-import { createLogger } from "@/utils/logger";
-import Form from "@/components/Form";
-import { FormButton } from "@/components/Button";
-import { handleAPIResponse } from "@/utils/api";
-import Input from "@/components/Input";
 import { type UpdateUsernameResponse } from "@/app/api/v1/user/username/route";
+import { FormButton } from "@/components/Button";
+import Card from "@/components/Card";
+import Form from "@/components/Form";
+import Input from "@/components/Input";
 import { UserContext } from "@/providers/UserProvider";
+import { handleAPIResponse } from "@/utils/api";
+import { createLogger } from "@/utils/logger";
 
 const log = createLogger("SettingsPage");
 

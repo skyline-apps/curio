@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { createClient, SupabaseClient } from "@/utils/supabase/server";
 import { db, eq } from "@/db";
 import { profiles, SelectProfile } from "@/db/schema";
 import { createLogger } from "@/utils/logger";
+import { createClient, SupabaseClient } from "@/utils/supabase/server";
 import { createUsernameSlug } from "@/utils/usernames";
 
 const log = createLogger("auth/callback");

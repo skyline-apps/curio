@@ -1,7 +1,7 @@
 "use client";
 
-import React, { Suspense } from "react";
 import Link from "next/link";
+import React, { Suspense } from "react";
 
 import URLMessage from "@/components/URLMessage";
 

@@ -1,5 +1,9 @@
-import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { type NextRequest, NextResponse } from "next/server";
+
+import { createLogger } from "@/utils/logger";
+
+const log = createLogger("supabase.middleware");
 
 export const updateSession = async (
   request: NextRequest,
@@ -40,7 +44,7 @@ export const updateSession = async (
     error,
   } = await supabase.auth.getUser();
   if (error) {
-    console.error(error);
+    log.error(error.message);
   }
 
   if (

@@ -1,7 +1,7 @@
-import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkDbError, db, DbError, DbErrorCode, eq } from "@/db";
-import { createLogger } from "@/utils/logger";
 import { profiles } from "@/db/schema";
+import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
+import { createLogger } from "@/utils/logger";
 import { usernameError } from "@/utils/usernames";
 
 const log = createLogger("api/v1/user/username");

@@ -1,12 +1,12 @@
-import React, { PropsWithChildren } from "react";
 import { NextUIProvider } from "@nextui-org/react";
-
-import { type User, UserProvider } from "./UserProvider";
+import React, { PropsWithChildren } from "react";
 
 import { db, eq } from "@/db";
-import { createClient } from "@/utils/supabase/server";
-import { createLogger } from "@/utils/logger";
 import { profiles } from "@/db/schema";
+import { createLogger } from "@/utils/logger";
+import { createClient } from "@/utils/supabase/server";
+
+import { type User, UserProvider } from "./UserProvider";
 
 const log = createLogger("Providers");
 

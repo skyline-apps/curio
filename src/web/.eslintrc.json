@@ -1,23 +1,24 @@
 {
   "extends": [
     "next",
-    "plugin:import/recommended",
     "plugin:@typescript-eslint/recommended",
     "prettier"
   ],
   "ignorePatterns": [
-    ".config.js"
+    "*.config.js"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "project": "./tsconfig.json"
+    "ecmaVersion": "latest",
+    "project": "./tsconfig.json",
+    "sourceType": "module"
   },
   "plugins": [
     "@typescript-eslint",
-    "import",
     "prettier",
     "promise",
     "react",
+    "simple-import-sort",
     "unused-imports"
   ],
   "root": true,
@@ -43,22 +44,9 @@
         "caughtErrorsIgnorePattern": "^_"
       }
     ],
-    "import/order": [
-      "error",
-      {
-        "groups": [
-          "external",
-          "index",
-          "sibling",
-          "parent",
-          "internal",
-          "builtin",
-          "object",
-          "type"
-        ],
-        "newlines-between": "always"
-      }
-    ],
+    "import/first": "error",
+    "import/newline-after-import": "error",
+    "import/no-duplicates": "error",
     "no-console": [
       "error"
     ],
@@ -72,13 +60,8 @@
       }
     ],
     "react/prop-types": "error",
-    "sort-imports": [
-      "error",
-      {
-        "ignoreCase": true,
-        "allowSeparatedGroups": true
-      }
-    ],
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
     "unused-imports/no-unused-imports": "error"
   }
 }
