@@ -33,11 +33,11 @@ interface CurioButtonProps extends ButtonProps {
 }
 
 // Add forwardRef to ensure Dropdowns are properly positioned.
-const CurioButton: React.FC<CurioButtonProps> = forwardRef(
+const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
   ({ href, ...props }: CurioButtonProps, ref) => {
     if (href) {
       return (
-        <Link href={href}>
+        <Link href={href} passHref>
           <Button ref={ref} {...props} />
         </Link>
       );
