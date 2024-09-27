@@ -56,6 +56,9 @@
         "newlines-between": "always"
       }
     ],
+    "no-console": [
+      "error"
+    ],
     "prettier/prettier": "error",
     "react/function-component-definition": [
         2,

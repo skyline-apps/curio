@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 import { createClient, SupabaseClient } from "@/utils/supabase/server";
 import { db, eq } from "@/db";
 import { profiles, SelectProfile } from "@/db/schema";
+import { createLogger } from "@/utils/logger";
 import { createUsernameSlug } from "@/utils/usernames";
+
+const log = createLogger("auth/callback");
 
 // Create Profile corresponding to new User
 async function getOrCreateProfile(
@@ -56,7 +59,7 @@ export async function GET(request: Request): Promise<NextResponse> {
         return NextResponse.redirect(`${origin}${next}`);
       }
     } else {
-      console.error("Error exchanging code: ", error);
+      log.error("Error exchanging code: ", error);
     }
   }
 
