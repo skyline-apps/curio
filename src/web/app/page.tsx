@@ -1,9 +1,13 @@
-import { LuBookMarked, LuBookOpen, LuStar } from "react-icons/lu";
-import { Card } from "@nextui-org/react";
+import {
+  HiOutlineBookmarkSquare,
+  HiOutlineBookOpen,
+  HiOutlineStar,
+} from "react-icons/hi2";
 import React from "react";
-import CurioName from "@/public/logo/curio_name.svg";
 
 import Button from "@/components/Button";
+import Card from "@/components/Card";
+import CurioName from "@/public/logo/curio_name.svg";
 
 interface FeatureProps {
   icon: React.ReactNode;
@@ -34,17 +38,17 @@ const Home: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <Feature
-            icon={<LuBookMarked className="text-primary" />}
+            icon={<HiOutlineBookmarkSquare className="text-primary" />}
             title="Save Anything"
             description="Save any link from the internet, whether it's an article, book, movie, podcast, or song."
           />
           <Feature
-            icon={<LuStar className="text-warning" />}
+            icon={<HiOutlineStar className="text-warning" />}
             title="Organize"
             description="Favorite, tag, highlight, and add notes to saved items."
           />
           <Feature
-            icon={<LuBookOpen className="text-success" />}
+            icon={<HiOutlineBookOpen className="text-success" />}
             title="Read Later"
             description="Read your articles later with a clean, focused viewer."
           />

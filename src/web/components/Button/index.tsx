@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, ButtonProps } from "@nextui-org/react";
+import { Button, ButtonProps, Spinner } from "@nextui-org/react";
 import React, { forwardRef } from "react";
 import Link from "next/link";
 import { useFormStatus } from "react-dom";
@@ -15,9 +15,10 @@ export const FormButton: React.FC<FormButtonProps> = ({
   ...props
 }: FormButtonProps) => {
   const { pending } = useFormStatus();
+  const loadingContent = pendingText ? <Spinner /> : null;
   return (
     <Button type="submit" aria-disabled={pending} {...props}>
-      {pending ? pendingText : children}
+      {pending ? loadingContent : children}
     </Button>
   );
 };

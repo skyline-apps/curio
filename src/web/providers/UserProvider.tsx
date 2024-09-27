@@ -10,6 +10,7 @@ export type User = {
 export type UserContextType = {
   user: User;
   clearUser: () => void;
+  changeUsername: (username: string) => void;
 };
 
 interface UserProviderProps {
@@ -24,6 +25,7 @@ export const UserContext = createContext<UserContextType>({
     email: null,
   },
   clearUser: () => {},
+  changeUsername: (_username: string) => {},
 });
 
 export const UserProvider: React.FC<UserProviderProps> = ({
@@ -36,8 +38,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({
     setCurrentUser({ id: null, username: null, email: null });
   };
 
+  const changeUsername = (username: string): void => {
+    setCurrentUser({ ...currentUser, username });
+  };
+
   return (
-    <UserContext.Provider value={{ user: currentUser, clearUser }}>
+    <UserContext.Provider
+      value={{ user: currentUser, clearUser, changeUsername }}
+    >
       {children}
     </UserContext.Provider>
   );
