@@ -7,6 +7,16 @@
   "ignorePatterns": [
     "*.config.js"
   ],
+  "overrides": [
+    {
+      "files": [
+        "components/**/*"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": "latest",
@@ -49,6 +59,36 @@
     "import/no-duplicates": "error",
     "no-console": [
       "error"
+    ],
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "next/server",
+            "message": "Please use `@/utils/api` instead of `next/server`"
+          },
+          {
+            "name": "@nextui-org/react",
+            "message": "Please use components from the `@/components/` library"
+          }
+        ],
+        "patterns": [
+          {
+            "group": [
+              "@supabase/*"
+            ],
+            "message": "Please use `@/utils/supabase` instead of `@supabase/*`"
+          },
+          {
+            "group": [
+              "drizzle-orm",
+              "postgres"
+            ],
+            "message": "Please use `@/db` for database utilities"
+          }
+        ]
+      }
     ],
     "prettier/prettier": "error",
     "promise/catch-or-return": "error",

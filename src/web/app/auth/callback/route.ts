@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports
 import { NextResponse } from "next/server";
 
 import { db, eq } from "@/db";

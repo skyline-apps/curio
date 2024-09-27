@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-imports */
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 

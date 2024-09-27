@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports
 import { type NextRequest, type NextResponse } from "next/server";
 
 import { updateSession } from "@/utils/supabase/middleware";

@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-imports */
 "use server";
 
 import { createServerClient } from "@supabase/ssr";
