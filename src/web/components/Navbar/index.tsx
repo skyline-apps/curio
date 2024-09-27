@@ -12,8 +12,11 @@ import {
 } from "@/components/Dropdown";
 import Button from "@/components/Button";
 import { createClient } from "@/utils/supabase/client";
+import { createLogger } from "@/utils/logger";
 import CurioColored from "@/public/logo/curio_colored.svg";
 import { UserContext } from "@/providers/UserProvider";
+
+const log = createLogger("Navbar");
 
 const CurioNavbar: React.FC = () => {
   const router = useRouter();
@@ -27,7 +30,7 @@ const CurioNavbar: React.FC = () => {
   const handleLogout = async (): Promise<void> => {
     const { error } = await supabase.auth.signOut();
     if (error) {
-      console.error("Error logging out:", error);
+      log.error("Error with logout:", error);
       return;
     }
     // Clear the current user from the UserContext.

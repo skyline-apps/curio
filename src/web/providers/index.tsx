@@ -5,7 +5,10 @@ import { type User, UserProvider } from "./UserProvider";
 
 import { db, eq } from "@/db";
 import { createClient } from "@/utils/supabase/server";
+import { createLogger } from "@/utils/logger";
 import { profiles } from "@/db/schema";
+
+const log = createLogger("Providers");
 
 const Providers: React.FC<PropsWithChildren> = async ({
   children,
@@ -19,7 +22,7 @@ const Providers: React.FC<PropsWithChildren> = async ({
   } = await supabase.auth.getUser();
 
   if (error) {
-    console.error(error);
+    log.error("Error getting user:", error);
   }
 
   if (user) {
