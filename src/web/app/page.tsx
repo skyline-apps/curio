@@ -29,7 +29,7 @@ const Feature: React.FC<FeatureProps> = ({
   </Card>
 );
 
-const Home: React.FC = () => {
+const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-grow container mx-auto px-4 py-12">
@@ -64,4 +64,4 @@ const Home: React.FC = () => {
   );
 };
 
-export default Home;
+export default LandingPage;
