@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports
 import { NextRequest, NextResponse } from "next/server";
 
 export type APIRequest = NextRequest;

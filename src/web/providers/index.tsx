@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports
 import { NextUIProvider } from "@nextui-org/react";
 import React, { PropsWithChildren } from "react";
 

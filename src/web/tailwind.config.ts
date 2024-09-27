@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports
 import { nextui } from "@nextui-org/react";
 import type { Config } from "tailwindcss";
 

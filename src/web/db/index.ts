@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-imports */
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres, { type PostgresError } from "postgres";
 
