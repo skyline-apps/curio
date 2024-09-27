@@ -7,3 +7,4 @@ docker start curio
 
 docker exec curio npm run lint
 docker exec curio npm run build
+docker exec curio npm run test
