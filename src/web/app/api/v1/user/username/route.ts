@@ -2,7 +2,7 @@ import { checkDbError, db, DbError, DbErrorCode, eq } from "@/db";
 import { profiles } from "@/db/schema";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
-import { usernameError } from "@/utils/usernames";
+import { usernameError } from "@/utils/username";
 
 const log = createLogger("api/v1/user/username");
 
@@ -31,11 +31,11 @@ export async function POST(
     }
 
     // Validate the new username
-    if (usernameError(newUsername)) {
+    const errorMessage = usernameError(newUsername);
+    if (errorMessage) {
       return APIResponseJSON(
         {
-          error:
-            "Valid usernames must contain only alphanumeric characters or underscores.",
+          error: errorMessage,
         },
         { status: 400 },
       );
