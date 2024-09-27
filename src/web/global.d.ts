@@ -8,6 +8,5 @@ declare module "*.svg" {
 declare module "*.svg?url" {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const content: any;
-  export const ReactComponent: any;
   export default content;
 }
