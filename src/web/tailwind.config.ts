@@ -1,6 +1,6 @@
 import { nextui } from "@nextui-org/react";
 
-import { brown, darkBrown, themeColors } from "./utils/colors";
+import { brown, darkBrown, lightBrown, themeColors } from "./utils/colors";
 
 import type { Config } from "tailwindcss";
 
@@ -22,6 +22,12 @@ const config: Config = {
   plugins: [
     nextui({
       layout: {
+        boxShadow: {
+          small: "0 0 0 1px rgba(0, 0, 0, 0.05)",
+          medium: "0 0px 2px 1px rgba(0, 0, 0, 0.05)",
+          large:
+            "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+        },
         radius: {
           small: "0.0625rem",
           medium: "0.125rem",
@@ -33,6 +39,7 @@ const config: Config = {
           colors: {
             background: brown[25],
             foreground: darkBrown,
+            content1: lightBrown,
             ...themeColors,
           },
         },
@@ -40,6 +47,7 @@ const config: Config = {
           colors: {
             background: darkBrown,
             foreground: brown[25],
+            content1: brown[800],
             ...themeColors,
           },
         },

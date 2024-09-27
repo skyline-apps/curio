@@ -5,7 +5,9 @@
     "plugin:@typescript-eslint/recommended",
     "prettier"
   ],
-  "ignorePatterns": [".config.js"]
+  "ignorePatterns": [
+    ".config.js"
+  ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "project": "./tsconfig.json"
@@ -13,9 +15,10 @@
   "plugins": [
     "@typescript-eslint",
     "import",
-    "unused-imports",
+    "prettier",
+    "promise",
     "react",
-    "prettier"
+    "unused-imports"
   ],
   "root": true,
   "rules": {
@@ -60,17 +63,21 @@
       "error"
     ],
     "prettier/prettier": "error",
+    "promise/catch-or-return": "error",
     "react/function-component-definition": [
-        2,
-        {
-            "namedComponents": "arrow-function",
-            "unnamedComponents": "arrow-function"
-        }
+      2,
+      {
+        "namedComponents": "arrow-function",
+        "unnamedComponents": "arrow-function"
+      }
     ],
     "react/prop-types": "error",
     "sort-imports": [
       "error",
-      { "ignoreCase": true, "allowSeparatedGroups": true }
+      {
+        "ignoreCase": true,
+        "allowSeparatedGroups": true
+      }
     ],
     "unused-imports/no-unused-imports": "error"
   }

@@ -1,4 +1,4 @@
-export const lightBrown = "#F6F1E4";
+export const lightBrown = "#FAF7F5";
 export const darkBrown = "#433B35";
 
 export const gray = {

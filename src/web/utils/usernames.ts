@@ -10,7 +10,7 @@ export function createUsernameSlug(email: string): string {
 }
 
 // Returns an empty string if OK, or a reason if invalid.
-export function isValidUsername(username: string): string {
+export function usernameError(username: string): string {
   const allowedCharacters = /^[a-zA-Z0-9_]+$/;
   if (!username) {
     return "Username cannot be empty.";

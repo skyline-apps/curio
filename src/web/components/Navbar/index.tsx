@@ -1,6 +1,7 @@
 "use client";
 import { Navbar, NavbarBrand, NavbarContent } from "@nextui-org/navbar";
 import React, { useContext } from "react";
+import { HiOutlineUser } from "react-icons/hi2";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -25,6 +26,10 @@ const CurioNavbar: React.FC = () => {
 
   const handleLogin = (): void => {
     router.push("/login");
+  };
+
+  const handleSettings = (): void => {
+    router.push("/settings");
   };
 
   const handleLogout = async (): Promise<void> => {
@@ -52,10 +57,15 @@ const CurioNavbar: React.FC = () => {
         {user.id ? (
           <Dropdown>
             <DropdownTrigger>
-              <Button>{user.username}</Button>
+              <Button isIconOnly>
+                <HiOutlineUser />{" "}
+              </Button>
             </DropdownTrigger>
             <DropdownMenu>
-              <DropdownItem onPress={handleLogout}>Log Out</DropdownItem>
+              <DropdownItem onPress={handleSettings}>Settings</DropdownItem>
+              <DropdownItem onPress={handleLogout} description={user.username}>
+                Log Out
+              </DropdownItem>
             </DropdownMenu>
           </Dropdown>
         ) : (
