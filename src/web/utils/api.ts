@@ -15,7 +15,7 @@ export async function handleAPIResponse<T>(
 ): Promise<APIResponse<T>> {
   if (response.status < 200 || response.status >= 300) {
     const error = await response.json();
-    throw new Error(`Error: ${error.error}`);
+    throw new Error(error.error);
   }
   const result = await response.json();
   return result;
