@@ -20,9 +20,18 @@ const HomePage: React.FC = () => {
           {JSON.stringify(user, null, 2)}
         </pre>
       </div>
-      <p className="font-sans">This is a long block of sans serif font. Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
-      <p className="font-serif">This is a long block of serif font. Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
-      <p className="font-mono">This is a long block of mono font. Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
+      <p className="font-sans">
+        This is a long block of sans serif font. Lorem ipsum dolor sit amet
+        consectetur adipisicing elit.
+      </p>
+      <p className="font-serif">
+        This is a long block of serif font. Lorem ipsum dolor sit amet
+        consectetur adipisicing elit.
+      </p>
+      <p className="font-mono">
+        This is a long block of mono font. Lorem ipsum dolor sit amet
+        consectetur adipisicing elit.
+      </p>
       <div className="flex flex-row gap-2 items-start">
         <div className="w-48 h-48 bg-primary">Primary</div>
         <div className="w-48 h-48 bg-secondary">Secondary</div>

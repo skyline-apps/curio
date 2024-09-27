@@ -1,9 +1,9 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
-
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
+
 export type { SupabaseClient } from "@supabase/supabase-js";
 
 export const createClient = async (): Promise<SupabaseClient> => {

@@ -1,21 +1,21 @@
 "use client";
 import { Navbar, NavbarBrand, NavbarContent } from "@nextui-org/navbar";
-import React, { useContext } from "react";
-import { HiOutlineUser } from "react-icons/hi2";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import React, { useContext } from "react";
+import { HiOutlineUser } from "react-icons/hi2";
 
+import Button from "@/components/Button";
 import {
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
 } from "@/components/Dropdown";
-import Button from "@/components/Button";
-import { createClient } from "@/utils/supabase/client";
-import { createLogger } from "@/utils/logger";
-import CurioColored from "@/public/logo/curio_colored.svg";
 import { UserContext } from "@/providers/UserProvider";
+import CurioColored from "@/public/logo/curio_colored.svg";
+import { createLogger } from "@/utils/logger";
+import { createClient } from "@/utils/supabase/client";
 
 const log = createLogger("Navbar");
 

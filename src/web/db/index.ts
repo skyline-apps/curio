@@ -1,12 +1,12 @@
-import postgres, { type PostgresError } from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
+import postgres, { type PostgresError } from "postgres";
 
 import * as schema from "@/db/schema";
 
 const client = postgres(process.env.POSTGRES_URL!);
 export const db = drizzle(client, { schema });
 
-export { eq, lt, gt, lte, gte, ne } from "drizzle-orm";
+export { eq, gt, gte, lt, lte, ne } from "drizzle-orm";
 
 export type DbError = PostgresError;
 

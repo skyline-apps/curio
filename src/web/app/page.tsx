@@ -1,9 +1,9 @@
+import React from "react";
 import {
   HiOutlineBookmarkSquare,
   HiOutlineBookOpen,
   HiOutlineStar,
 } from "react-icons/hi2";
-import React from "react";
 
 import Button from "@/components/Button";
 import Card from "@/components/Card";

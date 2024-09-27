@@ -2,8 +2,8 @@
 
 export {
   Dropdown,
-  DropdownTrigger,
+  DropdownItem,
   DropdownMenu,
   DropdownSection,
-  DropdownItem,
+  DropdownTrigger,
 } from "@nextui-org/dropdown";
