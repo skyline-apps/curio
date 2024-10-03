@@ -28,6 +28,8 @@ const config: Config = {
     "^.+\\.(svg)$": "<rootDir>/__mocks__/svg.ts", // Needs to match Next.js's key exactly to overwrite.
     "\\./db$": "<rootDir>/__mocks__/db.ts",
     "\\./utils/logger$": "<rootDir>/__mocks__/logger.ts",
+    "\\./utils/supabase/client$": "<rootDir>/__mocks__/supabase-client.ts",
+    "\\./utils/supabase/server$": "<rootDir>/__mocks__/supabase-server.ts",
   },
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
