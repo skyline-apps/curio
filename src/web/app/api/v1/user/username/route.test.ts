@@ -10,23 +10,31 @@ import { POST } from "./route";
 
 describe("POST /api/v1/user/username", () => {
   test("should return 400 if userId or username is missing", async () => {
-    let response = await POST(makeMockRequest({ userId: "", username: "" }));
+    let response = await POST(makeMockRequest({}));
     expect(response.status).toBe(400);
     let body = await response.json();
     expect(body).toEqual({ error: "User ID and username are required." });
 
-    response = await POST(makeMockRequest({ userId: "user123", username: "" }));
+    response = await POST(makeMockRequest({ userId: "user123" }));
     expect(response.status).toBe(400);
     expect(response.status).toBe(400);
     body = await response.json();
     expect(body).toEqual({ error: "User ID and username are required." });
 
-    response = await POST(
-      makeMockRequest({ userId: "", username: "newusername" }),
-    );
+    response = await POST(makeMockRequest({ username: "newusername" }));
     expect(response.status).toBe(400);
     body = await response.json();
     expect(body).toEqual({ error: "User ID and username are required." });
+  });
+
+  test("should return 400 if new username is empty", async () => {
+    const response = await POST(
+      makeMockRequest({ userId: "user123", username: "" }),
+    );
+
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body).toEqual({ error: "Username cannot be empty." });
   });
 
   test("should return 400 if new username is invalid", async () => {
