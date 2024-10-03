@@ -1,4 +1,5 @@
-import { checkDbError, db, DbError, DbErrorCode, eq } from "@/db";
+import { db, eq } from "@/db";
+import { checkDbError, DbError, DbErrorCode } from "@/db/errors";
 import { profiles } from "@/db/schema";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
