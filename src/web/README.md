@@ -13,9 +13,8 @@ Navigate to the application in your browser at (https://localhost:3000).
 ### Database migrations
 #### Creating a migration
 1. Edit the schema definition at `db/schema.ts`.
-2. Exec into the app container using `docker exec -it curio bash`.
-3. Run `npm run db:generate <MIGRATION_NAME>`.
-4. Check in the generated files.
+2. Run `npm run db:generate <MIGRATION_NAME>`.
+3. Check in the generated files.
 
 #### Running migrations
 1. Exec into the app container using `docker exec -it curio bash`.

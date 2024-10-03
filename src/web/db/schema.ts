@@ -1,6 +1,7 @@
 // eslint-disable-next-line no-restricted-imports
 import {
   foreignKey,
+  pgEnum,
   pgSchema,
   pgTable,
   text,
@@ -16,12 +17,25 @@ const authUsers = authSchema.table("users", {
   email: text("email").notNull().unique(),
 });
 
+export enum ColorScheme {
+  AUTO = "auto",
+  LIGHT = "light",
+  DARK = "dark",
+}
+
+export const colorSchemeEnum = pgEnum("color_scheme", [
+  ColorScheme.AUTO,
+  ColorScheme.LIGHT,
+  ColorScheme.DARK,
+]);
+
 export const profiles = pgTable(
   "profiles",
   {
     id: uuid("id").defaultRandom().primaryKey(),
     username: text("username").notNull().unique(),
     userId: uuid("user_id").notNull(),
+    colorScheme: colorSchemeEnum("color_scheme").notNull().default("auto"),
   },
   (table) => ({
     usernameIndex: uniqueIndex("username_index").on(table.username),
