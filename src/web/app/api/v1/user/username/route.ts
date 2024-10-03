@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import { db, eq } from "@/db";
 import { checkDbError, DbError, DbErrorCode } from "@/db/errors";
 import { profiles } from "@/db/schema";
@@ -7,31 +9,33 @@ import { usernameError } from "@/utils/username";
 
 const log = createLogger("api/v1/user/username");
 
+const UpdateUsernameRequestSchema = z.object({
+  userId: z.string(),
+  username: z.string(),
+});
+
 export interface UpdateUsernameResponse {
   updatedUsername?: string;
 }
 
 // TODO(kim): Add authentication to API routes.
-/*
- * POST /api/v1/user/username
- * body:
- *   - userId (string) - ID of current user
- *   - username (string) - new username to set for user
- */
 export async function POST(
   request: APIRequest,
 ): Promise<APIResponse<UpdateUsernameResponse>> {
   try {
-    const { userId, username: newUsername } = await request.json();
+    const data = await request.json();
 
-    if (!userId || !newUsername) {
+    const parsed = UpdateUsernameRequestSchema.safeParse(data);
+    if (!parsed.success) {
       return APIResponseJSON(
         { error: "User ID and username are required." },
         { status: 400 },
       );
     }
 
-    // Validate the new username
+    const { userId, username: newUsername } = parsed.data;
+
+    // Check that the new username is valid
     const errorMessage = usernameError(newUsername);
     if (errorMessage) {
       return APIResponseJSON(
