@@ -58,7 +58,7 @@ const CurioNavbar: React.FC = () => {
           <Dropdown>
             <DropdownTrigger>
               <Button isIconOnly>
-                <HiOutlineUser />{" "}
+                <HiOutlineUser />
               </Button>
             </DropdownTrigger>
             <DropdownMenu>
