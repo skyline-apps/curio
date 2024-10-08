@@ -7,6 +7,12 @@ import type {
 } from "@/app/api/v1/user/settings/validation";
 import { handleAPIResponse } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
+import {
+  initializeTheme,
+  setDarkTheme,
+  setLightTheme,
+  setSystemTheme,
+} from "@/utils/theme";
 
 const log = createLogger("SettingsProvider");
 
@@ -45,8 +51,21 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   };
 
   useEffect(() => {
+    initializeTheme();
     fetchSettings();
   }, []);
+
+  useEffect(() => {
+    if (currentSettings?.colorScheme) {
+      if (currentSettings.colorScheme === "auto") {
+        setSystemTheme();
+      } else if (currentSettings.colorScheme === "light") {
+        setLightTheme();
+      } else if (currentSettings.colorScheme === "dark") {
+        setDarkTheme();
+      }
+    }
+  }, [currentSettings?.colorScheme]);
 
   const updateSettings = async (
     field: keyof Settings,
