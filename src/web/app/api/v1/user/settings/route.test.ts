@@ -8,7 +8,25 @@ import { ColorScheme } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
 import { makeAuthenticatedMockRequest } from "@/utils/test/api";
 
-import { POST } from "./route";
+import { GET, POST } from "./route";
+
+describe("GET /api/v1/user/settings", () => {
+  it("should return 200 with the user's current color scheme", async () => {
+    const colorScheme = ColorScheme.DARK;
+    const request: APIRequest = makeAuthenticatedMockRequest();
+    db.where.mockResolvedValue([{ colorScheme: colorScheme }]);
+
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+
+    const result = await response.json();
+    expect(result).toEqual({
+      colorScheme: ColorScheme.DARK,
+    });
+
+    expect(db.select).toHaveBeenCalledTimes(1);
+  });
+});
 
 describe("POST /api/v1/user/settings", () => {
   it("should return 200 when successfully updating the user's color scheme", async () => {

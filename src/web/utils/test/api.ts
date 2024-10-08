@@ -15,13 +15,13 @@ export const makeMockRequest = (
 };
 
 export const makeAuthenticatedMockRequest = (
-  requestBody: Record<string, unknown>,
+  requestBody?: Record<string, unknown>,
   headers?: Record<string, string>,
 ): APIRequest => {
   const mockHeaders = new Headers({ "x-user-id": "user123", ...headers });
 
   const mockRequest = {
-    json: jest.fn().mockResolvedValue(requestBody),
+    ...(requestBody && { json: jest.fn().mockResolvedValue(requestBody) }),
     headers: mockHeaders,
   } as unknown as APIRequest;
 

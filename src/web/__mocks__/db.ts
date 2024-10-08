@@ -9,6 +9,8 @@ export const db = {
   where: jest.fn().mockReturnThis(),
   values: jest.fn().mockReturnThis(),
   returning: jest.fn().mockReturnThis(),
+  select: jest.fn().mockReturnThis(),
+  from: jest.fn().mockReturnThis(),
   query: {
     profiles: mockQuery,
   },
