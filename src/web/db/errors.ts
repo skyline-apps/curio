@@ -6,6 +6,7 @@ export type DbError = PostgresError;
 export enum DbErrorCode {
   Invalid = "invalid",
   Unknown = "unknown",
+  ConnectionFailure = "08006",
   UniqueViolation = "23505",
 }
 
