@@ -17,6 +17,7 @@ describe("POST /api/v1/user/username", () => {
     expect(response.status).toBe(401);
     const body = await response.json();
     expect(body).toEqual({ error: "Unauthorized." });
+    expect(db.update).toHaveBeenCalledTimes(0);
   });
 
   test("should return 400 if username is missing", async () => {
@@ -24,6 +25,7 @@ describe("POST /api/v1/user/username", () => {
     expect(response.status).toBe(400);
     const body = await response.json();
     expect(body).toEqual({ error: "Username is required." });
+    expect(db.update).toHaveBeenCalledTimes(0);
   });
 
   test("should return 400 if new username is empty", async () => {
@@ -32,6 +34,7 @@ describe("POST /api/v1/user/username", () => {
     expect(response.status).toBe(400);
     const body = await response.json();
     expect(body).toEqual({ error: "Username cannot be empty." });
+    expect(db.update).toHaveBeenCalledTimes(0);
   });
 
   test("should return 400 if new username is invalid", async () => {
@@ -42,11 +45,12 @@ describe("POST /api/v1/user/username", () => {
     expect(response.status).toBe(400);
     const body = await response.json();
     expect(body).toEqual({ error: "Username must be at least 2 characters." });
+    expect(db.update).toHaveBeenCalledTimes(0);
   });
 
   test("should return 500 if database update fails (no user updated)", async () => {
     // Mock the db.update chain
-    db.update().set().where().returning.mockResolvedValue([]);
+    db.returning.mockResolvedValue([]);
 
     const response = await POST(
       makeAuthenticatedMockRequest({ username: "newusername" }),
@@ -55,14 +59,12 @@ describe("POST /api/v1/user/username", () => {
     expect(response.status).toBe(500);
     const body = await response.json();
     expect(body).toEqual({ error: "Failed to update username." });
+    expect(db.update).toHaveBeenCalledTimes(1);
   });
 
   test("should return 200 and updated username when update is successful", async () => {
     // Mock the db.update chain
-    db.update()
-      .set()
-      .where()
-      .returning.mockResolvedValue([{ updatedUsername: "newusername" }]);
+    db.returning.mockResolvedValue([{ updatedUsername: "newusername" }]);
 
     const response = await POST(
       makeAuthenticatedMockRequest({ username: "newusername" }),
@@ -71,13 +73,14 @@ describe("POST /api/v1/user/username", () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toEqual({ updatedUsername: "newusername" });
+    expect(db.update).toHaveBeenCalledTimes(1);
   });
 
   test("should return 400 if username is already in use (unique violation)", async () => {
     // Mock the db.update chain to throw a unique violation error
     const mockError = { code: DbErrorCode.UniqueViolation };
 
-    db.update().set().where().returning.mockRejectedValue(mockError);
+    db.returning.mockRejectedValue(mockError);
 
     const response = await POST(
       makeAuthenticatedMockRequest({ username: "existingusername" }),
@@ -86,13 +89,14 @@ describe("POST /api/v1/user/username", () => {
     expect(response.status).toBe(400);
     const body = await response.json();
     expect(body).toEqual({ error: "Username already in use." });
+    expect(db.update).toHaveBeenCalledTimes(1);
   });
 
   test("should return 500 if unknown error occurs during database update", async () => {
     // Mock the db.update chain to throw an unknown error
     const mockError = { code: "XXX" };
 
-    db.update().set().where().returning.mockRejectedValue(mockError);
+    db.returning.mockRejectedValue(mockError);
 
     const response = await POST(
       makeAuthenticatedMockRequest({ username: "newusername" }),
@@ -101,5 +105,6 @@ describe("POST /api/v1/user/username", () => {
     expect(response.status).toBe(500);
     const body = await response.json();
     expect(body).toEqual({ error: "Unknown error updating username." });
+    expect(db.update).toHaveBeenCalledTimes(1);
   });
 });

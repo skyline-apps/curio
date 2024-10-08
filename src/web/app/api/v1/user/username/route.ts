@@ -21,66 +21,62 @@ export interface UpdateUsernameResponse {
 export async function POST(
   request: APIRequest,
 ): Promise<APIResponse<UpdateUsernameResponse>> {
-  try {
-    const userId = request.headers.get("x-user-id");
+  const userId = request.headers.get("x-user-id");
 
-    if (!userId) {
-      return APIResponseJSON({ error: "Unauthorized." }, { status: 401 });
-    }
+  if (!userId) {
+    return APIResponseJSON({ error: "Unauthorized." }, { status: 401 });
+  }
 
-    const data = await request.json();
+  const data = await request.json();
 
-    const parsed = UpdateUsernameRequestSchema.safeParse(data);
-    if (!parsed.success) {
-      return APIResponseJSON(
-        { error: "Username is required." },
-        { status: 400 },
-      );
-    }
+  const parsed = UpdateUsernameRequestSchema.safeParse(data);
+  if (!parsed.success) {
+    return APIResponseJSON({ error: "Username is required." }, { status: 400 });
+  }
 
-    const { username: newUsername } = parsed.data;
+  const { username: newUsername } = parsed.data;
 
-    // Check that the new username is valid
-    const errorMessage = usernameError(newUsername);
-    if (errorMessage) {
-      return APIResponseJSON(
-        {
-          error: errorMessage,
-        },
-        { status: 400 },
-      );
-    }
-
-    // Update the username in the database
-    const updatedUser = await db
-      .update(profiles)
-      .set({ username: newUsername })
-      .where(eq(profiles.userId, userId))
-      .returning({ updatedUsername: profiles.username });
-
-    if (!updatedUser.length) {
-      log.error("Failed to update username.");
-      return APIResponseJSON(
-        { error: "Failed to update username." },
-        { status: 500 },
-      );
-    }
-
-    // Return the updated username
-    return APIResponseJSON({
-      updatedUsername: updatedUser[0].updatedUsername,
-    });
-  } catch (error) {
-    if (checkDbError(error as DbError) === DbErrorCode.UniqueViolation) {
-      return APIResponseJSON(
-        { error: "Username already in use." },
-        { status: 400 },
-      );
-    }
-    log.error("Error updating username:", error);
+  // Check that the new username is valid
+  const errorMessage = usernameError(newUsername);
+  if (errorMessage) {
     return APIResponseJSON(
-      { error: "Unknown error updating username." },
-      { status: 500 },
+      {
+        error: errorMessage,
+      },
+      { status: 400 },
     );
   }
+
+  // Update the username in the database
+  return db
+    .update(profiles)
+    .set({ username: newUsername })
+    .where(eq(profiles.userId, userId))
+    .returning({ updatedUsername: profiles.username })
+    .then((updates) => {
+      if (!updates.length) {
+        log.error(`Failed to update username for user ${userId}.`);
+        return APIResponseJSON(
+          { error: "Failed to update username." },
+          { status: 500 },
+        );
+      }
+      // Return the updated username
+      return APIResponseJSON({
+        updatedUsername: updates[0].updatedUsername,
+      });
+    })
+    .catch((error) => {
+      if (checkDbError(error as DbError) === DbErrorCode.UniqueViolation) {
+        return APIResponseJSON(
+          { error: "Username already in use." },
+          { status: 400 },
+        );
+      }
+      log.error(`Error updating username for user ${userId}:`, error);
+      return APIResponseJSON(
+        { error: "Unknown error updating username." },
+        { status: 500 },
+      );
+    });
 }

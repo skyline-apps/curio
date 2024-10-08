@@ -8,3 +8,4 @@ const client = postgres(process.env.POSTGRES_URL!);
 export const db = drizzle(client, { schema });
 
 export { eq, gt, gte, lt, lte, ne } from "drizzle-orm";
+export type { PgColumn, SelectedFields } from "drizzle-orm/pg-core";
