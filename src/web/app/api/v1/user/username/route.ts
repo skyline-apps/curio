@@ -10,7 +10,6 @@ import { usernameError } from "@/utils/username";
 const log = createLogger("api/v1/user/username");
 
 const UpdateUsernameRequestSchema = z.object({
-  userId: z.string(),
   username: z.string(),
 });
 
@@ -23,17 +22,23 @@ export async function POST(
   request: APIRequest,
 ): Promise<APIResponse<UpdateUsernameResponse>> {
   try {
+    const userId = request.headers.get("x-user-id");
+
+    if (!userId) {
+      return APIResponseJSON({ error: "Unauthorized." }, { status: 401 });
+    }
+
     const data = await request.json();
 
     const parsed = UpdateUsernameRequestSchema.safeParse(data);
     if (!parsed.success) {
       return APIResponseJSON(
-        { error: "User ID and username are required." },
+        { error: "Username is required." },
         { status: 400 },
       );
     }
 
-    const { userId, username: newUsername } = parsed.data;
+    const { username: newUsername } = parsed.data;
 
     // Check that the new username is valid
     const errorMessage = usernameError(newUsername);
