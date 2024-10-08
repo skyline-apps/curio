@@ -1,18 +1,14 @@
 "use client";
+import { useTheme } from "next-themes";
 import React, { createContext, useEffect, useState } from "react";
 
 import type {
   Settings,
   UpdatedSettings,
 } from "@/app/api/v1/user/settings/validation";
+import { ColorScheme } from "@/db/schema";
 import { handleAPIResponse } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
-import {
-  initializeTheme,
-  setDarkTheme,
-  setLightTheme,
-  setSystemTheme,
-} from "@/utils/theme";
 
 const log = createLogger("SettingsProvider");
 
@@ -36,6 +32,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   children,
 }: SettingsProviderProps): React.ReactNode => {
   const [currentSettings, setCurrentSettings] = useState<Settings>();
+  const { setTheme } = useTheme();
 
   const fetchSettings = async (): Promise<void> => {
     fetch("/api/v1/user/settings", {
@@ -51,21 +48,20 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   };
 
   useEffect(() => {
-    initializeTheme();
     fetchSettings();
   }, []);
 
   useEffect(() => {
     if (currentSettings?.colorScheme) {
-      if (currentSettings.colorScheme === "auto") {
-        setSystemTheme();
-      } else if (currentSettings.colorScheme === "light") {
-        setLightTheme();
-      } else if (currentSettings.colorScheme === "dark") {
-        setDarkTheme();
+      if (currentSettings.colorScheme === ColorScheme.AUTO) {
+        setTheme("system");
+      } else if (currentSettings.colorScheme === ColorScheme.LIGHT) {
+        setTheme("light");
+      } else if (currentSettings.colorScheme === ColorScheme.DARK) {
+        setTheme("dark");
       }
     }
-  }, [currentSettings?.colorScheme]);
+  }, [currentSettings?.colorScheme, setTheme]);
 
   const updateSettings = async (
     field: keyof Settings,

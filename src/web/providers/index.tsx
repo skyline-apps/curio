@@ -1,5 +1,6 @@
 // eslint-disable-next-line no-restricted-imports
 import { NextUIProvider } from "@nextui-org/react";
+import { ThemeProvider } from "next-themes";
 import React, { PropsWithChildren } from "react";
 
 import { db, eq } from "@/db";
@@ -42,11 +43,13 @@ const Providers: React.FC<PropsWithChildren> = async ({
   }
 
   return (
-    <NextUIProvider>
-      <UserProvider user={currentUser}>
-        <SettingsProvider>{children}</SettingsProvider>
-      </UserProvider>
-    </NextUIProvider>
+    <ThemeProvider>
+      <NextUIProvider>
+        <UserProvider user={currentUser}>
+          <SettingsProvider>{children}</SettingsProvider>
+        </UserProvider>
+      </NextUIProvider>
+    </ThemeProvider>
   );
 };
 
