@@ -4,33 +4,30 @@
 import { db } from "__mocks__/db";
 
 import { DbErrorCode } from "@/db/errors";
-import { makeMockRequest } from "@/utils/test/api";
+import {
+  makeAuthenticatedMockRequest,
+  makeMockRequest,
+} from "@/utils/test/api";
 
 import { POST } from "./route";
 
 describe("POST /api/v1/user/username", () => {
-  test("should return 400 if userId or username is missing", async () => {
-    let response = await POST(makeMockRequest({}));
-    expect(response.status).toBe(400);
-    let body = await response.json();
-    expect(body).toEqual({ error: "User ID and username are required." });
+  test("should return 401 if no userId is present in the headers", async () => {
+    const response = await POST(makeMockRequest({ username: "newusername" }));
+    expect(response.status).toBe(401);
+    const body = await response.json();
+    expect(body).toEqual({ error: "Unauthorized." });
+  });
 
-    response = await POST(makeMockRequest({ userId: "user123" }));
+  test("should return 400 if username is missing", async () => {
+    const response = await POST(makeAuthenticatedMockRequest({}));
     expect(response.status).toBe(400);
-    expect(response.status).toBe(400);
-    body = await response.json();
-    expect(body).toEqual({ error: "User ID and username are required." });
-
-    response = await POST(makeMockRequest({ username: "newusername" }));
-    expect(response.status).toBe(400);
-    body = await response.json();
-    expect(body).toEqual({ error: "User ID and username are required." });
+    const body = await response.json();
+    expect(body).toEqual({ error: "Username is required." });
   });
 
   test("should return 400 if new username is empty", async () => {
-    const response = await POST(
-      makeMockRequest({ userId: "user123", username: "" }),
-    );
+    const response = await POST(makeAuthenticatedMockRequest({ username: "" }));
 
     expect(response.status).toBe(400);
     const body = await response.json();
@@ -39,7 +36,7 @@ describe("POST /api/v1/user/username", () => {
 
   test("should return 400 if new username is invalid", async () => {
     const response = await POST(
-      makeMockRequest({ userId: "user123", username: "k" }),
+      makeAuthenticatedMockRequest({ username: "k" }),
     );
 
     expect(response.status).toBe(400);
@@ -52,7 +49,7 @@ describe("POST /api/v1/user/username", () => {
     db.update().set().where().returning.mockResolvedValue([]);
 
     const response = await POST(
-      makeMockRequest({ userId: "user123", username: "newusername" }),
+      makeAuthenticatedMockRequest({ username: "newusername" }),
     );
 
     expect(response.status).toBe(500);
@@ -68,7 +65,7 @@ describe("POST /api/v1/user/username", () => {
       .returning.mockResolvedValue([{ updatedUsername: "newusername" }]);
 
     const response = await POST(
-      makeMockRequest({ userId: "user123", username: "newusername" }),
+      makeAuthenticatedMockRequest({ username: "newusername" }),
     );
 
     expect(response.status).toBe(200);
@@ -83,7 +80,7 @@ describe("POST /api/v1/user/username", () => {
     db.update().set().where().returning.mockRejectedValue(mockError);
 
     const response = await POST(
-      makeMockRequest({ userId: "user123", username: "existingusername" }),
+      makeAuthenticatedMockRequest({ username: "existingusername" }),
     );
 
     expect(response.status).toBe(400);
@@ -98,7 +95,7 @@ describe("POST /api/v1/user/username", () => {
     db.update().set().where().returning.mockRejectedValue(mockError);
 
     const response = await POST(
-      makeMockRequest({ userId: "user123", username: "newusername" }),
+      makeAuthenticatedMockRequest({ username: "newusername" }),
     );
 
     expect(response.status).toBe(500);

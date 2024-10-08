@@ -59,6 +59,10 @@ export const updateSession = async (
     return NextResponse.redirect(url);
   }
 
+  if (user) {
+    supabaseResponse.headers.set("X-User-ID", user.id);
+  }
+
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
   // creating a new response object with NextResponse.next() make sure to:
   // 1. Pass the request in it, like so:
