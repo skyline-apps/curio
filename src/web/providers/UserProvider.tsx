@@ -1,6 +1,9 @@
 "use client";
 import React, { createContext, useState } from "react";
 
+import { type UpdateUsernameResponse } from "@/app/api/v1/user/username/route";
+import { handleAPIResponse } from "@/utils/api";
+
 export type User = {
   id: string | null;
   username: string | null;
@@ -10,7 +13,7 @@ export type User = {
 export type UserContextType = {
   user: User;
   clearUser: () => void;
-  changeUsername: (username: string) => void;
+  changeUsername: (username: string) => Promise<void>;
 };
 
 interface UserProviderProps {
@@ -25,7 +28,7 @@ export const UserContext = createContext<UserContextType>({
     email: null,
   },
   clearUser: () => {},
-  changeUsername: (_username: string) => {},
+  changeUsername: (_username: string) => Promise.resolve(),
 });
 
 export const UserProvider: React.FC<UserProviderProps> = ({
@@ -38,8 +41,22 @@ export const UserProvider: React.FC<UserProviderProps> = ({
     setCurrentUser({ id: null, username: null, email: null });
   };
 
-  const changeUsername = (username: string): void => {
-    setCurrentUser({ ...currentUser, username });
+  const changeUsername = async (username: string): Promise<void> => {
+    return fetch("/api/v1/user/username", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId: user.id, username: username }),
+    })
+      .then(handleAPIResponse<UpdateUsernameResponse>)
+      .then((result) => {
+        const { updatedUsername } = result;
+        if (!updatedUsername) {
+          throw Error("Failed to update username");
+        }
+        setCurrentUser({ ...currentUser, username: updatedUsername });
+      });
   };
 
   return (

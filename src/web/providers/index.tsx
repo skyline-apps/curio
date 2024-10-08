@@ -7,6 +7,7 @@ import { profiles } from "@/db/schema";
 import { createLogger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/server";
 
+import { SettingsProvider } from "./SettingsProvider";
 import { type User, UserProvider } from "./UserProvider";
 
 const log = createLogger("Providers");
@@ -42,7 +43,9 @@ const Providers: React.FC<PropsWithChildren> = async ({
 
   return (
     <NextUIProvider>
-      <UserProvider user={currentUser}>{children}</UserProvider>
+      <UserProvider user={currentUser}>
+        <SettingsProvider>{children}</SettingsProvider>
+      </UserProvider>
     </NextUIProvider>
   );
 };

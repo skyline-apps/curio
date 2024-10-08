@@ -35,7 +35,9 @@ export const profiles = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     username: text("username").notNull().unique(),
     userId: uuid("user_id").notNull(),
-    colorScheme: colorSchemeEnum("color_scheme").notNull().default("auto"),
+    colorScheme: colorSchemeEnum("color_scheme")
+      .notNull()
+      .default(ColorScheme.AUTO),
   },
   (table) => ({
     usernameIndex: uniqueIndex("username_index").on(table.username),

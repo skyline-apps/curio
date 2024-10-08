@@ -1,14 +1,21 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+import fetchMock from "jest-fetch-mock";
 import React from "react";
 
 import { User, UserContext, UserProvider } from "./UserProvider";
 
 describe("UserContext", () => {
+  fetchMock.enableMocks();
+
   const initialUser: User = {
     id: "123",
     username: "testuser",
     email: "test@example.com",
   };
+
+  beforeEach(() => {
+    fetchMock.resetMocks();
+  });
 
   it("provides initial user values", () => {
     render(
@@ -61,28 +68,42 @@ describe("UserContext", () => {
     expect(screen.getByTestId("user-email")).toHaveTextContent("");
   });
 
-  it("changes username when changeUsername is called", () => {
-    let changeUsernameFunction: (username: string) => void;
+  it("changes username when changeUsername is called", async () => {
+    fetch.mockResponseOnce(JSON.stringify({ updatedUsername: "newtestuser" }));
 
     render(
       <UserProvider user={initialUser}>
         <UserContext.Consumer>
-          {({ user, changeUsername }) => {
-            changeUsernameFunction = changeUsername;
-            return <span data-testid="user-username">{user.username}</span>;
-          }}
+          {({ user, changeUsername }) => (
+            <div>
+              <button onClick={() => changeUsername("newtestuser")}>
+                Change username
+                <div data-testid="username">{user.username}</div>
+              </button>
+            </div>
+          )}
         </UserContext.Consumer>
       </UserProvider>,
     );
 
-    expect(screen.getByTestId("user-username")).toHaveTextContent("testuser");
-
-    act(() => {
-      changeUsernameFunction("newusername");
+    expect(screen.getByTestId("username")).toHaveTextContent("testuser");
+    await act(async () => {
+      await fireEvent.click(screen.getByText("Change username"));
     });
 
-    expect(screen.getByTestId("user-username")).toHaveTextContent(
-      "newusername",
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/user/username",
+      expect.objectContaining({
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: initialUser.id,
+          username: "newtestuser",
+        }),
+      }),
     );
+    expect(screen.getByTestId("username")).toHaveTextContent("newtestuser");
   });
 });

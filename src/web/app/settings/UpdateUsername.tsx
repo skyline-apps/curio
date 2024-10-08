@@ -1,51 +1,41 @@
 import React, { useContext, useState } from "react";
 
-import { type UpdateUsernameResponse } from "@/app/api/v1/user/username/route";
 import Button from "@/components/Button";
 import { FormSection } from "@/components/Form";
 import Input from "@/components/Input";
+import { Spinner } from "@/components/Spinner";
 import { UserContext } from "@/providers/UserProvider";
-import { handleAPIResponse } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
 
 const log = createLogger("UpdateUsername");
 
-const UpdateUsername: React.FC<> = () => {
+const UpdateUsername: React.FC = () => {
   const { user, changeUsername } = useContext(UserContext);
   const [newUsername, setNewUsername] = useState<string>(user.username || "");
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
   const updateUsername = async (): Promise<void> => {
-    setLoading(true);
+    setSubmitting(true);
     setErrorMessage("");
     setSuccessMessage("");
-    fetch("/api/v1/user/username", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId: user.id, username: newUsername }),
-    })
-      .then(handleAPIResponse<UpdateUsernameResponse>)
-      .then((result) => {
-        const { updatedUsername } = result;
-        if (!updatedUsername) {
-          throw Error("Failed to update username");
-        }
-        changeUsername(updatedUsername);
+    changeUsername(newUsername)
+      .then(() => {
         setSuccessMessage("Successfully updated username.");
-        setLoading(false);
+        setSubmitting(false);
       })
       .catch((error) => {
         log.error("Error updating username: ", error);
         setErrorMessage(`${error}`);
-        setLoading(false);
+        setSubmitting(false);
       });
   };
 
   const submitEnabled = newUsername !== user.username;
+  if (!user.id) {
+    return <Spinner />;
+  }
 
   return (
     <FormSection
@@ -56,7 +46,7 @@ const UpdateUsername: React.FC<> = () => {
         <Button
           size="sm"
           isDisabled={!submitEnabled}
-          isLoading={loading}
+          isLoading={submitting}
           onPress={updateUsername}
         >
           Update
@@ -68,7 +58,6 @@ const UpdateUsername: React.FC<> = () => {
       <Input
         type="text"
         name="username"
-        size="sm"
         value={newUsername}
         onChange={(event) => setNewUsername(event.target.value)}
       />

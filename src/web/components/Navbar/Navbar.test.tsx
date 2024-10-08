@@ -1,5 +1,6 @@
 import { supabaseMock } from "__mocks__/supabase";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import fetchMock from "jest-fetch-mock";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -13,6 +14,8 @@ jest.mock("next/navigation", () => ({
 }));
 
 describe("Navbar", () => {
+  fetchMock.enableMocks();
+
   const mockPush = jest.fn();
   const mockClearUser = jest.fn();
   const mockChangeUsername = jest.fn();
@@ -44,6 +47,7 @@ describe("Navbar", () => {
   );
 
   beforeEach(() => {
+    fetchMock.resetMocks();
     // Mock useRouter implementation
     (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,

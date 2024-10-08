@@ -13,7 +13,6 @@ const SettingsPage: React.FC = () => {
 
   return (
     <div className="mx-auto max-w-screen-md">
-      <h2 className="text-lg mb-2">Account settings</h2>
       <SettingsForm />
     </div>
   );
