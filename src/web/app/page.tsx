@@ -7,7 +7,8 @@ import {
 
 import Button from "@/components/Button";
 import Card from "@/components/Card";
-import CurioName from "@/public/logo/curio_name.svg";
+import CurioNameDark from "@/public/logo/curio_name_dark.svg";
+import CurioNameLight from "@/public/logo/curio_name_light.svg";
 
 interface FeatureProps {
   icon: React.ReactNode;
@@ -33,7 +34,8 @@ const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-grow container mx-auto px-4 py-12">
-        <CurioName className="h-24 mx-auto" />
+        <CurioNameDark className="h-24 mx-auto block dark:hidden" />
+        <CurioNameLight className="h-24 mx-auto hidden dark:block" />
         <h2 className="text-2xl text-center mb-8">Curate your inspirations</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
