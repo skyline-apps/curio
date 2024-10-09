@@ -1,5 +1,24 @@
-export const lightBrown = "#FAF7F5";
-export const darkBrown = "#433B35";
+export const brown = {
+  975: "#292622",
+  950: "#453F39",
+  900: "#605850",
+  800: "#7B7167",
+  700: "#96897E",
+  600: "#B1A195",
+  500: "#CCB9AC",
+  400: "#D4C1B4",
+  300: "#DBC8BC",
+  200: "#E1D0C5",
+  100: "#E8D8CE",
+  75: "#EDDFD7",
+  50: "#F3E8E1",
+  25: "#F8F0EC",
+  foreground: "#292622",
+  DEFAULT: "#CCB9AC",
+};
+
+export const lightBrown = brown[25];
+export const darkBrown = brown[975];
 
 export const gray = {
   900: "#55524F",
@@ -14,22 +33,6 @@ export const gray = {
   50: "#E4E2DD",
   foreground: lightBrown,
   DEFAULT: "#AAA49E",
-};
-
-export const brown = {
-  900: "#675D55",
-  800: "#81746B",
-  700: "#9A8B80",
-  600: "#B3A296",
-  500: "#CCB9AC",
-  400: "#D5C3B5",
-  300: "#DDCDBF",
-  200: "#E4D6C9",
-  100: "#EBE0D4",
-  50: "#F2E9E0",
-  25: "#F8F2EC",
-  foreground: darkBrown,
-  DEFAULT: "#CCB9AC",
 };
 
 export const green = {
@@ -96,7 +99,6 @@ export const themeColors = {
   primary: blue,
   secondary: gray,
   default: brown,
-  divider: gray,
   success: green,
   warning: yellow,
   danger: red,
