@@ -1,6 +1,3 @@
-/**
- * @jest-environment node
- */
 import { handleAPIResponse } from "./api";
 
 describe("handleAPIResponse", () => {
