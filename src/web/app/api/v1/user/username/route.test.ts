@@ -1,6 +1,3 @@
-/**
- * @jest-environment node
- */
 import { db } from "__mocks__/db";
 
 import { DbErrorCode } from "@/db/errors";

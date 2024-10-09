@@ -1,6 +1,3 @@
-/**
- * @jest-environment node
- */
 import { db } from "__mocks__/db";
 import { supabaseMock } from "__mocks__/supabase";
 // eslint-disable-next-line no-restricted-imports

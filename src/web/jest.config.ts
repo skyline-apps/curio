@@ -11,32 +11,43 @@ const createJestConfig = nextJest({
   dir: "./",
 });
 
-const config: Config = {
-  // Automatically clear mock calls, instances, contexts and results before every test
+const customConfig: Config = {
   clearMocks: true,
-
-  // Indicates whether the coverage information should be collected while executing the test
-  collectCoverage: false,
-  // The directory where Jest should output its coverage files
-  coverageDirectory: "coverage",
-
-  // Indicates which provider should be used to instrument code for coverage
-  coverageProvider: "v8",
-
-  // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   moduleNameMapper: {
-    "^.+\\.(svg)$": "<rootDir>/__mocks__/svg.ts", // Needs to match Next.js's key exactly to overwrite.
+    "^.+\\.(svg)$": "<rootDir>/__mocks__/svg.ts",
     "\\./db$": "<rootDir>/__mocks__/db.ts",
     "\\./utils/logger$": "<rootDir>/__mocks__/logger.ts",
     "\\./utils/supabase/client$": "<rootDir>/__mocks__/supabase-client.ts",
     "\\./utils/supabase/server$": "<rootDir>/__mocks__/supabase-server.ts",
   },
-
-  // A list of paths to modules that run some code to configure or set up the testing framework before each test
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
-
-  // The test environment that will be used for testing
-  testEnvironment: "jsdom",
 };
 
-export default createJestConfig(config);
+// Separate into two different projects, one for jsdom (React) tests and one for node.
+// We have to do some fancy stuff here wrapping both configs in createJestConfig.
+const jestConfig = async (): Promise<Config> => {
+  const jsdomConfig = await createJestConfig({
+    ...customConfig,
+    displayName: "jsdom",
+    testMatch: ["<rootDir>/**/*.test.tsx"],
+    testEnvironment: "jsdom",
+    setupFilesAfterEnv: [
+      ...(customConfig.setupFilesAfterEnv || []),
+      "<rootDir>/jest.setup.jsdom.ts",
+    ],
+  })();
+
+  const nodeConfig = await createJestConfig({
+    ...customConfig,
+    displayName: "node",
+    testMatch: ["<rootDir>/**/*.test.ts"],
+    testEnvironment: "node",
+  })();
+
+  return {
+    ...customConfig,
+    projects: [jsdomConfig, nodeConfig],
+  };
+};
+
+export default jestConfig;
