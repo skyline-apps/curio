@@ -13,7 +13,9 @@ export const metadata: Metadata = {
   description: "Curate your inspirations",
 };
 
-interface RootLayoutProps extends React.PropsWithChildren {}
+interface RootLayoutProps extends React.PropsWithChildren {
+  modal: React.ReactNode;
+}
 
 const sans = Noto_Sans({
   display: "swap",
@@ -35,6 +37,7 @@ const mono = Noto_Sans_Mono({
 
 const RootLayout: React.FC<RootLayoutProps> = ({
   children,
+  modal,
 }: RootLayoutProps) => {
   return (
     <html
@@ -70,6 +73,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({
         <Providers>
           <Navbar />
           <main className="w-full p-4">{children}</main>
+          {modal}
         </Providers>
       </body>
     </html>
