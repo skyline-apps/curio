@@ -1,6 +1,7 @@
 "use client";
 import React, { useContext } from "react";
 
+import AppPage from "@/components/AppPage";
 import { UserContext } from "@/providers/UserProvider";
 
 import SettingsForm from "./SettingsForm";
@@ -12,9 +13,11 @@ const SettingsPage: React.FC = () => {
   }
 
   return (
-    <div className="mx-auto max-w-screen-md">
-      <SettingsForm />
-    </div>
+    <AppPage>
+      <div className="mx-auto max-w-screen-md">
+        <SettingsForm />
+      </div>
+    </AppPage>
   );
 };
 

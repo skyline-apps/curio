@@ -4,7 +4,7 @@ import { z } from "zod";
 import { type Settings } from "@/app/api/v1/user/settings/validation";
 import { FormSection } from "@/components/Form";
 import { Radio, RadioGroup } from "@/components/Radio";
-import { Spinner } from "@/components/Spinner";
+import Spinner from "@/components/Spinner";
 import Toast from "@/components/Toast";
 import { SettingsContext } from "@/providers/SettingsProvider";
 import { createLogger } from "@/utils/logger";
@@ -90,27 +90,31 @@ const UpdateUserSettings: React.FC = () => {
 
   const fields = SettingsSchema.shape;
 
+  let contents;
+
   if (!settings) {
-    return <Spinner />;
+    contents = <Spinner className="mt-4" centered />;
+  } else {
+    contents = (Object.keys(fields) as Array<keyof typeof fields>).map(
+      (fieldKey) => (
+        <FormSection
+          key={fieldKey}
+          className="max-w-md"
+          title={camelCaseToSentenceCase(fieldKey)}
+          description={fields[fieldKey].description}
+        >
+          {renderField(fieldKey, fields[fieldKey])}
+          {submitting === fieldKey && <Spinner color="secondary" size="sm" />}
+        </FormSection>
+      ),
+    );
   }
 
   return (
     <>
       {successMessage && <Toast>{successMessage}</Toast>}
       {errorMessage && <Toast>{errorMessage}</Toast>}
-      <div>
-        {(Object.keys(fields) as Array<keyof typeof fields>).map((fieldKey) => (
-          <FormSection
-            key={fieldKey}
-            className="max-w-md"
-            title={camelCaseToSentenceCase(fieldKey)}
-            description={fields[fieldKey].description}
-          >
-            {renderField(fieldKey, fields[fieldKey])}
-            {submitting === fieldKey && <Spinner color="secondary" size="sm" />}
-          </FormSection>
-        ))}
-      </div>
+      <div className="max-w-md">{contents}</div>
     </>
   );
 };

@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import { Noto_Sans, Noto_Sans_Mono, Noto_Serif } from "next/font/google";
 import React from "react";
 
-import Navbar from "@/components/Navbar";
 import Providers from "@/providers";
 
 export const metadata: Metadata = {
@@ -43,6 +42,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({
     <html
       lang="en"
       className={`${sans.variable} ${serif.variable} ${mono.variable}`}
+      suppressHydrationWarning
     >
       <head>
         <script
@@ -71,8 +71,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({
       </head>
       <body className="text-foreground">
         <Providers>
-          <Navbar />
-          <main className="w-full p-4">{children}</main>
+          <main className="w-full h-full">{children}</main>
           {modal}
         </Providers>
       </body>
