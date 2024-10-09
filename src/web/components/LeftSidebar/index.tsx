@@ -22,7 +22,7 @@ const LeftSidebar: React.FC = () => {
   const router = useRouter();
   const { user } = useContext(UserContext);
   // TODO(Kim): Implement collapsible and mobile-friendly sidebar
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen] = useState(true);
   const pathname = usePathname();
 
   const handleLogout = useLogout();
