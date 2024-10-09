@@ -6,9 +6,9 @@ import UpdateUserSettings from "./UpdateUserSettings";
 const SettingsForm: React.FC = () => {
   return (
     <>
-      <h2 className="text-lg mb-2">Account settings</h2>
+      <h2 className="text-lg my-2">Account settings</h2>
       <UpdateUsername />
-      <h2 className="text-lg mb-2">Preferences</h2>
+      <h2 className="text-lg my-2">Preferences</h2>
       <UpdateUserSettings />
     </>
   );
