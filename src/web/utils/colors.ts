@@ -1,10 +1,10 @@
 export const brown = {
-  975: "#292622",
-  950: "#453F39",
-  900: "#605850",
-  800: "#7B7167",
-  700: "#96897E",
-  600: "#B1A195",
+  975: "#35382E",
+  950: "#4F5143",
+  900: "#6A6958",
+  800: "#827E6D",
+  700: "#9B9382",
+  600: "#B4A697",
   500: "#CCB9AC",
   400: "#D4C1B4",
   300: "#DBC8BC",
@@ -13,7 +13,7 @@ export const brown = {
   75: "#EDDFD7",
   50: "#F3E8E1",
   25: "#F8F0EC",
-  foreground: "#292622",
+  foreground: "#35382E",
   DEFAULT: "#CCB9AC",
 };
 
@@ -21,18 +21,22 @@ export const lightBrown = brown[25];
 export const darkBrown = brown[975];
 
 export const gray = {
-  900: "#55524F",
-  800: "#6B6762",
-  700: "#807B76",
-  600: "#95908A",
-  500: "#AAA49E",
-  400: "#B6B0AA",
-  300: "#C2BDB7",
-  200: "#CEC9C3",
-  100: "#D9D5D0",
-  50: "#E4E2DD",
+  975: "#312D2A",
+  950: "#46413D",
+  900: "#5C5450",
+  800: "#726863",
+  700: "#877B76",
+  600: "#9D8F89",
+  500: "#B2A29C",
+  400: "#BCACA6",
+  300: "#C6B6B1",
+  200: "#CFC0BB",
+  100: "#D8CBC6",
+  75: "#E1D5D2",
+  50: "#E9E0DD",
+  25: "#F1EBE9",
   foreground: lightBrown,
-  DEFAULT: "#AAA49E",
+  DEFAULT: "#B2A29C",
 };
 
 export const green = {
