@@ -40,9 +40,32 @@ const RootLayout: React.FC<RootLayoutProps> = ({
     <html
       lang="en"
       className={`${sans.variable} ${serif.variable} ${mono.variable}`}
-      suppressHydrationWarning
     >
-      <head></head>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+        (function() {
+          function getInitialColorMode() {
+            const persistedColorPreference = window.localStorage.getItem('theme');
+            const hasPersistedPreference = typeof persistedColorPreference === 'string';
+            if (hasPersistedPreference) {
+              return persistedColorPreference;
+            }
+            const mql = window.matchMedia('(prefers-color-scheme: dark)');
+            const hasMediaQueryPreference = typeof mql.matches === 'boolean';
+            if (hasMediaQueryPreference) {
+              return mql.matches ? 'dark' : 'light';
+            }
+            return 'light';
+          }
+          const colorMode = getInitialColorMode();
+          document.documentElement.classList.add(colorMode);
+        })();
+      `,
+          }}
+        />
+      </head>
       <body className="text-foreground">
         <Providers>
           <Navbar />
