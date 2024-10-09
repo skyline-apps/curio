@@ -2,7 +2,13 @@
 import { nextui } from "@nextui-org/react";
 import type { Config } from "tailwindcss";
 
-import { brown, darkBrown, lightBrown, themeColors } from "./utils/colors";
+import {
+  brown,
+  darkBrown,
+  gray,
+  lightBrown,
+  themeColors,
+} from "./utils/colors";
 
 const config: Config = {
   content: [
@@ -66,6 +72,8 @@ const config: Config = {
           colors: {
             background: brown[50],
             foreground: darkBrown,
+            default: { ...brown, foreground: darkBrown, DEFAULT: brown[200] },
+            secondary: { ...gray, foreground: darkBrown, DEFAULT: gray[700] },
             divider: brown[100],
             content1: lightBrown,
             content2: brown[100],
@@ -78,6 +86,8 @@ const config: Config = {
           colors: {
             background: darkBrown,
             foreground: lightBrown,
+            default: { ...brown, foreground: lightBrown, DEFAULT: brown[800] },
+            secondary: { ...gray, foreground: lightBrown, DEFAULT: gray[300] },
             divider: brown[950],
             content1: brown[950],
             content2: brown[900],

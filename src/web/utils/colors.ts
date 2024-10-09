@@ -101,8 +101,6 @@ export const blue = {
 
 export const themeColors = {
   primary: blue,
-  secondary: gray,
-  default: brown,
   success: green,
   warning: yellow,
   danger: red,
