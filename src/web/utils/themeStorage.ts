@@ -31,3 +31,7 @@ export function setSystemTheme(): void {
     document.documentElement.classList.remove("dark");
   }
 }
+
+export function clearTheme(): void {
+  localStorage.removeItem("theme");
+}

@@ -5,7 +5,6 @@ import type {
   Settings,
   UpdatedSettings,
 } from "@/app/api/v1/user/settings/validation";
-import { ColorScheme } from "@/db/schema";
 import { handleAPIResponse } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
 import {
@@ -13,7 +12,7 @@ import {
   setDarkTheme,
   setLightTheme,
   setSystemTheme,
-} from "@/utils/theme";
+} from "@/utils/themeStorage";
 
 const log = createLogger("SettingsProvider");
 
@@ -23,7 +22,6 @@ export type SettingsContextType = {
     field: keyof Settings,
     value: Settings[keyof Settings],
   ) => Promise<Settings | void>;
-  getActualColorScheme: () => ColorScheme;
 };
 
 interface SettingsProviderProps {
@@ -32,7 +30,6 @@ interface SettingsProviderProps {
 
 export const SettingsContext = createContext<SettingsContextType>({
   updateSettings: async () => {},
-  getActualColorScheme: () => ColorScheme.AUTO,
 });
 
 export const SettingsProvider: React.FC<SettingsProviderProps> = ({
@@ -49,7 +46,11 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         setCurrentSettings(result);
       })
       .catch((error) => {
-        log.error("Error getting settings: ", error);
+        if (error.message.match(/unauthorized/i)) {
+          setCurrentSettings(undefined);
+        } else {
+          log.error("Error getting settings: ", error);
+        }
       });
   };
 
@@ -92,27 +93,11 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       });
   };
 
-  const getActualColorScheme = (): ColorScheme => {
-    if (!currentSettings) {
-      return ColorScheme.AUTO;
-    }
-    if (currentSettings.colorScheme === ColorScheme.AUTO) {
-      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        return ColorScheme.DARK;
-      } else {
-        return ColorScheme.LIGHT;
-      }
-    } else {
-      return currentSettings.colorScheme;
-    }
-  };
-
   return (
     <SettingsContext.Provider
       value={{
         settings: currentSettings,
         updateSettings,
-        getActualColorScheme,
       }}
     >
       {children}
