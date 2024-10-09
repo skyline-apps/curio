@@ -76,7 +76,7 @@ const config: Config = {
         dark: {
           colors: {
             background: darkBrown,
-            foreground: brown[25],
+            foreground: brown[50],
             content1: brown[900],
             content2: brown[800],
             content3: brown[700],

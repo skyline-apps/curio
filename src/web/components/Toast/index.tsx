@@ -3,6 +3,7 @@ import { HiXMark } from "react-icons/hi2";
 
 import Button from "@/components/Button";
 import Card from "@/components/Card";
+import Icon from "@/components/Icon";
 import { cn } from "@/utils/cn";
 
 const ANIMATION_DURATION = 300;
@@ -63,7 +64,7 @@ const Toast: React.FC<ToastProps> = ({
             setTimeout(() => setVisible(false), ANIMATION_DURATION);
           }}
         >
-          <HiXMark />
+          <Icon icon={<HiXMark />} />
         </Button>
       )}
     </Card>
