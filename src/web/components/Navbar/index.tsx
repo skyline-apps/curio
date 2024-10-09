@@ -2,6 +2,7 @@
 import { Navbar, NavbarBrand, NavbarContent } from "@nextui-org/navbar";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import React, { useContext } from "react";
 import { HiOutlineUser } from "react-icons/hi2";
 
@@ -14,13 +15,15 @@ import {
 } from "@/components/Dropdown";
 import Icon from "@/components/Icon";
 import { UserContext } from "@/providers/UserProvider";
-import CurioColored from "@/public/logo/curio_colored.svg";
+import CurioDark from "@/public/logo/curio_dark.svg";
+import CurioLight from "@/public/logo/curio_light.svg";
 import { createLogger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
 
 const log = createLogger("Navbar");
 
 const CurioNavbar: React.FC = () => {
+  const { theme } = useTheme();
   const router = useRouter();
   const { user, clearUser } = useContext(UserContext);
   const supabase = createClient();
@@ -51,7 +54,11 @@ const CurioNavbar: React.FC = () => {
     <Navbar isBordered maxWidth="full">
       <NavbarBrand>
         <Link href={homeLink}>
-          <CurioColored height="56px" />
+          {theme === "dark" ? (
+            <CurioLight height="40px" />
+          ) : (
+            <CurioDark height="40px" />
+          )}
         </Link>
       </NavbarBrand>
       <NavbarContent justify="end">
@@ -59,7 +66,7 @@ const CurioNavbar: React.FC = () => {
           <Dropdown>
             <DropdownTrigger>
               <Button isIconOnly variant="flat">
-                <Icon className="text-foreground" icon={<HiOutlineUser />} />
+                <Icon icon={<HiOutlineUser />} />
               </Button>
             </DropdownTrigger>
             <DropdownMenu>
