@@ -2,7 +2,6 @@
 import { Navbar, NavbarBrand, NavbarContent } from "@nextui-org/navbar";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
 import React, { useContext } from "react";
 import { HiOutlineUser } from "react-icons/hi2";
 
@@ -14,6 +13,8 @@ import {
   DropdownTrigger,
 } from "@/components/Dropdown";
 import Icon from "@/components/Icon";
+import { ColorScheme } from "@/db/schema";
+import { SettingsContext } from "@/providers/SettingsProvider";
 import { UserContext } from "@/providers/UserProvider";
 import CurioDark from "@/public/logo/curio_dark.svg";
 import CurioLight from "@/public/logo/curio_light.svg";
@@ -23,7 +24,7 @@ import { createClient } from "@/utils/supabase/client";
 const log = createLogger("Navbar");
 
 const CurioNavbar: React.FC = () => {
-  const { theme } = useTheme();
+  const { getActualColorScheme } = useContext(SettingsContext);
   const router = useRouter();
   const { user, clearUser } = useContext(UserContext);
   const supabase = createClient();
@@ -54,7 +55,7 @@ const CurioNavbar: React.FC = () => {
     <Navbar isBordered maxWidth="full">
       <NavbarBrand>
         <Link href={homeLink}>
-          {theme === "dark" ? (
+          {getActualColorScheme() === ColorScheme.DARK ? (
             <CurioLight height="40px" />
           ) : (
             <CurioDark height="40px" />
