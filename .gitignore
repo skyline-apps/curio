@@ -15,6 +15,7 @@ build
 
 # misc
 .vscode
+.cursorrules
 .DS_Store
 *.pem
 
