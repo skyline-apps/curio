@@ -12,6 +12,7 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from "@/components/Dropdown";
+import Icon from "@/components/Icon";
 import { UserContext } from "@/providers/UserProvider";
 import CurioColored from "@/public/logo/curio_colored.svg";
 import { createLogger } from "@/utils/logger";
@@ -57,8 +58,8 @@ const CurioNavbar: React.FC = () => {
         {user.id ? (
           <Dropdown>
             <DropdownTrigger>
-              <Button isIconOnly>
-                <HiOutlineUser />
+              <Button isIconOnly variant="flat">
+                <Icon className="text-foreground" icon={<HiOutlineUser />} />
               </Button>
             </DropdownTrigger>
             <DropdownMenu>

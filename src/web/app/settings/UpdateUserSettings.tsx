@@ -96,12 +96,8 @@ const UpdateUserSettings: React.FC = () => {
 
   return (
     <>
-      <div className="h-6">
-        {successMessage && (
-          <Toast className="text-success">{successMessage}</Toast>
-        )}
-        {errorMessage && <Toast className="text-danger">{errorMessage}</Toast>}
-      </div>
+      {successMessage && <Toast>{successMessage}</Toast>}
+      {errorMessage && <Toast>{errorMessage}</Toast>}
       <div>
         {(Object.keys(fields) as Array<keyof typeof fields>).map((fieldKey) => (
           <FormSection

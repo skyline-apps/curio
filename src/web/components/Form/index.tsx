@@ -1,5 +1,6 @@
 import React from "react";
 
+import Card from "@/components/Card";
 import { cn } from "@/utils/cn";
 
 interface FormProps extends React.FormHTMLAttributes<HTMLFormElement> {
@@ -39,7 +40,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
   children,
 }: FormSectionProps) => {
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
+    <Card className={cn("flex flex-col gap-2", className)}>
       {title && <h3>{title}</h3>}
       {description && <p className="text-secondary text-sm">{description}</p>}
       <div className={"flex flex-row gap-2"}>{children}</div>
@@ -54,6 +55,6 @@ export const FormSection: React.FC<FormSectionProps> = ({
         </div>
         {actions}
       </div>
-    </div>
+    </Card>
   );
 };
