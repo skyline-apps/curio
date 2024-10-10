@@ -53,8 +53,8 @@ const LeftSidebar: React.FC = () => {
     setSelectedKey(newSelectedKey);
   }, [pathname]);
 
-  const handleNavigation = (key: string): void => {
-    router.push(key);
+  const handleNavigation = (key: React.Key): void => {
+    router.push(key.toString());
   };
 
   const toggleSidebar = (): void => {
