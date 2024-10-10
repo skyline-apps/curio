@@ -11,7 +11,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-row h-full w-full">
       <LeftSidebar />
-      <AppPage>{children}</AppPage>
+      <div className="flex-1">
+        <AppPage>{children}</AppPage>
+      </div>
     </div>
   );
 };
