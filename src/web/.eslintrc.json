@@ -25,6 +25,7 @@
   },
   "plugins": [
     "@typescript-eslint",
+    "no-relative-import-paths",
     "prettier",
     "promise",
     "react",
@@ -59,6 +60,10 @@
     "import/no-duplicates": "error",
     "no-console": [
       "error"
+    ],
+    "no-relative-import-paths/no-relative-import-paths": [
+      "error",
+      { "allowSameFolder": true }
     ],
     "no-restricted-imports": [
       "error",
