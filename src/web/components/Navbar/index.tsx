@@ -6,7 +6,7 @@ import React, { useContext } from "react";
 import { HiOutlineUser } from "react-icons/hi2";
 
 import Button from "@/components/Button";
-import CurioBrand from "@/components/CurioBrand";
+import { CurioBrand } from "@/components/CurioBrand";
 import {
   Dropdown,
   DropdownItem,

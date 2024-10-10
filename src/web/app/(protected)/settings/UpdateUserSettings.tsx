@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import { z } from "zod";
 
+import { SettingsSchema } from "@/app/api/v1/user/settings/validation";
 import { type Settings } from "@/app/api/v1/user/settings/validation";
 import { FormSection } from "@/components/Form";
 import { Radio, RadioGroup } from "@/components/Radio";
@@ -9,8 +10,6 @@ import Toast from "@/components/Toast";
 import { SettingsContext } from "@/providers/SettingsProvider";
 import { createLogger } from "@/utils/logger";
 import { camelCaseToSentenceCase } from "@/utils/string";
-
-import { SettingsSchema } from "../api/v1/user/settings/validation";
 
 const log = createLogger("UpdateUserSettings");
 
@@ -88,7 +87,7 @@ const UpdateUserSettings: React.FC = () => {
     }
   };
 
-  const fields = SettingsSchema.shape;
+  const fields = SettingsSchema.shape as Record<keyof Settings, z.ZodTypeAny>;
 
   let contents;
 
