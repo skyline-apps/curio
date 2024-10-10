@@ -1,6 +1,6 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { HiArrowRightOnRectangle, HiOutlineCog6Tooth } from "react-icons/hi2";
 
 import Button from "@/components/Button";
@@ -21,9 +21,9 @@ import { cn } from "@/utils/cn";
 const LeftSidebar: React.FC = () => {
   const router = useRouter();
   const { user } = useContext(UserContext);
-  // TODO(Kim): Implement collapsible and mobile-friendly sidebar
   const [sidebarOpen] = useState(true);
   const pathname = usePathname();
+  const [selectedKey, setSelectedKey] = useState<string>("/home");
 
   const handleLogout = useLogout();
 
@@ -31,7 +31,16 @@ const LeftSidebar: React.FC = () => {
     router.push("/settings");
   };
 
-  // TODO(Kim): Fix animation on tabs
+  useEffect(() => {
+    // Update selectedKey when pathname changes
+    setSelectedKey(pathname);
+  }, [pathname]);
+
+  const handleSelectionChange = (key: React.Key) => {
+    setSelectedKey(key as string);
+    router.push(key as string);
+  };
+
   return (
     <aside
       className={cn(
@@ -49,12 +58,13 @@ const LeftSidebar: React.FC = () => {
             isVertical
             fullWidth
             variant="light"
-            selectedKey={pathname}
+            selectedKey={selectedKey}
+            onSelectionChange={handleSelectionChange}
             aria-label="Navigation"
           >
-            <Tab key="/home" href="/home" title="Home" />
-            <Tab key="/archive" href="/archive" title="Archive" />
-            <Tab key="/favorites" href="/favorites" title="Favorites" />
+            <Tab key="/home" title="Home" />
+            <Tab key="/archive" title="Archive" />
+            <Tab key="/favorites" title="Favorites" />
           </Tabs>
         </nav>
       </div>
