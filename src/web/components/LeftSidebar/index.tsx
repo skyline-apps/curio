@@ -136,7 +136,9 @@ const LeftSidebar: React.FC = () => {
         <nav className="flex flex-col p-2">
           <div className={cn(sidebarOpen ? "hidden md:block" : "hidden")}>
             <Tabs
-              classNames={{ tab: "justify-start" }}
+              classNames={{
+                tab: "justify-start",
+              }}
               isVertical
               fullWidth
               variant="light"
@@ -181,8 +183,12 @@ const LeftSidebar: React.FC = () => {
       <div className="flex-none">
         <div className={cn(sidebarOpen ? "hidden md:block" : "hidden")}>
           <Dropdown>
-            <DropdownTrigger className="mx-auto py-2">
-              <Button variant="light" disableRipple className="w-full h-full">
+            <DropdownTrigger className="p-2">
+              <Button
+                variant="light"
+                disableRipple
+                className="justify-start w-full h-full"
+              >
                 <User name={user.username} description={user.email} />
               </Button>
             </DropdownTrigger>

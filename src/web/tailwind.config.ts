@@ -70,7 +70,12 @@ const config: Config = {
       themes: {
         light: {
           colors: {
-            background: brown[50],
+            background: {
+              400: brown[25],
+              DEFAULT: brown[50],
+              600: brown[75],
+              700: brown[100],
+            },
             foreground: darkBrown,
             default: { ...brown, foreground: darkBrown, DEFAULT: brown[200] },
             secondary: { ...gray, foreground: darkBrown, DEFAULT: gray[700] },
@@ -84,7 +89,12 @@ const config: Config = {
         },
         dark: {
           colors: {
-            background: darkBrown,
+            background: {
+              400: brown[975],
+              DEFAULT: brown[950],
+              600: brown[900],
+              700: brown[800],
+            },
             foreground: lightBrown,
             default: { ...brown, foreground: lightBrown, DEFAULT: brown[800] },
             secondary: { ...gray, foreground: lightBrown, DEFAULT: gray[300] },
