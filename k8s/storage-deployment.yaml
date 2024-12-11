@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: storage
+  name: storage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: storage
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: storage
+    spec:
+      containers:
+        - env:
+            - name: ANON_KEY
+              value: "${ANON_KEY}"
+            - name: DATABASE_URL
+              value: "postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}"
+            - name: FILE_SIZE_LIMIT
+              value: "52428800"
+            - name: GLOBAL_S3_BUCKET
+              value: "stub"
+            - name: IMGPROXY_URL
+              value: "http://imgproxy:5001"
+            - name: JWT_SECRET
+              value: "${JWT_SECRET}"
+            - name: REGION
+              value: "stub"
+            - name: SERVICE_ROLE_KEY
+              value: "${SERVICE_ROLE_KEY}"
+            - name: STORAGE_BACKEND
+              value: "file"
+            - name: TENANT_ID
+              value: "stub"
+            - name: PROJECT_REF
+              value: "${PROJECT_REF}"
+            - name: POSTGREST_URL
+              value: "http://rest:3000"
+            - name: PGRST_JWT_SECRET
+              value: "${JWT_SECRET}"
+            - name: FILE_STORAGE_BACKEND_PATH
+              value: "/var/lib/storage"
+            - name: ENABLE_IMAGE_TRANSFORMATION
+              value: "true"
+            - name: ENABLE_IMAGE_SEARCH
+              value: "true"
+          image: supabase/storage-api:v1.10.1
+          livenessProbe:
+            exec:
+              command:
+                - wget
+                - --no-verbose
+                - --tries=1
+                - --spider
+                - http://localhost:5000/status
+            failureThreshold: 3
+            periodSeconds: 5
+            timeoutSeconds: 5
+          name: supabase-storage
+          volumeMounts:
+            - mountPath: /var/lib/storage
+              name: storage-data
+      volumes:
+        - name: storage-data
+          persistentVolumeClaim:
+            claimName: storage-data
+      restartPolicy: Always

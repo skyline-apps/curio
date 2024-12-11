@@ -1,0 +1,40 @@
+apiVersion: v1
+data:
+  roles.sql: |
+    -- Create roles if they don't exist
+    DO $$
+    BEGIN
+      IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'authenticator') THEN
+        CREATE ROLE authenticator LOGIN NOINHERIT;
+      END IF;
+      IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'pgbouncer') THEN
+        CREATE ROLE pgbouncer LOGIN NOINHERIT;
+      END IF;
+      IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'supabase_auth_admin') THEN
+        CREATE ROLE supabase_auth_admin LOGIN NOINHERIT;
+      END IF;
+      IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'supabase_functions_admin') THEN
+        CREATE ROLE supabase_functions_admin LOGIN NOINHERIT;
+      END IF;
+      IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'supabase_storage_admin') THEN
+        CREATE ROLE supabase_storage_admin LOGIN NOINHERIT CREATEDB;
+      END IF;
+    END
+    $$;
+
+    -- Set passwords for all roles
+    ALTER USER authenticator WITH PASSWORD '${POSTGRES_PASSWORD}';
+    ALTER USER pgbouncer WITH PASSWORD '${POSTGRES_PASSWORD}';
+    ALTER USER supabase_auth_admin WITH PASSWORD '${POSTGRES_PASSWORD}';
+    ALTER USER supabase_functions_admin WITH PASSWORD '${POSTGRES_PASSWORD}';
+    ALTER USER supabase_storage_admin WITH PASSWORD '${POSTGRES_PASSWORD}';
+
+    -- Grant connection permissions
+    GRANT CONNECT ON DATABASE ${POSTGRES_DB} TO supabase_storage_admin;
+kind: ConfigMap
+metadata:
+  annotations:
+    use-subpath: "true"
+  labels:
+    app: db
+  name: db-cm2

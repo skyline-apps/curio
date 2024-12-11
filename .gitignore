@@ -34,5 +34,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# db
-docker/volumes/db/data
+# PostgreSQL SSL certificates
+certs/*.crt
+certs/*.key
+certs/*.srl

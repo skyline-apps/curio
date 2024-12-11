@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: web
+  name: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - args:
+            - npm
+            - run
+            - dev
+          env:
+            - name: NEXT_PUBLIC_SUPABASE_ANON_KEY
+              value: "${ANON_KEY}"
+            - name: NEXT_PUBLIC_SUPABASE_URL
+              value: "${SUPABASE_PUBLIC_URL}"
+            - name: POSTGRES_URL
+              value: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
+          image: web
+          name: curio
+          workingDir: /app
+      restartPolicy: Always

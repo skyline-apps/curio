@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: vector
+  name: vector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vector
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: vector
+    spec:
+      serviceAccountName: vector
+      containers:
+        - args:
+            - --config
+            - /etc/vector/vector.yml
+          env:
+            - name: LOGFLARE_API_KEY
+              value: "${LOGFLARE_API_KEY}"
+            - name: VECTOR_LOG
+              value: "debug"
+            - name: VECTOR_SELF_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          image: timberio/vector:0.28.1-alpine
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 9001
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 9001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 9001
+            failureThreshold: 30
+            periodSeconds: 10
+          name: supabase-vector
+          ports:
+            - containerPort: 9001
+              name: api
+          volumeMounts:
+            - mountPath: /etc/vector
+              name: vector-cm0
+              readOnly: true
+            - mountPath: /var/log
+              name: var-log
+              readOnly: true
+            - mountPath: /var/lib/docker/containers
+              name: var-lib-docker-containers
+              readOnly: true
+            - mountPath: /var/log/pods
+              name: pod-logs
+              readOnly: true
+      restartPolicy: Always
+      volumes:
+        - configMap:
+            name: vector-cm0
+          name: vector-cm0
+        - hostPath:
+            path: /var/log
+          name: var-log
+        - hostPath:
+            path: /var/lib/docker/containers
+          name: var-lib-docker-containers
+        - name: pod-logs
+          hostPath:
+            path: /var/log/pods
+            type: DirectoryOrCreate

@@ -1,0 +1,14 @@
+apiVersion: v1
+data:
+  realtime.sql: |
+    \set pguser `echo "$POSTGRES_USER"`
+
+    create schema if not exists _realtime;
+    alter schema _realtime owner to :pguser;
+kind: ConfigMap
+metadata:
+  annotations:
+    use-subpath: "true"
+  labels:
+    app: db
+  name: db-cm0

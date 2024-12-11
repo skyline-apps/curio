@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: analytics
+  name: analytics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analytics
+  template:
+    metadata:
+      labels:
+        app: analytics
+    spec:
+      containers:
+        - env:
+            - name: DB_DATABASE
+              value: "${POSTGRES_DB}"
+            - name: DB_HOSTNAME
+              value: "${POSTGRES_HOST}"
+            - name: DB_PASSWORD
+              value: "${POSTGRES_PASSWORD}"
+            - name: DB_PORT
+              value: "${POSTGRES_PORT}"
+            - name: DB_SCHEMA
+              value: "_analytics"
+            - name: DB_USERNAME
+              value: supabase_admin
+            - name: LOGFLARE_API_KEY
+              value: "${LOGFLARE_API_KEY}"
+            - name: LOGFLARE_FEATURE_FLAG_OVERRIDE
+              value: "multibackend=true"
+            - name: LOGFLARE_MIN_CLUSTER_SIZE
+              value: "1"
+            - name: LOGFLARE_NODE_HOST
+              value: "127.0.0.1"
+            - name: LOGFLARE_SINGLE_TENANT
+              value: "true"
+            - name: LOGFLARE_SUPABASE_MODE
+              value: "true"
+            - name: POSTGRES_BACKEND_SCHEMA
+              value: "_analytics"
+            - name: POSTGRES_BACKEND_URL
+              value: "postgresql://supabase_admin:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
+          image: supabase/logflare:1.4.0
+          livenessProbe:
+            exec:
+              command:
+                - curl
+                - http://localhost:4000/health
+            failureThreshold: 10
+            periodSeconds: 5
+            timeoutSeconds: 5
+          name: supabase-analytics
+          ports:
+            - containerPort: 4000
+              protocol: TCP
+      restartPolicy: Always

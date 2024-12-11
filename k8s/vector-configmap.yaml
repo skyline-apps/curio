@@ -1,0 +1,208 @@
+apiVersion: v1
+data:
+  vector.yml: |
+    api:
+      enabled: true
+      address: 0.0.0.0:9001
+
+    sources:
+      kubernetes_logs:
+        type: kubernetes_logs
+        exclude_paths_glob_patterns:
+          - /var/log/pods/kube-system_*/*
+          - /var/log/pods/*vector*/*
+
+    transforms:
+      project_logs:
+        type: remap
+        inputs:
+          - kubernetes_logs
+        source: |-
+          .project = "default"
+          .event_message = del(.message)
+          .appname = del(.pod_name)
+          del(.container_id)
+          del(.source_type)
+          del(.stream)
+          del(.label)
+          del(.image)
+          del(.host)
+          del(.stream)
+      router:
+        type: route
+        inputs:
+          - project_logs
+        route:
+          kong: '.appname == "supabase-kong"'
+          auth: '.appname == "supabase-auth"'
+          rest: '.appname == "supabase-rest"'
+          realtime: '.appname == "supabase-realtime"'
+          storage: '.appname == "supabase-storage"'
+          functions: '.appname == "supabase-functions"'
+          db: '.appname == "supabase-db"'
+      kong_logs:
+        type: remap
+        inputs:
+          - router.kong
+        source: |-
+          req, err = parse_nginx_log(.event_message, "combined")
+          if err == null {
+              .timestamp = req.timestamp
+              .metadata.request.headers.referer = req.referer
+              .metadata.request.headers.user_agent = req.agent
+              .metadata.request.headers.cf_connecting_ip = req.client
+              .metadata.request.method = req.method
+              .metadata.request.path = req.path
+              .metadata.request.protocol = req.protocol
+              .metadata.response.status_code = req.status
+          }
+          if err != null {
+            abort
+          }
+      kong_err:
+        type: remap
+        inputs:
+          - router.kong
+        source: |-
+          .metadata.request.method = "GET"
+          .metadata.response.status_code = 200
+          parsed, err = parse_nginx_log(.event_message, "error")
+          if err == null {
+              .timestamp = parsed.timestamp
+              .severity = parsed.severity
+              .metadata.request.host = parsed.host
+              .metadata.request.headers.cf_connecting_ip = parsed.client
+              url, err = split(parsed.request, " ")
+              if err == null {
+                  .metadata.request.method = url[0]
+                  .metadata.request.path = url[1]
+                  .metadata.request.protocol = url[2]
+              }
+          }
+          if err != null {
+            abort
+          }
+      auth_logs:
+        type: remap
+        inputs:
+          - router.auth
+        source: |-
+          parsed, err = parse_json(.event_message)
+          if err == null {
+              .metadata.timestamp = parsed.time
+              .metadata = merge!(.metadata, parsed)
+          }
+      rest_logs:
+        type: remap
+        inputs:
+          - router.rest
+        source: |-
+          parsed, err = parse_json(.event_message)
+          if err == null {
+              .metadata.timestamp = parsed.time
+              .metadata = merge!(.metadata, parsed)
+          }
+      realtime_logs:
+        type: remap
+        inputs:
+          - router.realtime
+        source: |-
+          parsed, err = parse_json(.event_message)
+          if err == null {
+              .metadata.timestamp = parsed.time
+              .metadata = merge!(.metadata, parsed)
+          }
+      storage_logs:
+        type: remap
+        inputs:
+          - router.storage
+        source: |-
+          parsed, err = parse_json(.event_message)
+          if err == null {
+              .metadata.timestamp = parsed.time
+              .metadata = merge!(.metadata, parsed)
+          }
+      functions_logs:
+        type: remap
+        inputs:
+          - router.functions
+        source: |-
+          parsed, err = parse_json(.event_message)
+          if err == null {
+              .metadata.timestamp = parsed.time
+              .metadata = merge!(.metadata, parsed)
+          }
+      db_logs:
+        type: remap
+        inputs:
+          - router.db
+        source: |-
+          parsed, err = parse_json(.event_message)
+          if err == null {
+              .metadata.timestamp = parsed.time
+              .metadata = merge!(.metadata, parsed)
+          }
+
+    sinks:
+      logflare_auth:
+        type: 'http'
+        inputs:
+          - auth_logs
+        encoding:
+          codec: json
+        uri: 'https://api.logflare.app/logs?api_key=${LOGFLARE_API_KEY}&source=auth'
+        compression: gzip
+      logflare_rest:
+        type: 'http'
+        inputs:
+          - rest_logs
+        encoding:
+          codec: json
+        uri: 'https://api.logflare.app/logs?api_key=${LOGFLARE_API_KEY}&source=rest'
+        compression: gzip
+      logflare_realtime:
+        type: 'http'
+        inputs:
+          - realtime_logs
+        encoding:
+          codec: json
+        uri: 'https://api.logflare.app/logs?api_key=${LOGFLARE_API_KEY}&source=realtime'
+        compression: gzip
+      logflare_storage:
+        type: 'http'
+        inputs:
+          - storage_logs
+        encoding:
+          codec: json
+        uri: 'https://api.logflare.app/logs?api_key=${LOGFLARE_API_KEY}&source=storage'
+        compression: gzip
+      logflare_functions:
+        type: 'http'
+        inputs:
+          - functions_logs
+        encoding:
+          codec: json
+        uri: 'https://api.logflare.app/logs?api_key=${LOGFLARE_API_KEY}&source=functions'
+        compression: gzip
+      logflare_db:
+        type: 'http'
+        inputs:
+          - db_logs
+        encoding:
+          codec: json
+        uri: 'https://api.logflare.app/logs?api_key=${LOGFLARE_API_KEY}&source=db'
+        compression: gzip
+      logflare_kong:
+        type: 'http'
+        inputs:
+          - kong_logs
+          - kong_err
+        encoding:
+          codec: json
+        uri: 'https://api.logflare.app/logs?api_key=${LOGFLARE_API_KEY}&source=kong'
+        compression: gzip
+kind: ConfigMap
+metadata:
+  labels:
+    app: vector
+  name: vector-cm0

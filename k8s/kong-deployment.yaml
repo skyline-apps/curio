@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kong
+  name: kong
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kong
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: kong
+    spec:
+      containers:
+        - command:
+            - bash
+            - -c
+            - eval "echo \"$(cat ~/temp.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start
+          env:
+            - name: DASHBOARD_PASSWORD
+              value: "${KONG_DASHBOARD_PASSWORD}"
+            - name: DASHBOARD_USERNAME
+              value: "${KONG_DASHBOARD_USERNAME}"
+            - name: KONG_DATABASE
+              value: "off"
+            - name: KONG_DECLARATIVE_CONFIG
+              value: "/home/kong/kong.yml"
+            - name: KONG_DNS_ORDER
+              value: "LAST,A,CNAME"
+            - name: KONG_NGINX_PROXY_PROXY_BUFFERS
+              value: "64 160k"
+            - name: KONG_NGINX_PROXY_PROXY_BUFFER_SIZE
+              value: "160k"
+            - name: KONG_PLUGINS
+              value: "request-transformer,cors,key-auth,acl,basic-auth"
+            - name: SUPABASE_ANON_KEY
+              value: "${ANON_KEY}"
+            - name: SUPABASE_SERVICE_KEY
+              value: "${SERVICE_ROLE_KEY}"
+          image: kong:2.8.1
+          name: supabase-kong
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+            - containerPort: 8443
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /home/kong/temp.yml
+              name: kong-cm0
+              readOnly: true
+              subPath: temp.yml
+      restartPolicy: Always
+      volumes:
+        - configMap:
+            items:
+              - key: kong.yml
+                path: temp.yml
+            name: kong-cm0
+          name: kong-cm0

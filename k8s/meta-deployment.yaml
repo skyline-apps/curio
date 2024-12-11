@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: meta
+  name: meta
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: meta
+  template:
+    metadata:
+      labels:
+        app: meta
+    spec:
+      containers:
+        - env:
+            - name: PG_META_DB_HOST
+              value: "${POSTGRES_HOST}"
+            - name: PG_META_DB_NAME
+              value: "${POSTGRES_DB}"
+            - name: PG_META_DB_PASSWORD
+              value: "${POSTGRES_PASSWORD}"
+            - name: PG_META_DB_PORT
+              value: "${POSTGRES_PORT}"
+            - name: PG_META_DB_USER
+              value: "${POSTGRES_USER}"
+            - name: PG_META_PORT
+              value: "8080"
+          image: supabase/postgres-meta:v0.83.2
+          name: supabase-meta
+      restartPolicy: Always

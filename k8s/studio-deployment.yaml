@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: studio
+  name: studio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: studio
+  template:
+    metadata:
+      labels:
+        app: studio
+    spec:
+      containers:
+        - env:
+            - name: AUTH_JWT_SECRET
+              value: "${JWT_SECRET}"
+            - name: DEFAULT_ORGANIZATION_NAME
+              value: "${STUDIO_DEFAULT_ORGANIZATION}"
+            - name: DEFAULT_PROJECT_NAME
+              value: "${STUDIO_DEFAULT_PROJECT}"
+            - name: LOGFLARE_API_KEY
+              value: "${LOGFLARE_API_KEY}"
+            - name: LOGFLARE_URL
+              value: "http://analytics:4000"
+            - name: NEXT_ANALYTICS_BACKEND_PROVIDER
+              value: "postgres"
+            - name: NEXT_PUBLIC_ENABLE_LOGS
+              value: "true"
+            - name: POSTGRES_PASSWORD
+              value: "${POSTGRES_PASSWORD}"
+            - name: STUDIO_PG_META_URL
+              value: "http://meta:8080"
+            - name: STUDIO_PORT
+              value: "${STUDIO_PORT}"
+            - name: SUPABASE_ANON_KEY
+              value: "${ANON_KEY}"
+            - name: SUPABASE_PUBLIC_URL
+              value: "${SUPABASE_PUBLIC_URL}"
+            - name: SUPABASE_SERVICE_KEY
+              value: "${SERVICE_ROLE_KEY}"
+            - name: SUPABASE_URL
+              value: "http://kong:8000"
+          image: supabase/studio:20240729-ce42139
+          livenessProbe:
+            exec:
+              command:
+                - node
+                - -e
+                - require('http').get('http://localhost:3000/api/profile', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})
+            failureThreshold: 3
+            periodSeconds: 5
+            timeoutSeconds: 5
+          name: supabase-studio
+      restartPolicy: Always

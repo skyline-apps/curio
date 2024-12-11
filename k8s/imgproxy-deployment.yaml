@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: imgproxy
+  name: imgproxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: imgproxy
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: imgproxy
+    spec:
+      containers:
+        - env:
+            - name: IMGPROXY_BIND
+              value: ":5001"
+            - name: IMGPROXY_ENABLE_WEBP_DETECTION
+              value: "${IMGPROXY_ENABLE_WEBP_DETECTION}"
+            - name: IMGPROXY_LOCAL_FILESYSTEM_ROOT
+              value: "/"
+            - name: IMGPROXY_USE_ETAG
+              value: "true"
+          image: darthsim/imgproxy:v3.8.0
+          livenessProbe:
+            exec:
+              command:
+                - imgproxy
+                - health
+            failureThreshold: 3
+            periodSeconds: 5
+            timeoutSeconds: 5
+          name: supabase-imgproxy
+      restartPolicy: Always
+      # TODO: Add volume mount

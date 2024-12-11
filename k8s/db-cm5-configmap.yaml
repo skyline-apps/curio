@@ -1,0 +1,14 @@
+apiVersion: v1
+data:
+  logs.sql: |
+    \set pguser `echo "$POSTGRES_USER"`
+
+    create schema if not exists _analytics;
+    alter schema _analytics owner to :pguser;
+kind: ConfigMap
+metadata:
+  annotations:
+    use-subpath: "true"
+  labels:
+    app: db
+  name: db-cm5

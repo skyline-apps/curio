@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: realtime
+  name: realtime
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: realtime
+  template:
+    metadata:
+      labels:
+        app: realtime
+    spec:
+      containers:
+        - env:
+            - name: API_JWT_SECRET
+              value: "${JWT_SECRET}"
+            - name: APP_NAME
+              value: "realtime"
+            - name: DB_AFTER_CONNECT_QUERY
+              value: "SET search_path TO _realtime"
+            - name: DB_ENC_KEY
+              value: ${REALTIME_DB_ENC_KEY}
+            - name: DB_HOST
+              value: "${POSTGRES_HOST}"
+            - name: DB_NAME
+              value: "${POSTGRES_DB}"
+            - name: DB_PASSWORD
+              value: "${POSTGRES_PASSWORD}"
+            - name: DB_PORT
+              value: "${POSTGRES_PORT}"
+            - name: DB_USER
+              value: supabase_admin
+            - name: DNS_NODES
+              value: "''"
+            - name: ERL_AFLAGS
+              value: "-proto_dist inet_tcp"
+            - name: PORT
+              value: "4000"
+            - name: RLIMIT_NOFILE
+              value: "10000"
+            - name: SECRET_KEY_BASE
+              value: "${REALTIME_SECRET_KEY_BASE}"
+            - name: SEED_SELF_HOST
+              value: "true"
+          image: supabase/realtime:v2.30.34
+          livenessProbe:
+            exec:
+              command:
+                - curl
+                - -sSfL
+                - --head
+                - -o
+                - /dev/null
+                - -H
+                - 'Authorization: Bearer ${JWT_SECRET}'
+                - http://localhost:4000/api/tenants/realtime-dev/health
+            failureThreshold: 3
+            periodSeconds: 5
+            timeoutSeconds: 5
+          name: realtime-dev.supabase-realtime
+      restartPolicy: Always

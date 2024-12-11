@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: auth
+  name: auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+        - env:
+            - name: GOTRUE_API_HOST
+              value: "0.0.0.0"
+            - name: GOTRUE_API_PORT
+              value: "9999"
+            - name: API_EXTERNAL_URL
+              value: "${API_EXTERNAL_URL}"
+            - name: GOTRUE_DB_DRIVER
+              value: "postgres"
+            - name: GOTRUE_DB_DATABASE_URL
+              value: "postgres://supabase_auth_admin:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
+            - name: GOTRUE_SITE_URL
+              value: "${SITE_URL}"
+            - name: GOTRUE_URI_ALLOW_LIST
+              value: "${ADDITIONAL_REDIRECT_URLS}"
+            - name: GOTRUE_JWT_SECRET
+              value: "${JWT_SECRET}"
+            - name: GOTRUE_JWT_EXP
+              value: "${JWT_EXPIRY}"
+            - name: GOTRUE_JWT_DEFAULT_GROUP_NAME
+              value: "authenticated"
+            - name: GOTRUE_JWT_AUD
+              value: "authenticated"
+            - name: GOTRUE_JWT_ADMIN_ROLES
+              value: "service_role"
+            - name: GOTRUE_DISABLE_SIGNUP
+              value: "${DISABLE_SIGNUP}"
+            - name: GOTRUE_EXTERNAL_EMAIL_ENABLED
+              value: "${ENABLE_EMAIL_SIGNUP}"
+            - name: GOTRUE_MAILER_AUTOCONFIRM
+              value: "${ENABLE_EMAIL_AUTOCONFIRM}"
+            - name: GOTRUE_SMTP_ADMIN_EMAIL
+              value: "${SMTP_ADMIN_EMAIL}"
+            - name: GOTRUE_SMTP_HOST
+              value: "${SMTP_HOST}"
+            - name: GOTRUE_SMTP_PORT
+              value: "${SMTP_PORT}"
+            - name: GOTRUE_SMTP_USER
+              value: "${SMTP_USER}"
+            - name: GOTRUE_SMTP_PASS
+              value: "${SMTP_PASS}"
+            - name: GOTRUE_SMTP_SENDER_NAME
+              value: "${SMTP_SENDER_NAME}"
+            - name: GOTRUE_MAILER_URLPATHS_CONFIRMATION
+              value: "${MAILER_URLPATHS_CONFIRMATION}"
+            - name: GOTRUE_MAILER_URLPATHS_INVITE
+              value: "${MAILER_URLPATHS_INVITE}"
+            - name: GOTRUE_MAILER_URLPATHS_RECOVERY
+              value: "${MAILER_URLPATHS_RECOVERY}"
+            - name: GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE
+              value: "${MAILER_URLPATHS_EMAIL_CHANGE}"
+            - name: GOTRUE_EXTERNAL_PHONE_ENABLED
+              value: "${ENABLE_PHONE_SIGNUP}"
+            - name: GOTRUE_SMS_AUTOCONFIRM
+              value: "${ENABLE_PHONE_AUTOCONFIRM}"
+            - name: GOTRUE_EXTERNAL_GOOGLE_ENABLED
+              value: "${ENABLE_GOOGLE_AUTH}"
+            - name: GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID
+              value: "${GOOGLE_CLIENT_ID}"
+            - name: GOTRUE_EXTERNAL_GOOGLE_SECRET
+              value: "${GOOGLE_CLIENT_SECRET}"
+            - name: GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI
+              value: "${GOOGLE_REDIRECT_URI}"
+            - name: GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED
+              value: "${ENABLE_ANONYMOUS_USERS}"
+          image: supabase/gotrue:v2.158.1
+          livenessProbe:
+            exec:
+              command:
+                - wget
+                - --no-verbose
+                - --tries=1
+                - --spider
+                - http://localhost:9999/health
+            failureThreshold: 3
+            periodSeconds: 5
+            timeoutSeconds: 5
+          name: supabase-auth
+      restartPolicy: Always

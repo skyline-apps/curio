@@ -1,0 +1,133 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: db
+  name: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      initContainers:
+      - name: init-chmod-data
+        image: busybox:1.37.0
+        command:
+        - sh
+        - -c
+        - |
+          # Initialize the persistent volume and copy config
+          echo "Setting up database file permissions..."
+          mkdir -p /var/lib/postgresql/data
+          chown -R 101:102 /var/lib/postgresql
+          chmod 700 /var/lib/postgresql/data
+          echo "Done"
+        volumeMounts:
+        - name: db-data
+          mountPath: /var/lib/postgresql/data
+      containers:
+      - name: db
+        image: supabase/postgres:15.1.1.78
+        env:
+        - name: POSTGRES_USER
+          value: "${POSTGRES_USER}"
+        - name: POSTGRES_PASSWORD
+          value: "${POSTGRES_PASSWORD}"
+        - name: POSTGRES_DB
+          value: "${POSTGRES_DB}"
+        - name: POSTGRES_HOST
+          value: "/var/run/postgresql"
+        - name: PGPORT
+          value: "${POSTGRES_PORT}"
+        - name: POSTGRES_PORT
+          value: "${POSTGRES_PORT}"
+        - name: JWT_SECRET
+          value: "${JWT_SECRET}"
+        - name: JWT_EXP
+          value: "${JWT_EXPIRY}"
+        ports:
+        - containerPort: ${POSTGRES_PORT}
+        securityContext:
+          runAsUser: 101
+          runAsGroup: 102
+        volumeMounts:
+        - name: db-data
+          mountPath: /var/lib/postgresql/data
+        - name: db-config
+          mountPath: /etc/postgresql/conf.d
+          readOnly: true
+        - mountPath: /docker-entrypoint-initdb.d/migrations/99-realtime.sql
+          name: db-cm0
+          subPath: realtime.sql
+        - mountPath: /docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql
+          name: db-cm1
+          subPath: webhooks.sql
+        - mountPath: /docker-entrypoint-initdb.d/init-scripts/99-roles.sql
+          name: db-cm2
+          subPath: roles.sql
+        - mountPath: /docker-entrypoint-initdb.d/init-scripts/99-jwt.sql
+          name: db-cm3
+          subPath: jwt.sql
+        - mountPath: /docker-entrypoint-initdb.d/migrations/99-logs.sql
+          name: db-cm5
+          subPath: logs.sql
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+            - -h
+            - localhost
+          failureThreshold: 10
+          periodSeconds: 5
+          timeoutSeconds: 5
+      volumes:
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: db-data
+      - name: db-config
+        configMap:
+          name: db-config
+      - name: db-cm0
+        configMap:
+          name: db-cm0
+          items:
+          - key: realtime.sql
+            path: realtime.sql
+      - name: db-cm1
+        configMap:
+          name: db-cm1
+          items:
+          - key: webhooks.sql
+            path: webhooks.sql
+      - name: db-cm2
+        configMap:
+          name: db-cm2
+          items:
+          - key: roles.sql
+            path: roles.sql
+      - name: db-cm3
+        configMap:
+          name: db-cm3
+          items:
+          - key: jwt.sql
+            path: jwt.sql
+      - name: db-cm5
+        configMap:
+          name: db-cm5
+          items:
+          - key: logs.sql
+            path: logs.sql
+      - name: db-certs
+        secret:
+          secretName: db-certs
+          defaultMode: 0600
+          optional: true
