@@ -156,3 +156,4 @@ spec:
           optional: true
       - name: cert-data
         emptyDir: {}
+      # TODO: Add a volume to persist contents of `/etc/postgresql-custom`?

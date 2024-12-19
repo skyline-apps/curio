@@ -8,6 +8,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
   hostPath:
     path: /data/postgres
     type: DirectoryOrCreate
@@ -22,3 +23,5 @@ spec:
   resources:
     requests:
       storage: 10Gi
+  volumeName: storage-data
+  storageClassName: ""
