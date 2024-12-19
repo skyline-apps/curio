@@ -17,15 +17,11 @@ data:
     min_wal_size = 80MB
 
     # Security Settings
-    # password_encryption = scram-sha-256
-    ssl = off
-    # ssl_cert_file = '/etc/postgresql/certs/server.crt'
-    # ssl_key_file = '/etc/postgresql/certs/server.key'
-    # ssl_ca_file = '/etc/postgresql/certs/server-ca.crt'
-
-    # # Force SSL for all connections
-    # hostssl all all all scram-sha-256
-    # host all all all reject
+    password_encryption = scram-sha-256
+    ssl = on
+    ssl_cert_file = '/var/lib/postgresql/certs/server.crt'
+    ssl_key_file = '/var/lib/postgresql/certs/server.key'
+    ssl_ca_file = '/var/lib/postgresql/certs/server-ca.crt'
 
     # Locale Settings
     log_timezone = 'UTC'
@@ -53,3 +49,7 @@ data:
 
     # IPv6 local connections
     host    all             all             ::1/128                scram-sha-256
+
+    # Force SSL for all connections
+    hostssl all     all             all                     scram-sha-256
+    host    all     all             all                     reject

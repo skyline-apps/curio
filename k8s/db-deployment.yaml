@@ -17,21 +17,42 @@ spec:
         app: db
     spec:
       initContainers:
-      - name: init-chmod-data
+      - name: init-chmod
         image: busybox:1.37.0
+        securityContext:
+          runAsUser: 0
+          runAsGroup: 0
         command:
         - sh
         - -c
         - |
-          # Initialize the persistent volume and copy config
-          echo "Setting up database file permissions..."
-          mkdir -p /var/lib/postgresql/data
-          chown -R 101:102 /var/lib/postgresql
+          # Initialize the persistent volume with correct permissions
+          echo "Setting up database data directory permissions..."
+          chown -R 101:102 /var/lib/postgresql/data
           chmod 700 /var/lib/postgresql/data
+          echo "Done"
+
+          echo "Setting up SSL certificate permissions..."
+          # Create a new writable directory for certs
+          mkdir -p /var/lib/postgresql/certs
+          # Copy certs to writable location
+          cp /etc/postgresql/certs/* /var/lib/postgresql/certs/
+          # Set permissions
+          chown -R 101:102 /var/lib/postgresql/certs
+          chmod -R 0600 /var/lib/postgresql/certs/*
           echo "Done"
         volumeMounts:
         - name: db-data
           mountPath: /var/lib/postgresql/data
+        - name: db-certs
+          mountPath: /etc/postgresql/certs
+          readOnly: true
+        - name: cert-data
+          mountPath: /var/lib/postgresql/certs
+      securityContext:
+        fsGroup: 102
+        runAsUser: 101
+        runAsGroup: 102
       containers:
       - name: db
         image: supabase/postgres:15.1.1.78
@@ -60,8 +81,10 @@ spec:
         volumeMounts:
         - name: db-data
           mountPath: /var/lib/postgresql/data
+        - name: cert-data
+          mountPath: /var/lib/postgresql/certs
         - name: db-config
-          mountPath: /etc/postgresql/conf.d
+          mountPath: /etc/postgresql/postgresql.conf.d/
           readOnly: true
         - mountPath: /docker-entrypoint-initdb.d/migrations/99-realtime.sql
           name: db-cm0
@@ -131,3 +154,5 @@ spec:
           secretName: db-certs
           defaultMode: 0600
           optional: true
+      - name: cert-data
+        emptyDir: {}

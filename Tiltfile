@@ -6,8 +6,20 @@ dotenv()
 
 os.environ['CERT_DIR'] = os.path.abspath('certs')
 
-def inject_env_vars(yaml_str):
+def inject_env_vars(yaml_str, is_cert_secret=False):
     env_map = {k: str(v) for k, v in os.environ.items()}
+
+    if is_cert_secret:
+        cert_dir = os.environ.get('CERT_DIR')
+        if cert_dir and os.path.exists(cert_dir):
+            server_crt = str(read_file(os.path.join(cert_dir, 'server.crt')))
+            server_key = str(read_file(os.path.join(cert_dir, 'server.key')))
+            server_ca = str(read_file(os.path.join(cert_dir, 'server-ca.crt')))
+            local_cmd = "echo -n '{}' | base64 -w 0"
+            env_map['SERVER_CERT'] = str(local(local_cmd.format(server_crt), echo_off=True)).strip()
+            env_map['SERVER_KEY'] = str(local(local_cmd.format(server_key), echo_off=True)).strip()
+            env_map['SERVER_CA_CERT'] = str(local(local_cmd.format(server_ca), echo_off=True)).strip()
+
     for key, value in env_map.items():
         yaml_str = yaml_str.replace('${' + key + '}', value)
         yaml_str = yaml_str.replace('$' + key, value)
@@ -15,7 +27,8 @@ def inject_env_vars(yaml_str):
 
 def apply_k8s_yaml(file_path, allow_duplicates=False):
     yaml_content = str(read_file(file_path))
-    processed_yaml = inject_env_vars(yaml_content)
+    is_cert_secret = file_path.endswith('db-certs-secret.yaml')
+    processed_yaml = inject_env_vars(yaml_content, is_cert_secret)
     k8s_yaml(blob(processed_yaml), allow_duplicates=allow_duplicates)
 
 apply_k8s_yaml('k8s/kong-configmap.yaml')
