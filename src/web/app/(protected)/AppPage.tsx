@@ -15,9 +15,10 @@ const AppPage: React.FC<AppPageProps> = ({ children }) => {
   const pathname = usePathname();
 
   return (
-    <div className="w-full h-screen p-4 overflow-auto">
+    <div className="w-full h-screen">
       {user.id ? (
         <motion.div
+          className="h-full"
           key={pathname}
           initial={{ opacity: 0.8, x: -2 }}
           animate={{ opacity: 1, x: 0 }}

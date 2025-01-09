@@ -9,10 +9,12 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
-    <div className="flex flex-row h-full w-full">
+    <div className="flex flex-row h-screen w-full">
       <LeftSidebar />
       <div className="flex-1 overflow-y-auto">
-        <AppPage>{children}</AppPage>
+        <AppPage>
+          <div className="p-4">{children}</div>
+        </AppPage>
       </div>
     </div>
   );
