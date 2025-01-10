@@ -76,19 +76,19 @@ const LeftSidebar: React.FC = () => {
       key: "profile",
       label: "Profile",
       icon: <HiOutlineUser />,
-      onClick: () => router.push("/profile"),
+      onPress: () => router.push("/profile"),
     },
     {
       key: "settings",
       label: "Settings",
       icon: <HiOutlineCog6Tooth />,
-      onClick: () => router.push("/settings"),
+      onPress: () => router.push("/settings"),
     },
     {
       key: "logout",
       label: "Log Out",
       icon: <HiArrowRightOnRectangle />,
-      onClick: handleLogout,
+      onPress: handleLogout,
     },
   ];
 
@@ -120,7 +120,7 @@ const LeftSidebar: React.FC = () => {
           <Button
             isIconOnly
             variant="light"
-            onClick={toggleSidebar}
+            onPress={toggleSidebar}
             aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
             className={cn(
               "mt-2",
@@ -137,6 +137,7 @@ const LeftSidebar: React.FC = () => {
           <div className={cn(sidebarOpen ? "hidden md:block" : "hidden")}>
             <Tabs
               classNames={{
+                cursor: ["bg-background-600", "dark:bg-background-600"],
                 tab: "justify-start",
               }}
               isVertical
@@ -173,7 +174,7 @@ const LeftSidebar: React.FC = () => {
                 key={item.key}
                 icon={item.icon}
                 label={item.label}
-                onClick={() => handleNavigation(item.key)}
+                onPress={() => handleNavigation(item.key)}
                 isSelected={selectedKey === item.key}
               />
             ))}
@@ -197,7 +198,7 @@ const LeftSidebar: React.FC = () => {
                 <DropdownItem
                   key={item.key}
                   startContent={<Icon icon={item.icon} />}
-                  onPress={item.onClick}
+                  onPress={item.onPress}
                 >
                   {item.label}
                 </DropdownItem>
@@ -215,7 +216,8 @@ const LeftSidebar: React.FC = () => {
               key={item.key}
               icon={item.icon}
               label={item.label}
-              onClick={item.onClick}
+              onPress={item.onPress}
+              isSelected={selectedKey === item.key}
             />
           ))}
         </div>

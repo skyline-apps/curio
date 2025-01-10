@@ -6,21 +6,21 @@ import Icon from "@/components/Icon";
 interface SidebarButtonProps {
   icon: React.ReactNode;
   label: string;
-  onClick: () => void;
+  onPress: () => void;
   isSelected?: boolean;
 }
 
 const SidebarButton: React.FC<SidebarButtonProps> = ({
   icon,
   label,
-  onClick,
+  onPress,
   isSelected = false,
 }) => {
   return (
     <Button
       isIconOnly
       variant={isSelected ? "solid" : "light"}
-      onClick={onClick}
+      onPress={onPress}
       aria-label={label}
       className="w-full"
     >

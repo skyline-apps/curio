@@ -45,14 +45,14 @@ const CurioNavbar: React.FC = () => {
               </Button>
             </DropdownTrigger>
             <DropdownMenu>
-              <DropdownItem onPress={handleLogout} description={user.username}>
+              <DropdownItem key="logout" onPress={handleLogout} description={user.username}>
                 Log Out
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>
         ) : (
           <Link href="/login">
-            <Button onClick={handleLogin}>Log In</Button>
+            <Button onPress={handleLogin}>Log In</Button>
           </Link>
         )}
       </NavbarContent>
