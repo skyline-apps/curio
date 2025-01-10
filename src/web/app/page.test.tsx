@@ -3,6 +3,8 @@ import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import fetchMock from "jest-fetch-mock";
 
+import Page from "./page";
+
 // Mock the SVG imports
 jest.mock("@/public/logo/curio_name_dark.svg", () => ({
   __esModule: true,
@@ -48,8 +50,6 @@ jest.mock("next/navigation", () => ({
     push: jest.fn(),
   }),
 }));
-
-import Page from "./page";
 
 describe("Page", () => {
   fetchMock.enableMocks();
