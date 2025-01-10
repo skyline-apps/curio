@@ -152,10 +152,7 @@ const LeftSidebar: React.FC = () => {
                 <Tab
                   key={item.key}
                   title={
-                    <div
-                      className="flex items-center w-full h-full"
-                      onClick={() => handleNavigation(item.key)}
-                    >
+                    <div className="flex items-center w-full h-full">
                       <Icon icon={item.icon} className="mr-2" />
                       {item.label}
                     </div>
@@ -185,13 +182,9 @@ const LeftSidebar: React.FC = () => {
         <div className={cn(sidebarOpen ? "hidden md:block" : "hidden")}>
           <Dropdown>
             <DropdownTrigger className="p-2">
-              <Button
-                variant="light"
-                disableRipple
-                className="justify-start w-full h-full"
-              >
+              <div className="flex justify-start w-full h-full">
                 <User name={user.username} description={user.email} />
-              </Button>
+              </div>
             </DropdownTrigger>
             <DropdownMenu>
               {userActionItems.map((item) => (
