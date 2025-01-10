@@ -1,5 +1,5 @@
 import { supabaseMock } from "__mocks__/supabase";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import fetchMock from "jest-fetch-mock";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -7,6 +7,53 @@ import React from "react";
 import { UserContext } from "@/providers/UserProvider";
 
 import Navbar from ".";
+
+// Mock CurioBrand component
+jest.mock("@/components/CurioBrand", () => ({
+  __esModule: true,
+  CurioBrand: () => <div data-testid="curio-brand">CurioBrand</div>,
+}));
+
+// Mock NextUI components
+jest.mock("@nextui-org/navbar", () => ({
+  Navbar: ({ children }: { children: React.ReactNode }) => (
+    <nav data-testid="navbar">{children}</nav>
+  ),
+  NavbarContent: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="navbar-content">{children}</div>
+  ),
+  NavbarItem: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="navbar-item">{children}</div>
+  ),
+  NavbarBrand: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="navbar-brand">{children}</div>
+  ),
+}));
+
+jest.mock("@nextui-org/button", () => ({
+  Button: ({ children, onPress }: { children: React.ReactNode; onPress?: () => void }) => (
+    <button data-testid="button" onClick={onPress}>
+      {children}
+    </button>
+  ),
+}));
+
+jest.mock("@nextui-org/dropdown", () => ({
+  Dropdown: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="dropdown">{children}</div>
+  ),
+  DropdownTrigger: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="dropdown-trigger">{children}</div>
+  ),
+  DropdownMenu: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="dropdown-menu">{children}</div>
+  ),
+  DropdownItem: ({ children, onPress }: { children: React.ReactNode; onPress?: () => void }) => (
+    <div data-testid="dropdown-item" onClick={onPress}>
+      {children}
+    </div>
+  ),
+}));
 
 // Mock the useRouter hook
 jest.mock("next/navigation", () => ({
@@ -48,71 +95,85 @@ describe("Navbar", () => {
 
   beforeEach(() => {
     fetchMock.resetMocks();
-    // Mock useRouter implementation
-    (useRouter as jest.Mock).mockReturnValue({
+    (useRouter as jest.Mock).mockImplementation(() => ({
       push: mockPush,
+    }));
+    jest.clearAllMocks();
+  });
+
+  it("renders login button when user is not logged in", async () => {
+    await act(async () => {
+      render(
+        <MockNoUserProvider>
+          <Navbar />
+        </MockNoUserProvider>,
+      );
     });
+
+    const loginButton = screen.getByTestId("button");
+    expect(loginButton).toHaveTextContent("Log In");
   });
 
-  it("renders login button when user is not logged in", () => {
-    // Render component with user not logged in (user.id is falsy)
-    render(
-      <MockNoUserProvider>
-        <Navbar />
-      </MockNoUserProvider>,
-    );
+  it("renders logout option when user is logged in", async () => {
+    await act(async () => {
+      render(
+        <MockUserProvider>
+          <Navbar />
+        </MockUserProvider>,
+      );
+    });
 
-    // Check if the login button is rendered
-    expect(screen.getByText("Log In")).toBeInTheDocument();
+    const userButton = screen.getByTestId("button");
+    await act(async () => {
+      fireEvent.click(userButton);
+    });
+
+    const logoutItem = screen.getByText("Log Out");
+    expect(logoutItem).toBeInTheDocument();
   });
 
-  it("renders logout option when user is logged in", () => {
-    // Render component with a logged-in user
-    render(
-      <MockUserProvider>
-        <Navbar />
-      </MockUserProvider>,
-    );
+  it("calls clearUser and redirects on logout", async () => {
+    supabaseMock.auth.signOut.mockResolvedValue({ error: null });
 
-    // Check if the logout button is rendered in the dropdown
-    fireEvent.click(screen.getByRole("button")); // Open the dropdown
-    expect(screen.getByText("Log Out")).toBeInTheDocument();
-  });
+    await act(async () => {
+      render(
+        <MockUserProvider>
+          <Navbar />
+        </MockUserProvider>,
+      );
+    });
 
-  it("handles logout correctly", async () => {
-    // Render component with a logged-in user
-    render(
-      <MockUserProvider>
-        <Navbar />
-      </MockUserProvider>,
-    );
+    const userButton = screen.getByTestId("button");
+    await act(async () => {
+      fireEvent.click(userButton);
+    });
 
-    // Simulate opening the dropdown and clicking on "Log Out"
-    fireEvent.click(screen.getByRole("button")); // Open the dropdown
-    fireEvent.click(screen.getByText("Log Out"));
+    const logoutItem = screen.getByText("Log Out");
+    await act(async () => {
+      fireEvent.click(logoutItem);
+    });
 
-    // Check if supabase.auth.signOut was called
     await waitFor(() => {
-      expect(supabaseMock.auth.signOut).toHaveBeenCalled();
+      expect(mockClearUser).toHaveBeenCalled();
+      expect(mockPush).toHaveBeenCalledWith("/");
     });
-
-    // Check if clearUser was called
-    expect(mockClearUser).toHaveBeenCalled();
-
-    // Check if the router push was called to redirect to "/"
-    expect(mockPush).toHaveBeenCalledWith("/");
   });
 
-  it("handles login click correctly", () => {
+  it("handles login click correctly", async () => {
     // Render component with no user (logged-out state)
-    render(
-      <MockNoUserProvider>
-        <Navbar />
-      </MockNoUserProvider>,
-    );
+    await act(async () => {
+      render(
+        <MockNoUserProvider>
+          <Navbar />
+        </MockNoUserProvider>,
+      );
+    });
 
     // Simulate clicking the login button
-    fireEvent.click(screen.getByText("Log In"));
+    const loginButton = screen.getByTestId("button");
+    await act(async () => {
+      fireEvent.click(loginButton);
+    });
 
     // Check if the router push was called with "/login"
     expect(mockPush).toHaveBeenCalledWith("/login");
