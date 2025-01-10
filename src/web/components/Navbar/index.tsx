@@ -45,7 +45,11 @@ const CurioNavbar: React.FC = () => {
               </Button>
             </DropdownTrigger>
             <DropdownMenu>
-              <DropdownItem key="logout" onPress={handleLogout} description={user.username}>
+              <DropdownItem
+                key="logout"
+                onPress={handleLogout}
+                description={user.username}
+              >
                 Log Out
               </DropdownItem>
             </DropdownMenu>

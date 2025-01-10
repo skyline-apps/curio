@@ -1,5 +1,11 @@
 import { supabaseMock } from "__mocks__/supabase";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import fetchMock from "jest-fetch-mock";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -31,7 +37,13 @@ jest.mock("@nextui-org/navbar", () => ({
 }));
 
 jest.mock("@nextui-org/button", () => ({
-  Button: ({ children, onPress }: { children: React.ReactNode; onPress?: () => void }) => (
+  Button: ({
+    children,
+    onPress,
+  }: {
+    children: React.ReactNode;
+    onPress?: () => void;
+  }) => (
     <button data-testid="button" onClick={onPress}>
       {children}
     </button>
@@ -48,7 +60,13 @@ jest.mock("@nextui-org/dropdown", () => ({
   DropdownMenu: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="dropdown-menu">{children}</div>
   ),
-  DropdownItem: ({ children, onPress }: { children: React.ReactNode; onPress?: () => void }) => (
+  DropdownItem: ({
+    children,
+    onPress,
+  }: {
+    children: React.ReactNode;
+    onPress?: () => void;
+  }) => (
     <div data-testid="dropdown-item" onClick={onPress}>
       {children}
     </div>
