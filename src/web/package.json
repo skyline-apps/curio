@@ -9,8 +9,8 @@
     "lint": "next lint",
     "db:generate": "npx drizzle-kit generate --name",
     "db:migrate": "npx drizzle-kit migrate",
-    "test": "jest",
-    "test:watch": "jest --watch"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch"
   },
   "dependencies": {
     "@next/third-parties": "^14.1.4",
