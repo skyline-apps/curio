@@ -5,8 +5,9 @@ import { createLogger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/server";
 import type { StorageClient } from "@/utils/supabase/types";
 
+import { ITEMS_BUCKET } from "./constants";
+
 const log = createLogger("utils/storage");
-const ITEMS_BUCKET = "items";
 
 export class StorageError extends Error {
   constructor(message: string) {

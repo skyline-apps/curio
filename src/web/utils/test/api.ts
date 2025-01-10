@@ -1,29 +1,64 @@
-import { APIRequest } from "@/utils/api";
+import type { APIRequest } from "@/utils/api";
+
+export type MockRequestOptions = {
+  url?: string;
+  headers?: Record<string, string>;
+  method?: string;
+  searchParams?: Record<string, string>;
+};
+
+export type RequestBody = Record<string, unknown> | undefined;
 
 export const makeMockRequest = (
-  requestBody: Record<string, unknown>,
-  headers?: Record<string, string>,
+  body?: RequestBody,
+  options: MockRequestOptions = {},
 ): APIRequest => {
-  const mockHeaders = new Headers(headers);
+  const { headers = {}, method = "POST", searchParams = {} } = options;
+  let { url = "http://localhost" } = options;
 
-  const mockRequest = {
-    json: jest.fn().mockResolvedValue(requestBody),
-    headers: mockHeaders,
-  } as unknown as APIRequest;
+  // Add search params to URL for GET requests
+  if (method === "GET" && Object.keys(searchParams).length > 0) {
+    const urlObj = new URL(url);
+    Object.entries(searchParams).forEach(([key, value]) => {
+      urlObj.searchParams.append(key, value);
+    });
+    url = urlObj.toString();
+  }
 
-  return mockRequest;
+  const requestInit: RequestInit = {
+    method,
+    headers: new Headers(headers),
+  };
+
+  if (body && method !== "GET") {
+    requestInit.body = JSON.stringify(body);
+  }
+
+  const request = new Request(url, requestInit) as APIRequest;
+
+  // Add a mock json method for GET requests
+  if (method === "GET" && body) {
+    request.json = async () => body;
+  }
+
+  return request;
 };
 
 export const makeAuthenticatedMockRequest = (
-  requestBody?: Record<string, unknown>,
-  headers?: Record<string, string>,
+  body?: RequestBody,
+  options: MockRequestOptions = {},
 ): APIRequest => {
-  const mockHeaders = new Headers({ "x-user-id": "user123", ...headers });
+  const headers = {
+    ...options.headers,
+    "x-user-id": "test-user-id",
+  };
 
-  const mockRequest = {
-    ...(requestBody && { json: jest.fn().mockResolvedValue(requestBody) }),
-    headers: mockHeaders,
-  } as unknown as APIRequest;
+  return makeMockRequest(body, { ...options, headers });
+};
 
-  return mockRequest;
+export const makeUnauthenticatedMockRequest = (
+  body?: RequestBody,
+  options: MockRequestOptions = {},
+): APIRequest => {
+  return makeMockRequest(body, options);
 };
