@@ -10,5 +10,5 @@ const pool = new Pool({
 
 export const db = drizzle(pool, { schema });
 
-export { eq, gt, gte, lt, lte, ne } from "drizzle-orm";
+export { and, eq, gt, gte, lt, lte, ne, sql } from "drizzle-orm";
 export type { PgColumn, SelectedFields } from "drizzle-orm/pg-core";
