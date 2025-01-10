@@ -62,7 +62,7 @@ export const items = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     url: text("url").notNull().unique(),
-    slug: text("slug"),
+    slug: text("slug").notNull().unique(),
     title: text("title"),
     description: text("description"),
     author: text("author"),
