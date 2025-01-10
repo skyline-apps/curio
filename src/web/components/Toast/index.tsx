@@ -59,7 +59,7 @@ const Toast: React.FC<ToastProps> = ({
           size="sm"
           variant="light"
           isIconOnly
-          onClick={() => {
+          onPress={() => {
             setIsExiting(true);
             setTimeout(() => setVisible(false), ANIMATION_DURATION);
           }}

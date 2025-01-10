@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@next/third-parties": "^14.1.4",
-    "@nextui-org/react": "^2.4.8",
+    "@nextui-org/react": "^2.6.11",
     "@supabase/ssr": "^0.5.1",
     "drizzle-orm": "^0.33.0",
     "framer-motion": "^11.11.7",

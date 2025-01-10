@@ -30,7 +30,7 @@ const GoogleOAuthButton: React.FC<GoogleOAuthButtonProps> = ({
 
   return (
     <div id="google-signin-button">
-      <Button isDisabled={isSigningIn} onClick={handleSignInWithGoogle}>
+      <Button isDisabled={isSigningIn} onPress={handleSignInWithGoogle}>
         Sign in with Google
       </Button>
       <p className="text-red-500">{errorMessage}</p>
