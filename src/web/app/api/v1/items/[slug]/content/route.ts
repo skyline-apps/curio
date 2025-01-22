@@ -107,6 +107,7 @@ export async function POST(
     }
 
     try {
+      const newDate = new Date();
       const status = await uploadItemContent(slug, content);
 
       const response: UpdateItemContentResponse = {
@@ -117,6 +118,19 @@ export async function POST(
             ? "Content updated and set as main version"
             : "Content updated",
       };
+
+      if (status === UploadStatus.UPDATED_MAIN) {
+        // TODO: Get item metadata and update here
+        await db
+          .update(items)
+          .set({ updatedAt: newDate })
+          .where(eq(items.id, item[0].items.id));
+
+        await db
+          .update(profileItems)
+          .set({ savedAt: newDate })
+          .where(eq(profileItems.itemId, item[0].items.id));
+      }
 
       return APIResponseJSON(response);
     } catch (error) {
