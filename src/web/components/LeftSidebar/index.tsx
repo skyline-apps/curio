@@ -60,7 +60,9 @@ const LeftSidebar: React.FC = () => {
           "self-center": !sidebarOpen,
         })}
         isIconOnly={!sidebarOpen}
-        onPress={() => null}
+        onPress={
+          () => null // TODO: Implement saving pages from app
+        }
       >
         <Icon icon={<HiPlus />} />
         {sidebarOpen && "Add new"}
