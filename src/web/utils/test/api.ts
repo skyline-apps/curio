@@ -1,19 +1,23 @@
 import type { APIRequest } from "@/utils/api";
 
+export const DEFAULT_TEST_USER_ID = "123e4567-e89b-12d3-a456-426614174002";
+export const DEFAULT_TEST_PROFILE_ID = "123e4567-e89b-12d3-a456-426614174000";
+
 export type MockRequestOptions = {
   url?: string;
   headers?: Record<string, string>;
   method?: string;
   searchParams?: Record<string, string>;
+  userId?: string;
+  body?: RequestBody;
 };
 
 export type RequestBody = Record<string, unknown> | undefined;
 
 export const makeMockRequest = (
-  body?: RequestBody,
   options: MockRequestOptions = {},
 ): APIRequest => {
-  const { headers = {}, method = "POST", searchParams = {} } = options;
+  const { headers = {}, method = "POST", searchParams = {}, body } = options;
   let { url = "http://localhost" } = options;
 
   // Add search params to URL for GET requests
@@ -41,24 +45,27 @@ export const makeMockRequest = (
     request.json = async () => body;
   }
 
+  // Add a mock json method for POST requests
+  if (method === "POST" && body) {
+    request.json = async () => body;
+  }
+
   return request;
 };
 
 export const makeAuthenticatedMockRequest = (
-  body?: RequestBody,
   options: MockRequestOptions = {},
 ): APIRequest => {
   const headers = {
     ...options.headers,
-    "x-user-id": "test-user-id",
+    "x-user-id": options.userId ?? DEFAULT_TEST_USER_ID,
   };
 
-  return makeMockRequest(body, { ...options, headers });
+  return makeMockRequest({ ...options, headers });
 };
 
 export const makeUnauthenticatedMockRequest = (
-  body?: RequestBody,
   options: MockRequestOptions = {},
 ): APIRequest => {
-  return makeMockRequest(body, options);
+  return makeMockRequest(options);
 };

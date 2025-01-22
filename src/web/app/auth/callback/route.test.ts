@@ -1,19 +1,20 @@
-import { db } from "__mocks__/db";
 import { supabaseMock } from "__mocks__/supabase";
-// eslint-disable-next-line no-restricted-imports
-import { NextResponse } from "next/server";
 
+// eslint-disable-next-line no-restricted-imports
 import { GET } from "./route"; // adjust path
 
 describe("GET /auth/callback", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("should redirect to error page if no code is provided", async () => {
     const request = new Request("http://localhost/auth/callback");
     const response = await GET(request);
 
-    expect(response).toEqual(
-      NextResponse.redirect(
-        "http://localhost/auth/auth-code-error?error=Invalid authentication code.",
-      ),
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe(
+      "http://localhost/auth/auth-code-error?error=Invalid%20authentication%20code.",
     );
   });
 
@@ -22,27 +23,14 @@ describe("GET /auth/callback", () => {
       "http://localhost/auth/callback?code=valid_code&next=/dashboard",
     );
 
-    const profilesMock = db.query.profiles.findFirst;
-    profilesMock.mockResolvedValueOnce(null);
-
-    const insertMock = db
-      .insert()
-      .values()
-      .returning.mockResolvedValue([
-        { userId: "user1", username: "slug-user@example.com" },
-      ]);
-
     const response = await GET(request);
 
     expect(supabaseMock.auth.exchangeCodeForSession).toHaveBeenCalledWith(
       "valid_code",
     );
     expect(supabaseMock.auth.getUser).toHaveBeenCalled();
-    expect(profilesMock).toHaveBeenCalled();
-    expect(insertMock).toHaveBeenCalled();
-    expect(response).toEqual(
-      NextResponse.redirect("http://localhost/dashboard"),
-    );
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("http://localhost/dashboard");
   });
 
   it("should redirect to error page if profile creation fails", async () => {
@@ -50,16 +38,18 @@ describe("GET /auth/callback", () => {
       "http://localhost/auth/callback?code=valid_code",
     );
 
-    db.query.profiles.findFirst.mockResolvedValueOnce(null); // no existing profile
-    db.insert().values().returning.mockResolvedValue([]); // profile creation fails
+    // Mock getUser to return null user to trigger profile creation failure
+    supabaseMock.auth.getUser.mockResolvedValueOnce({
+      data: { user: null },
+      error: null,
+    });
 
     const response = await GET(request);
     expect(supabaseMock.auth.getUser).toHaveBeenCalled();
 
-    expect(response).toEqual(
-      NextResponse.redirect(
-        "http://localhost/auth/auth-code-error?error=Profile creation failed.",
-      ),
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe(
+      "http://localhost/auth/auth-code-error?error=Profile%20creation%20failed.",
     );
   });
 
@@ -68,16 +58,15 @@ describe("GET /auth/callback", () => {
       "http://localhost/auth/callback?code=invalid_code",
     );
 
-    supabaseMock.auth.exchangeCodeForSession.mockResolvedValue({
+    supabaseMock.auth.exchangeCodeForSession.mockResolvedValueOnce({
       error: "Some error",
     });
 
     const response = await GET(request);
 
-    expect(response).toEqual(
-      NextResponse.redirect(
-        "http://localhost/auth/auth-code-error?error=Invalid authentication code.",
-      ),
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe(
+      "http://localhost/auth/auth-code-error?error=Invalid%20authentication%20code.",
     );
   });
 });

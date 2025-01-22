@@ -15,7 +15,6 @@ const customConfig: Config = {
   clearMocks: true,
   moduleNameMapper: {
     "^.+\\.(svg)$": "<rootDir>/__mocks__/svg.ts",
-    "\\./db$": "<rootDir>/__mocks__/db.ts",
     "\\./utils/logger$": "<rootDir>/__mocks__/logger.ts",
     "\\./utils/supabase/client$": "<rootDir>/__mocks__/supabase-client.ts",
     "\\./utils/supabase/server$": "<rootDir>/__mocks__/supabase-server.ts",
@@ -32,10 +31,7 @@ const jestConfig = async (): Promise<Config> => {
     displayName: "jsdom",
     testMatch: ["<rootDir>/**/*.test.tsx"],
     testEnvironment: "jsdom",
-    setupFilesAfterEnv: [
-      ...(customConfig.setupFilesAfterEnv || []),
-      "<rootDir>/jest.setup.jsdom.ts",
-    ],
+    setupFilesAfterEnv: ["<rootDir>/jest.setup.jsdom.ts"], // Frontend tests only need basic setup
   })();
 
   const nodeConfig = await createJestConfig({
@@ -43,6 +39,10 @@ const jestConfig = async (): Promise<Config> => {
     displayName: "node",
     testMatch: ["<rootDir>/**/*.test.ts"],
     testEnvironment: "node",
+    setupFilesAfterEnv: [
+      "<rootDir>/jest.setup.ts",
+      "<rootDir>/jest.setup.api.ts", // API tests need both basic and DB setup
+    ],
   })();
 
   return {
