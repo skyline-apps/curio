@@ -1,17 +1,27 @@
-import { db } from "__mocks__/db";
-
+import { eq } from "@/db";
 import { DbErrorCode } from "@/db/errors";
-import { ColorScheme } from "@/db/schema";
+import { ColorScheme, profiles } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
-import { makeAuthenticatedMockRequest } from "@/utils/test/api";
+import {
+  DEFAULT_TEST_PROFILE_ID,
+  makeAuthenticatedMockRequest,
+} from "@/utils/test/api";
+import { testDb } from "@/utils/test/provider";
 
 import { GET, POST } from "./route";
 
 describe("GET /api/v1/user/settings", () => {
+  beforeEach(async () => {
+    await testDb
+      .update(profiles)
+      .set({
+        colorScheme: ColorScheme.DARK,
+      })
+      .where(eq(profiles.id, DEFAULT_TEST_PROFILE_ID));
+  });
+
   it("should return 200 with the user's current color scheme", async () => {
-    const colorScheme = ColorScheme.DARK;
     const request: APIRequest = makeAuthenticatedMockRequest();
-    db.where.mockResolvedValue([{ colorScheme: colorScheme }]);
 
     const response = await GET(request);
     expect(response.status).toBe(200);
@@ -20,31 +30,33 @@ describe("GET /api/v1/user/settings", () => {
     expect(result).toEqual({
       colorScheme: ColorScheme.DARK,
     });
-
-    expect(db.select).toHaveBeenCalledTimes(1);
   });
 });
 
 describe("POST /api/v1/user/settings", () => {
   it("should return 200 when successfully updating the user's color scheme", async () => {
-    const colorScheme = ColorScheme.DARK;
-    const request: APIRequest = makeAuthenticatedMockRequest({ colorScheme });
-    db.returning.mockResolvedValue([{ colorScheme: colorScheme }]);
+    const colorScheme = ColorScheme.LIGHT;
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      body: { colorScheme },
+    });
 
     const response = await POST(request);
     expect(response.status).toBe(200);
 
     const result = await response.json();
     expect(result).toEqual({
-      colorScheme: ColorScheme.DARK,
+      colorScheme,
     });
 
-    expect(db.update).toHaveBeenCalledTimes(1);
+    const profile = await testDb.db.query.profiles.findFirst({
+      where: eq(profiles.id, DEFAULT_TEST_PROFILE_ID),
+    });
+    expect(profile?.colorScheme).toBe(colorScheme);
   });
 
   it("should return 400 if the settings object is invalid", async () => {
     const request: APIRequest = makeAuthenticatedMockRequest({
-      invalidSetting: "hi",
+      body: { invalidSetting: "hi" },
     });
 
     const response = await POST(request);
@@ -58,7 +70,7 @@ describe("POST /api/v1/user/settings", () => {
 
   it("should return 400 if the color scheme choice is invalid", async () => {
     const request: APIRequest = makeAuthenticatedMockRequest({
-      colorScheme: "bad color",
+      body: { colorScheme: "bad color" },
     });
 
     const response = await POST(request);
@@ -71,17 +83,19 @@ describe("POST /api/v1/user/settings", () => {
   });
 
   test("should return 500 if database error in update", async () => {
-    // Mock the db.update chain to throw a unique violation error
-    const mockError = { code: DbErrorCode.ConnectionFailure };
-    db.returning.mockRejectedValue(mockError);
-    const colorScheme = ColorScheme.DARK;
-    const request: APIRequest = makeAuthenticatedMockRequest({ colorScheme });
+    jest.spyOn(testDb.db, "update").mockImplementationOnce(() => {
+      throw { code: DbErrorCode.ConnectionFailure };
+    });
+
+    const colorScheme = ColorScheme.LIGHT;
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      body: { colorScheme },
+    });
 
     const response = await POST(request);
-
     expect(response.status).toBe(500);
-    const body = await response.json();
-    expect(body).toEqual({ error: "Error updating settings." });
-    expect(db.update).toHaveBeenCalledTimes(1);
+
+    const result = await response.json();
+    expect(result.error).toBe("Error updating settings.");
   });
 });

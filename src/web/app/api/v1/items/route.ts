@@ -45,7 +45,7 @@ export async function GET(
   const { limit, slugs } = parsed.data;
 
   try {
-    const baseQuery = db
+    const results = await db
       .select({
         id: items.id,
         url: items.url,
@@ -60,10 +60,7 @@ export async function GET(
         savedAt: profileItems.savedAt,
       })
       .from(items)
-      .innerJoin(profileItems, eq(items.id, profileItems.itemId));
-
-    // Get items with conditions
-    const results = await baseQuery
+      .innerJoin(profileItems, eq(items.id, profileItems.itemId))
       .where(
         slugs
           ? and(
