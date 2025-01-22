@@ -11,4 +11,12 @@ export const supabaseMock = {
     exchangeCodeForSession: jest.fn().mockResolvedValue({ error: null }),
     signOut: jest.fn().mockResolvedValue({ error: null }),
   },
+  storage: {
+    from: jest.fn(() => ({
+      download: jest
+        .fn()
+        .mockResolvedValue({ data: new Uint8Array([1, 2, 3]) }),
+      upload: jest.fn().mockResolvedValue({ data: { path: "test-path" } }),
+    })),
+  },
 };

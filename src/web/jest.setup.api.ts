@@ -6,6 +6,25 @@ import {
 } from "./utils/test/api";
 import { testDb } from "./utils/test/provider";
 
+// Mock the request context
+const requestStore = new Map();
+requestStore.set("_nextRequestStore", {
+  request: new Request("http://localhost:3000"),
+});
+
+// Mock the request context
+jest.mock("next/dist/client/components/request-async-storage.external", () => ({
+  getRequestStore: () => requestStore,
+}));
+
+// Mock cookies
+jest.mock("next/headers", () => ({
+  cookies: jest.fn(() => ({
+    get: jest.fn(() => ({ value: "test-cookie" })),
+    getAll: jest.fn(() => [{ name: "sb-access-token", value: "test-cookie" }]),
+  })),
+}));
+
 type TableResult = {
   rows: Array<{ tablename: string }>;
 };
