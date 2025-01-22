@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { HiXMark } from "react-icons/hi2";
 
-import Button from "@/components/Button";
-import Card from "@/components/Card";
-import Icon from "@/components/Icon";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import Icon from "@/components/ui/Icon";
 import { cn } from "@/utils/cn";
 
 const ANIMATION_DURATION = 300;

@@ -10,9 +10,9 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-} from "@/components/Dropdown";
-import Icon from "@/components/Icon";
-import { User } from "@/components/User";
+} from "@/components/ui/Dropdown";
+import Icon from "@/components/ui/Icon";
+import { User } from "@/components/ui/User";
 import { cn } from "@/utils/cn";
 
 import SidebarButton from "./SidebarButton";

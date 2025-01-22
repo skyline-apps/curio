@@ -1,9 +1,9 @@
 import React from "react";
 import { HiChevronLeft } from "react-icons/hi2";
 
-import Button from "@/components/Button";
 import { CurioBrand, CurioLogo } from "@/components/CurioBrand";
-import Icon from "@/components/Icon";
+import Button from "@/components/ui/Button";
+import Icon from "@/components/ui/Icon";
 import { cn } from "@/utils/cn";
 
 interface SidebarHeaderProps {

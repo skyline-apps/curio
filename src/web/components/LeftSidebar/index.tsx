@@ -3,8 +3,8 @@ import { usePathname, useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
 import { HiPlus } from "react-icons/hi2";
 
-import Button from "@/components/Button";
-import Icon from "@/components/Icon";
+import Button from "@/components/ui/Button";
+import Icon from "@/components/ui/Icon";
 import { useLogout } from "@/hooks/useLogout";
 import { UserContext } from "@/providers/UserProvider";
 import { cn } from "@/utils/cn";

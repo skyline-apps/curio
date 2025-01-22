@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import React, { useContext } from "react";
 
-import Spinner from "@/components/Spinner";
+import Spinner from "@/components/ui/Spinner";
 import { UserContext } from "@/providers/UserProvider";
 
 interface AppPageProps {

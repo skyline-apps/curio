@@ -1,9 +1,9 @@
 import React, { useContext, useState } from "react";
 
-import Button from "@/components/Button";
-import { FormSection } from "@/components/Form";
-import Input from "@/components/Input";
-import Spinner from "@/components/Spinner";
+import Button from "@/components/ui/Button";
+import { FormSection } from "@/components/ui/Form";
+import Input from "@/components/ui/Input";
+import Spinner from "@/components/ui/Spinner";
 import { UserContext } from "@/providers/UserProvider";
 import { createLogger } from "@/utils/logger";
 
