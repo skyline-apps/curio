@@ -9,6 +9,11 @@ To start the local development environment:
 2. Start file syncing with `docker compose watch`.
 3. Navigate to `http://localhost:3000` to view the application.
 
+### Supabase dashboard
+With the development environment running, navigate to `http://localhost:8000` to view the Supabase dashboard.
+
+Use the `DASHBOARD_USERNAME` and `DASHBOARD_PASSWORD` environment variables to sign in.
+
 ### Database shell
 1. Run `docker exec -it db bash`.
 2. Then, run `psql -U postgres`.
