@@ -1,13 +1,8 @@
 import { db, eq } from "@/db";
 import { checkDbError, DbError, DbErrorCode } from "@/db/errors";
 import { profiles } from "@/db/schema";
-import {
-  APIRequest,
-  APIResponse,
-  APIResponseJSON,
-  checkUserProfile,
-  parseAPIRequest,
-} from "@/utils/api";
+import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
+import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
 import { createLogger } from "@/utils/logger";
 import { usernameError } from "@/utils/username";
 
