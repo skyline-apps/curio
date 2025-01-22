@@ -15,6 +15,7 @@ export const CreateOrUpdateItemsRequestSchema = z.object({
 });
 
 export const GetItemsRequestSchema = z.object({
+  // TODO: Add description here and pass through to OpenAPI schema
   slugs: z
     .string()
     .optional()
@@ -22,7 +23,10 @@ export const GetItemsRequestSchema = z.object({
       if (val && !val.split(",").every((s) => s.trim().length > 0)) {
         throw new Error("Invalid slug format");
       }
-    }),
+    })
+    .describe(
+      "A comma-separated list of slugs to retrieve. If the slug is not found, it will be ignored.",
+    ),
   limit: z.coerce.number().min(1).max(100).optional().default(10),
   cursor: z.string().optional(),
 });
