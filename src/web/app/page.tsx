@@ -5,9 +5,9 @@ import {
   HiOutlineStar,
 } from "react-icons/hi2";
 
-import Button from "@/components/Button";
-import Card from "@/components/Card";
 import Navbar from "@/components/Navbar";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
 import CurioNameDark from "@/public/logo/curio_name_dark.svg";
 import CurioNameLight from "@/public/logo/curio_name_light.svg";
 

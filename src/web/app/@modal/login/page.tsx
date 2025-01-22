@@ -8,7 +8,7 @@ import Modal, {
   ModalBody,
   ModalContent,
   ModalHeader,
-} from "@/components/Modal";
+} from "@/components/ui/Modal";
 
 interface LoginPageProps {}
 

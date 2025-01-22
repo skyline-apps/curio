@@ -3,10 +3,10 @@ import { z } from "zod";
 
 import { SettingsSchema } from "@/app/api/v1/user/settings/validation";
 import { type Settings } from "@/app/api/v1/user/settings/validation";
-import { FormSection } from "@/components/Form";
-import { Radio, RadioGroup } from "@/components/Radio";
-import Spinner from "@/components/Spinner";
-import Toast from "@/components/Toast";
+import { FormSection } from "@/components/ui/Form";
+import { Radio, RadioGroup } from "@/components/ui/Radio";
+import Spinner from "@/components/ui/Spinner";
+import Toast from "@/components/ui/Toast";
 import { SettingsContext } from "@/providers/SettingsProvider";
 import { createLogger } from "@/utils/logger";
 import { camelCaseToSentenceCase } from "@/utils/string";

@@ -1,6 +1,6 @@
 import React from "react";
 
-import Card from "@/components/Card";
+import Card from "@/components/ui/Card";
 import { cn } from "@/utils/cn";
 
 interface FormProps extends React.FormHTMLAttributes<HTMLFormElement> {

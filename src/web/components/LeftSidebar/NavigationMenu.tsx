@@ -5,8 +5,8 @@ import {
   HiOutlineStar,
 } from "react-icons/hi2";
 
-import Icon from "@/components/Icon";
-import { Tab, Tabs } from "@/components/Tabs";
+import Icon from "@/components/ui/Icon";
+import { Tab, Tabs } from "@/components/ui/Tabs";
 import { cn } from "@/utils/cn";
 
 import SidebarButton from "./SidebarButton";
