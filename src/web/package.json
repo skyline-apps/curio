@@ -12,7 +12,8 @@
     "db:generate": "npx drizzle-kit generate --name",
     "db:migrate": "npx drizzle-kit migrate",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch"
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
+    "generate:openapi": "tsx scripts/generate-openapi.ts"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.3.0",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.2.15",
+    "@local/eslint-plugin-eslint-local-rules": "file:eslint-local-rules",
     "@svgr/webpack": "^8.1.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.5.0",
@@ -64,9 +66,8 @@
     "postcss": "^8.4.35",
     "prettier": "^3.1.1",
     "tailwindcss": "^3.4.1",
-    "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.3.3",
-    "uuid": "^11.0.5",
-    "@local/eslint-plugin-eslint-local-rules": "file:eslint-local-rules"
+    "uuid": "^11.0.5"
   }
 }
