@@ -9,6 +9,11 @@ To start the local development environment:
 2. Start file syncing with `docker compose watch`.
 3. Navigate to `http://localhost:3000` to view the application.
 
+### Linting
+To install the local eslint plugins, run
+1. `cd src/web/eslint-local-rules`
+2. `npm run build`
+
 ### Supabase dashboard
 With the development environment running, navigate to `http://localhost:8000` to view the Supabase dashboard.
 

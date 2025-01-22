@@ -8,7 +8,12 @@ export const SettingsSchema = z
   })
   .strict();
 
-export const UpdateableSettingsSchema = SettingsSchema.partial();
+export const UpdateableSettingsRequestSchema = SettingsSchema.partial();
 
-export type Settings = z.infer<typeof SettingsSchema>;
-export type UpdatedSettings = z.infer<typeof UpdateableSettingsSchema>;
+export type SettingsResponse = z.infer<typeof SettingsSchema>;
+export type UpdatedSettingsRequest = z.infer<
+  typeof UpdateableSettingsRequestSchema
+>;
+export type UpdatedSettingsResponse = z.infer<
+  typeof UpdateableSettingsRequestSchema
+>;

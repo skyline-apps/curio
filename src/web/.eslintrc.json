@@ -30,7 +30,8 @@
     "promise",
     "react",
     "simple-import-sort",
-    "unused-imports"
+    "unused-imports",
+    "@local/eslint-local-rules"
   ],
   "root": true,
   "rules": {
@@ -63,7 +64,9 @@
     ],
     "no-relative-import-paths/no-relative-import-paths": [
       "error",
-      { "allowSameFolder": true }
+      {
+        "allowSameFolder": true
+      }
     ],
     "no-restricted-imports": [
       "error",
@@ -107,6 +110,7 @@
     "react/prop-types": "error",
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error",
-    "unused-imports/no-unused-imports": "error"
+    "unused-imports/no-unused-imports": "error",
+    "@local/eslint-local-rules/api-validation": "error"
   }
 }

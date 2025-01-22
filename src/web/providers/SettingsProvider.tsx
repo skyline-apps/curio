@@ -2,7 +2,7 @@
 import React, { createContext, useEffect, useState } from "react";
 
 import type {
-  Settings,
+  SettingsResponse,
   UpdatedSettings,
 } from "@/app/api/v1/user/settings/validation";
 import { handleAPIResponse } from "@/utils/api";
@@ -17,11 +17,11 @@ import {
 const log = createLogger("SettingsProvider");
 
 export type SettingsContextType = {
-  settings?: Settings;
+  settings?: SettingsResponse;
   updateSettings: (
-    field: keyof Settings,
-    value: Settings[keyof Settings],
-  ) => Promise<Settings | void>;
+    field: keyof SettingsResponse,
+    value: SettingsResponse[keyof SettingsResponse],
+  ) => Promise<SettingsResponse | void>;
 };
 
 interface SettingsProviderProps {
@@ -35,13 +35,13 @@ export const SettingsContext = createContext<SettingsContextType>({
 export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   children,
 }: SettingsProviderProps): React.ReactNode => {
-  const [currentSettings, setCurrentSettings] = useState<Settings>();
+  const [currentSettings, setCurrentSettings] = useState<SettingsResponse>();
 
   const fetchSettings = async (): Promise<void> => {
     fetch("/api/v1/user/settings", {
       method: "GET",
     })
-      .then(handleAPIResponse<Settings>)
+      .then(handleAPIResponse<SettingsResponse>)
       .then((result) => {
         setCurrentSettings(result);
       })
@@ -72,9 +72,9 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   }, [currentSettings?.colorScheme]);
 
   const updateSettings = async (
-    field: keyof Settings,
-    value: Settings[keyof Settings],
-  ): Promise<Settings | void> => {
+    field: keyof SettingsResponse,
+    value: SettingsResponse[keyof SettingsResponse],
+  ): Promise<SettingsResponse | void> => {
     if (!currentSettings) {
       return;
     }

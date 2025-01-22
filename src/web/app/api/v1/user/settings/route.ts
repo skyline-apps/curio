@@ -1,37 +1,36 @@
 import { db, eq, type PgColumn, type SelectedFields } from "@/db";
 import { profiles } from "@/db/schema";
-import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
+import {
+  APIRequest,
+  APIResponse,
+  APIResponseJSON,
+  checkUserProfile,
+  parseAPIRequest,
+} from "@/utils/api";
 import { createLogger } from "@/utils/logger";
 
 import {
-  type Settings,
-  UpdateableSettingsSchema,
-  type UpdatedSettings,
+  type SettingsResponse,
+  UpdateableSettingsRequestSchema,
+  type UpdatedSettingsResponse,
 } from "./validation";
 
 const log = createLogger("api/v1/user/settings");
 type ProfileKey = keyof typeof profiles;
 
-export async function GET(request: APIRequest): Promise<APIResponse<Settings>> {
+/** @no-request */
+export async function GET(
+  request: APIRequest,
+): Promise<APIResponse<SettingsResponse>> {
   const userId = request.headers.get("x-user-id");
-
-  if (!userId) {
-    return APIResponseJSON({ error: "Unauthorized." }, { status: 401 });
-  }
-
   try {
-    const results = await db
-      .select({ colorScheme: profiles.colorScheme })
-      .from(profiles)
-      .where(eq(profiles.userId, userId));
-
-    if (!results.length) {
-      return APIResponseJSON(
-        { error: "No settings found for this user." },
-        { status: 200 },
-      );
+    const profileResult = await checkUserProfile(userId);
+    if ("error" in profileResult) {
+      return profileResult.error as APIResponse<UpdatedSettingsResponse>;
     }
-    return APIResponseJSON(results[0]);
+    return APIResponseJSON({
+      colorScheme: profileResult.profile.colorScheme,
+    });
   } catch (error) {
     log.error(
       `Database connection error fetching settings for user ${userId}`,
@@ -46,33 +45,23 @@ export async function GET(request: APIRequest): Promise<APIResponse<Settings>> {
 
 export async function POST(
   request: APIRequest,
-): Promise<APIResponse<UpdatedSettings>> {
+): Promise<APIResponse<UpdatedSettingsResponse>> {
   const userId = request.headers.get("x-user-id");
-
-  if (!userId) {
-    return APIResponseJSON({ error: "Unauthorized." }, { status: 401 });
-  }
-
   try {
-    const data = await request.json();
-    const parsed = UpdateableSettingsSchema.safeParse(data);
-
-    if (!parsed.success) {
-      const errors = parsed.error.issues.map((issue) => {
-        // issue.path can be either a string or an array, so handle both cases.
-        const path =
-          issue.path.length !== undefined ? issue.path.join(".") : issue.path;
-        return path ? `${path}: ${issue.message}` : issue.message;
-      });
-      const message = errors.join("\n ");
-      return APIResponseJSON(
-        { error: `Invalid settings:\n${message}` },
-        { status: 400 },
-      );
+    const profileResult = await checkUserProfile(userId);
+    if ("error" in profileResult) {
+      return profileResult.error as APIResponse<UpdatedSettingsResponse>;
     }
 
-    const settings = parsed.data;
-    const settingsKeys = Object.keys(parsed.data);
+    const body = await request.json();
+    const data = await parseAPIRequest(UpdateableSettingsRequestSchema, body);
+
+    if ("error" in data) {
+      return data.error as APIResponse<UpdatedSettingsResponse>;
+    }
+
+    const settings = data;
+    const settingsKeys = Object.keys(settings);
 
     // Get the list of settings fields to return.
     const returnFields = settingsKeys.reduce<SelectedFields>((acc, key) => {
@@ -89,16 +78,16 @@ export async function POST(
     const updates = await db
       .update(profiles)
       .set({ ...settings })
-      .where(eq(profiles.userId, userId))
+      .where(eq(profiles.userId, profileResult.profile.userId))
       .returning(returnFields);
 
     if (!updates.length) {
       return APIResponseJSON(
         { error: "No settings updated." },
         { status: 200 },
-      );
+      ) as APIResponse<UpdatedSettingsResponse>;
     }
-    return APIResponseJSON(updates[0]);
+    return APIResponseJSON(updates[0]) as APIResponse<UpdatedSettingsResponse>;
   } catch (error) {
     log.error(`Error updating settings for user ${userId}`, error);
     return APIResponseJSON(

@@ -1,7 +1,12 @@
-import { checkUserProfile } from "@/app/api/v1/items/utils";
 import { and, db, eq } from "@/db";
 import { items, profileItems } from "@/db/schema";
-import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
+import {
+  APIRequest,
+  APIResponse,
+  APIResponseJSON,
+  checkUserProfile,
+  parseAPIRequest,
+} from "@/utils/api";
 import { createLogger } from "@/utils/logger";
 import {
   getItemContent,
@@ -10,8 +15,9 @@ import {
 } from "@/utils/storage";
 
 import {
+  GetItemContentRequestSchema,
   GetItemContentResponse,
-  ItemContentSchema,
+  UpdateItemContentRequestSchema,
   UpdateItemContentResponse,
   UploadStatus,
 } from "./validation";
@@ -20,23 +26,24 @@ const log = createLogger("api/v1/items/[slug]/content");
 
 export async function GET(
   request: APIRequest,
-  { params }: { params: { slug: string } },
 ): Promise<APIResponse<GetItemContentResponse>> {
+  const userId = request.headers.get("x-user-id");
   try {
-    const { slug } = params;
-    const userId = request.headers.get("x-user-id");
-
     const profileResult = await checkUserProfile(userId);
-    if (profileResult.error) {
-      return profileResult.error;
+    if ("error" in profileResult) {
+      return profileResult.error as APIResponse<GetItemContentResponse>;
     }
 
-    if (!slug) {
-      return APIResponseJSON(
-        { error: "Item slug is required." },
-        { status: 400 },
-      );
+    const url = new URL(request.url);
+    const data = await parseAPIRequest(
+      GetItemContentRequestSchema,
+      Object.fromEntries(url.searchParams),
+    );
+    if ("error" in data) {
+      return data.error;
     }
+
+    const { slug } = data;
 
     const item = await db
       .select()
@@ -55,11 +62,12 @@ export async function GET(
     }
 
     const content = await getItemContent(slug);
-
-    return APIResponseJSON({
+    const response: GetItemContentResponse = {
       content,
       itemId: item[0].items.id,
-    });
+    };
+
+    return APIResponseJSON(response);
   } catch (error) {
     log.error("Error getting item content:", error);
     return APIResponseJSON(
@@ -71,23 +79,21 @@ export async function GET(
 
 export async function POST(
   request: APIRequest,
-  { params }: { params: { slug: string } },
 ): Promise<APIResponse<UpdateItemContentResponse>> {
+  const userId = request.headers.get("x-user-id");
   try {
-    const { slug } = params;
-    const userId = request.headers.get("x-user-id");
-
     const profileResult = await checkUserProfile(userId);
-    if (profileResult.error) {
-      return profileResult.error;
+    if ("error" in profileResult) {
+      return profileResult.error as APIResponse<UpdateItemContentResponse>;
     }
 
-    if (!slug) {
-      return APIResponseJSON(
-        { error: "Item slug is required." },
-        { status: 400 },
-      );
+    const body = await request.json();
+    const data = await parseAPIRequest(UpdateItemContentRequestSchema, body);
+    if ("error" in data) {
+      return data.error;
     }
+
+    const { slug, content } = data;
 
     const item = await db
       .select()
@@ -105,23 +111,8 @@ export async function POST(
       return APIResponseJSON({ error: "Item not found." }, { status: 404 });
     }
 
-    const parsed = ItemContentSchema.safeParse(await request.json());
-
-    if (!parsed.success) {
-      const errors = parsed.error.issues.map((issue) => {
-        const path =
-          issue.path.length !== undefined ? issue.path.join(".") : issue.path;
-        return path ? `${path}: ${issue.message}` : issue.message;
-      });
-      const message = errors.join("\n");
-      return APIResponseJSON(
-        { error: `Invalid request body:\n${message}` },
-        { status: 400 },
-      );
-    }
-
     try {
-      const status = await uploadItemContent(slug, parsed.data.content);
+      const status = await uploadItemContent(slug, content);
 
       const response: UpdateItemContentResponse = {
         status,

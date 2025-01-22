@@ -8,7 +8,7 @@ import {
 import fetchMock from "jest-fetch-mock";
 import React from "react";
 
-import type { Settings } from "@/app/api/v1/user/settings/validation";
+import type { SettingsResponse } from "@/app/api/v1/user/settings/validation";
 import { ColorScheme } from "@/db/schema";
 
 import { SettingsContext, SettingsProvider } from "./SettingsProvider";
@@ -16,7 +16,7 @@ import { SettingsContext, SettingsProvider } from "./SettingsProvider";
 describe("SettingsContext", () => {
   fetchMock.enableMocks();
 
-  const initialSettings: Settings = {
+  const initialSettings: SettingsResponse = {
     colorScheme: ColorScheme.LIGHT,
   };
 

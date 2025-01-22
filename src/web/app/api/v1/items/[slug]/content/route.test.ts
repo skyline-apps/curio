@@ -51,9 +51,10 @@ describe("GET /api/v1/items/[slug]/content", () => {
 
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "GET",
+      searchParams: { slug: TEST_ITEM_SLUG },
     });
 
-    const response = await GET(request, { params: { slug: TEST_ITEM_SLUG } });
+    const response = await GET(request);
     expect(response.status).toBe(200);
 
     const data = await response.json();
@@ -66,9 +67,10 @@ describe("GET /api/v1/items/[slug]/content", () => {
   it("should return 404 if item not found", async () => {
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "GET",
+      searchParams: { slug: "nonexistent" },
     });
 
-    const response = await GET(request, { params: { slug: "nonexistent" } });
+    const response = await GET(request);
     expect(response.status).toBe(404);
     const data = await response.json();
     expect(data.error).toBe("Item not found.");
@@ -78,21 +80,23 @@ describe("GET /api/v1/items/[slug]/content", () => {
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "GET",
       userId: NONEXISTENT_USER_ID,
+      searchParams: { slug: TEST_ITEM_SLUG },
     });
 
-    const response = await GET(request, { params: { slug: TEST_ITEM_SLUG } });
+    const response = await GET(request);
     expect(response.status).toBe(404);
   });
 
-  it("should return 400 if slug is missing", async () => {
+  it("should return 404 if slug is missing", async () => {
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "GET",
+      searchParams: { slug: "" },
     });
 
-    const response = await GET(request, { params: { slug: "" } });
-    expect(response.status).toBe(400);
+    const response = await GET(request);
+    expect(response.status).toBe(404);
     const data = await response.json();
-    expect(data.error).toBe("Item slug is required.");
+    expect(data.error).toBe("Item not found.");
   });
 });
 
@@ -122,10 +126,11 @@ describe("POST /api/v1/items/[slug]/content", () => {
       method: "POST",
       body: {
         content: "Updated content",
+        slug: TEST_ITEM_SLUG,
       },
     });
 
-    const response = await POST(request, { params: { slug: TEST_ITEM_SLUG } });
+    const response = await POST(request);
     expect(response.status).toBe(200);
 
     const data = await response.json();
@@ -141,10 +146,11 @@ describe("POST /api/v1/items/[slug]/content", () => {
       method: "POST",
       body: {
         content: "Updated content",
+        slug: "nonexistent",
       },
     });
 
-    const response = await POST(request, { params: { slug: "nonexistent" } });
+    const response = await POST(request);
     expect(response.status).toBe(404);
     const data = await response.json();
     expect(data.error).toBe("Item not found.");
@@ -156,25 +162,27 @@ describe("POST /api/v1/items/[slug]/content", () => {
       userId: NONEXISTENT_USER_ID,
       body: {
         content: "Updated content",
+        slug: TEST_ITEM_SLUG,
       },
     });
 
-    const response = await POST(request, { params: { slug: TEST_ITEM_SLUG } });
+    const response = await POST(request);
     expect(response.status).toBe(404);
   });
 
-  it("should return 400 if slug is missing", async () => {
+  it("should return 404 if slug is missing", async () => {
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "POST",
       body: {
         content: "Updated content",
+        slug: "",
       },
     });
 
-    const response = await POST(request, { params: { slug: "" } });
-    expect(response.status).toBe(400);
+    const response = await POST(request);
+    expect(response.status).toBe(404);
     const data = await response.json();
-    expect(data.error).toBe("Item slug is required.");
+    expect(data.error).toBe("Item not found.");
   });
 
   it("should return 400 if content is missing", async () => {
@@ -200,12 +208,14 @@ describe("POST /api/v1/items/[slug]/content", () => {
 
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "POST",
-      body: {},
+      body: {
+        slug: TEST_ITEM_SLUG,
+      },
     });
 
-    const response = await POST(request, { params: { slug: TEST_ITEM_SLUG } });
+    const response = await POST(request);
     expect(response.status).toBe(400);
     const data = await response.json();
-    expect(data.error).toBe("Invalid request body:\ncontent: Required");
+    expect(data.error).toBe("Invalid request parameters:\ncontent: Required");
   });
 });

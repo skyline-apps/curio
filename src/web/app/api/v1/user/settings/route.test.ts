@@ -64,7 +64,7 @@ describe("POST /api/v1/user/settings", () => {
 
     const result = await response.json();
     expect(result.error).toEqual(
-      "Invalid settings:\nUnrecognized key(s) in object: 'invalidSetting'",
+      "Invalid request parameters:\nUnrecognized key(s) in object: 'invalidSetting'",
     );
   });
 
@@ -78,7 +78,7 @@ describe("POST /api/v1/user/settings", () => {
 
     const result = await response.json();
     expect(result.error).toEqual(
-      "Invalid settings:\ncolorScheme: Invalid enum value. Expected 'auto' | 'light' | 'dark', received 'bad color'",
+      "Invalid request parameters:\ncolorScheme: Invalid enum value. Expected 'auto' | 'light' | 'dark', received 'bad color'",
     );
   });
 

@@ -21,3 +21,9 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: jest.fn(),
   })),
 });
+
+// Add TextEncoder/TextDecoder for pg package
+const { TextEncoder, TextDecoder } = require("util");
+
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;

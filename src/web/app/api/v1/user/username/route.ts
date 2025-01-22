@@ -1,44 +1,41 @@
-import { z } from "zod";
-
 import { db, eq } from "@/db";
 import { checkDbError, DbError, DbErrorCode } from "@/db/errors";
 import { profiles } from "@/db/schema";
-import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
+import {
+  APIRequest,
+  APIResponse,
+  APIResponseJSON,
+  checkUserProfile,
+  parseAPIRequest,
+} from "@/utils/api";
 import { createLogger } from "@/utils/logger";
 import { usernameError } from "@/utils/username";
 
+import {
+  UpdateUsernameRequestSchema,
+  UpdateUsernameResponse,
+} from "./validation";
+
 const log = createLogger("api/v1/user/username");
 
-const UpdateUsernameRequestSchema = z.object({
-  username: z.string(),
-});
-
-export interface UpdateUsernameResponse {
-  updatedUsername?: string;
-}
-
-// TODO(kim): Add authentication to API routes.
 export async function POST(
   request: APIRequest,
 ): Promise<APIResponse<UpdateUsernameResponse>> {
   const userId = request.headers.get("x-user-id");
 
-  if (!userId) {
-    return APIResponseJSON({ error: "Unauthorized." }, { status: 401 });
-  }
-
   try {
-    const data = await request.json();
-
-    const parsed = UpdateUsernameRequestSchema.safeParse(data);
-    if (!parsed.success) {
-      return APIResponseJSON(
-        { error: "Username is required." },
-        { status: 400 },
-      );
+    const profileResult = await checkUserProfile(userId);
+    if ("error" in profileResult) {
+      return profileResult.error as APIResponse<UpdateUsernameResponse>;
     }
 
-    const { username: newUsername } = parsed.data;
+    const body = await request.json();
+    const data = await parseAPIRequest(UpdateUsernameRequestSchema, body);
+    if ("error" in data) {
+      return data.error;
+    }
+
+    const { username: newUsername } = data;
 
     // Check that the new username is valid
     const errorMessage = usernameError(newUsername);
@@ -55,7 +52,7 @@ export async function POST(
     const updates = await db
       .update(profiles)
       .set({ username: newUsername })
-      .where(eq(profiles.userId, userId))
+      .where(userId ? eq(profiles.userId, userId) : undefined)
       .returning({ updatedUsername: profiles.username });
 
     if (!updates.length) {

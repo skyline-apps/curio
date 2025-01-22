@@ -1,0 +1,9 @@
+{
+  "name": "@local/eslint-plugin-eslint-local-rules",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "private": true,
+  "scripts": {
+    "build": "tsc"
+  }
+}
