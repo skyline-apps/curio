@@ -1,7 +1,10 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
+import { HiPlus } from "react-icons/hi2";
 
+import Button from "@/components/Button";
+import Icon from "@/components/Icon";
 import { useLogout } from "@/hooks/useLogout";
 import { UserContext } from "@/providers/UserProvider";
 import { cn } from "@/utils/cn";
@@ -52,6 +55,16 @@ const LeftSidebar: React.FC = () => {
           onNavigation={handleNavigation}
         />
       </div>
+      <Button
+        className={cn("m-2", {
+          "self-center": !sidebarOpen,
+        })}
+        isIconOnly={!sidebarOpen}
+        onPress={() => null}
+      >
+        <Icon icon={<HiPlus />} />
+        {sidebarOpen && "Add new"}
+      </Button>
       <UserMenu
         user={user}
         sidebarOpen={sidebarOpen}

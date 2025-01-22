@@ -22,7 +22,7 @@ const SidebarButton: React.FC<SidebarButtonProps> = ({
       variant={isSelected ? "solid" : "light"}
       onPress={onPress}
       aria-label={label}
-      className="w-full"
+      className="mx-2"
     >
       <Icon icon={icon} />
     </Button>
