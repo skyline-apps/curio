@@ -52,7 +52,9 @@ describe("POST /api/v1/user/username", () => {
     const response = await POST(request);
     expect(response.status).toBe(400);
     const data = await response.json();
-    expect(data).toEqual({ error: "Username is required." });
+    expect(data).toEqual({
+      error: "Invalid request parameters:\nusername: Required",
+    });
   });
 
   it("should return 400 if new username is empty", async () => {

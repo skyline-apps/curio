@@ -1,10 +1,15 @@
 import { and, db, eq, sql } from "@/db";
 import { items, profileItems } from "@/db/schema";
-import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
+import {
+  APIRequest,
+  APIResponse,
+  APIResponseJSON,
+  checkUserProfile,
+  parseAPIRequest,
+} from "@/utils/api";
 import { createLogger } from "@/utils/logger";
 import { cleanUrl, generateSlug } from "@/utils/url";
 
-import { checkUserProfile } from "./utils";
 import {
   CreateOrUpdateItemsRequestSchema,
   CreateOrUpdateItemsResponse,
@@ -18,33 +23,23 @@ export async function GET(
   request: APIRequest,
 ): Promise<APIResponse<GetItemsResponse>> {
   const userId = request.headers.get("x-user-id");
-
-  const profileResult = await checkUserProfile(userId);
-  if (profileResult.error) {
-    return profileResult.error;
-  }
-
-  const url = new URL(request.url);
-  const parsed = GetItemsRequestSchema.safeParse(
-    Object.fromEntries(url.searchParams),
-  );
-
-  if (!parsed.success) {
-    const errors = parsed.error.issues.map((issue) => {
-      const path =
-        issue.path.length !== undefined ? issue.path.join(".") : issue.path;
-      return path ? `${path}: ${issue.message}` : issue.message;
-    });
-    const message = errors.join("\n");
-    return APIResponseJSON(
-      { error: `Invalid request parameters:\n${message}` },
-      { status: 400 },
-    );
-  }
-
-  const { limit, slugs } = parsed.data;
-
   try {
+    const profileResult = await checkUserProfile(userId);
+    if ("error" in profileResult) {
+      return profileResult.error as APIResponse<GetItemsResponse>;
+    }
+
+    const url = new URL(request.url);
+    const data = await parseAPIRequest(
+      GetItemsRequestSchema,
+      Object.fromEntries(url.searchParams),
+    );
+    if ("error" in data) {
+      return data.error;
+    }
+
+    const { limit, slugs } = data;
+
     const results = await db
       .select({
         id: items.id,
@@ -79,19 +74,18 @@ export async function GET(
       .where(eq(profileItems.profileId, profileResult.profile.id))
       .then((res) => Number(res[0]?.count ?? 0));
 
-    // Format response
     const response: GetItemsResponse = {
       items: results.map((item) => ({
         id: item.id,
-        url: item.url,
-        slug: item.slug,
-        title: item.title ?? undefined,
-        description: item.description ?? undefined,
-        author: item.author ?? undefined,
-        thumbnail: item.thumbnail ?? undefined,
-        publishedAt: item.publishedAt?.toISOString() ?? undefined,
         createdAt: item.createdAt.toISOString(),
         updatedAt: item.updatedAt.toISOString(),
+        url: item.url,
+        slug: item.slug,
+        title: item.title || "",
+        description: item.description || "",
+        author: item.author || "",
+        thumbnail: item.thumbnail || "",
+        publishedAt: item.publishedAt?.toISOString() || "",
       })),
       total,
       nextCursor:
@@ -109,30 +103,19 @@ export async function POST(
   request: APIRequest,
 ): Promise<APIResponse<CreateOrUpdateItemsResponse>> {
   const userId = request.headers.get("x-user-id");
-
-  const profileResult = await checkUserProfile(userId);
-  if (profileResult.error) {
-    return profileResult.error;
-  }
-
   try {
-    const body = await request.json();
-    const parsed = CreateOrUpdateItemsRequestSchema.safeParse(body);
-
-    if (!parsed.success) {
-      const errors = parsed.error.issues.map((issue) => {
-        const path =
-          issue.path.length !== undefined ? issue.path.join(".") : issue.path;
-        return path ? `${path}: ${issue.message}` : issue.message;
-      });
-      const message = errors.join("\n");
-      return APIResponseJSON(
-        { error: `Invalid request body:\n${message}` },
-        { status: 400 },
-      );
+    const profileResult = await checkUserProfile(userId);
+    if (profileResult.error) {
+      return profileResult.error;
     }
 
-    const { items: newItems } = parsed.data;
+    const body = await request.json();
+    const data = await parseAPIRequest(CreateOrUpdateItemsRequestSchema, body);
+    if ("error" in data) {
+      return data.error;
+    }
+
+    const { items: newItems } = data;
 
     const now = new Date();
     const itemsToInsert = newItems.map((item) => ({

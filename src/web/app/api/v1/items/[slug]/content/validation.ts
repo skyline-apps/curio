@@ -7,8 +7,8 @@ export enum UploadStatus {
   ERROR = "ERROR",
 }
 
-export const ItemContentSchema = z.object({
-  content: z.string(),
+export const GetItemContentRequestSchema = z.object({
+  slug: z.string(),
 });
 
 export type GetItemContentResponse =
@@ -19,6 +19,11 @@ export type GetItemContentResponse =
   | {
       error: string;
     };
+
+export const UpdateItemContentRequestSchema = z.object({
+  content: z.string(),
+  slug: z.string(),
+});
 
 export type UpdateItemContentResponse =
   | {

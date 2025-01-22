@@ -30,14 +30,14 @@ jest.mock("@/components/Navbar", () => ({
   default: () => <div data-testid="navbar" />,
 }));
 
-jest.mock("@/components/Button", () => ({
+jest.mock("@/components/ui/Button", () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => (
     <button data-testid="button">{children}</button>
   ),
 }));
 
-jest.mock("@/components/Card", () => ({
+jest.mock("@/components/ui/Card", () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="card">{children}</div>

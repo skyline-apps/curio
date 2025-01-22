@@ -17,10 +17,14 @@ export const CreateOrUpdateItemsRequestSchema = z.object({
 export const GetItemsRequestSchema = z.object({
   slugs: z
     .string()
-    .transform((str) => str.split(","))
-    .optional(),
+    .optional()
+    .superRefine((val) => {
+      if (val && !val.split(",").every((s) => s.trim().length > 0)) {
+        throw new Error("Invalid slug format");
+      }
+    }),
+  limit: z.coerce.number().min(1).max(100).optional().default(10),
   cursor: z.string().optional(),
-  limit: z.coerce.number().min(1).max(100).optional().default(50),
 });
 
 export type ItemMetadata = z.infer<typeof ItemMetadataSchema>;

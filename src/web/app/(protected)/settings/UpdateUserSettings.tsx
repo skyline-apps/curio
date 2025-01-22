@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import { z } from "zod";
 
 import { SettingsSchema } from "@/app/api/v1/user/settings/validation";
-import { type Settings } from "@/app/api/v1/user/settings/validation";
+import { type SettingsResponse } from "@/app/api/v1/user/settings/validation";
 import { FormSection } from "@/components/ui/Form";
 import { Radio, RadioGroup } from "@/components/ui/Radio";
 import Spinner from "@/components/ui/Spinner";
@@ -19,9 +19,9 @@ const UpdateUserSettings: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [submitting, setSubmitting] = useState<string>("");
 
-  const updateSetting = async <T extends keyof Settings>(
+  const updateSetting = async <T extends keyof SettingsResponse>(
     field: T,
-    value: Settings[T],
+    value: SettingsResponse[T],
   ): Promise<void> => {
     if (!settings) {
       return;
@@ -42,7 +42,7 @@ const UpdateUserSettings: React.FC = () => {
   };
 
   const renderField = (
-    fieldKey: keyof Settings,
+    fieldKey: keyof SettingsResponse,
     fieldSchema: z.ZodTypeAny,
   ): JSX.Element => {
     if (!settings) {
@@ -58,7 +58,10 @@ const UpdateUserSettings: React.FC = () => {
           orientation="horizontal"
           value={value?.toString()}
           onValueChange={(val) =>
-            updateSetting(fieldKey, val as Settings[keyof Settings])
+            updateSetting(
+              fieldKey,
+              val as SettingsResponse[keyof SettingsResponse],
+            )
           }
         >
           {enumOptions.map((option) => (
@@ -87,7 +90,10 @@ const UpdateUserSettings: React.FC = () => {
     }
   };
 
-  const fields = SettingsSchema.shape as Record<keyof Settings, z.ZodTypeAny>;
+  const fields = SettingsSchema.shape as Record<
+    keyof SettingsResponse,
+    z.ZodTypeAny
+  >;
 
   let contents;
 
