@@ -1,7 +1,7 @@
 "use client";
 import React, { createContext, useState } from "react";
 
-import { type UpdateUsernameResponse } from "@/app/api/v1/user/username/route";
+import { type UpdateUsernameResponse } from "@/app/api/v1/user/username/validation";
 import { handleAPIResponse } from "@/utils/api";
 
 export type User = {

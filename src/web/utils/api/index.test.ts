@@ -1,4 +1,4 @@
-import { handleAPIResponse } from "./api";
+import { handleAPIResponse } from ".";
 
 describe("handleAPIResponse", () => {
   it("should handle a successful response", async () => {

@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom";
 
 // Add TextEncoder/TextDecoder for pg package
-import { TextDecoder, TextEncoder } from "util";
+import { TextEncoder } from "util";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -26,4 +26,3 @@ Object.defineProperty(window, "matchMedia", {
 });
 
 global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder;

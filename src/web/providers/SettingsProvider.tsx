@@ -3,7 +3,7 @@ import React, { createContext, useEffect, useState } from "react";
 
 import type {
   SettingsResponse,
-  UpdatedSettings,
+  UpdatedSettingsResponse,
 } from "@/app/api/v1/user/settings/validation";
 import { handleAPIResponse } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
@@ -85,7 +85,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       },
       body: JSON.stringify({ [field]: value }),
     })
-      .then(handleAPIResponse<UpdatedSettings>)
+      .then(handleAPIResponse<UpdatedSettingsResponse>)
       .then((result) => {
         const newSettings = { ...currentSettings, ...result };
         setCurrentSettings(newSettings);
