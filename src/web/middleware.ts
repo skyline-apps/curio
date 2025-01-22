@@ -16,11 +16,12 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * And the paths that are exactly
+     * - /auth
+     * - /api/v1/health
+     And the ones that are exactly
      * - /
      * - /login
-     * Feel free to modify this pattern to include more paths.
      */
-    "/((?!_next/static|_next/image|favicon.ico|auth|login$|$|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|auth|login$|api/v1/health|$|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
