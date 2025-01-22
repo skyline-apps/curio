@@ -15,7 +15,6 @@ export const CreateOrUpdateItemsRequestSchema = z.object({
 });
 
 export const GetItemsRequestSchema = z.object({
-  // TODO: Add description here and pass through to OpenAPI schema
   slugs: z
     .string()
     .optional()
@@ -37,22 +36,32 @@ export type CreateOrUpdateItemsRequest = z.infer<
 >;
 export type GetItemsRequest = z.infer<typeof GetItemsRequestSchema>;
 
-export interface ItemResponse extends ItemMetadata {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-}
+const ItemResponseSchema = ItemMetadataSchema.extend({
+  id: z.string(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
 
-export interface GetItemsResponse {
-  items: ItemResponse[];
-  nextCursor?: string;
-  total: number;
-}
+export const GetItemsResponseSchema = z.object({
+  items: z.array(ItemResponseSchema),
+  nextCursor: z.string().optional(),
+  total: z.number(),
+});
 
-export interface CreateOrUpdateItemsResponse {
-  items: ItemResponse[];
-  errors?: Array<{
-    url: string;
-    error: string;
-  }>;
-}
+export type GetItemsResponse = z.infer<typeof GetItemsResponseSchema>;
+
+export const CreateOrUpdateItemsResponseSchema = z.object({
+  items: z.array(ItemResponseSchema),
+  errors: z
+    .array(
+      z.object({
+        url: z.string(),
+        error: z.string(),
+      }),
+    )
+    .optional(),
+});
+
+export type CreateOrUpdateItemsResponse = z.infer<
+  typeof CreateOrUpdateItemsResponseSchema
+>;

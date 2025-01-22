@@ -1,5 +1,6 @@
 import { jest } from "@jest/globals";
 
+import { eq } from "@/db";
 import { items, profileItems } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
 import {
@@ -102,6 +103,8 @@ describe("GET /api/v1/items/[slug]/content", () => {
 
 describe("POST /api/v1/items/[slug]/content", () => {
   it("should return 200 when successfully updating content", async () => {
+    const originalPublishedDate = new Date("2024-01-10T12:50:00-08:00");
+    const originalCreationDate = new Date("2025-01-10T12:52:56-08:00");
     const mockItem = {
       id: TEST_ITEM_ID,
       url: "https://example.com",
@@ -110,16 +113,16 @@ describe("POST /api/v1/items/[slug]/content", () => {
       description: "An example item",
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
-      publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-      createdAt: new Date("2025-01-10T12:52:56-08:00"),
-      updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+      publishedAt: originalPublishedDate,
+      createdAt: originalCreationDate,
+      updatedAt: originalCreationDate,
     };
 
     await testDb.db.insert(items).values(mockItem);
     await testDb.db.insert(profileItems).values({
       profileId: DEFAULT_TEST_PROFILE_ID,
       itemId: TEST_ITEM_ID,
-      savedAt: new Date("2025-01-10T12:52:56-08:00"),
+      savedAt: originalCreationDate,
     });
 
     const request: APIRequest = makeAuthenticatedMockRequest({
@@ -139,6 +142,28 @@ describe("POST /api/v1/items/[slug]/content", () => {
       message: "Content updated and set as main version",
       status: "UPDATED_MAIN",
     });
+
+    const updatedItem = await testDb.db
+      .select()
+      .from(items)
+      .where(eq(items.id, TEST_ITEM_ID))
+      .limit(1);
+    expect(
+      (updatedItem[0].updatedAt as Date).getTime() >
+        originalCreationDate.getTime(),
+    ).toBe(true);
+    expect((updatedItem[0].createdAt as Date).getTime()).toEqual(
+      originalCreationDate.getTime(),
+    );
+
+    const updatedProfileItem = await testDb.db
+      .select()
+      .from(profileItems)
+      .where(eq(profileItems.itemId, TEST_ITEM_ID))
+      .limit(1);
+    expect(
+      updatedProfileItem[0].savedAt.getTime() > originalCreationDate.getTime(),
+    ).toBe(true);
   });
 
   it("should return 404 if item not found", async () => {
