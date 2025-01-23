@@ -44,7 +44,7 @@ export const updateSession = async (
     data: { user },
     error,
   } = await supabase.auth.getUser();
-  if (error) {
+  if (error && !request.headers.get("x-api-key")) {
     log.error(error.message);
   }
 
