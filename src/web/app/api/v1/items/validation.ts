@@ -18,6 +18,8 @@ const ItemResultSchema = z.object({
   updatedAt: z.string().datetime(),
 });
 
+export type ItemResult = z.infer<typeof ItemResultSchema>;
+
 export const GetItemsRequestSchema = z.object({
   slugs: z
     .string()
