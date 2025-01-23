@@ -18,8 +18,9 @@ export async function GET(
   request: APIRequest,
 ): Promise<APIResponse<GetItemsResponse>> {
   const userId = request.headers.get("x-user-id");
+  const apiKey = request.headers.get("x-api-key");
   try {
-    const profileResult = await checkUserProfile(userId);
+    const profileResult = await checkUserProfile(userId, apiKey);
     if ("error" in profileResult) {
       return profileResult.error as APIResponse<GetItemsResponse>;
     }
@@ -98,8 +99,9 @@ export async function POST(
   request: APIRequest,
 ): Promise<APIResponse<CreateOrUpdateItemsResponse>> {
   const userId = request.headers.get("x-user-id");
+  const apiKey = request.headers.get("x-api-key");
   try {
-    const profileResult = await checkUserProfile(userId);
+    const profileResult = await checkUserProfile(userId, apiKey);
     if (profileResult.error) {
       return profileResult.error;
     }

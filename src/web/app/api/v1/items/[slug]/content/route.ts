@@ -23,8 +23,9 @@ export async function GET(
   request: APIRequest,
 ): Promise<APIResponse<GetItemContentResponse>> {
   const userId = request.headers.get("x-user-id");
+  const apiKey = request.headers.get("x-api-key");
   try {
-    const profileResult = await checkUserProfile(userId);
+    const profileResult = await checkUserProfile(userId, apiKey);
     if ("error" in profileResult) {
       return profileResult.error as APIResponse<GetItemContentResponse>;
     }
@@ -76,8 +77,9 @@ export async function POST(
   request: APIRequest,
 ): Promise<APIResponse<UpdateItemContentResponse>> {
   const userId = request.headers.get("x-user-id");
+  const apiKey = request.headers.get("x-api-key");
   try {
-    const profileResult = await checkUserProfile(userId);
+    const profileResult = await checkUserProfile(userId, apiKey);
     if ("error" in profileResult) {
       return profileResult.error as APIResponse<UpdateItemContentResponse>;
     }
