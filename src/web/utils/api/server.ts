@@ -39,6 +39,12 @@ export async function checkUserProfile(
       .innerJoin(apiKeys, eq(apiKeys.profileId, profiles.id))
       .where(and(eq(apiKeys.key, apiKey), eq(apiKeys.isActive, true)))
       .limit(1);
+    if (results.length > 0) {
+      await db
+        .update(apiKeys)
+        .set({ lastUsedAt: new Date() })
+        .where(eq(apiKeys.key, apiKey));
+    }
   } else if (userId) {
     results = await db
       .select({

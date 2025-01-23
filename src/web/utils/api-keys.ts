@@ -95,23 +95,3 @@ export async function revokeApiKey(
     .set({ isActive: false })
     .where(and(eq(apiKeys.id, keyId), eq(apiKeys.profileId, profile.id)));
 }
-
-export async function validateApiKey(
-  key: string,
-): Promise<SelectApiKey | null> {
-  const [apiKey] = await db
-    .select()
-    .from(apiKeys)
-    .where(and(eq(apiKeys.key, key), eq(apiKeys.isActive, true)));
-
-  if (!apiKey) {
-    return null;
-  }
-
-  await db
-    .update(apiKeys)
-    .set({ lastUsedAt: new Date() })
-    .where(eq(apiKeys.id, apiKey.id));
-
-  return apiKey;
-}
