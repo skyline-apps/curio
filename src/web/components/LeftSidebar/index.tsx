@@ -56,7 +56,7 @@ const LeftSidebar: React.FC = () => {
         />
       </div>
       <Button
-        className={cn("m-2", {
+        className={cn("m-2 min-w-10", {
           "self-center": !sidebarOpen,
         })}
         isIconOnly={!sidebarOpen}
@@ -65,7 +65,7 @@ const LeftSidebar: React.FC = () => {
         }
       >
         <Icon icon={<HiPlus />} />
-        {sidebarOpen && "Add new"}
+        <span className="hidden md:block">{sidebarOpen && "Add new"}</span>
       </Button>
       <UserMenu
         user={user}
