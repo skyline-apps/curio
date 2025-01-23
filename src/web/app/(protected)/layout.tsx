@@ -12,9 +12,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     <div className="flex flex-row h-screen w-full">
       <LeftSidebar />
       <div className="flex-1 overflow-y-auto">
-        <AppPage>
-          <div className="p-4">{children}</div>
-        </AppPage>
+        <AppPage>{children}</AppPage>
       </div>
     </div>
   );

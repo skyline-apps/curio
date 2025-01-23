@@ -12,7 +12,7 @@ const SettingsPage: React.FC = () => {
   }
 
   return (
-    <div className="mx-auto max-w-screen-md flex flex-col h-full">
+    <div className="mx-auto max-w-screen-md flex flex-col pb-4">
       <SettingsForm />
     </div>
   );
