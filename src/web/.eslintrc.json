@@ -10,14 +10,16 @@
   "overrides": [
     {
       "files": [
-        "components/**/*"
+        "components/ui/**/*"
       ],
       "rules": {
         "no-restricted-imports": "off"
       }
     },
     {
-      "files": ["scripts/**/*"],
+      "files": [
+        "scripts/**/*"
+      ],
       "rules": {
         "no-console": "off"
       }
@@ -83,7 +85,7 @@
             "message": "Please use `@/utils/api` instead of `next/server`"
           },
           {
-            "name": "@nextui-org/react",
+            "name": "@heroui/react",
             "message": "Please use components from the `@/components/` library"
           }
         ],
