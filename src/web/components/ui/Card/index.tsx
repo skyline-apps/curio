@@ -1,4 +1,4 @@
-import { Card, CardProps } from "@nextui-org/react";
+import { Card, CardProps } from "@heroui/react";
 
 import { cn } from "@/utils/cn";
 

@@ -5,7 +5,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalProps,
-} from "@nextui-org/modal";
+} from "@heroui/modal";
 
 interface CurioModalProps extends ModalProps {}
 

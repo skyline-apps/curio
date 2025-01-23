@@ -1,4 +1,4 @@
-import { User, UserProps } from "@nextui-org/react";
+import { User, UserProps } from "@heroui/react";
 
 const CurioUser: React.FC<UserProps> = (props) => {
   return (

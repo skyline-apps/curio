@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-restricted-imports
-import { nextui } from "@nextui-org/react";
+import { heroui } from "@heroui/react";
 import type { Config } from "tailwindcss";
 
 import {
@@ -14,7 +14,7 @@ const config: Config = {
   content: [
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
+    "./node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     fontFamily: {
@@ -53,7 +53,7 @@ const config: Config = {
   },
   darkMode: "class",
   plugins: [
-    nextui({
+    heroui({
       layout: {
         boxShadow: {
           small: "0 0 0 1px rgba(0, 0, 0, 0.05)",

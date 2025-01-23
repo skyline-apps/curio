@@ -1,6 +1,6 @@
 "use client";
 
-import { Snippet, type SnippetProps } from "@nextui-org/react";
+import { Snippet, type SnippetProps } from "@heroui/react";
 import React from "react";
 
 export interface CurioSnippetProps extends SnippetProps {}
