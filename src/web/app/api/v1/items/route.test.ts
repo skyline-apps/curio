@@ -1,7 +1,11 @@
 import { DbErrorCode } from "@/db/errors";
 import { items, profileItems } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
-import { makeAuthenticatedMockRequest } from "@/utils/test/api";
+import {
+  DEFAULT_TEST_API_KEY,
+  makeAuthenticatedMockRequest,
+  makeUnauthenticatedMockRequest,
+} from "@/utils/test/api";
 import { testDb } from "@/utils/test/provider";
 
 import { GET, POST } from "./route";
@@ -11,7 +15,13 @@ const TEST_ITEM_ID = "123e4567-e89b-12d3-a456-426614174001";
 const NONEXISTENT_USER_ID = "123e4567-e89b-12d3-a456-426614174003";
 
 describe("GET /api/v1/items", () => {
-  it("should return 200 with the user's items", async () => {
+  test.each([
+    ["should return 200 with the user's items via regular auth", ""],
+    [
+      "should return 200 with the user's items via api key",
+      DEFAULT_TEST_API_KEY,
+    ],
+  ])("%s", async (_, apiKey) => {
     const mockItems = [
       {
         id: TEST_ITEM_ID,
@@ -36,6 +46,7 @@ describe("GET /api/v1/items", () => {
 
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "GET",
+      apiKey: apiKey,
     });
 
     const response = await GET(request);
@@ -75,21 +86,47 @@ describe("GET /api/v1/items", () => {
     expect(data.error).toContain("Invalid request parameters");
   });
 
-  it("should return 404 if user profile not found", async () => {
+  it("should return 401 if user profile not found", async () => {
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "GET",
       userId: NONEXISTENT_USER_ID,
     });
 
     const response = await GET(request);
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(401);
+  });
+
+  it("should return 401 when no valid auth is provided", async () => {
+    const request: APIRequest = makeUnauthenticatedMockRequest({
+      method: "GET",
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(401);
+  });
+
+  it("should return 401 when invalid api key is provided", async () => {
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "GET",
+      apiKey: "invalid-api-key",
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(401);
   });
 });
 
 describe("POST /api/v1/items", () => {
-  it("should return 200 when successfully creating items", async () => {
+  test.each([
+    ["should return 200 updating user's items via regular auth", ""],
+    [
+      "should return 200 updating user's items via api key",
+      DEFAULT_TEST_API_KEY,
+    ],
+  ])("%s", async (_, apiKey) => {
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "POST",
+      apiKey: apiKey,
       body: {
         items: [
           {
@@ -131,7 +168,7 @@ describe("POST /api/v1/items", () => {
     expect(response.status).toBe(400);
   });
 
-  it("should return 404 if user profile not found", async () => {
+  it("should return 401 if user profile not found", async () => {
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "POST",
       userId: NONEXISTENT_USER_ID,
@@ -145,7 +182,40 @@ describe("POST /api/v1/items", () => {
     });
 
     const response = await POST(request);
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(401);
+  });
+
+  it("should return 401 if no valid auth is provided", async () => {
+    const request: APIRequest = makeUnauthenticatedMockRequest({
+      method: "POST",
+      body: {
+        items: [
+          {
+            url: "https://example.com",
+          },
+        ],
+      },
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(401);
+  });
+
+  it("should return 401 if invalid api key is provided", async () => {
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "POST",
+      apiKey: "invalid-api-key",
+      body: {
+        items: [
+          {
+            url: "https://example.com",
+          },
+        ],
+      },
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(401);
   });
 
   it("should return 500 if database error occurs", async () => {

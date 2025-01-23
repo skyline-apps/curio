@@ -2,6 +2,7 @@ import type { APIRequest } from "@/utils/api";
 
 export const DEFAULT_TEST_USER_ID = "123e4567-e89b-12d3-a456-426614174002";
 export const DEFAULT_TEST_PROFILE_ID = "123e4567-e89b-12d3-a456-426614174000";
+export const DEFAULT_TEST_API_KEY = "test-api-key";
 
 export type MockRequestOptions = {
   url?: string;
@@ -9,6 +10,7 @@ export type MockRequestOptions = {
   method?: string;
   searchParams?: Record<string, string>;
   userId?: string;
+  apiKey?: string;
   body?: RequestBody;
 };
 
@@ -56,10 +58,13 @@ export const makeMockRequest = (
 export const makeAuthenticatedMockRequest = (
   options: MockRequestOptions = {},
 ): APIRequest => {
-  const headers = {
-    ...options.headers,
-    "x-user-id": options.userId ?? DEFAULT_TEST_USER_ID,
-  };
+  const headers = { ...options.headers };
+
+  if (options.apiKey) {
+    headers["x-api-key"] = options.apiKey;
+  } else {
+    headers["x-user-id"] = options.userId ?? DEFAULT_TEST_USER_ID;
+  }
 
   return makeMockRequest({ ...options, headers });
 };
