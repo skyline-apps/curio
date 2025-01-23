@@ -1,17 +1,21 @@
 import { z } from "zod";
 
-export const ItemMetadataSchema = z.object({
-  url: z.string().url(),
-  slug: z.string().optional(),
+const UrlSchema = z.string().url().describe("Unique URL of the item.");
+const SlugSchema = z
+  .string()
+  .describe("Unique slug for the item used to identify it in its URL.");
+
+const ItemResultSchema = z.object({
+  id: z.string(),
+  url: UrlSchema,
+  slug: SlugSchema,
   title: z.string().optional(),
   description: z.string().optional(),
   author: z.string().optional(),
   thumbnail: z.string().url().optional(),
   publishedAt: z.string().datetime().optional(),
-});
-
-export const CreateOrUpdateItemsRequestSchema = z.object({
-  items: z.array(ItemMetadataSchema),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
 });
 
 export const GetItemsRequestSchema = z.object({
@@ -29,29 +33,36 @@ export const GetItemsRequestSchema = z.object({
   limit: z.coerce.number().min(1).max(100).optional().default(10),
   cursor: z.string().optional(),
 });
-
-export type ItemMetadata = z.infer<typeof ItemMetadataSchema>;
-export type CreateOrUpdateItemsRequest = z.infer<
-  typeof CreateOrUpdateItemsRequestSchema
->;
 export type GetItemsRequest = z.infer<typeof GetItemsRequestSchema>;
 
-const ItemResponseSchema = ItemMetadataSchema.extend({
-  id: z.string(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-});
-
 export const GetItemsResponseSchema = z.object({
-  items: z.array(ItemResponseSchema),
+  items: z.array(ItemResultSchema),
   nextCursor: z.string().optional(),
   total: z.number(),
 });
-
 export type GetItemsResponse = z.infer<typeof GetItemsResponseSchema>;
 
+const ItemMetadataSchema = z
+  .object({
+    url: UrlSchema,
+    title: z.string().optional(),
+    description: z.string().optional(),
+    author: z.string().optional(),
+    thumbnail: z.string().url().optional(),
+    publishedAt: z.string().datetime().optional(),
+  })
+  .strict();
+
+export const CreateOrUpdateItemsRequestSchema = z.object({
+  items: z.array(ItemMetadataSchema),
+});
+
+export type CreateOrUpdateItemsRequest = z.infer<
+  typeof CreateOrUpdateItemsRequestSchema
+>;
+
 export const CreateOrUpdateItemsResponseSchema = z.object({
-  items: z.array(ItemResponseSchema),
+  items: z.array(ItemResultSchema),
   errors: z
     .array(
       z.object({

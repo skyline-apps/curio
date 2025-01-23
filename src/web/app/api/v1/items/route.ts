@@ -127,7 +127,6 @@ export async function POST(
       updatedAt: now,
     }));
 
-    // Insert items
     const insertedItems = await db
       .insert(items)
       .values(itemsToInsert)
@@ -161,6 +160,7 @@ export async function POST(
     const response: CreateOrUpdateItemsResponse = {
       items: insertedItems.map((item) => ({
         id: item.id,
+        slug: item.slug,
         url: item.url,
         title: item.title ?? undefined,
         description: item.description ?? undefined,

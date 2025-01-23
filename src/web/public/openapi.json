@@ -297,12 +297,17 @@
                       "items": {
                         "type": "object",
                         "properties": {
+                          "id": {
+                            "type": "string"
+                          },
                           "url": {
                             "type": "string",
-                            "format": "uri"
+                            "format": "uri",
+                            "description": "Unique URL of the item."
                           },
                           "slug": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Unique slug for the item used to identify it in its URL."
                           },
                           "title": {
                             "type": "string"
@@ -321,9 +326,6 @@
                             "type": "string",
                             "format": "date-time"
                           },
-                          "id": {
-                            "type": "string"
-                          },
                           "createdAt": {
                             "type": "string",
                             "format": "date-time"
@@ -334,8 +336,9 @@
                           }
                         },
                         "required": [
-                          "url",
                           "id",
+                          "url",
+                          "slug",
                           "createdAt",
                           "updatedAt"
                         ]
@@ -416,10 +419,8 @@
                       "properties": {
                         "url": {
                           "type": "string",
-                          "format": "uri"
-                        },
-                        "slug": {
-                          "type": "string"
+                          "format": "uri",
+                          "description": "Unique URL of the item."
                         },
                         "title": {
                           "type": "string"
@@ -441,7 +442,8 @@
                       },
                       "required": [
                         "url"
-                      ]
+                      ],
+                      "additionalProperties": false
                     }
                   }
                 },
@@ -465,12 +467,17 @@
                       "items": {
                         "type": "object",
                         "properties": {
+                          "id": {
+                            "type": "string"
+                          },
                           "url": {
                             "type": "string",
-                            "format": "uri"
+                            "format": "uri",
+                            "description": "Unique URL of the item."
                           },
                           "slug": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Unique slug for the item used to identify it in its URL."
                           },
                           "title": {
                             "type": "string"
@@ -489,9 +496,6 @@
                             "type": "string",
                             "format": "date-time"
                           },
-                          "id": {
-                            "type": "string"
-                          },
                           "createdAt": {
                             "type": "string",
                             "format": "date-time"
@@ -502,8 +506,9 @@
                           }
                         },
                         "required": [
-                          "url",
                           "id",
+                          "url",
+                          "slug",
                           "createdAt",
                           "updatedAt"
                         ]
