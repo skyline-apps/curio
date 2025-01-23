@@ -7,6 +7,7 @@ import { profiles } from "@/db/schema";
 import { createLogger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/server";
 
+import { ItemsProvider } from "./ItemsProvider";
 import { SettingsProvider } from "./SettingsProvider";
 import { type User, UserProvider } from "./UserProvider";
 
@@ -44,7 +45,9 @@ const Providers: React.FC<PropsWithChildren> = async ({
   return (
     <HeroUIProvider>
       <UserProvider user={currentUser}>
-        <SettingsProvider>{children}</SettingsProvider>
+        <ItemsProvider>
+          <SettingsProvider>{children}</SettingsProvider>
+        </ItemsProvider>
       </UserProvider>
     </HeroUIProvider>
   );

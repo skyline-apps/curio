@@ -71,6 +71,7 @@ const config: Config = {
         light: {
           colors: {
             background: {
+              300: brown[15],
               400: brown[25],
               DEFAULT: brown[50],
               600: brown[75],
@@ -91,6 +92,7 @@ const config: Config = {
         dark: {
           colors: {
             background: {
+              300: brown[985],
               400: brown[975],
               DEFAULT: brown[950],
               600: brown[925],

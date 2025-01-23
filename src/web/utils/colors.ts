@@ -1,4 +1,5 @@
 export const brown = {
+  985: "#1B1C17",
   975: "#1C1F1A",
   950: "#1F231D",
   925: "#3A3F35",
@@ -14,6 +15,7 @@ export const brown = {
   75: "#EEE3E1",
   50: "#F4ECEB",
   25: "#FAF7F6",
+  15: "#F9F4F4",
   foreground: "#1A1F1C",
   DEFAULT: "#CCB9AC",
 };
