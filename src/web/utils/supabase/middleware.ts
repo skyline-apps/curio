@@ -61,6 +61,9 @@ export const updateSession = async (
   }
 
   if (!user && request.nextUrl.pathname.startsWith("/api")) {
+    if (request.headers.get("x-api-key")) {
+      return supabaseResponse;
+    }
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -1,32 +1,59 @@
 import { ZodType } from "zod";
 
-import { db, eq } from "@/db";
-import { profiles } from "@/db/schema";
+import { and, db, eq } from "@/db";
+import { apiKeys, profiles } from "@/db/schema";
 
 import { APIResponse, APIResponseJSON } from "./index";
 
 type ProfileResult =
   | { error: APIResponse<{ error: string }>; profile?: never }
-  | { error?: never; profile: typeof profiles.$inferSelect };
+  | {
+      error?: never;
+      profile: Pick<
+        typeof profiles.$inferSelect,
+        "id" | "userId" | "colorScheme" | "username"
+      >;
+    };
 
 export async function checkUserProfile(
   userId: string | null,
+  apiKey: string | null,
 ): Promise<ProfileResult> {
-  if (!userId) {
+  if (!userId && !apiKey) {
     return Promise.resolve({
       error: APIResponseJSON({ error: "Unauthorized." }, { status: 401 }),
     });
   }
 
-  const results = await db
-    .select()
-    .from(profiles)
-    .where(eq(profiles.userId, userId))
-    .limit(1);
+  let results;
 
+  if (apiKey) {
+    results = await db
+      .select({
+        id: profiles.id,
+        username: profiles.username,
+        userId: profiles.userId,
+        colorScheme: profiles.colorScheme,
+      })
+      .from(profiles)
+      .innerJoin(apiKeys, eq(apiKeys.profileId, profiles.id))
+      .where(and(eq(apiKeys.key, apiKey), eq(apiKeys.isActive, true)))
+      .limit(1);
+  } else if (userId) {
+    results = await db
+      .select({
+        id: profiles.id,
+        username: profiles.username,
+        userId: profiles.userId,
+        colorScheme: profiles.colorScheme,
+      })
+      .from(profiles)
+      .where(eq(profiles.userId, userId))
+      .limit(1);
+  }
   if (!results || results.length === 0) {
     return {
-      error: APIResponseJSON({ error: "Profile not found." }, { status: 404 }),
+      error: APIResponseJSON({ error: "Unauthorized" }, { status: 401 }),
     };
   }
 
