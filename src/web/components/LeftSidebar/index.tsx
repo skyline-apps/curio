@@ -16,7 +16,7 @@ import UserMenu from "./UserMenu";
 const LeftSidebar: React.FC = () => {
   const router = useRouter();
   const { user } = useContext(UserContext);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
   const pathname = usePathname();
   const [selectedKey, setSelectedKey] = useState<string>(SidebarKey.NONE);
 
