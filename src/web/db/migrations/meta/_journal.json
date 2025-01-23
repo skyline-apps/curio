@@ -29,6 +29,13 @@
       "when": 1736538467222,
       "tag": "0003_add-unique-constraint-on-slug",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1737596608055,
+      "tag": "0004_api_keys",
+      "breakpoints": true
     }
   ]
 }
