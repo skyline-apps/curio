@@ -3,6 +3,7 @@
 import React, { useContext, useEffect, useState } from "react";
 
 import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
 import { FormSection } from "@/components/ui/Form";
 import Input from "@/components/ui/Input";
 import { Dialog, showAlert, showConfirm } from "@/components/ui/Modal/Dialog";
@@ -160,9 +161,9 @@ const AccountSettings: React.FC = () => {
               </p>
             ) : (
               apiKeys.map((key) => (
-                <div
+                <Card
                   key={key.id}
-                  className="flex items-center justify-between p-2 border rounded"
+                  className="flex-row items-center justify-between p-2"
                 >
                   <div>
                     <p className="text-sm">{key.name}</p>
@@ -180,7 +181,7 @@ const AccountSettings: React.FC = () => {
                   >
                     {key.isActive ? "Revoke" : "Revoked"}
                   </Button>
-                </div>
+                </Card>
               ))
             )}
           </div>
