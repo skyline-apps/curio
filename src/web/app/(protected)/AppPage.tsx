@@ -18,7 +18,7 @@ const AppPage: React.FC<AppPageProps> = ({ children }) => {
     <div className="w-full h-screen">
       {user.id ? (
         <motion.div
-          className="h-full"
+          className="h-full p-4"
           key={pathname}
           initial={{ opacity: 0.8, x: -2 }}
           animate={{ opacity: 1, x: 0 }}

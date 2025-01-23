@@ -15,8 +15,9 @@ export type ItemMetadata = ItemResult;
 
 export type ItemsContextType = {
   items: ItemMetadata[];
+  totalItems: number;
   isLoading: boolean;
-  fetchItems: () => Promise<void>;
+  fetchItems: (options: GetItemsRequestSchema) => Promise<void>;
 };
 
 interface ItemsProviderProps {
@@ -25,6 +26,7 @@ interface ItemsProviderProps {
 
 export const ItemsContext = createContext<ItemsContextType>({
   items: [],
+  totalItems: 0,
   isLoading: true,
   fetchItems: (_options: GetItemsRequestSchema) => Promise.resolve(),
 });
@@ -33,6 +35,7 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
   children,
 }: ItemsProviderProps): React.ReactNode => {
   const [items, setItems] = useState<ItemResult[]>([]);
+  const [totalItems, setTotalItems] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchItems = (options: GetItemsRequestSchema): void => {
@@ -46,11 +49,12 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     })
       .then(handleAPIResponse<GetItemsResponse>)
       .then((result) => {
-        const { items } = result;
+        const { items, total } = result;
         if (!items) {
           throw Error("Failed to fetch items");
         }
         setItems(items);
+        setTotalItems(total);
         setLoading(false);
       })
       .catch((error) => {
@@ -60,7 +64,7 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
   };
 
   return (
-    <ItemsContext.Provider value={{ items, isLoading: loading, fetchItems }}>
+    <ItemsContext.Provider value={{ items, totalItems, isLoading: loading, fetchItems }}>
       {children}
     </ItemsContext.Provider>
   );
