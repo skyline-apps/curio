@@ -4,6 +4,7 @@ import { eq } from "@/db";
 import { items, profileItems } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
 import {
+  DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_PROFILE_ID,
   makeAuthenticatedMockRequest,
 } from "@/utils/test/api";
@@ -29,7 +30,10 @@ const TEST_ITEM_SLUG = "example-com";
 const NONEXISTENT_USER_ID = "123e4567-e89b-12d3-a456-426614174003";
 
 describe("GET /api/v1/items/[slug]/content", () => {
-  it("should return 200 with the item content", async () => {
+  test.each([
+    ["should return 200 with item content via regular auth", ""],
+    ["should return 200 with item content via api key", DEFAULT_TEST_API_KEY],
+  ])("%s", async (_, apiKey) => {
     const mockItem = {
       id: TEST_ITEM_ID,
       url: "https://example.com",
@@ -52,6 +56,7 @@ describe("GET /api/v1/items/[slug]/content", () => {
 
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "GET",
+      apiKey,
       searchParams: { slug: TEST_ITEM_SLUG },
     });
 
@@ -65,6 +70,28 @@ describe("GET /api/v1/items/[slug]/content", () => {
     });
   });
 
+  it("should return 401 if user profile not found", async () => {
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "GET",
+      userId: NONEXISTENT_USER_ID,
+      searchParams: { slug: TEST_ITEM_SLUG },
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(401);
+  });
+
+  it("should return 401 if invalid api key provided", async () => {
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "GET",
+      apiKey: "invalid-api-key",
+      searchParams: { slug: TEST_ITEM_SLUG },
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(401);
+  });
+
   it("should return 404 if item not found", async () => {
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "GET",
@@ -75,17 +102,6 @@ describe("GET /api/v1/items/[slug]/content", () => {
     expect(response.status).toBe(404);
     const data = await response.json();
     expect(data.error).toBe("Item not found.");
-  });
-
-  it("should return 404 if user profile not found", async () => {
-    const request: APIRequest = makeAuthenticatedMockRequest({
-      method: "GET",
-      userId: NONEXISTENT_USER_ID,
-      searchParams: { slug: TEST_ITEM_SLUG },
-    });
-
-    const response = await GET(request);
-    expect(response.status).toBe(404);
   });
 
   it("should return 404 if slug is missing", async () => {
@@ -102,7 +118,13 @@ describe("GET /api/v1/items/[slug]/content", () => {
 });
 
 describe("POST /api/v1/items/[slug]/content", () => {
-  it("should return 200 when successfully updating content", async () => {
+  test.each([
+    ["should return 200 when updating content via regular auth", ""],
+    [
+      "should return 200 when updating content via api key",
+      DEFAULT_TEST_API_KEY,
+    ],
+  ])("%s", async (_, apiKey) => {
     const originalPublishedDate = new Date("2024-01-10T12:50:00-08:00");
     const originalCreationDate = new Date("2025-01-10T12:52:56-08:00");
     const mockItem = {
@@ -127,6 +149,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
 
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "POST",
+      apiKey,
       body: {
         content: "Updated content",
         slug: TEST_ITEM_SLUG,
@@ -166,6 +189,34 @@ describe("POST /api/v1/items/[slug]/content", () => {
     ).toBe(true);
   });
 
+  it("should return 401 if user profile not found", async () => {
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "POST",
+      userId: NONEXISTENT_USER_ID,
+      body: {
+        content: "Updated content",
+        slug: TEST_ITEM_SLUG,
+      },
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(401);
+  });
+
+  it("should return 401 if invalid api key provided", async () => {
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "POST",
+      apiKey: "invalid-api-key",
+      body: {
+        content: "Updated content",
+        slug: TEST_ITEM_SLUG,
+      },
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(401);
+  });
+
   it("should return 404 if item not found", async () => {
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "POST",
@@ -179,20 +230,6 @@ describe("POST /api/v1/items/[slug]/content", () => {
     expect(response.status).toBe(404);
     const data = await response.json();
     expect(data.error).toBe("Item not found.");
-  });
-
-  it("should return 404 if user profile not found", async () => {
-    const request: APIRequest = makeAuthenticatedMockRequest({
-      method: "POST",
-      userId: NONEXISTENT_USER_ID,
-      body: {
-        content: "Updated content",
-        slug: TEST_ITEM_SLUG,
-      },
-    });
-
-    const response = await POST(request);
-    expect(response.status).toBe(404);
   });
 
   it("should return 404 if slug is missing", async () => {

@@ -1,6 +1,7 @@
-import { ColorScheme, profiles } from "@/db/schema";
+import { apiKeys, ColorScheme, profiles } from "@/db/schema";
 
 import {
+  DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_USER_ID,
 } from "./utils/test/api";
@@ -44,6 +45,14 @@ beforeAll(async () => {
     createdAt: new Date("2025-01-10T12:52:56-08:00"),
     updatedAt: new Date("2025-01-10T12:52:56-08:00"),
   });
+
+  await testDb.db.insert(apiKeys).values({
+    profileId: DEFAULT_TEST_PROFILE_ID,
+    key: DEFAULT_TEST_API_KEY,
+    name: "test-api-key",
+    createdAt: new Date("2025-01-10T12:52:56-08:00"),
+    isActive: true,
+  });
 });
 
 beforeEach(async () => {
@@ -55,7 +64,7 @@ beforeEach(async () => {
   `);
 
   for (const { tablename } of result.rows.reverse()) {
-    if (tablename === "profiles") {
+    if (tablename === "profiles" || tablename === "api_keys") {
       continue;
     }
     await testDb.raw.query(`DELETE FROM "${tablename}";`);
