@@ -2,6 +2,7 @@
 import {
   boolean,
   foreignKey,
+  index,
   integer,
   pgEnum,
   pgSchema,
@@ -177,9 +178,31 @@ export const profileItemLabels = pgTable(
   }),
 );
 
+export const apiKeys = pgTable(
+  "api_keys",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    profileId: uuid("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    key: text("key").notNull().unique(),
+    name: text("name").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    lastUsedAt: timestamp("last_used_at"),
+    expiresAt: timestamp("expires_at"),
+    isActive: boolean("is_active").default(true).notNull(),
+  },
+  (table) => ({
+    profileIdIdx: index("api_keys_profile_id_idx").on(table.profileId),
+    keyIdx: uniqueIndex("api_keys_key_idx").on(table.key),
+  }),
+);
+
 export type InsertProfile = typeof profiles.$inferInsert;
 export type SelectProfile = typeof profiles.$inferSelect;
 export type InsertItem = typeof items.$inferInsert;
 export type InsertProfileLabel = typeof profileLabels.$inferInsert;
 export type InsertProfileItem = typeof profileItems.$inferInsert;
 export type InsertProfileItemLabel = typeof profileItemLabels.$inferInsert;
+export type InsertApiKey = typeof apiKeys.$inferInsert;
+export type SelectApiKey = typeof apiKeys.$inferSelect;
