@@ -1,8 +1,10 @@
+import { eq } from "@/db";
 import { DbErrorCode } from "@/db/errors";
 import { items, profileItems } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_API_KEY,
+  DEFAULT_TEST_PROFILE_ID,
   makeAuthenticatedMockRequest,
   makeUnauthenticatedMockRequest,
 } from "@/utils/test/api";
@@ -118,11 +120,8 @@ describe("GET /api/v1/items", () => {
 
 describe("POST /api/v1/items", () => {
   test.each([
-    ["should return 200 updating user's items via regular auth", ""],
-    [
-      "should return 200 updating user's items via api key",
-      DEFAULT_TEST_API_KEY,
-    ],
+    ["should return 200 adding item via regular auth", ""],
+    ["should return 200 adding item via api key", DEFAULT_TEST_API_KEY],
   ])("%s", async (_, apiKey) => {
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "POST",
@@ -150,6 +149,80 @@ describe("POST /api/v1/items", () => {
         }),
       ],
     });
+
+    const savedItems = await testDb.db
+      .select()
+      .from(profileItems)
+      .where(eq(profileItems.profileId, DEFAULT_TEST_PROFILE_ID));
+
+    expect(savedItems).toEqual([
+      expect.objectContaining({
+        id: expect.any(String),
+        state: "active",
+        isFavorite: false,
+        archivedAt: null,
+        lastReadAt: null,
+      }),
+    ]);
+  });
+
+  test.each([
+    ["should return 200 updating item via regular auth", ""],
+    ["should return 200 updating item via api key", DEFAULT_TEST_API_KEY],
+  ])("%s", async (_, apiKey) => {
+    await testDb.db.insert(items).values({
+      id: TEST_ITEM_ID,
+      url: "https://example.com",
+      slug: "example-com",
+      title: "Old title",
+      createdAt: new Date("2025-01-10T12:52:56-08:00"),
+      updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+    });
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "POST",
+      apiKey: apiKey,
+      body: {
+        items: [
+          {
+            url: "https://example.com",
+            title: "New title",
+            description: "New description",
+          },
+        ],
+      },
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data).toEqual({
+      items: [
+        expect.objectContaining({
+          url: expect.stringMatching(/^https:\/\/example\.com\/?$/),
+          id: expect.any(String),
+          title: "New title",
+          description: "New description",
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+      ],
+    });
+
+    const savedItems = await testDb.db
+      .select()
+      .from(profileItems)
+      .where(eq(profileItems.profileId, DEFAULT_TEST_PROFILE_ID));
+
+    expect(savedItems).toEqual([
+      expect.objectContaining({
+        id: expect.any(String),
+        state: "active",
+        isFavorite: false,
+        archivedAt: null,
+        lastReadAt: null,
+      }),
+    ]);
   });
 
   it("should return 400 if request body is invalid", async () => {
@@ -159,6 +232,23 @@ describe("POST /api/v1/items", () => {
         items: [
           {
             url: "",
+          },
+        ],
+      },
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(400);
+  });
+
+  it("should return 400 if request body includes slugs", async () => {
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "POST",
+      body: {
+        items: [
+          {
+            url: "http://example.com",
+            slug: "test-slug",
           },
         ],
       },
