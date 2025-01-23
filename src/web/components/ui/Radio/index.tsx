@@ -1,4 +1,4 @@
-import { Radio, RadioGroup, RadioProps } from "@nextui-org/react";
+import { Radio, RadioGroup, RadioProps } from "@heroui/react";
 
 const CurioRadio: React.FC<RadioProps> = (props: RadioProps) => {
   return <Radio size="sm" {...props} />;

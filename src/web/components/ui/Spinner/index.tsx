@@ -1,4 +1,4 @@
-import { Spinner, SpinnerProps } from "@nextui-org/react";
+import { Spinner, SpinnerProps } from "@heroui/react";
 
 interface CurioSpinnerProps extends SpinnerProps {
   centered?: boolean;

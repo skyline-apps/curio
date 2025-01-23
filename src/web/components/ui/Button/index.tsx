@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, ButtonProps } from "@nextui-org/react";
+import { Button, ButtonProps } from "@heroui/react";
 import Link from "next/link";
 import React, { forwardRef } from "react";
 import { useFormStatus } from "react-dom";

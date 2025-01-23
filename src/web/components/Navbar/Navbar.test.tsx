@@ -21,7 +21,7 @@ jest.mock("@/components/CurioBrand", () => ({
 }));
 
 // Mock NextUI components
-jest.mock("@nextui-org/navbar", () => ({
+jest.mock("@heroui/navbar", () => ({
   Navbar: ({ children }: { children: React.ReactNode }) => (
     <nav data-testid="navbar">{children}</nav>
   ),
@@ -36,7 +36,7 @@ jest.mock("@nextui-org/navbar", () => ({
   ),
 }));
 
-jest.mock("@nextui-org/button", () => ({
+jest.mock("@heroui/button", () => ({
   Button: ({
     children,
     onPress,
@@ -50,7 +50,7 @@ jest.mock("@nextui-org/button", () => ({
   ),
 }));
 
-jest.mock("@nextui-org/dropdown", () => ({
+jest.mock("@heroui/dropdown", () => ({
   Dropdown: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="dropdown">{children}</div>
   ),

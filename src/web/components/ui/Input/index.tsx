@@ -1,4 +1,4 @@
-import { Input, InputProps } from "@nextui-org/react";
+import { Input, InputProps } from "@heroui/react";
 import React from "react";
 
 const CurioInput: React.FC<InputProps> = ({

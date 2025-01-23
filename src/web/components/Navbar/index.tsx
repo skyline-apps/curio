@@ -1,5 +1,5 @@
 "use client";
-import { Navbar, NavbarBrand, NavbarContent } from "@nextui-org/navbar";
+import { Navbar, NavbarBrand, NavbarContent } from "@heroui/navbar";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useContext } from "react";
