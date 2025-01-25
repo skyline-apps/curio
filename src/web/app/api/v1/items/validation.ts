@@ -35,7 +35,9 @@ export const GetItemsRequestSchema = z.object({
   limit: z.coerce.number().min(1).max(1000).optional().default(100),
   cursor: z.string().optional(),
 });
-export type GetItemsRequest = z.infer<typeof GetItemsRequestSchema>;
+export type GetItemsRequest = Partial<z.infer<typeof GetItemsRequestSchema>> & {
+  limit?: number;
+};
 
 export const GetItemsResponseSchema = z.object({
   items: z.array(ItemResultSchema),

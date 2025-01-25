@@ -2,7 +2,7 @@
 import React, { createContext, useState } from "react";
 
 import {
-  type GetItemsRequestSchema,
+  type GetItemsRequest,
   type GetItemsResponse,
   type ItemResult,
 } from "@/app/api/v1/items/validation";
@@ -17,7 +17,7 @@ export type ItemsContextType = {
   items: ItemMetadata[];
   totalItems: number;
   isLoading: boolean;
-  fetchItems: (options: GetItemsRequestSchema) => Promise<void>;
+  fetchItems: (options: GetItemsRequest) => Promise<void>;
 };
 
 interface ItemsProviderProps {
@@ -28,7 +28,7 @@ export const ItemsContext = createContext<ItemsContextType>({
   items: [],
   totalItems: 0,
   isLoading: true,
-  fetchItems: (_options: GetItemsRequestSchema) => Promise.resolve(),
+  fetchItems: (_options: GetItemsRequest) => Promise.resolve(),
 });
 
 export const ItemsProvider: React.FC<ItemsProviderProps> = ({
@@ -38,14 +38,18 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
   const [totalItems, setTotalItems] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const fetchItems = (options: GetItemsRequestSchema): void => {
+  const fetchItems = async (options: GetItemsRequest): Promise<void> => {
     setLoading(true);
-    fetch("/api/v1/items", {
+    const params = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(options).map(([key, value]) => [key, String(value)]),
+      ),
+    );
+    await fetch(`/api/v1/items?${params.toString()}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
-      searchParams: options,
     })
       .then(handleAPIResponse<GetItemsResponse>)
       .then((result) => {
@@ -64,7 +68,9 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
   };
 
   return (
-    <ItemsContext.Provider value={{ items, totalItems, isLoading: loading, fetchItems }}>
+    <ItemsContext.Provider
+      value={{ items, totalItems, isLoading: loading, fetchItems }}
+    >
       {children}
     </ItemsContext.Provider>
   );
