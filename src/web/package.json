@@ -17,8 +17,9 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.3.0",
-    "@next/third-parties": "^14.1.4",
     "@heroui/react": "2.6.14",
+    "@heroui/use-infinite-scroll": "^2.2.3",
+    "@next/third-parties": "^14.1.4",
     "@supabase/ssr": "^0.5.1",
     "drizzle-orm": "^0.38.0",
     "framer-motion": "^11.11.7",
