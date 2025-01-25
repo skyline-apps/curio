@@ -34,7 +34,21 @@ export async function GET(
       return data.error;
     }
 
-    const { limit, slugs } = data;
+    const { limit, slugs, cursor } = data;
+
+    // Build the where clause
+    let whereClause = slugs
+      ? and(
+          eq(profileItems.profileId, profileResult.profile.id),
+          sql`${items.slug} = ANY(${slugs})`,
+        )
+      : eq(profileItems.profileId, profileResult.profile.id);
+
+    // Add cursor condition if provided
+    if (cursor) {
+      const cursorCondition = sql`${items.id} < ${cursor}`;
+      whereClause = and(whereClause, cursorCondition);
+    }
 
     const results = await db
       .select({
@@ -52,15 +66,8 @@ export async function GET(
       })
       .from(items)
       .innerJoin(profileItems, eq(items.id, profileItems.itemId))
-      .where(
-        slugs
-          ? and(
-              eq(profileItems.profileId, profileResult.profile.id),
-              sql`${items.slug} = ANY(${slugs})`,
-            )
-          : eq(profileItems.profileId, profileResult.profile.id),
-      )
-      .orderBy(sql`${profileItems.savedAt} DESC`)
+      .where(whereClause)
+      .orderBy(sql`${items.id} DESC`)
       .limit(limit);
 
     const total = await db
