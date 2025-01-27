@@ -66,7 +66,7 @@ describe("GET /api/v1/items/[slug]/content", () => {
     const data = await response.json();
     expect(data).toEqual({
       content: "test content",
-      itemId: TEST_ITEM_ID,
+      id: TEST_ITEM_ID,
     });
   });
 
@@ -161,7 +161,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
 
     const data = await response.json();
     expect(data).toEqual({
-      itemId: TEST_ITEM_ID,
+      id: TEST_ITEM_ID,
       message: "Content updated and set as main version",
       status: "UPDATED_MAIN",
     });

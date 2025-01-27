@@ -60,7 +60,7 @@ export async function GET(
     const content = await getItemContent(slug);
     const response: GetItemContentResponse = {
       content,
-      itemId: item[0].items.id,
+      id: item[0].items.id,
     };
 
     return APIResponseJSON(response);
@@ -114,7 +114,7 @@ export async function POST(
 
       const response: UpdateItemContentResponse = {
         status,
-        itemId: item[0].items.id,
+        id: item[0].items.id,
         message:
           status === UploadStatus.UPDATED_MAIN
             ? "Content updated and set as main version"

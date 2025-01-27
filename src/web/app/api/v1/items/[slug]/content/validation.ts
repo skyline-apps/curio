@@ -14,7 +14,7 @@ export const GetItemContentRequestSchema = z.object({
 export const GetItemContentResponseSchema = z.union([
   z.object({
     content: z.string(),
-    itemId: z.string(),
+    id: z.string(),
   }),
   z.object({
     error: z.string(),
@@ -37,17 +37,17 @@ export const UpdateItemContentRequestSchema = z.object({
 export const UpdateItemContentResponseSchema = z.discriminatedUnion("status", [
   z.object({
     status: z.literal(UploadStatus.UPDATED_MAIN),
-    itemId: z.string(),
+    id: z.string(),
     message: z.string(),
   }),
   z.object({
     status: z.literal(UploadStatus.STORED_VERSION),
-    itemId: z.string(),
+    id: z.string(),
     message: z.string(),
   }),
   z.object({
     status: z.literal(UploadStatus.SKIPPED),
-    itemId: z.string(),
+    id: z.string(),
     message: z.string(),
   }),
   z.object({
