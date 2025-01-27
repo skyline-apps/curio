@@ -27,7 +27,7 @@ const HomePage: React.FC = () => {
           hasMore={hasMore}
           loader={<></>}
           endMessage={
-            <div className="flex flex-row items-center justify-center py-4 text-secondary-800 gap-2">
+            <div className="flex flex-row items-center justify-center py-8 text-secondary-800 gap-2">
               {totalItems === 0 ? (
                 <>
                   <p>Nothing here yet.</p>
