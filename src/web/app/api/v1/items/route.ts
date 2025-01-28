@@ -37,7 +37,6 @@ export async function GET(
 
     const { limit, slugs, cursor } = data;
 
-    // Build the where clause
     let whereClause = slugs
       ? and(
           eq(profileItems.profileId, profileResult.profile.id),
@@ -45,7 +44,6 @@ export async function GET(
         )
       : eq(profileItems.profileId, profileResult.profile.id);
 
-    // Add cursor condition if provided
     if (cursor) {
       const cursorCondition = sql`${items.id} < ${cursor}`;
       whereClause = and(whereClause, cursorCondition);
@@ -56,14 +54,14 @@ export async function GET(
         id: items.id,
         url: items.url,
         slug: items.slug,
-        title: items.title,
-        description: items.description,
-        author: items.author,
-        thumbnail: items.thumbnail,
-        publishedAt: items.publishedAt,
         createdAt: items.createdAt,
-        updatedAt: items.updatedAt,
-        savedAt: profileItems.savedAt,
+        metadata: {
+          title: profileItems.title,
+          description: profileItems.description,
+          author: profileItems.author,
+          thumbnail: profileItems.thumbnail,
+          publishedAt: profileItems.publishedAt,
+        },
       })
       .from(items)
       .innerJoin(profileItems, eq(items.id, profileItems.itemId))
@@ -112,53 +110,95 @@ export async function POST(
     const { items: newItems } = data;
 
     const now = new Date();
-    const itemsToInsert = newItems.map((item) => ({
-      url: cleanUrl(item.url),
-      slug: generateSlug(item.url),
-      title: item.title,
-      description: item.description,
-      author: item.author,
-      thumbnail: item.thumbnail,
-      publishedAt: item.publishedAt ? new Date(item.publishedAt) : null,
-      createdAt: now,
-      updatedAt: now,
-    }));
 
-    const insertedItems = await db
-      .insert(items)
-      .values(itemsToInsert)
-      .onConflictDoUpdate({
-        target: items.url,
-        set: {
-          updatedAt: now,
-          title: sql`EXCLUDED.title`,
-          description: sql`EXCLUDED.description`,
-          author: sql`EXCLUDED.author`,
-          thumbnail: sql`EXCLUDED.thumbnail`,
-          publishedAt: sql`EXCLUDED.published_at`,
-        },
-      })
-      .returning();
+    return await db.transaction(async (tx) => {
+      const itemsToInsert = newItems.map((item) => ({
+        url: cleanUrl(item.url),
+        slug: generateSlug(item.url),
+        createdAt: now,
+        updatedAt: now,
+      }));
 
-    // Link items to profile if link doesn't exist
-    await db
-      .insert(profileItems)
-      .values(
-        insertedItems.map((item) => ({
-          profileId: profileResult.profile.id,
-          itemId: item.id,
+      const insertedItems = await tx
+        .insert(items)
+        .values(itemsToInsert)
+        .onConflictDoUpdate({
+          target: items.url,
+          set: { slug: items.slug }, // Should be a no-op, needed to include the non-updated rows in the url to ID map
+        })
+        .returning({
+          id: items.id,
+          url: items.url,
+          slug: items.slug,
+          createdAt: items.createdAt,
+        });
+
+      const urlToItemId = new Map(
+        insertedItems.map((item) => [item.url, item.id]),
+      );
+
+      const profileItemsToInsert = newItems.map((item) => {
+        const cleanedUrl = cleanUrl(item.url);
+        const itemId = urlToItemId.get(cleanedUrl);
+        if (!itemId) {
+          throw new Error(
+            `Failed to find itemId for URL ${item.url}. This should never happen.`,
+          );
+        }
+
+        return {
+          title: item.metadata?.title || cleanedUrl,
+          description: item.metadata?.description || null,
+          author: item.metadata?.author || null,
+          thumbnail: item.metadata?.thumbnail || null,
+          publishedAt: item.metadata?.publishedAt
+            ? new Date(item.metadata.publishedAt)
+            : null,
           savedAt: now,
-        })),
-      )
-      .onConflictDoNothing({
-        target: [profileItems.profileId, profileItems.itemId],
+          updatedAt: now,
+          profileId: profileResult.profile.id,
+          itemId,
+        };
       });
 
-    const response: CreateOrUpdateItemsResponse = {
-      items: insertedItems.map((item) => ItemResultSchema.parse(item)),
-    };
+      const insertedMetadata = await tx
+        .insert(profileItems)
+        .values(profileItemsToInsert)
+        .onConflictDoUpdate({
+          target: [profileItems.profileId, profileItems.itemId],
+          set: {
+            title: sql`COALESCE(NULLIF(EXCLUDED.title, ''), ${profileItems.title})`,
+            description: sql`COALESCE(EXCLUDED.description, ${profileItems.description})`,
+            author: sql`COALESCE(EXCLUDED.author, ${profileItems.author})`,
+            thumbnail: sql`COALESCE(EXCLUDED.thumbnail, ${profileItems.thumbnail})`,
+            publishedAt: sql`COALESCE(EXCLUDED.published_at, ${profileItems.publishedAt})`,
+            updatedAt: sql`now()`,
+          },
+        })
+        .returning({
+          itemId: profileItems.itemId,
+          title: profileItems.title,
+          description: profileItems.description,
+          author: profileItems.author,
+          thumbnail: profileItems.thumbnail,
+          publishedAt: profileItems.publishedAt,
+        });
 
-    return APIResponseJSON(response);
+      const response: CreateOrUpdateItemsResponse = {
+        items: insertedItems.map((item) => {
+          const metadata = insertedMetadata.find(
+            (metadata) => metadata.itemId === item.id,
+          );
+          const { itemId: _itemId, ...metadataWithoutId } = metadata || {};
+          return ItemResultSchema.parse({
+            ...item,
+            metadata: metadataWithoutId,
+          });
+        }),
+      };
+
+      return APIResponseJSON(response);
+    });
   } catch (error) {
     log.error("Error creating items:", error);
     return APIResponseJSON({ error: "Error creating items." }, { status: 500 });

@@ -31,11 +31,6 @@ describe("GET /api/v1/items", () => {
         id: TEST_ITEM_ID,
         url: "https://example.com",
         slug: "example-com",
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        publishedAt: new Date("2025-01-10T12:52:56-08:00"),
         createdAt: new Date("2025-01-10T12:52:56-08:00"),
         updatedAt: new Date("2025-01-10T12:52:56-08:00"),
       },
@@ -46,6 +41,11 @@ describe("GET /api/v1/items", () => {
       profileId: TEST_PROFILE_ID,
       itemId: TEST_ITEM_ID,
       savedAt: new Date("2025-01-10T12:52:56-08:00"),
+      title: "Example",
+      description: "An example item",
+      author: "Test Author",
+      thumbnail: "https://example.com/thumb.jpg",
+      publishedAt: new Date("2025-01-10T12:52:56-08:00"),
     });
 
     const request: APIRequest = makeAuthenticatedMockRequest({
@@ -60,6 +60,13 @@ describe("GET /api/v1/items", () => {
     expect(data.items).toHaveLength(1);
     expect(data.items[0].id).toBe(TEST_ITEM_ID);
     expect(data.total).toBe(1);
+    expect(data.items[0].metadata).toEqual({
+      author: "Test Author",
+      description: "An example item",
+      publishedAt: "2025-01-10T20:52:56.000Z",
+      thumbnail: "https://example.com/thumb.jpg",
+      title: "Example",
+    });
   });
 
   it("should support cursor-based pagination", async () => {
@@ -69,11 +76,6 @@ describe("GET /api/v1/items", () => {
         id: TEST_ITEM_ID,
         url: "https://example1.com",
         slug: "example1-com",
-        title: "Example 1",
-        description: "First example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb1.jpg",
-        publishedAt: new Date("2025-01-10T12:52:56-08:00"),
         createdAt: new Date("2025-01-10T12:52:56-08:00"),
         updatedAt: new Date("2025-01-10T12:52:56-08:00"),
       },
@@ -81,40 +83,55 @@ describe("GET /api/v1/items", () => {
         id: TEST_ITEM_ID_2,
         url: "https://example2.com",
         slug: "example2-com",
-        title: "Example 2",
-        description: "Second example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb2.jpg",
-        publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-        createdAt: new Date("2025-01-10T12:52:56-08:00"),
-        updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+        createdAt: new Date("2025-01-10T12:53:56-08:00"),
+        updatedAt: new Date("2025-01-10T12:53:56-08:00"),
       },
       {
         id: TEST_ITEM_ID_3,
         url: "https://example3.com",
         slug: "example3-com",
+        createdAt: new Date("2025-01-10T12:54:56-08:00"),
+        updatedAt: new Date("2025-01-10T12:54:56-08:00"),
+      },
+    ];
+
+    const mockItemsMetadata = [
+      {
+        itemId: TEST_ITEM_ID,
+        title: "Example 1",
+        description: "First example item",
+        author: "Test Author",
+        thumbnail: "https://example.com/thumb1.jpg",
+        publishedAt: new Date("2025-01-10T12:52:56-08:00"),
+      },
+      {
+        itemId: TEST_ITEM_ID_2,
+        title: "Example 2",
+        description: "Second example item",
+        author: "Test Author",
+        thumbnail: "https://example.com/thumb2.jpg",
+        publishedAt: new Date("2025-01-10T12:52:56-08:00"),
+      },
+      {
+        itemId: TEST_ITEM_ID_3,
         title: "Example 3",
         description: "Third example item",
         author: "Test Author",
         thumbnail: "https://example.com/thumb3.jpg",
         publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-        createdAt: new Date("2025-01-10T12:52:56-08:00"),
-        updatedAt: new Date("2025-01-10T12:52:56-08:00"),
       },
     ];
 
     await testDb.db.insert(items).values(mockItems);
 
-    // Insert profile items in reverse order to test ordering
-    for (const item of mockItems.reverse()) {
+    for (const item of mockItemsMetadata.reverse()) {
       await testDb.db.insert(profileItems).values({
+        ...item,
         profileId: TEST_PROFILE_ID,
-        itemId: item.id,
         savedAt: new Date("2025-01-10T12:52:56-08:00"),
       });
     }
 
-    // First page (limit 2)
     const params = new URLSearchParams({
       limit: "2",
     });
@@ -133,7 +150,6 @@ describe("GET /api/v1/items", () => {
     expect(firstData.items[0].id).toBe(TEST_ITEM_ID_3); // Most recent first
     expect(firstData.items[1].id).toBe(TEST_ITEM_ID_2);
 
-    // Second page using cursor
     const secondParams = new URLSearchParams({
       limit: "2",
       cursor: firstData.nextCursor,
@@ -200,8 +216,11 @@ describe("GET /api/v1/items", () => {
 
 describe("POST /api/v1/items", () => {
   test.each([
-    ["should return 200 adding item via regular auth", ""],
-    ["should return 200 adding item via api key", DEFAULT_TEST_API_KEY],
+    ["should return 200 creating untitled item via regular auth", ""],
+    [
+      "should return 200 creating untitled item via api key",
+      DEFAULT_TEST_API_KEY,
+    ],
   ])("%s", async (_, apiKey) => {
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "POST",
@@ -209,7 +228,7 @@ describe("POST /api/v1/items", () => {
       body: {
         items: [
           {
-            url: "https://example.com",
+            url: "https://example.com?query=value",
           },
         ],
       },
@@ -221,12 +240,15 @@ describe("POST /api/v1/items", () => {
     const data = await response.json();
     expect(data).toEqual({
       items: [
-        expect.objectContaining({
-          url: expect.stringMatching(/^https:\/\/example\.com\/?$/),
+        {
+          url: "https://example.com/",
           id: expect.any(String),
+          slug: expect.stringMatching(/^example-com-[a-f0-9]{6}$/),
+          metadata: expect.objectContaining({
+            title: "https://example.com/",
+          }),
           createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-        }),
+        },
       ],
     });
 
@@ -239,6 +261,7 @@ describe("POST /api/v1/items", () => {
       expect.objectContaining({
         id: expect.any(String),
         state: "active",
+        title: "https://example.com/",
         isFavorite: false,
         archivedAt: null,
         lastReadAt: null,
@@ -252,11 +275,20 @@ describe("POST /api/v1/items", () => {
   ])("%s", async (_, apiKey) => {
     await testDb.db.insert(items).values({
       id: TEST_ITEM_ID,
-      url: "https://example.com",
-      slug: "example-com",
-      title: "Old title",
+      url: "https://example.com/",
+      slug: "example-com-123456",
       createdAt: new Date("2025-01-10T12:52:56-08:00"),
       updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+    });
+    await testDb.db.insert(profileItems).values({
+      profileId: DEFAULT_TEST_PROFILE_ID,
+      itemId: TEST_ITEM_ID,
+      title: "Old title",
+      author: "Kim",
+      state: "active",
+      isFavorite: false,
+      archivedAt: null,
+      lastReadAt: null,
     });
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "POST",
@@ -265,8 +297,96 @@ describe("POST /api/v1/items", () => {
         items: [
           {
             url: "https://example.com",
+            metadata: {
+              title: "New title",
+              description: "New description",
+            },
+          },
+          {
+            url: "https://example-2.com",
+            metadata: {
+              title: "Example title",
+            },
+          },
+        ],
+      },
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data).toEqual({
+      items: [
+        {
+          url: "https://example.com/",
+          id: expect.any(String),
+          slug: expect.stringMatching(/^example-com-[a-f0-9]{6}$/),
+          metadata: expect.objectContaining({
             title: "New title",
             description: "New description",
+            author: "Kim",
+          }),
+          createdAt: expect.any(String),
+        },
+        {
+          url: "https://example-2.com/",
+          id: expect.any(String),
+          slug: expect.stringMatching(/^example-2-com-[a-f0-9]{6}$/),
+          metadata: expect.objectContaining({
+            title: "Example title",
+          }),
+          createdAt: expect.any(String),
+        },
+      ],
+    });
+
+    const dbItems = await testDb.db.select().from(items);
+
+    expect(dbItems.length).toBe(2);
+
+    const savedItems = await testDb.db
+      .select()
+      .from(profileItems)
+      .where(eq(profileItems.profileId, DEFAULT_TEST_PROFILE_ID));
+
+    expect(savedItems.length).toBe(2);
+
+    expect(savedItems).toEqual([
+      expect.objectContaining({
+        itemId: TEST_ITEM_ID,
+        state: "active",
+        title: "New title",
+        description: "New description",
+        author: "Kim",
+        isFavorite: false,
+        archivedAt: null,
+        lastReadAt: null,
+      }),
+      expect.objectContaining({
+        itemId: expect.any(String),
+        state: "active",
+        title: "Example title",
+        description: null,
+        isFavorite: false,
+        archivedAt: null,
+        lastReadAt: null,
+      }),
+    ]);
+  });
+
+  it("should return 200 if overwriting existing item with different URL", async () => {
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "POST",
+      body: {
+        items: [
+          {
+            url: "https://example.com?query=value",
+            metadata: {
+              title: "My title",
+              description: "My description",
+              publishedAt: new Date("2024-01-01"),
+            },
           },
         ],
       },
@@ -279,30 +399,52 @@ describe("POST /api/v1/items", () => {
     expect(data).toEqual({
       items: [
         expect.objectContaining({
-          url: expect.stringMatching(/^https:\/\/example\.com\/?$/),
+          url: "https://example.com/",
           id: expect.any(String),
-          title: "New title",
-          description: "New description",
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
+          slug: expect.stringMatching(/^example-com-[a-f0-9]{6}$/),
+          metadata: expect.objectContaining({
+            title: "My title",
+            description: "My description",
+            publishedAt: "2024-01-01T00:00:00.000Z",
+          }),
         }),
       ],
     });
 
-    const savedItems = await testDb.db
-      .select()
-      .from(profileItems)
-      .where(eq(profileItems.profileId, DEFAULT_TEST_PROFILE_ID));
+    const request2: APIRequest = makeAuthenticatedMockRequest({
+      method: "POST",
+      body: {
+        items: [
+          {
+            url: "https://example.com",
+            metadata: {
+              author: "Kim",
+              description: "",
+            },
+          },
+        ],
+      },
+    });
 
-    expect(savedItems).toEqual([
-      expect.objectContaining({
-        id: expect.any(String),
-        state: "active",
-        isFavorite: false,
-        archivedAt: null,
-        lastReadAt: null,
-      }),
-    ]);
+    const response2 = await POST(request2);
+    expect(response2.status).toBe(200);
+
+    const data2 = await response2.json();
+    expect(data2).toEqual({
+      items: [
+        expect.objectContaining({
+          url: "https://example.com/",
+          id: expect.any(String),
+          slug: expect.stringMatching(/^example-com-[a-f0-9]{6}$/),
+          metadata: expect.objectContaining({
+            title: "https://example.com/",
+            author: "Kim",
+            description: "My description",
+            publishedAt: "2024-01-01T00:00:00.000Z",
+          }),
+        }),
+      ],
+    });
   });
 
   it("should return 400 if request body is invalid", async () => {
@@ -400,9 +542,18 @@ describe("POST /api/v1/items", () => {
       },
     });
 
-    jest.spyOn(testDb.db, "insert").mockImplementationOnce(() => {
-      throw { code: DbErrorCode.UniqueViolation };
-    });
+    type PgTx = Parameters<Parameters<typeof testDb.db.transaction>[0]>[0];
+
+    jest
+      .spyOn(testDb.db, "transaction")
+      .mockImplementationOnce(async (callback) => {
+        return callback({
+          ...testDb.db,
+          insert: () => {
+            throw { code: DbErrorCode.UniqueViolation };
+          },
+        } as unknown as PgTx);
+      });
 
     const response = await POST(request);
     expect(response.status).toBe(500);

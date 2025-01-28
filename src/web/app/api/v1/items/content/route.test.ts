@@ -38,11 +38,6 @@ describe("GET /api/v1/items/[slug]/content", () => {
       id: TEST_ITEM_ID,
       url: "https://example.com",
       slug: TEST_ITEM_SLUG,
-      title: "Example",
-      description: "An example item",
-      author: "Test Author",
-      thumbnail: "https://example.com/thumb.jpg",
-      publishedAt: new Date("2025-01-10T12:52:56-08:00"),
       createdAt: new Date("2025-01-10T12:52:56-08:00"),
       updatedAt: new Date("2025-01-10T12:52:56-08:00"),
     };
@@ -51,6 +46,11 @@ describe("GET /api/v1/items/[slug]/content", () => {
     await testDb.db.insert(profileItems).values({
       profileId: DEFAULT_TEST_PROFILE_ID,
       itemId: TEST_ITEM_ID,
+      title: "Example",
+      description: "An example item",
+      author: "Test Author",
+      thumbnail: "https://example.com/thumb.jpg",
+      publishedAt: new Date("2025-01-10T12:52:56-08:00"),
       savedAt: new Date("2025-01-10T12:52:56-08:00"),
     });
 
@@ -69,13 +69,14 @@ describe("GET /api/v1/items/[slug]/content", () => {
       item: {
         id: TEST_ITEM_ID,
         slug: TEST_ITEM_SLUG,
-        author: "Test Author",
         createdAt: "2025-01-10T20:52:56.000Z",
-        description: "An example item",
-        publishedAt: "2025-01-10T20:52:56.000Z",
-        thumbnail: "https://example.com/thumb.jpg",
-        title: "Example",
-        updatedAt: "2025-01-10T20:52:56.000Z",
+        metadata: {
+          author: "Test Author",
+          description: "An example item",
+          publishedAt: "2025-01-10T20:52:56.000Z",
+          thumbnail: "https://example.com/thumb.jpg",
+          title: "Example",
+        },
         url: "https://example.com",
       },
     });
@@ -142,11 +143,6 @@ describe("POST /api/v1/items/[slug]/content", () => {
       id: TEST_ITEM_ID,
       url: "https://example.com",
       slug: TEST_ITEM_SLUG,
-      title: "Example",
-      description: "An example item",
-      author: "Test Author",
-      thumbnail: "https://example.com/thumb.jpg",
-      publishedAt: originalPublishedDate,
       createdAt: originalCreationDate,
       updatedAt: originalCreationDate,
     };
@@ -155,6 +151,11 @@ describe("POST /api/v1/items/[slug]/content", () => {
     await testDb.db.insert(profileItems).values({
       profileId: DEFAULT_TEST_PROFILE_ID,
       itemId: TEST_ITEM_ID,
+      title: "Example",
+      description: "An example item",
+      author: "Test Author",
+      thumbnail: "https://example.com/thumb.jpg",
+      publishedAt: originalPublishedDate,
       savedAt: originalCreationDate,
     });
 
@@ -263,11 +264,6 @@ describe("POST /api/v1/items/[slug]/content", () => {
       id: TEST_ITEM_ID,
       url: "https://example.com",
       slug: TEST_ITEM_SLUG,
-      title: "Example",
-      description: "An example item",
-      author: "Test Author",
-      thumbnail: "https://example.com/thumb.jpg",
-      publishedAt: new Date("2025-01-10T12:52:56-08:00"),
       createdAt: new Date("2025-01-10T12:52:56-08:00"),
       updatedAt: new Date("2025-01-10T12:52:56-08:00"),
     };
@@ -276,6 +272,11 @@ describe("POST /api/v1/items/[slug]/content", () => {
     await testDb.db.insert(profileItems).values({
       profileId: DEFAULT_TEST_PROFILE_ID,
       itemId: TEST_ITEM_ID,
+      title: "Example",
+      description: "An example item",
+      author: "Test Author",
+      thumbnail: "https://example.com/thumb.jpg",
+      publishedAt: new Date("2025-01-10T12:52:56-08:00"),
       savedAt: new Date("2025-01-10T12:52:56-08:00"),
     });
 
