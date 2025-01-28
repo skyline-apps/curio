@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { ItemResultSchema } from "@/app/api/v1/items/validation";
+
 export enum UploadStatus {
   UPDATED_MAIN = "UPDATED_MAIN",
   STORED_VERSION = "STORED_VERSION",
@@ -14,7 +16,7 @@ export const GetItemContentRequestSchema = z.object({
 export const GetItemContentResponseSchema = z.union([
   z.object({
     content: z.string(),
-    id: z.string(),
+    item: ItemResultSchema,
   }),
   z.object({
     error: z.string(),

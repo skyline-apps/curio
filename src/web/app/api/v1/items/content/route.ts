@@ -1,3 +1,4 @@
+import { ItemResultSchema } from "@/app/api/v1/items/validation";
 import { and, db, eq } from "@/db";
 import { items, profileItems } from "@/db/schema";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
@@ -42,7 +43,19 @@ export async function GET(
     const { slug } = data;
 
     const item = await db
-      .select()
+      .select({
+        id: items.id,
+        url: items.url,
+        slug: items.slug,
+        title: items.title,
+        description: items.description,
+        author: items.author,
+        thumbnail: items.thumbnail,
+        publishedAt: items.publishedAt,
+        createdAt: items.createdAt,
+        updatedAt: items.updatedAt,
+        savedAt: profileItems.savedAt,
+      })
       .from(items)
       .innerJoin(profileItems, eq(items.id, profileItems.itemId))
       .where(
@@ -60,7 +73,7 @@ export async function GET(
     const content = await getItemContent(slug);
     const response: GetItemContentResponse = {
       content,
-      id: item[0].items.id,
+      item: ItemResultSchema.parse(item[0]),
     };
 
     return APIResponseJSON(response);

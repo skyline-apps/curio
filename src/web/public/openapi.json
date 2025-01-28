@@ -310,35 +310,42 @@
                             "description": "Unique slug for the item used to identify it in its URL."
                           },
                           "title": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "description": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "author": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "thumbnail": {
                             "type": "string",
+                            "nullable": true,
                             "format": "uri"
                           },
                           "publishedAt": {
                             "type": "string",
-                            "format": "date-time"
+                            "nullable": true
                           },
                           "createdAt": {
-                            "type": "string",
-                            "format": "date-time"
+                            "type": "string"
                           },
                           "updatedAt": {
-                            "type": "string",
-                            "format": "date-time"
+                            "type": "string"
                           }
                         },
                         "required": [
                           "id",
                           "url",
                           "slug",
+                          "title",
+                          "description",
+                          "author",
+                          "thumbnail",
+                          "publishedAt",
                           "createdAt",
                           "updatedAt"
                         ]
@@ -480,35 +487,42 @@
                             "description": "Unique slug for the item used to identify it in its URL."
                           },
                           "title": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "description": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "author": {
-                            "type": "string"
+                            "type": "string",
+                            "nullable": true
                           },
                           "thumbnail": {
                             "type": "string",
+                            "nullable": true,
                             "format": "uri"
                           },
                           "publishedAt": {
                             "type": "string",
-                            "format": "date-time"
+                            "nullable": true
                           },
                           "createdAt": {
-                            "type": "string",
-                            "format": "date-time"
+                            "type": "string"
                           },
                           "updatedAt": {
-                            "type": "string",
-                            "format": "date-time"
+                            "type": "string"
                           }
                         },
                         "required": [
                           "id",
                           "url",
                           "slug",
+                          "title",
+                          "description",
+                          "author",
+                          "thumbnail",
+                          "publishedAt",
                           "createdAt",
                           "updatedAt"
                         ]
@@ -581,9 +595,9 @@
         }
       }
     },
-    "/api/v1/items/{slug}/content": {
+    "/api/v1/items/content": {
       "get": {
-        "description": "GET /api/v1/items/{slug}/content",
+        "description": "GET /api/v1/items/content",
         "tags": [
           "V1"
         ],
@@ -612,13 +626,66 @@
                         "content": {
                           "type": "string"
                         },
-                        "itemId": {
-                          "type": "string"
+                        "item": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "url": {
+                              "type": "string",
+                              "format": "uri",
+                              "description": "Unique URL of the item."
+                            },
+                            "slug": {
+                              "type": "string",
+                              "description": "Unique slug for the item used to identify it in its URL."
+                            },
+                            "title": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "description": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "author": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "thumbnail": {
+                              "type": "string",
+                              "nullable": true,
+                              "format": "uri"
+                            },
+                            "publishedAt": {
+                              "type": "string",
+                              "nullable": true
+                            },
+                            "createdAt": {
+                              "type": "string"
+                            },
+                            "updatedAt": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "url",
+                            "slug",
+                            "title",
+                            "description",
+                            "author",
+                            "thumbnail",
+                            "publishedAt",
+                            "createdAt",
+                            "updatedAt"
+                          ]
                         }
                       },
                       "required": [
                         "content",
-                        "itemId"
+                        "item"
                       ]
                     },
                     {
@@ -678,7 +745,7 @@
         }
       },
       "post": {
-        "description": "POST /api/v1/items/{slug}/content",
+        "description": "POST /api/v1/items/content",
         "tags": [
           "V1"
         ],
@@ -723,7 +790,7 @@
                             "UPDATED_MAIN"
                           ]
                         },
-                        "itemId": {
+                        "id": {
                           "type": "string"
                         },
                         "message": {
@@ -732,7 +799,7 @@
                       },
                       "required": [
                         "status",
-                        "itemId",
+                        "id",
                         "message"
                       ]
                     },
@@ -745,7 +812,7 @@
                             "STORED_VERSION"
                           ]
                         },
-                        "itemId": {
+                        "id": {
                           "type": "string"
                         },
                         "message": {
@@ -754,7 +821,7 @@
                       },
                       "required": [
                         "status",
-                        "itemId",
+                        "id",
                         "message"
                       ]
                     },
@@ -767,7 +834,7 @@
                             "SKIPPED"
                           ]
                         },
-                        "itemId": {
+                        "id": {
                           "type": "string"
                         },
                         "message": {
@@ -776,7 +843,7 @@
                       },
                       "required": [
                         "status",
-                        "itemId",
+                        "id",
                         "message"
                       ]
                     },

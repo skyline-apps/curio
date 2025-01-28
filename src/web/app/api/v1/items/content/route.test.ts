@@ -66,7 +66,18 @@ describe("GET /api/v1/items/[slug]/content", () => {
     const data = await response.json();
     expect(data).toEqual({
       content: "test content",
-      id: TEST_ITEM_ID,
+      item: {
+        id: TEST_ITEM_ID,
+        slug: TEST_ITEM_SLUG,
+        author: "Test Author",
+        createdAt: "2025-01-10T20:52:56.000Z",
+        description: "An example item",
+        publishedAt: "2025-01-10T20:52:56.000Z",
+        thumbnail: "https://example.com/thumb.jpg",
+        title: "Example",
+        updatedAt: "2025-01-10T20:52:56.000Z",
+        url: "https://example.com",
+      },
     });
   });
 
