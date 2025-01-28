@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
 
-import { UploadStatus } from "@/app/api/v1/items/[slug]/content/validation";
+import { UploadStatus } from "@/app/api/v1/items/content/validation";
 
 export class StorageError extends Error {
   constructor(message: string) {

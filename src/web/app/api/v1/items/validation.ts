@@ -5,17 +5,33 @@ const SlugSchema = z
   .string()
   .describe("Unique slug for the item used to identify it in its URL.");
 
-const ItemResultSchema = z.object({
+export const ItemResultSchema = z.object({
   id: z.string(),
   url: UrlSchema,
   slug: SlugSchema,
-  title: z.string().optional(),
-  description: z.string().optional(),
-  author: z.string().optional(),
-  thumbnail: z.string().url().optional(),
-  publishedAt: z.string().datetime().optional(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  title: z
+    .string()
+    .nullable()
+    .transform((val) => val || ""),
+  description: z
+    .string()
+    .nullable()
+    .transform((val) => val || ""),
+  author: z
+    .string()
+    .nullable()
+    .transform((val) => val || ""),
+  thumbnail: z
+    .string()
+    .url()
+    .nullable()
+    .transform((val) => val || ""),
+  publishedAt: z
+    .date()
+    .nullable()
+    .transform((val) => val?.toISOString() || ""),
+  createdAt: z.date().transform((val) => val.toISOString()),
+  updatedAt: z.date().transform((val) => val.toISOString()),
 });
 
 export type ItemResult = z.infer<typeof ItemResultSchema>;

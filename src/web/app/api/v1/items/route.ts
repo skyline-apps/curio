@@ -10,6 +10,7 @@ import {
   CreateOrUpdateItemsResponse,
   GetItemsRequestSchema,
   GetItemsResponse,
+  ItemResultSchema,
 } from "./validation";
 
 const log = createLogger("api/v1/items");
@@ -78,21 +79,10 @@ export async function GET(
       .then((res) => Number(res[0]?.count ?? 0));
 
     const response: GetItemsResponse = {
-      items: results.map((item) => ({
-        id: item.id,
-        createdAt: item.createdAt.toISOString(),
-        updatedAt: item.updatedAt.toISOString(),
-        url: item.url,
-        slug: item.slug,
-        title: item.title || "",
-        description: item.description || "",
-        author: item.author || "",
-        thumbnail: item.thumbnail || "",
-        publishedAt: item.publishedAt?.toISOString() || "",
-      })),
-      total,
+      items: results.map((item) => ItemResultSchema.parse(item)),
       nextCursor:
         results.length === limit ? results[results.length - 1].id : undefined,
+      total,
     };
 
     return APIResponseJSON(response);
@@ -165,18 +155,7 @@ export async function POST(
       });
 
     const response: CreateOrUpdateItemsResponse = {
-      items: insertedItems.map((item) => ({
-        id: item.id,
-        slug: item.slug,
-        url: item.url,
-        title: item.title ?? undefined,
-        description: item.description ?? undefined,
-        author: item.author ?? undefined,
-        thumbnail: item.thumbnail ?? undefined,
-        publishedAt: item.publishedAt?.toISOString() ?? undefined,
-        createdAt: item.createdAt.toISOString(),
-        updatedAt: item.updatedAt.toISOString(),
-      })),
+      items: insertedItems.map((item) => ItemResultSchema.parse(item)),
     };
 
     return APIResponseJSON(response);

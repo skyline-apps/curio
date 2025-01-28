@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
 
-import { UploadStatus } from "@/app/api/v1/items/[slug]/content/validation";
+import { UploadStatus } from "@/app/api/v1/items/content/validation";
 import { createLogger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/server";
 import type { StorageClient } from "@/utils/supabase/types";
