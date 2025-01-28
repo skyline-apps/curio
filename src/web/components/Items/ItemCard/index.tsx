@@ -17,9 +17,9 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }: ItemCardProps) => {
           href={`/items/${item.slug}`}
           className="text-sm text-foreground hover:underline"
         >
-          {item.title}
+          {item.metadata.title}
         </Link>
-        <p className="text-xs text-secondary">{item.description}</p>
+        <p className="text-xs text-secondary">{item.metadata.description}</p>
       </div>
     </div>
   );
