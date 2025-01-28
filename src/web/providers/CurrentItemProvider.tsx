@@ -32,7 +32,10 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   const [loading, setLoading] = useState(true);
 
   const fetchContent = useCallback(async (slug: string): Promise<void> => {
-    if (!slug) return;
+    if (!slug) {
+      setCurrentItem(null);
+      return;
+    }
     const searchParams = new URLSearchParams({
       slug,
     });
@@ -49,6 +52,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
       ).then(handleAPIResponse<GetItemContentResponse>);
       if ("error" in result) {
         log.error(`Failed to fetch item content for ${slug}`, result.error);
+        setCurrentItem(null);
         throw result.error;
       }
       setCurrentItem((prev) => {
@@ -57,6 +61,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
       });
     } catch (error) {
       log.error(`Failed to fetch item content for ${slug}`, error);
+      setCurrentItem(null);
       throw error;
     } finally {
       setLoading(false);
