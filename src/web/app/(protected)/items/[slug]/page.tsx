@@ -20,8 +20,11 @@ const ItemPage: React.FC = () => {
 
   return (
     <div className="flex-1 w-full h-full flex flex-col">
-      {loading && <Spinner centered />}
-      {currentItem && <MarkdownViewer>{currentItem.content}</MarkdownViewer>}
+      {loading ? (
+        <Spinner centered />
+      ) : (
+        currentItem && <MarkdownViewer>{currentItem.content}</MarkdownViewer>
+      )}
     </div>
   );
 };
