@@ -38,6 +38,7 @@
     "@electric-sql/pglite": "^0.2.15",
     "@local/eslint-plugin-eslint-local-rules": "file:eslint-local-rules",
     "@svgr/webpack": "^8.1.0",
+    "@tailwindcss/typography": "^0.5.16",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.1",
