@@ -1,7 +1,11 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
-import { HiPlus } from "react-icons/hi2";
+import {
+  HiChevronDoubleLeft,
+  HiChevronDoubleRight,
+  HiPlus,
+} from "react-icons/hi2";
 
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
@@ -48,7 +52,7 @@ const LeftSidebar: React.FC = () => {
       )}
     >
       <div className="grow">
-        <SidebarHeader sidebarOpen={sidebarOpen} onToggle={toggleSidebar} />
+        <SidebarHeader sidebarOpen={sidebarOpen} />
         <NavigationMenu
           sidebarOpen={sidebarOpen}
           selectedKey={selectedKey}
@@ -67,13 +71,36 @@ const LeftSidebar: React.FC = () => {
         <Icon icon={<HiPlus />} />
         <span className="hidden md:block">{sidebarOpen && "Add new"}</span>
       </Button>
-      <UserMenu
-        user={user}
-        sidebarOpen={sidebarOpen}
-        selectedKey={selectedKey}
-        onLogout={handleLogout}
-        onNavigate={handleNavigation}
-      />
+      <div
+        className={cn(
+          "flex items-center",
+          sidebarOpen ? "flex-row gap-2" : "flex-col",
+        )}
+      >
+        <UserMenu
+          user={user}
+          sidebarOpen={sidebarOpen}
+          selectedKey={selectedKey}
+          onLogout={handleLogout}
+          onNavigate={handleNavigation}
+        />
+        <Button
+          isIconOnly
+          variant="light"
+          onPress={toggleSidebar}
+          aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          className={cn(
+            "flex-none w-10",
+            sidebarOpen ? "hidden md:mr-2 md:flex" : "hidden mb-2 md:flex",
+          )}
+        >
+          <Icon
+            icon={
+              sidebarOpen ? <HiChevronDoubleLeft /> : <HiChevronDoubleRight />
+            }
+          />
+        </Button>
+      </div>
     </aside>
   );
 };

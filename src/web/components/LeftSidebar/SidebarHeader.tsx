@@ -1,20 +1,13 @@
 import React from "react";
-import { HiChevronLeft } from "react-icons/hi2";
 
-import { CurioBrand, CurioLogo } from "@/components/CurioBrand";
-import Button from "@/components/ui/Button";
-import Icon from "@/components/ui/Icon";
+import { CurioBrand, CurioHomeLogo } from "@/components/CurioBrand";
 import { cn } from "@/utils/cn";
 
 interface SidebarHeaderProps {
   sidebarOpen: boolean;
-  onToggle: () => void;
 }
 
-const SidebarHeader: React.FC<SidebarHeaderProps> = ({
-  sidebarOpen,
-  onToggle,
-}) => {
+const SidebarHeader: React.FC<SidebarHeaderProps> = ({ sidebarOpen }) => {
   return (
     <div
       className={cn(
@@ -22,28 +15,11 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({
         sidebarOpen ? "justify-center md:justify-between" : "justify-center",
       )}
     >
-      <div
-        className={cn("transition-opacity duration-300 ml-4", {
-          "opacity-100 hidden md:block": sidebarOpen,
-          "opacity-0 w-0 hidden md:hidden": !sidebarOpen,
-        })}
-      >
-        <CurioBrand />
+      <div className="transition-opacity duration-300 opacity-100 hidden md:block">
+        {sidebarOpen ? <CurioBrand className="ml-4" /> : <CurioHomeLogo />}
       </div>
-      <Button
-        isIconOnly
-        variant="light"
-        onPress={onToggle}
-        aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-        className={cn(
-          "mt-2",
-          sidebarOpen ? "hidden md:mr-2 md:flex" : "hidden md:flex",
-        )}
-      >
-        <Icon icon={sidebarOpen ? <HiChevronLeft /> : <CurioLogo />} />
-      </Button>
-      <div className="block md:hidden mt-2 w-10 h-10">
-        <Icon className="block md:hidden" icon={<CurioLogo />} />
+      <div className="block md:hidden mt-2">
+        <CurioHomeLogo />
       </div>
     </div>
   );
