@@ -4,11 +4,7 @@ import { items, profileItems } from "@/db/schema";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
 import { createLogger } from "@/utils/logger";
-import {
-  getItemContent,
-  StorageError,
-  uploadItemContent,
-} from "@/utils/storage";
+import { storage, StorageError } from "@/utils/storage";
 
 import {
   GetItemContentRequestSchema,
@@ -70,19 +66,27 @@ export async function GET(
       return APIResponseJSON({ error: "Item not found." }, { status: 404 });
     }
 
-    const content = await getItemContent(slug);
+    const content = await storage.getItemContent(slug);
     const response: GetItemContentResponse = {
       content,
       item: ItemResultSchema.parse(item[0]),
     };
 
     return APIResponseJSON(response);
-  } catch (error) {
-    log.error("Error getting item content:", error);
-    return APIResponseJSON(
-      { error: "Error getting item content." },
-      { status: 500 },
-    );
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      log.error("Error getting item content:", error);
+      return APIResponseJSON(
+        { error: "Error getting item content." },
+        { status: 500 },
+      );
+    } else {
+      log.error("Unknown error getting item content:", error);
+      return APIResponseJSON(
+        { error: "Unknown error getting item content." },
+        { status: 500 },
+      );
+    }
   }
 }
 
@@ -123,7 +127,7 @@ export async function POST(
 
     try {
       const newDate = new Date();
-      const status = await uploadItemContent(slug, content);
+      const status = await storage.uploadItemContent(slug, content);
 
       const response: UpdateItemContentResponse = {
         status,
@@ -148,17 +152,36 @@ export async function POST(
       }
 
       return APIResponseJSON(response);
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof StorageError) {
         return APIResponseJSON({ error: error.message }, { status: 400 });
+      } else if (error instanceof Error) {
+        log.error("Error updating item content:", error);
+        return APIResponseJSON(
+          { error: "Error updating item content." },
+          { status: 500 },
+        );
+      } else {
+        log.error("Unknown error updating item content:", error);
+        return APIResponseJSON(
+          { error: "Unknown error updating item content." },
+          { status: 500 },
+        );
       }
-      throw error;
     }
-  } catch (error) {
-    log.error("Error updating item content:", error);
-    return APIResponseJSON(
-      { error: "Error updating item content." },
-      { status: 500 },
-    );
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      log.error("Error updating item content:", error);
+      return APIResponseJSON(
+        { error: "Error updating item content." },
+        { status: 500 },
+      );
+    } else {
+      log.error("Unknown error updating item content:", error);
+      return APIResponseJSON(
+        { error: "Unknown error updating item content." },
+        { status: 500 },
+      );
+    }
   }
 }
