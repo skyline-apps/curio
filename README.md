@@ -2,7 +2,7 @@
 
 ## Local development
 First, set up environment variables and secrets.
-1. Copy `.env.template` to `.env` and populate values.
+1. Copy `.env.template` to `.env` and populate values. Make sure to use the instructions [here](https://supabase.com/docs/guides/self-hosting/docker#generate-api-keys) to generate the `ANON_KEY` and `SERVICE_ROLE_KEY`.
 
 To start the local development environment:
 1. Run `docker compose up -d` to start containers in detached mode.
