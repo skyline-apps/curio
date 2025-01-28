@@ -20,8 +20,8 @@ export const brown = {
   DEFAULT: "#CCB9AC",
 };
 
-export const lightBrown = brown[25];
-export const darkBrown = brown[975];
+export const lightBrown = brown[75];
+export const darkBrown = brown[925];
 
 export const gray = {
   975: "#312D2A",
