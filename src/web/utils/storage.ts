@@ -24,11 +24,25 @@ interface VersionMetadata {
 
 export class Storage {
   private storage: StorageClient | null = null;
+  private lastInitTime: number = 0;
+  private readonly REFRESH_INTERVAL = 3600000; // 1 hour in milliseconds
 
   private async getStorageClient(): Promise<StorageClient> {
-    if (!this.storage) {
+    const now = Date.now();
+    if (!this.storage || now - this.lastInitTime > this.REFRESH_INTERVAL) {
       const supabase = await createClient();
       this.storage = supabase.storage;
+      this.lastInitTime = now;
+
+      try {
+        // Verify we can access the bucket
+        await this.storage.from(ITEMS_BUCKET).list();
+      } catch (error) {
+        log.error("Failed to verify storage access", { error });
+        // Reset storage client to force re-initialization on next attempt
+        this.storage = null;
+        throw new StorageError("Failed to initialize storage client");
+      }
     }
     return this.storage;
   }
@@ -76,13 +90,13 @@ export class Storage {
     try {
       const { data: currentData } = await storage
         .from(ITEMS_BUCKET)
-        .download(`${slug}.html`);
+        .download(`${slug}/latest.md`);
 
       if (currentData) {
         const currentContent = await currentData.text();
         if (currentContent.length >= content.length) {
           // Current content is longer, just store the new version
-          const versionPath = `${slug}/versions/${timestamp}.html`;
+          const versionPath = `${slug}/versions/${timestamp}.md`;
           const metadata: VersionMetadata = {
             timestamp,
             length: content.length,
@@ -92,14 +106,14 @@ export class Storage {
           const { error: versionError } = await storage
             .from(ITEMS_BUCKET)
             .upload(versionPath, content, {
-              contentType: "text/html",
+              contentType: "text/markdown",
               upsert: false,
               metadata: { version: JSON.stringify(metadata) },
             });
 
           if (versionError) {
             log.error(
-              "Error uploading version for item ${slug}:",
+              `Error uploading version for item ${slug}:`,
               versionError,
             );
             throw new StorageError("Failed to upload version");
@@ -113,7 +127,7 @@ export class Storage {
     }
 
     // This is either the first version or a longer version than current
-    const versionPath = `${slug}/versions/${timestamp}.html`;
+    const versionPath = `${slug}/versions/${timestamp}.md`;
     const metadata: VersionMetadata = {
       timestamp,
       length: content.length,
@@ -124,26 +138,26 @@ export class Storage {
     const { error: versionError } = await storage
       .from(ITEMS_BUCKET)
       .upload(versionPath, content, {
-        contentType: "text/html",
+        contentType: "text/markdown",
         upsert: false,
         metadata: { version: JSON.stringify(metadata) },
       });
 
     if (versionError) {
-      log.error("Error uploading version for item ${slug}:", versionError);
+      log.error(`Error uploading version for item ${slug}:`, versionError);
       throw new StorageError("Failed to upload version");
     }
 
     // Update main file since this is longer
     const { error: mainError } = await storage
       .from(ITEMS_BUCKET)
-      .upload(`${slug}.html`, content, {
-        contentType: "text/html",
+      .upload(`${slug}/latest.md`, content, {
+        contentType: "text/markdown",
         upsert: true,
       });
 
     if (mainError) {
-      log.error("Error updating main file for item ${slug}:", mainError);
+      log.error(`Error updating main file for item ${slug}:`, mainError);
       throw new StorageError("Failed to update main file");
     }
 
@@ -154,10 +168,10 @@ export class Storage {
     const storage = await this.getStorageClient();
     const { data, error } = await storage
       .from(ITEMS_BUCKET)
-      .download(`${slug}.html`);
+      .download(`${slug}/latest.md`);
 
     if (error) {
-      log.error("Error downloading content for item ${slug}:", error);
+      log.error(`Error downloading content for item ${slug}:`, error);
       throw new StorageError("Failed to download content");
     }
 
@@ -171,7 +185,7 @@ export class Storage {
       .list(`${slug}/versions`);
 
     if (error) {
-      log.error("Error listing versions for item ${slug}:", error);
+      log.error(`Error listing versions for item ${slug}:`, error);
       throw new StorageError("Failed to list versions");
     }
 
@@ -180,7 +194,7 @@ export class Storage {
         try {
           return JSON.parse(file.metadata?.version || "{}") as VersionMetadata;
         } catch (e) {
-          log.error("Error parsing metadata for ${file.name}:", e);
+          log.error(`Error parsing metadata for ${file.name}:`, e);
           return null;
         }
       })
