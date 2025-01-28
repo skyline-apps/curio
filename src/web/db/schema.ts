@@ -64,11 +64,6 @@ export const items = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     url: text("url").notNull().unique(),
     slug: text("slug").notNull().unique(),
-    title: text("title"),
-    description: text("description"),
-    author: text("author"),
-    thumbnail: text("thumbnail"),
-    publishedAt: timestamp("published_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -118,6 +113,11 @@ export const profileItems = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     profileId: uuid("profile_id").notNull(),
     itemId: uuid("item_id").notNull(),
+    title: text("title").notNull(),
+    description: text("description"),
+    author: text("author"),
+    thumbnail: text("thumbnail"),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
     state: itemState("state").notNull().default("active"),
     isFavorite: boolean("is_favorite").notNull().default(false),
     readingProgress: integer("reading_progress").notNull().default(0),
@@ -126,6 +126,9 @@ export const profileItems = pgTable(
       .defaultNow(),
     archivedAt: timestamp("archived_at", { withTimezone: true }),
     lastReadAt: timestamp("last_read_at", { withTimezone: true }),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (table) => ({
     profileForeignKey: foreignKey({
