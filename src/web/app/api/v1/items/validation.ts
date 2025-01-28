@@ -5,33 +5,51 @@ const SlugSchema = z
   .string()
   .describe("Unique slug for the item used to identify it in its URL.");
 
+const ItemMetadataSchema = z
+  .object({
+    title: z.string().max(255).describe("The title of the item."),
+    description: z
+      .string()
+      .max(2048)
+      .nullable()
+      .optional()
+      .describe(
+        "The description of the item. If left blank, will remain unchanged.",
+      ),
+    author: z
+      .string()
+      .max(255)
+      .nullable()
+      .optional()
+      .describe(
+        "The author of the item. If left blank, will remain unchanged.",
+      ),
+    thumbnail: z
+      .string()
+      .url()
+      .max(2048)
+      .nullable()
+      .optional()
+      .describe(
+        "The thumbnail of the item. If left blank, will remain unchanged.",
+      ),
+    publishedAt: z
+      .date()
+      .transform((val) => val.toISOString())
+      .nullable()
+      .optional()
+      .describe(
+        "The published date of the item. If left blank, will remain unchanged.",
+      ),
+  })
+  .strict();
+
 export const ItemResultSchema = z.object({
   id: z.string(),
   url: UrlSchema,
   slug: SlugSchema,
-  title: z
-    .string()
-    .nullable()
-    .transform((val) => val || ""),
-  description: z
-    .string()
-    .nullable()
-    .transform((val) => val || ""),
-  author: z
-    .string()
-    .nullable()
-    .transform((val) => val || ""),
-  thumbnail: z
-    .string()
-    .url()
-    .nullable()
-    .transform((val) => val || ""),
-  publishedAt: z
-    .date()
-    .nullable()
-    .transform((val) => val?.toISOString() || ""),
+  metadata: ItemMetadataSchema,
   createdAt: z.date().transform((val) => val.toISOString()),
-  updatedAt: z.date().transform((val) => val.toISOString()),
 });
 
 export type ItemResult = z.infer<typeof ItemResultSchema>;
@@ -62,19 +80,15 @@ export const GetItemsResponseSchema = z.object({
 });
 export type GetItemsResponse = z.infer<typeof GetItemsResponseSchema>;
 
-const ItemMetadataSchema = z
-  .object({
-    url: UrlSchema,
-    title: z.string().optional(),
-    description: z.string().optional(),
-    author: z.string().optional(),
-    thumbnail: z.string().url().optional(),
-    publishedAt: z.string().datetime().optional(),
-  })
-  .strict();
-
 export const CreateOrUpdateItemsRequestSchema = z.object({
-  items: z.array(ItemMetadataSchema),
+  items: z.array(
+    z
+      .object({
+        url: UrlSchema,
+        metadata: ItemMetadataSchema.partial().optional(),
+      })
+      .strict(),
+  ),
 });
 
 export type CreateOrUpdateItemsRequest = z.infer<
