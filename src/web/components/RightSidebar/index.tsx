@@ -40,7 +40,7 @@ const RightSidebar: React.FC = () => {
         </div>
         <Button
           isIconOnly
-          variant="light"
+          variant="faded"
           onPress={toggleSidebar}
           aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           className={cn(
