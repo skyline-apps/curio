@@ -14,14 +14,14 @@ export const brown = {
   100: "#E7DAD6",
   75: "#EEE3E1",
   50: "#F4ECEB",
-  25: "#FAF7F6",
-  15: "#F9F4F4",
+  25: "#F9F4F4",
+  15: "#FAF7F6",
   foreground: "#1A1F1C",
   DEFAULT: "#CCB9AC",
 };
 
-export const lightBrown = brown[75];
-export const darkBrown = brown[925];
+export const lightBrown = brown[200];
+export const darkBrown = brown[900];
 
 export const gray = {
   975: "#312D2A",

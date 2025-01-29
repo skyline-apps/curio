@@ -15,7 +15,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
   return (
     <>
       {metadata.thumbnail && (
-        <div className="bg-background-300 w-full h-48 p-2">
+        <div className="w-full h-48 p-2">
           <img
             alt="item thumbnail"
             className="object-contain w-full h-full"
