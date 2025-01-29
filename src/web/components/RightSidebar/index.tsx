@@ -1,13 +1,17 @@
 "use client";
-import React, { useState } from "react";
+import React, { useContext } from "react";
 import { HiChevronDoubleLeft, HiChevronDoubleRight } from "react-icons/hi2";
 
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
+import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import { cn } from "@/utils/cn";
 
+import ItemMetadata from "./ItemMetadata";
+
 const RightSidebar: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
+  const { currentItem, sidebarOpen, setSidebarOpen } =
+    useContext(CurrentItemContext);
 
   const toggleSidebar = (): void => {
     setSidebarOpen(!sidebarOpen);
@@ -21,7 +25,9 @@ const RightSidebar: React.FC = () => {
       )}
     >
       <div className="flex flex-col justify-between h-full">
-        <div className="grow">sidebar</div>
+        <div className="grow">
+          {sidebarOpen && <ItemMetadata item={currentItem?.item} />}
+        </div>
         <Button
           isIconOnly
           variant="light"

@@ -34,8 +34,13 @@ const ItemMetadataSchema = z
         "The thumbnail of the item. If left blank, will remain unchanged.",
       ),
     publishedAt: z
-      .date()
-      .transform((val) => val.toISOString())
+      .union([z.string(), z.date()])
+      .transform((val) => {
+        if (val instanceof Date) {
+          return val.toISOString();
+        }
+        return val;
+      })
       .nullable()
       .optional()
       .describe(
