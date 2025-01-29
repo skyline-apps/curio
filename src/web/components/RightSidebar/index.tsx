@@ -17,6 +17,7 @@ const RightSidebar: React.FC = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  // TODO: Add transition for content appearing
   return (
     <aside
       className={cn(

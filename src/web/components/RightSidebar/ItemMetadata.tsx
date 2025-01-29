@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { ItemContent } from "@/providers/CurrentItemProvider";
 
 interface ItemMetadataProps {
-  item: ItemContent["item"];
+  item?: ItemContent["item"];
 }
 
 const ItemMetadata: React.FC<ItemMetadataProps> = ({
