@@ -48,7 +48,7 @@ const LeftSidebar: React.FC = () => {
       className={cn(
         "flex flex-col justify-between h-screen border-r-1 border-divider transition-all duration-300 ease-in-out",
         "w-16 md:w-64",
-        { "md:w-16": !sidebarOpen },
+        { "overflow-hidden w-0 md:w-16": !sidebarOpen },
       )}
     >
       <div className="grow">
@@ -62,6 +62,7 @@ const LeftSidebar: React.FC = () => {
       <Button
         className={cn("m-2 min-w-10", {
           "self-center": !sidebarOpen,
+          "hidden md:flex": !sidebarOpen,
         })}
         isIconOnly={!sidebarOpen}
         onPress={
@@ -74,7 +75,7 @@ const LeftSidebar: React.FC = () => {
       <div
         className={cn(
           "flex items-center",
-          sidebarOpen ? "flex-row gap-2" : "flex-col",
+          sidebarOpen ? "flex-col md:flex-row gap-2" : "flex-col",
         )}
       >
         <UserMenu
@@ -86,12 +87,12 @@ const LeftSidebar: React.FC = () => {
         />
         <Button
           isIconOnly
-          variant="light"
+          variant="faded"
           onPress={toggleSidebar}
           aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           className={cn(
-            "flex-none w-10",
-            sidebarOpen ? "hidden md:mr-2 md:flex" : "hidden mb-2 md:flex",
+            "flex-none w-10 z-10 m-2",
+            sidebarOpen ? "" : "absolute left-0 bottom-0 md:relative",
           )}
         >
           <Icon
