@@ -14,7 +14,7 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }: ItemCardProps) => {
   return (
     <div
       key={item.id}
-      className="flex flex-row bg-background-400 px-4 py-1 h-16 rounded-sm hover:bg-background-300"
+      className="flex flex-row bg-background-400 px-4 py-1 h-16 rounded-sm overflow-x-hidden hover:bg-background-300"
       onClick={() => populateCurrentItem({ item })}
     >
       <div className="block">
