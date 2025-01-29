@@ -5,6 +5,8 @@ import Link from "next/link";
 import React, { forwardRef } from "react";
 import { useFormStatus } from "react-dom";
 
+import { cn } from "@/utils/cn";
+
 interface FormButtonProps extends ButtonProps {
   pendingText?: string;
 }
@@ -35,6 +37,12 @@ interface CurioButtonProps extends ButtonProps {
 // Add forwardRef to ensure Dropdowns are properly positioned.
 const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
   ({ href, ...props }: CurioButtonProps, ref) => {
+    if (props.variant === "faded") {
+      props.className = cn(
+        "bg-background-400 hover:bg-background-300 border-none shadow",
+        props.className,
+      );
+    }
     if (href) {
       return (
         <Link href={href} passHref>
