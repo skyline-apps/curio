@@ -3,6 +3,7 @@ import React, { useContext } from "react";
 
 import AppPage from "@/app/(protected)/AppPage";
 import LeftSidebar from "@/components/LeftSidebar";
+import RightSidebar from "@/components/RightSidebar";
 import { Progress } from "@/components/ui/Progress";
 import { ItemsContext } from "@/providers/ItemsProvider";
 
@@ -31,6 +32,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <div className="flex-1 overflow-y-auto">
         <AppPage>{children}</AppPage>
       </div>
+      <RightSidebar />
     </div>
   );
 };
