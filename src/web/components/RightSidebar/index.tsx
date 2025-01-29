@@ -29,7 +29,7 @@ const RightSidebar: React.FC = () => {
         <div className="grow overflow-hidden">
           <div
             className={cn(
-              "w-80 transition-all duration-300 ease-in-out transform",
+              "h-full w-80 transition-all duration-300 ease-in-out transform", // Explicit width needed for transition
               sidebarOpen
                 ? "translate-x-0 opacity-100"
                 : "translate-x-full opacity-0",

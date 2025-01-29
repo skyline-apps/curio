@@ -21,6 +21,7 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }: ItemCardProps) => {
         <Link
           href={`/items/${item.slug}`}
           className="text-sm text-foreground hover:underline"
+          onClick={(ev) => ev.stopPropagation()}
         >
           {item.metadata.title}
         </Link>

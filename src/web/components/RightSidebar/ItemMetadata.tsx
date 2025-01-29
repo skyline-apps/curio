@@ -9,7 +9,13 @@ interface ItemMetadataProps {
 const ItemMetadata: React.FC<ItemMetadataProps> = ({
   item,
 }: ItemMetadataProps) => {
-  if (!item || !item.metadata) return null;
+  if (!item || !item.metadata) {
+    return (
+      <div className="flex h-full items-center justify-center p-4">
+        <p className="text-secondary">Select an item to view it here.</p>
+      </div>
+    );
+  }
   const { metadata } = item;
 
   return (

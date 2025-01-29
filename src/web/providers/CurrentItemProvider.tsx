@@ -43,7 +43,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
 }: CurrentItemProviderProps): React.ReactNode => {
   const [currentItem, setCurrentItem] = useState<ItemContent | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
   const clearCurrentItem = (): void => {
     setCurrentItem(null);
@@ -80,7 +80,8 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         throw result.error;
       }
       if (result) {
-        populateCurrentItem(result);
+        setCurrentItem(result);
+        setSidebarOpen(false);
       }
     } catch (error) {
       log.error(`Failed to fetch item content for ${slug}`, error);
