@@ -3,18 +3,22 @@ import { useContext } from "react";
 
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import type { ItemMetadata } from "@/providers/ItemsProvider";
+import { cn } from "@/utils/cn";
 
 interface ItemCardProps {
   item: ItemMetadata;
 }
 
 const ItemCard: React.FC<ItemCardProps> = ({ item }: ItemCardProps) => {
-  const { populateCurrentItem } = useContext(CurrentItemContext);
+  const { currentItem, populateCurrentItem } = useContext(CurrentItemContext);
 
   return (
     <div
       key={item.id}
-      className="flex flex-row bg-background-400 px-4 py-1 h-16 rounded-sm overflow-x-hidden hover:bg-background-300"
+      className={cn(
+        "flex flex-row bg-background-400 px-4 py-1 h-16 rounded-sm overflow-x-hidden hover:bg-background-300",
+        currentItem?.item.id === item.id && "bg-background-300",
+      )}
       onClick={() => populateCurrentItem({ item })}
     >
       <div className="block">
