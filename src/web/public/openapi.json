@@ -309,31 +309,54 @@
                             "type": "string",
                             "description": "Unique slug for the item used to identify it in its URL."
                           },
-                          "title": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "description": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "author": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "thumbnail": {
-                            "type": "string",
-                            "nullable": true,
-                            "format": "uri"
-                          },
-                          "publishedAt": {
-                            "type": "string",
-                            "nullable": true
+                          "metadata": {
+                            "type": "object",
+                            "properties": {
+                              "title": {
+                                "type": "string",
+                                "maxLength": 255,
+                                "description": "The title of the item."
+                              },
+                              "description": {
+                                "type": "string",
+                                "nullable": true,
+                                "maxLength": 2048,
+                                "description": "The description of the item. If left blank, will remain unchanged."
+                              },
+                              "author": {
+                                "type": "string",
+                                "nullable": true,
+                                "maxLength": 255,
+                                "description": "The author of the item. If left blank, will remain unchanged."
+                              },
+                              "thumbnail": {
+                                "type": "string",
+                                "nullable": true,
+                                "maxLength": 2048,
+                                "format": "uri",
+                                "description": "The thumbnail of the item. If left blank, will remain unchanged."
+                              },
+                              "publishedAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "nullable": true
+                                  }
+                                ],
+                                "description": "The published date of the item. If left blank, will remain unchanged."
+                              }
+                            },
+                            "required": [
+                              "title"
+                            ],
+                            "additionalProperties": false
                           },
                           "createdAt": {
-                            "type": "string"
-                          },
-                          "updatedAt": {
                             "type": "string"
                           }
                         },
@@ -341,13 +364,8 @@
                           "id",
                           "url",
                           "slug",
-                          "title",
-                          "description",
-                          "author",
-                          "thumbnail",
-                          "publishedAt",
-                          "createdAt",
-                          "updatedAt"
+                          "metadata",
+                          "createdAt"
                         ]
                       }
                     },
@@ -429,22 +447,49 @@
                           "format": "uri",
                           "description": "Unique URL of the item."
                         },
-                        "title": {
-                          "type": "string"
-                        },
-                        "description": {
-                          "type": "string"
-                        },
-                        "author": {
-                          "type": "string"
-                        },
-                        "thumbnail": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "publishedAt": {
-                          "type": "string",
-                          "format": "date-time"
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "title": {
+                              "type": "string",
+                              "maxLength": 255,
+                              "description": "The title of the item."
+                            },
+                            "description": {
+                              "type": "string",
+                              "nullable": true,
+                              "maxLength": 2048,
+                              "description": "The description of the item. If left blank, will remain unchanged."
+                            },
+                            "author": {
+                              "type": "string",
+                              "nullable": true,
+                              "maxLength": 255,
+                              "description": "The author of the item. If left blank, will remain unchanged."
+                            },
+                            "thumbnail": {
+                              "type": "string",
+                              "nullable": true,
+                              "maxLength": 2048,
+                              "format": "uri",
+                              "description": "The thumbnail of the item. If left blank, will remain unchanged."
+                            },
+                            "publishedAt": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "nullable": true
+                                }
+                              ],
+                              "description": "The published date of the item. If left blank, will remain unchanged."
+                            }
+                          },
+                          "additionalProperties": false
                         }
                       },
                       "required": [
@@ -486,31 +531,54 @@
                             "type": "string",
                             "description": "Unique slug for the item used to identify it in its URL."
                           },
-                          "title": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "description": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "author": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "thumbnail": {
-                            "type": "string",
-                            "nullable": true,
-                            "format": "uri"
-                          },
-                          "publishedAt": {
-                            "type": "string",
-                            "nullable": true
+                          "metadata": {
+                            "type": "object",
+                            "properties": {
+                              "title": {
+                                "type": "string",
+                                "maxLength": 255,
+                                "description": "The title of the item."
+                              },
+                              "description": {
+                                "type": "string",
+                                "nullable": true,
+                                "maxLength": 2048,
+                                "description": "The description of the item. If left blank, will remain unchanged."
+                              },
+                              "author": {
+                                "type": "string",
+                                "nullable": true,
+                                "maxLength": 255,
+                                "description": "The author of the item. If left blank, will remain unchanged."
+                              },
+                              "thumbnail": {
+                                "type": "string",
+                                "nullable": true,
+                                "maxLength": 2048,
+                                "format": "uri",
+                                "description": "The thumbnail of the item. If left blank, will remain unchanged."
+                              },
+                              "publishedAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "nullable": true
+                                  }
+                                ],
+                                "description": "The published date of the item. If left blank, will remain unchanged."
+                              }
+                            },
+                            "required": [
+                              "title"
+                            ],
+                            "additionalProperties": false
                           },
                           "createdAt": {
-                            "type": "string"
-                          },
-                          "updatedAt": {
                             "type": "string"
                           }
                         },
@@ -518,13 +586,8 @@
                           "id",
                           "url",
                           "slug",
-                          "title",
-                          "description",
-                          "author",
-                          "thumbnail",
-                          "publishedAt",
-                          "createdAt",
-                          "updatedAt"
+                          "metadata",
+                          "createdAt"
                         ]
                       }
                     },
@@ -641,31 +704,54 @@
                               "type": "string",
                               "description": "Unique slug for the item used to identify it in its URL."
                             },
-                            "title": {
-                              "type": "string",
-                              "nullable": true
-                            },
-                            "description": {
-                              "type": "string",
-                              "nullable": true
-                            },
-                            "author": {
-                              "type": "string",
-                              "nullable": true
-                            },
-                            "thumbnail": {
-                              "type": "string",
-                              "nullable": true,
-                              "format": "uri"
-                            },
-                            "publishedAt": {
-                              "type": "string",
-                              "nullable": true
+                            "metadata": {
+                              "type": "object",
+                              "properties": {
+                                "title": {
+                                  "type": "string",
+                                  "maxLength": 255,
+                                  "description": "The title of the item."
+                                },
+                                "description": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "maxLength": 2048,
+                                  "description": "The description of the item. If left blank, will remain unchanged."
+                                },
+                                "author": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "maxLength": 255,
+                                  "description": "The author of the item. If left blank, will remain unchanged."
+                                },
+                                "thumbnail": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "maxLength": 2048,
+                                  "format": "uri",
+                                  "description": "The thumbnail of the item. If left blank, will remain unchanged."
+                                },
+                                "publishedAt": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "nullable": true
+                                    }
+                                  ],
+                                  "description": "The published date of the item. If left blank, will remain unchanged."
+                                }
+                              },
+                              "required": [
+                                "title"
+                              ],
+                              "additionalProperties": false
                             },
                             "createdAt": {
-                              "type": "string"
-                            },
-                            "updatedAt": {
                               "type": "string"
                             }
                           },
@@ -673,13 +759,8 @@
                             "id",
                             "url",
                             "slug",
-                            "title",
-                            "description",
-                            "author",
-                            "thumbnail",
-                            "publishedAt",
-                            "createdAt",
-                            "updatedAt"
+                            "metadata",
+                            "createdAt"
                           ]
                         }
                       },

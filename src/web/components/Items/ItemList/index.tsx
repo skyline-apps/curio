@@ -1,12 +1,19 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 
 import ItemCard from "@/components/Items/ItemCard";
+import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import { ItemsContext } from "@/providers/ItemsProvider";
 
 interface ItemListProps {}
 
 const ItemList: React.FC<ItemListProps> = () => {
   const { items } = useContext(ItemsContext);
+  const { clearCurrentItem } = useContext(CurrentItemContext);
+
+  useEffect(() => {
+    clearCurrentItem();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <div className="flex flex-col gap-1">
       {items.map((item) => (
