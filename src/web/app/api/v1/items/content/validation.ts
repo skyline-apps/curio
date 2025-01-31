@@ -39,17 +39,17 @@ export const UpdateItemContentRequestSchema = z.object({
 export const UpdateItemContentResponseSchema = z.discriminatedUnion("status", [
   z.object({
     status: z.literal(UploadStatus.UPDATED_MAIN),
-    id: z.string(),
+    slug: z.string(),
     message: z.string(),
   }),
   z.object({
     status: z.literal(UploadStatus.STORED_VERSION),
-    id: z.string(),
+    slug: z.string(),
     message: z.string(),
   }),
   z.object({
     status: z.literal(UploadStatus.SKIPPED),
-    id: z.string(),
+    slug: z.string(),
     message: z.string(),
   }),
   z.object({
