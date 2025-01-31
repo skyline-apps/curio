@@ -7,7 +7,8 @@ import Spinner from "@/components/ui/Spinner";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 
 const ItemPage: React.FC = () => {
-  const { fetchContent, loading, currentItem } = useContext(CurrentItemContext);
+  const { fetchContent, loading, loadingError, currentItem } =
+    useContext(CurrentItemContext);
   const { slug } = useParams();
 
   useEffect(() => {
@@ -22,6 +23,10 @@ const ItemPage: React.FC = () => {
     <div className="flex-1 w-full h-full flex flex-col">
       {loading ? (
         <Spinner centered />
+      ) : loadingError ? (
+        <>
+          <p className="text-sm text-danger">{loadingError}</p>
+        </>
       ) : (
         currentItem && <MarkdownViewer>{currentItem.content}</MarkdownViewer>
       )}
