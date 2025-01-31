@@ -1,6 +1,10 @@
 import type { PressEvent } from "@react-types/shared";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
+import {
+  UpdateItemContentResponse,
+  UploadStatus,
+} from "@/app/api/v1/items/content/validation";
 import Button from "@/components/ui/Button";
 import Form from "@/components/ui/Form";
 import Input from "@/components/ui/Input";
@@ -28,33 +32,43 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [newItemSlug, setNewItemSlug] = useState<string | null>(null);
 
-  const closeModal = (): void => {
+  const closeModal = useCallback((): void => {
     setUrlInput("");
     setLoading(false);
     setError(null);
     onClose();
-  };
+  }, [onClose]);
 
   useEffect(() => {
     const handleMessage = (
-      event: MessageEvent<{ type: string; error?: string }>,
+      event: MessageEvent<{
+        type: string;
+        error?: string;
+        data?: UpdateItemContentResponse;
+      }>,
     ): void => {
       if (event.data.type === "CURIO_SAVE_ERROR") {
         setLoading(false);
         log.error("Error saving content", event.data);
         setError("Error saving content. Contact us if this error persists.");
       } else if (event.data.type === "CURIO_SAVE_SUCCESS") {
+        if (!event.data.data || event.data.data.status === UploadStatus.ERROR) {
+          setLoading(false);
+          log.error("Error updating content", event.data);
+          setError("Error saving content. Contact us if this error persists.");
+          return;
+        }
         // TODO: refresh items list if on items list page
         log.info("Content saved successfully", event.data);
         // TODO: make toast appear correctly
-        setNewItemSlug(event.data.slug);
+        setNewItemSlug(event.data.data.slug);
         closeModal();
       }
     };
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, []);
+  }, [closeModal]);
 
   const openAndSave = (
     event: React.FormEvent<HTMLFormElement> | PressEvent,
@@ -63,6 +77,7 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
     setError(null);
     try {
       setLoading(true);
+      // TODO: add timeout if this takes too long
       window.postMessage(
         {
           type: "CURIO_SAVE_REQUEST",
