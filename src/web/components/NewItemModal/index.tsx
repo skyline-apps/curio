@@ -9,6 +9,7 @@ import Modal, {
   ModalContent,
   ModalHeader,
 } from "@/components/ui/Modal";
+import Toast from "@/components/ui/Toast";
 import { createLogger } from "@/utils/logger";
 
 interface NewItemModalProps {
@@ -23,10 +24,14 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
   onClose,
 }: NewItemModalProps) => {
   const [urlInput, setUrlInput] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [newItemSlug, setNewItemSlug] = useState<string | null>(null);
 
   const closeModal = (): void => {
     setUrlInput("");
+    setLoading(false);
+    setError(null);
     onClose();
   };
 
@@ -35,10 +40,14 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
       event: MessageEvent<{ type: string; error?: string }>,
     ): void => {
       if (event.data.type === "CURIO_SAVE_ERROR") {
+        setLoading(false);
         log.error("Error saving content", event.data);
         setError("Error saving content. Contact us if this error persists.");
       } else if (event.data.type === "CURIO_SAVE_SUCCESS") {
+        // TODO: refresh items list if on items list page
         log.info("Content saved successfully", event.data);
+        // TODO: make toast appear correctly
+        setNewItemSlug(event.data.slug);
         closeModal();
       }
     };
@@ -53,6 +62,7 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
     if ("preventDefault" in event) event.preventDefault();
     setError(null);
     try {
+      setLoading(true);
       window.postMessage(
         {
           type: "CURIO_SAVE_REQUEST",
@@ -69,37 +79,48 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
   };
 
   return (
-    <Modal
-      isKeyboardDismissDisabled={true}
-      isOpen={isOpen}
-      onClose={closeModal}
-    >
-      <ModalContent>
-        <ModalHeader>
-          <h1 className="text-2xl font-medium">New item</h1>
-        </ModalHeader>
-        <ModalBody>
-          <Form onSubmit={openAndSave}>
-            <Input
-              type="text"
-              name="url"
-              label="Item to save"
-              labelPlacement="outside"
-              placeholder="URL"
-              value={urlInput}
-              className="flex-1"
-              onChange={(event) => setUrlInput(event.target.value)}
-            />
-            {error && (
-              <div className="mt-2 text-sm text-danger-600">{error}</div>
-            )}
-            <Button className="w-full sm:w-48 self-end" onPress={openAndSave}>
-              Open page and save
-            </Button>
-          </Form>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+    <>
+      <Modal
+        isKeyboardDismissDisabled={true}
+        isOpen={isOpen}
+        onClose={closeModal}
+      >
+        <ModalContent>
+          <ModalHeader>
+            <h1 className="text-2xl font-medium">New item</h1>
+          </ModalHeader>
+          <ModalBody>
+            <Form onSubmit={openAndSave}>
+              <Input
+                type="text"
+                name="url"
+                label="Item to save"
+                labelPlacement="outside"
+                placeholder="URL"
+                value={urlInput}
+                className="flex-1"
+                onChange={(event) => setUrlInput(event.target.value)}
+              />
+              {error && (
+                <div className="mt-2 text-sm text-danger-600">{error}</div>
+              )}
+              <Button
+                className="w-full sm:w-48 self-end"
+                onPress={openAndSave}
+                isLoading={loading}
+              >
+                Open page and save
+              </Button>
+            </Form>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+      {newItemSlug && (
+        <Toast>
+          Item successfully saved! <a href={`/items/${newItemSlug}`}>View</a>
+        </Toast>
+      )}
+    </>
   );
 };
 
