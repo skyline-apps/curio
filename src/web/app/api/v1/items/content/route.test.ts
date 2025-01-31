@@ -1,8 +1,10 @@
 import { jest } from "@jest/globals";
 
+import { uploadItemContent } from "@/__mocks__/storage";
 import { eq } from "@/db";
 import { items, profileItems } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
+import { ExtractError, extractMainContentAsMarkdown } from "@/utils/extract";
 import {
   DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_PROFILE_ID,
@@ -36,7 +38,7 @@ describe("GET /api/v1/items/[slug]/content", () => {
   ])("%s", async (_, apiKey) => {
     const mockItem = {
       id: TEST_ITEM_ID,
-      url: "https://example.com",
+      url: "https://example.com/",
       slug: TEST_ITEM_SLUG,
       createdAt: new Date("2025-01-10T12:52:56-08:00"),
       updatedAt: new Date("2025-01-10T12:52:56-08:00"),
@@ -77,7 +79,7 @@ describe("GET /api/v1/items/[slug]/content", () => {
           thumbnail: "https://example.com/thumb.jpg",
           title: "Example",
         },
-        url: "https://example.com",
+        url: "https://example.com/",
       },
     });
   });
@@ -141,7 +143,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
     const originalCreationDate = new Date("2025-01-10T12:52:56-08:00");
     const mockItem = {
       id: TEST_ITEM_ID,
-      url: "https://example.com",
+      url: "https://example.com/",
       slug: TEST_ITEM_SLUG,
       createdAt: originalCreationDate,
       updatedAt: originalCreationDate,
@@ -163,8 +165,8 @@ describe("POST /api/v1/items/[slug]/content", () => {
       method: "POST",
       apiKey,
       body: {
-        content: "Updated content",
-        slug: TEST_ITEM_SLUG,
+        url: "https://example.com/",
+        htmlContent: "<div>Test content</div>",
       },
     });
 
@@ -177,6 +179,15 @@ describe("POST /api/v1/items/[slug]/content", () => {
       message: "Content updated and set as main version",
       status: "UPDATED_MAIN",
     });
+
+    expect(extractMainContentAsMarkdown).toHaveBeenCalledWith(
+      "<div>Test content</div>",
+    );
+
+    expect(uploadItemContent).toHaveBeenCalledWith(
+      TEST_ITEM_SLUG,
+      "Markdown content",
+    );
 
     const updatedItem = await testDb.db
       .select()
@@ -199,6 +210,96 @@ describe("POST /api/v1/items/[slug]/content", () => {
     expect(
       updatedProfileItem[0].savedAt.getTime() > originalCreationDate.getTime(),
     ).toBe(true);
+  });
+
+  it("should return 200 even when content URL does not match exactly", async () => {
+    const originalPublishedDate = new Date("2024-01-10T12:50:00-08:00");
+    const originalCreationDate = new Date("2025-01-10T12:52:56-08:00");
+    const mockItem = {
+      id: TEST_ITEM_ID,
+      url: "https://example.com/",
+      slug: TEST_ITEM_SLUG,
+      createdAt: originalCreationDate,
+      updatedAt: originalCreationDate,
+    };
+
+    await testDb.db.insert(items).values(mockItem);
+    await testDb.db.insert(profileItems).values({
+      profileId: DEFAULT_TEST_PROFILE_ID,
+      itemId: TEST_ITEM_ID,
+      title: "Example",
+      description: "An example item",
+      author: "Test Author",
+      thumbnail: "https://example.com/thumb.jpg",
+      publishedAt: originalPublishedDate,
+      savedAt: originalCreationDate,
+    });
+
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "POST",
+      body: {
+        url: "https://example.com",
+        htmlContent: "<div>Test content</div>",
+      },
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data).toEqual({
+      id: TEST_ITEM_ID,
+      message: "Content updated and set as main version",
+      status: "UPDATED_MAIN",
+    });
+
+    expect(extractMainContentAsMarkdown).toHaveBeenCalledWith(
+      "<div>Test content</div>",
+    );
+
+    expect(uploadItemContent).toHaveBeenCalledWith(
+      TEST_ITEM_SLUG,
+      "Markdown content",
+    );
+  });
+
+  it("should return 500 when content extraction fails", async () => {
+    const mockItem = {
+      id: TEST_ITEM_ID,
+      url: "https://example.com/",
+      slug: TEST_ITEM_SLUG,
+      createdAt: new Date("2025-01-10T12:52:56-08:00"),
+      updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+    };
+
+    await testDb.db.insert(items).values(mockItem);
+    await testDb.db.insert(profileItems).values({
+      profileId: DEFAULT_TEST_PROFILE_ID,
+      itemId: TEST_ITEM_ID,
+      title: "Example",
+      description: "An example item",
+      author: "Test Author",
+      thumbnail: "https://example.com/thumb.jpg",
+      publishedAt: new Date("2024-01-10T12:50:00-08:00"),
+      savedAt: new Date("2025-01-10T12:52:56-08:00"),
+    });
+
+    jest
+      .mocked(extractMainContentAsMarkdown)
+      .mockRejectedValueOnce(new ExtractError("Failed to extract content"));
+
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "POST",
+      body: {
+        url: "https://example.com/",
+        htmlContent: "<div>Invalid content</div>",
+      },
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(500);
+    const data = await response.json();
+    expect(data.error).toBe("Failed to extract content");
   });
 
   it("should return 401 if user profile not found", async () => {
@@ -233,8 +334,8 @@ describe("POST /api/v1/items/[slug]/content", () => {
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "POST",
       body: {
-        content: "Updated content",
-        slug: "nonexistent",
+        htmlContent: "<div>Updated content</div>",
+        url: "https://example.com/",
       },
     });
 
@@ -244,12 +345,12 @@ describe("POST /api/v1/items/[slug]/content", () => {
     expect(data.error).toBe("Item not found.");
   });
 
-  it("should return 404 if slug is missing", async () => {
+  it("should return 404 if url is missing", async () => {
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "POST",
       body: {
-        content: "Updated content",
-        slug: "",
+        htmlContent: "<div>Updated content</div>",
+        url: "",
       },
     });
 
@@ -262,7 +363,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
   it("should return 400 if content is missing", async () => {
     const mockItem = {
       id: TEST_ITEM_ID,
-      url: "https://example.com",
+      url: "https://example.com/",
       slug: TEST_ITEM_SLUG,
       createdAt: new Date("2025-01-10T12:52:56-08:00"),
       updatedAt: new Date("2025-01-10T12:52:56-08:00"),
@@ -283,13 +384,15 @@ describe("POST /api/v1/items/[slug]/content", () => {
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "POST",
       body: {
-        slug: TEST_ITEM_SLUG,
+        url: "https://example.com/",
       },
     });
 
     const response = await POST(request);
     expect(response.status).toBe(400);
     const data = await response.json();
-    expect(data.error).toBe("Invalid request parameters:\ncontent: Required");
+    expect(data.error).toBe(
+      "Invalid request parameters:\nhtmlContent: Required",
+    );
   });
 });
