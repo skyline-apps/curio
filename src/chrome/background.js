@@ -34,81 +34,83 @@ async function saveContent(url, htmlContent) {
     return contentResponse.json();
 }
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "saveCurioPage") {
-        // If targetUrl is provided, create a new tab and capture its content
+async function handleSaveRequest(request, sender, sendResponse) {
+    try {
+        let pageData;
+
         if (request.targetUrl) {
-            chrome.tabs.create({ url: request.targetUrl, active: false }, (tab) => {
-                // Wait for the tab to finish loading
+            // Handle new tab creation
+            const tab = await new Promise(resolve =>
+                chrome.tabs.create({ url: request.targetUrl, active: false }, resolve)
+            );
+
+            pageData = await new Promise((resolve, reject) => {
                 chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
                     if (tabId === tab.id && info.status === 'complete') {
-                        // Remove the listener
                         chrome.tabs.onUpdated.removeListener(listener);
-
-                        // Execute script to get page content
                         chrome.scripting.executeScript({
                             target: { tabId: tab.id },
-                            function: () => {
-                                return {
-                                    url: window.location.href,
-                                    html: document.documentElement.outerHTML,
-                                    title: document.title
-                                };
-                            }
+                            function: () => ({
+                                url: window.location.href,
+                                html: document.documentElement.outerHTML,
+                                title: document.title
+                            })
                         }, (results) => {
-                            const pageData = results[0].result;
-                            saveContent(pageData.url, pageData.html)
-                                .then(data => {
-                                    // Close the temporary tab
-                                    chrome.tabs.remove(tab.id);
-                                    sendResponse({ success: true, data });
-                                })
-                                .catch(error => {
-                                    chrome.tabs.remove(tab.id);
-                                    sendResponse({ success: false, error: error.message });
-                                });
+                            if (chrome.runtime.lastError) {
+                                reject(chrome.runtime.lastError);
+                            } else {
+                                resolve(results[0].result);
+                            }
                         });
                     }
                 });
             });
-            return true;
-        }
-        // Handle existing case for popup
-        else if (request.pageData) {
-            saveContent(request.pageData.url, request.pageData.html)
-                .then(data => {
-                    sendResponse({ success: true, data });
-                })
-                .catch(error => {
-                    sendResponse({ success: false, error: error.message });
-                });
-            return true;
+
+            const response = await saveContent(pageData.url, pageData.html);
+            chrome.tabs.remove(tab.id);
+            return { success: true, data: response };
         } else {
-            // TODO: fix this
-            // Otherwise, get page data from active tab (from popup)
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                const activeTab = tabs[0];
+            // Handle existing tab from popup
+            const [tab] = await new Promise(resolve =>
+                chrome.tabs.query({ active: true, currentWindow: true }, resolve)
+            );
+
+            pageData = await new Promise((resolve, reject) => {
                 chrome.scripting.executeScript({
-                    target: { tabId: activeTab.id },
-                    function: () => {
-                        return {
-                            url: window.location.href,
-                            html: document.documentElement.outerHTML,
-                            title: document.title
-                        };
-                    }
+                    target: { tabId: tab.id },
+                    function: () => ({
+                        url: window.location.href,
+                        html: document.documentElement.outerHTML,
+                        title: document.title
+                    })
                 }, (results) => {
-                    const pageData = results[0].result;
-                    saveContent(pageData.url, pageData.html)
-                        .then(data => {
-                            sendResponse({ success: true, data });
-                        })
-                        .catch(error => {
-                            sendResponse({ success: false, error: error.message });
-                        });
+                    if (chrome.runtime.lastError) {
+                        reject(chrome.runtime.lastError);
+                    } else {
+                        resolve(results[0].result);
+                    }
                 });
             });
-            return true;
+
+            const response = await saveContent(pageData.url, pageData.html);
+            return { success: true, data: response };
         }
+    } catch (error) {
+        return {
+            success: false,
+            error: error.message || 'Failed to save page'
+        };
+    }
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'saveCurioPage') {
+        handleSaveRequest(request, sender, sendResponse)
+            .then(sendResponse)
+            .catch(error => sendResponse({
+                success: false,
+                error: error.message
+            }));
+        return true; // Keep message channel open
     }
 });
