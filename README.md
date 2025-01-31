@@ -43,6 +43,8 @@ With the development environment running, navigate to `http://localhost:8000` to
 
 Use the `DASHBOARD_USERNAME` and `DASHBOARD_PASSWORD` environment variables to sign in.
 
+Saved Markdown content can be viewed here in the Supabase Storage page.
+
 ### Database shell
 1. Run `docker exec -it db bash`.
 2. Then, run `psql -U postgres`.
