@@ -6,17 +6,22 @@ import type {
   UpdatedSettingsResponse,
 } from "@/app/api/v1/user/settings/validation";
 import { handleAPIResponse } from "@/utils/api";
-import { createLogger } from "@/utils/logger";
 import {
+  type AppLayoutSettings,
   initializeTheme,
+  loadLayoutSettings,
   setDarkTheme,
   setLightTheme,
   setSystemTheme,
-} from "@/utils/themeStorage";
+  updateLayoutSettings,
+} from "@/utils/displayStorage";
+import { createLogger } from "@/utils/logger";
 
 const log = createLogger("SettingsProvider");
 
 export type SettingsContextType = {
+  appLayout?: AppLayoutSettings;
+  updateAppLayout: (settings: AppLayoutSettings) => void;
   settings?: SettingsResponse;
   updateSettings: (
     field: keyof SettingsResponse,
@@ -29,6 +34,7 @@ interface SettingsProviderProps {
 }
 
 export const SettingsContext = createContext<SettingsContextType>({
+  updateAppLayout: () => {},
   updateSettings: async () => {},
 });
 
@@ -36,6 +42,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   children,
 }: SettingsProviderProps): React.ReactNode => {
   const [currentSettings, setCurrentSettings] = useState<SettingsResponse>();
+  const [appLayout, setAppLayout] = useState<AppLayoutSettings>();
 
   const fetchSettings = async (): Promise<void> => {
     fetch("/api/v1/user/settings", {
@@ -57,6 +64,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   useEffect(() => {
     initializeTheme();
     fetchSettings();
+    setAppLayout(loadLayoutSettings());
   }, []);
 
   useEffect(() => {
@@ -70,6 +78,11 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       }
     }
   }, [currentSettings?.colorScheme]);
+
+  const updateAppLayout = (settings: AppLayoutSettings): void => {
+    setAppLayout(settings);
+    updateLayoutSettings(settings);
+  };
 
   const updateSettings = async (
     field: keyof SettingsResponse,
@@ -98,6 +111,8 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       value={{
         settings: currentSettings,
         updateSettings,
+        appLayout,
+        updateAppLayout,
       }}
     >
       {children}
