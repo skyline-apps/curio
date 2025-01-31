@@ -18,7 +18,7 @@
                 "http://localhost:3000/*"
             ],
             "js": [
-                "content-script.js"
+                "content.js"
             ]
         }
     ],

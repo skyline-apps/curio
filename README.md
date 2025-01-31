@@ -9,6 +9,30 @@ To start the local development environment:
 2. Start file syncing with `docker compose watch`.
 3. Navigate to `http://localhost:3000` to view the application.
 
+### Chrome extension
+To develop locally using the Chrome extension, first make sure that the API hostname is correctly set in `src/chrome/background.js`, `src/chrome/content.js`, and `src/chrome/manifest.json`.
+
+* For local development, this should be set to `http://localhost:3000/*`.
+* For production, this should be set to `https://curi.ooo/*`.
+
+The manifest should contain something like
+```
+    "content_scripts": [
+        {
+            "matches": [
+                "http://localhost:3000/*"
+            ],
+            "js": [
+                "content.js"
+            ]
+        },
+    ],
+```
+
+Next, install the extension in development mode. In Chrome, open `chrome://extensions`. Click on "Load unpacked" and select the `src/chrome` directory.
+
+Finally, update `NEXT_PUBLIC_CHROME_EXTENSION_ID` in `.env` based on the Chrome extension ID in the chrome://extensions page.
+
 ### Linting
 To install the local eslint plugins, run
 1. `cd src/web/eslint-local-rules`
