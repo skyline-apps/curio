@@ -3,8 +3,10 @@ import { and, db, eq } from "@/db";
 import { items, profileItems } from "@/db/schema";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
+import { ExtractError, extractMainContentAsMarkdown } from "@/utils/extract";
 import { createLogger } from "@/utils/logger";
 import { storage, StorageError } from "@/utils/storage";
+import { cleanUrl } from "@/utils/url";
 
 import {
   GetItemContentRequestSchema,
@@ -14,7 +16,7 @@ import {
   UploadStatus,
 } from "./validation";
 
-const log = createLogger("api/v1/items/[slug]/content");
+const log = createLogger("api/v1/items/content");
 
 export async function GET(
   request: APIRequest,
@@ -109,7 +111,9 @@ export async function POST(
       return data.error;
     }
 
-    const { slug, content } = data;
+    const { url, htmlContent } = data;
+
+    const cleanedUrl = cleanUrl(url);
 
     const item = await db
       .select()
@@ -117,7 +121,7 @@ export async function POST(
       .innerJoin(profileItems, eq(items.id, profileItems.itemId))
       .where(
         and(
-          eq(items.slug, slug),
+          eq(items.url, cleanedUrl),
           eq(profileItems.profileId, profileResult.profile.id),
         ),
       )
@@ -127,53 +131,46 @@ export async function POST(
       return APIResponseJSON({ error: "Item not found." }, { status: 404 });
     }
 
-    try {
-      const newDate = new Date();
-      const status = await storage.uploadItemContent(slug, content);
+    const slug = item[0].items.slug;
 
-      const response: UpdateItemContentResponse = {
-        status,
-        id: item[0].items.id,
-        message:
-          status === UploadStatus.UPDATED_MAIN
-            ? "Content updated and set as main version"
-            : "Content updated",
-      };
+    const newDate = new Date();
+    const markdownContent = await extractMainContentAsMarkdown(htmlContent);
+    const status = await storage.uploadItemContent(slug, markdownContent);
 
-      if (status === UploadStatus.UPDATED_MAIN) {
-        // TODO: Get item metadata and update here
-        await db
-          .update(items)
-          .set({ updatedAt: newDate })
-          .where(eq(items.id, item[0].items.id));
+    const response: UpdateItemContentResponse = {
+      status,
+      id: item[0].items.id,
+      message:
+        status === UploadStatus.UPDATED_MAIN
+          ? "Content updated and set as main version"
+          : "Content updated",
+    };
 
-        await db
-          .update(profileItems)
-          .set({ savedAt: newDate })
-          .where(eq(profileItems.itemId, item[0].items.id));
-      }
+    if (status === UploadStatus.UPDATED_MAIN) {
+      // TODO: Get item metadata and update here
+      await db
+        .update(items)
+        .set({ updatedAt: newDate })
+        .where(eq(items.id, item[0].items.id));
 
-      return APIResponseJSON(response);
-    } catch (error: unknown) {
-      if (error instanceof StorageError) {
-        return APIResponseJSON({ error: error.message }, { status: 400 });
-      } else if (error instanceof Error) {
-        log.error("Error updating item content:", error);
-        return APIResponseJSON(
-          { error: "Error updating item content." },
-          { status: 500 },
-        );
-      } else {
-        log.error("Unknown error updating item content:", error);
-        return APIResponseJSON(
-          { error: "Unknown error updating item content." },
-          { status: 500 },
-        );
-      }
+      await db
+        .update(profileItems)
+        .set({ savedAt: newDate })
+        .where(eq(profileItems.itemId, item[0].items.id));
     }
+
+    return APIResponseJSON(response);
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      log.error("Error updating item content:", error);
+    if (error instanceof StorageError) {
+      return APIResponseJSON({ error: error.message }, { status: 500 });
+    } else if (error instanceof ExtractError) {
+      return APIResponseJSON({ error: error.message }, { status: 500 });
+    } else if (error instanceof Error) {
+      log.error(
+        "Error updating item content:",
+        error.name,
+        error.message.substring(0, 200),
+      );
       return APIResponseJSON(
         { error: "Error updating item content." },
         { status: 500 },

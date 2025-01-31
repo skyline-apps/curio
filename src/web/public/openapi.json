@@ -838,18 +838,18 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "content": {
+                  "htmlContent": {
                     "type": "string",
-                    "description": "The new content for the item. Will replace the existing content only if it's longer."
+                    "description": "The HTML content for the item. Will replace the existing content only if it's longer."
                   },
-                  "slug": {
+                  "url": {
                     "type": "string",
-                    "description": "The unique slug of the item to update."
+                    "description": "The URL of the item to update."
                   }
                 },
                 "required": [
-                  "content",
-                  "slug"
+                  "htmlContent",
+                  "url"
                 ]
               }
             }

@@ -28,12 +28,12 @@ export type GetItemContentResponse = z.infer<
 >;
 
 export const UpdateItemContentRequestSchema = z.object({
-  content: z
+  htmlContent: z
     .string()
     .describe(
-      "The new content for the item. Will replace the existing content only if it's longer.",
+      "The HTML content for the item. Will replace the existing content only if it's longer.",
     ),
-  slug: z.string().describe("The unique slug of the item to update."),
+  url: z.string().describe("The URL of the item to update."),
 });
 
 export const UpdateItemContentResponseSchema = z.discriminatedUnion("status", [
