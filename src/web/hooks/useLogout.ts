@@ -2,9 +2,9 @@ import { useRouter } from "next/navigation";
 import { useContext } from "react";
 
 import { UserContext } from "@/providers/UserProvider";
+import { clearTheme, initializeTheme } from "@/utils/displayStorage";
 import { createLogger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/client";
-import { clearTheme, initializeTheme } from "@/utils/themeStorage";
 
 const log = createLogger("useLogout");
 

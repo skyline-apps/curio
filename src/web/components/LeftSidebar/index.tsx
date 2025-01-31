@@ -11,6 +11,7 @@ import NewItemModal from "@/components/NewItemModal";
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
 import { useLogout } from "@/hooks/useLogout";
+import { SettingsContext } from "@/providers/SettingsProvider";
 import { UserContext } from "@/providers/UserProvider";
 import { cn } from "@/utils/cn";
 
@@ -21,11 +22,10 @@ import UserMenu from "./UserMenu";
 const LeftSidebar: React.FC = () => {
   const router = useRouter();
   const { user } = useContext(UserContext);
-  // TODO: Store this sidebarOpen state in localStorage
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
   const pathname = usePathname();
   const [selectedKey, setSelectedKey] = useState<string>(SidebarKey.NONE);
   const [showNewItemModal, setShowNewItemModal] = useState<boolean>(false);
+  const { appLayout, updateAppLayout } = useContext(SettingsContext);
 
   const handleLogout = useLogout();
 
@@ -38,12 +38,21 @@ const LeftSidebar: React.FC = () => {
     setSelectedKey(newSelectedKey);
   }, [pathname]);
 
+  if (!appLayout) {
+    return null;
+  }
+
+  const sidebarOpen = appLayout.leftSidebarOpen;
+
   const handleNavigation = (key: React.Key): void => {
     router.push(key.toString());
   };
 
   const toggleSidebar = (): void => {
-    setSidebarOpen(!sidebarOpen);
+    updateAppLayout({
+      ...appLayout,
+      leftSidebarOpen: !sidebarOpen,
+    });
   };
 
   return (
