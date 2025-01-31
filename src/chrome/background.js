@@ -84,6 +84,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 });
             return true;
         } else {
+            // TODO: fix this
             // Otherwise, get page data from active tab (from popup)
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 const activeTab = tabs[0];
