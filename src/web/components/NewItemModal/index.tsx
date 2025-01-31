@@ -1,6 +1,8 @@
+import type { PressEvent } from "@react-types/shared";
 import { useEffect, useState } from "react";
 
 import Button from "@/components/ui/Button";
+import Form from "@/components/ui/Form";
 import Input from "@/components/ui/Input";
 import Modal, {
   ModalBody,
@@ -34,7 +36,10 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
     ): void => {
       if (event.data.type === "CURIO_SAVE_ERROR") {
         log.error("Error saving content", event.data);
-        setError(event.data.error || "Unknown error saving content");
+        setError("Error saving content. Contact us if this error persists.");
+      } else if (event.data.type === "CURIO_SAVE_SUCCESS") {
+        log.info("Content saved successfully", event.data);
+        closeModal();
       }
     };
 
@@ -42,7 +47,10 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 
-  const openAndSave = (): void => {
+  const openAndSave = (
+    event: React.FormEvent<HTMLFormElement> | PressEvent,
+  ): void => {
+    if ("preventDefault" in event) event.preventDefault();
     setError(null);
     try {
       window.postMessage(
@@ -53,7 +61,9 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
         "http://localhost:3000",
       );
     } catch (error) {
-      setError("Failed to communicate with Chrome extension");
+      setError(
+        "Failed to communicate with Chrome extension. Please ensure the extension is properly installed and enabled.",
+      );
       log.error("Error sending save request:", error);
     }
   };
@@ -69,7 +79,7 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
           <h1 className="text-2xl font-medium">New item</h1>
         </ModalHeader>
         <ModalBody>
-          <div className="flex flex-col gap-2">
+          <Form onSubmit={openAndSave}>
             <Input
               type="text"
               name="url"
@@ -86,7 +96,7 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
             <Button className="w-full sm:w-48 self-end" onPress={openAndSave}>
               Open page and save
             </Button>
-          </div>
+          </Form>
         </ModalBody>
       </ModalContent>
     </Modal>
