@@ -871,7 +871,7 @@
                             "UPDATED_MAIN"
                           ]
                         },
-                        "id": {
+                        "slug": {
                           "type": "string"
                         },
                         "message": {
@@ -880,7 +880,7 @@
                       },
                       "required": [
                         "status",
-                        "id",
+                        "slug",
                         "message"
                       ]
                     },
@@ -893,7 +893,7 @@
                             "STORED_VERSION"
                           ]
                         },
-                        "id": {
+                        "slug": {
                           "type": "string"
                         },
                         "message": {
@@ -902,7 +902,7 @@
                       },
                       "required": [
                         "status",
-                        "id",
+                        "slug",
                         "message"
                       ]
                     },
@@ -915,7 +915,7 @@
                             "SKIPPED"
                           ]
                         },
-                        "id": {
+                        "slug": {
                           "type": "string"
                         },
                         "message": {
@@ -924,7 +924,7 @@
                       },
                       "required": [
                         "status",
-                        "id",
+                        "slug",
                         "message"
                       ]
                     },

@@ -134,12 +134,15 @@ export async function POST(
     const slug = item[0].items.slug;
 
     const newDate = new Date();
-    const markdownContent = await extractMainContentAsMarkdown(htmlContent);
+    const markdownContent = await extractMainContentAsMarkdown(
+      cleanedUrl,
+      htmlContent,
+    );
     const status = await storage.uploadItemContent(slug, markdownContent);
 
     const response: UpdateItemContentResponse = {
       status,
-      id: item[0].items.id,
+      slug: item[0].items.slug,
       message:
         status === UploadStatus.UPDATED_MAIN
           ? "Content updated and set as main version"

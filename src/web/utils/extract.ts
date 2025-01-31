@@ -9,35 +9,59 @@ export class ExtractError extends Error {
   }
 }
 
-const turndownService = new TurndownService({
+const turndown = new TurndownService({
   headingStyle: "atx",
   codeBlockStyle: "fenced",
   bulletListMarker: "-",
 });
 
-turndownService.addRule("images", {
-  filter: "img",
-  replacement: (_content: string, node: Node) => {
-    if (!(node instanceof HTMLElement)) return "";
-    const src = node.getAttribute("src");
-    const alt = node.getAttribute("alt") || "";
-    return src ? `![${alt}](${src})` : "";
+// Add custom rule for handling picture elements
+turndown.addRule("picture", {
+  filter: ["picture"],
+  replacement: function (content, node) {
+    // Find the img element within picture
+    const img = node.querySelector("img");
+    if (!img) return "";
+
+    // Get parent anchor if it exists
+    const parentAnchor = (node as Element).closest("a");
+    const href = parentAnchor?.getAttribute("href");
+
+    // Get image attributes
+    const src = img.getAttribute("src") || "";
+    const alt = img.getAttribute("alt") || "";
+    const title = img.getAttribute("title")
+      ? ` "${img.getAttribute("title")}"`
+      : "";
+
+    // If there's a parent anchor, wrap the image in a link
+    if (href) {
+      return `[![${alt}](${src}${title}) ](${href})`;
+    }
+
+    // Otherwise just return the image
+    return `![${alt}](${src}${title})`;
   },
 });
 
 export class Extract {
-  async extractMainContentAsMarkdown(url: string): Promise<string> {
-    const response = await fetch(url);
-    const html = await response.text();
-    const dom = new JSDOM(html, { url });
+  async extractMainContentAsMarkdown(
+    url: string,
+    html: string,
+  ): Promise<string> {
+    try {
+      const dom = new JSDOM(html, { url });
 
-    const reader = new Readability(dom.window.document);
-    const article = reader.parse();
-    if (!article) {
-      throw new ExtractError("Failed to extract content");
+      const reader = new Readability(dom.window.document);
+      const article = reader.parse();
+      if (!article) {
+        throw new ExtractError("Failed to extract content");
+      }
+
+      return turndown.turndown(article.content);
+    } catch (error) {
+      throw error instanceof Error ? error : new Error(String(error));
     }
-
-    return turndownService.turndown(article.content);
   }
 }
 

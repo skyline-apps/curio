@@ -29,6 +29,7 @@ global.fetch = jest.fn(() => Promise.resolve(mockResponse));
 
 const TEST_ITEM_ID = "123e4567-e89b-12d3-a456-426614174001";
 const TEST_ITEM_SLUG = "example-com";
+const TEST_ITEM_URL = "https://example.com/";
 const NONEXISTENT_USER_ID = "123e4567-e89b-12d3-a456-426614174003";
 
 describe("GET /api/v1/items/[slug]/content", () => {
@@ -38,7 +39,7 @@ describe("GET /api/v1/items/[slug]/content", () => {
   ])("%s", async (_, apiKey) => {
     const mockItem = {
       id: TEST_ITEM_ID,
-      url: "https://example.com/",
+      url: TEST_ITEM_URL,
       slug: TEST_ITEM_SLUG,
       createdAt: new Date("2025-01-10T12:52:56-08:00"),
       updatedAt: new Date("2025-01-10T12:52:56-08:00"),
@@ -79,7 +80,7 @@ describe("GET /api/v1/items/[slug]/content", () => {
           thumbnail: "https://example.com/thumb.jpg",
           title: "Example",
         },
-        url: "https://example.com/",
+        url: TEST_ITEM_URL,
       },
     });
   });
@@ -143,7 +144,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
     const originalCreationDate = new Date("2025-01-10T12:52:56-08:00");
     const mockItem = {
       id: TEST_ITEM_ID,
-      url: "https://example.com/",
+      url: TEST_ITEM_URL,
       slug: TEST_ITEM_SLUG,
       createdAt: originalCreationDate,
       updatedAt: originalCreationDate,
@@ -165,7 +166,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       method: "POST",
       apiKey,
       body: {
-        url: "https://example.com/",
+        url: TEST_ITEM_URL,
         htmlContent: "<div>Test content</div>",
       },
     });
@@ -175,12 +176,13 @@ describe("POST /api/v1/items/[slug]/content", () => {
 
     const data = await response.json();
     expect(data).toEqual({
-      id: TEST_ITEM_ID,
+      slug: TEST_ITEM_SLUG,
       message: "Content updated and set as main version",
       status: "UPDATED_MAIN",
     });
 
     expect(extractMainContentAsMarkdown).toHaveBeenCalledWith(
+      TEST_ITEM_URL,
       "<div>Test content</div>",
     );
 
@@ -217,7 +219,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
     const originalCreationDate = new Date("2025-01-10T12:52:56-08:00");
     const mockItem = {
       id: TEST_ITEM_ID,
-      url: "https://example.com/",
+      url: TEST_ITEM_URL,
       slug: TEST_ITEM_SLUG,
       createdAt: originalCreationDate,
       updatedAt: originalCreationDate,
@@ -248,12 +250,13 @@ describe("POST /api/v1/items/[slug]/content", () => {
 
     const data = await response.json();
     expect(data).toEqual({
-      id: TEST_ITEM_ID,
+      slug: TEST_ITEM_SLUG,
       message: "Content updated and set as main version",
       status: "UPDATED_MAIN",
     });
 
     expect(extractMainContentAsMarkdown).toHaveBeenCalledWith(
+      TEST_ITEM_URL,
       "<div>Test content</div>",
     );
 
@@ -266,7 +269,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
   it("should return 500 when content extraction fails", async () => {
     const mockItem = {
       id: TEST_ITEM_ID,
-      url: "https://example.com/",
+      url: TEST_ITEM_URL,
       slug: TEST_ITEM_SLUG,
       createdAt: new Date("2025-01-10T12:52:56-08:00"),
       updatedAt: new Date("2025-01-10T12:52:56-08:00"),
@@ -291,7 +294,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "POST",
       body: {
-        url: "https://example.com/",
+        url: TEST_ITEM_URL,
         htmlContent: "<div>Invalid content</div>",
       },
     });
@@ -335,7 +338,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       method: "POST",
       body: {
         htmlContent: "<div>Updated content</div>",
-        url: "https://example.com/",
+        url: TEST_ITEM_URL,
       },
     });
 
@@ -363,7 +366,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
   it("should return 400 if content is missing", async () => {
     const mockItem = {
       id: TEST_ITEM_ID,
-      url: "https://example.com/",
+      url: TEST_ITEM_URL,
       slug: TEST_ITEM_SLUG,
       createdAt: new Date("2025-01-10T12:52:56-08:00"),
       updatedAt: new Date("2025-01-10T12:52:56-08:00"),
@@ -384,7 +387,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "POST",
       body: {
-        url: "https://example.com/",
+        url: TEST_ITEM_URL,
       },
     });
 
