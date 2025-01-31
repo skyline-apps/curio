@@ -20,8 +20,9 @@ export type CurrentItemContextType = {
   currentItem: ItemContent | null;
   populateCurrentItem: (item: ItemContent | null) => void;
   clearCurrentItem: () => void;
-  loading: boolean;
   fetchContent: (path: string) => Promise<void>;
+  loading: boolean;
+  loadingError: string | null;
 };
 
 interface CurrentItemProviderProps {
@@ -34,16 +35,18 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
   currentItem: null,
   populateCurrentItem: () => {},
   clearCurrentItem: () => {},
-  loading: true,
   fetchContent: () => Promise.resolve(),
+  loading: true,
+  loadingError: null,
 });
 
 export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   children,
 }: CurrentItemProviderProps): React.ReactNode => {
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [currentItem, setCurrentItem] = useState<ItemContent | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
 
   const clearCurrentItem = (): void => {
     setCurrentItem(null);
@@ -56,9 +59,13 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   };
 
   const fetchContent = useCallback(async (slug: string): Promise<void> => {
+    setLoadingError(null);
     if (!slug) {
       clearCurrentItem();
       return;
+    }
+    if (slug !== currentItem?.item.slug) {
+      clearCurrentItem();
     }
     const searchParams = new URLSearchParams({
       slug,
@@ -74,10 +81,10 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
           },
         },
       ).then(handleAPIResponse<GetItemContentResponse>);
-      if ("error" in result) {
-        log.error(`Failed to fetch item content for ${slug}`, result.error);
-        clearCurrentItem();
-        throw result.error;
+      if (!result || "error" in result) {
+        log.error(`Failed to fetch item content for ${slug}`, result?.error);
+        setLoadingError(`Failed to fetch item content.`);
+        return;
       }
       if (result) {
         setCurrentItem(result);
@@ -85,8 +92,8 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
       }
     } catch (error) {
       log.error(`Failed to fetch item content for ${slug}`, error);
-      clearCurrentItem();
-      throw error;
+      setLoadingError(`Failed to fetch item content.`);
+      return;
     } finally {
       setLoading(false);
     }
@@ -100,8 +107,9 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         currentItem,
         populateCurrentItem,
         clearCurrentItem,
-        loading,
         fetchContent,
+        loading,
+        loadingError,
       }}
     >
       {children}
