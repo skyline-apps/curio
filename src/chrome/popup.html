@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Curio Saver</title>
+    <style>
+        body {
+            width: 300px;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+        }
+
+        button {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+
+        .saved-page {
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .saved-page h3 {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+        }
+
+        .saved-page p {
+            margin: 0;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <button id="saveCurioPage">Save Current Page</button>
+    <div id="savedPages"></div>
+    <script src="popup.js"></script>
+</body>
+
+</html>
