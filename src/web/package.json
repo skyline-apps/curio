@@ -42,6 +42,7 @@
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.1",
+    "@types/chrome": "^0.0.300",
     "@types/jest": "^29.5.13",
     "@types/node": "^20",
     "@types/pg": "^8.11.10",
