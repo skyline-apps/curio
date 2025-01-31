@@ -66,7 +66,7 @@ export async function GET(
       .from(items)
       .innerJoin(profileItems, eq(items.id, profileItems.itemId))
       .where(whereClause)
-      .orderBy(sql`${items.id} DESC`)
+      .orderBy(sql`${profileItems.savedAt} DESC`)
       .limit(limit);
 
     const total = await db
