@@ -1,3 +1,39 @@
+const API_HOST = 'http://localhost:3000';
+const API_ENDPOINTS = {
+    items: `${API_HOST}/api/v1/items`,
+    content: `${API_HOST}/api/v1/items/content`,
+};
+
+async function saveContent(url, htmlContent) {
+    const itemResponse = await fetch(API_ENDPOINTS.items, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ items: [{ url }] })
+    });
+
+    if (!itemResponse.ok) {
+        const text = await itemResponse.text();
+        throw new Error(`HTTP error status: ${itemResponse.status}, message: ${text}`);
+    }
+
+    const contentResponse = await fetch(API_ENDPOINTS.content, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url, htmlContent })
+    });
+
+    if (!contentResponse.ok) {
+        const text = await contentResponse.text();
+        throw new Error(`HTTP error status: ${contentResponse.status}, message: ${text}`);
+    }
+
+    return contentResponse.json();
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "saveCurioPage") {
         // If targetUrl is provided, create a new tab and capture its content
@@ -21,34 +57,32 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             }
                         }, (results) => {
                             const pageData = results[0].result;
-                            chrome.storage.local.get(['savedPages'], (data) => {
-                                const savedPages = data.savedPages || [];
-                                savedPages.push({
-                                    ...pageData,
-                                    timestamp: new Date().toISOString()
-                                });
-                                chrome.storage.local.set({ savedPages }, () => {
+                            saveContent(pageData.url, pageData.html)
+                                .then(data => {
                                     // Close the temporary tab
                                     chrome.tabs.remove(tab.id);
-                                    sendResponse({ success: true });
+                                    sendResponse({ success: true, data });
+                                })
+                                .catch(error => {
+                                    chrome.tabs.remove(tab.id);
+                                    sendResponse({ success: false, error: error.message });
                                 });
-                            });
                         });
                     }
                 });
             });
-            return true; // Will respond asynchronously
+            return true;
         }
         // Handle existing case for popup
         else if (request.pageData) {
-            chrome.storage.local.get(['savedPages'], (data) => {
-                const savedPages = data.savedPages || [];
-                savedPages.push({
-                    ...request.pageData,
-                    timestamp: new Date().toISOString()
+            saveContent(request.pageData.url, request.pageData.html)
+                .then(data => {
+                    sendResponse({ success: true, data });
+                })
+                .catch(error => {
+                    sendResponse({ success: false, error: error.message });
                 });
-                chrome.storage.local.set({ savedPages });
-            });
+            return true;
         } else {
             // Otherwise, get page data from active tab (from popup)
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -64,24 +98,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     }
                 }, (results) => {
                     const pageData = results[0].result;
-                    chrome.storage.local.get(['savedPages'], (data) => {
-                        const savedPages = data.savedPages || [];
-                        savedPages.push({
-                            ...pageData,
-                            timestamp: new Date().toISOString()
+                    saveContent(pageData.url, pageData.html)
+                        .then(data => {
+                            sendResponse({ success: true, data });
+                        })
+                        .catch(error => {
+                            sendResponse({ success: false, error: error.message });
                         });
-                        chrome.storage.local.set({ savedPages }, () => {
-                            if (chrome.runtime.lastError) {
-                                sendResponse({ success: false, error: chrome.runtime.lastError });
-                            } else {
-                                sendResponse({ success: true });
-                            }
-                        });
-                    });
                 });
             });
+            return true;
         }
-        // Return true to indicate we will send a response asynchronously
-        return true;
     }
 });
