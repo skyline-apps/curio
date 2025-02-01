@@ -14,9 +14,69 @@ import { GET, POST } from "./route";
 
 const TEST_PROFILE_ID = "123e4567-e89b-12d3-a456-426614174000";
 const TEST_ITEM_ID = "123e4567-e89b-12d3-a456-426614174001";
+const TEST_ITEM_URL_1 = "https://example.com/";
 const TEST_ITEM_ID_2 = "223e4567-e89b-12d3-a456-426614174001";
+const TEST_ITEM_URL_2 = "https://example2.com/";
 const TEST_ITEM_ID_3 = "323e4567-e89b-12d3-a456-426614174001";
+const TEST_ITEM_URL_3 = "https://example3.com/";
 const NONEXISTENT_USER_ID = "123e4567-e89b-12d3-a456-426614174003";
+
+const MOCK_ITEMS = [
+  {
+    id: TEST_ITEM_ID,
+    url: TEST_ITEM_URL_1,
+    slug: "example-com",
+    createdAt: new Date("2025-01-10T12:52:56-08:00"),
+    updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+  },
+  {
+    id: TEST_ITEM_ID_2,
+    url: TEST_ITEM_URL_2,
+    slug: "example2-com",
+    createdAt: new Date("2025-01-10T12:53:56-08:00"),
+    updatedAt: new Date("2025-01-10T12:53:56-08:00"),
+  },
+  {
+    id: TEST_ITEM_ID_3,
+    url: TEST_ITEM_URL_3,
+    slug: "example3-com",
+    createdAt: new Date("2025-01-10T12:54:56-08:00"),
+    updatedAt: new Date("2025-01-10T12:54:56-08:00"),
+  },
+];
+
+const MOCK_PROFILE_ITEMS = [
+  {
+    profileId: TEST_PROFILE_ID,
+    itemId: TEST_ITEM_ID,
+    title: "Example 1",
+    description: "First example item",
+    author: "Test Author",
+    thumbnail: "https://example.com/thumb1.jpg",
+    publishedAt: new Date("2025-01-10T12:52:56-08:00"),
+    savedAt: new Date("2025-01-10T12:52:56-08:00"),
+  },
+  {
+    profileId: TEST_PROFILE_ID,
+    itemId: TEST_ITEM_ID_2,
+    title: "Example 2",
+    description: "Second example item",
+    author: "Test Author",
+    thumbnail: "https://example.com/thumb2.jpg",
+    publishedAt: new Date("2025-01-10T12:52:56-08:00"),
+    savedAt: new Date("2025-01-10T12:52:56-08:00"),
+  },
+  {
+    profileId: TEST_PROFILE_ID,
+    itemId: TEST_ITEM_ID_3,
+    title: "Example 3",
+    description: "Third example item",
+    author: "Test Author",
+    thumbnail: "https://example.com/thumb3.jpg",
+    publishedAt: new Date("2025-01-10T12:52:56-08:00"),
+    savedAt: new Date("2025-01-10T12:52:56-08:00"),
+  },
+];
 
 describe("GET /api/v1/items", () => {
   test.each([
@@ -26,27 +86,8 @@ describe("GET /api/v1/items", () => {
       DEFAULT_TEST_API_KEY,
     ],
   ])("%s", async (_, apiKey) => {
-    const mockItems = [
-      {
-        id: TEST_ITEM_ID,
-        url: "https://example.com",
-        slug: "example-com",
-        createdAt: new Date("2025-01-10T12:52:56-08:00"),
-        updatedAt: new Date("2025-01-10T12:52:56-08:00"),
-      },
-    ];
-
-    await testDb.db.insert(items).values(mockItems);
-    await testDb.db.insert(profileItems).values({
-      profileId: TEST_PROFILE_ID,
-      itemId: TEST_ITEM_ID,
-      savedAt: new Date("2025-01-10T12:52:56-08:00"),
-      title: "Example",
-      description: "An example item",
-      author: "Test Author",
-      thumbnail: "https://example.com/thumb.jpg",
-      publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-    });
+    await testDb.db.insert(items).values(MOCK_ITEMS[0]);
+    await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS[0]);
 
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "GET",
@@ -62,75 +103,17 @@ describe("GET /api/v1/items", () => {
     expect(data.total).toBe(1);
     expect(data.items[0].metadata).toEqual({
       author: "Test Author",
-      description: "An example item",
+      description: "First example item",
       publishedAt: "2025-01-10T20:52:56.000Z",
-      thumbnail: "https://example.com/thumb.jpg",
-      title: "Example",
+      thumbnail: "https://example.com/thumb1.jpg",
+      title: "Example 1",
     });
   });
 
   it("should support cursor-based pagination", async () => {
     // Create multiple test items with different IDs to test pagination
-    const mockItems = [
-      {
-        id: TEST_ITEM_ID,
-        url: "https://example1.com",
-        slug: "example1-com",
-        createdAt: new Date("2025-01-10T12:52:56-08:00"),
-        updatedAt: new Date("2025-01-10T12:52:56-08:00"),
-      },
-      {
-        id: TEST_ITEM_ID_2,
-        url: "https://example2.com",
-        slug: "example2-com",
-        createdAt: new Date("2025-01-10T12:53:56-08:00"),
-        updatedAt: new Date("2025-01-10T12:53:56-08:00"),
-      },
-      {
-        id: TEST_ITEM_ID_3,
-        url: "https://example3.com",
-        slug: "example3-com",
-        createdAt: new Date("2025-01-10T12:54:56-08:00"),
-        updatedAt: new Date("2025-01-10T12:54:56-08:00"),
-      },
-    ];
-
-    const mockItemsMetadata = [
-      {
-        itemId: TEST_ITEM_ID,
-        title: "Example 1",
-        description: "First example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb1.jpg",
-        publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-      },
-      {
-        itemId: TEST_ITEM_ID_2,
-        title: "Example 2",
-        description: "Second example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb2.jpg",
-        publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-      },
-      {
-        itemId: TEST_ITEM_ID_3,
-        title: "Example 3",
-        description: "Third example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb3.jpg",
-        publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-      },
-    ];
-
-    await testDb.db.insert(items).values(mockItems);
-
-    for (const item of mockItemsMetadata.reverse()) {
-      await testDb.db.insert(profileItems).values({
-        ...item,
-        profileId: TEST_PROFILE_ID,
-        savedAt: new Date("2025-01-10T12:52:56-08:00"),
-      });
-    }
+    await testDb.db.insert(items).values(MOCK_ITEMS);
+    await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS.reverse());
 
     const params = new URLSearchParams({
       limit: "2",
@@ -167,6 +150,67 @@ describe("GET /api/v1/items", () => {
     expect(secondData.total).toBe(3);
     expect(secondData.nextCursor).toBeUndefined(); // No more pages
     expect(secondData.items[0].id).toBe(TEST_ITEM_ID); // Last item
+  });
+
+  it("should return 200 when fetching specific slugs", async () => {
+    await testDb.db.insert(items).values(MOCK_ITEMS);
+    await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+    const params = new URLSearchParams({
+      slugs: "example-com,example2-com",
+    });
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "GET",
+      url: `http://localhost:3000/api/v1/items?${params.toString()}`,
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data.items).toHaveLength(2);
+    expect(data.items[0].id).toBe(TEST_ITEM_ID);
+    expect(data.items[1].id).toBe(TEST_ITEM_ID_2);
+    expect(data.total).toBe(3);
+  });
+
+  it("should return 200 when fetching specific urls", async () => {
+    await testDb.db.insert(items).values(MOCK_ITEMS);
+    await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+    const params = new URLSearchParams({
+      urls: "https://example2.com?query=val,https://example3.com",
+    });
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "GET",
+      url: `http://localhost:3000/api/v1/items?${params.toString()}`,
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data.items).toHaveLength(2);
+    expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
+    expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
+    expect(data.total).toBe(3);
+  });
+
+  it("should return 400 when both slugs and urls are provided", async () => {
+    await testDb.db.insert(items).values(MOCK_ITEMS);
+    await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+    const params = new URLSearchParams({
+      slugs: "example-com,example2-com",
+      urls: "https://example2.com?query=val,https://example3.com",
+    });
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "GET",
+      url: `http://localhost:3000/api/v1/items?${params.toString()}`,
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(400);
   });
 
   it("should return 400 with default limit if limit is invalid", async () => {
@@ -241,7 +285,7 @@ describe("POST /api/v1/items", () => {
     expect(data).toEqual({
       items: [
         {
-          url: "https://example.com/",
+          url: TEST_ITEM_URL_1,
           id: expect.any(String),
           slug: expect.stringMatching(/^example-com-[a-f0-9]{6}$/),
           metadata: expect.objectContaining({
@@ -275,7 +319,7 @@ describe("POST /api/v1/items", () => {
   ])("%s", async (_, apiKey) => {
     await testDb.db.insert(items).values({
       id: TEST_ITEM_ID,
-      url: "https://example.com/",
+      url: TEST_ITEM_URL_1,
       slug: "example-com-123456",
       createdAt: new Date("2025-01-10T12:52:56-08:00"),
       updatedAt: new Date("2025-01-10T12:52:56-08:00"),
@@ -296,14 +340,14 @@ describe("POST /api/v1/items", () => {
       body: {
         items: [
           {
-            url: "https://example.com",
+            url: TEST_ITEM_URL_1,
             metadata: {
               title: "New title",
               description: "New description",
             },
           },
           {
-            url: "https://example-2.com",
+            url: TEST_ITEM_URL_2,
             metadata: {
               title: "Example title",
             },
@@ -330,9 +374,9 @@ describe("POST /api/v1/items", () => {
           createdAt: expect.any(String),
         },
         {
-          url: "https://example-2.com/",
+          url: "https://example2.com/",
           id: expect.any(String),
-          slug: expect.stringMatching(/^example-2-com-[a-f0-9]{6}$/),
+          slug: expect.stringMatching(/^example2-com-[a-f0-9]{6}$/),
           metadata: expect.objectContaining({
             title: "Example title",
           }),
@@ -433,7 +477,7 @@ describe("POST /api/v1/items", () => {
     expect(data2).toEqual({
       items: [
         expect.objectContaining({
-          url: "https://example.com/",
+          url: TEST_ITEM_URL_1,
           id: expect.any(String),
           slug: expect.stringMatching(/^example-com-[a-f0-9]{6}$/),
           metadata: expect.objectContaining({

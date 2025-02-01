@@ -59,21 +59,41 @@ export const ItemResultSchema = z.object({
 
 export type ItemResult = z.infer<typeof ItemResultSchema>;
 
-export const GetItemsRequestSchema = z.object({
-  slugs: z
-    .string()
-    .optional()
-    .superRefine((val) => {
-      if (val && !val.split(",").every((s) => s.trim().length > 0)) {
-        throw new Error("Invalid slug format");
-      }
-    })
-    .describe(
-      "A comma-separated list of slugs to retrieve. If the slug is not found, it will be ignored.",
-    ),
-  limit: z.coerce.number().min(1).max(1000).optional().default(100),
-  cursor: z.string().optional(),
-});
+export const GetItemsRequestSchema = z
+  .object({
+    slugs: z
+      .string()
+      .optional()
+      .transform((val) =>
+        val ? val.split(",").map((s) => s.trim()) : undefined,
+      )
+      .refine(
+        (val) => !val || val.every((s) => s.length > 0),
+        "Invalid slug format",
+      )
+      .describe(
+        "A comma-separated list of slugs to retrieve. If the slug is not found, it will be ignored.",
+      ),
+    urls: z
+      .string()
+      .optional()
+      .transform((val) =>
+        val ? val.split(",").map((s) => s.trim()) : undefined,
+      )
+      .refine(
+        (val) => !val || val.every((s) => s.length > 0),
+        "Invalid URL format",
+      )
+      .describe(
+        "A comma-separated list of URLs to retrieve. If the URL is not found, it will be ignored.",
+      ),
+    limit: z.coerce.number().min(1).max(1000).optional().default(100),
+    cursor: z.string().optional(),
+  })
+  .refine(
+    (val) => !(val.slugs && val.urls),
+    "Cannot provide both slugs and urls",
+  );
 export type GetItemsRequest = Partial<z.infer<typeof GetItemsRequestSchema>> & {
   limit?: number;
 };
