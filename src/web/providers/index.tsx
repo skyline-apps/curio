@@ -10,6 +10,7 @@ import { createClient } from "@/utils/supabase/server";
 import { CurrentItemProvider } from "./CurrentItemProvider";
 import { ItemsProvider } from "./ItemsProvider";
 import { SettingsProvider } from "./SettingsProvider";
+import { ToastProvider } from "./ToastProvider";
 import { type User, UserProvider } from "./UserProvider";
 
 const log = createLogger("Providers");
@@ -47,9 +48,11 @@ const Providers: React.FC<PropsWithChildren> = async ({
     <HeroUIProvider>
       <UserProvider user={currentUser}>
         <ItemsProvider>
-          <CurrentItemProvider>
-            <SettingsProvider>{children}</SettingsProvider>
-          </CurrentItemProvider>
+          <ToastProvider>
+            <CurrentItemProvider>
+              <SettingsProvider>{children}</SettingsProvider>
+            </CurrentItemProvider>
+          </ToastProvider>
         </ItemsProvider>
       </UserProvider>
     </HeroUIProvider>
