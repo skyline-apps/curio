@@ -35,14 +35,20 @@ export async function GET(
       return data.error;
     }
 
-    const { limit, slugs, cursor } = data;
+    const { limit, slugs, urls, cursor } = data;
+    const cleanedUrls = urls?.map((url) => cleanUrl(url)) ?? [];
 
     let whereClause = slugs
       ? and(
           eq(profileItems.profileId, profileResult.profile.id),
-          sql`${items.slug} = ANY(${slugs})`,
+          sql`${items.slug} = ANY(ARRAY[${sql.join(slugs, sql`, `)}]::text[])`,
         )
-      : eq(profileItems.profileId, profileResult.profile.id);
+      : urls
+        ? and(
+            eq(profileItems.profileId, profileResult.profile.id),
+            sql`${items.url} = ANY(ARRAY[${sql.join(cleanedUrls, sql`, `)}]::text[])`,
+          )
+        : eq(profileItems.profileId, profileResult.profile.id);
 
     if (cursor) {
       const cursorCondition = sql`${items.id} < ${cursor}`;

@@ -256,31 +256,29 @@
         "parameters": [
           {
             "schema": {
-              "type": "string",
-              "description": "A comma-separated list of slugs to retrieve. If the slug is not found, it will be ignored."
+              "type": "object",
+              "properties": {
+                "slugs": {
+                  "type": "string",
+                  "description": "A comma-separated list of slugs to retrieve. If the slug is not found, it will be ignored."
+                },
+                "urls": {
+                  "type": "string",
+                  "description": "A comma-separated list of URLs to retrieve. If the URL is not found, it will be ignored."
+                },
+                "limit": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 1000,
+                  "default": 100
+                },
+                "cursor": {
+                  "type": "string"
+                }
+              }
             },
-            "required": false,
-            "description": "A comma-separated list of slugs to retrieve. If the slug is not found, it will be ignored.",
-            "name": "slugs",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "number",
-              "minimum": 1,
-              "maximum": 1000,
-              "default": 100
-            },
-            "required": false,
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": false,
-            "name": "cursor",
+            "required": true,
+            "name": "value",
             "in": "query"
           }
         ],
