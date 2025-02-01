@@ -107,6 +107,7 @@ describe("GET /api/v1/items", () => {
       publishedAt: "2025-01-10T20:52:56.000Z",
       thumbnail: "https://example.com/thumb1.jpg",
       title: "Example 1",
+      savedAt: "2025-01-10T20:52:56.000Z",
     });
   });
 
@@ -420,6 +421,24 @@ describe("POST /api/v1/items", () => {
   });
 
   it("should return 200 if overwriting existing item with different URL", async () => {
+    await testDb.db.insert(items).values({
+      id: TEST_ITEM_ID,
+      url: TEST_ITEM_URL_1,
+      slug: "example-com-123456",
+      createdAt: new Date("2025-01-10T12:52:56-08:00"),
+      updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+    });
+    await testDb.db.insert(profileItems).values({
+      profileId: DEFAULT_TEST_PROFILE_ID,
+      itemId: TEST_ITEM_ID,
+      title: "Old title",
+      author: "Kim",
+      state: "active",
+      isFavorite: false,
+      archivedAt: null,
+      savedAt: new Date("2025-01-01T00:00:00.000Z"),
+      lastReadAt: null,
+    });
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "POST",
       body: {
@@ -450,6 +469,7 @@ describe("POST /api/v1/items", () => {
             title: "My title",
             description: "My description",
             publishedAt: "2024-01-01T00:00:00.000Z",
+            savedAt: "2025-01-01T00:00:00.000Z",
           }),
         }),
       ],

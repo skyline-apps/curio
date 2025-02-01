@@ -46,6 +46,19 @@ const ItemMetadataSchema = z
       .describe(
         "The published date of the item. If left blank, will remain unchanged.",
       ),
+    savedAt: z
+      .union([z.string(), z.date()])
+      .transform((val) => {
+        if (val instanceof Date) {
+          return val.toISOString();
+        }
+        return val;
+      })
+      .nullable()
+      .optional()
+      .describe(
+        "The published date of the item. If left blank, will remain unchanged.",
+      ),
   })
   .strict();
 

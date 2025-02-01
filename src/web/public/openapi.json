@@ -347,6 +347,20 @@
                                   }
                                 ],
                                 "description": "The published date of the item. If left blank, will remain unchanged."
+                              },
+                              "savedAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "nullable": true
+                                  }
+                                ],
+                                "description": "The published date of the item. If left blank, will remain unchanged."
                               }
                             },
                             "required": [
@@ -485,6 +499,20 @@
                                 }
                               ],
                               "description": "The published date of the item. If left blank, will remain unchanged."
+                            },
+                            "savedAt": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "nullable": true
+                                }
+                              ],
+                              "description": "The published date of the item. If left blank, will remain unchanged."
                             }
                           },
                           "additionalProperties": false
@@ -557,6 +585,20 @@
                                 "description": "The thumbnail of the item. If left blank, will remain unchanged."
                               },
                               "publishedAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "nullable": true
+                                  }
+                                ],
+                                "description": "The published date of the item. If left blank, will remain unchanged."
+                              },
+                              "savedAt": {
                                 "anyOf": [
                                   {
                                     "type": "string"
@@ -730,6 +772,20 @@
                                   "description": "The thumbnail of the item. If left blank, will remain unchanged."
                                 },
                                 "publishedAt": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "nullable": true
+                                    }
+                                  ],
+                                  "description": "The published date of the item. If left blank, will remain unchanged."
+                                },
+                                "savedAt": {
                                   "anyOf": [
                                     {
                                       "type": "string"

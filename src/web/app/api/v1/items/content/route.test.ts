@@ -83,6 +83,7 @@ describe("GET /api/v1/items/[slug]/content", () => {
           publishedAt: "2025-01-10T20:52:56.000Z",
           thumbnail: "https://example.com/thumb.jpg",
           title: "Example",
+          savedAt: "2025-01-10T20:52:56.000Z",
         },
         url: TEST_ITEM_URL,
       },

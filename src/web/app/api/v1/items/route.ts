@@ -67,6 +67,7 @@ export async function GET(
           author: profileItems.author,
           thumbnail: profileItems.thumbnail,
           publishedAt: profileItems.publishedAt,
+          savedAt: profileItems.savedAt,
         },
       })
       .from(items)
@@ -188,6 +189,7 @@ export async function POST(
           author: profileItems.author,
           thumbnail: profileItems.thumbnail,
           publishedAt: profileItems.publishedAt,
+          savedAt: profileItems.savedAt,
         });
 
       const response: CreateOrUpdateItemsResponse = {
