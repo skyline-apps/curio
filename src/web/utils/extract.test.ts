@@ -92,4 +92,122 @@ describe("Extract", () => {
       ).rejects.toThrow(ExtractError);
     });
   });
+
+  describe("extractMetadata", () => {
+    it("should extract metadata from Open Graph tags", async () => {
+      const html = `
+        <html>
+          <head>
+            <meta property="og:title" content="OG Test Title" />
+            <meta property="og:description" content="OG test description" />
+            <meta property="og:image" content="https://example.com/og-image.jpg" />
+            <meta property="article:author" content="John Doe" />
+            <meta property="article:published_time" content="2024-01-31T08:00:00Z" />
+          </head>
+          <body></body>
+        </html>
+      `;
+
+      const metadata = await extract.extractMetadata(
+        "https://example.com",
+        html,
+      );
+
+      expect(metadata).toEqual({
+        title: "OG Test Title",
+        description: "OG test description",
+        thumbnail: "https://example.com/og-image.jpg",
+        author: "John Doe",
+        publishedAt: new Date("2024-01-31T08:00:00Z"),
+      });
+    });
+
+    it("should extract metadata from JSON-LD", async () => {
+      const html = `
+        <html>
+          <head>
+            <script type="application/ld+json">
+              {
+                "@context": "https://schema.org",
+                "@type": "Article",
+                "headline": "JSON-LD Test Title",
+                "description": "JSON-LD test description",
+                "image": "https://example.com/jsonld-image.jpg",
+                "author": {
+                  "@type": "Person",
+                  "name": "Jane Smith"
+                },
+                "datePublished": "2024-01-31T08:00:00Z"
+              }
+            </script>
+          </head>
+          <body></body>
+        </html>
+      `;
+
+      const metadata = await extract.extractMetadata(
+        "https://example.com",
+        html,
+      );
+
+      expect(metadata).toEqual({
+        title: "JSON-LD Test Title",
+        description: "JSON-LD test description",
+        thumbnail: "https://example.com/jsonld-image.jpg",
+        author: "Jane Smith",
+        publishedAt: new Date("2024-01-31T08:00:00Z"),
+      });
+    });
+
+    it("should extract metadata from standard meta tags and title", async () => {
+      const html = `
+        <html>
+          <head>
+            <title>Standard Test Title</title>
+            <meta name="description" content="Standard test description" />
+            <meta name="author" content="Bob Wilson" />
+          </head>
+          <body></body>
+        </html>
+      `;
+
+      const metadata = await extract.extractMetadata(
+        "https://example.com",
+        html,
+      );
+
+      expect(metadata).toEqual({
+        title: "Standard Test Title",
+        description: "Standard test description",
+        author: "Bob Wilson",
+        thumbnail: null,
+        publishedAt: null,
+      });
+    });
+
+    it("should handle missing metadata gracefully", async () => {
+      const html = "<html><head></head><body></body></html>";
+
+      const metadata = await extract.extractMetadata(
+        "https://example.com",
+        html,
+      );
+
+      expect(metadata).toEqual({
+        title: null,
+        description: null,
+        author: null,
+        thumbnail: null,
+        publishedAt: null,
+      });
+    });
+
+    it("should throw ExtractError for invalid HTML", async () => {
+      const invalidHtml = "not html at all";
+
+      await expect(
+        extract.extractMetadata("https://example.com", invalidHtml),
+      ).rejects.toThrow(ExtractError);
+    });
+  });
 });

@@ -75,6 +75,12 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
     event: React.FormEvent<HTMLFormElement> | PressEvent,
   ): void => {
     if ("preventDefault" in event) event.preventDefault();
+    try {
+      new URL(urlInput);
+    } catch {
+      setError("Please enter a valid URL.");
+      return;
+    }
     setError(null);
     try {
       setLoading(true);
