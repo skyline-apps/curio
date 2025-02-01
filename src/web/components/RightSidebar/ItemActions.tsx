@@ -43,6 +43,7 @@ const ItemActions = ({ item }: ItemActionsProps): JSX.Element => {
     <div className="flex flex-row gap-2 my-2 justify-end flex-none">
       <Button
         isIconOnly
+        variant="faded"
         size="sm"
         onPress={() => {
           /* TODO: Implement favorite */
@@ -52,6 +53,7 @@ const ItemActions = ({ item }: ItemActionsProps): JSX.Element => {
       </Button>
       <Button
         isIconOnly
+        variant="faded"
         size="sm"
         onPress={() => {
           /* TODO: Implement archive */
@@ -61,6 +63,7 @@ const ItemActions = ({ item }: ItemActionsProps): JSX.Element => {
       </Button>
       <Button
         isIconOnly
+        variant="faded"
         size="sm"
         onPress={handleRefetch}
         isLoading={savingItem}
