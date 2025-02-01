@@ -48,8 +48,8 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
             </p>
           </Link>
         )}
-        <div className="flex flex-row gap-2 justify-between items-end">
-          <div className="flex flex-col flex-1 min-w-24 pb-2">
+        <div className="flex flex-row gap-2 justify-between items-start">
+          <div className="flex flex-col flex-1 min-w-24 py-2">
             {metadata.author && (
               <p className="text-xs overflow-hidden text-ellipsis truncate text-secondary-300 dark:text-secondary-600">
                 {metadata.author}
