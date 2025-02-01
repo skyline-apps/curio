@@ -56,10 +56,10 @@ export async function GET(
           author: profileItems.author,
           thumbnail: profileItems.thumbnail,
           publishedAt: profileItems.publishedAt,
+          savedAt: profileItems.savedAt,
         },
         createdAt: items.createdAt,
         updatedAt: items.updatedAt,
-        savedAt: profileItems.savedAt,
       })
       .from(items)
       .innerJoin(profileItems, eq(items.id, profileItems.itemId))

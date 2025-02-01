@@ -19,6 +19,8 @@ const ItemPage: React.FC = () => {
     }
   }, [fetchContent, slug]);
 
+  const { metadata } = currentItem?.item || {};
+
   return (
     <div className="flex-1 w-full h-full flex flex-col">
       {loading ? (
@@ -29,9 +31,17 @@ const ItemPage: React.FC = () => {
         </>
       ) : (
         currentItem && (
-          <MarkdownViewer className="max-w-5xl p-4">
-            {currentItem.content}
-          </MarkdownViewer>
+          <>
+            <h1 className="text-lg font-medium">{metadata?.title}</h1>
+            <MarkdownViewer className="max-w-5xl py-4">
+              {currentItem.content}
+            </MarkdownViewer>
+            <hr className="my-4" />
+            <p className="text-sm text-secondary italic py-4">
+              {metadata?.savedAt &&
+                `Saved on ${new Date(metadata.savedAt).toLocaleString()}`}
+            </p>
+          </>
         )
       )}
     </div>
