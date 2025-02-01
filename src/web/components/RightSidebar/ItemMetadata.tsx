@@ -33,6 +33,15 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
         <Link className="hover:underline" href={`/items/${item.slug}`}>
           <h2>{metadata.title}</h2>
         </Link>
+        {item.url === metadata.title ? (
+          <Link className="hover:underline" href={item.url} target="_blank">
+            <p className="text-sm text-secondary">Original page</p>
+          </Link>
+        ) : (
+          <Link className="hover:underline" href={item.url}>
+            <p className="text-sm text-primary">{item.url}</p>
+          </Link>
+        )}
         <div className="flex flex-row justify-between gap-2 text-sm text-secondary-300 dark:text-secondary-600">
           {metadata.author && <p>{metadata.author}</p>}
           {metadata.publishedAt && (
