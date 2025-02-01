@@ -115,6 +115,7 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
                 value={urlInput}
                 className="flex-1"
                 onChange={(event) => setUrlInput(event.target.value)}
+                autoFocus
               />
               {error && (
                 <div className="mt-2 text-sm text-danger-600">{error}</div>
@@ -131,8 +132,13 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
         </ModalContent>
       </Modal>
       {newItemSlug && (
-        <Toast>
-          Item successfully saved! <a href={`/items/${newItemSlug}`}>View</a>
+        <Toast dismissable disappearing={false}>
+          <div className="flex gap-2 items-center">
+            Item successfully saved!
+            <Button size="sm" href={`/items/${newItemSlug}`}>
+              View
+            </Button>
+          </div>
         </Toast>
       )}
     </>
