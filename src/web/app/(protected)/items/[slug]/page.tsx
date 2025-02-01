@@ -28,7 +28,11 @@ const ItemPage: React.FC = () => {
           <p className="text-sm text-danger">{loadingError}</p>
         </>
       ) : (
-        currentItem && <MarkdownViewer>{currentItem.content}</MarkdownViewer>
+        currentItem && (
+          <MarkdownViewer className="max-w-5xl p-4">
+            {currentItem.content}
+          </MarkdownViewer>
+        )
       )}
     </div>
   );
