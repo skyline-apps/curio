@@ -4,7 +4,11 @@ import { uploadItemContent } from "@/__mocks__/storage";
 import { eq } from "@/db";
 import { items, profileItems } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
-import { ExtractError, extractMainContentAsMarkdown } from "@/utils/extract";
+import {
+  ExtractError,
+  extractMainContentAsMarkdown,
+  extractMetadata,
+} from "@/utils/extract";
 import {
   DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_PROFILE_ID,
@@ -191,6 +195,11 @@ describe("POST /api/v1/items/[slug]/content", () => {
       "Markdown content",
     );
 
+    expect(extractMetadata).toHaveBeenCalledWith(
+      TEST_ITEM_URL,
+      "<div>Test content</div>",
+    );
+
     const updatedItem = await testDb.db
       .select()
       .from(items)
@@ -212,6 +221,12 @@ describe("POST /api/v1/items/[slug]/content", () => {
     expect(
       updatedProfileItem[0].savedAt.getTime() > originalCreationDate.getTime(),
     ).toBe(true);
+
+    expect(updatedProfileItem[0].author).toEqual("kim");
+    expect(updatedProfileItem[0].title).toEqual("test title");
+    expect(updatedProfileItem[0].description).toEqual("test description");
+    expect(updatedProfileItem[0].thumbnail).toEqual("test thumbnail");
+    expect(updatedProfileItem[0].publishedAt).toEqual(originalPublishedDate);
   });
 
   it("should return 200 even when content URL does not match exactly", async () => {

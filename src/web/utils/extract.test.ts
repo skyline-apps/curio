@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-import { Extract, ExtractError } from "@/utils/extract";
+import { Extract, ExtractError, MetadataError } from "@/utils/extract";
 
 jest.unmock("@/utils/extract");
 
@@ -202,12 +202,12 @@ describe("Extract", () => {
       });
     });
 
-    it("should throw ExtractError for invalid HTML", async () => {
+    it("should throw MetadataError for invalid HTML", async () => {
       const invalidHtml = "not html at all";
 
       await expect(
         extract.extractMetadata("https://example.com", invalidHtml),
-      ).rejects.toThrow(ExtractError);
+      ).rejects.toThrow(MetadataError);
     });
   });
 });
