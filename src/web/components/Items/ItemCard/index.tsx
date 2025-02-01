@@ -21,7 +21,7 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }: ItemCardProps) => {
       )}
       onClick={() => populateCurrentItem({ item })}
     >
-      <div className="block">
+      <div className="block overflow-hidden">
         <Link
           href={`/items/${item.slug}`}
           className="text-sm text-foreground hover:underline"
@@ -29,7 +29,7 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }: ItemCardProps) => {
         >
           {item.metadata.title}
         </Link>
-        <p className="text-xs text-secondary truncate">
+        <p className="text-xs text-secondary text-wrap">
           {item.metadata.description}
         </p>
       </div>
