@@ -3,7 +3,12 @@ import { and, db, eq } from "@/db";
 import { items, profileItems } from "@/db/schema";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
-import { ExtractError, extractMainContentAsMarkdown } from "@/utils/extract";
+import {
+  ExtractError,
+  extractMainContentAsMarkdown,
+  extractMetadata,
+  MetadataError,
+} from "@/utils/extract";
 import { createLogger } from "@/utils/logger";
 import { storage, StorageError } from "@/utils/storage";
 import { cleanUrl } from "@/utils/url";
@@ -150,23 +155,44 @@ export async function POST(
     };
 
     if (status === UploadStatus.UPDATED_MAIN) {
-      // TODO: Get item metadata and update here
       await db
         .update(items)
         .set({ updatedAt: newDate })
         .where(eq(items.id, item[0].items.id));
 
-      await db
-        .update(profileItems)
-        .set({ savedAt: newDate })
-        .where(eq(profileItems.itemId, item[0].items.id));
+      try {
+        const metadata = await extractMetadata(item[0].items.url, htmlContent);
+        await db
+          .update(profileItems)
+          .set({
+            savedAt: newDate,
+            title: metadata.title || item[0].items.url,
+            author: metadata.author,
+            description: metadata.description,
+            thumbnail: metadata.thumbnail,
+            publishedAt: metadata.publishedAt,
+          })
+          .where(eq(profileItems.itemId, item[0].items.id));
+      } catch (error: unknown) {
+        if (error instanceof MetadataError) {
+          await db
+            .update(profileItems)
+            .set({
+              savedAt: newDate,
+            })
+            .where(eq(profileItems.itemId, item[0].items.id));
+          return APIResponseJSON(response);
+        } else {
+          throw error;
+        }
+      }
     }
-
     return APIResponseJSON(response);
   } catch (error: unknown) {
     if (error instanceof StorageError) {
       return APIResponseJSON({ error: error.message }, { status: 500 });
     } else if (error instanceof ExtractError) {
+      log.error("Error extracting content:", error.message);
       return APIResponseJSON({ error: error.message }, { status: 500 });
     } else if (error instanceof Error) {
       log.error(
