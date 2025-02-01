@@ -1,10 +1,22 @@
 import Markdown, { Options } from "react-markdown";
 
-interface MarkdownViewerProps extends Options {}
+import { cn } from "@/utils/cn";
 
-const MarkdownViewer = (options: MarkdownViewerProps): JSX.Element => {
+interface MarkdownViewerProps extends Options {
+  className?: string;
+}
+
+const MarkdownViewer = ({
+  className,
+  ...options
+}: MarkdownViewerProps): JSX.Element => {
   return (
-    <div className="prose prose-slate max-w-none [&_*]:!text-default-foreground hover:prose-a:!text-primary dark:prose-invert">
+    <div
+      className={cn(
+        "prose prose-slate max-w-none [&_*]:!text-default-foreground hover:prose-a:!text-primary dark:prose-invert",
+        className,
+      )}
+    >
       <Markdown {...options} />
     </div>
   );

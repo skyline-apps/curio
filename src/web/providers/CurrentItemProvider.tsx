@@ -88,7 +88,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
       }
       if (result) {
         setCurrentItem(result);
-        setSidebarOpen(false);
+        setSidebarOpen(true);
       }
     } catch (error) {
       log.error(`Failed to fetch item content for ${slug}`, error);
