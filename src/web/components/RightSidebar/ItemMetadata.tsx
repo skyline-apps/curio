@@ -1,6 +1,12 @@
 import Link from "next/link";
+import { useCallback, useContext } from "react";
 
+import Button from "@/components/ui/Button";
+import { BrowserMessageContext } from "@/providers/BrowserMessageProvider";
 import type { ItemContent } from "@/providers/CurrentItemProvider";
+import { createLogger } from "@/utils/logger";
+
+const log = createLogger("item-metadata");
 
 interface ItemMetadataProps {
   item?: ItemContent["item"];
@@ -9,6 +15,18 @@ interface ItemMetadataProps {
 const ItemMetadata: React.FC<ItemMetadataProps> = ({
   item,
 }: ItemMetadataProps) => {
+  const { savingItem, saveItemContent } = useContext(BrowserMessageContext);
+
+  const handleRefetch = useCallback(async () => {
+    if (!item?.url) return;
+
+    try {
+      await saveItemContent(item.url);
+    } catch (error) {
+      log.error("Error refetching content:", error);
+    }
+  }, [item?.url, saveItemContent]);
+
   if (!item || !item.metadata) {
     return (
       <div className="flex h-full items-center justify-center p-4">
@@ -29,10 +47,12 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
           />
         </div>
       )}
-      <div className="p-4">
-        <Link className="hover:underline" href={`/items/${item.slug}`}>
-          <h2>{metadata.title}</h2>
-        </Link>
+      <div className="px-4 py-2 overflow-x-hidden">
+        <div className="flex items-start justify-between">
+          <Link className="hover:underline" href={`/items/${item.slug}`}>
+            <h2>{metadata.title}</h2>
+          </Link>
+        </div>
         {item.url === metadata.title ? (
           <Link className="hover:underline" href={item.url} target="_blank">
             <p className="text-sm text-secondary">Original page</p>
@@ -51,6 +71,9 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
         {metadata.description && (
           <p className="text-sm text-secondary">{metadata.description}</p>
         )}
+        <Button size="sm" onPress={handleRefetch} isLoading={savingItem}>
+          Refetch
+        </Button>
       </div>
     </>
   );
