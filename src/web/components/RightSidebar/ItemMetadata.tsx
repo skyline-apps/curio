@@ -1,12 +1,8 @@
 import Link from "next/link";
-import { useCallback, useContext } from "react";
 
-import Button from "@/components/ui/Button";
-import { BrowserMessageContext } from "@/providers/BrowserMessageProvider";
 import type { ItemContent } from "@/providers/CurrentItemProvider";
-import { createLogger } from "@/utils/logger";
 
-const log = createLogger("item-metadata");
+import ItemActions from "./ItemActions";
 
 interface ItemMetadataProps {
   item?: ItemContent["item"];
@@ -15,18 +11,6 @@ interface ItemMetadataProps {
 const ItemMetadata: React.FC<ItemMetadataProps> = ({
   item,
 }: ItemMetadataProps) => {
-  const { savingItem, saveItemContent } = useContext(BrowserMessageContext);
-
-  const handleRefetch = useCallback(async () => {
-    if (!item?.url) return;
-
-    try {
-      await saveItemContent(item.url);
-    } catch (error) {
-      log.error("Error refetching content:", error);
-    }
-  }, [item?.url, saveItemContent]);
-
   if (!item || !item.metadata) {
     return (
       <div className="flex h-full items-center justify-center p-4">
@@ -37,7 +21,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
   const { metadata } = item;
 
   return (
-    <>
+    <div className="flex-1">
       {metadata.thumbnail && (
         <div className="w-full h-48 p-2">
           <img
@@ -55,27 +39,36 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
         </div>
         {item.url === metadata.title ? (
           <Link className="hover:underline" href={item.url} target="_blank">
-            <p className="text-sm text-secondary">Original page</p>
+            <p className="text-sm text-primary">Original page</p>
           </Link>
         ) : (
           <Link className="hover:underline" href={item.url}>
-            <p className="text-sm text-primary">{item.url}</p>
+            <p className="text-sm text-primary overflow-hidden text-ellipsis truncate">
+              {item.url}
+            </p>
           </Link>
         )}
-        <div className="flex flex-row justify-between gap-2 text-sm text-secondary-300 dark:text-secondary-600">
-          {metadata.author && <p>{metadata.author}</p>}
-          {metadata.publishedAt && (
-            <p>{new Date(metadata.publishedAt).toLocaleDateString()}</p>
-          )}
+        <div className="flex flex-row gap-2 justify-between items-end">
+          <div className="flex flex-col flex-1 min-w-24 pb-2">
+            {metadata.author && (
+              <p className="text-xs overflow-hidden text-ellipsis truncate text-secondary-300 dark:text-secondary-600">
+                {metadata.author}
+              </p>
+            )}
+
+            {metadata.publishedAt && (
+              <p className="text-xs text-secondary-300 dark:text-secondary-600">
+                {new Date(metadata.publishedAt).toLocaleDateString()}
+              </p>
+            )}
+          </div>
+          <ItemActions item={item} />
         </div>
         {metadata.description && (
           <p className="text-sm text-secondary">{metadata.description}</p>
         )}
-        <Button size="sm" onPress={handleRefetch} isLoading={savingItem}>
-          Refetch
-        </Button>
       </div>
-    </>
+    </div>
   );
 };
 
