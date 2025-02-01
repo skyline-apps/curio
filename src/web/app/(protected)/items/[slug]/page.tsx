@@ -31,9 +31,9 @@ const ItemPage: React.FC = () => {
         </>
       ) : (
         currentItem && (
-          <>
+          <div className="max-w-4xl mx-auto">
             <h1 className="text-lg font-medium">{metadata?.title}</h1>
-            <MarkdownViewer className="max-w-5xl py-4">
+            <MarkdownViewer className="py-4">
               {currentItem.content}
             </MarkdownViewer>
             <hr className="my-4" />
@@ -41,7 +41,7 @@ const ItemPage: React.FC = () => {
               {metadata?.savedAt &&
                 `Saved on ${new Date(metadata.savedAt).toLocaleString()}`}
             </p>
-          </>
+          </div>
         )
       )}
     </div>
