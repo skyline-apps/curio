@@ -24,6 +24,11 @@ const Toast: React.FC<ToastProps> = ({
   const [visible, setVisible] = useState<boolean>(true);
   const [isExiting, setIsExiting] = useState<boolean>(false);
 
+  useEffect(() => {
+    setVisible(true);
+    setIsExiting(false);
+  }, [children]);
+
   const startSnackbarTimer = (): (() => void) => {
     const timer = setTimeout(() => {
       setIsExiting(true);
@@ -37,7 +42,7 @@ const Toast: React.FC<ToastProps> = ({
 
   useEffect(() => {
     if (disappearing && visible) {
-      startSnackbarTimer();
+      return startSnackbarTimer();
     }
   }, [disappearing, visible]);
 

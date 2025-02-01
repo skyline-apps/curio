@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useContext, useState } from "react";
 import { z } from "zod";
 
@@ -6,8 +8,8 @@ import { type SettingsResponse } from "@/app/api/v1/user/settings/validation";
 import { FormSection } from "@/components/ui/Form";
 import { Radio, RadioGroup } from "@/components/ui/Radio";
 import Spinner from "@/components/ui/Spinner";
-import Toast from "@/components/ui/Toast";
 import { SettingsContext } from "@/providers/SettingsProvider";
+import { useToast } from "@/providers/ToastProvider";
 import { createLogger } from "@/utils/logger";
 import { camelCaseToSentenceCase } from "@/utils/string";
 
@@ -15,8 +17,7 @@ const log = createLogger("UpdateUserSettings");
 
 const UpdateUserSettings: React.FC = () => {
   const { settings, updateSettings } = useContext(SettingsContext);
-  const [successMessage, setSuccessMessage] = useState<string>("");
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const { showToast } = useToast();
   const [submitting, setSubmitting] = useState<string>("");
 
   const updateSetting = async <T extends keyof SettingsResponse>(
@@ -27,16 +28,20 @@ const UpdateUserSettings: React.FC = () => {
       return;
     }
     setSubmitting(field);
-    setErrorMessage("");
-    setSuccessMessage("");
     updateSettings(field, value)
       .then(() => {
-        setSuccessMessage("Successfully updated settings.");
+        showToast("Successfully updated settings.", {
+          disappearing: true,
+          dismissable: true,
+        });
         setSubmitting("");
       })
       .catch((error) => {
         log.error("Error updating settings: ", error);
-        setErrorMessage("Error updating settings.");
+        showToast("Error updating settings.", {
+          disappearing: true,
+          dismissable: true,
+        });
         setSubmitting("");
       });
   };
@@ -115,13 +120,7 @@ const UpdateUserSettings: React.FC = () => {
     );
   }
 
-  return (
-    <>
-      {successMessage && <Toast>{successMessage}</Toast>}
-      {errorMessage && <Toast>{errorMessage}</Toast>}
-      <div className="max-w-md">{contents}</div>
-    </>
-  );
+  return <div className="max-w-md">{contents}</div>;
 };
 
 export default UpdateUserSettings;
