@@ -2,6 +2,14 @@ import { jest } from "@jest/globals";
 
 import { ExtractedMetadata } from "@/utils/extract";
 
+export const MOCK_METADATA: ExtractedMetadata = {
+  author: "kim",
+  title: "test title",
+  description: "test description",
+  thumbnail: "test thumbnail",
+  publishedAt: new Date("2024-01-10T12:50:00-08:00"),
+};
+
 export class ExtractError extends Error {
   constructor(message: string) {
     super(message);
@@ -52,10 +60,4 @@ export const extractMetadata = jest
 // Set default mock values
 extractMainContentAsMarkdown.mockResolvedValue("Markdown content");
 
-extractMetadata.mockResolvedValue({
-  author: "kim",
-  title: "test title",
-  description: "test description",
-  thumbnail: "test thumbnail",
-  publishedAt: new Date("2024-01-10T12:50:00-08:00"),
-});
+extractMetadata.mockResolvedValue(MOCK_METADATA);

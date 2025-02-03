@@ -5,6 +5,7 @@ import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_PROFILE_ID,
+  DEFAULT_TEST_PROFILE_ID_2,
   makeAuthenticatedMockRequest,
   makeUnauthenticatedMockRequest,
 } from "@/utils/test/api";
@@ -12,12 +13,11 @@ import { testDb } from "@/utils/test/provider";
 
 import { GET, POST } from "./route";
 
-const TEST_PROFILE_ID = "123e4567-e89b-12d3-a456-426614174000";
 const TEST_ITEM_ID = "123e4567-e89b-12d3-a456-426614174001";
 const TEST_ITEM_URL_1 = "https://example.com/";
-const TEST_ITEM_ID_2 = "223e4567-e89b-12d3-a456-426614174001";
+const TEST_ITEM_ID_2 = "123e4567-e89b-12d3-a456-426614174002";
 const TEST_ITEM_URL_2 = "https://example2.com/";
-const TEST_ITEM_ID_3 = "323e4567-e89b-12d3-a456-426614174001";
+const TEST_ITEM_ID_3 = "123e4567-e89b-12d3-a456-426614174003";
 const TEST_ITEM_URL_3 = "https://example3.com/";
 const NONEXISTENT_USER_ID = "123e4567-e89b-12d3-a456-426614174003";
 
@@ -47,7 +47,7 @@ const MOCK_ITEMS = [
 
 const MOCK_PROFILE_ITEMS = [
   {
-    profileId: TEST_PROFILE_ID,
+    profileId: DEFAULT_TEST_PROFILE_ID,
     itemId: TEST_ITEM_ID,
     title: "Example 1",
     description: "First example item",
@@ -57,24 +57,34 @@ const MOCK_PROFILE_ITEMS = [
     savedAt: new Date("2025-01-10T12:52:56-08:00"),
   },
   {
-    profileId: TEST_PROFILE_ID,
+    profileId: DEFAULT_TEST_PROFILE_ID,
     itemId: TEST_ITEM_ID_2,
     title: "Example 2",
     description: "Second example item",
     author: "Test Author",
     thumbnail: "https://example.com/thumb2.jpg",
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-    savedAt: new Date("2025-01-10T12:52:56-08:00"),
+    savedAt: new Date("2025-01-10T12:52:57-08:00"),
   },
   {
-    profileId: TEST_PROFILE_ID,
+    profileId: DEFAULT_TEST_PROFILE_ID,
     itemId: TEST_ITEM_ID_3,
     title: "Example 3",
     description: "Third example item",
     author: "Test Author",
     thumbnail: "https://example.com/thumb3.jpg",
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-    savedAt: new Date("2025-01-10T12:52:56-08:00"),
+    savedAt: new Date("2025-01-10T12:52:58-08:00"),
+  },
+  {
+    profileId: DEFAULT_TEST_PROFILE_ID_2,
+    itemId: TEST_ITEM_ID_3,
+    title: "Example 3 New title",
+    description: "Third example item",
+    author: "Test Author",
+    thumbnail: "https://example.com/thumb3.jpg",
+    publishedAt: new Date("2025-01-10T12:52:56-08:00"),
+    savedAt: new Date("2025-01-10T12:52:56-08:04"),
   },
 ];
 
@@ -114,7 +124,7 @@ describe("GET /api/v1/items", () => {
   it("should support cursor-based pagination", async () => {
     // Create multiple test items with different IDs to test pagination
     await testDb.db.insert(items).values(MOCK_ITEMS);
-    await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS.reverse());
+    await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
 
     const params = new URLSearchParams({
       limit: "2",
@@ -170,8 +180,8 @@ describe("GET /api/v1/items", () => {
 
     const data = await response.json();
     expect(data.items).toHaveLength(2);
-    expect(data.items[0].id).toBe(TEST_ITEM_ID);
-    expect(data.items[1].id).toBe(TEST_ITEM_ID_2);
+    expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
+    expect(data.items[1].id).toBe(TEST_ITEM_ID);
     expect(data.total).toBe(3);
   });
 
@@ -192,8 +202,8 @@ describe("GET /api/v1/items", () => {
 
     const data = await response.json();
     expect(data.items).toHaveLength(2);
-    expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
-    expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
+    expect(data.items[0].id).toBe(TEST_ITEM_ID_3);
+    expect(data.items[1].id).toBe(TEST_ITEM_ID_2);
     expect(data.total).toBe(3);
   });
 
@@ -310,6 +320,7 @@ describe("POST /api/v1/items", () => {
         isFavorite: false,
         archivedAt: null,
         lastReadAt: null,
+        savedAt: null,
       }),
     ]);
   });
