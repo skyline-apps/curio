@@ -42,7 +42,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
             <p className="text-sm text-primary">Original page</p>
           </Link>
         ) : (
-          <Link className="hover:underline" href={item.url}>
+          <Link className="hover:underline" href={item.url} target="_blank">
             <p className="text-sm text-primary overflow-hidden text-ellipsis truncate">
               {item.url}
             </p>
