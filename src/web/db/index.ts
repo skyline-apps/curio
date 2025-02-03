@@ -18,6 +18,7 @@ export {
   gt,
   gte,
   inArray,
+  is,
   lt,
   lte,
   ne,
