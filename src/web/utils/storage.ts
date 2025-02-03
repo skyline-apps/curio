@@ -8,6 +8,7 @@ import type { StorageClient } from "@/utils/supabase/types";
 import { ITEMS_BUCKET } from "./constants";
 
 const log = createLogger("utils/storage");
+const DEFAULT_NAME = "default";
 
 export class StorageError extends Error {
   constructor(message: string) {
@@ -90,7 +91,7 @@ export class Storage {
     try {
       const { data: currentData } = await storage
         .from(ITEMS_BUCKET)
-        .download(`${slug}/latest.md`);
+        .download(`${slug}/${DEFAULT_NAME}.md`);
 
       if (currentData) {
         const currentContent = await currentData.text();
@@ -151,7 +152,7 @@ export class Storage {
     // Update main file since this is longer
     const { error: mainError } = await storage
       .from(ITEMS_BUCKET)
-      .upload(`${slug}/latest.md`, content, {
+      .upload(`${slug}/${DEFAULT_NAME}.md`, content, {
         contentType: "text/markdown",
         upsert: true,
       });
@@ -168,7 +169,7 @@ export class Storage {
     const storage = await this.getStorageClient();
     const { data, error } = await storage
       .from(ITEMS_BUCKET)
-      .download(`${slug}/latest.md`);
+      .download(`${slug}/${DEFAULT_NAME}.md`);
 
     if (error) {
       log.error(`Error downloading content for item ${slug}:`, error);
