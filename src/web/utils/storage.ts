@@ -1,6 +1,7 @@
 import { createHash } from "crypto";
 
 import { UploadStatus } from "@/app/api/v1/items/content/validation";
+import { ExtractedMetadata } from "@/utils/extract";
 import { createLogger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/server";
 import type { StorageClient } from "@/utils/supabase/types";
@@ -17,7 +18,7 @@ export class StorageError extends Error {
   }
 }
 
-interface VersionMetadata {
+interface VersionMetadata extends ExtractedMetadata {
   timestamp: string;
   length: number;
   hash: string;
@@ -55,6 +56,7 @@ export class Storage {
   async uploadItemContent(
     slug: string,
     content: string,
+    metadata: ExtractedMetadata,
   ): Promise<Exclude<UploadStatus, UploadStatus.ERROR>> {
     const storage = await this.getStorageClient();
     const timestamp = new Date().toISOString();
@@ -68,10 +70,14 @@ export class Storage {
     if (existingVersions?.length) {
       for (const version of existingVersions) {
         try {
-          const metadata: VersionMetadata = JSON.parse(
-            version.metadata?.version || "{}",
-          );
-          if (metadata.hash === contentHash) {
+          const { data, error } = await storage
+            .from(ITEMS_BUCKET)
+            .info(`${slug}/versions/${version.name}`);
+          if (error) {
+            continue;
+          }
+          const existingMetadata = data.metadata;
+          if (existingMetadata && existingMetadata.hash === contentHash) {
             log.info("Content already exists, skipping upload", {
               slug,
               hash: contentHash,
@@ -86,6 +92,19 @@ export class Storage {
         }
       }
     }
+    let fileMetadata: VersionMetadata;
+    try {
+      fileMetadata = JSON.parse(
+        JSON.stringify({
+          timestamp,
+          length: content.length,
+          hash: contentHash,
+          ...metadata,
+        }),
+      );
+    } catch (e) {
+      throw new StorageError("Failed to serialize version metadata");
+    }
 
     // Check current main file content length
     try {
@@ -98,18 +117,13 @@ export class Storage {
         if (currentContent.length >= content.length) {
           // Current content is longer, just store the new version
           const versionPath = `${slug}/versions/${timestamp}.md`;
-          const metadata: VersionMetadata = {
-            timestamp,
-            length: content.length,
-            hash: contentHash,
-          };
 
           const { error: versionError } = await storage
             .from(ITEMS_BUCKET)
             .upload(versionPath, content, {
               contentType: "text/markdown",
               upsert: false,
-              metadata: { version: JSON.stringify(metadata) },
+              metadata: fileMetadata,
             });
 
           if (versionError) {
@@ -119,6 +133,7 @@ export class Storage {
             );
             throw new StorageError("Failed to upload version");
           }
+
           return UploadStatus.STORED_VERSION;
         }
       }
@@ -129,11 +144,6 @@ export class Storage {
 
     // This is either the first version or a longer version than current
     const versionPath = `${slug}/versions/${timestamp}.md`;
-    const metadata: VersionMetadata = {
-      timestamp,
-      length: content.length,
-      hash: contentHash,
-    };
 
     // Upload as new version
     const { error: versionError } = await storage
@@ -141,7 +151,7 @@ export class Storage {
       .upload(versionPath, content, {
         contentType: "text/markdown",
         upsert: false,
-        metadata: { version: JSON.stringify(metadata) },
+        metadata: fileMetadata,
       });
 
     if (versionError) {
@@ -155,6 +165,7 @@ export class Storage {
       .upload(`${slug}/${DEFAULT_NAME}.md`, content, {
         contentType: "text/markdown",
         upsert: true,
+        metadata: fileMetadata,
       });
 
     if (mainError) {
@@ -179,31 +190,22 @@ export class Storage {
     return await data.text();
   }
 
-  async listItemVersions(slug: string): Promise<VersionMetadata[]> {
+  async getItemMetadata(slug: string): Promise<VersionMetadata> {
     const storage = await this.getStorageClient();
-    const { data: files, error } = await storage
+    const { data, error } = await storage
       .from(ITEMS_BUCKET)
-      .list(`${slug}/versions`);
+      .info(`${slug}/${DEFAULT_NAME}.md`);
 
     if (error) {
-      log.error(`Error listing versions for item ${slug}:`, error);
-      throw new StorageError("Failed to list versions");
+      log.error(`Error getting metadata for item ${slug}:`, error);
+      throw new StorageError("Failed to get metadata");
     }
 
-    return files
-      .map((file) => {
-        try {
-          return JSON.parse(file.metadata?.version || "{}") as VersionMetadata;
-        } catch (e) {
-          log.error(`Error parsing metadata for ${file.name}:`, e);
-          return null;
-        }
-      })
-      .filter((metadata): metadata is VersionMetadata => metadata !== null)
-      .sort(
-        (a, b) =>
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-      );
+    if (!data.metadata?.title) {
+      throw new StorageError("Failed to verify metadata contents");
+    }
+
+    return data.metadata as VersionMetadata;
   }
 }
 
@@ -211,4 +213,4 @@ export class Storage {
 export const storage = new Storage();
 
 // Export individual methods for convenience
-export const { uploadItemContent, getItemContent, listItemVersions } = storage;
+export const { uploadItemContent, getItemContent, getItemMetadata } = storage;
