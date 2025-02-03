@@ -121,14 +121,13 @@ export const profileItems = pgTable(
     state: itemState("state").notNull().default("active"),
     isFavorite: boolean("is_favorite").notNull().default(false),
     readingProgress: integer("reading_progress").notNull().default(0),
-    savedAt: timestamp("saved_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    savedAt: timestamp("saved_at", { withTimezone: true }),
     archivedAt: timestamp("archived_at", { withTimezone: true }),
     lastReadAt: timestamp("last_read_at", { withTimezone: true }),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    versionName: text("version_name"),
   },
   (table) => ({
     profileForeignKey: foreignKey({

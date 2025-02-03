@@ -57,6 +57,20 @@
       "when": 1738042188428,
       "tag": "0007_updated-at for profile_items",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1738611091874,
+      "tag": "0008_saved-at nullable",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1738611775588,
+      "tag": "0009_add versionName",
+      "breakpoints": true
     }
   ]
 }

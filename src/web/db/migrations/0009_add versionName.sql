@@ -1,0 +1,1 @@
+ALTER TABLE "profile_items" ADD COLUMN "version_name" text;
