@@ -14,7 +14,7 @@
             width: 100%;
             height: 32px;
             padding: 8px;
-            margin: 5px 0;
+            margin: 12px 0;
             cursor: pointer;
             background-color: #759763;
             border: none;
@@ -41,6 +41,11 @@
             }
         }
 
+        #logo {
+            display: block;
+            margin: 0 auto;
+        }
+
         .spinner {
             display: inline-block;
             width: 14px;
@@ -62,7 +67,8 @@
 </head>
 
 <body>
-    <button id="saveCurioPage">Save current page</button>
+    <a href="https://curi.ooo" target="_blank"><img id="logo" src="curio_dark.svg" alt="Curio Logo" height="40px" /></a>
+    <button id="saveCurioPage"><span class="spinner"></span></button>
     <div id="errorMessage" class="error-message"></div>
     <script src="popup.js"></script>
 </body>
