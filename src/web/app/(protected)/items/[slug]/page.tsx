@@ -25,24 +25,24 @@ const ItemPage: React.FC = () => {
     <div className="flex-1 w-full h-full flex flex-col">
       {loading ? (
         <Spinner centered />
-      ) : loadingError ? (
-        <>
-          <p className="text-sm text-danger">{loadingError}</p>
-        </>
-      ) : (
-        currentItem && (
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-lg font-medium">{metadata?.title}</h1>
+      ) : currentItem ? (
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-lg font-medium mb-2">{metadata?.title}</h1>
+          {loadingError ? (
+            <p className="text-sm text-danger">{loadingError}</p>
+          ) : (
             <MarkdownViewer className="py-4">
               {currentItem.content}
             </MarkdownViewer>
-            <hr className="my-4" />
-            <p className="text-sm text-secondary italic py-4">
-              {metadata?.savedAt &&
-                `Saved on ${new Date(metadata.savedAt).toLocaleString()}`}
-            </p>
-          </div>
-        )
+          )}
+          <hr className="my-4" />
+          <p className="text-sm text-secondary italic py-4">
+            {metadata?.savedAt &&
+              `Saved on ${new Date(metadata.savedAt).toLocaleString()}`}
+          </p>
+        </div>
+      ) : (
+        loadingError && <p className="text-sm text-danger">{loadingError}</p>
       )}
     </div>
   );

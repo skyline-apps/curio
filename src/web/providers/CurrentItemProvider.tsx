@@ -2,6 +2,7 @@
 import React, { createContext, useCallback, useState } from "react";
 
 import { GetItemContentResponse } from "@/app/api/v1/items/content/validation";
+import { GetItemsResponse } from "@/app/api/v1/items/validation";
 import { handleAPIResponse } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
 
@@ -58,6 +59,29 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     setSidebarOpen(!!item);
   };
 
+  const fetchMetadata = useCallback(async (slug: string): Promise<void> => {
+    const searchParams = new URLSearchParams({
+      slugs: slug,
+    });
+    try {
+      const result = await fetch(`/api/v1/items?${searchParams.toString()}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then(handleAPIResponse<GetItemsResponse>);
+      if (!result || "error" in result) {
+        log.error(`Failed to fetch item metadata for ${slug}`, result?.error);
+        setLoadingError(`Failed to fetch item.`);
+        return;
+      }
+      populateCurrentItem({ item: result.items[0] });
+    } catch (error) {
+      log.error(`Failed to fetch item metadata for ${slug}`, error);
+      setLoadingError(`Failed to fetch item.`);
+    }
+  }, []);
+
   const fetchContent = useCallback(async (slug: string): Promise<void> => {
     setLoadingError(null);
     if (!slug) {
@@ -84,6 +108,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
       if (!result || "error" in result) {
         log.error(`Failed to fetch item content for ${slug}`, result?.error);
         setLoadingError(`Failed to fetch item content.`);
+        await fetchMetadata(slug);
         return;
       }
       if (result) {
@@ -97,6 +122,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     } catch (error) {
       log.error(`Failed to fetch item content for ${slug}`, error);
       setLoadingError(`Failed to fetch item content.`);
+      await fetchMetadata(slug);
       return;
     } finally {
       setLoading(false);
