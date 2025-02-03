@@ -28,6 +28,8 @@ interface BrowserMessageProviderProps {
   children: React.ReactNode;
 }
 
+const SAVE_TIMEOUT_MS = 10000;
+
 export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
   children,
 }: BrowserMessageProviderProps) => {
@@ -40,10 +42,21 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
     try {
       setSavingItem(true);
       setSavingError(null);
+
+      const timeoutId = setTimeout(() => {
+        setSavingItem(false);
+        setSavingError(
+          "Request timed out. Please try again or check that the Curio extension is installed and enabled.",
+        );
+      }, SAVE_TIMEOUT_MS);
+
+      const currentTimeoutId = timeoutId;
+
       window.postMessage(
         {
           type: "CURIO_SAVE_REQUEST",
           url,
+          timeoutId: currentTimeoutId,
         },
         "http://localhost:3000",
       );
@@ -57,6 +70,14 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
 
   const handleMessage = useCallback(
     (event: MessageEvent) => {
+      if (
+        (event.data.type === "CURIO_SAVE_SUCCESS" ||
+          event.data.type === "CURIO_SAVE_ERROR") &&
+        event.data.timeoutId
+      ) {
+        clearTimeout(event.data.timeoutId);
+      }
+
       if (event.data.type === "CURIO_SAVE_SUCCESS") {
         setSavingItem(false);
         if (!event.data.data || event.data.data.status === UploadStatus.ERROR) {
