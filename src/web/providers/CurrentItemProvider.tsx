@@ -56,7 +56,11 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
 
   const populateCurrentItem = (item: ItemContent | null): void => {
     setCurrentItem(item);
-    setSidebarOpen(!!item);
+    if (typeof window !== "undefined" && window.innerWidth > 1048) {
+      setSidebarOpen(!!item);
+    } else {
+      setSidebarOpen(false);
+    }
   };
 
   const fetchMetadata = useCallback(async (slug: string): Promise<void> => {
@@ -112,7 +116,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         return;
       }
       if (result) {
-        setCurrentItem(result);
+        populateCurrentItem(result);
         if (typeof window !== "undefined" && window.innerWidth > 1048) {
           setSidebarOpen(true);
         } else {
