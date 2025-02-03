@@ -161,7 +161,6 @@ export async function POST(
           publishedAt: item.metadata?.publishedAt
             ? new Date(item.metadata.publishedAt)
             : null,
-          savedAt: now,
           updatedAt: now,
           profileId: profileResult.profile.id,
           itemId,

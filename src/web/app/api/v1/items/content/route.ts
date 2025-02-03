@@ -1,9 +1,10 @@
 import { ItemResultSchema } from "@/app/api/v1/items/validation";
-import { and, db, eq } from "@/db";
+import { and, db, eq, sql } from "@/db";
 import { items, profileItems } from "@/db/schema";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
 import {
+  ExtractedMetadata,
   ExtractError,
   extractMainContentAsMarkdown,
   extractMetadata,
@@ -83,7 +84,9 @@ export async function GET(
 
     return APIResponseJSON(response);
   } catch (error: unknown) {
-    if (error instanceof Error) {
+    if (error instanceof StorageError) {
+      return APIResponseJSON({ error: error.message }, { status: 500 });
+    } else if (error instanceof Error) {
       log.error("Error getting item content:", error);
       return APIResponseJSON(
         { error: "Error getting item content." },
@@ -97,6 +100,33 @@ export async function GET(
       );
     }
   }
+}
+
+async function updateMetadata(
+  itemUrl: string,
+  profileId: string,
+  itemId: string,
+  metadata: ExtractedMetadata,
+  savedAt: Date,
+): Promise<void> {
+  const newTitle = metadata.title || itemUrl;
+  await db
+    .update(profileItems)
+    .set({
+      savedAt: savedAt,
+      title: newTitle,
+      author: metadata.author,
+      description: metadata.description,
+      thumbnail: metadata.thumbnail,
+      publishedAt: metadata.publishedAt ? new Date(metadata.publishedAt) : null,
+      versionName: null,
+    })
+    .where(
+      and(
+        eq(profileItems.itemId, itemId),
+        eq(profileItems.profileId, profileId),
+      ),
+    );
 }
 
 export async function POST(
@@ -139,11 +169,16 @@ export async function POST(
     const slug = item[0].items.slug;
 
     const newDate = new Date();
+    const metadata = await extractMetadata(cleanedUrl, htmlContent);
     const markdownContent = await extractMainContentAsMarkdown(
       cleanedUrl,
       htmlContent,
     );
-    const status = await storage.uploadItemContent(slug, markdownContent);
+    const status = await storage.uploadItemContent(
+      slug,
+      markdownContent,
+      metadata,
+    );
 
     const response: UpdateItemContentResponse = {
       status,
@@ -151,7 +186,9 @@ export async function POST(
       message:
         status === UploadStatus.UPDATED_MAIN
           ? "Content updated and set as main version"
-          : "Content updated",
+          : status === UploadStatus.SKIPPED
+            ? "Content already exists"
+            : "Content updated",
     };
 
     if (status === UploadStatus.UPDATED_MAIN) {
@@ -160,45 +197,65 @@ export async function POST(
         .set({ updatedAt: newDate })
         .where(eq(items.id, item[0].items.id));
 
-      try {
-        const metadata = await extractMetadata(item[0].items.url, htmlContent);
-        await db
-          .update(profileItems)
-          .set({
-            savedAt: newDate,
-            title: metadata.title || item[0].items.url,
-            author: metadata.author,
-            description: metadata.description,
-            thumbnail: metadata.thumbnail,
-            publishedAt: metadata.publishedAt,
-          })
-          .where(eq(profileItems.itemId, item[0].items.id));
-      } catch (error: unknown) {
-        if (error instanceof MetadataError) {
-          await db
-            .update(profileItems)
-            .set({
-              savedAt: newDate,
-            })
-            .where(eq(profileItems.itemId, item[0].items.id));
-          return APIResponseJSON(response);
-        } else {
-          throw error;
-        }
+      await updateMetadata(
+        item[0].items.url,
+        profileResult.profile.id,
+        item[0].items.id,
+        metadata,
+        newDate,
+      );
+      return APIResponseJSON(response);
+    } else if (
+      status === UploadStatus.STORED_VERSION ||
+      status === UploadStatus.SKIPPED
+    ) {
+      const profileItem = await db
+        .select()
+        .from(profileItems)
+        .where(
+          and(
+            eq(profileItems.itemId, item[0].items.id),
+            eq(profileItems.profileId, profileResult.profile.id),
+            sql`${profileItems.versionName} IS NULL`,
+            sql`${profileItems.savedAt} IS NULL`,
+          ),
+        )
+        .limit(1);
+
+      // If the metadata hasn't previously been stored, update it here.
+      if (profileItem.length > 0) {
+        const defaultMetadata = await storage.getItemMetadata(slug);
+        await updateMetadata(
+          item[0].items.url,
+          profileResult.profile.id,
+          item[0].items.id,
+          defaultMetadata,
+          newDate,
+        );
       }
+      return APIResponseJSON(response);
+    } else {
+      log.error("Upload error", { status: status });
+      return APIResponseJSON(
+        { error: "Error uploading item content." },
+        { status: 500 },
+      );
     }
-    return APIResponseJSON(response);
   } catch (error: unknown) {
     if (error instanceof StorageError) {
       return APIResponseJSON({ error: error.message }, { status: 500 });
     } else if (error instanceof ExtractError) {
       log.error("Error extracting content:", error.message);
       return APIResponseJSON({ error: error.message }, { status: 500 });
+    } else if (error instanceof MetadataError) {
+      log.error("Error extracting metadata:", error.message);
+      return APIResponseJSON({ error: error.message }, { status: 500 });
     } else if (error instanceof Error) {
       log.error(
         "Error updating item content:",
         error.name,
         error.message.substring(0, 200),
+        error.stack,
       );
       return APIResponseJSON(
         { error: "Error updating item content." },

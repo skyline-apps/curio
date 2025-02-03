@@ -2,6 +2,8 @@ import { jest } from "@jest/globals";
 
 import { UploadStatus } from "@/app/api/v1/items/content/validation";
 
+import { MOCK_METADATA } from "./extract";
+
 export class StorageError extends Error {
   constructor(message: string) {
     super(message);
@@ -21,8 +23,13 @@ export class Storage {
     return "";
   }
 
-  async listItemVersions(_slug: string): Promise<VersionMetadata[]> {
-    return [];
+  async getItemMetadata(_slug: string): Promise<VersionMetadata> {
+    return {
+      timestamp: "2024-10-20T12:00:00.000Z",
+      length: 100,
+      hash: "contenthash",
+      ...MOCK_METADATA,
+    };
   }
 }
 
@@ -41,11 +48,14 @@ export const uploadItemContent = jest
   .mockImplementation(async () => UploadStatus.UPDATED_MAIN);
 export const getItemContent = jest
   .spyOn(storage, "getItemContent")
-  .mockImplementation(async () => "");
+  .mockImplementation(async () => "test content");
 export const listItemVersions = jest
-  .spyOn(storage, "listItemVersions")
-  .mockImplementation(async () => []);
-
-// Set default mock values
-getItemContent.mockResolvedValue("test content");
-uploadItemContent.mockResolvedValue(UploadStatus.UPDATED_MAIN);
+  .spyOn(storage, "getItemMetadata")
+  .mockImplementation(async () => {
+    return {
+      timestamp: "2024-10-20T12:00:00.000Z",
+      length: 100,
+      hash: "contenthash",
+      ...MOCK_METADATA,
+    };
+  });
