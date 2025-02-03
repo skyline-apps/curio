@@ -3,7 +3,9 @@ import { apiKeys, ColorScheme, profiles } from "@/db/schema";
 import {
   DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_PROFILE_ID,
+  DEFAULT_TEST_PROFILE_ID_2,
   DEFAULT_TEST_USER_ID,
+  DEFAULT_TEST_USER_ID_2,
 } from "./utils/test/api";
 import { testDb } from "./utils/test/provider";
 
@@ -37,10 +39,25 @@ beforeAll(async () => {
       ON CONFLICT (id) DO NOTHING;
     `);
 
+  await testDb.raw.query(`
+      INSERT INTO auth.users (id, email)
+      VALUES ('${DEFAULT_TEST_USER_ID_2}', 'test2@curi.ooo')
+      ON CONFLICT (id) DO NOTHING;
+    `);
+
   await testDb.db.insert(profiles).values({
     id: DEFAULT_TEST_PROFILE_ID,
     userId: DEFAULT_TEST_USER_ID,
     username: "defaultuser",
+    colorScheme: ColorScheme.AUTO,
+    createdAt: new Date("2025-01-10T12:52:56-08:00"),
+    updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+  });
+
+  await testDb.db.insert(profiles).values({
+    id: DEFAULT_TEST_PROFILE_ID_2,
+    userId: DEFAULT_TEST_USER_ID_2,
+    username: "defaultuser2",
     colorScheme: ColorScheme.AUTO,
     createdAt: new Date("2025-01-10T12:52:56-08:00"),
     updatedAt: new Date("2025-01-10T12:52:56-08:00"),

@@ -1,7 +1,9 @@
 import type { APIRequest } from "@/utils/api";
 
 export const DEFAULT_TEST_USER_ID = "123e4567-e89b-12d3-a456-426614174002";
+export const DEFAULT_TEST_USER_ID_2 = "123e4567-e89b-12d3-a456-426614174004";
 export const DEFAULT_TEST_PROFILE_ID = "123e4567-e89b-12d3-a456-426614174000";
+export const DEFAULT_TEST_PROFILE_ID_2 = "123e4567-e89b-12d3-a456-426614174001";
 export const DEFAULT_TEST_API_KEY = "test-api-key";
 
 export type MockRequestOptions = {
