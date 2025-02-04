@@ -28,11 +28,12 @@ export type CurrentItemContextType = {
   currentItem: ItemMetadata | null;
   loadedItem: Item | null;
   selectedItems: Set<string>;
-  selectItems: (slugs: string[]) => void;
-  unselectItems: () => void;
+  selectItems: (slugs: string[], index: number) => void;
+  clearSelectedItems: () => void;
   fetchContent: (slug: string, refresh?: boolean) => Promise<void>;
   loading: boolean;
   loadingError: string | null;
+  lastSelectionIndex: number | null;
 };
 
 interface CurrentItemProviderProps {
@@ -46,10 +47,11 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
   loadedItem: null,
   selectedItems: new Set<string>(),
   selectItems: () => {},
-  unselectItems: () => {},
+  clearSelectedItems: () => {},
   fetchContent: () => Promise.resolve(),
   loading: true,
   loadingError: null,
+  lastSelectionIndex: null,
 });
 
 export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
@@ -58,18 +60,33 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   const [currentItemSlug, setCurrentItemSlug] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [lastSelectionIndex, setLastSelectionIndex] = useState<number | null>(
+    null,
+  );
 
   const { items } = useContext(ItemsContext);
 
-  const unselectItems = (): void => {
+  const clearSelectedItems = (): void => {
     setSelectedItems(new Set());
     setCurrentItemSlug(null);
     setSidebarOpen(false);
+    setLastSelectionIndex(null);
   };
 
-  const selectItems = (slugs: string[]): void => {
-    setSelectedItems(new Set(slugs));
+  const selectItems = (
+    slugs: string[],
+    index: number,
+    replace: boolean = true,
+  ): void => {
     setCurrentItemSlug(null);
+    if (replace) {
+      setSelectedItems(new Set(slugs));
+    } else if (selectedItems.has(slugs[0])) {
+      slugs.forEach((slug) => selectedItems.delete(slug));
+    } else {
+      slugs.forEach((slug) => selectedItems.add(slug));
+    }
+    setLastSelectionIndex(index);
     if (typeof window !== "undefined" && window.innerWidth > 1048) {
       setSidebarOpen(!!slugs.length);
     } else {
@@ -160,10 +177,11 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         loadedItem,
         selectedItems,
         selectItems,
-        unselectItems,
+        clearSelectedItems,
         fetchContent,
         loading: isLoading,
         loadingError: error ? error.message || "Error loading items." : null,
+        lastSelectionIndex,
       }}
     >
       {children}
