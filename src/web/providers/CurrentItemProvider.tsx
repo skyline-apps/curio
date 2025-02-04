@@ -25,15 +25,21 @@ export type Item = Omit<
 export type CurrentItemContextType = {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
-  currentItem: ItemMetadata | null;
-  loadedItem: Item | null;
-  selectedItems: Set<string>;
-  selectItems: (slugs: string[], index: number) => void;
+  currentItem: ItemMetadata | null; // Metadata of currently loaded or selected item
+  loadedItem: Item | null; // Contents of currently loaded item
+  selectedItems: Set<string>; // All selected item slugs
+  selectItems: (
+    slugs: string[],
+    index: number,
+    replace?: boolean,
+    selectRange?: boolean,
+  ) => void;
   clearSelectedItems: () => void;
   fetchContent: (slug: string, refresh?: boolean) => Promise<void>;
   loading: boolean;
   loadingError: string | null;
   lastSelectionIndex: number | null;
+  setLastSelectionIndex: (index: number | null) => void;
 };
 
 interface CurrentItemProviderProps {
@@ -52,6 +58,7 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
   loading: true,
   loadingError: null,
   lastSelectionIndex: null,
+  setLastSelectionIndex: () => {},
 });
 
 export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
@@ -73,26 +80,44 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     setLastSelectionIndex(null);
   };
 
-  const selectItems = (
-    slugs: string[],
-    index: number,
-    replace: boolean = true,
-  ): void => {
-    setCurrentItemSlug(null);
-    if (replace) {
-      setSelectedItems(new Set(slugs));
-    } else if (selectedItems.has(slugs[0])) {
-      slugs.forEach((slug) => selectedItems.delete(slug));
-    } else {
-      slugs.forEach((slug) => selectedItems.add(slug));
-    }
-    setLastSelectionIndex(index);
-    if (typeof window !== "undefined" && window.innerWidth > 1048) {
-      setSidebarOpen(!!slugs.length);
-    } else {
-      setSidebarOpen(false);
-    }
-  };
+  const selectItems = useCallback(
+    (
+      slugs: string[],
+      index: number,
+      replace: boolean = true,
+      selectRange: boolean = false,
+    ) => {
+      if (replace) {
+        setSelectedItems(new Set(slugs));
+      } else if (selectRange && lastSelectionIndex !== null) {
+        // Handle shift-click range selection
+        const start = Math.min(lastSelectionIndex, index);
+        const end = Math.max(lastSelectionIndex, index);
+        const itemsInRange = items
+          .slice(start, end + 1)
+          .map((item) => item.slug);
+        setSelectedItems(new Set([...selectedItems, ...itemsInRange]));
+      } else {
+        // Handle ctrl/cmd-click multi-selection
+        const newSelection = new Set(selectedItems);
+        slugs.forEach((slug) => {
+          if (newSelection.has(slug)) {
+            newSelection.delete(slug);
+          } else {
+            newSelection.add(slug);
+          }
+        });
+        setSelectedItems(newSelection);
+      }
+      setLastSelectionIndex(index);
+      if (typeof window !== "undefined" && window.innerWidth > 1048) {
+        setSidebarOpen(!!slugs.length);
+      } else {
+        setSidebarOpen(false);
+      }
+    },
+    [items, lastSelectionIndex, selectedItems],
+  );
 
   const { data, isLoading, error, refetch } = useQuery<Item>({
     enabled: !!currentItemSlug,
@@ -143,22 +168,20 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     [currentItemSlug, refetch],
   );
 
+  const firstItem =
+    selectedItems.size === 1 ? selectedItems.values().next().value : null;
+
   const currentItem = useMemo(() => {
     if (currentItemSlug) {
-      if (!data?.item && selectedItems.size === 1) {
-        return (
-          items.find((item) => item.slug === Array.from(selectedItems)[0]) ||
-          null
-        );
+      if (!data?.item && firstItem) {
+        return items.find((item) => item.slug === firstItem) || null;
       }
       return data?.item || null;
-    } else if (selectedItems.size === 1) {
-      return (
-        items.find((item) => item.slug === Array.from(selectedItems)[0]) || null
-      );
+    } else if (firstItem) {
+      return items.find((item) => item.slug === firstItem) || null;
     }
     return null;
-  }, [items, data, currentItemSlug, selectedItems]);
+  }, [items, data, currentItemSlug, firstItem]);
 
   const loadedItem = useMemo(() => {
     if (!currentItem) return null;
@@ -182,6 +205,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         loading: isLoading,
         loadingError: error ? error.message || "Error loading items." : null,
         lastSelectionIndex,
+        setLastSelectionIndex,
       }}
     >
       {children}

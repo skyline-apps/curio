@@ -7,53 +7,87 @@ import { useKeyboardShortcut } from "@/providers/KeyboardShortcutProvider";
 
 export const ItemNavigation = (): null => {
   const { items } = useContext(ItemsContext);
-  const { selectItems, lastSelectionIndex } = useContext(CurrentItemContext);
+  const {
+    selectItems,
+    lastSelectionIndex,
+    setLastSelectionIndex,
+    clearSelectedItems,
+  } = useContext(CurrentItemContext);
 
   const navigateDown = (): boolean => {
     if (lastSelectionIndex === null) {
-      selectItems([items[0].slug], 0);
+      setLastSelectionIndex(0);
     } else if (lastSelectionIndex < items.length - 1) {
-      const nextItem = items[lastSelectionIndex + 1];
-      selectItems([nextItem.slug], lastSelectionIndex + 1);
+      setLastSelectionIndex(lastSelectionIndex + 1);
     }
     return true;
   };
 
   const navigateUp = (): boolean => {
     if (lastSelectionIndex === null) {
-      selectItems([items[0].slug], 0);
+      setLastSelectionIndex(0);
     } else if (lastSelectionIndex > 0) {
-      const prevItem = items[lastSelectionIndex - 1];
-      selectItems([prevItem.slug], lastSelectionIndex - 1);
+      setLastSelectionIndex(lastSelectionIndex - 1);
+    }
+    return true;
+  };
+
+  const selectCurrentItem = (): boolean => {
+    if (lastSelectionIndex !== null) {
+      selectItems([items[lastSelectionIndex].slug], lastSelectionIndex, false);
     }
     return true;
   };
 
   useKeyboardShortcut({
     key: "ArrowDown",
-    name: "Select next item",
+    name: "Next item",
     handler: navigateDown,
     priority: 100,
   });
 
   useKeyboardShortcut({
     key: "j",
-    name: "Select next item",
+    name: "Next item",
     handler: navigateDown,
     priority: 100,
   });
 
   useKeyboardShortcut({
     key: "ArrowUp",
-    name: "Select previous item",
+    name: "Previous item",
     handler: navigateUp,
     priority: 100,
   });
 
   useKeyboardShortcut({
     key: "k",
-    name: "Select previous item",
+    name: "Previous item",
     handler: navigateUp,
+    priority: 100,
+  });
+
+  useKeyboardShortcut({
+    key: "x",
+    name: "Select item",
+    handler: selectCurrentItem,
+    priority: 100,
+  });
+
+  useKeyboardShortcut({
+    key: "Enter",
+    name: "Select item",
+    handler: selectCurrentItem,
+    priority: 100,
+  });
+
+  useKeyboardShortcut({
+    key: "Escape",
+    name: "Clear selection",
+    handler: (): boolean => {
+      clearSelectedItems();
+      return true;
+    },
     priority: 100,
   });
 

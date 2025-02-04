@@ -10,7 +10,7 @@ import { cn } from "@/utils/cn";
 import ItemMetadata from "./ItemMetadata";
 
 const RightSidebar: React.FC = () => {
-  const { currentItem, sidebarOpen, setSidebarOpen } =
+  const { selectedItems, currentItem, sidebarOpen, setSidebarOpen } =
     useContext(CurrentItemContext);
 
   const toggleSidebar = (): void => {
@@ -35,7 +35,14 @@ const RightSidebar: React.FC = () => {
                 : "translate-x-full opacity-0",
             )}
           >
-            {sidebarOpen && <ItemMetadata item={currentItem || undefined} />}
+            {sidebarOpen &&
+              (currentItem ? (
+                <ItemMetadata item={currentItem || undefined} />
+              ) : (
+                <p className="text-secondary text-center py-8">
+                  {selectedItems.size} items selected
+                </p>
+              ))}
           </div>
         </div>
         <Button

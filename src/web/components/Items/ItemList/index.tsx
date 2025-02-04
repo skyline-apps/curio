@@ -9,7 +9,7 @@ interface ItemListProps {}
 
 const ItemList: React.FC<ItemListProps> = () => {
   const { items } = useContext(ItemsContext);
-  const { clearSelectedItems } = useContext(CurrentItemContext);
+  const { selectItems, clearSelectedItems } = useContext(CurrentItemContext);
 
   useEffect(() => {
     clearSelectedItems();
@@ -19,7 +19,22 @@ const ItemList: React.FC<ItemListProps> = () => {
     <div className="flex flex-col">
       <ItemNavigation />
       {items.map((item, index) => (
-        <ItemCard key={item.id} index={index} item={item} />
+        <ItemCard
+          key={item.id}
+          index={index}
+          item={item}
+          onClick={(e: React.MouseEvent) => {
+            e.preventDefault();
+            const isCtrlPressed = e.ctrlKey || e.metaKey;
+            const isShiftPressed = e.shiftKey;
+            selectItems(
+              [item.slug],
+              index,
+              !isCtrlPressed && !isShiftPressed,
+              isShiftPressed,
+            );
+          }}
+        />
       ))}
     </div>
   );
