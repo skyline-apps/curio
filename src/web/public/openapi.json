@@ -273,7 +273,8 @@
                   "default": 100
                 },
                 "cursor": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "The savedAt timestamp to start from."
                 }
               }
             },

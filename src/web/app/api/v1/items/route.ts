@@ -51,7 +51,7 @@ export async function GET(
         : eq(profileItems.profileId, profileResult.profile.id);
 
     if (cursor) {
-      const cursorCondition = sql`${items.id} < ${cursor}`;
+      const cursorCondition = sql`${profileItems.savedAt} < ${cursor}`;
       whereClause = and(whereClause, cursorCondition);
     }
 
@@ -86,7 +86,10 @@ export async function GET(
     const response: GetItemsResponse = {
       items: results.map((item) => ItemResultSchema.parse(item)),
       nextCursor:
-        results.length === limit ? results[results.length - 1].id : undefined,
+        results.length === limit
+          ? results[results.length - 1].metadata.savedAt?.toISOString() ||
+            undefined
+          : undefined,
       total,
     };
 

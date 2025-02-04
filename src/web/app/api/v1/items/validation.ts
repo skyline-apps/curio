@@ -101,7 +101,10 @@ export const GetItemsRequestSchema = z
         "A comma-separated list of URLs to retrieve. If the URL is not found, it will be ignored.",
       ),
     limit: z.coerce.number().min(1).max(1000).optional().default(100),
-    cursor: z.string().optional(),
+    cursor: z
+      .string()
+      .optional()
+      .describe("The savedAt timestamp to start from."),
   })
   .refine(
     (val) => !(val.slugs && val.urls),
