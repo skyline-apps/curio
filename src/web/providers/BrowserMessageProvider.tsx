@@ -5,6 +5,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -21,11 +22,13 @@ const log = createLogger("browser-message-provider");
 export enum EventType {
   SAVE_SUCCESS = "CURIO_SAVE_SUCCESS",
   SAVE_ERROR = "CURIO_SAVE_ERROR",
+  EXTENSION_INSTALLED = "CURIO_EXTENSION_INSTALLED",
 }
 
 interface BrowserMessageContextType {
   addMessageListener: (callback: (event: MessageEvent) => void) => void;
   removeMessageListener: (callback: (event: MessageEvent) => void) => void;
+  checkExtensionInstalled: (callback: (success: boolean) => void) => void;
   saveItemContent: (url: string) => Promise<void>;
   savingItem: boolean;
   savingError: string | null;
@@ -35,6 +38,7 @@ interface BrowserMessageContextType {
 export const BrowserMessageContext = createContext<BrowserMessageContextType>({
   addMessageListener: () => {},
   removeMessageListener: () => {},
+  checkExtensionInstalled: () => {},
   saveItemContent: () => Promise.resolve(),
   savingItem: false,
   savingError: null,
@@ -45,6 +49,7 @@ interface BrowserMessageProviderProps {
   children: React.ReactNode;
 }
 
+const INSTALLED_TIMEOUT_MS = 1000;
 const SAVE_TIMEOUT_MS = 10000;
 
 export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
@@ -56,10 +61,31 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
   const { fetchContent } = useContext(CurrentItemContext);
   const { showToast } = useToast();
   const listeners = useMemo(() => new Set<(event: MessageEvent) => void>(), []);
+  const installationCallback = useRef<((success: boolean) => void) | null>(
+    null,
+  );
 
   const clearSavingError = useCallback(() => {
     setSavingError(null);
   }, []);
+
+  const checkExtensionInstalled = useCallback(
+    (callback: (success: boolean) => void): void => {
+      installationCallback.current = callback;
+      const timeoutId = setTimeout(() => {
+        callback(false);
+      }, INSTALLED_TIMEOUT_MS);
+      try {
+        window.postMessage(
+          { type: "CURIO_CHECK_EXTENSION_INSTALLED", timeoutId: timeoutId },
+          "*",
+        );
+      } catch {
+        callback(false);
+      }
+    },
+    [],
+  );
 
   const saveItemContent = useCallback(async (url: string): Promise<void> => {
     try {
@@ -93,7 +119,11 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
 
   const handleMessage = useCallback(
     (event: MessageEvent) => {
-      if (
+      if (event.data.type === EventType.EXTENSION_INSTALLED) {
+        clearTimeout(event.data.timeoutId);
+        installationCallback.current?.(event.data.data.success);
+        return;
+      } else if (
         (event.data.type === EventType.SAVE_SUCCESS ||
           event.data.type === EventType.SAVE_ERROR) &&
         event.data.timeoutId
@@ -121,7 +151,6 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
           </div>,
           { dismissable: true, disappearing: false },
         );
-
         listeners.forEach((listener) => listener(event));
         log.info("Content saved successfully", event.data);
       } else if (event.data.type === EventType.SAVE_ERROR) {
@@ -145,14 +174,14 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
     (callback: (event: MessageEvent) => void) => {
       listeners.add(callback);
     },
-    [],
+    [listeners],
   );
 
   const removeMessageListener = useCallback(
     (callback: (event: MessageEvent) => void) => {
       listeners.delete(callback);
     },
-    [],
+    [listeners],
   );
 
   return (
@@ -160,6 +189,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
       value={{
         addMessageListener,
         removeMessageListener,
+        checkExtensionInstalled,
         saveItemContent,
         savingItem,
         savingError,

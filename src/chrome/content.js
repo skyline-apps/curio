@@ -3,6 +3,14 @@ const API_ORIGIN = 'http://localhost:3000';
 window.addEventListener('message', function (event) {
     if (event.origin !== API_ORIGIN) return;
 
+    if (event.data.type === 'CURIO_CHECK_EXTENSION_INSTALLED') {
+        window.postMessage({
+            type: 'CURIO_EXTENSION_INSTALLED',
+            data: { success: true },
+            timeoutId: event.data.timeoutId,
+        }, API_ORIGIN);
+    }
+
     if (event.data.type === 'CURIO_SAVE_REQUEST') {
         chrome.runtime.sendMessage({
             action: 'saveCurioPage',
@@ -11,12 +19,14 @@ window.addEventListener('message', function (event) {
             if (response.success) {
                 window.postMessage({
                     type: 'CURIO_SAVE_SUCCESS',
-                    data: response.data
+                    data: response.data,
+                    timeoutId: event.data.timeoutId,
                 }, API_ORIGIN);
             } else {
                 window.postMessage({
                     type: 'CURIO_SAVE_ERROR',
-                    error: response.error
+                    error: response.error,
+                    timeoutId: event.data.timeoutId,
                 }, API_ORIGIN);
             }
         });
