@@ -1,12 +1,20 @@
 "use client";
-import React, { createContext, useCallback, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 import { UploadStatus } from "@/app/api/v1/items/content/validation";
 import Button from "@/components/ui/Button";
 import { useToast } from "@/providers/ToastProvider";
 import { createLogger } from "@/utils/logger";
 
-const log = createLogger("content-message-provider");
+import { ItemsContext } from "./ItemsProvider";
+
+const log = createLogger("browser-message-provider");
 
 interface BrowserMessageContextType {
   addMessageListener: (callback: (event: MessageEvent) => void) => void;
@@ -35,6 +43,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
 }: BrowserMessageProviderProps) => {
   const [savingItem, setSavingItem] = useState<boolean>(false);
   const [savingError, setSavingError] = useState<string | null>(null);
+  const { fetchItems } = useContext(ItemsContext);
   const { showToast } = useToast();
   const listeners = new Set<(event: MessageEvent) => void>();
 
@@ -87,7 +96,8 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
           );
           return;
         }
-        // TODO: refresh items list if on items list page
+        fetchItems({}, true);
+        // TODO: refresh items content if selected
         log.info("Content saved successfully", event.data);
         showToast(
           <div className="flex gap-2 items-center">

@@ -1,6 +1,6 @@
 "use client";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import React, { createContext, useState } from "react";
+import React, { createContext, useCallback, useState } from "react";
 
 import {
   type GetItemsRequest,
@@ -84,17 +84,17 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 
-  const fetchItems = async (
-    options?: GetItemsRequest,
-    refetch?: boolean,
-  ): Promise<void> => {
-    setCurrentOptions(options || null);
-    if (refetch) {
-      await query.refetch();
-    } else if (query.hasNextPage) {
-      await query.fetchNextPage();
-    }
-  };
+  const fetchItems = useCallback(
+    async (options?: GetItemsRequest, refetch?: boolean): Promise<void> => {
+      setCurrentOptions(options || null);
+      if (refetch) {
+        await query.refetch();
+      } else if (query.hasNextPage) {
+        await query.fetchNextPage();
+      }
+    },
+    [query],
+  );
 
   const contextValue: ItemsContextType = {
     items: query.data?.pages.flatMap((p) => p.items) || [],
