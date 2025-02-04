@@ -1,11 +1,11 @@
 import Link from "next/link";
 
-import type { ItemContent } from "@/providers/CurrentItemProvider";
+import type { ItemMetadata } from "@/providers/ItemsProvider";
 
 import ItemActions from "./ItemActions";
 
 interface ItemMetadataProps {
-  item?: ItemContent["item"];
+  item?: ItemMetadata;
 }
 
 const ItemMetadata: React.FC<ItemMetadataProps> = ({

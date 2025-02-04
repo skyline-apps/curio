@@ -1,21 +1,21 @@
 "use client";
+import { useQuery } from "@tanstack/react-query";
 import React, {
   createContext,
   useCallback,
   useContext,
-  useEffect,
+  useMemo,
   useState,
 } from "react";
 
 import { GetItemContentResponse } from "@/app/api/v1/items/content/validation";
-import { GetItemsResponse } from "@/app/api/v1/items/validation";
-import { ItemsContext } from "@/providers/ItemsProvider";
+import { ItemMetadata, ItemsContext } from "@/providers/ItemsProvider";
 import { handleAPIResponse } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
 
 const log = createLogger("current-item-provider");
 
-export type ItemContent = Omit<
+export type Item = Omit<
   Exclude<GetItemContentResponse, { error: string }>,
   "content"
 > & {
@@ -25,10 +25,11 @@ export type ItemContent = Omit<
 export type CurrentItemContextType = {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
-  currentItem: ItemContent | null;
-  populateCurrentItem: (item: ItemContent | null) => void;
-  clearCurrentItem: () => void;
-  fetchContent: (path: string) => Promise<void>;
+  currentItem: ItemMetadata | null;
+  loadedItem: Item | null;
+  selectItem: (slug: string | null) => void;
+  unselectItem: () => void;
+  fetchContent: (slug: string, refresh?: boolean) => Promise<void>;
   loading: boolean;
   loadingError: string | null;
 };
@@ -41,8 +42,9 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
   sidebarOpen: true,
   setSidebarOpen: () => {},
   currentItem: null,
-  populateCurrentItem: () => {},
-  clearCurrentItem: () => {},
+  loadedItem: null,
+  selectItem: () => {},
+  unselectItem: () => {},
   fetchContent: () => Promise.resolve(),
   loading: true,
   loadingError: null,
@@ -51,76 +53,35 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
 export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   children,
 }: CurrentItemProviderProps): React.ReactNode => {
+  const [currentItemSlug, setCurrentItemSlug] = useState<string | null>(null);
+  const [selectedItemSlug, setSelectedItemSlug] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
-  const [currentItem, setCurrentItem] = useState<ItemContent | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [loadingError, setLoadingError] = useState<string | null>(null);
 
   const { items } = useContext(ItemsContext);
 
-  const clearCurrentItem = (): void => {
-    setCurrentItem(null);
+  const unselectItem = (): void => {
+    setSelectedItemSlug(null);
+    setCurrentItemSlug(null);
     setSidebarOpen(false);
   };
 
-  const populateCurrentItem = useCallback((item: ItemContent | null): void => {
-    setCurrentItem(item);
+  const selectItem = (slug: string | null): void => {
+    setSelectedItemSlug(slug);
     if (typeof window !== "undefined" && window.innerWidth > 1048) {
-      setSidebarOpen(!!item);
+      setSidebarOpen(!!slug);
     } else {
       setSidebarOpen(false);
     }
-  }, []);
+  };
 
-  useEffect(() => {
-    if (currentItem && items.length > 0) {
-      const updatedItem = items.find((item) => item.id === currentItem.item.id);
-      if (updatedItem) {
-        populateCurrentItem({
-          item: updatedItem,
-          content: currentItem.content,
-        });
-      }
-    }
-  }, [items, currentItem, populateCurrentItem]);
-
-  const fetchMetadata = useCallback(async (slug: string): Promise<void> => {
-    const searchParams = new URLSearchParams({
-      slugs: slug,
-    });
-    try {
-      const result = await fetch(`/api/v1/items?${searchParams.toString()}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }).then(handleAPIResponse<GetItemsResponse>);
-      if (!result || "error" in result) {
-        log.error(`Failed to fetch item metadata for ${slug}`, result?.error);
-        setLoadingError(`Failed to fetch item.`);
-        return;
-      }
-      populateCurrentItem({ item: result.items[0] });
-    } catch (error) {
-      log.error(`Failed to fetch item metadata for ${slug}`, error);
-      setLoadingError(`Failed to fetch item.`);
-    }
-  }, []);
-
-  const fetchContent = useCallback(async (slug: string): Promise<void> => {
-    setLoadingError(null);
-    if (!slug) {
-      clearCurrentItem();
-      return;
-    }
-    if (slug !== currentItem?.item.slug) {
-      clearCurrentItem();
-    }
-    const searchParams = new URLSearchParams({
-      slug,
-    });
-    try {
-      setLoading(true);
+  const { data, isLoading, error, refetch } = useQuery<Item>({
+    enabled: !!currentItemSlug,
+    queryKey: ["itemContent", currentItemSlug],
+    queryFn: async (): Promise<Item> => {
+      if (!currentItemSlug) throw new Error("No item to fetch");
+      const searchParams = new URLSearchParams({
+        slug: currentItemSlug,
+      });
       const result = await fetch(
         `/api/v1/items/content?${searchParams.toString()}`,
         {
@@ -131,28 +92,56 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         },
       ).then(handleAPIResponse<GetItemContentResponse>);
       if (!result || "error" in result) {
-        log.error(`Failed to fetch item content for ${slug}`, result?.error);
-        setLoadingError(`Failed to fetch item content.`);
-        await fetchMetadata(slug);
-        return;
+        log.error(
+          `Failed to fetch item content for ${currentItemSlug}`,
+          result?.error,
+        );
+        throw new Error(`Failed to fetch item content`);
       }
       if (result) {
-        populateCurrentItem(result);
         if (typeof window !== "undefined" && window.innerWidth > 1048) {
           setSidebarOpen(true);
         } else {
           setSidebarOpen(false);
         }
       }
-    } catch (error) {
-      log.error(`Failed to fetch item content for ${slug}`, error);
-      setLoadingError(`Failed to fetch item content.`);
-      await fetchMetadata(slug);
-      return;
-    } finally {
-      setLoading(false);
+      return result;
+    },
+  });
+
+  const fetchContent = useCallback(
+    async (slug: string, refresh?: boolean): Promise<void> => {
+      if (slug === currentItemSlug) {
+        if (!refresh) {
+          return;
+        } else {
+          await refetch();
+        }
+      }
+      setCurrentItemSlug(slug);
+    },
+    [currentItemSlug, refetch],
+  );
+
+  const currentItem = useMemo(() => {
+    if (currentItemSlug) {
+      if (!data?.item && selectedItemSlug) {
+        return items.find((item) => item.slug === selectedItemSlug) || null;
+      }
+      return data?.item || null;
+    } else if (selectedItemSlug) {
+      return items.find((item) => item.slug === selectedItemSlug) || null;
     }
-  }, []);
+    return null;
+  }, [items, data, selectedItemSlug, currentItemSlug]);
+
+  const loadedItem = useMemo(() => {
+    if (!currentItem) return null;
+    return {
+      item: currentItem,
+      content: data?.content,
+    };
+  }, [data, currentItem]);
 
   return (
     <CurrentItemContext.Provider
@@ -160,11 +149,12 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         sidebarOpen,
         setSidebarOpen,
         currentItem,
-        populateCurrentItem,
-        clearCurrentItem,
+        loadedItem,
+        selectItem,
+        unselectItem,
         fetchContent,
-        loading,
-        loadingError,
+        loading: isLoading,
+        loadingError: error ? error.message || "Error loading items." : null,
       }}
     >
       {children}

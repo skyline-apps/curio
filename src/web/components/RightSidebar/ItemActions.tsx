@@ -8,13 +8,13 @@ import {
 import Button from "@/components/ui/Button";
 import { Dialog, showConfirm } from "@/components/ui/Modal/Dialog";
 import { BrowserMessageContext } from "@/providers/BrowserMessageProvider";
-import type { ItemContent } from "@/providers/CurrentItemProvider";
+import { ItemMetadata } from "@/providers/ItemsProvider";
 import { createLogger } from "@/utils/logger";
 
 const log = createLogger("item-actions");
 
 interface ItemActionsProps {
-  item?: ItemContent["item"];
+  item?: ItemMetadata;
 }
 
 const ItemActions = ({ item }: ItemActionsProps): JSX.Element => {

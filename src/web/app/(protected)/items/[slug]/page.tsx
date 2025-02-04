@@ -7,7 +7,7 @@ import Spinner from "@/components/ui/Spinner";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 
 const ItemPage: React.FC = () => {
-  const { fetchContent, loading, loadingError, currentItem } =
+  const { fetchContent, loading, loadingError, loadedItem } =
     useContext(CurrentItemContext);
   const { slug } = useParams();
 
@@ -19,21 +19,25 @@ const ItemPage: React.FC = () => {
     }
   }, [fetchContent, slug]);
 
-  const { metadata } = currentItem?.item || {};
+  const { metadata } = loadedItem?.item || {};
 
   return (
     <div className="flex-1 w-full h-full flex flex-col">
       {loading ? (
         <Spinner centered />
-      ) : currentItem ? (
-        <div className="max-w-4xl mx-auto">
+      ) : loadedItem ? (
+        <div className="w-full lg:w-4xl max-w-4xl mx-auto">
           <h1 className="text-lg font-medium mb-2">{metadata?.title}</h1>
           {loadingError ? (
             <p className="text-sm text-danger">{loadingError}</p>
-          ) : (
+          ) : loadedItem.content ? (
             <MarkdownViewer className="py-4">
-              {currentItem.content}
+              {loadedItem.content}
             </MarkdownViewer>
+          ) : (
+            <p className="text-sm text-secondary italic py-4">
+              Content unavailable.
+            </p>
           )}
           <hr className="my-4" />
           <p className="text-sm text-secondary italic py-4">

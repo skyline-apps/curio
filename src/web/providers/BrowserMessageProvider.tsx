@@ -13,6 +13,7 @@ import Button from "@/components/ui/Button";
 import { useToast } from "@/providers/ToastProvider";
 import { createLogger } from "@/utils/logger";
 
+import { CurrentItemContext } from "./CurrentItemProvider";
 import { ItemsContext } from "./ItemsProvider";
 
 const log = createLogger("browser-message-provider");
@@ -52,6 +53,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
   const [savingItem, setSavingItem] = useState<boolean>(false);
   const [savingError, setSavingError] = useState<string | null>(null);
   const { fetchItems } = useContext(ItemsContext);
+  const { fetchContent } = useContext(CurrentItemContext);
   const { showToast } = useToast();
   const listeners = useMemo(() => new Set<(event: MessageEvent) => void>(), []);
 
@@ -109,7 +111,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
           return;
         }
         fetchItems({}, true);
-        // TODO: refresh items content if selected
+        fetchContent(event.data.data.slug, true);
         showToast(
           <div className="flex gap-2 items-center">
             Item successfully saved!
@@ -131,7 +133,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
         listeners.forEach((listener) => listener(event));
       }
     },
-    [showToast, fetchItems, listeners],
+    [showToast, fetchItems, listeners, fetchContent],
   );
 
   useEffect(() => {
