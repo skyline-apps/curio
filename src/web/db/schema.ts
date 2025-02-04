@@ -26,7 +26,6 @@ export enum ColorScheme {
   LIGHT = "light",
   DARK = "dark",
 }
-
 export const colorSchemeEnum = pgEnum("color_scheme", [
   ColorScheme.AUTO,
   ColorScheme.LIGHT,
@@ -76,7 +75,14 @@ export const items = pgTable(
   }),
 );
 
-export const itemState = pgEnum("item_state", ["active", "archived"]);
+export enum ItemState {
+  ACTIVE = "active",
+  ARCHIVED = "archived",
+}
+export const itemState = pgEnum("item_state", [
+  ItemState.ACTIVE,
+  ItemState.ARCHIVED,
+]);
 
 export const profileLabels = pgTable(
   "profile_labels",
@@ -118,7 +124,7 @@ export const profileItems = pgTable(
     author: text("author"),
     thumbnail: text("thumbnail"),
     publishedAt: timestamp("published_at", { withTimezone: true }),
-    state: itemState("state").notNull().default("active"),
+    state: itemState("state").notNull().default(ItemState.ACTIVE),
     isFavorite: boolean("is_favorite").notNull().default(false),
     readingProgress: integer("reading_progress").notNull().default(0),
     savedAt: timestamp("saved_at", { withTimezone: true }),
