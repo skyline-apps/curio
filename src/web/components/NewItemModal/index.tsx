@@ -25,11 +25,11 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
 }: NewItemModalProps) => {
   const [error, setError] = useState<string | null>(null);
   const [urlInput, setUrlInput] = useState<string>("");
-  const { saveItemContent, savingItem, savingError } = useContext(
-    BrowserMessageContext,
-  );
+  const { saveItemContent, savingItem, savingError, clearSavingError } =
+    useContext(BrowserMessageContext);
 
   const closeModal = useCallback((): void => {
+    clearSavingError();
     setUrlInput("");
     setError(null);
     onClose();
