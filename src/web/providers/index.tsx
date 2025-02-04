@@ -8,6 +8,7 @@ import { createLogger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/server";
 
 import { BrowserMessageProvider } from "./BrowserMessageProvider";
+import { ClientProviders } from "./ClientProviders";
 import { CurrentItemProvider } from "./CurrentItemProvider";
 import { ItemsProvider } from "./ItemsProvider";
 import { SettingsProvider } from "./SettingsProvider";
@@ -46,19 +47,21 @@ const Providers: React.FC<PropsWithChildren> = async ({
   }
 
   return (
-    <HeroUIProvider>
-      <UserProvider user={currentUser}>
-        <ItemsProvider>
-          <ToastProvider>
-            <BrowserMessageProvider>
-              <CurrentItemProvider>
-                <SettingsProvider>{children}</SettingsProvider>
-              </CurrentItemProvider>
-            </BrowserMessageProvider>
-          </ToastProvider>
-        </ItemsProvider>
-      </UserProvider>
-    </HeroUIProvider>
+    <ClientProviders>
+      <HeroUIProvider>
+        <UserProvider user={currentUser}>
+          <ItemsProvider>
+            <ToastProvider>
+              <BrowserMessageProvider>
+                <CurrentItemProvider>
+                  <SettingsProvider>{children}</SettingsProvider>
+                </CurrentItemProvider>
+              </BrowserMessageProvider>
+            </ToastProvider>
+          </ItemsProvider>
+        </UserProvider>
+      </HeroUIProvider>
+    </ClientProviders>
   );
 };
 
