@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 
 import ItemCard from "@/components/Items/ItemCard";
 import { ItemNavigation } from "@/components/Items/ItemNavigation";
@@ -10,19 +10,36 @@ interface ItemListProps {}
 const ItemList: React.FC<ItemListProps> = () => {
   const { items } = useContext(ItemsContext);
   const { selectItems, clearSelectedItems } = useContext(CurrentItemContext);
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     clearSelectedItems();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent): void => {
+      if (listRef.current && !listRef.current.contains(event.target as Node)) {
+        clearSelectedItems();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [clearSelectedItems]);
+
   return (
-    <div className="flex flex-col">
+    <div ref={listRef} className="flex flex-col">
       <ItemNavigation />
       {items.map((item, index) => (
         <ItemCard
           key={item.id}
           index={index}
           item={item}
+          onLongPress={() => {
+            selectItems([item.slug], index, false, false, true);
+          }}
           onClick={(e: React.MouseEvent) => {
             e.preventDefault();
             const isCtrlPressed = e.ctrlKey || e.metaKey;
