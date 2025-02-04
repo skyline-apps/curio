@@ -163,12 +163,12 @@ export async function POST(
 
         return {
           title: item.metadata?.title || cleanedUrl,
-          description: item.metadata?.description || null,
-          author: item.metadata?.author || null,
-          thumbnail: item.metadata?.thumbnail || null,
+          description: item.metadata?.description || sql`NULL`,
+          author: item.metadata?.author || sql`NULL`,
+          thumbnail: item.metadata?.thumbnail || sql`NULL`,
           publishedAt: item.metadata?.publishedAt
             ? new Date(item.metadata.publishedAt)
-            : null,
+            : sql`NULL`,
           updatedAt: now,
           profileId: profileResult.profile.id,
           itemId,
@@ -181,7 +181,10 @@ export async function POST(
         .onConflictDoUpdate({
           target: [profileItems.profileId, profileItems.itemId],
           set: {
-            title: sql`COALESCE(NULLIF(EXCLUDED.title, ''), ${profileItems.title})`,
+            title: sql`CASE
+              WHEN EXCLUDED.title = (SELECT url FROM items WHERE id = profile_items.item_id) THEN COALESCE(profile_items.title, EXCLUDED.title)
+              ELSE EXCLUDED.title
+            END`,
             description: sql`COALESCE(EXCLUDED.description, ${profileItems.description})`,
             author: sql`COALESCE(EXCLUDED.author, ${profileItems.author})`,
             thumbnail: sql`COALESCE(EXCLUDED.thumbnail, ${profileItems.thumbnail})`,

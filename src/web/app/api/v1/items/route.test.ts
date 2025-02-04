@@ -508,6 +508,7 @@ describe("POST /api/v1/items", () => {
             description: "My description",
             publishedAt: "2024-01-01T00:00:00.000Z",
             savedAt: "2025-01-01T00:00:00.000Z",
+            author: "Kim",
           }),
         }),
       ],
@@ -520,7 +521,7 @@ describe("POST /api/v1/items", () => {
           {
             url: "https://example.com",
             metadata: {
-              author: "Kim",
+              author: "Kim2",
               description: "",
             },
           },
@@ -539,10 +540,65 @@ describe("POST /api/v1/items", () => {
           id: expect.any(String),
           slug: expect.stringMatching(/^example-com-[a-f0-9]{6}$/),
           metadata: expect.objectContaining({
-            title: "https://example.com/",
-            author: "Kim",
+            title: "My title",
+            author: "Kim2",
             description: "My description",
             publishedAt: "2024-01-01T00:00:00.000Z",
+          }),
+        }),
+      ],
+    });
+  });
+
+  it("should return 200 and leave existing title untouched", async () => {
+    await testDb.db.insert(items).values({
+      id: TEST_ITEM_ID,
+      url: TEST_ITEM_URL_1,
+      slug: "example-com-123456",
+      createdAt: new Date("2025-01-10T12:52:56-08:00"),
+      updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+    });
+    await testDb.db.insert(profileItems).values({
+      profileId: DEFAULT_TEST_PROFILE_ID,
+      itemId: TEST_ITEM_ID,
+      title: "Old title",
+      author: "Kim",
+      state: ItemState.ACTIVE,
+      isFavorite: false,
+      archivedAt: null,
+      savedAt: new Date("2025-01-01T00:00:00.000Z"),
+      lastReadAt: null,
+    });
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "POST",
+      body: {
+        items: [
+          {
+            url: "https://example.com?query=value",
+            metadata: {
+              description: "My description",
+              publishedAt: new Date("2024-01-01"),
+            },
+          },
+        ],
+      },
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data).toEqual({
+      items: [
+        expect.objectContaining({
+          url: "https://example.com/",
+          id: expect.any(String),
+          slug: expect.stringMatching(/^example-com-[a-f0-9]{6}$/),
+          metadata: expect.objectContaining({
+            title: "Old title",
+            description: "My description",
+            publishedAt: "2024-01-01T00:00:00.000Z",
+            savedAt: "2025-01-01T00:00:00.000Z",
           }),
         }),
       ],
