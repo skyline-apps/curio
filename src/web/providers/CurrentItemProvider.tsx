@@ -27,8 +27,9 @@ export type CurrentItemContextType = {
   setSidebarOpen: (open: boolean) => void;
   currentItem: ItemMetadata | null;
   loadedItem: Item | null;
-  selectItem: (slug: string | null) => void;
-  unselectItem: () => void;
+  selectedItems: Set<string>;
+  selectItems: (slugs: string[]) => void;
+  unselectItems: () => void;
   fetchContent: (slug: string, refresh?: boolean) => Promise<void>;
   loading: boolean;
   loadingError: string | null;
@@ -43,8 +44,9 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
   setSidebarOpen: () => {},
   currentItem: null,
   loadedItem: null,
-  selectItem: () => {},
-  unselectItem: () => {},
+  selectedItems: new Set<string>(),
+  selectItems: () => {},
+  unselectItems: () => {},
   fetchContent: () => Promise.resolve(),
   loading: true,
   loadingError: null,
@@ -54,22 +56,22 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   children,
 }: CurrentItemProviderProps): React.ReactNode => {
   const [currentItemSlug, setCurrentItemSlug] = useState<string | null>(null);
-  const [selectedItemSlug, setSelectedItemSlug] = useState<string | null>(null);
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
   const { items } = useContext(ItemsContext);
 
-  const unselectItem = (): void => {
-    setSelectedItemSlug(null);
+  const unselectItems = (): void => {
+    setSelectedItems(new Set());
     setCurrentItemSlug(null);
     setSidebarOpen(false);
   };
 
-  const selectItem = (slug: string | null): void => {
-    setSelectedItemSlug(slug);
+  const selectItems = (slugs: string[]): void => {
+    setSelectedItems(new Set(slugs));
     setCurrentItemSlug(null);
     if (typeof window !== "undefined" && window.innerWidth > 1048) {
-      setSidebarOpen(!!slug);
+      setSidebarOpen(!!slugs.length);
     } else {
       setSidebarOpen(false);
     }
@@ -126,15 +128,20 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
 
   const currentItem = useMemo(() => {
     if (currentItemSlug) {
-      if (!data?.item && selectedItemSlug) {
-        return items.find((item) => item.slug === selectedItemSlug) || null;
+      if (!data?.item && selectedItems.size === 1) {
+        return (
+          items.find((item) => item.slug === Array.from(selectedItems)[0]) ||
+          null
+        );
       }
       return data?.item || null;
-    } else if (selectedItemSlug) {
-      return items.find((item) => item.slug === selectedItemSlug) || null;
+    } else if (selectedItems.size === 1) {
+      return (
+        items.find((item) => item.slug === Array.from(selectedItems)[0]) || null
+      );
     }
     return null;
-  }, [items, data, selectedItemSlug, currentItemSlug]);
+  }, [items, data, currentItemSlug, selectedItems]);
 
   const loadedItem = useMemo(() => {
     if (!currentItem) return null;
@@ -151,8 +158,9 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         setSidebarOpen,
         currentItem,
         loadedItem,
-        selectItem,
-        unselectItem,
+        selectedItems,
+        selectItems,
+        unselectItems,
         fetchContent,
         loading: isLoading,
         loadingError: error ? error.message || "Error loading items." : null,

@@ -11,7 +11,8 @@ interface ItemCardProps {
 }
 
 const ItemCard: React.FC<ItemCardProps> = ({ item }: ItemCardProps) => {
-  const { currentItem, selectItem } = useContext(CurrentItemContext);
+  const { currentItem, selectItems, selectedItems } =
+    useContext(CurrentItemContext);
   const getHostname = (url: string): string =>
     new URL(url).hostname.replace(/www./, "");
 
@@ -19,11 +20,15 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }: ItemCardProps) => {
     <div
       key={item.id}
       className={cn(
-        "flex flex-row bg-background-400 pl-4 pr-1 py-1 h-16 rounded-sm overflow-hidden hover:bg-background-300 group",
+        "flex flex-row bg-background-400 pl-4 pr-1 py-1 pb-2 h-16 rounded-sm overflow-hidden hover:bg-background-300 group",
         currentItem?.id === item.id && "bg-background-300",
       )}
-      onClick={() => selectItem(item.slug)}
-      data-active={currentItem?.id === item.id ? true : undefined}
+      onClick={() => selectItems([item.slug])}
+      data-active={
+        selectedItems.has(item.slug) || currentItem?.id === item.id
+          ? true
+          : undefined
+      }
     >
       <div className="flex flex-row gap-2 justify-between items-start w-full">
         <div className="grow h-full block overflow-hidden">
