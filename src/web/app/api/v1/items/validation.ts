@@ -1,9 +1,17 @@
 import { z } from "zod";
 
+import { ItemState } from "@/db/schema";
+
 const UrlSchema = z.string().url().describe("Unique URL of the item.");
 const SlugSchema = z
   .string()
   .describe("Unique slug for the item used to identify it in its URL.");
+const dateType = z.union([z.string(), z.date()]).transform((val) => {
+  if (val instanceof Date) {
+    return val.toISOString();
+  }
+  return val;
+});
 
 const ItemMetadataSchema = z
   .object({
@@ -33,32 +41,40 @@ const ItemMetadataSchema = z
       .describe(
         "The thumbnail of the item. If left blank, will remain unchanged.",
       ),
-    publishedAt: z
-      .union([z.string(), z.date()])
-      .transform((val) => {
-        if (val instanceof Date) {
-          return val.toISOString();
-        }
-        return val;
-      })
+    publishedAt: dateType
       .nullable()
       .optional()
       .describe(
         "The published date of the item. If left blank, will remain unchanged.",
       ),
-    savedAt: z
-      .union([z.string(), z.date()])
-      .transform((val) => {
-        if (val instanceof Date) {
-          return val.toISOString();
-        }
-        return val;
-      })
+    savedAt: dateType
       .nullable()
       .optional()
       .describe(
         "The published date of the item. If left blank, will remain unchanged.",
       ),
+    state: z
+      .nativeEnum(ItemState)
+      .describe("Whether the state is active or archived."),
+    isFavorite: z.boolean().describe("Whether the item is favorited."),
+    readingProgress: z
+      .number()
+      .min(0)
+      .max(100)
+      .describe(
+        "Progress reading the item. Should only populated if versionName is set.",
+      ),
+    lastReadAt: dateType
+      .nullable()
+      .optional()
+      .describe(
+        "The last read date of the item. Should only be populated if versionName is set.",
+      ),
+    versionName: z
+      .string()
+      .max(255)
+      .nullable()
+      .describe("The version name of the item."),
   })
   .strict();
 

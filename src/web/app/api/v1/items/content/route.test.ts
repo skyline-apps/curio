@@ -8,7 +8,7 @@ import {
 } from "@/__mocks__/storage";
 import { UploadStatus } from "@/app/api/v1/items/content/validation";
 import { desc, eq } from "@/db";
-import { items, profileItems } from "@/db/schema";
+import { items, ItemState, profileItems } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
 import {
   ExtractError,
@@ -68,6 +68,7 @@ describe("GET /api/v1/items/[slug]/content", () => {
       thumbnail: "https://example.com/thumb.jpg",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
       savedAt: ORIGINAL_CREATION_DATE,
+      isFavorite: true,
     });
 
     const request: APIRequest = makeAuthenticatedMockRequest({
@@ -93,6 +94,11 @@ describe("GET /api/v1/items/[slug]/content", () => {
           thumbnail: "https://example.com/thumb.jpg",
           title: "Example",
           savedAt: ORIGINAL_CREATION_DATE.toISOString(),
+          isFavorite: true,
+          state: ItemState.ACTIVE,
+          versionName: null,
+          lastReadAt: null,
+          readingProgress: 0,
         },
         url: TEST_ITEM_URL,
       },
@@ -113,6 +119,11 @@ describe("GET /api/v1/items/[slug]/content", () => {
       thumbnail: "https://example.com/thumb.jpg",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
       savedAt: ORIGINAL_CREATION_DATE,
+      state: ItemState.ACTIVE,
+      isFavorite: true,
+      readingProgress: 5,
+      lastReadAt: new Date("2025-02-10T12:50:00-08:00"),
+      versionName: "2010-04-04",
     });
 
     const request: APIRequest = makeAuthenticatedMockRequest({
@@ -136,6 +147,11 @@ describe("GET /api/v1/items/[slug]/content", () => {
           thumbnail: "https://example.com/thumb.jpg",
           title: "Example",
           savedAt: ORIGINAL_CREATION_DATE.toISOString(),
+          state: ItemState.ACTIVE,
+          isFavorite: true,
+          readingProgress: 5,
+          lastReadAt: "2025-02-10T20:50:00.000Z",
+          versionName: "2010-04-04",
         },
         url: TEST_ITEM_URL,
       },
