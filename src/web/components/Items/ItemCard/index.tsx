@@ -8,10 +8,11 @@ import { cn } from "@/utils/cn";
 
 interface ItemCardProps {
   item: ItemMetadata;
+  index: number;
 }
 
-const ItemCard: React.FC<ItemCardProps> = ({ item }: ItemCardProps) => {
-  const { currentItem, selectItems, selectedItems } =
+const ItemCard: React.FC<ItemCardProps> = ({ item, index }: ItemCardProps) => {
+  const { currentItem, selectItems, selectedItems, lastSelectionIndex } =
     useContext(CurrentItemContext);
   const getHostname = (url: string): string =>
     new URL(url).hostname.replace(/www./, "");
@@ -20,15 +21,15 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }: ItemCardProps) => {
     <div
       key={item.id}
       className={cn(
-        "flex flex-row bg-background-400 pl-4 pr-1 py-1 pb-2 h-16 rounded-sm overflow-hidden hover:bg-background-300 group",
-        currentItem?.id === item.id && "bg-background-300",
+        "group m-0.5 flex flex-row bg-background-400 pl-4 pr-1 py-1 pb-2 h-16 rounded-sm overflow-hidden hover:bg-background-300 data-[selected=true]:bg-background-300 data-[active=true]:outline-focus data-[active=true]:outline",
       )}
-      onClick={() => selectItems([item.slug])}
-      data-active={
+      onClick={() => selectItems([item.slug], index)}
+      data-selected={
         selectedItems.has(item.slug) || currentItem?.id === item.id
           ? true
           : undefined
       }
+      data-active={lastSelectionIndex === index}
     >
       <div className="flex flex-row gap-2 justify-between items-start w-full">
         <div className="grow h-full block overflow-hidden">
@@ -48,10 +49,7 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }: ItemCardProps) => {
             {item.metadata.description}
           </p>
         </div>
-        <ItemActions
-          item={item}
-          className="invisible group-hover:visible group-data-[active=true]:visible"
-        />
+        <ItemActions item={item} className="invisible group-hover:visible" />
       </div>
     </div>
   );
