@@ -15,7 +15,7 @@ import { GET, POST } from "./route";
 
 const TEST_ITEM_ID = "123e4567-e89b-12d3-a456-426614174001";
 const TEST_ITEM_URL_1 = "https://example.com/";
-const TEST_ITEM_ID_2 = "123e4567-e89b-12d3-a456-426614174002";
+const TEST_ITEM_ID_2 = "123e4567-e89b-12d3-a456-426614174000";
 const TEST_ITEM_URL_2 = "https://example2.com/";
 const TEST_ITEM_ID_3 = "123e4567-e89b-12d3-a456-426614174003";
 const TEST_ITEM_URL_3 = "https://example3.com/";
@@ -140,7 +140,9 @@ describe("GET /api/v1/items", () => {
     const firstData = await firstResponse.json();
     expect(firstData.items).toHaveLength(2);
     expect(firstData.total).toBe(3);
-    expect(firstData.nextCursor).toBe(TEST_ITEM_ID_2);
+    expect(firstData.nextCursor).toBe(
+      MOCK_PROFILE_ITEMS[1].savedAt.toISOString(),
+    );
     expect(firstData.items[0].id).toBe(TEST_ITEM_ID_3); // Most recent first
     expect(firstData.items[1].id).toBe(TEST_ITEM_ID_2);
 
