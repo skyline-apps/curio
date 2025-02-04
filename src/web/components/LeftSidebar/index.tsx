@@ -11,6 +11,10 @@ import NewItemModal from "@/components/NewItemModal";
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
 import { useLogout } from "@/hooks/useLogout";
+import {
+  BrowserMessageContext,
+  EventType,
+} from "@/providers/BrowserMessageProvider";
 import { SettingsContext } from "@/providers/SettingsProvider";
 import { UserContext } from "@/providers/UserProvider";
 import { cn } from "@/utils/cn";
@@ -26,8 +30,22 @@ const LeftSidebar: React.FC = () => {
   const [selectedKey, setSelectedKey] = useState<string>(SidebarKey.NONE);
   const [showNewItemModal, setShowNewItemModal] = useState<boolean>(false);
   const { appLayout, updateAppLayout } = useContext(SettingsContext);
+  const { addMessageListener, removeMessageListener } = useContext(
+    BrowserMessageContext,
+  );
 
   const handleLogout = useLogout();
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent): void => {
+      if (event.data.type === EventType.SAVE_SUCCESS) {
+        setShowNewItemModal(false);
+      }
+    };
+
+    addMessageListener(handleMessage);
+    return () => removeMessageListener(handleMessage);
+  }, [addMessageListener, removeMessageListener]);
 
   useEffect(() => {
     const newSelectedKey = Object.values(SidebarKey).includes(
