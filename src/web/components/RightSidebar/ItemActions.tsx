@@ -9,15 +9,22 @@ import Button from "@/components/ui/Button";
 import { Dialog, showConfirm } from "@/components/ui/Modal/Dialog";
 import { BrowserMessageContext } from "@/providers/BrowserMessageProvider";
 import { ItemMetadata } from "@/providers/ItemsProvider";
+import { cn } from "@/utils/cn";
 import { createLogger } from "@/utils/logger";
 
 const log = createLogger("item-actions");
 
 interface ItemActionsProps {
+  className?: string;
   item?: ItemMetadata;
+  showAdvanced?: boolean;
 }
 
-const ItemActions = ({ item }: ItemActionsProps): JSX.Element => {
+const ItemActions = ({
+  item,
+  showAdvanced,
+  className,
+}: ItemActionsProps): JSX.Element => {
   const { savingItem, saveItemContent } = useContext(BrowserMessageContext);
 
   const handleRefetch = useCallback(async () => {
@@ -40,7 +47,7 @@ const ItemActions = ({ item }: ItemActionsProps): JSX.Element => {
   }
 
   return (
-    <div className="flex flex-row gap-2 my-2 justify-end flex-none">
+    <div className={cn("flex flex-row gap-2 flex-none", className)}>
       <Button
         isIconOnly
         variant="faded"
@@ -61,15 +68,17 @@ const ItemActions = ({ item }: ItemActionsProps): JSX.Element => {
       >
         <HiOutlineArchiveBox />
       </Button>
-      <Button
-        isIconOnly
-        variant="faded"
-        size="sm"
-        onPress={handleRefetch}
-        isLoading={savingItem}
-      >
-        <HiOutlineArrowPath />
-      </Button>
+      {showAdvanced && (
+        <Button
+          isIconOnly
+          variant="faded"
+          size="sm"
+          onPress={handleRefetch}
+          isLoading={savingItem}
+        >
+          <HiOutlineArrowPath />
+        </Button>
+      )}
       <Dialog />
     </div>
   );
