@@ -76,17 +76,24 @@ export async function GET(
       return APIResponseJSON({ error: "Item not found." }, { status: 404 });
     }
 
-    const content = await storage.getItemContent(slug);
-    const response: GetItemContentResponse = {
-      content,
-      item: ItemResultSchema.parse(item[0]),
-    };
+    const itemResponse = ItemResultSchema.parse(item[0]);
 
-    return APIResponseJSON(response);
+    try {
+      const content = await storage.getItemContent(slug);
+      const response: GetItemContentResponse = {
+        content,
+        item: itemResponse,
+      };
+      return APIResponseJSON(response);
+    } catch (error: unknown) {
+      if (error instanceof StorageError) {
+        return APIResponseJSON({ item: itemResponse });
+      } else {
+        throw error;
+      }
+    }
   } catch (error: unknown) {
-    if (error instanceof StorageError) {
-      return APIResponseJSON({ error: error.message }, { status: 500 });
-    } else if (error instanceof Error) {
+    if (error instanceof Error) {
       log.error("Error getting item content:", error);
       return APIResponseJSON(
         { error: "Error getting item content." },
