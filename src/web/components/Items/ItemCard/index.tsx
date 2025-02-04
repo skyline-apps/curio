@@ -10,16 +10,16 @@ interface ItemCardProps {
 }
 
 const ItemCard: React.FC<ItemCardProps> = ({ item }: ItemCardProps) => {
-  const { currentItem, populateCurrentItem } = useContext(CurrentItemContext);
+  const { currentItem, selectItem } = useContext(CurrentItemContext);
 
   return (
     <div
       key={item.id}
       className={cn(
         "flex flex-row bg-background-400 px-4 py-1 h-16 rounded-sm overflow-x-hidden hover:bg-background-300",
-        currentItem?.item.id === item.id && "bg-background-300",
+        currentItem?.id === item.id && "bg-background-300",
       )}
-      onClick={() => populateCurrentItem({ item })}
+      onClick={() => selectItem(item.slug)}
     >
       <div className="block overflow-hidden">
         <Link

@@ -52,11 +52,11 @@ const Providers: React.FC<PropsWithChildren> = async ({
         <UserProvider user={currentUser}>
           <ItemsProvider>
             <ToastProvider>
-              <BrowserMessageProvider>
-                <CurrentItemProvider>
+              <CurrentItemProvider>
+                <BrowserMessageProvider>
                   <SettingsProvider>{children}</SettingsProvider>
-                </CurrentItemProvider>
-              </BrowserMessageProvider>
+                </BrowserMessageProvider>
+              </CurrentItemProvider>
             </ToastProvider>
           </ItemsProvider>
         </UserProvider>

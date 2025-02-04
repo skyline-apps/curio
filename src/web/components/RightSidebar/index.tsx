@@ -35,7 +35,7 @@ const RightSidebar: React.FC = () => {
                 : "translate-x-full opacity-0",
             )}
           >
-            {sidebarOpen && <ItemMetadata item={currentItem?.item} />}
+            {sidebarOpen && <ItemMetadata item={currentItem || undefined} />}
           </div>
         </div>
         <Button
