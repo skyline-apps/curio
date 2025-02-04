@@ -31,8 +31,9 @@ export type CurrentItemContextType = {
   selectItems: (
     slugs: string[],
     index: number,
-    replace?: boolean,
-    selectRange?: boolean,
+    replace?: boolean, // Clear out all other selections for this one
+    selectRange?: boolean, // Select a range from the lastSelectionIndex to this index
+    startSelecting?: boolean, // Start selecting, even if we're replacing
   ) => void;
   clearSelectedItems: () => void;
   fetchContent: (slug: string, refresh?: boolean) => Promise<void>;
@@ -70,6 +71,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   const [lastSelectionIndex, setLastSelectionIndex] = useState<number | null>(
     null,
   );
+  const [inSelectionMode, setInSelectionMode] = useState<boolean>(false);
 
   const { items } = useContext(ItemsContext);
 
@@ -78,6 +80,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     setCurrentItemSlug(null);
     setSidebarOpen(false);
     setLastSelectionIndex(null);
+    setInSelectionMode(false);
   };
 
   const selectItems = useCallback(
@@ -86,8 +89,9 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
       index: number,
       replace: boolean = true,
       selectRange: boolean = false,
+      startSelecting: boolean = false,
     ) => {
-      if (replace) {
+      if (replace && !inSelectionMode) {
         setSelectedItems(new Set(slugs));
       } else if (selectRange && lastSelectionIndex !== null) {
         // Handle shift-click range selection
@@ -110,6 +114,9 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         setSelectedItems(newSelection);
       }
       setLastSelectionIndex(index);
+      if (startSelecting) {
+        setInSelectionMode(true);
+      }
       if (typeof window !== "undefined" && window.innerWidth > 1048) {
         setSidebarOpen(!!slugs.length);
       } else {
