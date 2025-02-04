@@ -29,18 +29,26 @@ const ItemActions = ({
 
   const handleRefetch = useCallback(async () => {
     if (!item?.url) return;
-    showConfirm(
-      "Are you sure you want to refresh this item? This will erase any notes, highlights, and reading progress.",
-      async () => {
-        try {
-          await saveItemContent(item.url);
-        } catch (error) {
-          log.error("Error refreshing content:", error);
-        }
-      },
-      "Refresh",
-    );
-  }, [item?.url, saveItemContent]);
+    if (item.metadata.versionName) {
+      showConfirm(
+        "Are you sure you want to refresh this item? This will erase any notes, highlights, and reading progress.",
+        async () => {
+          try {
+            await saveItemContent(item.url);
+          } catch (error) {
+            log.error("Error refreshing content:", error);
+          }
+        },
+        "Refresh",
+      );
+    } else {
+      try {
+        await saveItemContent(item.url);
+      } catch (error) {
+        log.error("Error refreshing content:", error);
+      }
+    }
+  }, [item?.url, item?.metadata.versionName, saveItemContent]);
 
   if (!item) {
     return <></>;
