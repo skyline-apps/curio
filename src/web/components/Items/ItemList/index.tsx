@@ -8,10 +8,10 @@ interface ItemListProps {}
 
 const ItemList: React.FC<ItemListProps> = () => {
   const { items } = useContext(ItemsContext);
-  const { unselectItem } = useContext(CurrentItemContext);
+  const { unselectItems } = useContext(CurrentItemContext);
 
   useEffect(() => {
-    unselectItem();
+    unselectItems();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
