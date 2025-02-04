@@ -39,7 +39,7 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
   ({ href, ...props }: CurioButtonProps, ref) => {
     if (props.variant === "faded") {
       props.className = cn(
-        "bg-background-400 hover:bg-background-300 border-none shadow",
+        "bg-background-400 dark:bg-background hover:bg-background-300 dark:hover:bg-background-400 border-none shadow",
         props.className,
       );
     }
