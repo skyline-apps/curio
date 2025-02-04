@@ -67,6 +67,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
 
   const selectItem = (slug: string | null): void => {
     setSelectedItemSlug(slug);
+    setCurrentItemSlug(null);
     if (typeof window !== "undefined" && window.innerWidth > 1048) {
       setSidebarOpen(!!slug);
     } else {
