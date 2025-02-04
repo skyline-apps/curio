@@ -68,6 +68,11 @@ export async function GET(
           thumbnail: profileItems.thumbnail,
           publishedAt: profileItems.publishedAt,
           savedAt: profileItems.savedAt,
+          state: profileItems.state,
+          isFavorite: profileItems.isFavorite,
+          readingProgress: profileItems.readingProgress,
+          lastReadAt: profileItems.lastReadAt,
+          versionName: profileItems.versionName,
         },
       })
       .from(items)
@@ -192,6 +197,11 @@ export async function POST(
           thumbnail: profileItems.thumbnail,
           publishedAt: profileItems.publishedAt,
           savedAt: profileItems.savedAt,
+          state: profileItems.state,
+          isFavorite: profileItems.isFavorite,
+          readingProgress: profileItems.readingProgress,
+          lastReadAt: profileItems.lastReadAt,
+          versionName: profileItems.versionName,
         });
 
       const response: CreateOrUpdateItemsResponse = {

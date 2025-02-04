@@ -1,6 +1,6 @@
 import { eq } from "@/db";
 import { DbErrorCode } from "@/db/errors";
-import { items, profileItems } from "@/db/schema";
+import { items, ItemState, profileItems } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_API_KEY,
@@ -75,6 +75,11 @@ const MOCK_PROFILE_ITEMS = [
     thumbnail: "https://example.com/thumb3.jpg",
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
     savedAt: new Date("2025-01-10T12:52:58-08:00"),
+    state: ItemState.ACTIVE,
+    isFavorite: false,
+    readingProgress: 10,
+    lastReadAt: new Date("2025-01-15T12:00:00-08:00"),
+    versionName: "2024-01-01",
   },
   {
     profileId: DEFAULT_TEST_PROFILE_ID_2,
@@ -118,6 +123,11 @@ describe("GET /api/v1/items", () => {
       thumbnail: "https://example.com/thumb1.jpg",
       title: "Example 1",
       savedAt: "2025-01-10T20:52:56.000Z",
+      isFavorite: false,
+      lastReadAt: null,
+      readingProgress: 0,
+      state: ItemState.ACTIVE,
+      versionName: null,
     });
   });
 
@@ -205,7 +215,17 @@ describe("GET /api/v1/items", () => {
     const data = await response.json();
     expect(data.items).toHaveLength(2);
     expect(data.items[0].id).toBe(TEST_ITEM_ID_3);
+    expect(data.items[0].metadata.versionName).toBe("2024-01-01");
+    expect(data.items[0].metadata.lastReadAt).toBe("2025-01-15T20:00:00.000Z");
+    expect(data.items[0].metadata.isFavorite).toBe(false);
+    expect(data.items[0].metadata.readingProgress).toBe(10);
+    expect(data.items[0].metadata.state).toBe(ItemState.ACTIVE);
     expect(data.items[1].id).toBe(TEST_ITEM_ID_2);
+    expect(data.items[1].metadata.versionName).toBe(null);
+    expect(data.items[1].metadata.lastReadAt).toBe(null);
+    expect(data.items[1].metadata.isFavorite).toBe(false);
+    expect(data.items[1].metadata.readingProgress).toBe(0);
+    expect(data.items[1].metadata.state).toBe(ItemState.ACTIVE);
     expect(data.total).toBe(3);
   });
 
@@ -343,7 +363,8 @@ describe("POST /api/v1/items", () => {
       itemId: TEST_ITEM_ID,
       title: "Old title",
       author: "Kim",
-      state: "active",
+      savedAt: new Date("2024-01-10T12:52:56-08:00"),
+      state: ItemState.ACTIVE,
       isFavorite: false,
       archivedAt: null,
       lastReadAt: null,
@@ -384,6 +405,9 @@ describe("POST /api/v1/items", () => {
             title: "New title",
             description: "New description",
             author: "Kim",
+            state: ItemState.ACTIVE,
+            isFavorite: false,
+            readingProgress: 0,
           }),
           createdAt: expect.any(String),
         },
@@ -393,6 +417,7 @@ describe("POST /api/v1/items", () => {
           slug: expect.stringMatching(/^example2-com-[a-f0-9]{6}$/),
           metadata: expect.objectContaining({
             title: "Example title",
+            versionName: null,
           }),
           createdAt: expect.any(String),
         },
@@ -413,7 +438,7 @@ describe("POST /api/v1/items", () => {
     expect(savedItems).toEqual([
       expect.objectContaining({
         itemId: TEST_ITEM_ID,
-        state: "active",
+        state: ItemState.ACTIVE,
         title: "New title",
         description: "New description",
         author: "Kim",
@@ -423,7 +448,7 @@ describe("POST /api/v1/items", () => {
       }),
       expect.objectContaining({
         itemId: expect.any(String),
-        state: "active",
+        state: ItemState.ACTIVE,
         title: "Example title",
         description: null,
         isFavorite: false,
@@ -446,7 +471,7 @@ describe("POST /api/v1/items", () => {
       itemId: TEST_ITEM_ID,
       title: "Old title",
       author: "Kim",
-      state: "active",
+      state: ItemState.ACTIVE,
       isFavorite: false,
       archivedAt: null,
       savedAt: new Date("2025-01-01T00:00:00.000Z"),
