@@ -1,5 +1,6 @@
 "use client";
-import React, { createContext, useCallback, useState } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import React, { createContext, useState } from "react";
 
 import {
   type GetItemsRequest,
@@ -12,17 +13,22 @@ import { createLogger } from "@/utils/logger";
 const log = createLogger("items-provider");
 
 export type ItemMetadata = ItemResult;
+interface ItemsPage {
+  items: ItemMetadata[];
+  total: number;
+  nextCursor?: string;
+}
 
 export type ItemsContextType = {
   items: ItemMetadata[];
   totalItems: number;
   isLoading: boolean;
+  loadingError: string | null;
   hasMore: boolean;
-  fetchItems: (options?: GetItemsRequest, reset?: boolean) => Promise<void>;
+  fetchItems: (options?: GetItemsRequest, refetch?: boolean) => Promise<void>;
 };
 
-interface ItemsProviderProps {
-  children: React.ReactNode;
+interface ItemsProviderProps extends React.PropsWithChildren {
   initialLimit?: number;
 }
 
@@ -30,6 +36,7 @@ export const ItemsContext = createContext<ItemsContextType>({
   items: [],
   totalItems: 0,
   isLoading: false,
+  loadingError: null,
   hasMore: true,
   fetchItems: () => Promise.resolve(),
 });
@@ -38,83 +45,70 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
   children,
   initialLimit = 20,
 }: ItemsProviderProps): React.ReactNode => {
-  const [items, setItems] = useState<ItemResult[]>([]);
-  const [totalItems, setTotalItems] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [hasMore, setHasMore] = useState<boolean>(true);
-  const [nextCursor, setNextCursor] = useState<string | undefined>();
+  // TODO: Handle other query options like search filters etc.
+  const [currentOptions, setCurrentOptions] = useState<GetItemsRequest | null>(
+    null,
+  );
 
-  const fetchItems = useCallback(
-    async (options: GetItemsRequest = {}, reset = false): Promise<void> => {
-      if (!reset && loading) return;
-      if (!reset && !hasMore) return;
-
-      setLoading(true);
-
-      if (reset) {
-        setNextCursor(undefined);
-        setItems([]);
-      }
-
+  const query = useInfiniteQuery<ItemsPage>({
+    queryKey: ["items", initialLimit],
+    queryFn: async ({ pageParam }): Promise<ItemsPage> => {
       const params = new URLSearchParams(
         Object.fromEntries(
           Object.entries({
-            ...options,
-            limit: options.limit || initialLimit,
-            cursor: reset ? undefined : nextCursor,
+            ...currentOptions,
+            limit: currentOptions?.limit || initialLimit,
+            cursor: pageParam,
           })
             .filter(([_, value]) => value !== undefined)
             .map(([key, value]) => [key, String(value)]),
         ),
       );
 
-      try {
-        const result = await fetch(`/api/v1/items?${params.toString()}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }).then(handleAPIResponse<GetItemsResponse>);
+      const result = await fetch(`/api/v1/items?${params.toString()}`).then(
+        handleAPIResponse<GetItemsResponse>,
+      );
 
-        const { items: newItems, total, nextCursor: newCursor } = result;
-        if (!newItems) {
-          throw Error("Failed to fetch items");
-        }
-
-        setItems((prevItems) => {
-          if (reset) {
-            return newItems;
-          }
-          const existingIds = new Set(prevItems.map((item) => item.id));
-          const uniqueNewItems = newItems.filter(
-            (item) => !existingIds.has(item.id),
-          );
-          return [...prevItems, ...uniqueNewItems];
-        });
-
-        setTotalItems(total);
-        setNextCursor(newCursor);
-        setHasMore(!!newCursor);
-      } catch (error) {
-        log.error("Failed to fetch items", error);
-        throw error;
-      } finally {
-        setLoading(false);
+      if (!result.items) {
+        log.error("Failed to fetch items", result);
+        throw new Error("Failed to fetch items");
       }
+
+      return {
+        items: result.items,
+        total: result.total,
+        nextCursor: result.nextCursor,
+      };
     },
-    [loading, hasMore, nextCursor, initialLimit],
-  );
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  });
+
+  const fetchItems = async (
+    options?: GetItemsRequest,
+    refetch?: boolean,
+  ): Promise<void> => {
+    setCurrentOptions(options || null);
+    if (refetch) {
+      await query.refetch();
+    } else if (query.hasNextPage) {
+      await query.fetchNextPage();
+    }
+  };
+
+  const contextValue: ItemsContextType = {
+    items: query.data?.pages.flatMap((p) => p.items) || [],
+    totalItems: query.data?.pages[0]?.total || 0,
+    isLoading: query.isFetching,
+    loadingError: query.isRefetchError
+      ? query.error?.message || "Error loading items."
+      : null,
+    hasMore: !!query.hasNextPage,
+    fetchItems,
+  };
 
   return (
-    <ItemsContext.Provider
-      value={{
-        items,
-        totalItems,
-        isLoading: loading,
-        hasMore,
-        fetchItems,
-      }}
-    >
+    <ItemsContext.Provider value={contextValue}>
       {children}
     </ItemsContext.Provider>
   );

@@ -8,7 +8,8 @@ import Icon from "@/components/ui/Icon";
 import { ItemsContext } from "@/providers/ItemsProvider";
 
 const HomePage: React.FC = () => {
-  const { fetchItems, hasMore, items, totalItems } = useContext(ItemsContext);
+  const { fetchItems, hasMore, items, totalItems, loadingError } =
+    useContext(ItemsContext);
 
   useEffect(() => {
     fetchItems({});
@@ -28,7 +29,11 @@ const HomePage: React.FC = () => {
           loader={<></>}
           endMessage={
             <div className="flex flex-row items-center justify-center py-8 text-secondary-800 gap-2">
-              {totalItems === 0 ? (
+              {loadingError ? (
+                <>
+                  <p>{loadingError}</p>
+                </>
+              ) : totalItems === 0 ? (
                 <>
                   <p>Nothing here yet.</p>
                   <Icon className="text-secondary-800" icon={<LuBird />} />
