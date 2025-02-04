@@ -1,6 +1,6 @@
 "use client";
 import React, { useCallback, useContext, useEffect } from "react";
-import { LuBird, LuPartyPopper } from "react-icons/lu";
+import { LuBird } from "react-icons/lu";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 import ItemList from "@/components/Items/ItemList";
@@ -38,15 +38,7 @@ const HomePage: React.FC = () => {
                   <p>Nothing here yet.</p>
                   <Icon className="text-secondary-800" icon={<LuBird />} />
                 </>
-              ) : (
-                <>
-                  <p>You&apos;re all caught up!</p>
-                  <Icon
-                    className="text-secondary-800"
-                    icon={<LuPartyPopper />}
-                  />
-                </>
-              )}
+              ) : null}
             </div>
           }
           scrollableTarget="scrollableDiv"
