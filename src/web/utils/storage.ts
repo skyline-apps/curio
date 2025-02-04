@@ -183,7 +183,6 @@ export class Storage {
       .download(`${slug}/${DEFAULT_NAME}.md`);
 
     if (error) {
-      log.error(`Error downloading content for item ${slug}:`, error);
       throw new StorageError("Failed to download content");
     }
 

@@ -1,7 +1,11 @@
 import { jest } from "@jest/globals";
 
 import { MOCK_METADATA } from "@/__mocks__/extract";
-import { uploadItemContent } from "@/__mocks__/storage";
+import {
+  getItemContent,
+  StorageError,
+  uploadItemContent,
+} from "@/__mocks__/storage";
 import { UploadStatus } from "@/app/api/v1/items/content/validation";
 import { desc, eq } from "@/db";
 import { items, profileItems } from "@/db/schema";
@@ -78,6 +82,49 @@ describe("GET /api/v1/items/[slug]/content", () => {
     const data = await response.json();
     expect(data).toEqual({
       content: "test content",
+      item: {
+        id: TEST_ITEM_ID,
+        slug: TEST_ITEM_SLUG,
+        createdAt: ORIGINAL_CREATION_DATE.toISOString(),
+        metadata: {
+          author: "Test Author",
+          description: "An example item",
+          publishedAt: ORIGINAL_PUBLISHED_DATE.toISOString(),
+          thumbnail: "https://example.com/thumb.jpg",
+          title: "Example",
+          savedAt: ORIGINAL_CREATION_DATE.toISOString(),
+        },
+        url: TEST_ITEM_URL,
+      },
+    });
+  });
+
+  it("should return 200 with metadata even if item content is missing", async () => {
+    jest
+      .mocked(getItemContent)
+      .mockRejectedValueOnce(new StorageError("Failed to download content"));
+    await testDb.db.insert(items).values(MOCK_ITEM);
+    await testDb.db.insert(profileItems).values({
+      profileId: DEFAULT_TEST_PROFILE_ID,
+      itemId: TEST_ITEM_ID,
+      title: "Example",
+      description: "An example item",
+      author: "Test Author",
+      thumbnail: "https://example.com/thumb.jpg",
+      publishedAt: ORIGINAL_PUBLISHED_DATE,
+      savedAt: ORIGINAL_CREATION_DATE,
+    });
+
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "GET",
+      searchParams: { slug: TEST_ITEM_SLUG },
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data).toEqual({
       item: {
         id: TEST_ITEM_ID,
         slug: TEST_ITEM_SLUG,
@@ -321,7 +368,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
     expect(profileItem[1].title).toEqual("Example");
   });
 
-  test.each([
+  test.each<[string, Exclude<UploadStatus, UploadStatus.ERROR>]>([
     [
       "should return 200 with metadata when content already exists",
       UploadStatus.SKIPPED,

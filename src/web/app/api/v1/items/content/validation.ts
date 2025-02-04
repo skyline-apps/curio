@@ -15,7 +15,7 @@ export const GetItemContentRequestSchema = z.object({
 
 export const GetItemContentResponseSchema = z.union([
   z.object({
-    content: z.string(),
+    content: z.string().optional(),
     item: ItemResultSchema,
   }),
   z.object({
