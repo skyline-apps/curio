@@ -1,8 +1,15 @@
 "use client";
-import React, { createContext, useCallback, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 import { GetItemContentResponse } from "@/app/api/v1/items/content/validation";
 import { GetItemsResponse } from "@/app/api/v1/items/validation";
+import { ItemsContext } from "@/providers/ItemsProvider";
 import { handleAPIResponse } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
 
@@ -49,19 +56,33 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [loadingError, setLoadingError] = useState<string | null>(null);
 
+  const { items } = useContext(ItemsContext);
+
   const clearCurrentItem = (): void => {
     setCurrentItem(null);
     setSidebarOpen(false);
   };
 
-  const populateCurrentItem = (item: ItemContent | null): void => {
+  const populateCurrentItem = useCallback((item: ItemContent | null): void => {
     setCurrentItem(item);
     if (typeof window !== "undefined" && window.innerWidth > 1048) {
       setSidebarOpen(!!item);
     } else {
       setSidebarOpen(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (currentItem && items.length > 0) {
+      const updatedItem = items.find((item) => item.id === currentItem.item.id);
+      if (updatedItem) {
+        populateCurrentItem({
+          item: updatedItem,
+          content: currentItem.content,
+        });
+      }
+    }
+  }, [items, currentItem, populateCurrentItem]);
 
   const fetchMetadata = useCallback(async (slug: string): Promise<void> => {
     const searchParams = new URLSearchParams({
