@@ -1,5 +1,5 @@
 import type { PressEvent } from "@react-types/shared";
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 import Button from "@/components/ui/Button";
 import Form from "@/components/ui/Form";
@@ -25,15 +25,32 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
 }: NewItemModalProps) => {
   const [error, setError] = useState<string | null>(null);
   const [urlInput, setUrlInput] = useState<string>("");
-  const { saveItemContent, savingItem, savingError, clearSavingError } =
-    useContext(BrowserMessageContext);
+  const {
+    checkExtensionInstalled,
+    saveItemContent,
+    savingItem,
+    savingError,
+    clearSavingError,
+  } = useContext(BrowserMessageContext);
 
   const closeModal = useCallback((): void => {
     clearSavingError();
     setUrlInput("");
     setError(null);
     onClose();
-  }, [onClose]);
+  }, [onClose, clearSavingError]);
+
+  useEffect((): void => {
+    checkExtensionInstalled((success: boolean) => {
+      if (success) {
+        setError(null);
+      } else {
+        setError(
+          "Unable to connect to the browser extension. Please ensure it's installed correctly.",
+        );
+      }
+    });
+  }, [checkExtensionInstalled]);
 
   const openAndSave = async (
     event: React.FormEvent<HTMLFormElement> | PressEvent,
