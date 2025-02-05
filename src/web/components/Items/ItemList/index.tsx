@@ -18,6 +18,10 @@ const ItemList: React.FC<ItemListProps> = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent): void => {
+      const rightSidebar = document.querySelector('[id="right-sidebar"]');
+      if (rightSidebar?.contains(event.target as Node)) {
+        return;
+      }
       if (listRef.current && !listRef.current.contains(event.target as Node)) {
         clearSelectedItems();
       }
