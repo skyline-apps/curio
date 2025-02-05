@@ -56,6 +56,7 @@ const MOCK_PROFILE_ITEMS = [
     thumbnail: "https://example.com/thumb1.jpg",
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
     savedAt: new Date("2025-01-10T12:52:56-08:00"),
+    stateUpdatedAt: new Date("2025-01-10T12:52:56-08:00"),
   },
   {
     profileId: DEFAULT_TEST_PROFILE_ID,
@@ -66,6 +67,7 @@ const MOCK_PROFILE_ITEMS = [
     thumbnail: "https://example.com/thumb2.jpg",
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
     savedAt: new Date("2025-01-10T12:52:57-08:00"),
+    stateUpdatedAt: new Date("2025-01-10T12:52:57-08:00"),
   },
   {
     profileId: DEFAULT_TEST_PROFILE_ID,
@@ -76,6 +78,7 @@ const MOCK_PROFILE_ITEMS = [
     thumbnail: "https://example.com/thumb3.jpg",
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
     savedAt: new Date("2025-01-10T12:52:58-08:00"),
+    stateUpdatedAt: new Date("2025-01-10T12:52:58-08:00"),
     state: ItemState.ACTIVE,
     isFavorite: false,
     readingProgress: 10,
@@ -91,6 +94,7 @@ const MOCK_PROFILE_ITEMS = [
     thumbnail: "https://example.com/thumb3.jpg",
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
     savedAt: new Date("2025-01-10T12:52:56-08:04"),
+    stateUpdatedAt: new Date("2025-01-10T12:52:56-08:04"),
   },
 ];
 

@@ -151,7 +151,7 @@ describe("GET /api/v1/items", () => {
       thumbnail: "https://example.com/thumb1.jpg",
       title: "Example 1",
       savedAt: "2025-01-10T20:52:56.000Z",
-      stateUpdatedAt: "2025-04-30T20:52:59.000Z",
+      stateUpdatedAt: "2024-04-30T20:52:59.000Z",
       isFavorite: false,
       lastReadAt: null,
       readingProgress: 0,
