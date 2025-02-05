@@ -23,9 +23,12 @@ export type ItemsContextType = {
   items: ItemMetadata[];
   totalItems: number;
   isLoading: boolean;
+  isFetching: boolean;
   loadingError: string | null;
   hasMore: boolean;
   fetchItems: (refresh?: boolean, options?: GetItemsRequest) => Promise<void>;
+  searchQuery: string;
+  setSearchQuery: (search: string) => void;
 };
 
 interface ItemsProviderProps extends React.PropsWithChildren {
@@ -36,9 +39,12 @@ export const ItemsContext = createContext<ItemsContextType>({
   items: [],
   totalItems: 0,
   isLoading: false,
+  isFetching: false,
   loadingError: null,
   hasMore: true,
   fetchItems: () => Promise.resolve(),
+  searchQuery: "",
+  setSearchQuery: () => {},
 });
 
 export const ItemsProvider: React.FC<ItemsProviderProps> = ({
@@ -59,47 +65,54 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     return JSON.stringify(keyedOptions);
   };
 
-  const { data, fetchNextPage, refetch, hasNextPage, isFetching, error } =
-    useInfiniteQuery<ItemsPage>({
-      enabled: !!currentOptions,
-      gcTime: 0,
-      queryKey: ["items", initialLimit, serializeOptions(currentOptions)],
-      queryFn: async ({ pageParam }): Promise<ItemsPage> => {
-        const params = new URLSearchParams(
-          Object.fromEntries(
-            Object.entries({
-              ...(currentOptions?.filters
-                ? { filters: JSON.stringify(currentOptions?.filters) }
-                : {}),
-              ...(currentOptions?.search
-                ? { search: currentOptions?.search }
-                : {}),
-              limit: currentOptions?.limit || initialLimit,
-              cursor: pageParam,
-            })
-              .filter(([_, value]) => value !== undefined)
-              .map(([key, value]) => [key, String(value)]),
-          ),
-        );
+  const {
+    data,
+    fetchNextPage,
+    refetch,
+    hasNextPage,
+    isFetching,
+    isLoading,
+    error,
+  } = useInfiniteQuery<ItemsPage>({
+    enabled: !!currentOptions,
+    gcTime: 0,
+    queryKey: ["items", initialLimit, serializeOptions(currentOptions)],
+    queryFn: async ({ pageParam }): Promise<ItemsPage> => {
+      const params = new URLSearchParams(
+        Object.fromEntries(
+          Object.entries({
+            ...(currentOptions?.filters
+              ? { filters: JSON.stringify(currentOptions?.filters) }
+              : {}),
+            ...(currentOptions?.search
+              ? { search: currentOptions?.search }
+              : {}),
+            limit: currentOptions?.limit || initialLimit,
+            cursor: pageParam,
+          })
+            .filter(([_, value]) => value !== undefined)
+            .map(([key, value]) => [key, String(value)]),
+        ),
+      );
 
-        const result = await fetch(`/api/v1/items?${params.toString()}`).then(
-          handleAPIResponse<GetItemsResponse>,
-        );
+      const result = await fetch(`/api/v1/items?${params.toString()}`).then(
+        handleAPIResponse<GetItemsResponse>,
+      );
 
-        if (!result.items) {
-          log.error("Failed to fetch items", result);
-          throw new Error("Failed to fetch items");
-        }
+      if (!result.items) {
+        log.error("Failed to fetch items", result);
+        throw new Error("Failed to fetch items");
+      }
 
-        return {
-          items: result.items,
-          total: result.total,
-          nextCursor: result.nextCursor,
-        };
-      },
-      initialPageParam: undefined,
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    });
+      return {
+        items: result.items,
+        total: result.total,
+        nextCursor: result.nextCursor,
+      };
+    },
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  });
 
   const fetchItems = useCallback(
     async (refresh?: boolean, options?: GetItemsRequest): Promise<void> => {
@@ -115,13 +128,24 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     [refetch, fetchNextPage, hasNextPage],
   );
 
+  const searchQuery = currentOptions?.search || "";
+  const setSearchQuery = useCallback((search: string) => {
+    setCurrentOptions((prev) => ({
+      ...prev,
+      search,
+    }));
+  }, []);
+
   const contextValue: ItemsContextType = {
     items: data?.pages.flatMap((p) => p.items) || [],
     totalItems: data?.pages[0]?.total || 0,
-    isLoading: isFetching,
+    isLoading,
+    isFetching,
     loadingError: error ? error.message || "Error loading items." : null,
     hasMore: !!hasNextPage,
     fetchItems,
+    searchQuery,
+    setSearchQuery,
   };
 
   return (
