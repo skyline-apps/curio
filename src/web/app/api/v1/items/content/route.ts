@@ -17,8 +17,10 @@ import { cleanUrl } from "@/utils/url";
 import {
   GetItemContentRequestSchema,
   GetItemContentResponse,
+  GetItemContentResponseSchema,
   UpdateItemContentRequestSchema,
   UpdateItemContentResponse,
+  UpdateItemContentResponseSchema,
   UploadStatus,
 } from "./validation";
 
@@ -85,10 +87,11 @@ export async function GET(
 
     try {
       const content = await storage.getItemContent(slug);
-      const response: GetItemContentResponse = {
-        content,
-        item: itemResponse,
-      };
+      const response: GetItemContentResponse =
+        GetItemContentResponseSchema.parse({
+          content,
+          item: itemResponse,
+        });
       return APIResponseJSON(response);
     } catch (error: unknown) {
       if (error instanceof StorageError) {
@@ -192,16 +195,17 @@ export async function POST(
       metadata,
     );
 
-    const response: UpdateItemContentResponse = {
-      status,
-      slug: item[0].items.slug,
-      message:
-        status === UploadStatus.UPDATED_MAIN
-          ? "Content updated and set as main version"
-          : status === UploadStatus.SKIPPED
-            ? "Content already exists"
-            : "Content updated",
-    };
+    const response: UpdateItemContentResponse =
+      UpdateItemContentResponseSchema.parse({
+        status,
+        slug: item[0].items.slug,
+        message:
+          status === UploadStatus.UPDATED_MAIN
+            ? "Content updated and set as main version"
+            : status === UploadStatus.SKIPPED
+              ? "Content already exists"
+              : "Content updated",
+      });
 
     if (status === UploadStatus.UPDATED_MAIN) {
       await db

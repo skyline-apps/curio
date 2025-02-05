@@ -54,7 +54,7 @@ export async function POST(
         slug: items.slug,
       });
 
-    const response = UpdateStateResponseSchema.parse({
+    const response: UpdateStateResponse = UpdateStateResponseSchema.parse({
       updated: updatedItems,
     });
 
