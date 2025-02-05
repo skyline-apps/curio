@@ -12,6 +12,8 @@ export const apiValidationRule = ESLintUtils.RuleCreator.withoutDocs({
         "{{ method }} handler must use a request schema from validation.ts with parseAPIRequest",
       missingResponseType:
         "API route handler must use a response type from validation.ts",
+      missingResponseValidation:
+        "API {{ method }} response must be validated with a ResponseSchema.parse()",
     },
     schema: [],
   },
@@ -124,6 +126,26 @@ export const apiValidationRule = ESLintUtils.RuleCreator.withoutDocs({
       return hasParseAPIRequest || hasDirectUsage;
     }
 
+    function checkResponseValidation(
+      node: TSESTree.FunctionDeclaration,
+      imports: string[],
+    ): boolean {
+      const functionBody = findFunctionBody(node);
+      const responseSchemas = imports.filter((name) =>
+        name.endsWith("ResponseSchema"),
+      );
+
+      // No response schemas imported, can't validate
+      if (responseSchemas.length === 0) {
+        return false;
+      }
+
+      // Check if any statement uses ResponseSchema.parse()
+      return responseSchemas.some((schema) =>
+        functionBody.includes(`${schema}.parse(`),
+      );
+    }
+
     return {
       // Match both direct function declarations and withAuth wrapped functions
       ExportNamedDeclaration(node: TSESTree.ExportNamedDeclaration) {
@@ -184,6 +206,22 @@ export const apiValidationRule = ESLintUtils.RuleCreator.withoutDocs({
           context.report({
             node: functionNode,
             messageId: "missingRequestSchema",
+            data: {
+              method: httpMethod,
+            },
+          });
+        }
+
+        // Add response validation check
+        if (
+          !checkResponseValidation(
+            functionNode as TSESTree.FunctionDeclaration,
+            imports,
+          )
+        ) {
+          context.report({
+            node: functionNode,
+            messageId: "missingResponseValidation",
             data: {
               method: httpMethod,
             },
