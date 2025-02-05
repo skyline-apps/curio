@@ -1,5 +1,5 @@
-import { and, db, eq, sql } from "@/db";
-import { items, profileItems } from "@/db/schema";
+import { and, db, desc, eq, ilike, not, or, sql } from "@/db";
+import { items, ItemState, profileItems } from "@/db/schema";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
 import { createLogger } from "@/utils/logger";
@@ -37,8 +37,12 @@ export async function GET(
       return data.error;
     }
 
-    const { limit, slugs, urls, cursor } = data;
+    const { limit, slugs, urls, cursor, filters, search } = data;
     const cleanedUrls = urls?.map((url) => cleanUrl(url)) ?? [];
+
+    const cursorCondition = cursor
+      ? sql`${profileItems.savedAt} < ${cursor}`
+      : undefined;
 
     let whereClause = slugs
       ? and(
@@ -52,10 +56,38 @@ export async function GET(
           )
         : eq(profileItems.profileId, profileResult.profile.id);
 
-    if (cursor) {
-      const cursorCondition = sql`${profileItems.savedAt} < ${cursor}`;
-      whereClause = and(whereClause, cursorCondition);
+    if (filters) {
+      whereClause = and(
+        whereClause,
+        filters.state !== undefined
+          ? eq(profileItems.state, filters.state)
+          : undefined,
+        filters.isFavorite !== undefined
+          ? eq(profileItems.isFavorite, filters.isFavorite)
+          : undefined,
+      );
     }
+
+    if (search) {
+      whereClause = and(
+        whereClause,
+        or(
+          search ? ilike(profileItems.title, `%${search}%`) : undefined,
+          search ? ilike(profileItems.description, `%${search}%`) : undefined,
+        ),
+      );
+    }
+
+    if (!filters || filters.state !== ItemState.DELETED) {
+      whereClause = and(
+        whereClause,
+        not(eq(profileItems.state, ItemState.DELETED)),
+      );
+    }
+
+    const orderByClause = filters?.state
+      ? desc(profileItems.stateUpdatedAt)
+      : desc(profileItems.savedAt);
 
     const results = await db
       .select({
@@ -79,15 +111,15 @@ export async function GET(
       })
       .from(items)
       .innerJoin(profileItems, eq(items.id, profileItems.itemId))
-      .where(whereClause)
-      .orderBy(sql`${profileItems.savedAt} DESC`)
+      .where(and(whereClause, cursorCondition))
+      .orderBy(orderByClause)
       .limit(limit);
 
     const total = await db
       .select({ count: sql<number>`count(*)` })
       .from(items)
       .innerJoin(profileItems, eq(items.id, profileItems.itemId))
-      .where(eq(profileItems.profileId, profileResult.profile.id))
+      .where(whereClause)
       .then((res) => Number(res[0]?.count ?? 0));
 
     const response: GetItemsResponse = GetItemsResponseSchema.parse({

@@ -275,6 +275,15 @@
                 "cursor": {
                   "type": "string",
                   "description": "The savedAt timestamp to start from."
+                },
+                "filters": {
+                  "type": "string",
+                  "description": "The filters to apply."
+                },
+                "search": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "description": "The search query to apply."
                 }
               }
             },
@@ -362,15 +371,65 @@
                                   }
                                 ],
                                 "description": "The published date of the item. If left blank, will remain unchanged."
+                              },
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "active",
+                                  "archived",
+                                  "deleted"
+                                ],
+                                "description": "Whether the state is active or archived."
+                              },
+                              "isFavorite": {
+                                "type": "boolean",
+                                "description": "Whether the item is favorited."
+                              },
+                              "readingProgress": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100,
+                                "description": "Progress reading the item. Should only populated if versionName is set."
+                              },
+                              "lastReadAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "nullable": true
+                                  }
+                                ],
+                                "description": "The last read date of the item. Should only be populated if versionName is set."
+                              },
+                              "versionName": {
+                                "type": "string",
+                                "nullable": true,
+                                "maxLength": 255,
+                                "description": "The version name of the item."
                               }
                             },
                             "required": [
-                              "title"
+                              "title",
+                              "state",
+                              "isFavorite",
+                              "readingProgress",
+                              "versionName"
                             ],
                             "additionalProperties": false
                           },
                           "createdAt": {
-                            "type": "string"
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -514,6 +573,45 @@
                                 }
                               ],
                               "description": "The published date of the item. If left blank, will remain unchanged."
+                            },
+                            "state": {
+                              "type": "string",
+                              "enum": [
+                                "active",
+                                "archived",
+                                "deleted"
+                              ],
+                              "description": "Whether the state is active or archived."
+                            },
+                            "isFavorite": {
+                              "type": "boolean",
+                              "description": "Whether the item is favorited."
+                            },
+                            "readingProgress": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 100,
+                              "description": "Progress reading the item. Should only populated if versionName is set."
+                            },
+                            "lastReadAt": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "nullable": true
+                                }
+                              ],
+                              "description": "The last read date of the item. Should only be populated if versionName is set."
+                            },
+                            "versionName": {
+                              "type": "string",
+                              "nullable": true,
+                              "maxLength": 255,
+                              "description": "The version name of the item."
                             }
                           },
                           "additionalProperties": false
@@ -612,15 +710,65 @@
                                   }
                                 ],
                                 "description": "The published date of the item. If left blank, will remain unchanged."
+                              },
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "active",
+                                  "archived",
+                                  "deleted"
+                                ],
+                                "description": "Whether the state is active or archived."
+                              },
+                              "isFavorite": {
+                                "type": "boolean",
+                                "description": "Whether the item is favorited."
+                              },
+                              "readingProgress": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100,
+                                "description": "Progress reading the item. Should only populated if versionName is set."
+                              },
+                              "lastReadAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "nullable": true
+                                  }
+                                ],
+                                "description": "The last read date of the item. Should only be populated if versionName is set."
+                              },
+                              "versionName": {
+                                "type": "string",
+                                "nullable": true,
+                                "maxLength": 255,
+                                "description": "The version name of the item."
                               }
                             },
                             "required": [
-                              "title"
+                              "title",
+                              "state",
+                              "isFavorite",
+                              "readingProgress",
+                              "versionName"
                             ],
                             "additionalProperties": false
                           },
                           "createdAt": {
-                            "type": "string"
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -653,6 +801,212 @@
                   },
                   "required": [
                     "items"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/items/state": {
+      "post": {
+        "description": "POST /api/v1/items/state",
+        "tags": [
+          "V1"
+        ],
+        "requestBody": {
+          "description": "Request body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "slugs": {
+                    "type": "string",
+                    "description": "A comma-separated list of slugs to update. If the slug is not found, it will be ignored."
+                  },
+                  "state": {
+                    "type": "string",
+                    "description": "The new state of the items. Can be one of: active, archived, deleted "
+                  }
+                },
+                "required": [
+                  "slugs",
+                  "state"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "updated": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "slug": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "slug"
+                        ]
+                      },
+                      "description": "A list of slugs that were successfully updated."
+                    }
+                  },
+                  "required": [
+                    "updated"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/items/favorite": {
+      "post": {
+        "description": "POST /api/v1/items/favorite",
+        "tags": [
+          "V1"
+        ],
+        "requestBody": {
+          "description": "Request body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "slugs": {
+                    "type": "string",
+                    "description": "A comma-separated list of slugs to update. If the slug is not found, it will be ignored."
+                  },
+                  "favorite": {
+                    "type": "boolean",
+                    "description": "Whether the items should be favorited or unfavorited."
+                  }
+                },
+                "required": [
+                  "slugs",
+                  "favorite"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "updated": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "slug": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "slug"
+                        ]
+                      },
+                      "description": "A list of slugs that were successfully updated."
+                    }
+                  },
+                  "required": [
+                    "updated"
                   ]
                 }
               }
@@ -799,15 +1153,65 @@
                                     }
                                   ],
                                   "description": "The published date of the item. If left blank, will remain unchanged."
+                                },
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "active",
+                                    "archived",
+                                    "deleted"
+                                  ],
+                                  "description": "Whether the state is active or archived."
+                                },
+                                "isFavorite": {
+                                  "type": "boolean",
+                                  "description": "Whether the item is favorited."
+                                },
+                                "readingProgress": {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "maximum": 100,
+                                  "description": "Progress reading the item. Should only populated if versionName is set."
+                                },
+                                "lastReadAt": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "nullable": true
+                                    }
+                                  ],
+                                  "description": "The last read date of the item. Should only be populated if versionName is set."
+                                },
+                                "versionName": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "maxLength": 255,
+                                  "description": "The version name of the item."
                                 }
                               },
                               "required": [
-                                "title"
+                                "title",
+                                "state",
+                                "isFavorite",
+                                "readingProgress",
+                                "versionName"
                               ],
                               "additionalProperties": false
                             },
                             "createdAt": {
-                              "type": "string"
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
                             }
                           },
                           "required": [
@@ -820,7 +1224,6 @@
                         }
                       },
                       "required": [
-                        "content",
                         "item"
                       ]
                     },

@@ -19,6 +19,8 @@ const TEST_ITEM_ID_2 = "123e4567-e89b-12d3-a456-426614174000";
 const TEST_ITEM_URL_2 = "https://example2.com/";
 const TEST_ITEM_ID_3 = "123e4567-e89b-12d3-a456-426614174003";
 const TEST_ITEM_URL_3 = "https://example3.com/";
+const TEST_ITEM_ID_DELETED = "123e4567-e89b-12d3-a456-426614174004";
+const TEST_ITEM_URL_DELETED = "https://example4.com/";
 const NONEXISTENT_USER_ID = "123e4567-e89b-12d3-a456-426614174003";
 
 const MOCK_ITEMS = [
@@ -43,6 +45,13 @@ const MOCK_ITEMS = [
     createdAt: new Date("2025-01-10T12:54:56-08:00"),
     updatedAt: new Date("2025-01-10T12:54:56-08:00"),
   },
+  {
+    id: TEST_ITEM_ID_DELETED,
+    url: TEST_ITEM_URL_DELETED,
+    slug: "example4-com",
+    createdAt: new Date("2025-01-10T12:54:56-08:00"),
+    updatedAt: new Date("2025-01-10T12:54:56-08:00"),
+  },
 ];
 
 const MOCK_PROFILE_ITEMS = [
@@ -52,6 +61,8 @@ const MOCK_PROFILE_ITEMS = [
     title: "Example 1",
     description: "First example item",
     author: "Test Author",
+    state: ItemState.ARCHIVED,
+    stateUpdatedAt: new Date("2025-01-30T12:52:59-08:00"),
     thumbnail: "https://example.com/thumb1.jpg",
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
     savedAt: new Date("2025-01-10T12:52:56-08:00"),
@@ -59,9 +70,12 @@ const MOCK_PROFILE_ITEMS = [
   {
     profileId: DEFAULT_TEST_PROFILE_ID,
     itemId: TEST_ITEM_ID_2,
-    title: "Example 2",
-    description: "Second example item",
+    title: "Example item 2",
+    description: "Second example item HelLO",
     author: "Test Author",
+    state: ItemState.ACTIVE,
+    stateUpdatedAt: new Date("2025-01-25T12:52:59-08:00"),
+    isFavorite: true,
     thumbnail: "https://example.com/thumb2.jpg",
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
     savedAt: new Date("2025-01-10T12:52:57-08:00"),
@@ -70,16 +84,29 @@ const MOCK_PROFILE_ITEMS = [
     profileId: DEFAULT_TEST_PROFILE_ID,
     itemId: TEST_ITEM_ID_3,
     title: "Example 3",
-    description: "Third example item",
+    description: "Third example item 2",
     author: "Test Author",
     thumbnail: "https://example.com/thumb3.jpg",
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
     savedAt: new Date("2025-01-10T12:52:58-08:00"),
-    state: ItemState.ACTIVE,
+    state: ItemState.ARCHIVED,
+    stateUpdatedAt: new Date("2025-01-20T12:52:59-08:00"),
     isFavorite: false,
     readingProgress: 10,
     lastReadAt: new Date("2025-01-15T12:00:00-08:00"),
     versionName: "2024-01-01",
+  },
+  {
+    profileId: DEFAULT_TEST_PROFILE_ID,
+    itemId: TEST_ITEM_ID_DELETED,
+    title: "Example 3 New title",
+    description: "Third example item",
+    author: "Test Author",
+    thumbnail: "https://example.com/thumb3.jpg",
+    publishedAt: new Date("2025-01-10T12:52:56-08:00"),
+    savedAt: new Date("2025-01-10T12:52:56-08:04"),
+    state: ItemState.DELETED,
+    stateUpdatedAt: new Date("2025-01-10T12:52:59-08:00"),
   },
   {
     profileId: DEFAULT_TEST_PROFILE_ID_2,
@@ -126,7 +153,7 @@ describe("GET /api/v1/items", () => {
       isFavorite: false,
       lastReadAt: null,
       readingProgress: 0,
-      state: ItemState.ACTIVE,
+      state: ItemState.ARCHIVED,
       versionName: null,
     });
   });
@@ -194,7 +221,7 @@ describe("GET /api/v1/items", () => {
     expect(data.items).toHaveLength(2);
     expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
     expect(data.items[1].id).toBe(TEST_ITEM_ID);
-    expect(data.total).toBe(3);
+    expect(data.total).toBe(2);
   });
 
   it("should return 200 when fetching specific urls", async () => {
@@ -219,14 +246,154 @@ describe("GET /api/v1/items", () => {
     expect(data.items[0].metadata.lastReadAt).toBe("2025-01-15T20:00:00.000Z");
     expect(data.items[0].metadata.isFavorite).toBe(false);
     expect(data.items[0].metadata.readingProgress).toBe(10);
-    expect(data.items[0].metadata.state).toBe(ItemState.ACTIVE);
+    expect(data.items[0].metadata.state).toBe(ItemState.ARCHIVED);
     expect(data.items[1].id).toBe(TEST_ITEM_ID_2);
     expect(data.items[1].metadata.versionName).toBe(null);
     expect(data.items[1].metadata.lastReadAt).toBe(null);
-    expect(data.items[1].metadata.isFavorite).toBe(false);
+    expect(data.items[1].metadata.isFavorite).toBe(true);
     expect(data.items[1].metadata.readingProgress).toBe(0);
     expect(data.items[1].metadata.state).toBe(ItemState.ACTIVE);
-    expect(data.total).toBe(3);
+    expect(data.total).toBe(2);
+  });
+
+  it("should return 200 when applying a filter", async () => {
+    await testDb.db.insert(items).values(MOCK_ITEMS);
+    await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+    const params = new URLSearchParams({
+      filters: JSON.stringify({
+        state: ItemState.DELETED,
+      }),
+    });
+
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "GET",
+      url: `http://localhost:3000/api/v1/items?${params.toString()}`,
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data.items).toHaveLength(1);
+    expect(data.items[0].id).toBe(TEST_ITEM_ID_DELETED);
+    expect(data.total).toBe(1);
+  });
+
+  it("should return 200 when applying multiple filters", async () => {
+    await testDb.db.insert(items).values(MOCK_ITEMS);
+    await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+    const params = new URLSearchParams({
+      filters: JSON.stringify({
+        state: ItemState.ACTIVE,
+        isFavorite: true,
+      }),
+    });
+
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "GET",
+      url: `http://localhost:3000/api/v1/items?${params.toString()}`,
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data.items).toHaveLength(1);
+    expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
+    expect(data.total).toBe(1);
+  });
+
+  it("should return 200 when fuzzy searching items", async () => {
+    await testDb.db.insert(items).values(MOCK_ITEMS);
+    await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+    const params = new URLSearchParams({
+      search: "hellO",
+    });
+
+    const request = makeAuthenticatedMockRequest({
+      method: "GET",
+      url: `http://localhost:3000/api/v1/items?${params.toString()}`,
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data.items).toHaveLength(1);
+    expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
+    expect(data.total).toBe(1);
+  });
+
+  it("should return 200 when searching across title and description", async () => {
+    await testDb.db.insert(items).values(MOCK_ITEMS);
+    await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+    const params = new URLSearchParams({
+      search: "item 2",
+    });
+
+    const request = makeAuthenticatedMockRequest({
+      method: "GET",
+      url: `http://localhost:3000/api/v1/items?${params.toString()}`,
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data.items).toHaveLength(2);
+    expect(data.items[0].id).toBe(TEST_ITEM_ID_3);
+    expect(data.items[1].id).toBe(TEST_ITEM_ID_2);
+    expect(data.total).toBe(2);
+  });
+
+  it("should return 200 when combining filters and search", async () => {
+    await testDb.db.insert(items).values(MOCK_ITEMS);
+    await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+    const params = new URLSearchParams({
+      filters: JSON.stringify({
+        state: ItemState.ARCHIVED,
+      }),
+      search: "item 2",
+    });
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "GET",
+      url: `http://localhost:3000/api/v1/items?${params.toString()}`,
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data.items).toHaveLength(1);
+    expect(data.items[0].id).toBe(TEST_ITEM_ID_3);
+    expect(data.total).toBe(1);
+  });
+
+  it("should return 200 when filtering by inactive state ordering by stateUpdatedAt", async () => {
+    await testDb.db.insert(items).values(MOCK_ITEMS);
+    await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+    const params = new URLSearchParams({
+      filters: JSON.stringify({
+        state: ItemState.ARCHIVED,
+      }),
+    });
+
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "GET",
+      url: `http://localhost:3000/api/v1/items?${params.toString()}`,
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data.items).toHaveLength(2);
+    expect(data.items[0].id).toBe(TEST_ITEM_ID);
+    expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
+    expect(data.total).toBe(2);
   });
 
   it("should return 400 when both slugs and urls are provided", async () => {
