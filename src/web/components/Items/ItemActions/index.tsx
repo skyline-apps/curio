@@ -11,7 +11,6 @@ import {
 
 import Button from "@/components/ui/Button";
 import { Dialog, showConfirm } from "@/components/ui/Modal/Dialog";
-import { Tooltip } from "@/components/ui/Tooltip";
 import { ItemState } from "@/db/schema";
 import { BrowserMessageContext } from "@/providers/BrowserMessageProvider";
 import { ItemMetadata, ItemsContext } from "@/providers/ItemsProvider";
@@ -63,23 +62,18 @@ const ActionButton = <T,>({
   const status = pending ? !isActive : isActive;
 
   return (
-    <Tooltip
-      delay={2000}
-      closeDelay={0}
-      content={
+    <Button
+      isIconOnly
+      variant="faded"
+      size="sm"
+      onPress={onPress}
+      isLoading={isLoading}
+      tooltip={
         status ? (activeDisplay || defaultDisplay).text : defaultDisplay.text
       }
     >
-      <Button
-        isIconOnly
-        variant="faded"
-        size="sm"
-        onPress={onPress}
-        isLoading={isLoading}
-      >
-        {status ? (activeDisplay || defaultDisplay).icon : defaultDisplay.icon}
-      </Button>
-    </Tooltip>
+      {status ? (activeDisplay || defaultDisplay).icon : defaultDisplay.icon}
+    </Button>
   );
 };
 
