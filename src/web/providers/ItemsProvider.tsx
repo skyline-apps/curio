@@ -50,10 +50,20 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     null,
   );
 
+  const serializeOptions = (currentOptions: GetItemsRequest | null): string => {
+    if (!currentOptions) return "no options";
+    const keyedOptions = {
+      ...(currentOptions?.filters ? { filters: currentOptions.filters } : {}),
+      ...(currentOptions.search ? { search: currentOptions.search } : {}),
+    };
+    return JSON.stringify(keyedOptions);
+  };
+
   const { data, fetchNextPage, refetch, hasNextPage, isFetching, error } =
     useInfiniteQuery<ItemsPage>({
       enabled: !!currentOptions,
-      queryKey: ["items", initialLimit],
+      gcTime: 0,
+      queryKey: ["items", initialLimit, serializeOptions(currentOptions)],
       queryFn: async ({ pageParam }): Promise<ItemsPage> => {
         const params = new URLSearchParams(
           Object.fromEntries(
