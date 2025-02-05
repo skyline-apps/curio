@@ -78,10 +78,12 @@ export const items = pgTable(
 export enum ItemState {
   ACTIVE = "active",
   ARCHIVED = "archived",
+  DELETED = "deleted",
 }
 export const itemState = pgEnum("item_state", [
   ItemState.ACTIVE,
   ItemState.ARCHIVED,
+  ItemState.DELETED,
 ]);
 
 export const profileLabels = pgTable(
@@ -128,7 +130,7 @@ export const profileItems = pgTable(
     isFavorite: boolean("is_favorite").notNull().default(false),
     readingProgress: integer("reading_progress").notNull().default(0),
     savedAt: timestamp("saved_at", { withTimezone: true }),
-    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    stateUpdatedAt: timestamp("state_updated_at", { withTimezone: true }),
     lastReadAt: timestamp("last_read_at", { withTimezone: true }),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
