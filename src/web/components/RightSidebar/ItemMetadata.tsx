@@ -1,8 +1,7 @@
 import Link from "next/link";
 
+import ItemActions from "@/components/Items/ItemActions";
 import type { ItemMetadata } from "@/providers/ItemsProvider";
-
-import ItemActions from "./ItemActions";
 
 interface ItemMetadataProps {
   item?: ItemMetadata;

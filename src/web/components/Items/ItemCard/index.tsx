@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useContext, useRef } from "react";
 import { HiCheck } from "react-icons/hi2";
 
-import ItemActions from "@/components/RightSidebar/ItemActions";
+import ItemActions from "@/components/Items/ItemActions";
 import Icon from "@/components/ui/Icon";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import type { ItemMetadata } from "@/providers/ItemsProvider";
@@ -74,7 +74,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
         </div>
         <ItemActions
           item={item}
-          className="hidden md:block opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          className="hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity duration-200"
         />
       </div>
       <Icon
