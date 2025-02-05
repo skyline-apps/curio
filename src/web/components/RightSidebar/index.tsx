@@ -25,7 +25,7 @@ const RightSidebar: React.FC = () => {
         sidebarOpen ? "w-80" : "w-0 md:w-16",
       )}
     >
-      <div className="flex flex-col justify-between h-full">
+      <div id="right-sidebar" className="flex flex-col justify-between h-full">
         <div className="grow overflow-hidden">
           <div
             className={cn(
