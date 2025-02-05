@@ -2,6 +2,7 @@
 import React, { useContext } from "react";
 
 import AppPage from "@/app/(protected)/AppPage";
+import KeyboardShortcuts from "@/components/KeyboardShortcuts";
 import LeftSidebar from "@/components/LeftSidebar";
 import RightSidebar from "@/components/RightSidebar";
 import { Progress } from "@/components/ui/Progress";
@@ -33,6 +34,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         <AppPage>{children}</AppPage>
       </div>
       <RightSidebar />
+      <KeyboardShortcuts />
     </div>
   );
 };
