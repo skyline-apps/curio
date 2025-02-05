@@ -41,7 +41,7 @@ export async function GET(
     const cleanedUrls = urls?.map((url) => cleanUrl(url)) ?? [];
 
     const cursorCondition = cursor
-      ? sql`${profileItems.savedAt} < ${cursor}`
+      ? sql`${profileItems.stateUpdatedAt} < ${cursor}`
       : undefined;
 
     let whereClause = slugs
@@ -85,10 +85,6 @@ export async function GET(
       );
     }
 
-    const orderByClause = filters?.state
-      ? desc(profileItems.stateUpdatedAt)
-      : desc(profileItems.savedAt);
-
     const results = await db
       .select({
         id: items.id,
@@ -107,12 +103,13 @@ export async function GET(
           readingProgress: profileItems.readingProgress,
           lastReadAt: profileItems.lastReadAt,
           versionName: profileItems.versionName,
+          stateUpdatedAt: profileItems.stateUpdatedAt,
         },
       })
       .from(items)
       .innerJoin(profileItems, eq(items.id, profileItems.itemId))
       .where(and(whereClause, cursorCondition))
-      .orderBy(orderByClause)
+      .orderBy(desc(profileItems.stateUpdatedAt))
       .limit(limit);
 
     const total = await db
@@ -126,8 +123,9 @@ export async function GET(
       items: results.map((item) => ItemResultSchema.parse(item)),
       nextCursor:
         results.length === limit
-          ? results[results.length - 1].metadata.savedAt?.toISOString() ||
-            undefined
+          ? results[
+              results.length - 1
+            ].metadata.stateUpdatedAt?.toISOString() || undefined
           : undefined,
       total,
     });
@@ -225,9 +223,9 @@ export async function POST(
             author: sql`COALESCE(EXCLUDED.author, ${profileItems.author})`,
             thumbnail: sql`COALESCE(EXCLUDED.thumbnail, ${profileItems.thumbnail})`,
             publishedAt: sql`COALESCE(EXCLUDED.published_at, ${profileItems.publishedAt})`,
+            stateUpdatedAt: sql`COALESCE(EXCLUDED.state_updated_at, ${profileItems.stateUpdatedAt})`,
             updatedAt: sql`now()`,
             state: ItemState.ACTIVE,
-            stateUpdatedAt: sql`CASE WHEN profile_items.state <> ${ItemState.ACTIVE} THEN EXCLUDED.state_updated_at ELSE profile_items.state_updated_at END`,
           },
         })
         .returning({

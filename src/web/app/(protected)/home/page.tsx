@@ -5,6 +5,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 
 import ItemList from "@/components/Items/ItemList";
 import Icon from "@/components/ui/Icon";
+import { ItemState } from "@/db/schema";
 import { ItemsContext } from "@/providers/ItemsProvider";
 
 const HomePage: React.FC = () => {
@@ -12,11 +13,11 @@ const HomePage: React.FC = () => {
     useContext(ItemsContext);
 
   useEffect(() => {
-    fetchItems(false, {});
+    fetchItems(false, { filters: { state: ItemState.ACTIVE } });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadMore = useCallback(() => {
-    fetchItems(false, {});
+    fetchItems(false, { filters: { state: ItemState.ACTIVE } });
   }, [fetchItems]);
 
   return (

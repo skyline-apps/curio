@@ -68,6 +68,7 @@ describe("GET /api/v1/items/[slug]/content", () => {
       thumbnail: "https://example.com/thumb.jpg",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
       savedAt: ORIGINAL_CREATION_DATE,
+      stateUpdatedAt: ORIGINAL_CREATION_DATE,
       isFavorite: true,
     });
 
@@ -119,6 +120,7 @@ describe("GET /api/v1/items/[slug]/content", () => {
       thumbnail: "https://example.com/thumb.jpg",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
       savedAt: ORIGINAL_CREATION_DATE,
+      stateUpdatedAt: ORIGINAL_CREATION_DATE,
       state: ItemState.ACTIVE,
       isFavorite: true,
       readingProgress: 5,
@@ -222,6 +224,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
+      stateUpdatedAt: ORIGINAL_CREATION_DATE,
     });
 
     const request: APIRequest = makeAuthenticatedMockRequest({
@@ -301,6 +304,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
+      stateUpdatedAt: ORIGINAL_CREATION_DATE,
     });
 
     const request: APIRequest = makeAuthenticatedMockRequest({
@@ -342,6 +346,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
+      stateUpdatedAt: ORIGINAL_CREATION_DATE,
     });
     await testDb.db.insert(profileItems).values({
       profileId: DEFAULT_TEST_PROFILE_ID_2,
@@ -351,6 +356,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
+      stateUpdatedAt: ORIGINAL_CREATION_DATE,
       savedAt: ORIGINAL_CREATION_DATE,
     });
 
@@ -404,6 +410,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
+      stateUpdatedAt: ORIGINAL_CREATION_DATE,
     });
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "POST",
@@ -454,6 +461,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
+      stateUpdatedAt: ORIGINAL_CREATION_DATE,
     });
 
     jest
@@ -492,6 +500,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
+      stateUpdatedAt: ORIGINAL_CREATION_DATE,
     });
 
     jest
@@ -597,6 +606,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       thumbnail: "https://example.com/thumb.jpg",
       publishedAt: new Date("2025-01-10T12:52:56-08:00"),
       savedAt: new Date("2025-01-10T12:52:56-08:00"),
+      stateUpdatedAt: ORIGINAL_CREATION_DATE,
     });
 
     const request: APIRequest = makeAuthenticatedMockRequest({
