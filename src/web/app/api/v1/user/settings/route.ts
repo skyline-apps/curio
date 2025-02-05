@@ -6,8 +6,10 @@ import { createLogger } from "@/utils/logger";
 
 import {
   type SettingsResponse,
+  SettingsResponseSchema,
   UpdateableSettingsRequestSchema,
   type UpdatedSettingsResponse,
+  UpdatedSettingsResponseSchema,
 } from "./validation";
 
 const log = createLogger("api/v1/user/settings");
@@ -24,9 +26,10 @@ export async function GET(
     if ("error" in profileResult) {
       return profileResult.error as APIResponse<UpdatedSettingsResponse>;
     }
-    return APIResponseJSON({
+    const settings = SettingsResponseSchema.parse({
       colorScheme: profileResult.profile.colorScheme,
     });
+    return APIResponseJSON(settings);
   } catch (error) {
     log.error(
       `Database connection error fetching settings for user ${userId}`,
@@ -84,7 +87,10 @@ export async function POST(
         { status: 200 },
       ) as APIResponse<UpdatedSettingsResponse>;
     }
-    return APIResponseJSON(updates[0]) as APIResponse<UpdatedSettingsResponse>;
+
+    const response: UpdatedSettingsResponse =
+      UpdatedSettingsResponseSchema.parse(updates[0]);
+    return APIResponseJSON(response);
   } catch (error) {
     log.error(`Error updating settings for user ${userId}`, error);
     return APIResponseJSON(

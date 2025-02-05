@@ -9,6 +9,7 @@ import { usernameError } from "@/utils/username";
 import {
   UpdateUsernameRequestSchema,
   UpdateUsernameResponse,
+  UpdateUsernameResponseSchema,
 } from "./validation";
 
 const log = createLogger("api/v1/user/username");
@@ -59,9 +60,10 @@ export async function POST(
       );
     }
     // Return the updated username
-    return APIResponseJSON({
-      updatedUsername: updates[0].updatedUsername,
-    });
+    const response: UpdateUsernameResponse = UpdateUsernameResponseSchema.parse(
+      updates[0],
+    );
+    return APIResponseJSON(response);
   } catch (error) {
     if (checkDbError(error as DbError) === DbErrorCode.UniqueViolation) {
       return APIResponseJSON(

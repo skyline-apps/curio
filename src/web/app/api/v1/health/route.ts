@@ -1,15 +1,16 @@
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 
-import { HealthResponse } from "./validation";
+import { HealthResponse, HealthResponseSchema } from "./validation";
 
 /** @no-request */
 export async function GET(
   _request: APIRequest,
 ): Promise<APIResponse<HealthResponse>> {
   try {
-    return APIResponseJSON({
+    const response: HealthResponse = HealthResponseSchema.parse({
       healthy: true,
     });
+    return APIResponseJSON(response);
   } catch (error) {
     return APIResponseJSON({ healthy: false }, { status: 500 });
   }
