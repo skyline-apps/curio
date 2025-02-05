@@ -24,8 +24,8 @@ const RightSidebar: React.FC = () => {
   return (
     <aside
       className={cn(
-        "h-screen border-l-1 border-divider transition-all duration-300 ease-in-out absolute right-0 md:relative bg-background-400 shadow-lg",
-        sidebarOpen ? "w-80" : "w-0 md:w-16",
+        "h-screen border-l-1 border-divider transition-all duration-300 ease-in-out absolute right-0 lg:relative bg-background-400 shadow-lg",
+        sidebarOpen ? "w-80" : "w-0 lg:w-16",
       )}
     >
       <div id="right-sidebar" className="flex flex-col justify-between h-full">
@@ -61,7 +61,7 @@ const RightSidebar: React.FC = () => {
           aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           className={cn(
             "flex-none w-10 m-2 flex",
-            sidebarOpen ? "" : "absolute right-0 bottom-0 md:relative",
+            sidebarOpen ? "" : "absolute right-0 bottom-0 lg:relative",
           )}
         >
           <Icon
