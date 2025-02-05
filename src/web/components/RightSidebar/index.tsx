@@ -2,6 +2,7 @@
 import React, { useContext } from "react";
 import { HiChevronDoubleLeft, HiChevronDoubleRight } from "react-icons/hi2";
 
+import BulkActions from "@/components/Items/ItemActions/BulkActions";
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
@@ -39,9 +40,12 @@ const RightSidebar: React.FC = () => {
               (currentItem ? (
                 <ItemMetadata item={currentItem || undefined} />
               ) : (
-                <p className="text-secondary text-center py-8">
-                  {selectedItems.size} items selected
-                </p>
+                <>
+                  <p className="text-secondary text-center py-8">
+                    {selectedItems.size} items selected
+                  </p>
+                  <BulkActions />
+                </>
               ))}
           </div>
         </div>

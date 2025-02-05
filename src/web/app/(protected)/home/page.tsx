@@ -12,11 +12,11 @@ const HomePage: React.FC = () => {
     useContext(ItemsContext);
 
   useEffect(() => {
-    fetchItems({});
+    fetchItems(false, {});
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadMore = useCallback(() => {
-    fetchItems({});
+    fetchItems(false, {});
   }, [fetchItems]);
 
   return (

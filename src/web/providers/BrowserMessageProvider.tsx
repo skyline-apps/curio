@@ -140,7 +140,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
           );
           return;
         }
-        fetchItems({}, true);
+        fetchItems(true);
         fetchContent(event.data.data.slug, true);
         showToast(
           <div className="flex gap-2 items-center">
