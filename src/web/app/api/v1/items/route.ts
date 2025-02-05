@@ -205,6 +205,8 @@ export async function POST(
             : sql`NULL`,
           updatedAt: now,
           profileId: profileResult.profile.id,
+          state: ItemState.ACTIVE,
+          stateUpdatedAt: now,
           itemId,
         };
       });
@@ -224,6 +226,8 @@ export async function POST(
             thumbnail: sql`COALESCE(EXCLUDED.thumbnail, ${profileItems.thumbnail})`,
             publishedAt: sql`COALESCE(EXCLUDED.published_at, ${profileItems.publishedAt})`,
             updatedAt: sql`now()`,
+            state: ItemState.ACTIVE,
+            stateUpdatedAt: sql`CASE WHEN profile_items.state <> ${ItemState.ACTIVE} THEN EXCLUDED.state_updated_at ELSE profile_items.state_updated_at END`,
           },
         })
         .returning({
