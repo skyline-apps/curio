@@ -6,18 +6,21 @@ import KeyboardShortcuts from "@/components/KeyboardShortcuts";
 import LeftSidebar from "@/components/LeftSidebar";
 import RightSidebar from "@/components/RightSidebar";
 import { Progress } from "@/components/ui/Progress";
+import Spinner from "@/components/ui/Spinner";
 import { ItemsContext } from "@/providers/ItemsProvider";
+import { SettingsContext } from "@/providers/SettingsProvider";
 
 interface MainLayoutProps {
   children: React.ReactNode;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-  const { isLoading } = useContext(ItemsContext);
+  const { isFetching } = useContext(ItemsContext);
+  const { settings } = useContext(SettingsContext);
 
-  return (
+  return settings ? (
     <div className="flex flex-row h-screen w-full">
-      {isLoading && (
+      {isFetching && (
         <Progress
           aria-label="Loading..."
           size="sm"
@@ -35,6 +38,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       </div>
       <RightSidebar />
       <KeyboardShortcuts />
+    </div>
+  ) : (
+    <div className="h-screen">
+      <Spinner centered />
     </div>
   );
 };
