@@ -85,6 +85,13 @@
       "when": 1738712964715,
       "tag": "0011_add deleted state",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1738745017410,
+      "tag": "0012_force stateUpdatedAt",
+      "breakpoints": true
     }
   ]
 }
