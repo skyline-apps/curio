@@ -6,6 +6,7 @@ import BulkActions from "@/components/Items/ItemActions/BulkActions";
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
+import { ItemsContext } from "@/providers/ItemsProvider";
 import { cn } from "@/utils/cn";
 
 import ItemMetadata from "./ItemMetadata";
@@ -13,6 +14,7 @@ import ItemMetadata from "./ItemMetadata";
 const RightSidebar: React.FC = () => {
   const { selectedItems, currentItem, sidebarOpen, setSidebarOpen } =
     useContext(CurrentItemContext);
+  const { totalItems } = useContext(ItemsContext);
 
   const toggleSidebar = (): void => {
     setSidebarOpen(!sidebarOpen);
@@ -41,8 +43,11 @@ const RightSidebar: React.FC = () => {
                 <ItemMetadata item={currentItem || undefined} />
               ) : (
                 <>
-                  <p className="text-secondary text-center py-8">
+                  <p className="text-secondary text-center pt-16">
                     {selectedItems.size} items selected
+                  </p>
+                  <p className="text-secondary-600 text-center pb-8">
+                    {totalItems} total
                   </p>
                   {selectedItems.size > 0 && <BulkActions />}
                 </>
