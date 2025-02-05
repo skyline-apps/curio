@@ -370,7 +370,21 @@
                                     "nullable": true
                                   }
                                 ],
-                                "description": "The published date of the item. If left blank, will remain unchanged."
+                                "description": "The time the item was saved."
+                              },
+                              "stateUpdatedAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "nullable": true
+                                  }
+                                ],
+                                "description": "The time the item's state was last updated."
                               },
                               "state": {
                                 "type": "string",
@@ -572,7 +586,21 @@
                                   "nullable": true
                                 }
                               ],
-                              "description": "The published date of the item. If left blank, will remain unchanged."
+                              "description": "The time the item was saved."
+                            },
+                            "stateUpdatedAt": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "nullable": true
+                                }
+                              ],
+                              "description": "The time the item's state was last updated."
                             },
                             "state": {
                               "type": "string",
@@ -709,7 +737,21 @@
                                     "nullable": true
                                   }
                                 ],
-                                "description": "The published date of the item. If left blank, will remain unchanged."
+                                "description": "The time the item was saved."
+                              },
+                              "stateUpdatedAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "nullable": true
+                                  }
+                                ],
+                                "description": "The time the item's state was last updated."
                               },
                               "state": {
                                 "type": "string",
@@ -1152,7 +1194,21 @@
                                       "nullable": true
                                     }
                                   ],
-                                  "description": "The published date of the item. If left blank, will remain unchanged."
+                                  "description": "The time the item was saved."
+                                },
+                                "stateUpdatedAt": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "nullable": true
+                                    }
+                                  ],
+                                  "description": "The time the item's state was last updated."
                                 },
                                 "state": {
                                   "type": "string",

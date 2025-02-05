@@ -52,12 +52,18 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
 
   const { data, fetchNextPage, refetch, hasNextPage, isFetching, error } =
     useInfiniteQuery<ItemsPage>({
+      enabled: !!currentOptions,
       queryKey: ["items", initialLimit],
       queryFn: async ({ pageParam }): Promise<ItemsPage> => {
         const params = new URLSearchParams(
           Object.fromEntries(
             Object.entries({
-              ...currentOptions,
+              ...(currentOptions?.filters
+                ? { filters: JSON.stringify(currentOptions?.filters) }
+                : {}),
+              ...(currentOptions?.search
+                ? { search: currentOptions?.search }
+                : {}),
               limit: currentOptions?.limit || initialLimit,
               cursor: pageParam,
             })

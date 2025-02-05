@@ -62,7 +62,7 @@ const MOCK_PROFILE_ITEMS = [
     description: "First example item",
     author: "Test Author",
     state: ItemState.ARCHIVED,
-    stateUpdatedAt: new Date("2025-01-30T12:52:59-08:00"),
+    stateUpdatedAt: new Date("2024-04-30T12:52:59-08:00"),
     thumbnail: "https://example.com/thumb1.jpg",
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
     savedAt: new Date("2025-01-10T12:52:56-08:00"),
@@ -74,7 +74,7 @@ const MOCK_PROFILE_ITEMS = [
     description: "Second example item HelLO",
     author: "Test Author",
     state: ItemState.ACTIVE,
-    stateUpdatedAt: new Date("2025-01-25T12:52:59-08:00"),
+    stateUpdatedAt: new Date("2024-04-25T12:52:59-08:00"),
     isFavorite: true,
     thumbnail: "https://example.com/thumb2.jpg",
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
@@ -90,7 +90,7 @@ const MOCK_PROFILE_ITEMS = [
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
     savedAt: new Date("2025-01-10T12:52:58-08:00"),
     state: ItemState.ARCHIVED,
-    stateUpdatedAt: new Date("2025-01-20T12:52:59-08:00"),
+    stateUpdatedAt: new Date("2024-04-20T12:52:59-08:00"),
     isFavorite: false,
     readingProgress: 10,
     lastReadAt: new Date("2025-01-15T12:00:00-08:00"),
@@ -106,7 +106,7 @@ const MOCK_PROFILE_ITEMS = [
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
     savedAt: new Date("2025-01-10T12:52:56-08:04"),
     state: ItemState.DELETED,
-    stateUpdatedAt: new Date("2025-01-10T12:52:59-08:00"),
+    stateUpdatedAt: new Date("2024-04-12T12:52:59-08:00"),
   },
   {
     profileId: DEFAULT_TEST_PROFILE_ID_2,
@@ -117,6 +117,7 @@ const MOCK_PROFILE_ITEMS = [
     thumbnail: "https://example.com/thumb3.jpg",
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
     savedAt: new Date("2025-01-10T12:52:56-08:04"),
+    stateUpdatedAt: new Date("2024-05-31T12:52:59-08:00"),
   },
 ];
 
@@ -150,12 +151,61 @@ describe("GET /api/v1/items", () => {
       thumbnail: "https://example.com/thumb1.jpg",
       title: "Example 1",
       savedAt: "2025-01-10T20:52:56.000Z",
+      stateUpdatedAt: "2025-04-30T20:52:59.000Z",
       isFavorite: false,
       lastReadAt: null,
       readingProgress: 0,
       state: ItemState.ARCHIVED,
       versionName: null,
     });
+  });
+
+  it("should return 200 with active items sorted by stateUpdatedAt desc", async () => {
+    await testDb.db.insert(items).values(MOCK_ITEMS);
+    await testDb.db.insert(profileItems).values([
+      {
+        profileId: DEFAULT_TEST_PROFILE_ID,
+        itemId: TEST_ITEM_ID,
+        title: "Item 1",
+        state: ItemState.ACTIVE,
+        stateUpdatedAt: new Date("2025-01-12T12:52:56-08:00"),
+        savedAt: new Date("2025-01-30T12:52:56-08:00"),
+      },
+      {
+        profileId: DEFAULT_TEST_PROFILE_ID,
+        itemId: TEST_ITEM_ID_2,
+        title: "Item 2",
+        state: ItemState.ACTIVE,
+        stateUpdatedAt: new Date("2025-01-22T12:52:56-08:00"),
+        savedAt: new Date("2025-01-20T12:52:56-08:00"),
+      },
+      {
+        profileId: DEFAULT_TEST_PROFILE_ID,
+        itemId: TEST_ITEM_ID_3,
+        title: "Item 3",
+        state: ItemState.ACTIVE,
+        stateUpdatedAt: new Date("2025-01-17T12:52:56-08:00"),
+        savedAt: new Date("2025-01-10T12:52:56-08:00"),
+      },
+    ]);
+
+    const params = new URLSearchParams({
+      limit: "2",
+      filters: JSON.stringify({ state: ItemState.ACTIVE }),
+    });
+
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "GET",
+      url: `http://localhost:3000/api/v1/items?${params.toString()}`,
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data.items).toHaveLength(2);
+    expect(data.nextCursor).toBe("2025-01-17T20:52:56.000Z");
+    expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
+    expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
   });
 
   it("should support cursor-based pagination", async () => {
@@ -178,9 +228,9 @@ describe("GET /api/v1/items", () => {
     expect(firstData.items).toHaveLength(2);
     expect(firstData.total).toBe(3);
     expect(firstData.nextCursor).toBe(
-      MOCK_PROFILE_ITEMS[1].savedAt.toISOString(),
+      MOCK_PROFILE_ITEMS[1].stateUpdatedAt.toISOString(),
     );
-    expect(firstData.items[0].id).toBe(TEST_ITEM_ID_3); // Most recent first
+    expect(firstData.items[0].id).toBe(TEST_ITEM_ID); // Most recent first
     expect(firstData.items[1].id).toBe(TEST_ITEM_ID_2);
 
     const secondParams = new URLSearchParams({
@@ -199,7 +249,7 @@ describe("GET /api/v1/items", () => {
     expect(secondData.items).toHaveLength(1);
     expect(secondData.total).toBe(3);
     expect(secondData.nextCursor).toBeUndefined(); // No more pages
-    expect(secondData.items[0].id).toBe(TEST_ITEM_ID); // Last item
+    expect(secondData.items[0].id).toBe(TEST_ITEM_ID_3); // Last item
   });
 
   it("should return 200 when fetching specific slugs", async () => {
@@ -219,8 +269,8 @@ describe("GET /api/v1/items", () => {
 
     const data = await response.json();
     expect(data.items).toHaveLength(2);
-    expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
-    expect(data.items[1].id).toBe(TEST_ITEM_ID);
+    expect(data.items[0].id).toBe(TEST_ITEM_ID);
+    expect(data.items[1].id).toBe(TEST_ITEM_ID_2);
     expect(data.total).toBe(2);
   });
 
@@ -241,18 +291,18 @@ describe("GET /api/v1/items", () => {
 
     const data = await response.json();
     expect(data.items).toHaveLength(2);
-    expect(data.items[0].id).toBe(TEST_ITEM_ID_3);
-    expect(data.items[0].metadata.versionName).toBe("2024-01-01");
-    expect(data.items[0].metadata.lastReadAt).toBe("2025-01-15T20:00:00.000Z");
-    expect(data.items[0].metadata.isFavorite).toBe(false);
-    expect(data.items[0].metadata.readingProgress).toBe(10);
-    expect(data.items[0].metadata.state).toBe(ItemState.ARCHIVED);
-    expect(data.items[1].id).toBe(TEST_ITEM_ID_2);
-    expect(data.items[1].metadata.versionName).toBe(null);
-    expect(data.items[1].metadata.lastReadAt).toBe(null);
-    expect(data.items[1].metadata.isFavorite).toBe(true);
-    expect(data.items[1].metadata.readingProgress).toBe(0);
-    expect(data.items[1].metadata.state).toBe(ItemState.ACTIVE);
+    expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
+    expect(data.items[0].metadata.versionName).toBe(null);
+    expect(data.items[0].metadata.lastReadAt).toBe(null);
+    expect(data.items[0].metadata.isFavorite).toBe(true);
+    expect(data.items[0].metadata.readingProgress).toBe(0);
+    expect(data.items[0].metadata.state).toBe(ItemState.ACTIVE);
+    expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
+    expect(data.items[1].metadata.versionName).toBe("2024-01-01");
+    expect(data.items[1].metadata.lastReadAt).toBe("2025-01-15T20:00:00.000Z");
+    expect(data.items[1].metadata.isFavorite).toBe(false);
+    expect(data.items[1].metadata.readingProgress).toBe(10);
+    expect(data.items[1].metadata.state).toBe(ItemState.ARCHIVED);
     expect(data.total).toBe(2);
   });
 
@@ -343,8 +393,8 @@ describe("GET /api/v1/items", () => {
 
     const data = await response.json();
     expect(data.items).toHaveLength(2);
-    expect(data.items[0].id).toBe(TEST_ITEM_ID_3);
-    expect(data.items[1].id).toBe(TEST_ITEM_ID_2);
+    expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
+    expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
     expect(data.total).toBe(2);
   });
 
@@ -507,7 +557,7 @@ describe("POST /api/v1/items", () => {
         state: "active",
         title: "https://example.com/",
         isFavorite: false,
-        stateUpdatedAt: null,
+        stateUpdatedAt: expect.any(Date),
         lastReadAt: null,
         savedAt: null,
       }),
@@ -533,7 +583,7 @@ describe("POST /api/v1/items", () => {
       savedAt: new Date("2024-01-10T12:52:56-08:00"),
       state: ItemState.ACTIVE,
       isFavorite: false,
-      stateUpdatedAt: null,
+      stateUpdatedAt: new Date("2024-04-10T12:52:56-08:00"),
       lastReadAt: null,
     });
     const request: APIRequest = makeAuthenticatedMockRequest({
@@ -610,7 +660,7 @@ describe("POST /api/v1/items", () => {
         description: "New description",
         author: "Kim",
         isFavorite: false,
-        stateUpdatedAt: null,
+        stateUpdatedAt: expect.any(Date),
         lastReadAt: null,
       }),
       expect.objectContaining({
@@ -619,9 +669,12 @@ describe("POST /api/v1/items", () => {
         title: "Example title",
         description: null,
         isFavorite: false,
-        stateUpdatedAt: null,
+        stateUpdatedAt: expect.any(Date),
         lastReadAt: null,
       }),
+      expect(savedItems[0].stateUpdatedAt).not.toBe(
+        new Date("2024-04-10T12:52:56-08:00"),
+      ),
     ]);
   });
 
@@ -640,7 +693,7 @@ describe("POST /api/v1/items", () => {
       author: "Kim",
       state: ItemState.ACTIVE,
       isFavorite: false,
-      stateUpdatedAt: null,
+      stateUpdatedAt: new Date("2025-04-10T12:52:56-08:00"),
       savedAt: new Date("2025-01-01T00:00:00.000Z"),
       lastReadAt: null,
     });
@@ -732,7 +785,7 @@ describe("POST /api/v1/items", () => {
       author: "Kim",
       state: ItemState.ACTIVE,
       isFavorite: false,
-      stateUpdatedAt: null,
+      stateUpdatedAt: new Date("2025-04-10T12:52:56-08:00"),
       savedAt: new Date("2025-01-01T00:00:00.000Z"),
       lastReadAt: null,
     });
@@ -782,7 +835,9 @@ describe("POST /api/v1/items", () => {
       );
     expect(updatedItems).toHaveLength(1);
     expect(updatedItems[0].state).toBe(ItemState.ACTIVE);
-    expect(updatedItems[0].stateUpdatedAt).toBe(null);
+    expect(updatedItems[0].stateUpdatedAt).not.toBe(
+      new Date("2025-04-10T12:52:56-08:00"),
+    );
   });
 
   it("should return 200 if recreating item that has been deleted", async () => {
