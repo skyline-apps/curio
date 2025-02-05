@@ -3,6 +3,7 @@ import {
   HiOutlineArchiveBox,
   HiOutlineArrowPath,
   HiOutlineStar,
+  HiOutlineTrash,
 } from "react-icons/hi2";
 
 import Button from "@/components/ui/Button";
@@ -77,15 +78,26 @@ const ItemActions = ({
         <HiOutlineArchiveBox />
       </Button>
       {showAdvanced && (
-        <Button
-          isIconOnly
-          variant="faded"
-          size="sm"
-          onPress={handleRefetch}
-          isLoading={savingItem}
-        >
-          <HiOutlineArrowPath />
-        </Button>
+        <>
+          <Button
+            isIconOnly
+            variant="faded"
+            size="sm"
+            onPress={handleRefetch}
+            isLoading={savingItem}
+          >
+            <HiOutlineArrowPath />
+          </Button>
+          <Button
+            isIconOnly
+            variant="faded"
+            size="sm"
+            onPress={() => {} /* TODO: Implement delete */}
+            isLoading={savingItem}
+          >
+            <HiOutlineTrash />
+          </Button>
+        </>
       )}
       <Dialog />
     </div>

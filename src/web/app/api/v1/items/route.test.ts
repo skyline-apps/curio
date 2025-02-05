@@ -1,4 +1,4 @@
-import { eq } from "@/db";
+import { and, eq } from "@/db";
 import { DbErrorCode } from "@/db/errors";
 import { items, ItemState, profileItems } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
@@ -770,6 +770,70 @@ describe("POST /api/v1/items", () => {
         }),
       ],
     });
+
+    const updatedItems = await testDb.db
+      .select()
+      .from(profileItems)
+      .where(
+        and(
+          eq(profileItems.profileId, DEFAULT_TEST_PROFILE_ID),
+          eq(profileItems.itemId, TEST_ITEM_ID),
+        ),
+      );
+    expect(updatedItems).toHaveLength(1);
+    expect(updatedItems[0].state).toBe(ItemState.ACTIVE);
+    expect(updatedItems[0].stateUpdatedAt).toBe(null);
+  });
+
+  it("should return 200 if recreating item that has been deleted", async () => {
+    await testDb.db.insert(items).values(MOCK_ITEMS[3]);
+    await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS[3]);
+
+    const currentItems = await testDb.db
+      .select()
+      .from(profileItems)
+      .where(
+        and(
+          eq(profileItems.profileId, DEFAULT_TEST_PROFILE_ID),
+          eq(profileItems.itemId, TEST_ITEM_ID_DELETED),
+        ),
+      );
+
+    expect(currentItems).toHaveLength(1);
+    expect(currentItems[0].state).toBe(ItemState.DELETED);
+
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "POST",
+      body: {
+        items: [
+          {
+            url: "https://example4.com",
+          },
+        ],
+      },
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(200);
+
+    const updatedItems = await testDb.db
+      .select()
+      .from(profileItems)
+      .where(
+        and(
+          eq(profileItems.profileId, DEFAULT_TEST_PROFILE_ID),
+          eq(profileItems.itemId, TEST_ITEM_ID_DELETED),
+        ),
+      );
+
+    expect(updatedItems).toHaveLength(1);
+    expect(updatedItems[0].state).toBe(ItemState.ACTIVE);
+    expect(updatedItems[0].stateUpdatedAt).toBeInstanceOf(Date);
+    expect(
+      MOCK_PROFILE_ITEMS[3].stateUpdatedAt &&
+        (updatedItems[0].stateUpdatedAt as Date).getTime() >
+          MOCK_PROFILE_ITEMS[3].stateUpdatedAt.getTime(),
+    ).toBe(true);
   });
 
   it("should return 400 if request body is invalid", async () => {
