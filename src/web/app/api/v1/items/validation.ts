@@ -83,7 +83,7 @@ export const ItemResultSchema = z.object({
   url: UrlSchema,
   slug: SlugSchema,
   metadata: ItemMetadataSchema,
-  createdAt: z.date().transform((val) => val.toISOString()),
+  createdAt: dateType,
 });
 
 export type ItemResult = z.infer<typeof ItemResultSchema>;

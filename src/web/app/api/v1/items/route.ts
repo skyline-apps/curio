@@ -8,8 +8,10 @@ import { cleanUrl, generateSlug } from "@/utils/url";
 import {
   CreateOrUpdateItemsRequestSchema,
   CreateOrUpdateItemsResponse,
+  CreateOrUpdateItemsResponseSchema,
   GetItemsRequestSchema,
   GetItemsResponse,
+  GetItemsResponseSchema,
   ItemResultSchema,
 } from "./validation";
 
@@ -88,7 +90,7 @@ export async function GET(
       .where(eq(profileItems.profileId, profileResult.profile.id))
       .then((res) => Number(res[0]?.count ?? 0));
 
-    const response: GetItemsResponse = {
+    const response: GetItemsResponse = GetItemsResponseSchema.parse({
       items: results.map((item) => ItemResultSchema.parse(item)),
       nextCursor:
         results.length === limit
@@ -96,7 +98,7 @@ export async function GET(
             undefined
           : undefined,
       total,
-    };
+    });
 
     return APIResponseJSON(response);
   } catch (error) {
@@ -207,18 +209,19 @@ export async function POST(
           versionName: profileItems.versionName,
         });
 
-      const response: CreateOrUpdateItemsResponse = {
-        items: insertedItems.map((item) => {
-          const metadata = insertedMetadata.find(
-            (metadata) => metadata.itemId === item.id,
-          );
-          const { itemId: _itemId, ...metadataWithoutId } = metadata || {};
-          return ItemResultSchema.parse({
-            ...item,
-            metadata: metadataWithoutId,
-          });
-        }),
-      };
+      const response: CreateOrUpdateItemsResponse =
+        CreateOrUpdateItemsResponseSchema.parse({
+          items: insertedItems.map((item) => {
+            const metadata = insertedMetadata.find(
+              (metadata) => metadata.itemId === item.id,
+            );
+            const { itemId: _itemId, ...metadataWithoutId } = metadata || {};
+            return ItemResultSchema.parse({
+              ...item,
+              metadata: metadataWithoutId,
+            });
+          }),
+        });
 
       return APIResponseJSON(response);
     });
