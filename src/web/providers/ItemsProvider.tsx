@@ -25,7 +25,7 @@ export type ItemsContextType = {
   isLoading: boolean;
   loadingError: string | null;
   hasMore: boolean;
-  fetchItems: (options?: GetItemsRequest, refresh?: boolean) => Promise<void>;
+  fetchItems: (refresh?: boolean, options?: GetItemsRequest) => Promise<void>;
 };
 
 interface ItemsProviderProps extends React.PropsWithChildren {
@@ -86,8 +86,10 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     });
 
   const fetchItems = useCallback(
-    async (options?: GetItemsRequest, refresh?: boolean): Promise<void> => {
-      setCurrentOptions(options || null);
+    async (refresh?: boolean, options?: GetItemsRequest): Promise<void> => {
+      if (options) {
+        setCurrentOptions(options);
+      }
       if (refresh) {
         await refetch();
       } else if (hasNextPage) {

@@ -25,7 +25,6 @@ const log = createLogger("item-actions");
 interface ActionButtonProps<T> {
   action: () => Promise<T>;
   icon: React.ReactNode;
-  errorMessage: string;
   activeIcon?: React.ReactNode;
   isActive?: boolean;
   isLoading?: boolean;
@@ -33,7 +32,6 @@ interface ActionButtonProps<T> {
 const ActionButton = <T,>({
   action,
   icon,
-  errorMessage,
   activeIcon,
   isActive,
   isLoading,
@@ -47,14 +45,14 @@ const ActionButton = <T,>({
     setPending(true);
     await action()
       .then(async () => {
-        await fetchItems({}, true);
+        await fetchItems(true);
         setPending(false);
       })
       .catch((error) => {
         log.error(error);
-        showToast(errorMessage);
+        showToast("Error updating item.");
       });
-  }, [errorMessage, showToast, fetchItems, action]);
+  }, [showToast, fetchItems, action]);
 
   const status = pending ? !isActive : isActive;
 
@@ -120,7 +118,6 @@ const ItemActions = ({
         icon={<HiOutlineStar />}
         activeIcon={<HiStar />}
         isActive={item.metadata.isFavorite}
-        errorMessage="Error favoriting item"
       />
       <ActionButton
         action={() =>
@@ -134,7 +131,6 @@ const ItemActions = ({
         icon={<HiOutlineArchiveBox />}
         activeIcon={<HiArchiveBox />}
         isActive={item.metadata.state === ItemState.ARCHIVED}
-        errorMessage="Error archiving item"
       />
       {showAdvanced && (
         <>
@@ -142,7 +138,6 @@ const ItemActions = ({
             action={handleRefetch}
             icon={<HiOutlineArrowPath />}
             isLoading={savingItem}
-            errorMessage="Error reloading item"
           />
           <ActionButton
             action={() =>
@@ -156,7 +151,6 @@ const ItemActions = ({
             icon={<HiOutlineTrash />}
             activeIcon={<HiTrash />}
             isActive={item.metadata.state === ItemState.DELETED}
-            errorMessage="Error deleting item"
           />
         </>
       )}
