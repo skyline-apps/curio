@@ -10,10 +10,14 @@ export const SettingsSchema = z
 
 export const UpdateableSettingsRequestSchema = SettingsSchema.partial();
 
-export type SettingsResponse = z.infer<typeof SettingsSchema>;
+export const SettingsResponseSchema = SettingsSchema;
+export type SettingsResponse = z.infer<typeof SettingsResponseSchema>;
+
+export const UpdatedSettingsRequestSchema = UpdateableSettingsRequestSchema;
 export type UpdatedSettingsRequest = z.infer<
-  typeof UpdateableSettingsRequestSchema
+  typeof UpdatedSettingsRequestSchema
 >;
+export const UpdatedSettingsResponseSchema = SettingsSchema;
 export type UpdatedSettingsResponse = z.infer<
-  typeof UpdateableSettingsRequestSchema
+  typeof UpdatedSettingsResponseSchema
 >;
