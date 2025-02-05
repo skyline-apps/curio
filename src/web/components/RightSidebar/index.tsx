@@ -44,7 +44,7 @@ const RightSidebar: React.FC = () => {
                   <p className="text-secondary text-center py-8">
                     {selectedItems.size} items selected
                   </p>
-                  <BulkActions />
+                  {selectedItems.size > 0 && <BulkActions />}
                 </>
               ))}
           </div>
