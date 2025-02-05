@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "framer-motion";
 import React, { useContext, useEffect, useRef } from "react";
 
 import ItemCard from "@/components/Items/ItemCard";
@@ -36,27 +37,49 @@ const ItemList: React.FC<ItemListProps> = () => {
   return (
     <div ref={listRef} className="flex flex-col">
       <ItemNavigation />
-      {items.map((item, index) => (
-        <ItemCard
-          key={item.id}
-          index={index}
-          item={item}
-          onLongPress={() => {
-            selectItems([item.slug], index, false, false, true);
-          }}
-          onClick={(e: React.MouseEvent) => {
-            e.preventDefault();
-            const isCtrlPressed = e.ctrlKey || e.metaKey;
-            const isShiftPressed = e.shiftKey;
-            selectItems(
-              [item.slug],
-              index,
-              !isCtrlPressed && !isShiftPressed,
-              isShiftPressed,
-            );
-          }}
-        />
-      ))}
+      <AnimatePresence mode="popLayout">
+        {items.map((item, index) => (
+          <motion.div
+            key={item.id}
+            layout
+            initial={false}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              transition: {
+                type: "spring",
+                stiffness: 300,
+                damping: 25,
+              },
+            }}
+            exit={{
+              opacity: 0,
+              scale: 0.8,
+              transition: { duration: 0.1 },
+            }}
+          >
+            <ItemCard
+              key={item.id}
+              index={index}
+              item={item}
+              onLongPress={() => {
+                selectItems([item.slug], index, false, false, true);
+              }}
+              onClick={(e: React.MouseEvent) => {
+                e.preventDefault();
+                const isCtrlPressed = e.ctrlKey || e.metaKey;
+                const isShiftPressed = e.shiftKey;
+                selectItems(
+                  [item.slug],
+                  index,
+                  !isCtrlPressed && !isShiftPressed,
+                  isShiftPressed,
+                );
+              }}
+            />
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   );
 };
