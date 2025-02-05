@@ -11,6 +11,7 @@ import {
 
 import Button from "@/components/ui/Button";
 import { Dialog, showConfirm } from "@/components/ui/Modal/Dialog";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { ItemState } from "@/db/schema";
 import { BrowserMessageContext } from "@/providers/BrowserMessageProvider";
 import { ItemMetadata, ItemsContext } from "@/providers/ItemsProvider";
@@ -22,17 +23,22 @@ import { updateItemsFavorite, updateItemsState } from "./actions";
 
 const log = createLogger("item-actions");
 
+interface ActionButtonDisplay {
+  text: string;
+  icon: React.ReactNode;
+}
+
 interface ActionButtonProps<T> {
   action: () => Promise<T>;
-  icon: React.ReactNode;
-  activeIcon?: React.ReactNode;
+  defaultDisplay: ActionButtonDisplay;
+  activeDisplay?: ActionButtonDisplay;
   isActive?: boolean;
   isLoading?: boolean;
 }
 const ActionButton = <T,>({
   action,
-  icon,
-  activeIcon,
+  defaultDisplay,
+  activeDisplay,
   isActive,
   isLoading,
 }: ActionButtonProps<T>): React.ReactNode => {
@@ -57,15 +63,23 @@ const ActionButton = <T,>({
   const status = pending ? !isActive : isActive;
 
   return (
-    <Button
-      isIconOnly
-      variant="faded"
-      size="sm"
-      onPress={onPress}
-      isLoading={isLoading}
+    <Tooltip
+      delay={2000}
+      closeDelay={0}
+      content={
+        status ? (activeDisplay || defaultDisplay).text : defaultDisplay.text
+      }
     >
-      {status ? activeIcon : icon}
-    </Button>
+      <Button
+        isIconOnly
+        variant="faded"
+        size="sm"
+        onPress={onPress}
+        isLoading={isLoading}
+      >
+        {status ? (activeDisplay || defaultDisplay).icon : defaultDisplay.icon}
+      </Button>
+    </Tooltip>
   );
 };
 
@@ -115,8 +129,8 @@ const ItemActions = ({
         action={() =>
           updateItemsFavorite([item.slug], !item.metadata.isFavorite)
         }
-        icon={<HiOutlineStar />}
-        activeIcon={<HiStar />}
+        defaultDisplay={{ text: "Favorite", icon: <HiOutlineStar /> }}
+        activeDisplay={{ text: "Unfavorite", icon: <HiStar /> }}
         isActive={item.metadata.isFavorite}
       />
       <ActionButton
@@ -128,15 +142,18 @@ const ItemActions = ({
               : ItemState.ARCHIVED,
           )
         }
-        icon={<HiOutlineArchiveBox />}
-        activeIcon={<HiArchiveBox />}
+        defaultDisplay={{ text: "Archive", icon: <HiOutlineArchiveBox /> }}
+        activeDisplay={{ text: "Unarchive", icon: <HiArchiveBox /> }}
         isActive={item.metadata.state === ItemState.ARCHIVED}
       />
       {showAdvanced && (
         <>
           <ActionButton
             action={handleRefetch}
-            icon={<HiOutlineArrowPath />}
+            defaultDisplay={{
+              text: "Reload content",
+              icon: <HiOutlineArrowPath />,
+            }}
             isLoading={savingItem}
           />
           <ActionButton
@@ -148,8 +165,8 @@ const ItemActions = ({
                   : ItemState.DELETED,
               )
             }
-            icon={<HiOutlineTrash />}
-            activeIcon={<HiTrash />}
+            defaultDisplay={{ text: "Delete", icon: <HiOutlineTrash /> }}
+            activeDisplay={{ text: "Restore", icon: <HiTrash /> }}
             isActive={item.metadata.state === ItemState.DELETED}
           />
         </>
