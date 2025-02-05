@@ -1,7 +1,7 @@
 "use client";
 import React, { useCallback, useContext, useEffect } from "react";
 
-import InfiniteItemList from "@/components/Items/ItemList/InfiniteItemList";
+import ItemList from "@/components/Items/ItemList";
 import { ItemsContext } from "@/providers/ItemsProvider";
 
 const FavoritesPage: React.FC = () => {
@@ -17,7 +17,7 @@ const FavoritesPage: React.FC = () => {
 
   return (
     <div className="flex-1 w-full h-full flex flex-col">
-      <InfiniteItemList loadMore={loadMore} />
+      <ItemList loadMore={loadMore} />
     </div>
   );
 };
