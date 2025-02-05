@@ -3,7 +3,10 @@ import { useContext } from "react";
 
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import { ItemsContext } from "@/providers/ItemsProvider";
-import { useKeyboardShortcut } from "@/providers/KeyboardShortcutProvider";
+import {
+  ShortcutType,
+  useKeyboardShortcut,
+} from "@/providers/KeyboardShortcutProvider";
 
 export const ItemNavigation = (): null => {
   const { items } = useContext(ItemsContext);
@@ -42,6 +45,7 @@ export const ItemNavigation = (): null => {
   useKeyboardShortcut({
     key: "ArrowDown",
     name: "Next item",
+    category: ShortcutType.ITEMS,
     handler: navigateDown,
     priority: 100,
   });
@@ -49,6 +53,7 @@ export const ItemNavigation = (): null => {
   useKeyboardShortcut({
     key: "j",
     name: "Next item",
+    category: ShortcutType.ITEMS,
     handler: navigateDown,
     priority: 100,
   });
@@ -56,6 +61,7 @@ export const ItemNavigation = (): null => {
   useKeyboardShortcut({
     key: "ArrowUp",
     name: "Previous item",
+    category: ShortcutType.ITEMS,
     handler: navigateUp,
     priority: 100,
   });
@@ -63,6 +69,7 @@ export const ItemNavigation = (): null => {
   useKeyboardShortcut({
     key: "k",
     name: "Previous item",
+    category: ShortcutType.ITEMS,
     handler: navigateUp,
     priority: 100,
   });
@@ -70,6 +77,7 @@ export const ItemNavigation = (): null => {
   useKeyboardShortcut({
     key: "x",
     name: "Select item",
+    category: ShortcutType.ITEMS,
     handler: selectCurrentItem,
     priority: 100,
   });
@@ -77,6 +85,7 @@ export const ItemNavigation = (): null => {
   useKeyboardShortcut({
     key: "Enter",
     name: "Select item",
+    category: ShortcutType.ITEMS,
     handler: selectCurrentItem,
     priority: 100,
   });
@@ -84,6 +93,7 @@ export const ItemNavigation = (): null => {
   useKeyboardShortcut({
     key: "Escape",
     name: "Clear selection",
+    category: ShortcutType.ITEMS,
     handler: (): boolean => {
       clearSelectedItems();
       return true;

@@ -4,32 +4,47 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
+  useState,
 } from "react";
 
 export type KeyboardShortcutHandler = (event: KeyboardEvent) => boolean | void;
+
+export enum ShortcutType {
+  ITEMS = "Items",
+}
 
 export interface KeyboardShortcut {
   id: string;
   key: string;
   name: string;
+  category: ShortcutType;
   handler: KeyboardShortcutHandler;
   priority?: number;
   preventDefault?: boolean;
   conditions?: {
     notInInput?: boolean;
+    shiftKey?: boolean;
+    ctrlKey?: boolean; // Also cmd on Macs
   };
 }
 
 interface KeyboardShortcutContextType {
   registerShortcut: (shortcut: KeyboardShortcut) => void;
   unregisterShortcut: (id: string) => void;
+  keyboardShortcuts: Record<string, Record<string, KeyboardShortcut[]>>;
+  showKeyboardShortcuts: boolean;
+  setShowKeyboardShortcuts: (show: boolean) => void;
 }
 
 export const KeyboardShortcutContext =
   createContext<KeyboardShortcutContextType>({
     registerShortcut: () => {},
     unregisterShortcut: () => {},
+    keyboardShortcuts: {},
+    showKeyboardShortcuts: false,
+    setShowKeyboardShortcuts: () => {},
   });
 
 export const useKeyboardShortcut = (
@@ -54,6 +69,8 @@ export const KeyboardShortcutProvider: React.FC<
   KeyboardShortcutProviderProps
 > = ({ children }) => {
   const shortcuts = useRef<Map<string, KeyboardShortcut>>(new Map());
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] =
+    useState<boolean>(false);
 
   const registerShortcut = useCallback((shortcut: KeyboardShortcut) => {
     shortcuts.current.set(shortcut.id, {
@@ -71,6 +88,21 @@ export const KeyboardShortcutProvider: React.FC<
   }, []);
 
   useEffect(() => {
+    registerShortcut({
+      id: "shift-?",
+      key: "?",
+      name: "Show shortcuts",
+      category: "Default",
+      handler: () => {
+        setShowKeyboardShortcuts(true);
+      },
+      conditions: {
+        shiftKey: true,
+      },
+    });
+  }, [registerShortcut]);
+
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
       const matchingShortcuts = Array.from(shortcuts.current.values())
         .filter((s) => s.key === event.key)
@@ -82,6 +114,14 @@ export const KeyboardShortcutProvider: React.FC<
           (event.target instanceof HTMLInputElement ||
             event.target instanceof HTMLTextAreaElement)
         ) {
+          continue;
+        }
+
+        if (shortcut.conditions?.shiftKey && !event.shiftKey) {
+          continue;
+        }
+
+        if (shortcut.conditions?.ctrlKey && !(event.ctrlKey || event.metaKey)) {
           continue;
         }
 
@@ -101,11 +141,30 @@ export const KeyboardShortcutProvider: React.FC<
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const shortcutIds = Array.from(shortcuts.current.keys());
+
+  const keyboardShortcuts = useMemo(() => {
+    const result: Record<string, Record<string, KeyboardShortcut[]>> = {};
+    Array.from(shortcuts.current.values()).forEach((shortcut) => {
+      if (!result[shortcut.category]) {
+        result[shortcut.category] = {};
+      }
+      if (!result[shortcut.category][shortcut.name]) {
+        result[shortcut.category][shortcut.name] = [];
+      }
+      result[shortcut.category][shortcut.name].push(shortcut);
+    });
+    return result;
+  }, [shortcutIds]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <KeyboardShortcutContext.Provider
       value={{
         registerShortcut,
         unregisterShortcut,
+        showKeyboardShortcuts,
+        setShowKeyboardShortcuts,
+        keyboardShortcuts,
       }}
     >
       {children}
