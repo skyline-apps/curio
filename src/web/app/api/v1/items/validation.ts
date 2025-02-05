@@ -13,6 +13,20 @@ const dateType = z.union([z.string(), z.date()]).transform((val) => {
   return val;
 });
 
+const FilterSchema = z
+  .string()
+  .transform((val) => {
+    return JSON.parse(val);
+  })
+  .pipe(
+    z
+      .object({
+        state: z.nativeEnum(ItemState).optional(),
+        isFavorite: z.boolean().optional(),
+      })
+      .strict(),
+  );
+
 const ItemMetadataSchema = z
   .object({
     title: z.string().max(255).describe("The title of the item."),
@@ -121,6 +135,12 @@ export const GetItemsRequestSchema = z
       .string()
       .optional()
       .describe("The savedAt timestamp to start from."),
+    filters: FilterSchema.optional().describe("The filters to apply."),
+    search: z
+      .string()
+      .max(100)
+      .optional()
+      .describe("The search query to apply."),
   })
   .refine(
     (val) => !(val.slugs && val.urls),

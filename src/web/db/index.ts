@@ -17,11 +17,14 @@ export {
   eq,
   gt,
   gte,
+  ilike,
   inArray,
   is,
   lt,
   lte,
   ne,
+  not,
+  or,
   sql,
 } from "drizzle-orm";
 export type { PgColumn, SelectedFields } from "drizzle-orm/pg-core";
