@@ -71,6 +71,20 @@
       "when": 1738611775588,
       "tag": "0009_add versionName",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1738712913708,
+      "tag": "0010_rename to stateUpdatedAt",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1738712964715,
+      "tag": "0011_add deleted state",
+      "breakpoints": true
     }
   ]
 }

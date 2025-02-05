@@ -340,7 +340,7 @@ describe("POST /api/v1/items", () => {
         state: "active",
         title: "https://example.com/",
         isFavorite: false,
-        archivedAt: null,
+        stateUpdatedAt: null,
         lastReadAt: null,
         savedAt: null,
       }),
@@ -366,7 +366,7 @@ describe("POST /api/v1/items", () => {
       savedAt: new Date("2024-01-10T12:52:56-08:00"),
       state: ItemState.ACTIVE,
       isFavorite: false,
-      archivedAt: null,
+      stateUpdatedAt: null,
       lastReadAt: null,
     });
     const request: APIRequest = makeAuthenticatedMockRequest({
@@ -443,7 +443,7 @@ describe("POST /api/v1/items", () => {
         description: "New description",
         author: "Kim",
         isFavorite: false,
-        archivedAt: null,
+        stateUpdatedAt: null,
         lastReadAt: null,
       }),
       expect.objectContaining({
@@ -452,7 +452,7 @@ describe("POST /api/v1/items", () => {
         title: "Example title",
         description: null,
         isFavorite: false,
-        archivedAt: null,
+        stateUpdatedAt: null,
         lastReadAt: null,
       }),
     ]);
@@ -473,7 +473,7 @@ describe("POST /api/v1/items", () => {
       author: "Kim",
       state: ItemState.ACTIVE,
       isFavorite: false,
-      archivedAt: null,
+      stateUpdatedAt: null,
       savedAt: new Date("2025-01-01T00:00:00.000Z"),
       lastReadAt: null,
     });
@@ -565,7 +565,7 @@ describe("POST /api/v1/items", () => {
       author: "Kim",
       state: ItemState.ACTIVE,
       isFavorite: false,
-      archivedAt: null,
+      stateUpdatedAt: null,
       savedAt: new Date("2025-01-01T00:00:00.000Z"),
       lastReadAt: null,
     });
