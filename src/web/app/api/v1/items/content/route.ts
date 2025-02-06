@@ -31,23 +31,23 @@ export async function GET(
 ): Promise<APIResponse<GetItemContentResponse>> {
   const userId = request.headers.get("x-user-id");
   const apiKey = request.headers.get("x-api-key");
+  const profileResult = await checkUserProfile(userId, apiKey);
+  if ("error" in profileResult) {
+    return profileResult.error as APIResponse<GetItemContentResponse>;
+  }
+
+  const url = new URL(request.url);
+  const data = await parseAPIRequest(
+    GetItemContentRequestSchema,
+    Object.fromEntries(url.searchParams),
+  );
+  if ("error" in data) {
+    return data.error;
+  }
+
+  const { slug } = data;
+
   try {
-    const profileResult = await checkUserProfile(userId, apiKey);
-    if ("error" in profileResult) {
-      return profileResult.error as APIResponse<GetItemContentResponse>;
-    }
-
-    const url = new URL(request.url);
-    const data = await parseAPIRequest(
-      GetItemContentRequestSchema,
-      Object.fromEntries(url.searchParams),
-    );
-    if ("error" in data) {
-      return data.error;
-    }
-
-    const { slug } = data;
-
     const item = await db
       .select({
         id: items.id,
@@ -94,6 +94,7 @@ export async function GET(
         });
       return APIResponseJSON(response);
     } catch (error: unknown) {
+      // Still return metadata if content can't be loaded
       if (error instanceof StorageError) {
         return APIResponseJSON({ item: itemResponse });
       } else {
@@ -102,13 +103,13 @@ export async function GET(
     }
   } catch (error: unknown) {
     if (error instanceof Error) {
-      log.error("Error getting item content:", error);
+      log.error(`Error getting item content for ${slug}:`, error);
       return APIResponseJSON(
         { error: "Error getting item content." },
         { status: 500 },
       );
     } else {
-      log.error("Unknown error getting item content:", error);
+      log.error(`Unknown error getting item content for ${slug}:`, error);
       return APIResponseJSON(
         { error: "Unknown error getting item content." },
         { status: 500 },
@@ -149,20 +150,20 @@ export async function POST(
 ): Promise<APIResponse<UpdateItemContentResponse>> {
   const userId = request.headers.get("x-user-id");
   const apiKey = request.headers.get("x-api-key");
+  const profileResult = await checkUserProfile(userId, apiKey);
+  if ("error" in profileResult) {
+    return profileResult.error as APIResponse<UpdateItemContentResponse>;
+  }
+
+  const body = await request.json();
+  const data = await parseAPIRequest(UpdateItemContentRequestSchema, body);
+  if ("error" in data) {
+    return data.error;
+  }
+
+  const { url, htmlContent, skipMetadataExtraction } = data;
+
   try {
-    const profileResult = await checkUserProfile(userId, apiKey);
-    if ("error" in profileResult) {
-      return profileResult.error as APIResponse<UpdateItemContentResponse>;
-    }
-
-    const body = await request.json();
-    const data = await parseAPIRequest(UpdateItemContentRequestSchema, body);
-    if ("error" in data) {
-      return data.error;
-    }
-
-    const { url, htmlContent, skipMetadataExtraction } = data;
-
     const cleanedUrl = cleanUrl(url);
 
     const item = await db
@@ -283,14 +284,14 @@ export async function POST(
     if (error instanceof StorageError) {
       return APIResponseJSON({ error: error.message }, { status: 500 });
     } else if (error instanceof ExtractError) {
-      log.error("Error extracting content:", error.message);
+      log.error(`Error extracting content for ${url}:`, error.message);
       return APIResponseJSON({ error: error.message }, { status: 500 });
     } else if (error instanceof MetadataError) {
-      log.error("Error extracting metadata:", error.message);
+      log.error(`Error extracting metadata for ${url}:`, error.message);
       return APIResponseJSON({ error: error.message }, { status: 500 });
     } else if (error instanceof Error) {
       log.error(
-        "Error updating item content:",
+        `Error updating item content for ${url}:`,
         error.name,
         error.message.substring(0, 200),
         error.stack,
@@ -300,7 +301,7 @@ export async function POST(
         { status: 500 },
       );
     } else {
-      log.error("Unknown error updating item content:", error);
+      log.error(`Unknown error updating item content for ${url}:`, error);
       return APIResponseJSON(
         { error: "Unknown error updating item content." },
         { status: 500 },
