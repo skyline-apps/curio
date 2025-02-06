@@ -400,7 +400,7 @@
                                     "nullable": true
                                   }
                                 ],
-                                "description": "The time the item was saved."
+                                "description": "The time the item was saved. Cannot be populated manually."
                               },
                               "stateUpdatedAt": {
                                 "anyOf": [
@@ -414,7 +414,7 @@
                                     "nullable": true
                                   }
                                 ],
-                                "description": "The time the item's state was last updated."
+                                "description": "The time the item's state was last updated. Used to sort items in the feed."
                               },
                               "state": {
                                 "type": "string",
@@ -616,7 +616,7 @@
                                   "nullable": true
                                 }
                               ],
-                              "description": "The time the item was saved."
+                              "description": "The time the item was saved. Cannot be populated manually."
                             },
                             "stateUpdatedAt": {
                               "anyOf": [
@@ -630,7 +630,7 @@
                                   "nullable": true
                                 }
                               ],
-                              "description": "The time the item's state was last updated."
+                              "description": "The time the item's state was last updated. Used to sort items in the feed."
                             },
                             "state": {
                               "type": "string",
@@ -767,7 +767,7 @@
                                     "nullable": true
                                   }
                                 ],
-                                "description": "The time the item was saved."
+                                "description": "The time the item was saved. Cannot be populated manually."
                               },
                               "stateUpdatedAt": {
                                 "anyOf": [
@@ -781,7 +781,7 @@
                                     "nullable": true
                                   }
                                 ],
-                                "description": "The time the item's state was last updated."
+                                "description": "The time the item's state was last updated. Used to sort items in the feed."
                               },
                               "state": {
                                 "type": "string",
@@ -1224,7 +1224,7 @@
                                       "nullable": true
                                     }
                                   ],
-                                  "description": "The time the item was saved."
+                                  "description": "The time the item was saved. Cannot be populated manually."
                                 },
                                 "stateUpdatedAt": {
                                   "anyOf": [
@@ -1238,7 +1238,7 @@
                                       "nullable": true
                                     }
                                   ],
-                                  "description": "The time the item's state was last updated."
+                                  "description": "The time the item's state was last updated. Used to sort items in the feed."
                                 },
                                 "state": {
                                   "type": "string",
