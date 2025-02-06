@@ -60,7 +60,13 @@ export const useItemUpdate = (): UseItemUpdate => {
     { items: ItemMetadata[]; favorite: boolean }
   > = {
     mutationFn: async ({ items, favorite }) => {
-      const newItems = items.map((item) => ({ ...item, isFavorite: favorite }));
+      const newItems = items.map((item) => ({
+        ...item,
+        metadata: {
+          ...item.metadata,
+          isFavorite: favorite,
+        },
+      }));
       optimisticUpdateItems(newItems);
 
       return await fetch("/api/v1/items/favorite", {

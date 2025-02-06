@@ -482,7 +482,8 @@
                           "slug",
                           "metadata",
                           "createdAt"
-                        ]
+                        ],
+                        "additionalProperties": false
                       }
                     },
                     "nextCursor": {
@@ -849,7 +850,8 @@
                           "slug",
                           "metadata",
                           "createdAt"
-                        ]
+                        ],
+                        "additionalProperties": false
                       }
                     },
                     "errors": {
@@ -1306,7 +1308,8 @@
                             "slug",
                             "metadata",
                             "createdAt"
-                          ]
+                          ],
+                          "additionalProperties": false
                         }
                       },
                       "required": [

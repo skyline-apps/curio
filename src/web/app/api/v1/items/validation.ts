@@ -96,13 +96,15 @@ const ItemMetadataSchema = z
   })
   .strict();
 
-export const ItemResultSchema = z.object({
-  id: z.string(),
-  url: UrlSchema,
-  slug: SlugSchema,
-  metadata: ItemMetadataSchema,
-  createdAt: dateType,
-});
+export const ItemResultSchema = z
+  .object({
+    id: z.string(),
+    url: UrlSchema,
+    slug: SlugSchema,
+    metadata: ItemMetadataSchema,
+    createdAt: dateType,
+  })
+  .strict();
 
 export type ItemResult = z.infer<typeof ItemResultSchema>;
 
