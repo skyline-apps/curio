@@ -41,7 +41,7 @@ global.fetch = jest.fn(() => Promise.resolve(mockResponse));
 
 const TEST_ITEM_ID = "123e4567-e89b-12d3-a456-426614174001";
 const TEST_ITEM_SLUG = "example-com";
-const TEST_ITEM_URL = "https://example.com/";
+const TEST_ITEM_URL = "https://example.com";
 const NONEXISTENT_USER_ID = "123e4567-e89b-12d3-a456-426614174003";
 const ORIGINAL_PUBLISHED_DATE = new Date("2024-01-10T12:50:00-08:00");
 const ORIGINAL_CREATION_DATE = new Date("2025-01-10T12:52:56-08:00");
@@ -310,7 +310,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "POST",
       body: {
-        url: "https://example.com",
+        url: "https://example.com//",
         htmlContent: "<div>Test content</div>",
       },
     });
@@ -363,7 +363,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "POST",
       body: {
-        url: "https://example.com",
+        url: "https://example.com/",
         htmlContent: "<div>Test content</div>",
       },
     });

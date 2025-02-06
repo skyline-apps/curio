@@ -6,7 +6,7 @@ import { createHash } from "crypto";
 export function cleanUrl(url: string): string {
   try {
     const parsedUrl = new URL(url);
-    return `${parsedUrl.origin}${parsedUrl.pathname}`;
+    return `${parsedUrl.origin}${parsedUrl.pathname}`.replace(/\/+$/, "");
   } catch (error) {
     // If URL parsing fails, return the original URL
     return url;
