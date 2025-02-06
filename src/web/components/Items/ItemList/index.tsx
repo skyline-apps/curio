@@ -16,7 +16,8 @@ interface ItemListProps {}
 const ItemList: React.FC<ItemListProps> = ({}: ItemListProps) => {
   const parentRef = React.useRef<HTMLDivElement>(null);
   const innerRef = React.useRef<HTMLDivElement>(null);
-  const { selectItems, clearSelectedItems } = useContext(CurrentItemContext);
+  const { lastSelectionIndex, selectItems, clearSelectedItems } =
+    useContext(CurrentItemContext);
 
   const {
     hasNextPage,
@@ -41,6 +42,11 @@ const ItemList: React.FC<ItemListProps> = ({}: ItemListProps) => {
   useEffect(() => {
     clearSelectedItems();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (lastSelectionIndex === null) return;
+    rowVirtualizer.scrollToIndex(lastSelectionIndex);
+  }, [lastSelectionIndex, rowVirtualizer]);
 
   useEffect(() => {
     const [lastItem] = [...virtualizedItems].reverse();
@@ -103,7 +109,7 @@ const ItemList: React.FC<ItemListProps> = ({}: ItemListProps) => {
           ) : (
             <div
               ref={innerRef}
-              className="relative"
+              className="relative m-1"
               style={{
                 height: `${rowVirtualizer.getTotalSize()}px`,
               }}

@@ -123,7 +123,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         setSidebarOpen(false);
       }
     },
-    [items, lastSelectionIndex, selectedItems],
+    [items, lastSelectionIndex, selectedItems, inSelectionMode],
   );
 
   const { data, isLoading, error, refetch } = useQuery<Item>({
