@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useContext, useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 
 import ItemList from "@/components/Items/ItemList";
 import { ItemState } from "@/db/schema";
@@ -12,13 +12,9 @@ const ArchivePage: React.FC = () => {
     fetchItems(true, { filters: { state: ItemState.ARCHIVED } });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const loadMore = useCallback(() => {
-    fetchItems(false, { filters: { state: ItemState.ARCHIVED } });
-  }, [fetchItems]);
-
   return (
     <div className="flex-1 w-full h-full flex flex-col">
-      <ItemList loadMore={loadMore} />
+      <ItemList />
     </div>
   );
 };
