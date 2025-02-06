@@ -1,4 +1,4 @@
-import { and, eq } from "@/db";
+import { and, desc, eq } from "@/db";
 import { DbErrorCode } from "@/db/errors";
 import { items, ItemState, profileItems } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
@@ -648,11 +648,21 @@ describe("POST /api/v1/items", () => {
     const savedItems = await testDb.db
       .select()
       .from(profileItems)
-      .where(eq(profileItems.profileId, DEFAULT_TEST_PROFILE_ID));
+      .where(eq(profileItems.profileId, DEFAULT_TEST_PROFILE_ID))
+      .orderBy(desc(profileItems.stateUpdatedAt));
 
     expect(savedItems.length).toBe(2);
 
     expect(savedItems).toEqual([
+      expect.objectContaining({
+        itemId: expect.any(String),
+        state: ItemState.ACTIVE,
+        title: "Example title",
+        description: null,
+        isFavorite: false,
+        stateUpdatedAt: expect.any(Date),
+        lastReadAt: null,
+      }),
       expect.objectContaining({
         itemId: TEST_ITEM_ID,
         state: ItemState.ACTIVE,
@@ -663,19 +673,14 @@ describe("POST /api/v1/items", () => {
         stateUpdatedAt: expect.any(Date),
         lastReadAt: null,
       }),
-      expect.objectContaining({
-        itemId: expect.any(String),
-        state: ItemState.ACTIVE,
-        title: "Example title",
-        description: null,
-        isFavorite: false,
-        stateUpdatedAt: expect.any(Date),
-        lastReadAt: null,
-      }),
-      expect(savedItems[0].stateUpdatedAt).not.toBe(
-        new Date("2024-04-10T12:52:56-08:00"),
-      ),
     ]);
+
+    expect(savedItems[0].stateUpdatedAt).not.toEqual(
+      new Date("2024-04-10T12:52:56-08:00"),
+    );
+    expect(savedItems[1].stateUpdatedAt).toEqual(
+      new Date("2024-04-10T12:52:56-08:00"),
+    );
   });
 
   it("should return 200 if overwriting existing item with different URL", async () => {
