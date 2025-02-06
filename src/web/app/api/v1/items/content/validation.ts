@@ -34,6 +34,7 @@ export const UpdateItemContentRequestSchema = z.object({
       "The HTML content for the item. Will replace the existing content only if it's longer.",
     ),
   url: z.string().describe("The URL of the item to update."),
+  skipMetadataExtraction: z.boolean().optional().default(false),
 });
 
 export const UpdateItemContentResponseSchema = z.discriminatedUnion("status", [
