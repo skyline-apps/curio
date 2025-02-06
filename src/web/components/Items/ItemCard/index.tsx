@@ -36,11 +36,13 @@ const ItemCard: React.FC<ItemCardProps> = ({
       key={item.id}
       className={cn(
         "w-full group flex flex-row bg-background-400 pl-4 pr-1 py-1 pb-2 h-16 rounded-sm overflow-hidden hover:bg-background-300 data-[selected=true]:bg-background-300 data-[focus=true]:outline-focus data-[focus=true]:outline",
-        startPos && "absolute top-0 left-0",
+        startPos !== undefined && "absolute top-0 left-0",
       )}
       style={{
         ...(height && { height: `${height}px` }),
-        ...(startPos && { transform: `translateY(${startPos}px)` }),
+        ...(startPos !== undefined && {
+          transform: `translateY(${startPos}px)`,
+        }),
       }}
       onClick={onClick}
       onTouchStart={(e: React.TouchEvent) => {
