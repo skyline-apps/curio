@@ -1,0 +1,17 @@
+{
+  "name": "curio-script",
+  "version": "1.0.0",
+  "description": "scripts for curio",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "import:omnivore": "tsx importOmnivore.ts"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^3.3.2",
+    "tsx": "^4.19.2",
+    "unzipper": "^0.12.3"
+  }
+}

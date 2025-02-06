@@ -37,3 +37,6 @@ next-env.d.ts
 # db
 docker/volumes/db/data
 docker/volumes/storage
+
+# generated
+src/script/generated
