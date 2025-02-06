@@ -204,7 +204,9 @@ export async function POST(
           updatedAt: new Date(),
           profileId: profileResult.profile.id,
           state: ItemState.ACTIVE,
-          stateUpdatedAt: new Date(),
+          stateUpdatedAt: item.metadata?.stateUpdatedAt
+            ? new Date(item.metadata?.stateUpdatedAt)
+            : new Date(),
           itemId,
         };
       });

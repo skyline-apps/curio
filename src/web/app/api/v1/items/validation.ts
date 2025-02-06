@@ -64,11 +64,13 @@ const ItemMetadataSchema = z
     savedAt: dateType
       .nullable()
       .optional()
-      .describe("The time the item was saved."),
+      .describe("The time the item was saved. Cannot be populated manually."),
     stateUpdatedAt: dateType
       .nullable()
       .optional()
-      .describe("The time the item's state was last updated."),
+      .describe(
+        "The time the item's state was last updated. Used to sort items in the feed.",
+      ),
     state: z
       .nativeEnum(ItemState)
       .describe("Whether the state is active or archived."),
