@@ -99,6 +99,13 @@
       "when": 1738804013073,
       "tag": "0013_default state_updated_at",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1738880556200,
+      "tag": "0014_add favicon",
+      "breakpoints": true
     }
   ]
 }

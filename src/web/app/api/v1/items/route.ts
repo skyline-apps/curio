@@ -96,6 +96,7 @@ export async function GET(
           description: profileItems.description,
           author: profileItems.author,
           thumbnail: profileItems.thumbnail,
+          favicon: profileItems.favicon,
           publishedAt: profileItems.publishedAt,
           savedAt: profileItems.savedAt,
           state: profileItems.state,
@@ -198,6 +199,7 @@ export async function POST(
           description: item.metadata?.description || sql`NULL`,
           author: item.metadata?.author || sql`NULL`,
           thumbnail: item.metadata?.thumbnail || sql`NULL`,
+          favicon: item.metadata?.favicon || sql`NULL`,
           publishedAt: item.metadata?.publishedAt
             ? new Date(item.metadata.publishedAt)
             : sql`NULL`,
@@ -224,6 +226,7 @@ export async function POST(
             description: sql`COALESCE(EXCLUDED.description, ${profileItems.description})`,
             author: sql`COALESCE(EXCLUDED.author, ${profileItems.author})`,
             thumbnail: sql`COALESCE(EXCLUDED.thumbnail, ${profileItems.thumbnail})`,
+            favicon: sql`COALESCE(EXCLUDED.favicon, ${profileItems.favicon})`,
             publishedAt: sql`COALESCE(EXCLUDED.published_at, ${profileItems.publishedAt})`,
             stateUpdatedAt: sql`CASE
               WHEN EXCLUDED.state <> profile_items.state THEN EXCLUDED.state_updated_at
@@ -239,6 +242,7 @@ export async function POST(
           description: profileItems.description,
           author: profileItems.author,
           thumbnail: profileItems.thumbnail,
+          favicon: profileItems.favicon,
           publishedAt: profileItems.publishedAt,
           savedAt: profileItems.savedAt,
           state: profileItems.state,

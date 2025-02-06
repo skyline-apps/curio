@@ -35,36 +35,37 @@ const ItemMetadataSchema = z
       .max(2048)
       .nullable()
       .optional()
-      .describe(
-        "The description of the item. If left blank, will remain unchanged.",
-      ),
+      .describe("The description of the item."),
     author: z
       .string()
       .max(255)
       .nullable()
       .optional()
-      .describe(
-        "The author of the item. If left blank, will remain unchanged.",
-      ),
+      .describe("The author of the item."),
     thumbnail: z
       .string()
       .url()
       .max(2048)
       .nullable()
       .optional()
-      .describe(
-        "The thumbnail of the item. If left blank, will remain unchanged.",
-      ),
+      .describe("The thumbnail URL of the item."),
+    favicon: z
+      .string()
+      .url()
+      .max(2048)
+      .nullable()
+      .optional()
+      .describe("The favicon URL of the item."),
     publishedAt: dateType
       .nullable()
       .optional()
-      .describe(
-        "The published date of the item. If left blank, will remain unchanged.",
-      ),
+      .describe("The published date of the item."),
     savedAt: dateType
       .nullable()
       .optional()
-      .describe("The time the item was saved. Cannot be populated manually."),
+      .describe(
+        "The time the item was saved. Populated automatically and cannot be user-overridden.",
+      ),
     stateUpdatedAt: dateType
       .nullable()
       .optional()

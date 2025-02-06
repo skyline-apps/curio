@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useContext, useRef } from "react";
 import { HiCheck } from "react-icons/hi2";
 
+import Favicon from "@/components/Image/Favicon";
 import ItemActions from "@/components/Items/ItemActions";
 import Icon from "@/components/ui/Icon";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
@@ -68,6 +69,9 @@ const ItemCard: React.FC<ItemCardProps> = ({
       <div className="flex flex-row gap-2 justify-between items-start w-full">
         <div className="grow h-full block overflow-hidden">
           <div className="flex flex-row gap-2 items-center">
+            <div className="flex items-center justify-center w-4 h-4">
+              <Favicon url={item.metadata.favicon} />
+            </div>
             <Link
               href={`/items/${item.slug}`}
               className="text-sm text-foreground hover:underline truncate select-none"

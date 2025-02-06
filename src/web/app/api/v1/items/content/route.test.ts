@@ -66,6 +66,7 @@ describe("GET /api/v1/items/[slug]/content", () => {
       description: "An example item",
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
+      favicon: "https://example.com/favicon.ico",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
       savedAt: ORIGINAL_CREATION_DATE,
       stateUpdatedAt: ORIGINAL_CREATION_DATE,
@@ -93,6 +94,7 @@ describe("GET /api/v1/items/[slug]/content", () => {
           description: "An example item",
           publishedAt: ORIGINAL_PUBLISHED_DATE.toISOString(),
           thumbnail: "https://example.com/thumb.jpg",
+          favicon: "https://example.com/favicon.ico",
           title: "Example",
           savedAt: ORIGINAL_CREATION_DATE.toISOString(),
           isFavorite: true,
@@ -118,6 +120,7 @@ describe("GET /api/v1/items/[slug]/content", () => {
       description: "An example item",
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
+      favicon: "https://example.com/favicon.ico",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
       savedAt: ORIGINAL_CREATION_DATE,
       stateUpdatedAt: ORIGINAL_CREATION_DATE,
@@ -147,6 +150,7 @@ describe("GET /api/v1/items/[slug]/content", () => {
           description: "An example item",
           publishedAt: ORIGINAL_PUBLISHED_DATE.toISOString(),
           thumbnail: "https://example.com/thumb.jpg",
+          favicon: "https://example.com/favicon.ico",
           title: "Example",
           savedAt: ORIGINAL_CREATION_DATE.toISOString(),
           state: ItemState.ACTIVE,
@@ -223,6 +227,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       description: "An example item",
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
+      favicon: "https://example.com/favicon.ico",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
       stateUpdatedAt: ORIGINAL_CREATION_DATE,
     });
@@ -291,6 +296,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       MOCK_METADATA.description,
     );
     expect(updatedProfileItem[0].thumbnail).toEqual(MOCK_METADATA.thumbnail);
+    expect(updatedProfileItem[0].favicon).toEqual(MOCK_METADATA.favicon);
     expect(updatedProfileItem[0].publishedAt).toEqual(ORIGINAL_PUBLISHED_DATE);
   });
 
@@ -303,6 +309,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       description: "An example item",
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
+      favicon: "https://example.com/favicon.ico",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
       stateUpdatedAt: ORIGINAL_CREATION_DATE,
     });
@@ -345,6 +352,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       description: "An example item",
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
+      favicon: "https://example.com/favicon.ico",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
       stateUpdatedAt: ORIGINAL_CREATION_DATE,
     });
@@ -355,6 +363,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       description: "An example item",
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
+      favicon: "https://example.com/favicon.ico",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
       stateUpdatedAt: ORIGINAL_CREATION_DATE,
       savedAt: ORIGINAL_CREATION_DATE,
@@ -409,6 +418,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       description: "An example item",
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
+      favicon: "https://example.com/favicon.ico",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
       stateUpdatedAt: ORIGINAL_CREATION_DATE,
     });
@@ -444,6 +454,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
     expect(profileItem[0].description).toEqual(MOCK_METADATA.description);
     expect(profileItem[0].author).toEqual(MOCK_METADATA.author);
     expect(profileItem[0].thumbnail).toEqual(MOCK_METADATA.thumbnail);
+    expect(profileItem[0].favicon).toEqual(MOCK_METADATA.favicon);
     expect(profileItem[0].publishedAt).toEqual(MOCK_METADATA.publishedAt);
     expect(
       (profileItem[0].savedAt as Date).getTime() >
@@ -460,6 +471,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       description: "An example item",
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
+      favicon: "https://example.com/favicon.ico",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
       stateUpdatedAt: ORIGINAL_CREATION_DATE,
     });
@@ -503,6 +515,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       description: "An example item",
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
+      favicon: "https://example.com/favicon.ico",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
       stateUpdatedAt: ORIGINAL_CREATION_DATE,
     });
@@ -542,6 +555,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       description: "An example item",
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
+      favicon: "https://example.com/favicon.ico",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
       stateUpdatedAt: ORIGINAL_CREATION_DATE,
     });
@@ -647,6 +661,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       description: "An example item",
       author: "Test Author",
       thumbnail: "https://example.com/thumb.jpg",
+      favicon: "https://example.com/favicon.ico",
       publishedAt: new Date("2025-01-10T12:52:56-08:00"),
       savedAt: new Date("2025-01-10T12:52:56-08:00"),
       stateUpdatedAt: ORIGINAL_CREATION_DATE,

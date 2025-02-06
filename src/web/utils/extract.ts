@@ -1,5 +1,13 @@
 import { Readability } from "@mozilla/readability";
 import { JSDOM } from "jsdom";
+import {
+  Article,
+  ImageObject,
+  NewsArticle,
+  Organization,
+  Person,
+  Thing,
+} from "schema-dts";
 import TurndownService from "turndown";
 
 export class ExtractError extends Error {
@@ -45,21 +53,67 @@ turndown.addRule("picture", {
   },
 });
 
-interface JsonLdArticle {
-  "@type": "Article" | "NewsArticle";
-  headline?: string;
-  description?: string;
-  author?: { name: string } | string;
-  image?: string;
-  datePublished?: string;
-}
-
 export interface ExtractedMetadata {
   author: string | null;
   title: string | null;
   description: string | null;
   thumbnail: string | null;
+  favicon: string | null;
   publishedAt: Date | null;
+}
+
+type JsonLdGraph = {
+  "@context"?: string;
+  "@graph"?: Thing[];
+  "@type"?: string;
+} & Record<string, unknown>;
+
+type ArticleType = (Article | NewsArticle) & {
+  author?: string | Person | Organization | (string | Person | Organization)[];
+  image?: string | ImageObject | (string | ImageObject)[];
+  publisher?: Organization & {
+    logo?: string;
+  };
+};
+
+function isArticle(thing: Thing): thing is ArticleType {
+  return (
+    typeof thing === "object" &&
+    thing !== null &&
+    "@type" in thing &&
+    (thing["@type"] === "Article" || thing["@type"] === "NewsArticle")
+  );
+}
+
+function isPerson(thing: unknown): thing is Person & { name?: string } {
+  return (
+    typeof thing === "object" &&
+    thing !== null &&
+    "@type" in thing &&
+    thing["@type"] === "Person"
+  );
+}
+
+function isOrganization(
+  thing: unknown,
+): thing is Organization & { name?: string } {
+  return (
+    typeof thing === "object" &&
+    thing !== null &&
+    "@type" in thing &&
+    thing["@type"] === "Organization"
+  );
+}
+
+function isImageObject(
+  thing: unknown,
+): thing is ImageObject & { url?: string } {
+  return (
+    typeof thing === "object" &&
+    thing !== null &&
+    "@type" in thing &&
+    thing["@type"] === "ImageObject"
+  );
 }
 
 export class Extract {
@@ -74,23 +128,113 @@ export class Extract {
     return null;
   }
 
-  private extractJsonLd(doc: Document): JsonLdArticle | null {
-    const script = doc.querySelector('script[type="application/ld+json"]');
-    if (!script?.textContent) return null;
+  private parseJsonLd(jsonString: string): JsonLdGraph | null {
     try {
-      const data = JSON.parse(script.textContent);
-      return data["@type"] === "Article" || data["@type"] === "NewsArticle"
-        ? (data as JsonLdArticle)
-        : null;
+      const parsed = JSON.parse(jsonString);
+      // Handle both single object and array of objects
+      const data = Array.isArray(parsed) ? parsed[0] : parsed;
+      return data as unknown as JsonLdGraph;
     } catch {
       return null;
     }
   }
 
+  private extractJsonLd(doc: Document): ArticleType | null {
+    const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+
+    for (const script of scripts) {
+      if (!script.textContent) continue;
+
+      const jsonLd = this.parseJsonLd(script.textContent);
+      if (!jsonLd) continue;
+
+      const items: Thing[] = jsonLd["@graph"] || [jsonLd as unknown as Thing];
+
+      for (const item of items) {
+        if (isArticle(item)) {
+          return item;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private extractAuthorFromJsonLd(
+    article: Article | NewsArticle,
+  ): string | null {
+    const author = article.author;
+    if (!author) return null;
+
+    if (Array.isArray(author)) {
+      const firstAuthor = author[0];
+      if (typeof firstAuthor === "string") return firstAuthor;
+      if (isPerson(firstAuthor)) return firstAuthor.name?.toString() || null;
+      if (isOrganization(firstAuthor))
+        return firstAuthor.name?.toString() || null;
+      return null;
+    }
+
+    if (typeof author === "string") return author;
+    if (isPerson(author)) return author.name?.toString() || null;
+    if (isOrganization(author)) return author.name?.toString() || null;
+
+    return null;
+  }
+
+  private extractImageFromJsonLd(
+    article: Article | NewsArticle,
+  ): string | null {
+    const image = article.image;
+    if (!image) return null;
+
+    if (Array.isArray(image)) {
+      const firstImage = image[0];
+      if (typeof firstImage === "string") return firstImage;
+      if (isImageObject(firstImage)) return firstImage.url?.toString() || null;
+      return null;
+    }
+
+    if (typeof image === "string") return image;
+    if (isImageObject(image)) return image.url?.toString() || null;
+
+    return null;
+  }
+
+  private extractFavicon(doc: Document): string | null {
+    const favicon32 = doc.querySelector('link[rel="icon"][sizes="32x32"]');
+    if (favicon32) return favicon32.getAttribute("href");
+
+    const faviconShortcut32 = doc.querySelector(
+      'link[rel="shortcut icon"][sizes="32x32"]',
+    );
+    if (faviconShortcut32) return faviconShortcut32.getAttribute("href");
+
+    const faviconAny = doc.querySelector('link[rel="icon"]');
+    if (faviconAny) return faviconAny.getAttribute("href");
+
+    const shortcutIcon = doc.querySelector('link[rel="shortcut icon"]');
+    if (shortcutIcon) return shortcutIcon.getAttribute("href");
+
+    return null;
+  }
+
+  private createAbsoluteUrl(link: string | null, url: string): string | null {
+    if (!link) return null;
+    if (link.startsWith("http")) {
+      return link;
+    } else if (link.startsWith("/")) {
+      const hostname = new URL(url).hostname;
+      return `https://${hostname}${link}`;
+    }
+
+    return link;
+  }
+
   async extractMetadata(url: string, html: string): Promise<ExtractedMetadata> {
     try {
       if (!html.trim() || !html.includes("<") || !html.includes(">")) {
-        throw new Error("Invalid HTML: cannot parse content");
+        throw new ExtractError("Invalid HTML content");
       }
 
       const dom = new JSDOM(html);
@@ -108,8 +252,8 @@ export class Extract {
           'meta[name="twitter:title"]',
           'meta[name="title"]',
         ]) ||
+        jsonLd?.headline?.toString() ||
         document.title ||
-        jsonLd?.headline ||
         null;
 
       const description =
@@ -118,21 +262,15 @@ export class Extract {
           'meta[name="twitter:description"]',
           'meta[name="description"]',
         ]) ||
-        jsonLd?.description ||
+        jsonLd?.description?.toString() ||
         null;
-
-      const jsonLdAuthor = jsonLd?.author
-        ? typeof jsonLd.author === "string"
-          ? jsonLd.author
-          : jsonLd.author.name
-        : null;
 
       const author =
         this.getMetaContent(document, [
           'meta[property="article:author"]',
           'meta[name="author"]',
         ]) ||
-        jsonLdAuthor ||
+        (jsonLd && this.extractAuthorFromJsonLd(jsonLd)) ||
         null;
 
       const thumbnail =
@@ -141,7 +279,7 @@ export class Extract {
           'meta[name="twitter:image"]',
           'meta[property="og:image:url"]',
         ]) ||
-        jsonLd?.image ||
+        (jsonLd && this.extractImageFromJsonLd(jsonLd)) ||
         null;
 
       const publishedAt =
@@ -150,7 +288,14 @@ export class Extract {
           'meta[name="published_time"]',
           'meta[property="og:published_time"]',
         ]) ||
-        jsonLd?.datePublished ||
+        jsonLd?.datePublished?.toString() ||
+        null;
+
+      const favicon =
+        this.createAbsoluteUrl(this.extractFavicon(document), url) ||
+        (jsonLd?.publisher && "logo" in jsonLd.publisher
+          ? jsonLd.publisher.logo
+          : null) ||
         null;
 
       return {
@@ -158,6 +303,7 @@ export class Extract {
         description,
         author,
         thumbnail,
+        favicon,
         publishedAt: publishedAt ? new Date(publishedAt) : null,
       };
     } catch (error) {
