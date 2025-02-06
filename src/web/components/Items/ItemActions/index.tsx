@@ -1,4 +1,4 @@
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useContext } from "react";
 import {
   HiArchiveBox,
   HiOutlineArchiveBox,
@@ -13,6 +13,7 @@ import Button from "@/components/ui/Button";
 import { Dialog, showConfirm } from "@/components/ui/Modal/Dialog";
 import { ItemState } from "@/db/schema";
 import { BrowserMessageContext } from "@/providers/BrowserMessageProvider";
+import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import { ItemMetadata, ItemsContext } from "@/providers/ItemsProvider";
 import { useToast } from "@/providers/ToastProvider";
 import { cn } from "@/utils/cn";
@@ -42,24 +43,19 @@ const ActionButton = <T,>({
   isLoading,
 }: ActionButtonProps<T>): React.ReactNode => {
   const { fetchItems } = useContext(ItemsContext);
-  const [pending, setPending] = useState<boolean>(false);
   const { showToast } = useToast();
 
   // TODO: Clear selection in certain cases after action
   const onPress = useCallback(async () => {
-    setPending(true);
     await action()
       .then(async () => {
         await fetchItems(true);
-        setPending(false);
       })
       .catch((error) => {
         log.error(error);
         showToast("Error updating item.");
       });
   }, [showToast, fetchItems, action]);
-
-  const status = pending ? !isActive : isActive;
 
   return (
     <Button
@@ -69,10 +65,10 @@ const ActionButton = <T,>({
       onPress={onPress}
       isLoading={isLoading}
       tooltip={
-        status ? (activeDisplay || defaultDisplay).text : defaultDisplay.text
+        isActive ? (activeDisplay || defaultDisplay).text : defaultDisplay.text
       }
     >
-      {status ? (activeDisplay || defaultDisplay).icon : defaultDisplay.icon}
+      {isActive ? (activeDisplay || defaultDisplay).icon : defaultDisplay.icon}
     </Button>
   );
 };
@@ -89,8 +85,12 @@ const ItemActions = ({
   className,
 }: ItemActionsProps): JSX.Element => {
   const { updateItemsState, updateItemsFavorite } = useItemUpdate();
+  const { clearSelectedItems } = useContext(CurrentItemContext);
   const { savingItem, saveItemContent } = useContext(BrowserMessageContext);
+  const { optimisticUpdateItem, optimisticRemoveItem } =
+    useContext(ItemsContext);
 
+  // TODO: Invalidate caches here in case item metadata changes
   const handleRefetch = useCallback(async () => {
     if (!item?.url) return;
     if (item.metadata.versionName) {
@@ -121,22 +121,31 @@ const ItemActions = ({
   return (
     <div className={cn("flex flex-row gap-1", className)}>
       <ActionButton
-        action={() =>
-          updateItemsFavorite([item.slug], !item.metadata.isFavorite)
-        }
+        action={async () => {
+          optimisticUpdateItem({
+            ...item,
+            metadata: {
+              ...item.metadata,
+              isFavorite: !item.metadata.isFavorite,
+            },
+          });
+          return updateItemsFavorite([item.slug], !item.metadata.isFavorite);
+        }}
         defaultDisplay={{ text: "Favorite", icon: <HiOutlineStar /> }}
         activeDisplay={{ text: "Unfavorite", icon: <HiStar /> }}
         isActive={item.metadata.isFavorite}
       />
       <ActionButton
-        action={() =>
-          updateItemsState(
+        action={async () => {
+          optimisticRemoveItem(item.id);
+          clearSelectedItems();
+          return updateItemsState(
             [item.slug],
             item.metadata.state === ItemState.ARCHIVED
               ? ItemState.ACTIVE
               : ItemState.ARCHIVED,
-          )
-        }
+          );
+        }}
         defaultDisplay={{ text: "Archive", icon: <HiOutlineArchiveBox /> }}
         activeDisplay={{ text: "Unarchive", icon: <HiArchiveBox /> }}
         isActive={item.metadata.state === ItemState.ARCHIVED}
@@ -152,14 +161,16 @@ const ItemActions = ({
             isLoading={savingItem}
           />
           <ActionButton
-            action={() =>
-              updateItemsState(
+            action={async () => {
+              optimisticRemoveItem(item.id);
+              clearSelectedItems();
+              return updateItemsState(
                 [item.slug],
                 item.metadata.state === ItemState.DELETED
                   ? ItemState.ACTIVE
                   : ItemState.DELETED,
-              )
-            }
+              );
+            }}
             defaultDisplay={{ text: "Delete", icon: <HiOutlineTrash /> }}
             activeDisplay={{ text: "Restore", icon: <HiTrash /> }}
             isActive={item.metadata.state === ItemState.DELETED}

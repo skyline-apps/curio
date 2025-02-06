@@ -9,6 +9,8 @@ import type { ItemMetadata } from "@/providers/ItemsProvider";
 import { cn } from "@/utils/cn";
 
 interface ItemCardProps {
+  height?: number;
+  startPos?: number;
   item: ItemMetadata;
   index: number;
   onClick?: (ev: React.MouseEvent) => void;
@@ -16,6 +18,8 @@ interface ItemCardProps {
 }
 
 const ItemCard: React.FC<ItemCardProps> = ({
+  height,
+  startPos,
   item,
   index,
   onClick,
@@ -31,8 +35,13 @@ const ItemCard: React.FC<ItemCardProps> = ({
     <div
       key={item.id}
       className={cn(
-        "group relative m-0.5 flex flex-row bg-background-400 pl-4 pr-1 py-1 pb-2 h-16 rounded-sm overflow-hidden hover:bg-background-300 data-[selected=true]:bg-background-300 data-[focus=true]:outline-focus data-[focus=true]:outline",
+        "w-full group flex flex-row bg-background-400 pl-4 pr-1 py-1 pb-2 h-16 rounded-sm overflow-hidden hover:bg-background-300 data-[selected=true]:bg-background-300 data-[focus=true]:outline-focus data-[focus=true]:outline",
+        startPos && "absolute top-0 left-0",
       )}
+      style={{
+        ...(height && { height: `${height}px` }),
+        ...(startPos && { transform: `translateY(${startPos}px)` }),
+      }}
       onClick={onClick}
       onTouchStart={(e: React.TouchEvent) => {
         if (timer.current) clearTimeout(timer.current);

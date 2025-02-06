@@ -1,5 +1,9 @@
 "use client";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  InfiniteData,
+  useInfiniteQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import React, { createContext, useCallback, useState } from "react";
 
 import {
@@ -11,6 +15,8 @@ import { handleAPIResponse } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
 
 const log = createLogger("items-provider");
+
+export const ITEMS_BATCH_SIZE = 20;
 
 export type ItemMetadata = ItemResult;
 interface ItemsPage {
@@ -24,26 +30,30 @@ export type ItemsContextType = {
   totalItems: number;
   isLoading: boolean;
   isFetching: boolean;
+  isFetchingNextPage: boolean;
   invalidateCache: () => void;
+  optimisticUpdateItem: (item: ItemMetadata) => void;
+  optimisticRemoveItem: (itemId: string) => void;
   loadingError: string | null;
-  hasMore: boolean;
+  hasNextPage: boolean;
   fetchItems: (refresh?: boolean, options?: GetItemsRequest) => Promise<void>;
   searchQuery: string;
   setSearchQuery: (search: string) => void;
 };
 
-interface ItemsProviderProps extends React.PropsWithChildren {
-  initialLimit?: number;
-}
+interface ItemsProviderProps extends React.PropsWithChildren {}
 
 export const ItemsContext = createContext<ItemsContextType>({
   items: [],
   totalItems: 0,
   isLoading: false,
   isFetching: false,
+  isFetchingNextPage: false,
   invalidateCache: () => {},
+  optimisticUpdateItem: () => {},
+  optimisticRemoveItem: () => {},
   loadingError: null,
-  hasMore: true,
+  hasNextPage: true,
   fetchItems: () => Promise.resolve(),
   searchQuery: "",
   setSearchQuery: () => {},
@@ -51,7 +61,6 @@ export const ItemsContext = createContext<ItemsContextType>({
 
 export const ItemsProvider: React.FC<ItemsProviderProps> = ({
   children,
-  initialLimit = 20,
 }: ItemsProviderProps): React.ReactNode => {
   const queryClient = useQueryClient();
   const [currentOptions, setCurrentOptions] = useState<GetItemsRequest | null>(
@@ -73,11 +82,12 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     refetch,
     hasNextPage,
     isFetching,
+    isFetchingNextPage,
     isLoading,
     error,
   } = useInfiniteQuery<ItemsPage>({
     enabled: !!currentOptions,
-    queryKey: ["items", initialLimit, serializeOptions(currentOptions)],
+    queryKey: ["items", serializeOptions(currentOptions)],
     queryFn: async ({ pageParam }): Promise<ItemsPage> => {
       const params = new URLSearchParams(
         Object.fromEntries(
@@ -88,7 +98,7 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
             ...(currentOptions?.search
               ? { search: currentOptions?.search }
               : {}),
-            limit: currentOptions?.limit || initialLimit,
+            limit: ITEMS_BATCH_SIZE,
             cursor: pageParam,
           })
             .filter(([_, value]) => value !== undefined)
@@ -141,14 +151,58 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     queryClient.invalidateQueries({ queryKey: ["items"] });
   }, [queryClient]);
 
+  const optimisticUpdateItem = useCallback(
+    (updatedItem: ItemMetadata) => {
+      const key = ["items", serializeOptions(currentOptions)];
+
+      queryClient.setQueryData(key, (oldData: InfiniteData<ItemsPage>) => {
+        if (!oldData) return oldData;
+
+        const newData = {
+          ...oldData,
+          pages: oldData.pages.map((page: ItemsPage) => ({
+            ...page,
+            items: page.items.map((item: ItemMetadata) =>
+              item.id === updatedItem.id ? { ...item, ...updatedItem } : item,
+            ),
+          })),
+        };
+        return newData;
+      });
+    },
+    [currentOptions, queryClient, serializeOptions],
+  );
+
+  const optimisticRemoveItem = useCallback(
+    (itemId: string) => {
+      const key = ["items", serializeOptions(currentOptions)];
+
+      queryClient.setQueryData<InfiniteData<ItemsPage>>(key, (oldData) => {
+        if (!oldData) return oldData;
+
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => ({
+            ...page,
+            items: page.items.filter((item) => item.id !== itemId),
+          })),
+        };
+      });
+    },
+    [currentOptions, queryClient, serializeOptions],
+  );
+
   const contextValue: ItemsContextType = {
     items: data?.pages.flatMap((p) => p.items) || [],
     totalItems: data?.pages[0]?.total || 0,
     isLoading,
     isFetching,
+    isFetchingNextPage,
     invalidateCache,
+    optimisticUpdateItem,
+    optimisticRemoveItem,
     loadingError: error ? error.message || "Error loading items." : null,
-    hasMore: !!hasNextPage,
+    hasNextPage,
     fetchItems,
     searchQuery,
     setSearchQuery,
