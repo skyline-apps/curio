@@ -7,6 +7,7 @@ export const MOCK_METADATA: ExtractedMetadata = {
   title: "test title",
   description: "test description",
   thumbnail: "test thumbnail",
+  favicon: "test favicon",
   publishedAt: new Date("2024-01-10T12:50:00-08:00"),
 };
 
@@ -34,6 +35,7 @@ export class Extract {
       title: null,
       description: null,
       thumbnail: null,
+      favicon: null,
       publishedAt: null,
     };
   }
@@ -54,6 +56,7 @@ export const extractMetadata = jest
     title: null,
     description: null,
     thumbnail: null,
+    favicon: null,
     publishedAt: null,
   }));
 

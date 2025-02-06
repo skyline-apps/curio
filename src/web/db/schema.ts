@@ -125,6 +125,7 @@ export const profileItems = pgTable(
     description: text("description"),
     author: text("author"),
     thumbnail: text("thumbnail"),
+    favicon: text("favicon"),
     publishedAt: timestamp("published_at", { withTimezone: true }),
     state: itemState("state").notNull().default(ItemState.ACTIVE),
     isFavorite: boolean("is_favorite").notNull().default(false),

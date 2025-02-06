@@ -58,6 +58,7 @@ export async function GET(
           description: profileItems.description,
           author: profileItems.author,
           thumbnail: profileItems.thumbnail,
+          favicon: profileItems.favicon,
           publishedAt: profileItems.publishedAt,
           savedAt: profileItems.savedAt,
           state: profileItems.state,
@@ -67,7 +68,6 @@ export async function GET(
           versionName: profileItems.versionName,
         },
         createdAt: items.createdAt,
-        updatedAt: items.updatedAt,
       })
       .from(items)
       .innerJoin(profileItems, eq(items.id, profileItems.itemId))
@@ -134,6 +134,7 @@ async function updateMetadata(
       author: metadata.author,
       description: metadata.description,
       thumbnail: metadata.thumbnail,
+      favicon: metadata.favicon,
       publishedAt: metadata.publishedAt ? new Date(metadata.publishedAt) : null,
       versionName: null,
     })
@@ -176,6 +177,7 @@ export async function POST(
           description: profileItems.description,
           author: profileItems.author,
           thumbnail: profileItems.thumbnail,
+          favicon: profileItems.favicon,
           publishedAt: profileItems.publishedAt,
         },
       })
@@ -203,6 +205,7 @@ export async function POST(
         description: item[0].metadata.description,
         author: item[0].metadata.author,
         thumbnail: item[0].metadata.thumbnail,
+        favicon: item[0].metadata.favicon,
         publishedAt: item[0].metadata.publishedAt,
       };
     } else {

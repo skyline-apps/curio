@@ -117,6 +117,7 @@ describe("Extract", () => {
         title: "OG Test Title",
         description: "OG test description",
         thumbnail: "https://example.com/og-image.jpg",
+        favicon: null,
         author: "John Doe",
         publishedAt: new Date("2024-01-31T08:00:00Z"),
       });
@@ -133,6 +134,9 @@ describe("Extract", () => {
                 "headline": "JSON-LD Test Title",
                 "description": "JSON-LD test description",
                 "image": "https://example.com/jsonld-image.jpg",
+                "publisher": {
+                  "logo": "https://example.com/logo.jpg"
+                },
                 "author": {
                   "@type": "Person",
                   "name": "Jane Smith"
@@ -154,6 +158,51 @@ describe("Extract", () => {
         title: "JSON-LD Test Title",
         description: "JSON-LD test description",
         thumbnail: "https://example.com/jsonld-image.jpg",
+        favicon: "https://example.com/logo.jpg",
+        author: "Jane Smith",
+        publishedAt: new Date("2024-01-31T08:00:00Z"),
+      });
+    });
+
+    it("should extract metadata from JSON-LD lists", async () => {
+      const html = `
+        <html>
+          <head>
+            <script type="application/ld+json">
+              [{
+                "@context": "https://schema.org",
+                "@type": "Article",
+                "headline": "JSON-LD Test Title",
+                "description": "JSON-LD test description",
+                "image": [
+                  "https://example.com/jsonld-image.jpg",
+                  "https://example.com/alt-jsonld-image.jpg"
+                ],
+                "publisher": {
+                  "logo": "https://example.com/logo.jpg"
+                },
+                "author": {
+                  "@type": "Person",
+                  "name": "Jane Smith"
+                },
+                "datePublished": "2024-01-31T08:00:00Z"
+    }]
+            </script>
+          </head>
+          <body></body>
+        </html>
+      `;
+
+      const metadata = await extract.extractMetadata(
+        "https://example.com",
+        html,
+      );
+
+      expect(metadata).toEqual({
+        title: "JSON-LD Test Title",
+        description: "JSON-LD test description",
+        thumbnail: "https://example.com/jsonld-image.jpg",
+        favicon: "https://example.com/logo.jpg",
         author: "Jane Smith",
         publishedAt: new Date("2024-01-31T08:00:00Z"),
       });
@@ -181,6 +230,7 @@ describe("Extract", () => {
         description: "Standard test description",
         author: "Bob Wilson",
         thumbnail: null,
+        favicon: null,
         publishedAt: null,
       });
     });
@@ -198,6 +248,7 @@ describe("Extract", () => {
         description: null,
         author: null,
         thumbnail: null,
+        favicon: null,
         publishedAt: null,
       });
     });
@@ -209,5 +260,67 @@ describe("Extract", () => {
         extract.extractMetadata("https://example.com", invalidHtml),
       ).rejects.toThrow(MetadataError);
     });
+  });
+
+  it("should extract 32x32 favicon when available", async () => {
+    const html = `
+        <html>
+          <head>
+            <link rel="icon" sizes="16x16" href="/favicon-16.png">
+            <link rel="icon" sizes="32x32" href="/favicon-32.png">
+            <link rel="icon" sizes="64x64" href="/favicon-64.png">
+          </head>
+        </html>
+      `;
+    const { favicon } = await extract.extractMetadata(
+      "https://example.com",
+      html,
+    );
+    expect(favicon).toBe("https://example.com/favicon-32.png");
+  });
+
+  it("should extract any favicon when 32x32 is not available", async () => {
+    const html = `
+        <html>
+          <head>
+            <link rel="icon" href="/favicon.png">
+          </head>
+        </html>
+      `;
+    const { favicon } = await extract.extractMetadata(
+      "https://example.com",
+      html,
+    );
+    expect(favicon).toBe("https://example.com/favicon.png");
+  });
+
+  it("should extract shortcut icon as fallback", async () => {
+    const html = `
+        <html>
+          <head>
+            <link rel="shortcut icon" href="/shortcut-favicon.png">
+          </head>
+        </html>
+      `;
+    const { favicon } = await extract.extractMetadata(
+      "https://example.com",
+      html,
+    );
+    expect(favicon).toBe("https://example.com/shortcut-favicon.png");
+  });
+
+  it("should return null when no favicon is found", async () => {
+    const html = `
+        <html>
+          <head>
+            <title>No Favicon</title>
+          </head>
+        </html>
+      `;
+    const { favicon } = await extract.extractMetadata(
+      "https://example.com",
+      html,
+    );
+    expect(favicon).toBeNull();
   });
 });
