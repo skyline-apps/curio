@@ -13,7 +13,7 @@ import { ItemsContext } from "@/providers/ItemsProvider";
 import { useToast } from "@/providers/ToastProvider";
 import { createLogger } from "@/utils/logger";
 
-import { updateItemsState } from "./actions";
+import { useItemUpdate } from "./actions";
 
 const log = createLogger("bulk-actions");
 
@@ -63,6 +63,7 @@ const BulkActionButton = <T,>({
 };
 
 const BulkActions = (): React.ReactNode => {
+  const { updateItemsState } = useItemUpdate();
   const { selectedItems } = useContext(CurrentItemContext);
   const { items } = useContext(ItemsContext);
 

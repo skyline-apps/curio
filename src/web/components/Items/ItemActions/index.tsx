@@ -18,7 +18,7 @@ import { useToast } from "@/providers/ToastProvider";
 import { cn } from "@/utils/cn";
 import { createLogger } from "@/utils/logger";
 
-import { updateItemsFavorite, updateItemsState } from "./actions";
+import { useItemUpdate } from "./actions";
 
 const log = createLogger("item-actions");
 
@@ -88,6 +88,7 @@ const ItemActions = ({
   showAdvanced,
   className,
 }: ItemActionsProps): JSX.Element => {
+  const { updateItemsState, updateItemsFavorite } = useItemUpdate();
   const { savingItem, saveItemContent } = useContext(BrowserMessageContext);
 
   const handleRefetch = useCallback(async () => {
