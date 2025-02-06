@@ -35,6 +35,7 @@ async function sendItems(items: any[]) {
             metadata: {
                 ...item.metadata,
                 description: item.metadata.description?.substring(0, 2048),
+                stateUpdatedAt: item.metadata.savedAt,
             }
         }));
         const response = await fetch(ITEMS_ENDPOINT, {
