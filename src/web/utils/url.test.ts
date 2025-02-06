@@ -1,6 +1,21 @@
 import { cleanUrl, generateSlug } from "./url";
 
 describe("cleanUrl", () => {
+  it("handles root domains without trailing slashes", () => {
+    const url = "https://example.com";
+    expect(cleanUrl(url)).toBe("https://example.com");
+  });
+
+  it("handles root domains with trailing slashes", () => {
+    const url = "https://example.com/";
+    expect(cleanUrl(url)).toBe("https://example.com");
+  });
+
+  it("handles root domains with query parameters", () => {
+    const url = "https://example.com/?query=value";
+    expect(cleanUrl(url)).toBe("https://example.com");
+  });
+
   it("removes query parameters from URL", () => {
     const url = "https://example.com/path?query=value";
     expect(cleanUrl(url)).toBe("https://example.com/path");
@@ -11,9 +26,9 @@ describe("cleanUrl", () => {
     expect(cleanUrl(url)).toBe("https://example.com/path");
   });
 
-  it("keeps trailing slashes", () => {
+  it("removes trailing slashes", () => {
     const url = "https://example.com/path/";
-    expect(cleanUrl(url)).toBe("https://example.com/path/");
+    expect(cleanUrl(url)).toBe("https://example.com/path");
   });
 
   it("returns original string for invalid URLs", () => {

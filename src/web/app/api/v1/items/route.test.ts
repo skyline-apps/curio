@@ -14,13 +14,13 @@ import { testDb } from "@/utils/test/provider";
 import { GET, POST } from "./route";
 
 const TEST_ITEM_ID = "123e4567-e89b-12d3-a456-426614174001";
-const TEST_ITEM_URL_1 = "https://example.com/";
+const TEST_ITEM_URL_1 = "https://example.com";
 const TEST_ITEM_ID_2 = "123e4567-e89b-12d3-a456-426614174000";
-const TEST_ITEM_URL_2 = "https://example2.com/";
+const TEST_ITEM_URL_2 = "https://example2.com";
 const TEST_ITEM_ID_3 = "123e4567-e89b-12d3-a456-426614174003";
-const TEST_ITEM_URL_3 = "https://example3.com/";
+const TEST_ITEM_URL_3 = "https://example3.com";
 const TEST_ITEM_ID_DELETED = "123e4567-e89b-12d3-a456-426614174004";
-const TEST_ITEM_URL_DELETED = "https://example4.com/";
+const TEST_ITEM_URL_DELETED = "https://example4.com";
 const NONEXISTENT_USER_ID = "123e4567-e89b-12d3-a456-426614174003";
 
 const MOCK_ITEMS = [
@@ -279,7 +279,7 @@ describe("GET /api/v1/items", () => {
     await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
 
     const params = new URLSearchParams({
-      urls: "https://example2.com?query=val,https://example3.com",
+      urls: "https://example2.com?query=val,https://example3.com/",
     });
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "GET",
@@ -452,7 +452,7 @@ describe("GET /api/v1/items", () => {
 
     const params = new URLSearchParams({
       slugs: "example-com,example2-com",
-      urls: "https://example2.com?query=val,https://example3.com",
+      urls: "https://example2.com?query=val,https://example3.com/",
     });
     const request: APIRequest = makeAuthenticatedMockRequest({
       method: "GET",
@@ -539,7 +539,7 @@ describe("POST /api/v1/items", () => {
           id: expect.any(String),
           slug: expect.stringMatching(/^example-com-[a-f0-9]{6}$/),
           metadata: expect.objectContaining({
-            title: "https://example.com/",
+            title: "https://example.com",
           }),
           createdAt: expect.any(String),
         },
@@ -555,7 +555,7 @@ describe("POST /api/v1/items", () => {
       expect.objectContaining({
         id: expect.any(String),
         state: "active",
-        title: "https://example.com/",
+        title: TEST_ITEM_URL_1,
         isFavorite: false,
         stateUpdatedAt: expect.any(Date),
         lastReadAt: null,
@@ -615,7 +615,7 @@ describe("POST /api/v1/items", () => {
     expect(data).toEqual({
       items: [
         {
-          url: "https://example.com/",
+          url: TEST_ITEM_URL_1,
           id: expect.any(String),
           slug: expect.stringMatching(/^example-com-[a-f0-9]{6}$/),
           metadata: expect.objectContaining({
@@ -629,7 +629,7 @@ describe("POST /api/v1/items", () => {
           createdAt: expect.any(String),
         },
         {
-          url: "https://example2.com/",
+          url: TEST_ITEM_URL_2,
           id: expect.any(String),
           slug: expect.stringMatching(/^example2-com-[a-f0-9]{6}$/),
           metadata: expect.objectContaining({
@@ -725,7 +725,7 @@ describe("POST /api/v1/items", () => {
     expect(data).toEqual({
       items: [
         expect.objectContaining({
-          url: "https://example.com/",
+          url: TEST_ITEM_URL_1,
           id: expect.any(String),
           slug: expect.stringMatching(/^example-com-[a-f0-9]{6}$/),
           metadata: expect.objectContaining({
@@ -744,7 +744,7 @@ describe("POST /api/v1/items", () => {
       body: {
         items: [
           {
-            url: "https://example.com",
+            url: "https://example.com/",
             metadata: {
               author: "Kim2",
               description: "",
@@ -816,7 +816,7 @@ describe("POST /api/v1/items", () => {
     expect(data).toEqual({
       items: [
         expect.objectContaining({
-          url: "https://example.com/",
+          url: TEST_ITEM_URL_1,
           id: expect.any(String),
           slug: expect.stringMatching(/^example-com-[a-f0-9]{6}$/),
           metadata: expect.objectContaining({
