@@ -4,7 +4,7 @@ import {
   useInfiniteQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import React, { createContext, useCallback, useState } from "react";
+import React, { createContext, useCallback, useMemo, useState } from "react";
 
 import {
   type GetItemsRequest,
@@ -32,8 +32,8 @@ export type ItemsContextType = {
   isFetching: boolean;
   isFetchingNextPage: boolean;
   invalidateCache: () => void;
-  optimisticUpdateItem: (item: ItemMetadata) => void;
-  optimisticRemoveItem: (itemId: string) => void;
+  optimisticUpdateItems: (items: ItemMetadata[]) => void;
+  optimisticRemoveItems: (items: ItemMetadata[]) => void;
   loadingError: string | null;
   hasNextPage: boolean;
   fetchItems: (refresh?: boolean, options?: GetItemsRequest) => Promise<void>;
@@ -50,8 +50,8 @@ export const ItemsContext = createContext<ItemsContextType>({
   isFetching: false,
   isFetchingNextPage: false,
   invalidateCache: () => {},
-  optimisticUpdateItem: () => {},
-  optimisticRemoveItem: () => {},
+  optimisticUpdateItems: () => {},
+  optimisticRemoveItems: () => {},
   loadingError: null,
   hasNextPage: true,
   fetchItems: () => Promise.resolve(),
@@ -67,14 +67,14 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     null,
   );
 
-  const serializeOptions = (currentOptions: GetItemsRequest | null): string => {
+  const serializedOptions = useMemo((): string => {
     if (!currentOptions) return "no options";
     const keyedOptions = {
       ...(currentOptions?.filters ? { filters: currentOptions.filters } : {}),
       ...(currentOptions.search ? { search: currentOptions.search } : {}),
     };
     return JSON.stringify(keyedOptions);
-  };
+  }, [currentOptions]);
 
   const {
     data,
@@ -87,7 +87,7 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     error,
   } = useInfiniteQuery<ItemsPage>({
     enabled: !!currentOptions,
-    queryKey: ["items", serializeOptions(currentOptions)],
+    queryKey: ["items", serializedOptions],
     queryFn: async ({ pageParam }): Promise<ItemsPage> => {
       const params = new URLSearchParams(
         Object.fromEntries(
@@ -151,45 +151,53 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     queryClient.invalidateQueries({ queryKey: ["items"] });
   }, [queryClient]);
 
-  const optimisticUpdateItem = useCallback(
-    (updatedItem: ItemMetadata) => {
-      const key = ["items", serializeOptions(currentOptions)];
+  const optimisticUpdateItems = useCallback(
+    (updatedItems: ItemMetadata[]) => {
+      const key = ["items", serializedOptions];
 
       queryClient.setQueryData(key, (oldData: InfiniteData<ItemsPage>) => {
         if (!oldData) return oldData;
+
+        const updatedItemsIds = new Map(
+          updatedItems.map((item) => [item.id, item]),
+        );
 
         const newData = {
           ...oldData,
           pages: oldData.pages.map((page: ItemsPage) => ({
             ...page,
             items: page.items.map((item: ItemMetadata) =>
-              item.id === updatedItem.id ? { ...item, ...updatedItem } : item,
+              updatedItemsIds.get(item.id)
+                ? updatedItemsIds.get(item.id)
+                : item,
             ),
           })),
         };
         return newData;
       });
     },
-    [currentOptions, queryClient, serializeOptions],
+    [queryClient, serializedOptions],
   );
 
-  const optimisticRemoveItem = useCallback(
-    (itemId: string) => {
-      const key = ["items", serializeOptions(currentOptions)];
+  const optimisticRemoveItems = useCallback(
+    (items: ItemMetadata[]) => {
+      const key = ["items", serializedOptions];
 
       queryClient.setQueryData<InfiniteData<ItemsPage>>(key, (oldData) => {
         if (!oldData) return oldData;
+
+        const itemIds = items.map((item) => item.id);
 
         return {
           ...oldData,
           pages: oldData.pages.map((page) => ({
             ...page,
-            items: page.items.filter((item) => item.id !== itemId),
+            items: page.items.filter((item) => !itemIds.includes(item.id)),
           })),
         };
       });
     },
-    [currentOptions, queryClient, serializeOptions],
+    [queryClient, serializedOptions],
   );
 
   const contextValue: ItemsContextType = {
@@ -199,8 +207,8 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     isFetching,
     isFetchingNextPage,
     invalidateCache,
-    optimisticUpdateItem,
-    optimisticRemoveItem,
+    optimisticUpdateItems,
+    optimisticRemoveItems,
     loadingError: error ? error.message || "Error loading items." : null,
     hasNextPage,
     fetchItems,
