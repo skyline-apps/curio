@@ -400,7 +400,7 @@ describe("POST /api/v1/items/[slug]/content", () => {
       UploadStatus.STORED_VERSION,
     ],
   ])("%s", async (_, status) => {
-    uploadItemContent.mockResolvedValue(status);
+    uploadItemContent.mockResolvedValueOnce(status);
     await testDb.db.insert(items).values(MOCK_ITEM);
     await testDb.db.insert(profileItems).values({
       profileId: DEFAULT_TEST_PROFILE_ID,
