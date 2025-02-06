@@ -92,6 +92,13 @@
       "when": 1738745017410,
       "tag": "0012_force stateUpdatedAt",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1738804013073,
+      "tag": "0013_default state_updated_at",
+      "breakpoints": true
     }
   ]
 }
