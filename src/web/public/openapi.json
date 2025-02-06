@@ -122,7 +122,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "nullable": true
+                  "type": "object",
+                  "properties": {
+                    "colorScheme": {
+                      "type": "string",
+                      "enum": [
+                        "auto",
+                        "light",
+                        "dark"
+                      ],
+                      "description": "Color scheme to display."
+                    }
+                  },
+                  "required": [
+                    "colorScheme"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -201,7 +216,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "nullable": true
+                  "type": "object",
+                  "properties": {
+                    "colorScheme": {
+                      "type": "string",
+                      "enum": [
+                        "auto",
+                        "light",
+                        "dark"
+                      ],
+                      "description": "Color scheme to display."
+                    }
+                  },
+                  "required": [
+                    "colorScheme"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -1359,6 +1389,10 @@
                   "url": {
                     "type": "string",
                     "description": "The URL of the item to update."
+                  },
+                  "skipMetadataExtraction": {
+                    "type": "boolean",
+                    "default": false
                   }
                 },
                 "required": [

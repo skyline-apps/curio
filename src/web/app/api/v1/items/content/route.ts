@@ -161,12 +161,23 @@ export async function POST(
       return data.error;
     }
 
-    const { url, htmlContent } = data;
+    const { url, htmlContent, skipMetadataExtraction } = data;
 
     const cleanedUrl = cleanUrl(url);
 
     const item = await db
-      .select()
+      .select({
+        id: items.id,
+        slug: items.slug,
+        url: items.url,
+        metadata: {
+          title: profileItems.title,
+          description: profileItems.description,
+          author: profileItems.author,
+          thumbnail: profileItems.thumbnail,
+          publishedAt: profileItems.publishedAt,
+        },
+      })
       .from(items)
       .innerJoin(profileItems, eq(items.id, profileItems.itemId))
       .where(
@@ -181,10 +192,21 @@ export async function POST(
       return APIResponseJSON({ error: "Item not found." }, { status: 404 });
     }
 
-    const slug = item[0].items.slug;
+    const slug = item[0].slug;
 
     const newDate = new Date();
-    const metadata = await extractMetadata(cleanedUrl, htmlContent);
+    let metadata: ExtractedMetadata;
+    if (skipMetadataExtraction) {
+      metadata = {
+        title: item[0].metadata.title,
+        description: item[0].metadata.description,
+        author: item[0].metadata.author,
+        thumbnail: item[0].metadata.thumbnail,
+        publishedAt: item[0].metadata.publishedAt,
+      };
+    } else {
+      metadata = await extractMetadata(cleanedUrl, htmlContent);
+    }
     const markdownContent = await extractMainContentAsMarkdown(
       cleanedUrl,
       htmlContent,
@@ -198,7 +220,7 @@ export async function POST(
     const response: UpdateItemContentResponse =
       UpdateItemContentResponseSchema.parse({
         status,
-        slug: item[0].items.slug,
+        slug: slug,
         message:
           status === UploadStatus.UPDATED_MAIN
             ? "Content updated and set as main version"
@@ -211,12 +233,12 @@ export async function POST(
       await db
         .update(items)
         .set({ updatedAt: newDate })
-        .where(eq(items.id, item[0].items.id));
+        .where(eq(items.id, item[0].id));
 
       await updateMetadata(
-        item[0].items.url,
+        item[0].url,
         profileResult.profile.id,
-        item[0].items.id,
+        item[0].id,
         metadata,
         newDate,
       );
@@ -230,7 +252,7 @@ export async function POST(
         .from(profileItems)
         .where(
           and(
-            eq(profileItems.itemId, item[0].items.id),
+            eq(profileItems.itemId, item[0].id),
             eq(profileItems.profileId, profileResult.profile.id),
             sql`${profileItems.versionName} IS NULL`,
             sql`${profileItems.savedAt} IS NULL`,
@@ -242,9 +264,9 @@ export async function POST(
       if (profileItem.length > 0) {
         const defaultMetadata = await storage.getItemMetadata(slug);
         await updateMetadata(
-          item[0].items.url,
+          item[0].url,
           profileResult.profile.id,
-          item[0].items.id,
+          item[0].id,
           defaultMetadata,
           newDate,
         );

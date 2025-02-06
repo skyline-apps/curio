@@ -451,6 +451,49 @@ describe("POST /api/v1/items/[slug]/content", () => {
     ).toBe(true);
   });
 
+  it("should return 200 and skip metadata update", async () => {
+    await testDb.db.insert(items).values(MOCK_ITEM);
+    await testDb.db.insert(profileItems).values({
+      profileId: DEFAULT_TEST_PROFILE_ID,
+      itemId: TEST_ITEM_ID,
+      title: "Example",
+      description: "An example item",
+      author: "Test Author",
+      thumbnail: "https://example.com/thumb.jpg",
+      publishedAt: ORIGINAL_PUBLISHED_DATE,
+      stateUpdatedAt: ORIGINAL_CREATION_DATE,
+    });
+
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "POST",
+      body: {
+        url: "https://example.com/",
+        htmlContent: "<div>Test content</div>",
+        skipMetadataExtraction: true,
+      },
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data).toEqual({
+      slug: TEST_ITEM_SLUG,
+      message: "Content updated and set as main version",
+      status: "UPDATED_MAIN",
+    });
+
+    const profileItem = await testDb.db
+      .select()
+      .from(profileItems)
+      .where(eq(profileItems.itemId, TEST_ITEM_ID))
+      .orderBy(desc(profileItems.savedAt));
+
+    expect(profileItem.length).toBe(1);
+
+    expect(profileItem[0].title).toEqual("Example");
+  });
+
   it("should return 500 when content extraction fails", async () => {
     await testDb.db.insert(items).values(MOCK_ITEM);
     await testDb.db.insert(profileItems).values({
