@@ -1,5 +1,5 @@
 "use client";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import React, { createContext, useCallback, useState } from "react";
 
 import {
@@ -24,6 +24,7 @@ export type ItemsContextType = {
   totalItems: number;
   isLoading: boolean;
   isFetching: boolean;
+  invalidateCache: () => void;
   loadingError: string | null;
   hasMore: boolean;
   fetchItems: (refresh?: boolean, options?: GetItemsRequest) => Promise<void>;
@@ -40,6 +41,7 @@ export const ItemsContext = createContext<ItemsContextType>({
   totalItems: 0,
   isLoading: false,
   isFetching: false,
+  invalidateCache: () => {},
   loadingError: null,
   hasMore: true,
   fetchItems: () => Promise.resolve(),
@@ -51,7 +53,7 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
   children,
   initialLimit = 20,
 }: ItemsProviderProps): React.ReactNode => {
-  // TODO: Handle other query options like search filters etc.
+  const queryClient = useQueryClient();
   const [currentOptions, setCurrentOptions] = useState<GetItemsRequest | null>(
     null,
   );
@@ -75,7 +77,6 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     error,
   } = useInfiniteQuery<ItemsPage>({
     enabled: !!currentOptions,
-    gcTime: 0,
     queryKey: ["items", initialLimit, serializeOptions(currentOptions)],
     queryFn: async ({ pageParam }): Promise<ItemsPage> => {
       const params = new URLSearchParams(
@@ -136,11 +137,16 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     }));
   }, []);
 
+  const invalidateCache = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["items"] });
+  }, [queryClient]);
+
   const contextValue: ItemsContextType = {
     items: data?.pages.flatMap((p) => p.items) || [],
     totalItems: data?.pages[0]?.total || 0,
     isLoading,
     isFetching,
+    invalidateCache,
     loadingError: error ? error.message || "Error loading items." : null,
     hasMore: !!hasNextPage,
     fetchItems,
