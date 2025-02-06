@@ -55,7 +55,7 @@ function getLongestPathComponent(path: string): string {
 export function generateSlug(url: string): string {
   try {
     const cleanedUrl = cleanUrl(url);
-    const parsedUrl = new URL(cleanedUrl);
+    const parsedUrl = new URL(cleanedUrl.replace(/~/g, ""));
     // Get domain without protocol and www, limit to 7 words
     const domain = truncateWords(
       parsedUrl.host.replace(/^www\./, "").replace(/\./g, "-"),

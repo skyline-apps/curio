@@ -107,6 +107,18 @@ describe("generateSlug", () => {
     );
   });
 
+  it("handles special characters from URL", () => {
+    expect(generateSlug("https://example.com/~path?query=value")).toMatch(
+      /^example-com-path-[a-f0-9]{6}$/,
+    );
+    expect(generateSlug("https://example.com/🐶")).toMatch(
+      /^example-com-%F0%9F%90%B6-[a-f0-9]{6}$/,
+    );
+    expect(generateSlug("https://zh.wikipedia.org/wiki/中国")).toMatch(
+      /^zh-wikipedia-org-%E4%B8%AD%E5%9B%BD-[a-f0-9]{6}$/,
+    );
+  });
+
   it("uses longest path component for slug", () => {
     const url = "https://url.com/this/is/my/entire-path/preview";
     const slug = generateSlug(url);
