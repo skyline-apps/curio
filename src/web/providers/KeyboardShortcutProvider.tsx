@@ -13,6 +13,7 @@ export type KeyboardShortcutHandler = (event: KeyboardEvent) => boolean | void;
 
 export enum ShortcutType {
   ITEMS = "Items",
+  DEFAULT = "Default",
 }
 
 export interface KeyboardShortcut {
@@ -92,7 +93,7 @@ export const KeyboardShortcutProvider: React.FC<
       id: "shift-?",
       key: "?",
       name: "Show shortcuts",
-      category: "Default",
+      category: ShortcutType.DEFAULT,
       handler: () => {
         setShowKeyboardShortcuts(true);
       },

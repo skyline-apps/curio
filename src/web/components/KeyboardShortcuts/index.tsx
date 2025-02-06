@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 
-import { Kbd } from "@/components/ui/Kbd";
+import { Kbd, type KbdKey } from "@/components/ui/Kbd";
 import Modal, {
   ModalBody,
   ModalContent,
@@ -29,9 +29,9 @@ const KeyboardShortcuts = (): React.ReactElement => {
                   <React.Fragment key={name}>
                     <div className="flex gap-2">
                       {shortcutList.map((shortcut, index) => {
-                        const keys = [];
-                        if (shortcut.conditions.shiftKey) keys.push("shift");
-                        if (shortcut.conditions.ctrlKey) keys.push("ctrl");
+                        const keys: KbdKey[] = [];
+                        if (shortcut.conditions?.shiftKey) keys.push("shift");
+                        if (shortcut.conditions?.ctrlKey) keys.push("ctrl");
                         return (
                           <React.Fragment key={shortcut.key}>
                             <Kbd keys={keys}>{shortcut.key}</Kbd>
