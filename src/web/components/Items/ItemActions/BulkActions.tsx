@@ -38,7 +38,6 @@ const BulkActionButton = <T,>({
   const { fetchItems } = useContext(ItemsContext);
   const { showToast } = useToast();
 
-  // TODO: Clear selection in certain cases after action
   const onPress = useCallback(async () => {
     setPending(true);
     await action()
@@ -52,12 +51,10 @@ const BulkActionButton = <T,>({
       });
   }, [showToast, fetchItems, action]);
 
-  const status = pending ? !isActive : isActive;
-
   return (
     <Button variant="faded" size="sm" onPress={onPress} isLoading={pending}>
-      {status ? activeIcon : icon}
-      {status ? activeText : text}
+      {isActive ? activeIcon || icon : icon}
+      {isActive ? activeText || text : text}
     </Button>
   );
 };
@@ -74,12 +71,14 @@ const BulkActions = (): React.ReactNode => {
   const allArchived = itemStates.every((state) => state === ItemState.ARCHIVED);
   const allDeleted = itemStates.every((state) => state === ItemState.DELETED);
 
+  const itemsToUpdate = items.filter((item) => selectedItems.has(item.slug));
+
   return (
     <div className="flex flex-col gap-2 mx-4">
       <BulkActionButton
         action={() =>
           updateItemsState(
-            Array.from(selectedItems),
+            itemsToUpdate,
             allArchived ? ItemState.ACTIVE : ItemState.ARCHIVED,
           )
         }
@@ -92,7 +91,7 @@ const BulkActions = (): React.ReactNode => {
       <BulkActionButton
         action={() =>
           updateItemsState(
-            Array.from(selectedItems),
+            itemsToUpdate,
             allDeleted ? ItemState.ACTIVE : ItemState.DELETED,
           )
         }

@@ -10,10 +10,8 @@ import {
 } from "react-icons/hi2";
 
 import Button from "@/components/ui/Button";
-import { Dialog, showConfirm } from "@/components/ui/Modal/Dialog";
 import { ItemState } from "@/db/schema";
 import { BrowserMessageContext } from "@/providers/BrowserMessageProvider";
-import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import { ItemMetadata, ItemsContext } from "@/providers/ItemsProvider";
 import { useToast } from "@/providers/ToastProvider";
 import { cn } from "@/utils/cn";
@@ -84,35 +82,9 @@ const ItemActions = ({
   showAdvanced,
   className,
 }: ItemActionsProps): JSX.Element => {
-  const { updateItemsState, updateItemsFavorite } = useItemUpdate();
-  const { clearSelectedItems } = useContext(CurrentItemContext);
-  const { savingItem, saveItemContent } = useContext(BrowserMessageContext);
-  const { optimisticUpdateItem, optimisticRemoveItem } =
-    useContext(ItemsContext);
-
-  // TODO: Invalidate caches here in case item metadata changes
-  const handleRefetch = useCallback(async () => {
-    if (!item?.url) return;
-    if (item.metadata.versionName) {
-      showConfirm(
-        "Are you sure you want to refresh this item? This will erase any notes, highlights, and reading progress.",
-        async () => {
-          try {
-            await saveItemContent(item.url);
-          } catch (error) {
-            log.error("Error refreshing content:", error);
-          }
-        },
-        "Refresh",
-      );
-    } else {
-      try {
-        await saveItemContent(item.url);
-      } catch (error) {
-        log.error("Error refreshing content:", error);
-      }
-    }
-  }, [item?.url, item?.metadata.versionName, saveItemContent]);
+  const { updateItemsState, updateItemsFavorite, refetchItem } =
+    useItemUpdate();
+  const { savingItem } = useContext(BrowserMessageContext);
 
   if (!item) {
     return <></>;
@@ -121,31 +93,22 @@ const ItemActions = ({
   return (
     <div className={cn("flex flex-row gap-1", className)}>
       <ActionButton
-        action={async () => {
-          optimisticUpdateItem({
-            ...item,
-            metadata: {
-              ...item.metadata,
-              isFavorite: !item.metadata.isFavorite,
-            },
-          });
-          return updateItemsFavorite([item.slug], !item.metadata.isFavorite);
-        }}
+        action={async () =>
+          updateItemsFavorite([item], !item.metadata.isFavorite)
+        }
         defaultDisplay={{ text: "Favorite", icon: <HiOutlineStar /> }}
         activeDisplay={{ text: "Unfavorite", icon: <HiStar /> }}
         isActive={item.metadata.isFavorite}
       />
       <ActionButton
-        action={async () => {
-          optimisticRemoveItem(item.id);
-          clearSelectedItems();
-          return updateItemsState(
-            [item.slug],
+        action={async () =>
+          updateItemsState(
+            [item],
             item.metadata.state === ItemState.ARCHIVED
               ? ItemState.ACTIVE
               : ItemState.ARCHIVED,
-          );
-        }}
+          )
+        }
         defaultDisplay={{ text: "Archive", icon: <HiOutlineArchiveBox /> }}
         activeDisplay={{ text: "Unarchive", icon: <HiArchiveBox /> }}
         isActive={item.metadata.state === ItemState.ARCHIVED}
@@ -153,7 +116,7 @@ const ItemActions = ({
       {showAdvanced && (
         <>
           <ActionButton
-            action={handleRefetch}
+            action={async () => refetchItem(item)}
             defaultDisplay={{
               text: "Reload content",
               icon: <HiOutlineArrowPath />,
@@ -161,23 +124,20 @@ const ItemActions = ({
             isLoading={savingItem}
           />
           <ActionButton
-            action={async () => {
-              optimisticRemoveItem(item.id);
-              clearSelectedItems();
-              return updateItemsState(
-                [item.slug],
+            action={async () =>
+              updateItemsState(
+                [item],
                 item.metadata.state === ItemState.DELETED
                   ? ItemState.ACTIVE
                   : ItemState.DELETED,
-              );
-            }}
+              )
+            }
             defaultDisplay={{ text: "Delete", icon: <HiOutlineTrash /> }}
             activeDisplay={{ text: "Restore", icon: <HiTrash /> }}
             isActive={item.metadata.state === ItemState.DELETED}
           />
         </>
       )}
-      <Dialog />
     </div>
   );
 };
