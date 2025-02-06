@@ -223,7 +223,10 @@ export async function POST(
             author: sql`COALESCE(EXCLUDED.author, ${profileItems.author})`,
             thumbnail: sql`COALESCE(EXCLUDED.thumbnail, ${profileItems.thumbnail})`,
             publishedAt: sql`COALESCE(EXCLUDED.published_at, ${profileItems.publishedAt})`,
-            stateUpdatedAt: sql`COALESCE(EXCLUDED.state_updated_at, ${profileItems.stateUpdatedAt})`,
+            stateUpdatedAt: sql`CASE
+              WHEN EXCLUDED.state <> profile_items.state THEN EXCLUDED.state_updated_at
+              ELSE profile_items.state_updated_at
+            END`,
             updatedAt: sql`now()`,
             state: ItemState.ACTIVE,
           },
