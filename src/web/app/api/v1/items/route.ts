@@ -201,10 +201,10 @@ export async function POST(
           publishedAt: item.metadata?.publishedAt
             ? new Date(item.metadata.publishedAt)
             : sql`NULL`,
-          updatedAt: now,
+          updatedAt: new Date(),
           profileId: profileResult.profile.id,
           state: ItemState.ACTIVE,
-          stateUpdatedAt: now,
+          stateUpdatedAt: new Date(),
           itemId,
         };
       });
