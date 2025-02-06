@@ -132,7 +132,9 @@ export const profileItems = pgTable(
     savedAt: timestamp("saved_at", { withTimezone: true }),
     stateUpdatedAt: timestamp("state_updated_at", {
       withTimezone: true,
-    }).notNull(),
+    })
+      .notNull()
+      .defaultNow(),
     lastReadAt: timestamp("last_read_at", { withTimezone: true }),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
