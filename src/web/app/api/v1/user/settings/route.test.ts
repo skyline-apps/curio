@@ -10,92 +10,94 @@ import { testDb } from "@/utils/test/provider";
 
 import { GET, POST } from "./route";
 
-describe("GET /api/v1/user/settings", () => {
-  beforeEach(async () => {
-    await testDb
-      .update(profiles)
-      .set({
+describe("/api/v1/user/settings", () => {
+  describe("GET /api/v1/user/settings", () => {
+    beforeEach(async () => {
+      await testDb
+        .update(profiles)
+        .set({
+          colorScheme: ColorScheme.DARK,
+        })
+        .where(eq(profiles.id, DEFAULT_TEST_PROFILE_ID));
+    });
+
+    it("should return 200 with the user's current color scheme", async () => {
+      const request: APIRequest = makeAuthenticatedMockRequest();
+
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      const result = await response.json();
+      expect(result).toEqual({
         colorScheme: ColorScheme.DARK,
-      })
-      .where(eq(profiles.id, DEFAULT_TEST_PROFILE_ID));
-  });
-
-  it("should return 200 with the user's current color scheme", async () => {
-    const request: APIRequest = makeAuthenticatedMockRequest();
-
-    const response = await GET(request);
-    expect(response.status).toBe(200);
-
-    const result = await response.json();
-    expect(result).toEqual({
-      colorScheme: ColorScheme.DARK,
+      });
     });
   });
-});
 
-describe("POST /api/v1/user/settings", () => {
-  it("should return 200 when successfully updating the user's color scheme", async () => {
-    const colorScheme = ColorScheme.LIGHT;
-    const request: APIRequest = makeAuthenticatedMockRequest({
-      body: { colorScheme },
+  describe("POST /api/v1/user/settings", () => {
+    it("should return 200 when successfully updating the user's color scheme", async () => {
+      const colorScheme = ColorScheme.LIGHT;
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        body: { colorScheme },
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+
+      const result = await response.json();
+      expect(result).toEqual({
+        colorScheme,
+      });
+
+      const profile = await testDb.db.query.profiles.findFirst({
+        where: eq(profiles.id, DEFAULT_TEST_PROFILE_ID),
+      });
+      expect(profile?.colorScheme).toBe(colorScheme);
     });
 
-    const response = await POST(request);
-    expect(response.status).toBe(200);
+    it("should return 400 if the settings object is invalid", async () => {
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        body: { invalidSetting: "hi" },
+      });
 
-    const result = await response.json();
-    expect(result).toEqual({
-      colorScheme,
+      const response = await POST(request);
+      expect(response.status).toBe(400);
+
+      const result = await response.json();
+      expect(result.error).toEqual(
+        "Invalid request parameters:\nUnrecognized key(s) in object: 'invalidSetting'",
+      );
     });
 
-    const profile = await testDb.db.query.profiles.findFirst({
-      where: eq(profiles.id, DEFAULT_TEST_PROFILE_ID),
-    });
-    expect(profile?.colorScheme).toBe(colorScheme);
-  });
+    it("should return 400 if the color scheme choice is invalid", async () => {
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        body: { colorScheme: "bad color" },
+      });
 
-  it("should return 400 if the settings object is invalid", async () => {
-    const request: APIRequest = makeAuthenticatedMockRequest({
-      body: { invalidSetting: "hi" },
-    });
+      const response = await POST(request);
+      expect(response.status).toBe(400);
 
-    const response = await POST(request);
-    expect(response.status).toBe(400);
-
-    const result = await response.json();
-    expect(result.error).toEqual(
-      "Invalid request parameters:\nUnrecognized key(s) in object: 'invalidSetting'",
-    );
-  });
-
-  it("should return 400 if the color scheme choice is invalid", async () => {
-    const request: APIRequest = makeAuthenticatedMockRequest({
-      body: { colorScheme: "bad color" },
+      const result = await response.json();
+      expect(result.error).toEqual(
+        "Invalid request parameters:\ncolorScheme: Invalid enum value. Expected 'auto' | 'light' | 'dark', received 'bad color'",
+      );
     });
 
-    const response = await POST(request);
-    expect(response.status).toBe(400);
+    test("should return 500 if database error in update", async () => {
+      jest.spyOn(testDb.db, "update").mockImplementationOnce(() => {
+        throw { code: DbErrorCode.ConnectionFailure };
+      });
 
-    const result = await response.json();
-    expect(result.error).toEqual(
-      "Invalid request parameters:\ncolorScheme: Invalid enum value. Expected 'auto' | 'light' | 'dark', received 'bad color'",
-    );
-  });
+      const colorScheme = ColorScheme.LIGHT;
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        body: { colorScheme },
+      });
 
-  test("should return 500 if database error in update", async () => {
-    jest.spyOn(testDb.db, "update").mockImplementationOnce(() => {
-      throw { code: DbErrorCode.ConnectionFailure };
+      const response = await POST(request);
+      expect(response.status).toBe(500);
+
+      const result = await response.json();
+      expect(result.error).toBe("Error updating settings.");
     });
-
-    const colorScheme = ColorScheme.LIGHT;
-    const request: APIRequest = makeAuthenticatedMockRequest({
-      body: { colorScheme },
-    });
-
-    const response = await POST(request);
-    expect(response.status).toBe(500);
-
-    const result = await response.json();
-    expect(result.error).toBe("Error updating settings.");
   });
 });
