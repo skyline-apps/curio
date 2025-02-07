@@ -74,6 +74,7 @@ export async function GET(
         or(
           search ? ilike(profileItems.title, `%${search}%`) : undefined,
           search ? ilike(profileItems.description, `%${search}%`) : undefined,
+          search ? ilike(items.url, `%${search}%`) : undefined,
         ),
       );
     }

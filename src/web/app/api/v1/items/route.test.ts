@@ -404,6 +404,27 @@ describe("GET /api/v1/items", () => {
     expect(data.total).toBe(2);
   });
 
+  it("should return 200 when searching across url", async () => {
+    await testDb.db.insert(items).values(MOCK_ITEMS);
+    await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+    const params = new URLSearchParams({
+      search: "https://example.com",
+    });
+
+    const request = makeAuthenticatedMockRequest({
+      method: "GET",
+      url: `http://localhost:3000/api/v1/items?${params.toString()}`,
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data.items).toHaveLength(1);
+    expect(data.items[0].id).toBe(TEST_ITEM_ID);
+    expect(data.total).toBe(1);
+  });
+
   it("should return 200 when combining filters and search", async () => {
     await testDb.db.insert(items).values(MOCK_ITEMS);
     await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
