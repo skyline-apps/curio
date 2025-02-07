@@ -65,7 +65,7 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
 export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   children,
 }: CurrentItemProviderProps): React.ReactNode => {
-  const [currentItemSlug, setCurrentItemSlug] = useState<string | null>(null);
+  const [itemLoadedSlug, setItemLoadedSlug] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [lastSelectionIndex, setLastSelectionIndex] = useState<number | null>(
@@ -77,7 +77,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
 
   const clearSelectedItems = (): void => {
     setSelectedItems(new Set());
-    setCurrentItemSlug(null);
+    setItemLoadedSlug(null);
     setSidebarOpen(false);
     setLastSelectionIndex(null);
     setInSelectionMode(false);
@@ -127,12 +127,12 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   );
 
   const { data, isLoading, error, refetch } = useQuery<Item>({
-    enabled: !!currentItemSlug,
-    queryKey: ["itemContent", currentItemSlug],
+    enabled: !!itemLoadedSlug,
+    queryKey: ["itemContent", itemLoadedSlug],
     queryFn: async (): Promise<Item> => {
-      if (!currentItemSlug) throw new Error("No item to fetch");
+      if (!itemLoadedSlug) throw new Error("No item to fetch");
       const searchParams = new URLSearchParams({
-        slug: currentItemSlug,
+        slug: itemLoadedSlug,
       });
       const result = await fetch(
         `/api/v1/items/content?${searchParams.toString()}`,
@@ -145,7 +145,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
       ).then(handleAPIResponse<GetItemContentResponse>);
       if (!result || "error" in result) {
         log.error(
-          `Failed to fetch item content for ${currentItemSlug}`,
+          `Failed to fetch item content for ${itemLoadedSlug}`,
           result?.error,
         );
         throw new Error(`Failed to fetch item content`);
@@ -163,23 +163,23 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
 
   const fetchContent = useCallback(
     async (slug: string, refresh?: boolean): Promise<void> => {
-      if (slug === currentItemSlug) {
+      if (slug === itemLoadedSlug) {
         if (!refresh) {
           return;
         } else {
           await refetch();
         }
       }
-      setCurrentItemSlug(slug);
+      setItemLoadedSlug(slug);
     },
-    [currentItemSlug, refetch],
+    [itemLoadedSlug, refetch],
   );
 
   const firstItem =
     selectedItems.size === 1 ? selectedItems.values().next().value : null;
 
   const currentItem = useMemo(() => {
-    if (currentItemSlug) {
+    if (itemLoadedSlug) {
       if (!data?.item && firstItem) {
         return items.find((item) => item.slug === firstItem) || null;
       }
@@ -188,15 +188,11 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
       return items.find((item) => item.slug === firstItem) || null;
     }
     return null;
-  }, [items, data, currentItemSlug, firstItem]);
+  }, [items, data, itemLoadedSlug, firstItem]);
 
   const loadedItem = useMemo(() => {
-    if (!currentItem) return null;
-    return {
-      item: currentItem,
-      content: data?.content,
-    };
-  }, [data, currentItem]);
+    return data || null;
+  }, [data]);
 
   return (
     <CurrentItemContext.Provider

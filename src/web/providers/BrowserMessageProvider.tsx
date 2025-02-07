@@ -58,7 +58,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
   const [savingItem, setSavingItem] = useState<boolean>(false);
   const [savingError, setSavingError] = useState<string | null>(null);
   const { fetchItems } = useContext(ItemsContext);
-  const { fetchContent } = useContext(CurrentItemContext);
+  const { fetchContent, loadedItem } = useContext(CurrentItemContext);
   const { showToast } = useToast();
   const listeners = useMemo(() => new Set<(event: MessageEvent) => void>(), []);
   const installationCallback = useRef<((success: boolean) => void) | null>(
@@ -141,7 +141,9 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
           return;
         }
         fetchItems(true);
-        fetchContent(event.data.data.slug, true);
+        if (loadedItem?.item.slug === event.data.data.slug) {
+          fetchContent(event.data.data.slug, true);
+        }
         showToast(
           <div className="flex gap-2 items-center">
             Item successfully saved!
@@ -162,7 +164,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
         listeners.forEach((listener) => listener(event));
       }
     },
-    [showToast, fetchItems, listeners, fetchContent],
+    [showToast, fetchItems, listeners, fetchContent, loadedItem],
   );
 
   useEffect(() => {
