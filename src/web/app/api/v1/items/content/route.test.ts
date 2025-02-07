@@ -386,6 +386,7 @@ describe("POST /api/v1/items/content", () => {
       favicon: "https://example.com/favicon.ico",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
       stateUpdatedAt: ORIGINAL_CREATION_DATE,
+      readingProgress: 20,
       versionName: "2010-04-04",
     });
 
@@ -455,7 +456,48 @@ describe("POST /api/v1/items/content", () => {
     expect(updatedProfileItem[0].thumbnail).toEqual(MOCK_METADATA.thumbnail);
     expect(updatedProfileItem[0].favicon).toEqual(MOCK_METADATA.favicon);
     expect(updatedProfileItem[0].publishedAt).toEqual(ORIGINAL_PUBLISHED_DATE);
+  });
+
+  it("should return 200 and overwrite previous reading state when content updated", async () => {
+    await testDb.db.insert(items).values(MOCK_ITEM);
+    await testDb.db.insert(profileItems).values({
+      profileId: DEFAULT_TEST_PROFILE_ID,
+      itemId: TEST_ITEM_ID,
+      title: "Example",
+      description: "An example item",
+      author: "Test Author",
+      thumbnail: "https://example.com/thumb.jpg",
+      favicon: "https://example.com/favicon.ico",
+      publishedAt: ORIGINAL_PUBLISHED_DATE,
+      stateUpdatedAt: ORIGINAL_CREATION_DATE,
+      readingProgress: 20,
+      versionName: "2010-04-04",
+    });
+
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "POST",
+      body: {
+        url: TEST_ITEM_URL,
+        htmlContent: "<div>Test content</div>",
+      },
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data).toEqual({
+      slug: TEST_ITEM_SLUG,
+      message: "Content updated and set as main version",
+      status: "UPDATED_MAIN",
+    });
+    const updatedProfileItem = await testDb.db
+      .select()
+      .from(profileItems)
+      .where(eq(profileItems.itemId, TEST_ITEM_ID))
+      .limit(1);
     expect(updatedProfileItem[0].versionName).toEqual(null);
+    expect(updatedProfileItem[0].readingProgress).toEqual(0);
   });
 
   it("should return 200 even when content URL does not match exactly", async () => {
@@ -620,7 +662,50 @@ describe("POST /api/v1/items/content", () => {
     ).toBe(true);
   });
 
-  it("should return 200 and skip metadata update", async () => {
+  it("should return 200 without overwrite previous reading state when content not updated", async () => {
+    uploadItemContent.mockResolvedValueOnce(UploadStatus.STORED_VERSION);
+    await testDb.db.insert(items).values(MOCK_ITEM);
+    await testDb.db.insert(profileItems).values({
+      profileId: DEFAULT_TEST_PROFILE_ID,
+      itemId: TEST_ITEM_ID,
+      title: "Example",
+      description: "An example item",
+      author: "Test Author",
+      thumbnail: "https://example.com/thumb.jpg",
+      favicon: "https://example.com/favicon.ico",
+      publishedAt: ORIGINAL_PUBLISHED_DATE,
+      stateUpdatedAt: ORIGINAL_CREATION_DATE,
+      readingProgress: 20,
+      versionName: "2010-04-04",
+    });
+
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "POST",
+      body: {
+        url: TEST_ITEM_URL,
+        htmlContent: "<div>Test content</div>",
+      },
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data).toEqual({
+      slug: TEST_ITEM_SLUG,
+      message: "Content updated",
+      status: UploadStatus.STORED_VERSION,
+    });
+    const updatedProfileItem = await testDb.db
+      .select()
+      .from(profileItems)
+      .where(eq(profileItems.itemId, TEST_ITEM_ID))
+      .limit(1);
+    expect(updatedProfileItem[0].versionName).toEqual("2010-04-04");
+    expect(updatedProfileItem[0].readingProgress).toEqual(20);
+  });
+
+  it("should return 200 and skip metadata update when configured", async () => {
     await testDb.db.insert(items).values(MOCK_ITEM);
     await testDb.db.insert(profileItems).values({
       profileId: DEFAULT_TEST_PROFILE_ID,

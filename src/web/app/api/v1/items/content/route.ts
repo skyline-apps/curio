@@ -160,6 +160,7 @@ async function updateMetadata(
       thumbnail: metadata.thumbnail,
       favicon: metadata.favicon,
       publishedAt: metadata.publishedAt ? new Date(metadata.publishedAt) : null,
+      readingProgress: 0,
       versionName: null,
     })
     .where(
