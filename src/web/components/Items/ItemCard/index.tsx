@@ -69,7 +69,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
       <div className="flex flex-row gap-2 justify-between items-start w-full">
         <div className="grow h-full block overflow-hidden">
           <div className="flex flex-row gap-2 items-center">
-            <div className="flex items-center justify-center w-4 h-4">
+            <div className="flex shrink-0 items-center justify-center w-4 h-4">
               <Favicon url={item.metadata.favicon} />
             </div>
             <Link
