@@ -3,7 +3,6 @@ import { useParams } from "next/navigation";
 import React, { useContext, useEffect } from "react";
 
 import Article from "@/components/Article";
-import Spinner from "@/components/ui/Spinner";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 
 const ItemPage: React.FC = () => {
@@ -23,9 +22,7 @@ const ItemPage: React.FC = () => {
 
   return (
     <div className="flex-1 w-full h-full flex flex-col">
-      {loading ? (
-        <Spinner centered />
-      ) : loadedItem ? (
+      {!loading && loadedItem ? (
         <div className="w-full lg:w-4xl max-w-4xl mx-auto">
           <h1 className="text-lg font-medium mb-2">{metadata?.title}</h1>
           {loadingError ? (
