@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import Thumbnail from "@/components/Image/Thumbnail";
 import ItemActions from "@/components/Items/ItemActions";
 import type { ItemMetadata } from "@/providers/ItemsProvider";
 
@@ -21,15 +22,10 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
 
   return (
     <div className="flex-1">
-      {metadata.thumbnail && (
-        <div className="w-full h-48 p-2">
-          <img
-            alt="item thumbnail"
-            className="object-contain w-full h-full"
-            src={metadata.thumbnail}
-          />
-        </div>
-      )}
+      <Thumbnail
+        key={metadata.thumbnail}
+        thumbnail={metadata.thumbnail ? metadata.thumbnail : undefined}
+      />
       <div className="px-4 py-2 overflow-x-hidden">
         <div className="flex items-start justify-between">
           <Link className="hover:underline" href={`/items/${item.slug}`}>
