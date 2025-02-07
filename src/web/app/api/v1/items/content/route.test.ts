@@ -386,6 +386,7 @@ describe("POST /api/v1/items/content", () => {
       favicon: "https://example.com/favicon.ico",
       publishedAt: ORIGINAL_PUBLISHED_DATE,
       stateUpdatedAt: ORIGINAL_CREATION_DATE,
+      versionName: "2010-04-04",
     });
 
     const request: APIRequest = makeAuthenticatedMockRequest({
@@ -454,6 +455,7 @@ describe("POST /api/v1/items/content", () => {
     expect(updatedProfileItem[0].thumbnail).toEqual(MOCK_METADATA.thumbnail);
     expect(updatedProfileItem[0].favicon).toEqual(MOCK_METADATA.favicon);
     expect(updatedProfileItem[0].publishedAt).toEqual(ORIGINAL_PUBLISHED_DATE);
+    expect(updatedProfileItem[0].versionName).toEqual(null);
   });
 
   it("should return 200 even when content URL does not match exactly", async () => {

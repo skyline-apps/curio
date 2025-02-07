@@ -27,7 +27,7 @@ const FilterSchema = z
       .strict(),
   );
 
-const ItemMetadataSchema = z
+const ItemMetadataBaseSchema = z
   .object({
     title: z.string().max(255).describe("The title of the item."),
     description: z
@@ -42,34 +42,6 @@ const ItemMetadataSchema = z
       .nullable()
       .optional()
       .describe("The author of the item."),
-    thumbnail: z
-      .string()
-      .max(2048)
-      .nullable()
-      .optional()
-      .transform((val) => {
-        if (!val) return null;
-        try {
-          return val ? new URL(val).toString() : null;
-        } catch {
-          return null;
-        }
-      })
-      .describe("The thumbnail URL of the item."),
-    favicon: z
-      .string()
-      .max(2048)
-      .nullable()
-      .optional()
-      .transform((val) => {
-        if (!val) return null;
-        try {
-          return val ? new URL(val).toString() : null;
-        } catch {
-          return null;
-        }
-      })
-      .describe("The favicon URL of the item."),
     publishedAt: dateType
       .nullable()
       .optional()
@@ -110,6 +82,39 @@ const ItemMetadataSchema = z
       .describe("The version name of the item."),
   })
   .strict();
+
+const ItemMetadataSchema = ItemMetadataBaseSchema.merge(
+  z.object({
+    thumbnail: z
+      .string()
+      .max(2048)
+      .nullable()
+      .optional()
+      .transform((val) => {
+        if (!val) return null;
+        try {
+          return val ? new URL(val).toString() : null;
+        } catch {
+          return null;
+        }
+      })
+      .describe("The thumbnail URL of the item."),
+    favicon: z
+      .string()
+      .max(2048)
+      .nullable()
+      .optional()
+      .transform((val) => {
+        if (!val) return null;
+        try {
+          return val ? new URL(val).toString() : null;
+        } catch {
+          return null;
+        }
+      })
+      .describe("The favicon URL of the item."),
+  }),
+).strict();
 
 export const ItemResultSchema = z
   .object({
@@ -178,12 +183,31 @@ export const GetItemsResponseSchema = z.object({
 });
 export type GetItemsResponse = z.infer<typeof GetItemsResponseSchema>;
 
+const ItemMetadataUpdateSchema = ItemMetadataSchema.merge(
+  z.object({
+    thumbnail: z
+      .string()
+      .url()
+      .max(2048)
+      .nullable()
+      .optional()
+      .describe("The thumbnail URL of the item."),
+    favicon: z
+      .string()
+      .url()
+      .max(2048)
+      .nullable()
+      .optional()
+      .describe("The favicon URL of the item."),
+  }),
+).strict();
+
 export const CreateOrUpdateItemsRequestSchema = z.object({
   items: z.array(
     z
       .object({
         url: UrlSchema,
-        metadata: ItemMetadataSchema.partial().optional(),
+        metadata: ItemMetadataUpdateSchema.partial().optional(),
       })
       .strict(),
   ),
