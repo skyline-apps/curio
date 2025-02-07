@@ -2,10 +2,10 @@ import Link from "next/link";
 
 import Thumbnail from "@/components/Image/Thumbnail";
 import ItemActions from "@/components/Items/ItemActions";
-import type { ItemMetadata } from "@/providers/ItemsProvider";
+import type { Item } from "@/providers/ItemsProvider";
 
 interface ItemMetadataProps {
-  item?: ItemMetadata;
+  item?: Item;
 }
 
 const ItemMetadata: React.FC<ItemMetadataProps> = ({

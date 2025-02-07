@@ -71,7 +71,7 @@ const BulkActions = (): React.ReactNode => {
   const allArchived = itemStates.every((state) => state === ItemState.ARCHIVED);
   const allDeleted = itemStates.every((state) => state === ItemState.DELETED);
 
-  const itemsToUpdate = items.filter((item) => selectedItems.has(item.slug));
+  const itemsToUpdate = Array.from(selectedItems);
 
   return (
     <div className="flex flex-col gap-2 mx-4">

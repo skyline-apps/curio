@@ -1,9 +1,5 @@
 "use client";
-import {
-  InfiniteData,
-  useInfiniteQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import React, { createContext, useCallback, useMemo, useState } from "react";
 
 import {
@@ -18,22 +14,22 @@ const log = createLogger("items-provider");
 
 export const ITEMS_BATCH_SIZE = 20;
 
-export type ItemMetadata = ItemResult;
-interface ItemsPage {
-  items: ItemMetadata[];
+export const ITEMS_QUERY_KEY = "items";
+
+export type Item = ItemResult;
+
+export interface ItemsPage {
+  items: Item[];
   total: number;
   nextCursor?: string;
 }
 
 export type ItemsContextType = {
-  items: ItemMetadata[];
+  items: Item[];
   totalItems: number;
   isLoading: boolean;
   isFetching: boolean;
   isFetchingNextPage: boolean;
-  invalidateCache: () => void;
-  optimisticUpdateItems: (items: ItemMetadata[]) => void;
-  optimisticRemoveItems: (items: ItemMetadata[]) => void;
   loadingError: string | null;
   hasNextPage: boolean;
   fetchItems: (refresh?: boolean, options?: GetItemsRequest) => Promise<void>;
@@ -49,9 +45,6 @@ export const ItemsContext = createContext<ItemsContextType>({
   isLoading: false,
   isFetching: false,
   isFetchingNextPage: false,
-  invalidateCache: () => {},
-  optimisticUpdateItems: () => {},
-  optimisticRemoveItems: () => {},
   loadingError: null,
   hasNextPage: true,
   fetchItems: () => Promise.resolve(),
@@ -62,7 +55,6 @@ export const ItemsContext = createContext<ItemsContextType>({
 export const ItemsProvider: React.FC<ItemsProviderProps> = ({
   children,
 }: ItemsProviderProps): React.ReactNode => {
-  const queryClient = useQueryClient();
   const [currentOptions, setCurrentOptions] = useState<GetItemsRequest | null>(
     null,
   );
@@ -147,68 +139,12 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     }));
   }, []);
 
-  const invalidateCache = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ["items"] });
-  }, [queryClient]);
-
-  const optimisticUpdateItems = useCallback(
-    (updatedItems: ItemMetadata[]) => {
-      const key = ["items", serializedOptions];
-
-      queryClient.setQueryData(key, (oldData: InfiniteData<ItemsPage>) => {
-        if (!oldData) return oldData;
-
-        const updatedItemsIds = new Map(
-          updatedItems.map((item) => [item.id, item]),
-        );
-
-        const newData = {
-          ...oldData,
-          pages: oldData.pages.map((page: ItemsPage) => ({
-            ...page,
-            items: page.items.map((item: ItemMetadata) =>
-              updatedItemsIds.get(item.id)
-                ? updatedItemsIds.get(item.id)
-                : item,
-            ),
-          })),
-        };
-        return newData;
-      });
-    },
-    [queryClient, serializedOptions],
-  );
-
-  const optimisticRemoveItems = useCallback(
-    (items: ItemMetadata[]) => {
-      const key = ["items", serializedOptions];
-
-      queryClient.setQueryData<InfiniteData<ItemsPage>>(key, (oldData) => {
-        if (!oldData) return oldData;
-
-        const itemIds = items.map((item) => item.id);
-
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page) => ({
-            ...page,
-            items: page.items.filter((item) => !itemIds.includes(item.id)),
-          })),
-        };
-      });
-    },
-    [queryClient, serializedOptions],
-  );
-
   const contextValue: ItemsContextType = {
     items: data?.pages.flatMap((p) => p.items) || [],
     totalItems: data?.pages[0]?.total || 0,
     isLoading,
     isFetching,
     isFetchingNextPage,
-    invalidateCache,
-    optimisticUpdateItems,
-    optimisticRemoveItems,
     loadingError: error ? error.message || "Error loading items." : null,
     hasNextPage,
     fetchItems,

@@ -9,24 +9,26 @@ import React, {
 } from "react";
 
 import { GetItemContentResponse } from "@/app/api/v1/items/content/validation";
-import { ItemMetadata, ItemsContext } from "@/providers/ItemsProvider";
+import { Item, ItemsContext } from "@/providers/ItemsProvider";
 import { handleAPIResponse } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
 
 const log = createLogger("current-item-provider");
 
-export type Item = Omit<
+export type ItemWithContent = Omit<
   Exclude<GetItemContentResponse, { error: string }>,
   "content"
 > & {
   content?: string;
 };
 
+export const ITEM_CONTENT_QUERY_KEY = "itemContent";
+
 export type CurrentItemContextType = {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
-  currentItem: ItemMetadata | null; // Metadata of currently loaded or selected item
-  loadedItem: Item | null; // Contents of currently loaded item
+  currentItem: Item | null; // Metadata of currently loaded or selected item
+  loadedItem: ItemWithContent | null; // Contents of currently loaded item
   selectedItems: Set<string>; // All selected item slugs
   selectItems: (
     slugs: string[],
@@ -126,10 +128,10 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     [items, lastSelectionIndex, selectedItems, inSelectionMode],
   );
 
-  const { data, isLoading, error, refetch } = useQuery<Item>({
+  const { data, isLoading, error, refetch } = useQuery<ItemWithContent>({
     enabled: !!itemLoadedSlug,
-    queryKey: ["itemContent", itemLoadedSlug],
-    queryFn: async (): Promise<Item> => {
+    queryKey: [ITEM_CONTENT_QUERY_KEY, itemLoadedSlug],
+    queryFn: async (): Promise<ItemWithContent> => {
       if (!itemLoadedSlug) throw new Error("No item to fetch");
       const searchParams = new URLSearchParams({
         slug: itemLoadedSlug,
@@ -168,6 +170,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
           return;
         } else {
           await refetch();
+          return;
         }
       }
       setItemLoadedSlug(slug);

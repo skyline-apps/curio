@@ -7,8 +7,9 @@ import { UpdateStateResponse } from "@/app/api/v1/items/state/validation";
 import { showConfirm } from "@/components/ui/Modal/Dialog";
 import { ItemState } from "@/db/schema";
 import { BrowserMessageContext } from "@/providers/BrowserMessageProvider";
+import { useCache } from "@/providers/CacheProvider";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
-import { ItemMetadata, ItemsContext } from "@/providers/ItemsProvider";
+import { Item } from "@/providers/ItemsProvider";
 import { handleAPIResponse } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
 
@@ -16,34 +17,34 @@ const log = createLogger("item-actions");
 
 interface UseItemUpdate {
   updateItemsState: (
-    items: ItemMetadata[],
+    itemSlugs: string[],
     state: ItemState,
   ) => Promise<UpdateStateResponse>;
   updateItemsFavorite: (
-    items: ItemMetadata[],
+    itemSlugs: string[],
     favorite: boolean,
   ) => Promise<UpdateFavoriteResponse>;
-  refetchItem: (item: ItemMetadata) => Promise<void>;
+  refetchItem: (item: Item) => Promise<void>;
 }
 
 export const useItemUpdate = (): UseItemUpdate => {
   const { invalidateCache, optimisticUpdateItems, optimisticRemoveItems } =
-    useContext(ItemsContext);
+    useCache();
   const { clearSelectedItems } = useContext(CurrentItemContext);
   const { saveItemContent } = useContext(BrowserMessageContext);
 
   const updateItemsStateMutationOptions: UseMutationOptions<
     UpdateStateResponse,
     Error,
-    { items: ItemMetadata[]; state: ItemState }
+    { itemSlugs: string[]; state: ItemState }
   > = {
-    mutationFn: async ({ items, state }) => {
-      optimisticRemoveItems(items);
+    mutationFn: async ({ itemSlugs, state }) => {
+      optimisticRemoveItems(itemSlugs);
 
       return await fetch("/api/v1/items/state", {
         method: "POST",
         body: JSON.stringify({
-          slugs: items.map((item) => item.slug).join(","),
+          slugs: itemSlugs.join(","),
           state,
         }),
       }).then(handleAPIResponse<UpdateStateResponse>);
@@ -57,13 +58,12 @@ export const useItemUpdate = (): UseItemUpdate => {
   const updateItemsFavoriteMutationOptions: UseMutationOptions<
     UpdateFavoriteResponse,
     Error,
-    { items: ItemMetadata[]; favorite: boolean }
+    { itemSlugs: string[]; favorite: boolean }
   > = {
-    mutationFn: async ({ items, favorite }) => {
-      const newItems = items.map((item) => ({
-        ...item,
+    mutationFn: async ({ itemSlugs, favorite }) => {
+      const newItems = itemSlugs.map((slug) => ({
+        slug,
         metadata: {
-          ...item.metadata,
           isFavorite: favorite,
         },
       }));
@@ -72,7 +72,7 @@ export const useItemUpdate = (): UseItemUpdate => {
       return await fetch("/api/v1/items/favorite", {
         method: "POST",
         body: JSON.stringify({
-          slugs: items.map((item) => item.slug).join(","),
+          slugs: itemSlugs.join(","),
           favorite,
         }),
       }).then(handleAPIResponse<UpdateFavoriteResponse>);
@@ -85,7 +85,7 @@ export const useItemUpdate = (): UseItemUpdate => {
   const updateItemContentMutationOptions: UseMutationOptions<
     void,
     Error,
-    { item: ItemMetadata }
+    { item: Item }
   > = {
     mutationFn: async ({ item }) => {
       if (!item?.url) return;
@@ -109,9 +109,6 @@ export const useItemUpdate = (): UseItemUpdate => {
         }
       }
     },
-    onSuccess: () => {
-      invalidateCache();
-    },
   };
 
   const updateItemsStateMutation = useMutation(updateItemsStateMutationOptions);
@@ -123,26 +120,26 @@ export const useItemUpdate = (): UseItemUpdate => {
   );
 
   const updateItemsState = async (
-    items: ItemMetadata[],
+    itemSlugs: string[],
     state: ItemState,
   ): Promise<UpdateStateResponse> => {
     return await updateItemsStateMutation.mutateAsync({
-      items,
+      itemSlugs,
       state,
     });
   };
 
   const updateItemsFavorite = async (
-    items: ItemMetadata[],
+    itemSlugs: string[],
     favorite: boolean,
   ): Promise<UpdateFavoriteResponse> => {
     return await updateItemsFavoriteMutation.mutateAsync({
-      items,
+      itemSlugs,
       favorite,
     });
   };
 
-  const refetchItem = async (item: ItemMetadata): Promise<void> => {
+  const refetchItem = async (item: Item): Promise<void> => {
     return await updateItemContentMutation.mutateAsync({ item });
   };
 

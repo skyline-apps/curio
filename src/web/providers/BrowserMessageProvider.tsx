@@ -14,6 +14,7 @@ import Button from "@/components/ui/Button";
 import { useToast } from "@/providers/ToastProvider";
 import { createLogger } from "@/utils/logger";
 
+import { useCache } from "./CacheProvider";
 import { CurrentItemContext } from "./CurrentItemProvider";
 import { ItemsContext } from "./ItemsProvider";
 
@@ -55,6 +56,7 @@ const SAVE_TIMEOUT_MS = 10000;
 export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
   children,
 }: BrowserMessageProviderProps) => {
+  const { invalidateCache } = useCache();
   const [savingItem, setSavingItem] = useState<boolean>(false);
   const [savingError, setSavingError] = useState<string | null>(null);
   const { fetchItems } = useContext(ItemsContext);
@@ -143,6 +145,8 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
         fetchItems(true);
         if (loadedItem?.item.slug === event.data.data.slug) {
           fetchContent(event.data.data.slug, true);
+        } else {
+          invalidateCache(event.data.data.slug);
         }
         showToast(
           <div className="flex gap-2 items-center">
@@ -164,7 +168,14 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
         listeners.forEach((listener) => listener(event));
       }
     },
-    [showToast, fetchItems, listeners, fetchContent, loadedItem],
+    [
+      showToast,
+      fetchItems,
+      listeners,
+      fetchContent,
+      loadedItem,
+      invalidateCache,
+    ],
   );
 
   useEffect(() => {

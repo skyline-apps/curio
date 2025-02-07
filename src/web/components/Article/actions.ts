@@ -3,8 +3,8 @@ import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { useContext } from "react";
 
 import { ReadItemResponse } from "@/app/api/v1/items/read/validation";
+import { useCache } from "@/providers/CacheProvider";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
-import { ItemsContext } from "@/providers/ItemsProvider";
 import { handleAPIResponse } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
 
@@ -16,7 +16,7 @@ interface UseArticleUpdate {
 
 export const useArticleUpdate = (): UseArticleUpdate => {
   const { loadedItem } = useContext(CurrentItemContext);
-  const { optimisticUpdateItems } = useContext(ItemsContext);
+  const { optimisticUpdateItems } = useCache();
 
   const updateReadingProgressMutationOptions: UseMutationOptions<
     ReadItemResponse,
@@ -48,8 +48,8 @@ export const useArticleUpdate = (): UseArticleUpdate => {
     }
     optimisticUpdateItems([
       {
-        ...loadedItem.item,
-        metadata: { ...loadedItem.item.metadata, readingProgress },
+        slug: loadedItem.item.slug,
+        metadata: { readingProgress, lastReadAt: new Date().toISOString() },
       },
     ]);
     return await updateReadingProgressMutation.mutateAsync({
