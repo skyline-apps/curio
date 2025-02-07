@@ -130,20 +130,22 @@ const ItemList: React.FC<ItemListProps> = ({}: ItemListProps) => {
                       Loading more...
                     </div>
                   ) : (
-                    <div
-                      key="no-more"
-                      className="absolute left-0 top-0 w-full flex gap-2 items-center justify-center text-secondary-800 text-sm py-4"
-                      style={{
-                        height: `${virtualRow.size}px`,
-                        transform: `translateY(${virtualRow.start}px)`,
-                      }}
-                    >
-                      <p>You&apos;re all caught up!</p>
-                      <Icon
-                        className="text-secondary-800"
-                        icon={<LuPartyPopper />}
-                      />
-                    </div>
+                    !isLoading && (
+                      <div
+                        key="no-more"
+                        className="absolute left-0 top-0 w-full flex gap-2 items-center justify-center text-secondary-800 text-sm py-4"
+                        style={{
+                          height: `${virtualRow.size}px`,
+                          transform: `translateY(${virtualRow.start}px)`,
+                        }}
+                      >
+                        <p>You&apos;re all caught up!</p>
+                        <Icon
+                          className="text-secondary-800"
+                          icon={<LuPartyPopper />}
+                        />
+                      </div>
+                    )
                   );
                 }
 
