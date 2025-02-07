@@ -2,7 +2,7 @@
 import { useParams } from "next/navigation";
 import React, { useContext, useEffect } from "react";
 
-import MarkdownViewer from "@/components/Article/MarkdownViewer";
+import Article from "@/components/Article";
 import Spinner from "@/components/ui/Spinner";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 
@@ -31,16 +31,14 @@ const ItemPage: React.FC = () => {
           {loadingError ? (
             <p className="text-sm text-danger">{loadingError}</p>
           ) : loadedItem.content ? (
-            <MarkdownViewer className="py-4">
-              {loadedItem.content}
-            </MarkdownViewer>
+            <Article content={loadedItem.content} />
           ) : (
             <p className="text-sm text-secondary italic py-4">
               Content unavailable.
             </p>
           )}
-          <hr className="my-4" />
-          <p className="text-sm text-secondary italic py-4">
+          <hr className="border-secondary my-4" />
+          <p className="text-sm text-secondary italic py-4 select-none">
             {metadata?.savedAt &&
               `Saved on ${new Date(metadata.savedAt).toLocaleString()}`}
           </p>

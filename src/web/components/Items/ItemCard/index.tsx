@@ -32,6 +32,8 @@ const ItemCard: React.FC<ItemCardProps> = ({
     new URL(url).hostname.replace(/www./, "");
   const timer = useRef<number | null>(null);
 
+  const isRead = item.metadata.readingProgress > 0;
+
   return (
     <div
       key={item.id}
@@ -77,13 +79,17 @@ const ItemCard: React.FC<ItemCardProps> = ({
               className="text-sm text-foreground hover:underline truncate select-none"
               onClick={(ev) => ev.stopPropagation()}
             >
-              {item.metadata.title}
+              {isRead ? (
+                <div className="text-secondary-600">{item.metadata.title}</div>
+              ) : (
+                <div className="font-medium">{item.metadata.title}</div>
+              )}
             </Link>
-            <p className="text-xs text-secondary-600 select-none hidden md:block">
+            <p className="text-xs text-secondary-700 select-none hidden md:block">
               {getHostname(item.url)}
             </p>
           </div>
-          <p className="text-xs text-secondary text-wrap truncate select-none">
+          <p className="text-xs text-secondary-700 text-wrap truncate select-none">
             {item.metadata.description}
           </p>
         </div>
