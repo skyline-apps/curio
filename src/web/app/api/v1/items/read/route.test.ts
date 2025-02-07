@@ -104,7 +104,7 @@ describe("POST /api/v1/items/read", () => {
       state: ItemState.ACTIVE,
       isFavorite: true,
       readingProgress: 5,
-      lastReadAt: new Date("2025-02-10T12:50:00-08:00"),
+      lastReadAt: new Date("2015-02-10T12:50:00-08:00"),
     });
 
     const request: APIRequest = makeAuthenticatedMockRequest({
@@ -132,6 +132,10 @@ describe("POST /api/v1/items/read", () => {
       .execute();
 
     expect(updatedItem[0].versionName).toBe(MOCK_VERSION);
+    expect(
+      (updatedItem[0].lastReadAt as Date).getTime() >
+        new Date("2015-02-10T12:50:00-08:00").getTime(),
+    ).toBe(true);
   });
 
   it("should return 401 if user profile not found", async () => {
