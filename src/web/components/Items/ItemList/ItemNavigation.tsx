@@ -1,6 +1,8 @@
 "use client";
+import { useItemUpdate } from "components/Items/ItemActions/actions";
 import { useContext } from "react";
 
+import { ItemState } from "@/db/schema";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import { ItemsContext } from "@/providers/ItemsProvider";
 import {
@@ -15,7 +17,10 @@ export const ItemNavigation = (): null => {
     lastSelectionIndex,
     setLastSelectionIndex,
     clearSelectedItems,
+    selectedItems,
   } = useContext(CurrentItemContext);
+
+  const { updateItemsState, updateItemsFavorite } = useItemUpdate();
 
   const navigateDown = (): boolean => {
     if (lastSelectionIndex === null) {
@@ -38,6 +43,57 @@ export const ItemNavigation = (): null => {
   const selectCurrentItem = (): boolean => {
     if (lastSelectionIndex !== null) {
       selectItems([items[lastSelectionIndex].slug], lastSelectionIndex, false);
+    }
+    return true;
+  };
+
+  const favoriteCurrentItem = async (): Promise<boolean> => {
+    const itemsToUpdate =
+      selectedItems.size > 0
+        ? items.filter((item) => selectedItems.has(item.slug))
+        : lastSelectionIndex !== null
+          ? [items[lastSelectionIndex]]
+          : [];
+
+    if (itemsToUpdate.length > 0) {
+      const currentFavoriteState = itemsToUpdate[0].metadata.isFavorite;
+      await updateItemsFavorite(itemsToUpdate, !currentFavoriteState);
+    }
+    return true;
+  };
+
+  const archiveCurrentItem = async (): Promise<boolean> => {
+    const itemsToUpdate =
+      selectedItems.size > 0
+        ? items.filter(
+            (item) =>
+              selectedItems.has(item.slug) &&
+              item.metadata.state !== ItemState.ARCHIVED,
+          )
+        : lastSelectionIndex !== null
+          ? [items[lastSelectionIndex]]
+          : [];
+
+    if (itemsToUpdate.length > 0) {
+      await updateItemsState(itemsToUpdate, ItemState.ARCHIVED);
+    }
+    return true;
+  };
+
+  const deleteCurrentItem = async (): Promise<boolean> => {
+    const itemsToUpdate =
+      selectedItems.size > 0
+        ? items.filter(
+            (item) =>
+              selectedItems.has(item.slug) &&
+              item.metadata.state !== ItemState.DELETED,
+          )
+        : lastSelectionIndex !== null
+          ? [items[lastSelectionIndex]]
+          : [];
+
+    if (itemsToUpdate.length > 0) {
+      await updateItemsState(itemsToUpdate, ItemState.DELETED);
     }
     return true;
   };
@@ -99,6 +155,33 @@ export const ItemNavigation = (): null => {
       return true;
     },
     priority: 100,
+  });
+
+  useKeyboardShortcut({
+    key: "s",
+    name: "Toggle favorite",
+    category: ShortcutType.ACTIONS,
+    handler: favoriteCurrentItem,
+    priority: 100,
+  });
+
+  useKeyboardShortcut({
+    key: "e",
+    name: "Archive item",
+    category: ShortcutType.ACTIONS,
+    handler: archiveCurrentItem,
+    priority: 100,
+  });
+
+  useKeyboardShortcut({
+    key: "#",
+    name: "Delete item",
+    category: ShortcutType.ACTIONS,
+    handler: deleteCurrentItem,
+    priority: 100,
+    conditions: {
+      shiftKey: true,
+    },
   });
 
   return null;
