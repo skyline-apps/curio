@@ -294,6 +294,36 @@ describe("Extract", () => {
     expect(favicon).toBe("https://example.com/favicon.png");
   });
 
+  it("should extract favicon with relative path", async () => {
+    const html = `
+        <html>
+          <head>
+            <link rel="icon" href="./favicon.png">
+          </head>
+        </html>
+      `;
+    const { favicon } = await extract.extractMetadata(
+      "https://example.com/page",
+      html,
+    );
+    expect(favicon).toBe("https://example.com/page/favicon.png");
+  });
+
+  it("should extract favicon with absolute path", async () => {
+    const html = `
+        <html>
+          <head>
+            <link rel="icon" href="https://cdn.example.com/favicon.png">
+          </head>
+        </html>
+      `;
+    const { favicon } = await extract.extractMetadata(
+      "https://example.com",
+      html,
+    );
+    expect(favicon).toBe("https://cdn.example.com/favicon.png");
+  });
+
   it("should extract shortcut icon as fallback", async () => {
     const html = `
         <html>

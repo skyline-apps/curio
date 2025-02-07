@@ -452,6 +452,31 @@ describe("GET /api/v1/items", () => {
     expect(data.total).toBe(2);
   });
 
+  it("should return 200 on invalid thumbnail url", async () => {
+    await testDb.db.insert(items).values(MOCK_ITEMS[0]);
+    await testDb.db.insert(profileItems).values({
+      profileId: DEFAULT_TEST_PROFILE_ID,
+      itemId: TEST_ITEM_ID,
+      title: "Example",
+      description: "An example item",
+      author: "Test Author",
+      thumbnail: "bad",
+    });
+
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "GET",
+      url: `http://localhost:3000/api/v1/items`,
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data.items).toHaveLength(1);
+    expect(data.items[0].id).toBe(TEST_ITEM_ID);
+    expect(data.items[0].metadata.thumbnail).toBe(null);
+  });
+
   it("should return 400 when both slugs and urls are provided", async () => {
     await testDb.db.insert(items).values(MOCK_ITEMS);
     await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
@@ -926,6 +951,44 @@ describe("POST /api/v1/items", () => {
           {
             url: "http://example.com",
             slug: "test-slug",
+          },
+        ],
+      },
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(400);
+  });
+
+  it("should return 400 if request body includes non-url thumbnail", async () => {
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "POST",
+      body: {
+        items: [
+          {
+            url: "https://example.com",
+            metadata: {
+              thumbnail: "hello",
+            },
+          },
+        ],
+      },
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(400);
+  });
+
+  it("should return 400 if request body includes non-url favicon", async () => {
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "POST",
+      body: {
+        items: [
+          {
+            url: "https://example.com",
+            metadata: {
+              favicon: "./assets/favicon.png",
+            },
           },
         ],
       },
