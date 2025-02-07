@@ -32,7 +32,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
     new URL(url).hostname.replace(/www./, "");
   const timer = useRef<number | null>(null);
 
-  const isRead = item.metadata.readingProgress > 0;
+  const isRead = item.metadata.lastReadAt !== null;
 
   return (
     <div
