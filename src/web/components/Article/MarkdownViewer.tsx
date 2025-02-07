@@ -43,7 +43,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
       element?.removeEventListener("scroll", handleScroll);
       debouncedScrollHandler.cancel();
     };
-  }, [onProgressChange, debouncedScrollHandler]);
+  }, [onProgressChange, debouncedScrollHandler, containerRef]);
 
   useEffect(() => {
     // TODO: Debug why this data is stale
