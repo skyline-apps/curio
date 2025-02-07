@@ -9,11 +9,14 @@ import React, {
   useState,
 } from "react";
 
-export type KeyboardShortcutHandler = (event: KeyboardEvent) => boolean | void;
+export type KeyboardShortcutHandler = (
+  event: KeyboardEvent,
+) => boolean | void | Promise<boolean> | Promise<void>;
 
 export enum ShortcutType {
   ITEMS = "Items",
   DEFAULT = "Default",
+  ACTIONS = "Actions",
 }
 
 export interface KeyboardShortcut {
