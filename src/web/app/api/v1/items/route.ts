@@ -111,7 +111,8 @@ export async function GET(
       .from(items)
       .innerJoin(profileItems, eq(items.id, profileItems.itemId))
       .where(and(whereClause, cursorCondition))
-      .orderBy(desc(profileItems.stateUpdatedAt))
+      // TODO: Fix pagination bug if multiple items have the same stateUpdatedAt
+      .orderBy(desc(profileItems.stateUpdatedAt), desc(items.id))
       .limit(limit);
 
     const total = await db
