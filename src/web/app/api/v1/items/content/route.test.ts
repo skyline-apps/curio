@@ -27,19 +27,6 @@ import { testDb } from "@/utils/test/provider";
 
 import { GET, POST } from "./route";
 
-// Mock environment variables
-process.env.NEXT_PUBLIC_SUPABASE_URL = "http://localhost:54321";
-process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "test-anon-key";
-
-// Mock global fetch
-const mockResponse = {
-  ok: true,
-  json: () => Promise.resolve({ data: { path: "test-path" } }),
-  blob: () => Promise.resolve(new Blob(["test content"])),
-} as Response;
-
-global.fetch = jest.fn(() => Promise.resolve(mockResponse));
-
 const TEST_ITEM_ID = "123e4567-e89b-12d3-a456-426614174001";
 const TEST_ITEM_SLUG = "example-com";
 const TEST_ITEM_URL = "https://example.com";
@@ -54,7 +41,7 @@ const MOCK_ITEM = {
   updatedAt: ORIGINAL_CREATION_DATE,
 };
 
-describe("GET /api/v1/items/[slug]/content", () => {
+describe("GET /api/v1/items/content", () => {
   test.each([
     ["should return 200 with item default content via regular auth", ""],
     [
@@ -380,7 +367,7 @@ describe("GET /api/v1/items/[slug]/content", () => {
   });
 });
 
-describe("POST /api/v1/items/[slug]/content", () => {
+describe("POST /api/v1/items/content", () => {
   test.each([
     ["should return 200 when updating content via regular auth", ""],
     [

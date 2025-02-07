@@ -4,6 +4,8 @@ import { UploadStatus } from "@/app/api/v1/items/content/validation";
 
 import { MOCK_METADATA } from "./extract";
 
+export const MOCK_VERSION = "2024-10-20T12:00:00.000Z";
+
 export class StorageError extends Error {
   constructor(message: string) {
     super(message);
@@ -58,11 +60,11 @@ export const getItemContent = jest
     version: null,
     content: "test content",
   }));
-export const listItemVersions = jest
+export const getItemMetadata = jest
   .spyOn(storage, "getItemMetadata")
   .mockImplementation(async () => {
     return {
-      timestamp: "2024-10-20T12:00:00.000Z",
+      timestamp: MOCK_VERSION,
       length: 100,
       hash: "contenthash",
       ...MOCK_METADATA,
