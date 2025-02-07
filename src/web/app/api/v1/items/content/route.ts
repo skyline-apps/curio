@@ -86,12 +86,36 @@ export async function GET(
     const itemResponse = ItemResultSchema.parse(item[0]);
 
     try {
-      const content = await storage.getItemContent(slug);
-      const response: GetItemContentResponse =
-        GetItemContentResponseSchema.parse({
+      const { version, content } = await storage.getItemContent(
+        slug,
+        itemResponse.metadata.versionName,
+      );
+      let response: GetItemContentResponse = GetItemContentResponseSchema.parse(
+        {
           content,
           item: itemResponse,
+        },
+      );
+      // Clear out versionName if it can't be found.
+      if (version !== itemResponse.metadata.versionName) {
+        await db
+          .update(profileItems)
+          .set({ versionName: version })
+          .where(
+            and(
+              eq(profileItems.itemId, itemResponse.id),
+              eq(profileItems.profileId, profileResult.profile.id),
+            ),
+          );
+
+        response = GetItemContentResponseSchema.parse({
+          content,
+          item: {
+            ...itemResponse,
+            metadata: { ...itemResponse.metadata, versionName: version },
+          },
         });
+      }
       return APIResponseJSON(response);
     } catch (error: unknown) {
       // Still return metadata if content can't be loaded

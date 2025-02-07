@@ -176,17 +176,41 @@ export class Storage {
     return UploadStatus.UPDATED_MAIN;
   }
 
-  async getItemContent(slug: string): Promise<string> {
+  async getItemContent(
+    slug: string,
+    version: string | null,
+  ): Promise<{ version: string | null; content: string }> {
     const storage = await this.getStorageClient();
+    const versionPath = version
+      ? `${slug}/versions/${version}.md`
+      : `${slug}/${DEFAULT_NAME}.md`;
+
     const { data, error } = await storage
       .from(ITEMS_BUCKET)
-      .download(`${slug}/${DEFAULT_NAME}.md`);
+      .download(versionPath);
 
     if (error) {
-      throw new StorageError("Failed to download content");
+      if (version) {
+        const { data: defaultData, error: defaultError } = await storage
+          .from(ITEMS_BUCKET)
+          .download(`${slug}/${DEFAULT_NAME}.md`);
+
+        if (defaultError) {
+          throw new StorageError("Failed to download content");
+        }
+        return {
+          version: null,
+          content: await defaultData.text(),
+        };
+      } else {
+        throw new StorageError("Failed to download content");
+      }
     }
 
-    return await data.text();
+    return {
+      version,
+      content: await data.text(),
+    };
   }
 
   async getItemMetadata(slug: string): Promise<VersionMetadata> {

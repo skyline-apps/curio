@@ -19,8 +19,14 @@ export class Storage {
     return UploadStatus.UPDATED_MAIN;
   }
 
-  async getItemContent(_slug: string): Promise<string> {
-    return "";
+  async getItemContent(
+    _slug: string,
+    _version: string | null,
+  ): Promise<{ version: string | null; content: string }> {
+    return {
+      version: null,
+      content: "",
+    };
   }
 
   async getItemMetadata(_slug: string): Promise<VersionMetadata> {
@@ -48,7 +54,10 @@ export const uploadItemContent = jest
   .mockImplementation(async () => UploadStatus.UPDATED_MAIN);
 export const getItemContent = jest
   .spyOn(storage, "getItemContent")
-  .mockImplementation(async () => "test content");
+  .mockImplementation(async () => ({
+    version: null,
+    content: "test content",
+  }));
 export const listItemVersions = jest
   .spyOn(storage, "getItemMetadata")
   .mockImplementation(async () => {

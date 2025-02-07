@@ -3,6 +3,7 @@ import { jest } from "@jest/globals";
 import { MOCK_METADATA } from "@/__mocks__/extract";
 import {
   getItemContent,
+  storage,
   StorageError,
   uploadItemContent,
 } from "@/__mocks__/storage";
@@ -55,8 +56,11 @@ const MOCK_ITEM = {
 
 describe("GET /api/v1/items/[slug]/content", () => {
   test.each([
-    ["should return 200 with item content via regular auth", ""],
-    ["should return 200 with item content via api key", DEFAULT_TEST_API_KEY],
+    ["should return 200 with item default content via regular auth", ""],
+    [
+      "should return 200 with item default content via api key",
+      DEFAULT_TEST_API_KEY,
+    ],
   ])("%s", async (_, apiKey) => {
     await testDb.db.insert(items).values(MOCK_ITEM);
     await testDb.db.insert(profileItems).values({
@@ -106,12 +110,24 @@ describe("GET /api/v1/items/[slug]/content", () => {
         url: TEST_ITEM_URL,
       },
     });
+    expect(storage.getItemContent).toHaveBeenCalledTimes(1);
+    expect(storage.getItemContent).toHaveBeenCalledWith(TEST_ITEM_SLUG, null);
+
+    const updatedItem = await testDb.db
+      .select()
+      .from(profileItems)
+      .where(eq(profileItems.itemId, TEST_ITEM_ID))
+      .limit(1)
+      .execute();
+
+    expect(updatedItem[0].versionName).toBe(null);
   });
 
-  it("should return 200 with metadata even if item content is missing", async () => {
-    jest
-      .mocked(getItemContent)
-      .mockRejectedValueOnce(new StorageError("Failed to download content"));
+  it("should return 200 with custom version content", async () => {
+    jest.mocked(getItemContent).mockResolvedValueOnce({
+      version: "2010-04-04",
+      content: "custom version content",
+    });
     await testDb.db.insert(items).values(MOCK_ITEM);
     await testDb.db.insert(profileItems).values({
       profileId: DEFAULT_TEST_PROFILE_ID,
@@ -141,6 +157,7 @@ describe("GET /api/v1/items/[slug]/content", () => {
 
     const data = await response.json();
     expect(data).toEqual({
+      content: "custom version content",
       item: {
         id: TEST_ITEM_ID,
         slug: TEST_ITEM_SLUG,
@@ -162,6 +179,158 @@ describe("GET /api/v1/items/[slug]/content", () => {
         url: TEST_ITEM_URL,
       },
     });
+    expect(storage.getItemContent).toHaveBeenCalledTimes(1);
+    expect(storage.getItemContent).toHaveBeenCalledWith(
+      TEST_ITEM_SLUG,
+      "2010-04-04",
+    );
+
+    const updatedItem = await testDb.db
+      .select()
+      .from(profileItems)
+      .where(eq(profileItems.itemId, TEST_ITEM_ID))
+      .limit(1)
+      .execute();
+
+    expect(updatedItem[0].versionName).toBe("2010-04-04");
+  });
+
+  it("should return 200 with metadata even if item content is missing", async () => {
+    jest
+      .mocked(getItemContent)
+      .mockRejectedValueOnce(new StorageError("Failed to download content"));
+    await testDb.db.insert(items).values(MOCK_ITEM);
+    await testDb.db.insert(profileItems).values({
+      profileId: DEFAULT_TEST_PROFILE_ID,
+      itemId: TEST_ITEM_ID,
+      title: "Example",
+      description: "An example item",
+      author: "Test Author",
+      thumbnail: "https://example.com/thumb.jpg",
+      favicon: "https://example.com/favicon.ico",
+      publishedAt: ORIGINAL_PUBLISHED_DATE,
+      savedAt: ORIGINAL_CREATION_DATE,
+      stateUpdatedAt: ORIGINAL_CREATION_DATE,
+      state: ItemState.ACTIVE,
+      isFavorite: true,
+      readingProgress: 5,
+      lastReadAt: new Date("2025-02-10T12:50:00-08:00"),
+    });
+
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "GET",
+      searchParams: { slug: TEST_ITEM_SLUG },
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data).toEqual({
+      item: {
+        id: TEST_ITEM_ID,
+        slug: TEST_ITEM_SLUG,
+        createdAt: ORIGINAL_CREATION_DATE.toISOString(),
+        metadata: {
+          author: "Test Author",
+          description: "An example item",
+          publishedAt: ORIGINAL_PUBLISHED_DATE.toISOString(),
+          thumbnail: "https://example.com/thumb.jpg",
+          favicon: "https://example.com/favicon.ico",
+          title: "Example",
+          savedAt: ORIGINAL_CREATION_DATE.toISOString(),
+          state: ItemState.ACTIVE,
+          isFavorite: true,
+          readingProgress: 5,
+          lastReadAt: "2025-02-10T20:50:00.000Z",
+          versionName: null,
+        },
+        url: TEST_ITEM_URL,
+      },
+    });
+    expect(storage.getItemContent).toHaveBeenCalledTimes(1);
+    expect(storage.getItemContent).toHaveBeenCalledWith(TEST_ITEM_SLUG, null);
+
+    const updatedItem = await testDb.db
+      .select()
+      .from(profileItems)
+      .where(eq(profileItems.itemId, TEST_ITEM_ID))
+      .limit(1)
+      .execute();
+
+    expect(updatedItem[0].versionName).toBe(null);
+  });
+
+  it("should return 200 with default content if version is missing", async () => {
+    jest.mocked(getItemContent).mockResolvedValueOnce({
+      version: null,
+      content: "test content",
+    });
+    await testDb.db.insert(items).values(MOCK_ITEM);
+    await testDb.db.insert(profileItems).values({
+      profileId: DEFAULT_TEST_PROFILE_ID,
+      itemId: TEST_ITEM_ID,
+      title: "Example",
+      description: "An example item",
+      author: "Test Author",
+      thumbnail: "https://example.com/thumb.jpg",
+      favicon: "https://example.com/favicon.ico",
+      publishedAt: ORIGINAL_PUBLISHED_DATE,
+      savedAt: ORIGINAL_CREATION_DATE,
+      stateUpdatedAt: ORIGINAL_CREATION_DATE,
+      state: ItemState.ACTIVE,
+      isFavorite: true,
+      readingProgress: 5,
+      lastReadAt: new Date("2025-02-10T12:50:00-08:00"),
+      versionName: "2010-04-04",
+    });
+
+    const request: APIRequest = makeAuthenticatedMockRequest({
+      method: "GET",
+      searchParams: { slug: TEST_ITEM_SLUG },
+    });
+
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data).toEqual({
+      content: "test content",
+      item: {
+        id: TEST_ITEM_ID,
+        slug: TEST_ITEM_SLUG,
+        createdAt: ORIGINAL_CREATION_DATE.toISOString(),
+        metadata: {
+          author: "Test Author",
+          description: "An example item",
+          publishedAt: ORIGINAL_PUBLISHED_DATE.toISOString(),
+          thumbnail: "https://example.com/thumb.jpg",
+          favicon: "https://example.com/favicon.ico",
+          title: "Example",
+          savedAt: ORIGINAL_CREATION_DATE.toISOString(),
+          state: ItemState.ACTIVE,
+          isFavorite: true,
+          readingProgress: 5,
+          lastReadAt: "2025-02-10T20:50:00.000Z",
+          versionName: null,
+        },
+        url: TEST_ITEM_URL,
+      },
+    });
+    expect(storage.getItemContent).toHaveBeenCalledTimes(1);
+    expect(storage.getItemContent).toHaveBeenCalledWith(
+      TEST_ITEM_SLUG,
+      "2010-04-04",
+    );
+
+    const updatedItem = await testDb.db
+      .select()
+      .from(profileItems)
+      .where(eq(profileItems.itemId, TEST_ITEM_ID))
+      .limit(1)
+      .execute();
+
+    expect(updatedItem[0].versionName).toBe(null);
   });
 
   it("should return 401 if user profile not found", async () => {
