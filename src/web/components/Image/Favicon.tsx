@@ -15,7 +15,7 @@ const Favicon: React.FC<FaviconProps> = ({ className, url }: FaviconProps) => {
     setFailedLoading(true);
   };
 
-  return url && !failedLoading ? (
+  return url && !failedLoading ? ( // eslint-disable-next-line @next/next/no-img-element
     <img
       className={className}
       src={url}

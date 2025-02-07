@@ -16,6 +16,7 @@ const Thumbnail: React.FC<ThumbnailProps> = ({ thumbnail }: ThumbnailProps) => {
 
   return thumbnail && !failedLoading ? (
     <div className="w-full h-48 p-2">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         alt="item thumbnail"
         className="object-contain w-full h-full"
