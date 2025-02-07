@@ -25,6 +25,9 @@ export const AppPageProvider: React.FC<{
           key={pathname}
           initial={{ opacity: 0.8, x: -2 }}
           animate={{ opacity: 1, x: 0 }}
+          style={{
+            scrollBehavior: "smooth",
+          }}
           transition={{ duration: 0.15, ease: "easeOut" }}
         >
           {children}
