@@ -25,6 +25,9 @@ h3,
 h4,
 h5,
 h6,
+em,
+b,
+strong,
 pre {
   -webkit-user-select: text;
   -moz-user-select: text;
