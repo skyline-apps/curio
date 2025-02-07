@@ -108,34 +108,28 @@ export class Storage {
 
     // Check current main file content length
     try {
-      const { data: currentData } = await storage
+      const { data, error } = await storage
         .from(ITEMS_BUCKET)
-        .download(`${slug}/${DEFAULT_NAME}.md`);
+        .info(`${slug}/${DEFAULT_NAME}.md`);
 
-      if (currentData) {
-        const currentContent = await currentData.text();
-        if (currentContent.length >= content.length) {
-          // Current content is longer, just store the new version
-          const versionPath = `${slug}/versions/${timestamp}.md`;
+      if (!error && data?.metadata && data.metadata.length >= content.length) {
+        // Current content is longer, just store the new version
+        const versionPath = `${slug}/versions/${timestamp}.md`;
 
-          const { error: versionError } = await storage
-            .from(ITEMS_BUCKET)
-            .upload(versionPath, content, {
-              contentType: "text/markdown",
-              upsert: false,
-              metadata: fileMetadata,
-            });
+        const { error: versionError } = await storage
+          .from(ITEMS_BUCKET)
+          .upload(versionPath, content, {
+            contentType: "text/markdown",
+            upsert: false,
+            metadata: fileMetadata,
+          });
 
-          if (versionError) {
-            log.error(
-              `Error uploading version for item ${slug}:`,
-              versionError,
-            );
-            throw new StorageError("Failed to upload version");
-          }
-
-          return UploadStatus.STORED_VERSION;
+        if (versionError) {
+          log.error(`Error uploading version for item ${slug}:`, versionError);
+          throw new StorageError("Failed to upload version");
         }
+
+        return UploadStatus.STORED_VERSION;
       }
     } catch (error) {
       // Main file doesn't exist yet, or error reading it
