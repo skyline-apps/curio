@@ -55,6 +55,7 @@ export async function POST(
     }
     const updatedFields: Partial<typeof profileItems.$inferInsert> = {
       readingProgress,
+      lastReadAt: new Date(),
     };
 
     if (itemData[0].versionName === null) {
