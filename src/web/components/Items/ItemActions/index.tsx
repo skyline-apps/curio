@@ -12,7 +12,7 @@ import {
 import Button from "@/components/ui/Button";
 import { ItemState } from "@/db/schema";
 import { BrowserMessageContext } from "@/providers/BrowserMessageProvider";
-import { ItemMetadata, ItemsContext } from "@/providers/ItemsProvider";
+import { Item, ItemsContext } from "@/providers/ItemsProvider";
 import { useToast } from "@/providers/ToastProvider";
 import { cn } from "@/utils/cn";
 import { createLogger } from "@/utils/logger";
@@ -73,7 +73,7 @@ const ActionButton = <T,>({
 
 interface ItemActionsProps {
   className?: string;
-  item?: ItemMetadata;
+  item?: Item;
   showAdvanced?: boolean;
 }
 
@@ -94,7 +94,7 @@ const ItemActions = ({
     <div className={cn("flex flex-row gap-1", className)}>
       <ActionButton
         action={async () =>
-          updateItemsFavorite([item], !item.metadata.isFavorite)
+          updateItemsFavorite([item.slug], !item.metadata.isFavorite)
         }
         defaultDisplay={{ text: "Favorite", icon: <HiOutlineStar /> }}
         activeDisplay={{ text: "Unfavorite", icon: <HiStar /> }}
@@ -103,7 +103,7 @@ const ItemActions = ({
       <ActionButton
         action={async () =>
           updateItemsState(
-            [item],
+            [item.slug],
             item.metadata.state === ItemState.ARCHIVED
               ? ItemState.ACTIVE
               : ItemState.ARCHIVED,
@@ -126,7 +126,7 @@ const ItemActions = ({
           <ActionButton
             action={async () =>
               updateItemsState(
-                [item],
+                [item.slug],
                 item.metadata.state === ItemState.DELETED
                   ? ItemState.ACTIVE
                   : ItemState.DELETED,

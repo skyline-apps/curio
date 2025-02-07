@@ -6,13 +6,13 @@ import Favicon from "@/components/Image/Favicon";
 import ItemActions from "@/components/Items/ItemActions";
 import Icon from "@/components/ui/Icon";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
-import type { ItemMetadata } from "@/providers/ItemsProvider";
+import type { Item } from "@/providers/ItemsProvider";
 import { cn } from "@/utils/cn";
 
 interface ItemCardProps {
   height?: number;
   startPos?: number;
-  item: ItemMetadata;
+  item: Item;
   index: number;
   onClick?: (ev: React.MouseEvent) => void;
   onLongPress?: (ev: React.TouchEvent) => void;
