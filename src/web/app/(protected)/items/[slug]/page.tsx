@@ -2,7 +2,7 @@
 import { useParams } from "next/navigation";
 import React, { useContext, useEffect } from "react";
 
-import MarkdownViewer from "@/components/MarkdownViewer";
+import MarkdownViewer from "@/components/Article/MarkdownViewer";
 import Spinner from "@/components/ui/Spinner";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 
