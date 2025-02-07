@@ -4,10 +4,11 @@ import { HiOutlineDocument } from "react-icons/hi2";
 import Icon from "@/components/ui/Icon";
 
 interface FaviconProps {
+  className?: string;
   url?: string | null;
 }
 
-const Favicon: React.FC<FaviconProps> = ({ url }: FaviconProps) => {
+const Favicon: React.FC<FaviconProps> = ({ className, url }: FaviconProps) => {
   const [failedLoading, setFailedLoading] = useState<boolean>(false);
 
   const handleImageError = (): void => {
@@ -16,6 +17,7 @@ const Favicon: React.FC<FaviconProps> = ({ url }: FaviconProps) => {
 
   return url && !failedLoading ? (
     <img
+      className={className}
       src={url}
       width={12}
       height={12}
@@ -23,7 +25,10 @@ const Favicon: React.FC<FaviconProps> = ({ url }: FaviconProps) => {
       alt="favicon"
     />
   ) : (
-    <Icon icon={<HiOutlineDocument width={12} height={12} />} />
+    <Icon
+      className={className}
+      icon={<HiOutlineDocument width={12} height={12} />}
+    />
   );
 };
 

@@ -72,7 +72,10 @@ const ItemCard: React.FC<ItemCardProps> = ({
         <div className="grow h-full block overflow-hidden">
           <div className="flex flex-row gap-2 items-center">
             <div className="flex shrink-0 items-center justify-center w-4 h-4">
-              <Favicon url={item.metadata.favicon} />
+              <Favicon
+                className={isRead ? "opacity-50" : ""}
+                url={item.metadata.favicon}
+              />
             </div>
             <Link
               href={`/items/${item.slug}`}
