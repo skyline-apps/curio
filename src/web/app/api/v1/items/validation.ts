@@ -44,17 +44,31 @@ const ItemMetadataSchema = z
       .describe("The author of the item."),
     thumbnail: z
       .string()
-      .url()
       .max(2048)
       .nullable()
       .optional()
+      .transform((val) => {
+        if (!val) return null;
+        try {
+          return val ? new URL(val).toString() : null;
+        } catch {
+          return null;
+        }
+      })
       .describe("The thumbnail URL of the item."),
     favicon: z
       .string()
-      .url()
       .max(2048)
       .nullable()
       .optional()
+      .transform((val) => {
+        if (!val) return null;
+        try {
+          return val ? new URL(val).toString() : null;
+        } catch {
+          return null;
+        }
+      })
       .describe("The favicon URL of the item."),
     publishedAt: dateType
       .nullable()

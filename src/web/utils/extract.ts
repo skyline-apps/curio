@@ -225,10 +225,10 @@ export class Extract {
       return link;
     } else if (link.startsWith("/")) {
       const hostname = new URL(url).hostname;
-      return `https://${hostname}${link}`;
+      return new URL(`https://${hostname}${link}`).toString();
+    } else {
+      return new URL(`${url}/${link}`).toString();
     }
-
-    return link;
   }
 
   async extractMetadata(url: string, html: string): Promise<ExtractedMetadata> {
