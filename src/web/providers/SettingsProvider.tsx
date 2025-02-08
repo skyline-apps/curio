@@ -1,4 +1,5 @@
 "use client";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { createContext, useEffect, useState } from "react";
 
 import type {
@@ -15,9 +16,6 @@ import {
   setSystemTheme,
   updateLayoutSettings,
 } from "@/utils/displayStorage";
-import { createLogger } from "@/utils/logger";
-
-const log = createLogger("SettingsProvider");
 
 export type SettingsContextType = {
   appLayout?: AppLayoutSettings;
@@ -38,32 +36,50 @@ export const SettingsContext = createContext<SettingsContextType>({
   updateSettings: async () => {},
 });
 
+const fetchSettings = async (): Promise<SettingsResponse> => {
+  const response = await fetch("/api/v1/user/settings", {
+    method: "GET",
+  });
+  return handleAPIResponse<SettingsResponse>(response);
+};
+
 export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   children,
 }: SettingsProviderProps): React.ReactNode => {
-  const [currentSettings, setCurrentSettings] = useState<SettingsResponse>();
+  const queryClient = useQueryClient();
   const [appLayout, setAppLayout] = useState<AppLayoutSettings>();
 
-  const fetchSettings = async (): Promise<void> => {
-    fetch("/api/v1/user/settings", {
-      method: "GET",
-    })
-      .then(handleAPIResponse<SettingsResponse>)
-      .then((result) => {
-        setCurrentSettings(result);
-      })
-      .catch((error) => {
-        if (error.message.match(/unauthorized/i)) {
-          setCurrentSettings(undefined);
-        } else {
-          log.error("Error getting settings: ", error);
-        }
+  const { data: currentSettings } = useQuery({
+    queryKey: ["settings"],
+    queryFn: fetchSettings,
+    retry: 1,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: true,
+  });
+
+  const updateSettingsMutation = useMutation({
+    mutationFn: async (payload: {
+      field: keyof SettingsResponse;
+      value: SettingsResponse[keyof SettingsResponse];
+    }) => {
+      const response = await fetch("/api/v1/user/settings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ [payload.field]: payload.value }),
       });
-  };
+      return handleAPIResponse<UpdatedSettingsResponse>(response);
+    },
+    onSuccess: (result) => {
+      queryClient.setQueryData<SettingsResponse>(["settings"], (oldData) => {
+        return oldData ? { ...oldData, ...result } : undefined;
+      });
+    },
+  });
 
   useEffect(() => {
     initializeTheme();
-    fetchSettings();
     setAppLayout(loadLayoutSettings());
   }, []);
 
@@ -91,19 +107,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     if (!currentSettings) {
       return;
     }
-    return fetch("/api/v1/user/settings", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ [field]: value }),
-    })
-      .then(handleAPIResponse<UpdatedSettingsResponse>)
-      .then((result) => {
-        const newSettings = { ...currentSettings, ...result };
-        setCurrentSettings(newSettings);
-        return newSettings;
-      });
+    return updateSettingsMutation.mutateAsync({ field, value });
   };
 
   return (
