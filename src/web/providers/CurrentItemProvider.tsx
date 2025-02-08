@@ -1,9 +1,11 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
+import { usePathname } from "next/navigation";
 import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -67,6 +69,8 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
 export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   children,
 }: CurrentItemProviderProps): React.ReactNode => {
+  const pathname = usePathname();
+
   const [itemLoadedSlug, setItemLoadedSlug] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
@@ -84,6 +88,12 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     setLastSelectionIndex(null);
     setInSelectionMode(false);
   };
+
+  useEffect(() => {
+    if (!pathname.startsWith("/items/")) {
+      clearSelectedItems();
+    }
+  }, [pathname]);
 
   const selectItems = useCallback(
     (
