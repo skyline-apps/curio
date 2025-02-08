@@ -87,6 +87,10 @@
           {
             "name": "@heroui/react",
             "message": "Please use components from the `@/components/` library"
+          },
+          {
+            "name": "tailwind-merge",
+            "message": "Please use `cn` from `@/utils/cn`"
           }
         ],
         "patterns": [
