@@ -277,6 +277,325 @@
         }
       }
     },
+    "/api/v1/user/labels": {
+      "get": {
+        "description": "GET /api/v1/user/labels",
+        "tags": [
+          "V1"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "labels": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 255
+                          },
+                          "color": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "color"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "labels"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "POST /api/v1/user/labels",
+        "tags": [
+          "V1"
+        ],
+        "requestBody": {
+          "description": "Request body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "labels": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string",
+                              "nullable": true,
+                              "minLength": 1,
+                              "maxLength": 255
+                            },
+                            "color": {
+                              "type": "string",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 255
+                            },
+                            "color": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "color"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "labels"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "labels": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 255
+                          },
+                          "color": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "color"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "labels"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "DELETE /api/v1/user/labels",
+        "tags": [
+          "V1"
+        ],
+        "requestBody": {
+          "description": "Request body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deleted": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "deleted"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/items": {
       "get": {
         "description": "GET /api/v1/items",
@@ -359,20 +678,13 @@
                                 "type": "string",
                                 "nullable": true,
                                 "maxLength": 2048,
-                                "description": "The description of the item. If left blank, will remain unchanged."
+                                "description": "The description of the item."
                               },
                               "author": {
                                 "type": "string",
                                 "nullable": true,
                                 "maxLength": 255,
-                                "description": "The author of the item. If left blank, will remain unchanged."
-                              },
-                              "thumbnail": {
-                                "type": "string",
-                                "nullable": true,
-                                "maxLength": 2048,
-                                "format": "uri",
-                                "description": "The thumbnail of the item. If left blank, will remain unchanged."
+                                "description": "The author of the item."
                               },
                               "publishedAt": {
                                 "anyOf": [
@@ -386,7 +698,7 @@
                                     "nullable": true
                                   }
                                 ],
-                                "description": "The published date of the item. If left blank, will remain unchanged."
+                                "description": "The published date of the item."
                               },
                               "savedAt": {
                                 "anyOf": [
@@ -400,7 +712,7 @@
                                     "nullable": true
                                   }
                                 ],
-                                "description": "The time the item was saved. Cannot be populated manually."
+                                "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
                               },
                               "stateUpdatedAt": {
                                 "anyOf": [
@@ -454,6 +766,18 @@
                                 "nullable": true,
                                 "maxLength": 255,
                                 "description": "The version name of the item."
+                              },
+                              "thumbnail": {
+                                "type": "string",
+                                "nullable": true,
+                                "maxLength": 2048,
+                                "description": "The thumbnail URL of the item."
+                              },
+                              "favicon": {
+                                "type": "string",
+                                "nullable": true,
+                                "maxLength": 2048,
+                                "description": "The favicon URL of the item."
                               }
                             },
                             "required": [
@@ -576,20 +900,13 @@
                               "type": "string",
                               "nullable": true,
                               "maxLength": 2048,
-                              "description": "The description of the item. If left blank, will remain unchanged."
+                              "description": "The description of the item."
                             },
                             "author": {
                               "type": "string",
                               "nullable": true,
                               "maxLength": 255,
-                              "description": "The author of the item. If left blank, will remain unchanged."
-                            },
-                            "thumbnail": {
-                              "type": "string",
-                              "nullable": true,
-                              "maxLength": 2048,
-                              "format": "uri",
-                              "description": "The thumbnail of the item. If left blank, will remain unchanged."
+                              "description": "The author of the item."
                             },
                             "publishedAt": {
                               "anyOf": [
@@ -603,7 +920,7 @@
                                   "nullable": true
                                 }
                               ],
-                              "description": "The published date of the item. If left blank, will remain unchanged."
+                              "description": "The published date of the item."
                             },
                             "savedAt": {
                               "anyOf": [
@@ -617,7 +934,7 @@
                                   "nullable": true
                                 }
                               ],
-                              "description": "The time the item was saved. Cannot be populated manually."
+                              "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
                             },
                             "stateUpdatedAt": {
                               "anyOf": [
@@ -671,6 +988,20 @@
                               "nullable": true,
                               "maxLength": 255,
                               "description": "The version name of the item."
+                            },
+                            "thumbnail": {
+                              "type": "string",
+                              "nullable": true,
+                              "maxLength": 2048,
+                              "format": "uri",
+                              "description": "The thumbnail URL of the item."
+                            },
+                            "favicon": {
+                              "type": "string",
+                              "nullable": true,
+                              "maxLength": 2048,
+                              "format": "uri",
+                              "description": "The favicon URL of the item."
                             }
                           },
                           "additionalProperties": false
@@ -727,20 +1058,13 @@
                                 "type": "string",
                                 "nullable": true,
                                 "maxLength": 2048,
-                                "description": "The description of the item. If left blank, will remain unchanged."
+                                "description": "The description of the item."
                               },
                               "author": {
                                 "type": "string",
                                 "nullable": true,
                                 "maxLength": 255,
-                                "description": "The author of the item. If left blank, will remain unchanged."
-                              },
-                              "thumbnail": {
-                                "type": "string",
-                                "nullable": true,
-                                "maxLength": 2048,
-                                "format": "uri",
-                                "description": "The thumbnail of the item. If left blank, will remain unchanged."
+                                "description": "The author of the item."
                               },
                               "publishedAt": {
                                 "anyOf": [
@@ -754,7 +1078,7 @@
                                     "nullable": true
                                   }
                                 ],
-                                "description": "The published date of the item. If left blank, will remain unchanged."
+                                "description": "The published date of the item."
                               },
                               "savedAt": {
                                 "anyOf": [
@@ -768,7 +1092,7 @@
                                     "nullable": true
                                   }
                                 ],
-                                "description": "The time the item was saved. Cannot be populated manually."
+                                "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
                               },
                               "stateUpdatedAt": {
                                 "anyOf": [
@@ -822,6 +1146,18 @@
                                 "nullable": true,
                                 "maxLength": 255,
                                 "description": "The version name of the item."
+                              },
+                              "thumbnail": {
+                                "type": "string",
+                                "nullable": true,
+                                "maxLength": 2048,
+                                "description": "The thumbnail URL of the item."
+                              },
+                              "favicon": {
+                                "type": "string",
+                                "nullable": true,
+                                "maxLength": 2048,
+                                "description": "The favicon URL of the item."
                               }
                             },
                             "required": [
@@ -978,6 +1314,108 @@
                   },
                   "required": [
                     "updated"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/items/read": {
+      "post": {
+        "description": "POST /api/v1/items/read",
+        "tags": [
+          "V1"
+        ],
+        "requestBody": {
+          "description": "Request body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "slug": {
+                    "type": "string"
+                  },
+                  "readingProgress": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  }
+                },
+                "required": [
+                  "slug",
+                  "readingProgress"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "slug": {
+                      "type": "string"
+                    },
+                    "readingProgress": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100
+                    },
+                    "versionName": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "slug",
+                    "readingProgress",
+                    "versionName"
                   ]
                 }
               }
@@ -1185,20 +1623,13 @@
                                   "type": "string",
                                   "nullable": true,
                                   "maxLength": 2048,
-                                  "description": "The description of the item. If left blank, will remain unchanged."
+                                  "description": "The description of the item."
                                 },
                                 "author": {
                                   "type": "string",
                                   "nullable": true,
                                   "maxLength": 255,
-                                  "description": "The author of the item. If left blank, will remain unchanged."
-                                },
-                                "thumbnail": {
-                                  "type": "string",
-                                  "nullable": true,
-                                  "maxLength": 2048,
-                                  "format": "uri",
-                                  "description": "The thumbnail of the item. If left blank, will remain unchanged."
+                                  "description": "The author of the item."
                                 },
                                 "publishedAt": {
                                   "anyOf": [
@@ -1212,7 +1643,7 @@
                                       "nullable": true
                                     }
                                   ],
-                                  "description": "The published date of the item. If left blank, will remain unchanged."
+                                  "description": "The published date of the item."
                                 },
                                 "savedAt": {
                                   "anyOf": [
@@ -1226,7 +1657,7 @@
                                       "nullable": true
                                     }
                                   ],
-                                  "description": "The time the item was saved. Cannot be populated manually."
+                                  "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
                                 },
                                 "stateUpdatedAt": {
                                   "anyOf": [
@@ -1280,6 +1711,18 @@
                                   "nullable": true,
                                   "maxLength": 255,
                                   "description": "The version name of the item."
+                                },
+                                "thumbnail": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "maxLength": 2048,
+                                  "description": "The thumbnail URL of the item."
+                                },
+                                "favicon": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "maxLength": 2048,
+                                  "description": "The favicon URL of the item."
                                 }
                               },
                               "required": [

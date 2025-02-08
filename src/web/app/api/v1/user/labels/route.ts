@@ -1,4 +1,4 @@
-import { and, db, desc, eq, inArray, sql } from "@/db";
+import { and, db, eq, inArray, sql } from "@/db";
 import { profileLabels } from "@/db/schema";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
@@ -36,7 +36,7 @@ export async function GET(
       })
       .from(profileLabels)
       .where(eq(profileLabels.profileId, profileResult.profile.id))
-      .orderBy(desc(profileLabels.name));
+      .orderBy(profileLabels.createdAt);
     const response: GetLabelsResponse = GetLabelsResponseSchema.parse({
       labels,
     });
