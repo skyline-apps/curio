@@ -57,7 +57,10 @@ export const ItemNavigation = (): null => {
 
     if (itemsToUpdate.length > 0) {
       const currentFavoriteState = itemsToUpdate[0].metadata.isFavorite;
-      await updateItemsFavorite(itemsToUpdate, !currentFavoriteState);
+      await updateItemsFavorite(
+        itemsToUpdate.map((item) => item.slug),
+        !currentFavoriteState,
+      );
     }
     return true;
   };
@@ -75,7 +78,10 @@ export const ItemNavigation = (): null => {
           : [];
 
     if (itemsToUpdate.length > 0) {
-      await updateItemsState(itemsToUpdate, ItemState.ARCHIVED);
+      await updateItemsState(
+        itemsToUpdate.map((item) => item.slug),
+        ItemState.ARCHIVED,
+      );
     }
     return true;
   };
@@ -93,7 +99,10 @@ export const ItemNavigation = (): null => {
           : [];
 
     if (itemsToUpdate.length > 0) {
-      await updateItemsState(itemsToUpdate, ItemState.DELETED);
+      await updateItemsState(
+        itemsToUpdate.map((item) => item.slug),
+        ItemState.DELETED,
+      );
     }
     return true;
   };
