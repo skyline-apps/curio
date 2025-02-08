@@ -9,10 +9,13 @@ import { cn } from "@/utils/cn";
 const ANIMATION_DURATION = 300;
 const DEFAULT_TOAST_DURATION = 3000;
 
+export type ToastType = "error";
+
 interface ToastProps extends React.PropsWithChildren {
   className?: string;
   dismissable?: boolean;
   disappearing?: boolean;
+  type?: ToastType;
 }
 
 const Toast: React.FC<ToastProps> = ({
@@ -20,6 +23,7 @@ const Toast: React.FC<ToastProps> = ({
   className,
   dismissable = true,
   disappearing = true,
+  type,
 }: ToastProps) => {
   const [visible, setVisible] = useState<boolean>(true);
   const [isExiting, setIsExiting] = useState<boolean>(false);
@@ -55,6 +59,7 @@ const Toast: React.FC<ToastProps> = ({
             ? "animate-slide-out opacity-0"
             : "animate-slide-in opacity-100"
           : "opacity-0",
+        type === "error" && "text-danger",
         className,
       )}
     >

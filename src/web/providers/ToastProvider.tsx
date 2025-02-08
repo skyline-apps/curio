@@ -3,12 +3,13 @@
 import { AnimatePresence } from "framer-motion";
 import React, { createContext, useCallback, useContext, useState } from "react";
 
-import Toast from "@/components/ui/Toast";
+import Toast, { type ToastType } from "@/components/ui/Toast";
 
 export interface ToastOptions {
   duration?: number;
   dismissable?: boolean;
   disappearing?: boolean;
+  type?: ToastType;
   className?: string;
 }
 
@@ -64,6 +65,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
             key={counter}
             dismissable={toast.options?.dismissable}
             disappearing={toast.options?.disappearing}
+            type={toast.options?.type}
             className={toast.options?.className}
           >
             {toast.content}
