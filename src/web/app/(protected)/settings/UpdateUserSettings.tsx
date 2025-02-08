@@ -109,7 +109,6 @@ const UpdateUserSettings: React.FC = () => {
       (fieldKey) => (
         <FormSection
           key={fieldKey}
-          className="max-w-md"
           title={camelCaseToSentenceCase(fieldKey)}
           description={fields[fieldKey].description}
         >
@@ -120,7 +119,7 @@ const UpdateUserSettings: React.FC = () => {
     );
   }
 
-  return <div className="max-w-md">{contents}</div>;
+  return <div className="space-y-4">{contents}</div>;
 };
 
 export default UpdateUserSettings;

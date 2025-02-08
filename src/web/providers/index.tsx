@@ -50,19 +50,19 @@ const Providers: React.FC<PropsWithChildren> = async ({
   return (
     <ClientProviders>
       <HeroUIProvider>
-        <UserProvider user={currentUser}>
-          <ItemsProvider>
-            <CurrentItemProvider>
-              <ToastProvider>
-                <CacheProvider>
-                  <BrowserMessageProvider>
-                    <SettingsProvider>{children}</SettingsProvider>
-                  </BrowserMessageProvider>
-                </CacheProvider>
-              </ToastProvider>
-            </CurrentItemProvider>
-          </ItemsProvider>
-        </UserProvider>
+        <ToastProvider>
+          <UserProvider user={currentUser}>
+            <SettingsProvider>
+              <ItemsProvider>
+                <CurrentItemProvider>
+                  <CacheProvider>
+                    <BrowserMessageProvider>{children}</BrowserMessageProvider>
+                  </CacheProvider>
+                </CurrentItemProvider>
+              </ItemsProvider>
+            </SettingsProvider>
+          </UserProvider>
+        </ToastProvider>
       </HeroUIProvider>
     </ClientProviders>
   );

@@ -86,7 +86,7 @@ export const Dialog = (): JSX.Element => {
               {dialog.cancelLabel || "Cancel"}
             </Button>
           )}
-          <Button size="sm" color="primary" onPress={handleConfirm}>
+          <Button size="sm" onPress={handleConfirm}>
             {dialog.confirmLabel || "OK"}
           </Button>
         </ModalFooter>
