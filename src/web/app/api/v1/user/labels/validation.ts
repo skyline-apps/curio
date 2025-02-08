@@ -13,6 +13,8 @@ const LabelSchema = z.object({
   color: ColorSchema,
 });
 
+export type Label = z.infer<typeof LabelSchema>;
+
 export const GetLabelsResponseSchema = z.object({
   labels: z.array(LabelSchema),
 });
