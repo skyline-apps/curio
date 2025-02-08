@@ -1,15 +1,23 @@
 import { Input, InputProps } from "@heroui/react";
 import React from "react";
 
-const CurioInput: React.FC<InputProps> = ({
+export const INPUT_CLASSES =
+  "bg-default-50 dark:bg-default-950 hover:bg-default-75 data-[hover=true]:bg-default-75 group-data-[focus=true]:bg-default-75 dark:hover:bg-default-975 dark:group-data-[focus=true]:bg-default-975 dark:data-[hover=true]:bg-default-975";
+
+interface CurioInputProps extends InputProps {
+  transparent?: boolean;
+}
+
+const CurioInput: React.FC<CurioInputProps> = ({
+  transparent,
   className,
   ...props
-}: InputProps) => {
+}: CurioInputProps) => {
   return (
     <Input
       size="sm"
       classNames={{
-        inputWrapper: `bg-default-50 dark:bg-default-950 hover:bg-default-75 data-[hover=true]:bg-default-75 group-data-[focus=true]:bg-default-75 dark:hover:bg-default-975 dark:group-data-[focus=true]:bg-default-975 dark:data-[hover=true]:bg-default-975 ${className}`,
+        inputWrapper: `${transparent ? "bg-transparent hover:bg-transparent data-[hover=true]:bg-transparent group-data-[focus=true]:bg-transparent" : INPUT_CLASSES} ${className}`,
         input:
           "placeholder:text-secondary-400 dark:placeholder:text-secondary-900",
       }}
