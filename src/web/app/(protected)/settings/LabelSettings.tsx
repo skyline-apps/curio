@@ -133,7 +133,7 @@ const LabelSettings: React.FC = () => {
             {loadingLabels && <Spinner size="sm" />}
 
             {!draftLabel && (
-              <Button isIconOnly onPress={addDraftLabel} size="sm">
+              <Button isIconOnly onPress={addDraftLabel} size="xs">
                 <Icon icon={<HiOutlinePlus />} />
               </Button>
             )}
