@@ -5,6 +5,7 @@ import Link from "next/link";
 import React, { forwardRef } from "react";
 import { useFormStatus } from "react-dom";
 
+import Spinner from "@/components/ui/Spinner";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { cn } from "@/utils/cn";
 
@@ -31,14 +32,15 @@ export const FormButton: React.FC<FormButtonProps> = ({
   );
 };
 
-interface CurioButtonProps extends ButtonProps {
+interface CurioButtonProps extends Omit<ButtonProps, "size"> {
   href?: string;
   tooltip?: string;
+  size?: "xs" | "sm" | "md" | "lg";
 }
 
 // Add forwardRef to ensure Dropdowns are properly positioned.
 const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
-  ({ href, tooltip, ...props }: CurioButtonProps, ref) => {
+  ({ href, tooltip, size = "md", ...props }: CurioButtonProps, ref) => {
     let innerContent: React.ReactNode;
 
     if (props.variant === "faded") {
@@ -46,6 +48,15 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
         "bg-background-400 dark:bg-background hover:bg-background-300 dark:hover:bg-background-400 border-none shadow",
         props.className,
       );
+    }
+    if (size === "xs") {
+      props.className = cn("text-xs px-1 py-1 min-w-6 h-6", props.className);
+      if (props.isIconOnly) {
+        props.className = cn("w-6", props.className);
+      }
+      if (props.isLoading) {
+        props.spinner = <Spinner size="xs" />;
+      }
     }
     if (href) {
       innerContent = (

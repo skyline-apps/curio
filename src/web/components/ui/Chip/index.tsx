@@ -117,7 +117,7 @@ export const Chip: React.FC<ChipProps> = ({
       <div
         ref={chipContainerRef}
         className={cn(
-          "relative rounded-full inline-flex items-center space-x-2 text-sm px-2.5 border outline-none h-8",
+          "relative rounded inline-flex items-center space-x-2 text-xs px-2 border outline-none h-6",
           isEditing ? INPUT_CLASSES : "",
           className,
         )}
@@ -132,14 +132,15 @@ export const Chip: React.FC<ChipProps> = ({
           onChange={(e) => setEditValue(e.target.value)}
           onKeyDown={handleKeyDown}
           onBlur={handleBlur}
-          className="flex-grow bg-transparent outline-none text-foreground"
+          maxLength={255}
+          className="flex-grow w-12 bg-transparent outline-none text-foreground"
         />
         <Popover onClose={handleSave} placement="bottom">
           <PopoverTrigger>
             <Button
               isIconOnly
               ref={colorButtonRef}
-              className="w-3 h-3"
+              className="min-w-4 w-4 h-4"
               style={{ backgroundColor: editColor }}
             />
           </PopoverTrigger>
@@ -154,7 +155,7 @@ export const Chip: React.FC<ChipProps> = ({
                   key={paletteColor}
                   onClick={() => selectColor(paletteColor)}
                   className={cn(
-                    "w-6 h-6 rounded-full",
+                    "w-6 h-6 rounded",
                     editColor === paletteColor && "border-2 border-foreground",
                   )}
                   style={{
@@ -173,7 +174,7 @@ export const Chip: React.FC<ChipProps> = ({
     <div
       {...props}
       className={cn(
-        "rounded-full inline-flex items-center justify-center text-sm px-2.5 py-1 text-default-15 cursor-default group",
+        "rounded inline-flex items-center justify-center text-xs px-2 py-1 text-default-15 cursor-default group",
         editable && "cursor-pointer hover:opacity-80",
         className,
       )}
@@ -189,11 +190,11 @@ export const Chip: React.FC<ChipProps> = ({
           : undefined
       }
     >
-      {isUpdating ? <Spinner size="sm" className="text-foreground" /> : value}
+      {isUpdating ? <Spinner size="xs" className="text-foreground" /> : value}
       {onDelete && (
         <button
           onClick={handleDeleteClick}
-          className="ml-1 opacity-70 hover:opacity-100 transition-opacity rounded-full"
+          className="ml-2 opacity-70 hover:opacity-100 transition-opacity rounded"
         >
           <HiOutlineXMark size={16} />
         </button>
