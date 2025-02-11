@@ -40,32 +40,40 @@ interface CurioButtonProps extends Omit<ButtonProps, "size"> {
 
 // Add forwardRef to ensure Dropdowns are properly positioned.
 const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
-  ({ href, tooltip, size = "md", ...props }: CurioButtonProps, ref) => {
+  (
+    { href, tooltip, size = "md", className, ...props }: CurioButtonProps,
+    ref,
+  ) => {
     let innerContent: React.ReactNode;
 
-    if (props.variant === "faded") {
-      props.className = cn(
-        "bg-background-400 dark:bg-background hover:bg-background-300 dark:hover:bg-background-400 border-none shadow",
-        props.className,
-      );
-    }
-    if (size === "xs") {
-      props.className = cn("text-xs px-1 py-1 min-w-6 h-6", props.className);
-      if (props.isIconOnly) {
-        props.className = cn("w-6", props.className);
-      }
-      if (props.isLoading) {
-        props.spinner = <Spinner size="xs" />;
-      }
-    }
+    const buttonProps: ButtonProps = {
+      ...props,
+      className: cn(
+        {
+          "text-xs px-1 py-1 min-w-6 h-6": size === "xs",
+          [props.isIconOnly ? "w-6" : ""]: size === "xs",
+          "bg-background-400 dark:bg-background hover:bg-background-300 dark:hover:bg-background-400 border-none shadow":
+            props.variant === "faded",
+        },
+        className,
+      ),
+      size: size === "xs" ? undefined : size,
+      spinner:
+        size === "xs" && props.isLoading ? (
+          <Spinner size="xs" />
+        ) : (
+          props.spinner
+        ),
+    };
+
     if (href) {
       innerContent = (
         <Link href={href} passHref>
-          <Button ref={ref} {...props} />
+          <Button ref={ref} {...buttonProps} />
         </Link>
       );
     } else {
-      innerContent = <Button ref={ref} {...props} />;
+      innerContent = <Button ref={ref} {...buttonProps} />;
     }
 
     return tooltip ? (
