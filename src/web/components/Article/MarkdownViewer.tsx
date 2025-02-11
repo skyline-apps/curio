@@ -12,6 +12,8 @@ import { ReadItemResponse } from "@/app/api/v1/items/read/validation";
 import { useAppPage } from "@/providers/AppPageProvider";
 import { cn } from "@/utils/cn";
 
+import { SelectionTooltip } from "./SelectionTooltip";
+import { useHighlightSelection } from "./useHighlightSelection";
 import { useScrollProgress } from "./useScrollProgress";
 
 interface MarkdownViewerProps {
@@ -111,9 +113,29 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
     onProgressChange,
   });
 
+  const {
+    handleSelection,
+    currentSelection,
+    currentHighlight,
+    clearSelection,
+    isScrolling,
+  } = useHighlightSelection({
+    contentRef,
+  });
+
+  const handleSaveHighlight = async (
+    highlight: NewHighlight,
+  ): Promise<void> => {
+    if (onHighlight) {
+      await onHighlight(highlight);
+    }
+    clearSelection();
+  };
+
   return (
     <div
       ref={contentRef}
+      onMouseUp={handleSelection}
       className={cn(
         "prose prose-slate max-w-none overflow-y-auto h-full [&_*]:!text-default-foreground hover:prose-a:!text-primary dark:prose-invert",
         className,
@@ -122,6 +144,18 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
         {children || ""}
       </ReactMarkdown>
+
+      {currentSelection &&
+        currentHighlight &&
+        currentSelection.rangeCount > 0 &&
+        !isScrolling && (
+          <SelectionTooltip
+            selection={currentSelection}
+            highlight={currentHighlight}
+            onSave={handleSaveHighlight}
+            addNote={() => {} /* TODO */}
+          />
+        )}
     </div>
   );
 };
