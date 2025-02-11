@@ -105,6 +105,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     ) => {
       if (replace && !inSelectionMode) {
         setSelectedItems(new Set(slugs));
+        setSidebarOpen(!!slugs.length);
       } else if (selectRange && lastSelectionIndex !== null) {
         // Handle shift-click range selection
         const start = Math.min(lastSelectionIndex, index);
@@ -124,15 +125,15 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
           }
         });
         setSelectedItems(newSelection);
+        if (typeof window !== "undefined" && window.innerWidth > 1048) {
+          setSidebarOpen(!!slugs.length);
+        } else {
+          setSidebarOpen(false);
+        }
       }
       setLastSelectionIndex(index);
       if (startSelecting) {
         setInSelectionMode(true);
-      }
-      if (typeof window !== "undefined" && window.innerWidth > 1048) {
-        setSidebarOpen(!!slugs.length);
-      } else {
-        setSidebarOpen(false);
       }
     },
     [items, lastSelectionIndex, selectedItems, inSelectionMode],
