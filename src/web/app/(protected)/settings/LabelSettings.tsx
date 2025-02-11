@@ -20,6 +20,7 @@ const LabelSettings: React.FC = () => {
           <Labels
             labels={labels}
             loading={loadingLabels}
+            mode="create"
             onAdd={async (label) => {
               try {
                 await createLabel(label);

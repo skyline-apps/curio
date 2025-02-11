@@ -9,7 +9,8 @@ import {
 import { type Item, ITEMS_QUERY_KEY, type ItemsPage } from "./ItemsProvider";
 
 type ItemUpdate = { slug: string } & {
-  metadata: Partial<Item["metadata"]>;
+  metadata?: Partial<Item["metadata"]>;
+  labels?: Partial<Item["labels"]>;
 };
 
 export type CacheContextType = {
@@ -53,12 +54,15 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
           (oldData: ItemWithContent) => {
             if (!oldData) return oldData;
 
+            const labels = item.labels ? item.labels : oldData.item.labels;
+
             return {
               ...oldData,
               item: {
                 ...oldData.item,
                 ...item,
                 metadata: { ...oldData.item.metadata, ...item.metadata },
+                labels,
               },
             };
           },
@@ -87,6 +91,9 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
                         ...item.metadata,
                         ...updatedItemsSlugs.get(item.slug)?.metadata,
                       },
+                      labels: item.labels
+                        ? item.labels
+                        : updatedItemsSlugs.get(item.slug)?.labels,
                     }
                   : item,
               ),
