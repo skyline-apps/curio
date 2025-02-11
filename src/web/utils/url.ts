@@ -1,4 +1,6 @@
 import { createHash } from "crypto";
+import slugify from "limax";
+import punycode from "punycode";
 
 /**
  * Removes query parameters from a URL and returns the cleaned URL
@@ -46,38 +48,79 @@ function getLongestPathComponent(path: string): string {
 }
 
 /**
+ * Parses URL components without decoding unicode characters.
+ * Returns an object containing hostname and pathname.
+ * Note: This is a simplified parser that assumes a well-formed URL.
+ */
+function parseUrlPreserveUnicode(url: string): {
+  hostname: string;
+  pathname: string;
+} {
+  // Match hostname: capture everything between // and the next / or end of string
+  const hostnameMatch = url.match(/\/\/([^\/]+)(\/|$)/);
+  const hostname = hostnameMatch ? hostnameMatch[1] : "";
+
+  // Match pathname: capture everything after hostname until ? or # or end of string
+  const pathnameMatch = url.match(/\/\/[^\/]+(\/?[^?#]*)/);
+  const pathname = pathnameMatch ? pathnameMatch[1] : "/";
+
+  return { hostname, pathname };
+}
+
+/**
  * Generates a deterministic slug from a URL by:
- * 1. Removing query parameters
- * 2. Taking the domain and longest path component (limited to 7 words each)
- * 3. Creating a hash of the original URL
- * 4. Combining the components with the hash
+ * 1. Strip URL of query parameters
+ * 2. Get the domain and longest path component
+ * 3. Take the first 7 words of both domain and path component
+ * 4. Join words from domain and longest path component with -
+ * 5. Convert characters to ASCII
+ * 6. Append a 6-character hash generated from the cleaned URL
  */
 export function generateSlug(url: string): string {
   try {
+    new URL(url);
     const cleanedUrl = cleanUrl(url);
-    const parsedUrl = new URL(cleanedUrl.replace(/~/g, ""));
-    // Get domain without protocol and www, limit to 7 words
-    const domain = truncateWords(
-      parsedUrl.host.replace(/^www\./, "").replace(/\./g, "-"),
-      7,
-    );
-    // Get the longest path component and limit to 7 words
-    const path = parsedUrl.pathname.replace(/\/+$/, "");
-    const longestPathComponent = getLongestPathComponent(path).replace(
-      /\//g,
-      "-",
-    );
-    const slugBase = truncateWords(longestPathComponent, 7);
 
-    // Create a hash of the cleaned URL
+    const { hostname, pathname } = parseUrlPreserveUnicode(url);
+
+    // Generate hash from cleaned URL
     const hash = createHash("sha256")
       .update(cleanedUrl)
       .digest("hex")
       .slice(0, 6);
 
-    return slugBase ? `${domain}-${slugBase}-${hash}` : `${domain}-${hash}`;
+    // Get domain and longest path component
+    const domain = hostname.replace(/^www\./, "");
+    const longestPath = getLongestPathComponent(pathname);
+
+    // Take first 7 words of both domain and path
+    const domainWords = domain.split(/[.-]/).join("-");
+    const truncatedDomain = truncateWords(domainWords, 7);
+    const truncatedPath = truncateWords(longestPath, 7);
+
+    // Join domain and path with hyphens
+    const slug = `${truncatedDomain}-${truncatedPath}`
+      .toLowerCase()
+      .replace(/-+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+    // Convert to ASCII
+    const asciiSlug = slug
+      .split("-")
+      .map((part) => {
+        const slug = slugify(part);
+        if (slug.length === 0) {
+          return punycode.encode(part);
+        } else {
+          return slug;
+        }
+      })
+      .join("-");
+
+    // Append hash
+    return `${asciiSlug}-${hash}`;
   } catch (error) {
-    // If URL parsing fails, hash the entire URL
+    // If URL parsing fails, hash the original URL
     const hash = createHash("sha256").update(url).digest("hex").slice(0, 8);
     return `item-${hash}`;
   }
