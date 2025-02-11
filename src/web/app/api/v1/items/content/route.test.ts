@@ -12,6 +12,7 @@ import { desc, eq } from "@/db";
 import {
   items,
   ItemState,
+  profileItemHighlights,
   profileItemLabels,
   profileItems,
   profileLabels,
@@ -97,6 +98,29 @@ const MOCK_PROFILE_ITEM_LABELS = [
   },
 ];
 
+const MOCK_HIGHLIGHTS = [
+  {
+    id: "123e4567-e89b-12d3-a456-426614174010",
+    profileItemId: MOCK_PROFILE_ITEM.id,
+    startOffset: 10,
+    endOffset: 20,
+    text: "highlighted text",
+    note: "test note",
+    createdAt: new Date("2025-01-10T12:52:56-08:00"),
+    updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+  },
+  {
+    id: "123e4567-e89b-12d3-a456-426614174011",
+    profileItemId: MOCK_PROFILE_ITEM.id,
+    startOffset: 30,
+    endOffset: 40,
+    text: "another highlight",
+    note: null,
+    createdAt: new Date("2025-01-10T12:53:56-08:00"),
+    updatedAt: new Date("2025-01-10T12:53:56-08:00"),
+  },
+];
+
 describe("/api/v1/items/content", () => {
   describe("GET /api/v1/items/content", () => {
     test.each([
@@ -126,6 +150,7 @@ describe("/api/v1/items/content", () => {
           slug: TEST_ITEM_SLUG,
           createdAt: ORIGINAL_CREATION_DATE.toISOString(),
           labels: [],
+          highlights: [],
           metadata: {
             author: "Test Author",
             description: "An example item",
@@ -216,6 +241,7 @@ describe("/api/v1/items/content", () => {
           slug: TEST_ITEM_SLUG,
           createdAt: ORIGINAL_CREATION_DATE.toISOString(),
           labels: [],
+          highlights: [],
           metadata: {
             author: "Test Author",
             description: "An example item",
@@ -290,6 +316,7 @@ describe("/api/v1/items/content", () => {
               name: "Test Label 2",
             },
           ],
+          highlights: [],
           metadata: {
             author: "Test Author",
             description: "An example item",
@@ -349,6 +376,7 @@ describe("/api/v1/items/content", () => {
           slug: TEST_ITEM_SLUG,
           createdAt: ORIGINAL_CREATION_DATE.toISOString(),
           labels: [],
+          highlights: [],
           metadata: {
             author: "Test Author",
             description: "An example item",
@@ -426,6 +454,68 @@ describe("/api/v1/items/content", () => {
       expect(response.status).toBe(404);
       const data = await response.json();
       expect(data.error).toBe("Item not found.");
+    });
+
+    it("should return item with highlights when available", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEM);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEM);
+      await testDb.db.insert(profileLabels).values(MOCK_LABELS);
+      await testDb.db
+        .insert(profileItemLabels)
+        .values(MOCK_PROFILE_ITEM_LABELS);
+      await testDb.db.insert(profileItemHighlights).values(MOCK_HIGHLIGHTS);
+
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "GET",
+        searchParams: { slug: TEST_ITEM_SLUG },
+      });
+
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data.item.highlights).toHaveLength(2);
+      expect(data.item.highlights).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: MOCK_HIGHLIGHTS[0].id,
+            startOffset: MOCK_HIGHLIGHTS[0].startOffset,
+            endOffset: MOCK_HIGHLIGHTS[0].endOffset,
+            text: MOCK_HIGHLIGHTS[0].text,
+            note: MOCK_HIGHLIGHTS[0].note,
+          }),
+          expect.objectContaining({
+            id: MOCK_HIGHLIGHTS[1].id,
+            startOffset: MOCK_HIGHLIGHTS[1].startOffset,
+            endOffset: MOCK_HIGHLIGHTS[1].endOffset,
+            text: MOCK_HIGHLIGHTS[1].text,
+            note: MOCK_HIGHLIGHTS[1].note,
+          }),
+        ]),
+      );
+      expect(data.item.highlights[0].startOffset).toBeLessThan(
+        data.item.highlights[1].startOffset,
+      );
+    });
+
+    it("should return empty highlights array when no highlights exist", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEM);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEM);
+      await testDb.db.insert(profileLabels).values(MOCK_LABELS);
+      await testDb.db
+        .insert(profileItemLabels)
+        .values(MOCK_PROFILE_ITEM_LABELS);
+
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "GET",
+        searchParams: { slug: TEST_ITEM_SLUG },
+      });
+
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data.item.highlights).toEqual([]);
     });
   });
 

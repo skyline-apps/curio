@@ -1,7 +1,6 @@
 import { LABELS_CLAUSE } from "@/app/api/v1/items/route";
-import { ItemResultSchema } from "@/app/api/v1/items/validation";
 import { and, db, eq, sql } from "@/db";
-import { items, profileItems } from "@/db/schema";
+import { items, profileItemHighlights, profileItems } from "@/db/schema";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
 import {
@@ -19,6 +18,7 @@ import {
   GetItemContentRequestSchema,
   GetItemContentResponse,
   GetItemContentResponseSchema,
+  ItemResultWithHighlightsSchema,
   UpdateItemContentRequestSchema,
   UpdateItemContentResponse,
   UpdateItemContentResponseSchema,
@@ -69,6 +69,30 @@ export async function GET(
           versionName: profileItems.versionName,
         },
         labels: LABELS_CLAUSE,
+        highlights: sql<
+          Array<{
+            id: string;
+            startOffset: number;
+            endOffset: number;
+            text: string | null;
+            note: string | null;
+          }>
+        >`(
+          SELECT COALESCE(
+            json_agg(
+              json_build_object(
+                'id', h.id,
+                'startOffset', h.start_offset,
+                'endOffset', h.end_offset,
+                'text', h.text,
+                'note', h.note
+              ) ORDER BY h.start_offset
+            ),
+            '[]'::json
+          )
+          FROM ${profileItemHighlights} h
+          WHERE h.profile_item_id = ${profileItems.id}
+        )`,
         createdAt: items.createdAt,
       })
       .from(items)
@@ -85,13 +109,14 @@ export async function GET(
       return APIResponseJSON({ error: "Item not found." }, { status: 404 });
     }
 
-    const itemResponse = ItemResultSchema.parse(item[0]);
+    const itemResponse = ItemResultWithHighlightsSchema.parse(item[0]);
 
     try {
       const { version, content } = await storage.getItemContent(
         slug,
         itemResponse.metadata.versionName,
       );
+
       let response: GetItemContentResponse = GetItemContentResponseSchema.parse(
         {
           content,
