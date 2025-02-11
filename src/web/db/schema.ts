@@ -193,6 +193,33 @@ export const profileItemLabels = pgTable(
   }),
 );
 
+export const profileItemHighlights = pgTable(
+  "profile_item_highlights",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    profileItemId: uuid("profile_item_id").notNull(),
+    startOffset: integer("start_offset").notNull(),
+    endOffset: integer("end_offset").notNull(),
+    text: text("text"),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    profileItemForeignKey: foreignKey({
+      name: "profile_item_highlights_profile_item_id_fk",
+      columns: [table.profileItemId],
+      foreignColumns: [profileItems.id],
+    })
+      .onDelete("cascade")
+      .onUpdate("cascade"),
+  }),
+);
+
 export const apiKeys = pgTable(
   "api_keys",
   {
