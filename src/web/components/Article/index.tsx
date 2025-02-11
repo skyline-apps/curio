@@ -10,14 +10,16 @@ interface ArticleProps {
 }
 
 const Article: React.FC<ArticleProps> = ({ content }: ArticleProps) => {
-  const { updateReadingProgress } = useArticleUpdate();
+  const { updateReadingProgress, createHighlight } = useArticleUpdate();
   const { loadedItem } = useContext(CurrentItemContext);
 
   return (
     <>
       <MarkdownViewer
         readingProgress={loadedItem?.item.metadata.readingProgress || 0}
+        highlights={loadedItem?.item.highlights || []}
         onProgressChange={updateReadingProgress}
+        onHighlight={createHighlight}
         className="py-4"
       >
         {content}
