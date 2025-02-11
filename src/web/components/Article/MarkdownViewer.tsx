@@ -1,4 +1,4 @@
-import React, { type ComponentPropsWithoutRef } from "react";
+import React, { type ComponentPropsWithoutRef, useRef } from "react";
 import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -30,6 +30,9 @@ interface MarkdownNode {
     start: {
       offset: number;
     };
+    end: {
+      offset: number;
+    };
   };
   type?: string;
   value?: string;
@@ -49,10 +52,12 @@ const createComponentWithOffset = <T extends keyof JSX.IntrinsicElements>(
     ...rest
   }: MarkdownProps<T>): JSX.Element => {
     const startOffset = node?.position?.start?.offset;
+    const endOffset = node?.position?.end?.offset;
     return React.createElement(
       tag,
       {
         "data-start-offset": startOffset,
+        "data-end-offset": endOffset,
         ...rest,
       },
       children,
@@ -92,12 +97,14 @@ const components = {
 const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
   readingProgress,
   onProgressChange,
-  highlights: _highlights,
-  onHighlight: _onHighlight,
+  highlights,
+  onHighlight,
   className,
   children,
 }) => {
   const { containerRef } = useAppPage();
+  const contentRef = useRef<HTMLDivElement>(null);
+
   useScrollProgress({
     initialProgress: readingProgress,
     containerRef,
@@ -106,6 +113,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
 
   return (
     <div
+      ref={contentRef}
       className={cn(
         "prose prose-slate max-w-none overflow-y-auto h-full [&_*]:!text-default-foreground hover:prose-a:!text-primary dark:prose-invert",
         className,
