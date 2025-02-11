@@ -206,8 +206,11 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       await labelsMutation.mutateAsync({ type: LabelAction.CREATE, label });
       showToast("Label created successfully", { disappearing: true });
       return true;
-    } catch (error) {
-      showToast("Failed to create label", { type: "error" });
+    } catch (error: unknown) {
+      showToast(
+        error instanceof Error ? error.message : "Failed to create label",
+        { type: "error" },
+      );
       return false;
     }
   };

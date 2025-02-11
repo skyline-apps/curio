@@ -176,6 +176,18 @@ describe("/api/v1/user/labels", () => {
       expect(updatedLabels).toHaveLength(2);
     });
 
+    it("should return 200 for label name only used by another user", async () => {
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "POST",
+        body: {
+          labels: [{ name: "Ghost", color: "#0000FF" }],
+        },
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+    });
+
     it("should return 400 for invalid label name", async () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
@@ -189,6 +201,21 @@ describe("/api/v1/user/labels", () => {
 
       const data = await response.json();
       expect(data.error).toBeTruthy();
+    });
+
+    it("should return 400 for duplicate label name", async () => {
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "POST",
+        body: {
+          labels: [{ name: "Personal", color: "#0000FF" }],
+        },
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(400);
+
+      const data = await response.json();
+      expect(data.error).toBe("Label name already in use.");
     });
 
     it("should return 500 if database insert fails", async () => {

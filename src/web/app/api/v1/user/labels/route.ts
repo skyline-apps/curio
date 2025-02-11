@@ -1,4 +1,5 @@
 import { and, db, eq, inArray, sql } from "@/db";
+import { checkDbError, DbError, DbErrorCode } from "@/db/errors";
 import { profileLabels } from "@/db/schema";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
@@ -98,6 +99,12 @@ export async function POST(
     });
     return APIResponseJSON(response);
   } catch (error) {
+    if (checkDbError(error as DbError) === DbErrorCode.UniqueViolation) {
+      return APIResponseJSON(
+        { error: "Label name already in use." },
+        { status: 400 },
+      );
+    }
     log.error(`Error updating labels for user ${userId}`, error);
     return APIResponseJSON(
       { error: "Error updating labels." },
