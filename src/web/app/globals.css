@@ -27,6 +27,9 @@ h5,
 h6,
 em,
 b,
+ul,
+li,
+ol,
 strong,
 pre {
   -webkit-user-select: text;
