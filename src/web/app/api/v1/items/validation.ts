@@ -130,6 +130,10 @@ export const ItemResultSchema = z
 
 export type ItemResult = z.infer<typeof ItemResultSchema>;
 
+export const ItemResultWithoutLabelsSchema = ItemResultSchema.omit({
+  labels: true,
+});
+
 export const GetItemsRequestSchema = z
   .object({
     slugs: z
@@ -220,7 +224,7 @@ export type CreateOrUpdateItemsRequest = z.infer<
 >;
 
 export const CreateOrUpdateItemsResponseSchema = z.object({
-  items: z.array(ItemResultSchema),
+  items: z.array(ItemResultWithoutLabelsSchema),
   errors: z
     .array(
       z.object({
