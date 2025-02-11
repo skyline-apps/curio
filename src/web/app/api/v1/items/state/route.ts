@@ -39,7 +39,7 @@ export async function POST(
     const updatedItems = await db
       .update(profileItems)
       .set({
-        stateUpdatedAt: now,
+        stateUpdatedAt: sql`${sql.raw("'" + now.toISOString() + "'::timestamp")} + (array_position(ARRAY[${sql.join(slugs, sql`, `)}]::text[], ${items.slug})::integer * interval '1 millisecond')`,
         state,
       })
       .from(items)
@@ -52,6 +52,7 @@ export async function POST(
       )
       .returning({
         slug: items.slug,
+        stateUpdatedAt: profileItems.stateUpdatedAt,
       });
 
     const response: UpdateStateResponse = UpdateStateResponseSchema.parse({
