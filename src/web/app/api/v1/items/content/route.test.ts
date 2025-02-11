@@ -107,19 +107,7 @@ describe("/api/v1/items/content", () => {
       ],
     ])("%s", async (_, apiKey) => {
       await testDb.db.insert(items).values(MOCK_ITEM);
-      await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        favicon: "https://example.com/favicon.ico",
-        publishedAt: ORIGINAL_PUBLISHED_DATE,
-        savedAt: ORIGINAL_CREATION_DATE,
-        stateUpdatedAt: ORIGINAL_CREATION_DATE,
-        isFavorite: true,
-      });
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEM);
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "GET",
@@ -137,6 +125,7 @@ describe("/api/v1/items/content", () => {
           id: TEST_ITEM_ID,
           slug: TEST_ITEM_SLUG,
           createdAt: ORIGINAL_CREATION_DATE.toISOString(),
+          labels: [],
           metadata: {
             author: "Test Author",
             description: "An example item",
@@ -205,20 +194,9 @@ describe("/api/v1/items/content", () => {
       });
       await testDb.db.insert(items).values(MOCK_ITEM);
       await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        favicon: "https://example.com/favicon.ico",
-        publishedAt: ORIGINAL_PUBLISHED_DATE,
-        savedAt: ORIGINAL_CREATION_DATE,
-        stateUpdatedAt: ORIGINAL_CREATION_DATE,
-        state: ItemState.ACTIVE,
-        isFavorite: true,
+        ...MOCK_PROFILE_ITEM,
         readingProgress: 5,
-        lastReadAt: new Date("2025-02-10T12:50:00-08:00"),
+        lastReadAt: new Date("2025-02-10T20:50:00.000Z"),
         versionName: "2010-04-04",
       });
 
@@ -237,6 +215,7 @@ describe("/api/v1/items/content", () => {
           id: TEST_ITEM_ID,
           slug: TEST_ITEM_SLUG,
           createdAt: ORIGINAL_CREATION_DATE.toISOString(),
+          labels: [],
           metadata: {
             author: "Test Author",
             description: "An example item",
@@ -276,21 +255,14 @@ describe("/api/v1/items/content", () => {
         .mockRejectedValueOnce(new StorageError("Failed to download content"));
       await testDb.db.insert(items).values(MOCK_ITEM);
       await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        favicon: "https://example.com/favicon.ico",
-        publishedAt: ORIGINAL_PUBLISHED_DATE,
-        savedAt: ORIGINAL_CREATION_DATE,
-        stateUpdatedAt: ORIGINAL_CREATION_DATE,
-        state: ItemState.ACTIVE,
-        isFavorite: true,
+        ...MOCK_PROFILE_ITEM,
         readingProgress: 5,
-        lastReadAt: new Date("2025-02-10T12:50:00-08:00"),
+        lastReadAt: new Date("2025-02-10T20:50:00.000Z"),
       });
+      await testDb.db.insert(profileLabels).values(MOCK_LABELS);
+      await testDb.db
+        .insert(profileItemLabels)
+        .values(MOCK_PROFILE_ITEM_LABELS);
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "GET",
@@ -306,6 +278,18 @@ describe("/api/v1/items/content", () => {
           id: TEST_ITEM_ID,
           slug: TEST_ITEM_SLUG,
           createdAt: ORIGINAL_CREATION_DATE.toISOString(),
+          labels: [
+            {
+              color: "#ff0000",
+              id: "123e4567-e89b-12d3-a456-426614174005",
+              name: "Test Label 1",
+            },
+            {
+              color: "#00ff00",
+              id: "123e4567-e89b-12d3-a456-426614174006",
+              name: "Test Label 2",
+            },
+          ],
           metadata: {
             author: "Test Author",
             description: "An example item",
@@ -343,20 +327,9 @@ describe("/api/v1/items/content", () => {
       });
       await testDb.db.insert(items).values(MOCK_ITEM);
       await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        favicon: "https://example.com/favicon.ico",
-        publishedAt: ORIGINAL_PUBLISHED_DATE,
-        savedAt: ORIGINAL_CREATION_DATE,
-        stateUpdatedAt: ORIGINAL_CREATION_DATE,
-        state: ItemState.ACTIVE,
-        isFavorite: true,
+        ...MOCK_PROFILE_ITEM,
         readingProgress: 5,
-        lastReadAt: new Date("2025-02-10T12:50:00-08:00"),
+        lastReadAt: new Date("2025-02-10T20:50:00.000Z"),
         versionName: "2010-04-04",
       });
 
@@ -375,6 +348,7 @@ describe("/api/v1/items/content", () => {
           id: TEST_ITEM_ID,
           slug: TEST_ITEM_SLUG,
           createdAt: ORIGINAL_CREATION_DATE.toISOString(),
+          labels: [],
           metadata: {
             author: "Test Author",
             description: "An example item",

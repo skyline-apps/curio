@@ -19,6 +19,7 @@ import {
   GetItemsResponse,
   GetItemsResponseSchema,
   ItemResultSchema,
+  ItemResultWithoutLabelsSchema,
 } from "./validation";
 
 const log = createLogger("api/v1/items");
@@ -287,7 +288,7 @@ export async function POST(
               (metadata) => metadata.itemId === item.id,
             );
             const { itemId: _itemId, ...metadataWithoutId } = metadata || {};
-            return ItemResultSchema.parse({
+            return ItemResultWithoutLabelsSchema.parse({
               ...item,
               metadata: metadataWithoutId,
             });
