@@ -3,17 +3,20 @@ import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { useContext } from "react";
 
 import { UpdateFavoriteResponse } from "@/app/api/v1/items/favorite/validation";
+import { UpdateLabelsResponse } from "@/app/api/v1/items/labels/validation";
 import { UpdateStateResponse } from "@/app/api/v1/items/state/validation";
 import { showConfirm } from "@/components/ui/Modal/Dialog";
 import { ItemState } from "@/db/schema";
 import { BrowserMessageContext } from "@/providers/BrowserMessageProvider";
 import { useCache } from "@/providers/CacheProvider";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
-import { Item } from "@/providers/ItemsProvider";
+import { type Item } from "@/providers/ItemsProvider";
 import { handleAPIResponse } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
 
 const log = createLogger("item-actions");
+
+type ItemLabel = Item["labels"][0];
 
 interface UseItemUpdate {
   updateItemsState: (
@@ -24,6 +27,14 @@ interface UseItemUpdate {
     itemSlugs: string[],
     favorite: boolean,
   ) => Promise<UpdateFavoriteResponse>;
+  addItemsLabel: (
+    items: Item[],
+    labelToAdd: ItemLabel,
+  ) => Promise<UpdateLabelsResponse>;
+  removeItemsLabel: (
+    items: Item[],
+    labelToRemove: ItemLabel,
+  ) => Promise<UpdateLabelsResponse>;
   refetchItem: (item: Item) => Promise<void>;
 }
 
@@ -82,6 +93,70 @@ export const useItemUpdate = (): UseItemUpdate => {
     },
   };
 
+  const updateItemsLabelMutationOptions: UseMutationOptions<
+    UpdateLabelsResponse,
+    Error,
+    {
+      items: Item[];
+      labelToAdd: ItemLabel;
+    }
+  > = {
+    mutationFn: async ({ items, labelToAdd }) => {
+      const newItems = items.map((item) => ({
+        ...item,
+        labels: [...(item.labels || []), labelToAdd],
+      }));
+      optimisticUpdateItems(newItems);
+
+      return await fetch("/api/v1/items/labels", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          slugs: items.map((item) => item.slug).join(","),
+          labelIds: [labelToAdd.id],
+        }),
+      }).then(handleAPIResponse<UpdateLabelsResponse>);
+    },
+    onSuccess: () => {
+      invalidateCache();
+    },
+  };
+
+  const removeItemsLabelMutationOptions: UseMutationOptions<
+    UpdateLabelsResponse,
+    Error,
+    {
+      items: Item[];
+      labelToRemove: ItemLabel;
+    }
+  > = {
+    mutationFn: async ({ items, labelToRemove }) => {
+      const newItems = items.map((item) => ({
+        ...item,
+        labels: (item.labels || []).filter(
+          (label) => label.id !== labelToRemove.id,
+        ),
+      }));
+      optimisticUpdateItems(newItems);
+
+      return await fetch("/api/v1/items/labels", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          slugs: items.map((item) => item.slug).join(","),
+          labelIds: [labelToRemove.id],
+        }),
+      }).then(handleAPIResponse<UpdateLabelsResponse>);
+    },
+    onSuccess: () => {
+      invalidateCache();
+    },
+  };
+
   const updateItemContentMutationOptions: UseMutationOptions<
     void,
     Error,
@@ -115,6 +190,8 @@ export const useItemUpdate = (): UseItemUpdate => {
   const updateItemsFavoriteMutation = useMutation(
     updateItemsFavoriteMutationOptions,
   );
+  const updateItemsLabelMutation = useMutation(updateItemsLabelMutationOptions);
+  const removeItemsLabelMutation = useMutation(removeItemsLabelMutationOptions);
   const updateItemContentMutation = useMutation(
     updateItemContentMutationOptions,
   );
@@ -139,9 +216,35 @@ export const useItemUpdate = (): UseItemUpdate => {
     });
   };
 
+  const addItemsLabel = async (
+    items: Item[],
+    labelToAdd: ItemLabel,
+  ): Promise<UpdateLabelsResponse> => {
+    return await updateItemsLabelMutation.mutateAsync({
+      items,
+      labelToAdd,
+    });
+  };
+
+  const removeItemsLabel = async (
+    items: Item[],
+    labelToRemove: ItemLabel,
+  ): Promise<UpdateLabelsResponse> => {
+    return await removeItemsLabelMutation.mutateAsync({
+      items,
+      labelToRemove,
+    });
+  };
+
   const refetchItem = async (item: Item): Promise<void> => {
     return await updateItemContentMutation.mutateAsync({ item });
   };
 
-  return { updateItemsState, updateItemsFavorite, refetchItem };
+  return {
+    updateItemsState,
+    updateItemsFavorite,
+    addItemsLabel,
+    removeItemsLabel,
+    refetchItem,
+  };
 };

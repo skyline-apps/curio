@@ -4,6 +4,7 @@ import { HiCheck } from "react-icons/hi2";
 
 import Favicon from "@/components/Image/Favicon";
 import ItemActions from "@/components/Items/ItemActions";
+import Labels from "@/components/Labels";
 import Icon from "@/components/ui/Icon";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import type { Item } from "@/providers/ItemsProvider";
@@ -38,7 +39,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
     <div
       key={item.id}
       className={cn(
-        "w-full group flex flex-row bg-background-400 pl-4 pr-1 py-1 pb-2 h-16 rounded-sm overflow-hidden hover:bg-background-300 data-[selected=true]:bg-background-300 data-[focus=true]:outline-focus data-[focus=true]:outline",
+        "w-full group flex flex-row bg-background-400 pl-4 pr-1 py-1 h-16 rounded-sm overflow-hidden hover:bg-background-300 data-[selected=true]:bg-background-300 data-[focus=true]:outline-focus data-[focus=true]:outline",
         startPos !== undefined && "absolute top-0 left-0",
       )}
       style={{
@@ -70,7 +71,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
     >
       <div className="flex flex-row gap-2 justify-between items-start w-full">
         <div className="grow h-full block overflow-hidden">
-          <div className="flex flex-row gap-2 items-center">
+          <div className="flex flex-row gap-2 items-center h-6">
             <div className="flex shrink-0 items-center justify-center w-4 h-4">
               <Favicon
                 className={isRead ? "opacity-50" : ""}
@@ -79,7 +80,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
             </div>
             <Link
               href={`/items/${item.slug}`}
-              className="text-sm text-foreground hover:underline truncate select-none"
+              className="text-sm shrink-0 text-foreground hover:underline truncate select-none"
               onClick={(ev) => ev.stopPropagation()}
             >
               {isRead ? (
@@ -91,10 +92,17 @@ const ItemCard: React.FC<ItemCardProps> = ({
             <p className="text-xs text-secondary-700 select-none hidden md:block">
               {getHostname(item.url)}
             </p>
+            {item.labels && item.labels.length > 0 && (
+              <div className="hidden md:block max-h-6 overflow-hidden">
+                <Labels labels={item.labels} truncate />
+              </div>
+            )}
           </div>
-          <p className="text-xs text-secondary-700 text-wrap truncate select-none">
-            {item.metadata.description}
-          </p>
+          <div className="flex flex-col gap-1">
+            <p className="text-xs text-secondary-700 text-wrap truncate select-none">
+              {item.metadata.description}
+            </p>
+          </div>
         </div>
         <ItemActions
           item={item}

@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import { HiOutlinePlus } from "react-icons/hi2";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { HiOutlinePlus, HiOutlineTag } from "react-icons/hi2";
 
 import Button from "@/components/ui/Button";
 import { Chip, COLOR_PALETTE } from "@/components/ui/Chip";
 import Icon from "@/components/ui/Icon";
 import Spinner from "@/components/ui/Spinner";
+import { Tooltip } from "@/components/ui/Tooltip";
+
+import LabelPicker from "./LabelPicker";
 
 export interface Label {
   id: string;
@@ -14,35 +17,46 @@ export interface Label {
   color: string;
 }
 
-interface LabelsProps {
+interface BaseLabelsProps {
   labels: Label[];
   loading?: boolean;
-  onAdd?: (label: { name: string; color: string }) => Promise<void>;
   onDelete?: (labelId: string) => Promise<void>;
   onRename?: (
     labelId: string,
     updates: { name?: string; color?: string },
   ) => Promise<void>;
+  truncate?: boolean;
 }
 
-const Labels: React.FC<LabelsProps> = ({
-  labels,
-  loading = false,
-  onAdd,
-  onDelete,
-  onRename,
-}) => {
+interface CreateLabelsProps extends BaseLabelsProps {
+  mode?: "create";
+  onAdd?: (label: { name: string; color: string }) => Promise<void>;
+}
+
+interface PickerLabelsProps extends BaseLabelsProps {
+  mode: "picker";
+  availableLabels: Label[];
+  onAdd: (label: Label) => Promise<void>;
+}
+
+type LabelsProps = CreateLabelsProps | PickerLabelsProps;
+
+const Labels: React.FC<LabelsProps> = (props) => {
   const [draftLabel, setDraftLabel] = useState<{
     name: string;
     color: string;
   } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLDivElement>(null);
+  const [showCount, setShowCount] = useState<boolean>(false);
+  const [isReady, setIsReady] = useState<boolean>(false);
 
   const handleUpdateLabelName = async (
     labelId: string,
     newName: string,
     newColor?: string,
   ): Promise<void> => {
-    const currentLabel = labels?.find((label) => label.id === labelId);
+    const currentLabel = props.labels?.find((label) => label.id === labelId);
 
     if (
       currentLabel?.name === newName.trim() &&
@@ -59,14 +73,14 @@ const Labels: React.FC<LabelsProps> = ({
       updates.color = newColor;
     }
 
-    if (Object.keys(updates).length > 0 && onRename) {
-      await onRename(labelId, updates);
+    if (Object.keys(updates).length > 0 && props.onRename) {
+      await props.onRename(labelId, updates);
     }
   };
 
   const handleDeleteLabel = async (labelId: string): Promise<void> => {
-    if (onDelete) {
-      await onDelete(labelId);
+    if (props.onDelete) {
+      await props.onDelete(labelId);
     }
   };
 
@@ -87,8 +101,8 @@ const Labels: React.FC<LabelsProps> = ({
       return;
     }
 
-    if (onAdd) {
-      await onAdd({
+    if ((!props.mode || props.mode === "create") && props.onAdd) {
+      await props.onAdd({
         name: newName.trim(),
         color: newColor || draftLabel?.color || COLOR_PALETTE[0],
       });
@@ -96,49 +110,148 @@ const Labels: React.FC<LabelsProps> = ({
     }
   };
 
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      {labels.length === 0 && !draftLabel && (
-        <p className="text-secondary-800 text-sm">No labels yet.</p>
-      )}
-      {labels.map((label) => (
+  const checkFit = useCallback(() => {
+    if (
+      !props.truncate ||
+      !containerRef.current ||
+      !measureRef.current ||
+      props.labels.length === 0
+    ) {
+      setShowCount(false);
+      return;
+    }
+
+    const container = containerRef.current;
+    const measureContainer = measureRef.current;
+    const labelsContainer = measureContainer.querySelector(
+      ".labels-container",
+    ) as HTMLElement;
+
+    if (!labelsContainer) return;
+
+    const containerWidth = container.offsetWidth;
+    const labelsWidth = labelsContainer.scrollWidth;
+    const totalWidth = labelsWidth + (props.labels.length - 1) * 8;
+
+    setShowCount(totalWidth > containerWidth);
+  }, [props.truncate, props.labels.length]);
+
+  useEffect(() => {
+    setIsReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isReady) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      requestAnimationFrame(checkFit);
+    });
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => resizeObserver.disconnect();
+  }, [checkFit, isReady]);
+
+  useEffect(() => {
+    if (!isReady) return;
+    requestAnimationFrame(checkFit);
+  }, [checkFit, props.labels, isReady]);
+
+  if (props.mode === "picker") {
+    return (
+      <LabelPicker
+        availableLabels={props.availableLabels}
+        labels={props.labels}
+        onAdd={props.onAdd}
+        onDelete={props.onDelete}
+      />
+    );
+  }
+
+  const renderLabelChips = (): JSX.Element => (
+    <>
+      {props.labels.map((label) => (
         <Chip
           key={label.id}
+          className="label-chip"
           color={label.color}
-          editable={!!onRename}
+          editable={!!props.onRename}
           onEdit={(newName, newColor) =>
             handleUpdateLabelName(label.id, newName, newColor)
           }
-          onDelete={onDelete ? () => handleDeleteLabel(label.id) : undefined}
+          onDelete={
+            props.onDelete ? () => handleDeleteLabel(label.id) : undefined
+          }
           value={label.name}
         />
       ))}
+    </>
+  );
 
-      {draftLabel && (
-        <Chip
-          key="draft"
-          color={draftLabel.color}
-          editable
-          defaultActive
-          onEdit={(newName, newColor) =>
-            handleDraftLabelSave(newName, newColor)
-          }
-          onBlur={() => {
-            if (!draftLabel.name.trim()) {
-              setDraftLabel(null);
+  const renderDraftLabel = (): JSX.Element | null => {
+    if (!(!props.mode || props.mode === "create")) return null;
+
+    return (
+      <>
+        {draftLabel && (
+          <Chip
+            key="draft"
+            color={draftLabel.color}
+            editable
+            defaultActive
+            onEdit={(newName, newColor) =>
+              handleDraftLabelSave(newName, newColor)
             }
-          }}
-          value={draftLabel.name}
-        />
-      )}
-      {loading && <Spinner size="sm" />}
+            onBlur={() => {
+              if (!draftLabel.name.trim()) {
+                setDraftLabel(null);
+              }
+            }}
+            value={draftLabel.name}
+          />
+        )}
+        {!draftLabel && props.onAdd && (
+          <Button isIconOnly onPress={addDraftLabel} size="xs">
+            <Icon icon={<HiOutlinePlus />} />
+          </Button>
+        )}
+      </>
+    );
+  };
 
-      {!draftLabel && onAdd && (
-        <Button isIconOnly onPress={addDraftLabel} size="xs">
-          <Icon icon={<HiOutlinePlus />} />
-        </Button>
+  return (
+    <>
+      {isReady && (
+        <div
+          ref={measureRef}
+          className="absolute opacity-0 pointer-events-none"
+          aria-hidden="true"
+        >
+          <div className="labels-container whitespace-nowrap">
+            {renderLabelChips()}
+          </div>
+        </div>
       )}
-    </div>
+
+      <div ref={containerRef} className="flex flex-wrap items-center gap-2">
+        {props.truncate && showCount && props.labels.length > 0 ? (
+          <Tooltip content={`${props.labels.map((l) => l.name).join(", ")}`}>
+            <div className="text-xs h-6 w-8 flex items-center justify-start px-1 gap-1 rounded bg-secondary-400 text-default-50">
+              {props.labels.length}
+              <Icon icon={<HiOutlineTag className="text-default-50" />} />
+            </div>
+          </Tooltip>
+        ) : (
+          <>
+            {renderLabelChips()}
+            {props.loading && <Spinner size="xs" />}
+            {renderDraftLabel()}
+          </>
+        )}
+      </div>
+    </>
   );
 };
 

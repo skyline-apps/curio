@@ -1,8 +1,12 @@
 import Link from "next/link";
+import { useCallback, useContext } from "react";
 
 import Thumbnail from "@/components/Image/Thumbnail";
 import ItemActions from "@/components/Items/ItemActions";
+import { useItemUpdate } from "@/components/Items/ItemActions/actions";
+import Labels, { Label } from "@/components/Labels";
 import type { Item } from "@/providers/ItemsProvider";
+import { SettingsContext } from "@/providers/SettingsProvider";
 
 interface ItemMetadataProps {
   item?: Item;
@@ -11,6 +15,29 @@ interface ItemMetadataProps {
 const ItemMetadata: React.FC<ItemMetadataProps> = ({
   item,
 }: ItemMetadataProps) => {
+  const { labels } = useContext(SettingsContext);
+  const { addItemsLabel, removeItemsLabel } = useItemUpdate();
+
+  const handleAddLabel = useCallback(
+    async (label: Label): Promise<void> => {
+      if (!item) return;
+      await addItemsLabel([item], label);
+    },
+    [item, addItemsLabel],
+  );
+
+  const handleDeleteLabel = useCallback(
+    async (labelId: string): Promise<void> => {
+      if (!item || !item.labels) return;
+
+      const labelToRemove = item.labels.find((l) => l.id === labelId);
+      if (labelToRemove) {
+        await removeItemsLabel([item], labelToRemove);
+      }
+    },
+    [item, removeItemsLabel],
+  );
+
   if (!item || !item.metadata) {
     return (
       <div className="flex h-full items-center justify-center p-4">
@@ -60,8 +87,19 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
           <ItemActions item={item} showAdvanced />
         </div>
         {metadata.description && (
-          <p className="text-sm text-secondary">{metadata.description}</p>
+          <p className="text-sm text-secondary max-h-20 overflow-hidden">
+            {metadata.description}
+          </p>
         )}
+        <div className="flex flex-col gap-2 py-2">
+          <Labels
+            availableLabels={labels || []}
+            labels={item.labels || []}
+            mode="picker"
+            onAdd={handleAddLabel}
+            onDelete={handleDeleteLabel}
+          />
+        </div>
       </div>
     </div>
   );
