@@ -9,6 +9,18 @@ export enum UploadStatus {
   ERROR = "ERROR",
 }
 
+export const HighlightSchema = z.object({
+  id: z.string(),
+  startOffset: z.number(),
+  endOffset: z.number(),
+  text: z.string().nullable(),
+  note: z.string().nullable(),
+});
+
+export const ItemResultWithHighlightsSchema = ItemResultSchema.extend({
+  highlights: z.array(HighlightSchema),
+});
+
 export const GetItemContentRequestSchema = z.object({
   slug: z.string().describe("The unique slug of the item to retrieve."),
 });
@@ -16,7 +28,7 @@ export const GetItemContentRequestSchema = z.object({
 export const GetItemContentResponseSchema = z.union([
   z.object({
     content: z.string().optional(),
-    item: ItemResultSchema,
+    item: ItemResultWithHighlightsSchema,
   }),
   z.object({
     error: z.string(),
