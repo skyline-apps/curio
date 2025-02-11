@@ -9,7 +9,13 @@ import {
 } from "@/__mocks__/storage";
 import { UploadStatus } from "@/app/api/v1/items/content/validation";
 import { desc, eq } from "@/db";
-import { items, ItemState, profileItems } from "@/db/schema";
+import {
+  items,
+  ItemState,
+  profileItemLabels,
+  profileItems,
+  profileLabels,
+} from "@/db/schema";
 import { APIRequest } from "@/utils/api";
 import {
   ExtractError,
@@ -33,6 +39,9 @@ const TEST_ITEM_URL = "https://example.com";
 const NONEXISTENT_USER_ID = "123e4567-e89b-12d3-a456-426614174003";
 const ORIGINAL_PUBLISHED_DATE = new Date("2024-01-10T12:50:00-08:00");
 const ORIGINAL_CREATION_DATE = new Date("2025-01-10T12:52:56-08:00");
+const TEST_LABEL_ID_1 = "123e4567-e89b-12d3-a456-426614174005";
+const TEST_LABEL_ID_2 = "123e4567-e89b-12d3-a456-426614174006";
+
 const MOCK_ITEM = {
   id: TEST_ITEM_ID,
   url: TEST_ITEM_URL,
@@ -40,6 +49,53 @@ const MOCK_ITEM = {
   createdAt: ORIGINAL_CREATION_DATE,
   updatedAt: ORIGINAL_CREATION_DATE,
 };
+
+const MOCK_LABELS = [
+  {
+    id: TEST_LABEL_ID_1,
+    profileId: DEFAULT_TEST_PROFILE_ID,
+    name: "Test Label 1",
+    color: "#ff0000",
+    createdAt: new Date("2025-01-10T12:52:56-08:00"),
+    updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+  },
+  {
+    id: TEST_LABEL_ID_2,
+    profileId: DEFAULT_TEST_PROFILE_ID,
+    name: "Test Label 2",
+    color: "#00ff00",
+    createdAt: new Date("2025-01-10T12:52:56-08:00"),
+    updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+  },
+];
+
+const MOCK_PROFILE_ITEM = {
+  id: "123e4567-e89b-12d3-a456-426614174999",
+  profileId: DEFAULT_TEST_PROFILE_ID,
+  itemId: TEST_ITEM_ID,
+  title: "Example",
+  description: "An example item",
+  author: "Test Author",
+  thumbnail: "https://example.com/thumb.jpg",
+  favicon: "https://example.com/favicon.ico",
+  publishedAt: ORIGINAL_PUBLISHED_DATE,
+  savedAt: ORIGINAL_CREATION_DATE,
+  stateUpdatedAt: ORIGINAL_CREATION_DATE,
+  isFavorite: true,
+};
+
+const MOCK_PROFILE_ITEM_LABELS = [
+  {
+    id: "123e4567-e89b-12d3-a456-426614174007",
+    profileItemId: MOCK_PROFILE_ITEM.id,
+    labelId: TEST_LABEL_ID_1,
+  },
+  {
+    id: "123e4567-e89b-12d3-a456-426614174008",
+    profileItemId: MOCK_PROFILE_ITEM.id,
+    labelId: TEST_LABEL_ID_2,
+  },
+];
 
 describe("/api/v1/items/content", () => {
   describe("GET /api/v1/items/content", () => {
@@ -109,6 +165,37 @@ describe("/api/v1/items/content", () => {
         .execute();
 
       expect(updatedItem[0].versionName).toBe(null);
+    });
+
+    it("should return 200 with item and its labels", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEM);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEM);
+      await testDb.db.insert(profileLabels).values(MOCK_LABELS);
+      await testDb.db
+        .insert(profileItemLabels)
+        .values(MOCK_PROFILE_ITEM_LABELS);
+
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "GET",
+        searchParams: { slug: TEST_ITEM_SLUG },
+      });
+
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data.item.labels).toEqual([
+        {
+          id: TEST_LABEL_ID_1,
+          name: "Test Label 1",
+          color: "#ff0000",
+        },
+        {
+          id: TEST_LABEL_ID_2,
+          name: "Test Label 2",
+          color: "#00ff00",
+        },
+      ]);
     });
 
     it("should return 200 with custom version content", async () => {

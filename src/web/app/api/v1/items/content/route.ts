@@ -1,3 +1,4 @@
+import { LABELS_CLAUSE } from "@/app/api/v1/items/route";
 import { ItemResultSchema } from "@/app/api/v1/items/validation";
 import { and, db, eq, sql } from "@/db";
 import { items, profileItems } from "@/db/schema";
@@ -67,6 +68,7 @@ export async function GET(
           lastReadAt: profileItems.lastReadAt,
           versionName: profileItems.versionName,
         },
+        labels: LABELS_CLAUSE,
         createdAt: items.createdAt,
       })
       .from(items)

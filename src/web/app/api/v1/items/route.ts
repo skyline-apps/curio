@@ -1,5 +1,11 @@
 import { and, db, desc, eq, ilike, not, or, sql } from "@/db";
-import { items, ItemState, profileItems } from "@/db/schema";
+import {
+  items,
+  ItemState,
+  profileItemLabels,
+  profileItems,
+  profileLabels,
+} from "@/db/schema";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
 import { createLogger } from "@/utils/logger";
@@ -16,6 +22,25 @@ import {
 } from "./validation";
 
 const log = createLogger("api/v1/items");
+
+export const LABELS_CLAUSE = sql<
+  Array<{ id: string; name: string; color: string }>
+>`COALESCE(
+    (
+      SELECT json_agg(
+        json_build_object(
+          'id', pl.id,
+          'name', pl.name,
+          'color', pl.color
+        )
+      )
+      FROM ${profileItemLabels} pil
+      INNER JOIN ${profileLabels} pl ON pl.id = pil.label_id
+      WHERE pil.profile_item_id = ${profileItems.id}
+    ),
+    '[]'
+  )::json
+`;
 
 export async function GET(
   request: APIRequest,
@@ -107,6 +132,7 @@ export async function GET(
           versionName: profileItems.versionName,
           stateUpdatedAt: profileItems.stateUpdatedAt,
         },
+        labels: LABELS_CLAUSE,
       })
       .from(items)
       .innerJoin(profileItems, eq(items.id, profileItems.itemId))
