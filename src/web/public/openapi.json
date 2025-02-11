@@ -798,6 +798,30 @@
                                 "type": "string"
                               }
                             ]
+                          },
+                          "labels": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 255
+                                },
+                                "color": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "name",
+                                "color"
+                              ]
+                            }
                           }
                         },
                         "required": [
@@ -805,7 +829,8 @@
                           "url",
                           "slug",
                           "metadata",
-                          "createdAt"
+                          "createdAt",
+                          "labels"
                         ],
                         "additionalProperties": false
                       }
@@ -1462,6 +1487,486 @@
         }
       }
     },
+    "/api/v1/items/labels": {
+      "post": {
+        "description": "POST /api/v1/items/labels",
+        "tags": [
+          "V1"
+        ],
+        "requestBody": {
+          "description": "Request body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "slugs": {
+                    "type": "string",
+                    "description": "A comma-separated list of slugs to update. If the slug is not found, it will be ignored."
+                  },
+                  "labelIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "description": "An array of label UUIDs to apply to the specified items."
+                  }
+                },
+                "required": [
+                  "slugs",
+                  "labelIds"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "updated": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "slug": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "slug"
+                        ]
+                      },
+                      "description": "A list of slugs that were successfully updated."
+                    }
+                  },
+                  "required": [
+                    "updated"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "DELETE /api/v1/items/labels",
+        "tags": [
+          "V1"
+        ],
+        "requestBody": {
+          "description": "Request body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "slugs": {
+                    "type": "string",
+                    "description": "A comma-separated list of slugs to remove labels from. If the slug is not found, it will be ignored."
+                  },
+                  "labelIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "description": "An array of label UUIDs to remove from the specified items."
+                  }
+                },
+                "required": [
+                  "slugs",
+                  "labelIds"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deleted": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "slug": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "slug"
+                        ]
+                      },
+                      "description": "A list of slugs that had labels successfully deleted."
+                    }
+                  },
+                  "required": [
+                    "deleted"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/items/highlights": {
+      "post": {
+        "description": "POST /api/v1/items/highlights",
+        "tags": [
+          "V1"
+        ],
+        "requestBody": {
+          "description": "Request body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "slug": {
+                    "type": "string",
+                    "description": "The slug of the item to add highlights to."
+                  },
+                  "highlights": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Optional ID for updating an existing highlight"
+                        },
+                        "startOffset": {
+                          "type": "number",
+                          "minimum": 0,
+                          "description": "Index of start position within its node"
+                        },
+                        "endOffset": {
+                          "type": "number",
+                          "minimum": 0,
+                          "description": "Index of end position within its node"
+                        },
+                        "text": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "The text of the highlight"
+                        },
+                        "note": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "User note about the highlight"
+                        }
+                      },
+                      "required": [
+                        "startOffset",
+                        "endOffset",
+                        "text",
+                        "note"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "slug",
+                  "highlights"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "highlights": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "startOffset": {
+                            "type": "number",
+                            "minimum": 0,
+                            "description": "Index of start position within its node"
+                          },
+                          "endOffset": {
+                            "type": "number",
+                            "minimum": 0,
+                            "description": "Index of end position within its node"
+                          },
+                          "text": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "The text of the highlight"
+                          },
+                          "note": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "User note about the highlight"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "startOffset",
+                          "endOffset",
+                          "text",
+                          "note"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "highlights"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "DELETE /api/v1/items/highlights",
+        "tags": [
+          "V1"
+        ],
+        "requestBody": {
+          "description": "Request body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "slug": {
+                    "type": "string",
+                    "description": "The slug of the item to delete highlights from."
+                  },
+                  "highlightIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "minItems": 1,
+                    "description": "Array of highlight IDs to delete"
+                  }
+                },
+                "required": [
+                  "slug",
+                  "highlightIds"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deleted": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          }
+                        },
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "deleted"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/items/favorite": {
       "post": {
         "description": "POST /api/v1/items/favorite",
@@ -1743,6 +2248,62 @@
                                   "type": "string"
                                 }
                               ]
+                            },
+                            "labels": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 255
+                                  },
+                                  "color": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name",
+                                  "color"
+                                ]
+                              }
+                            },
+                            "highlights": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "startOffset": {
+                                    "type": "number"
+                                  },
+                                  "endOffset": {
+                                    "type": "number"
+                                  },
+                                  "text": {
+                                    "type": "string",
+                                    "nullable": true
+                                  },
+                                  "note": {
+                                    "type": "string",
+                                    "nullable": true
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "startOffset",
+                                  "endOffset",
+                                  "text",
+                                  "note"
+                                ]
+                              }
                             }
                           },
                           "required": [
@@ -1750,7 +2311,9 @@
                             "url",
                             "slug",
                             "metadata",
-                            "createdAt"
+                            "createdAt",
+                            "labels",
+                            "highlights"
                           ],
                           "additionalProperties": false
                         }
