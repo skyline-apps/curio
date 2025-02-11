@@ -1,44 +1,45 @@
 import { z } from "zod";
 
-export const CreateHighlightRequestSchema = z.object({
-  slug: z.string().describe("The slug of the item to add highlights to."),
-  highlights: z.array(
-    z.object({
-      id: z
-        .string()
-        .uuid()
-        .optional()
-        .describe("Optional ID for updating an existing highlight"),
-      startOffset: z
-        .number()
-        .min(0)
-        .describe("Start position of the highlight"),
-      endOffset: z.number().min(0).describe("End position of the highlight"),
-      text: z.string().min(1).describe("The highlighted text content"),
-      note: z.string().optional().describe("Optional note for the highlight"),
-    }),
-  ),
+export const HighlightSchema = z.object({
+  id: z.string().uuid(),
+  startOffset: z
+    .number()
+    .min(0)
+    .describe("Index of start position within its node"),
+  endOffset: z
+    .number()
+    .min(0)
+    .describe("Index of end position within its node"),
+  text: z.string().nullable().describe("The text of the highlight"),
+  note: z.string().nullable().describe("User note about the highlight"),
 });
 
-export type CreateHighlightRequest = z.infer<
-  typeof CreateHighlightRequestSchema
+export const NewHighlightSchema = HighlightSchema.extend({
+  id: z
+    .string()
+    .uuid()
+    .optional()
+    .describe("Optional ID for updating an existing highlight"),
+});
+
+export type Highlight = z.infer<typeof HighlightSchema>;
+export type NewHighlight = z.infer<typeof NewHighlightSchema>;
+
+export const CreateOrUpdateHighlightRequestSchema = z.object({
+  slug: z.string().describe("The slug of the item to add highlights to."),
+  highlights: z.array(NewHighlightSchema),
+});
+
+export type CreateOrUpdateHighlightRequest = z.infer<
+  typeof CreateOrUpdateHighlightRequestSchema
 >;
 
-export const CreateHighlightResponseSchema = z.object({
-  highlights: z.array(
-    z.object({
-      id: z.string().uuid(),
-      startOffset: z.number(),
-      endOffset: z.number(),
-      text: z.string(),
-      note: z.string().nullable(),
-      createdAt: z.date(),
-    }),
-  ),
+export const CreateOrUpdateHighlightResponseSchema = z.object({
+  highlights: z.array(HighlightSchema),
 });
 
-export type CreateHighlightResponse = z.infer<
-  typeof CreateHighlightResponseSchema
+export type CreateOrUpdateHighlightResponse = z.infer<
+  typeof CreateOrUpdateHighlightResponseSchema
 >;
 
 export const DeleteHighlightRequestSchema = z.object({

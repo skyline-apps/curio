@@ -2,6 +2,8 @@
 import { InfiniteData, useQueryClient } from "@tanstack/react-query";
 import React, { createContext, useCallback, useContext } from "react";
 
+import { type Highlight } from "@/app/api/v1/items/highlights/validation";
+
 import {
   ITEM_CONTENT_QUERY_KEY,
   type ItemWithContent,
@@ -11,6 +13,7 @@ import { type Item, ITEMS_QUERY_KEY, type ItemsPage } from "./ItemsProvider";
 type ItemUpdate = { slug: string } & {
   metadata?: Partial<Item["metadata"]>;
   labels?: Partial<Item["labels"]>;
+  highlights?: Highlight[];
 };
 
 export type CacheContextType = {
@@ -62,6 +65,9 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
                 ...oldData.item,
                 ...item,
                 metadata: { ...oldData.item.metadata, ...item.metadata },
+                highlights: item.highlights?.length
+                  ? item.highlights
+                  : oldData.item.highlights,
                 labels,
               },
             };

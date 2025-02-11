@@ -5,9 +5,9 @@ import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
 import { createLogger } from "@/utils/logger";
 
 import {
-  CreateHighlightRequestSchema,
-  CreateHighlightResponse,
-  CreateHighlightResponseSchema,
+  CreateOrUpdateHighlightRequestSchema,
+  CreateOrUpdateHighlightResponse,
+  CreateOrUpdateHighlightResponseSchema,
   DeleteHighlightRequestSchema,
   DeleteHighlightResponse,
   DeleteHighlightResponseSchema,
@@ -17,7 +17,7 @@ const log = createLogger("api/v1/items/highlights");
 
 export async function POST(
   request: APIRequest,
-): Promise<APIResponse<CreateHighlightResponse>> {
+): Promise<APIResponse<CreateOrUpdateHighlightResponse>> {
   const userId = request.headers.get("x-user-id");
   const apiKey = request.headers.get("x-api-key");
   try {
@@ -27,7 +27,10 @@ export async function POST(
     }
 
     const body = await request.json();
-    const data = await parseAPIRequest(CreateHighlightRequestSchema, body);
+    const data = await parseAPIRequest(
+      CreateOrUpdateHighlightRequestSchema,
+      body,
+    );
     if ("error" in data) {
       return data.error;
     }
@@ -93,7 +96,7 @@ export async function POST(
       })
       .returning();
 
-    const response = CreateHighlightResponseSchema.parse({
+    const response = CreateOrUpdateHighlightResponseSchema.parse({
       highlights: savedHighlights.map((h) => ({
         id: h.id,
         startOffset: h.startOffset,
