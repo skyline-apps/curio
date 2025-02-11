@@ -1,59 +1,42 @@
-import React, { useEffect, useState } from "react";
-import Markdown, { Options } from "react-markdown";
-import { useDebouncedCallback } from "use-debounce";
+import React from "react";
+import ReactMarkdown from "react-markdown";
 
+import {
+  CreateOrUpdateHighlightResponse,
+  type Highlight,
+  type NewHighlight,
+} from "@/app/api/v1/items/highlights/validation";
 import { ReadItemResponse } from "@/app/api/v1/items/read/validation";
 import { useAppPage } from "@/providers/AppPageProvider";
 import { cn } from "@/utils/cn";
 
-interface MarkdownViewerProps extends Options {
-  className?: string;
+import { useScrollProgress } from "./useScrollProgress";
+
+interface MarkdownViewerProps {
   readingProgress: number;
   onProgressChange?: (progress: number) => Promise<ReadItemResponse>;
+  highlights: Highlight[];
+  onHighlight?: (
+    highlight: NewHighlight,
+  ) => Promise<CreateOrUpdateHighlightResponse>;
+  className?: string;
+  children?: string;
 }
 
 const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
-  className,
-  readingProgress = 0,
+  readingProgress,
   onProgressChange,
-  ...options
-}: MarkdownViewerProps): JSX.Element => {
-  const [progress, setProgress] = useState<number>(readingProgress); // Used to track progress on the client side
+  highlights,
+  onHighlight,
+  className,
+  children,
+}) => {
   const { containerRef } = useAppPage();
-
-  const debouncedScrollHandler = useDebouncedCallback((element) => {
-    const totalHeight = element.scrollHeight - element.clientHeight;
-    const currentProgress = Math.round((element.scrollTop / totalHeight) * 100);
-
-    if (currentProgress !== progress) {
-      setProgress(currentProgress);
-      onProgressChange?.(currentProgress);
-    }
-  }, 300);
-
-  useEffect(() => {
-    const handleScroll = (): void => {
-      if (!containerRef.current) return;
-      debouncedScrollHandler(containerRef.current);
-    };
-
-    const element = containerRef.current;
-    element?.addEventListener("scroll", handleScroll);
-    return () => {
-      element?.removeEventListener("scroll", handleScroll);
-      debouncedScrollHandler.cancel();
-    };
-  }, [onProgressChange, debouncedScrollHandler, containerRef]);
-
-  useEffect(() => {
-    // TODO: Debug why this data is stale
-    if (!containerRef.current || !readingProgress) return;
-
-    const element = containerRef.current;
-    const totalHeight = element.scrollHeight - element.clientHeight;
-    element.scrollTop = (readingProgress / 100) * totalHeight;
-    // Only manually scroll on component initialization
-  }, [containerRef.current]); // eslint-disable-line react-hooks/exhaustive-deps
+  useScrollProgress({
+    initialProgress: readingProgress,
+    containerRef,
+    onProgressChange,
+  });
 
   return (
     <div
@@ -62,7 +45,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
         className,
       )}
     >
-      <Markdown {...options} />
+      <ReactMarkdown>{children || ""}</ReactMarkdown>
     </div>
   );
 };
