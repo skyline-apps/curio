@@ -56,13 +56,13 @@ function parseUrlPreserveUnicode(url: string): {
   hostname: string;
   pathname: string;
 } {
-  // Match hostname: capture everything between // and the next / or end of string
-  const hostnameMatch = url.match(/\/\/([^\/]+)(\/|$)/);
+  // Match hostname: capture everything between // and the next / or end of string, excluding ? and #
+  const hostnameMatch = url.match(/\/\/([^\/\?#]+)/);
   const hostname = hostnameMatch ? hostnameMatch[1] : "";
 
   // Match pathname: capture everything after hostname until ? or # or end of string
-  const pathnameMatch = url.match(/\/\/[^\/]+(\/?[^?#]*)/);
-  const pathname = pathnameMatch ? pathnameMatch[1] : "/";
+  const pathnameMatch = url.match(/\/\/[^\/]+(\/?[^\?#]*)/);
+  const pathname = pathnameMatch ? pathnameMatch[1] : "";
 
   return { hostname, pathname };
 }

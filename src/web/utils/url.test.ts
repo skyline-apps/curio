@@ -17,7 +17,7 @@ describe("url", () => {
       expect(cleanUrl(url)).toBe("https://example.com");
     });
 
-    it("removes query parameters from URL", () => {
+    it("removes query parameters from path URL", () => {
       const url = "https://example.com/path?query=value";
       expect(cleanUrl(url)).toBe("https://example.com/path");
     });
@@ -40,15 +40,33 @@ describe("url", () => {
 
   describe("generateSlug", () => {
     it("generates correct slug format for simple URL", () => {
-      const url = "https://example.com/path";
-      const slug = generateSlug(url);
-      expect(slug).toMatch(/^example-com-path-[a-f0-9]{6}$/);
+      expect(generateSlug("https://example.com")).toMatch(
+        /^example-com-[a-f0-9]{6}$/,
+      );
+      expect(generateSlug("https://example.com/")).toMatch(
+        /^example-com-[a-f0-9]{6}$/,
+      );
+      expect(generateSlug("https://example.com/path")).toMatch(
+        /^example-com-path-[a-f0-9]{6}$/,
+      );
     });
 
     it("handles URLs with query parameters", () => {
-      const url = "https://example.com/path?query=value";
-      const slug = generateSlug(url);
-      expect(slug).toMatch(/^example-com-path-[a-f0-9]{6}$/);
+      expect(generateSlug("https://example.com?query=value")).toMatch(
+        /^example-com-[a-f0-9]{6}$/,
+      );
+      expect(generateSlug("https://example.com#fragment")).toMatch(
+        /^example-com-[a-f0-9]{6}$/,
+      );
+    });
+
+    it("handles URLs with query parameters in path", () => {
+      expect(generateSlug("https://example.com/path?query=value")).toMatch(
+        /^example-com-path-[a-f0-9]{6}$/,
+      );
+      expect(generateSlug("https://example.com/path#fragment")).toMatch(
+        /^example-com-path-[a-f0-9]{6}$/,
+      );
     });
 
     it("removes www from domain", () => {
