@@ -1,6 +1,12 @@
 import { and, desc, eq } from "@/db";
 import { DbErrorCode } from "@/db/errors";
-import { items, ItemState, profileItems } from "@/db/schema";
+import {
+  items,
+  ItemState,
+  profileItemLabels,
+  profileItems,
+  profileLabels,
+} from "@/db/schema";
 import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_API_KEY,
@@ -22,6 +28,9 @@ const TEST_ITEM_URL_3 = "https://example3.com";
 const TEST_ITEM_ID_DELETED = "123e4567-e89b-12d3-a456-426614174004";
 const TEST_ITEM_URL_DELETED = "https://example4.com";
 const NONEXISTENT_USER_ID = "123e4567-e89b-12d3-a456-426614174003";
+
+const TEST_LABEL_ID_1 = "123e4567-e89b-12d3-a456-426614174005";
+const TEST_LABEL_ID_2 = "123e4567-e89b-12d3-a456-426614174006";
 
 const MOCK_ITEMS = [
   {
@@ -54,8 +63,28 @@ const MOCK_ITEMS = [
   },
 ];
 
+const MOCK_LABELS = [
+  {
+    id: TEST_LABEL_ID_1,
+    profileId: DEFAULT_TEST_PROFILE_ID,
+    name: "Test Label 1",
+    color: "#ff0000",
+    createdAt: new Date("2025-01-10T12:52:56-08:00"),
+    updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+  },
+  {
+    id: TEST_LABEL_ID_2,
+    profileId: DEFAULT_TEST_PROFILE_ID,
+    name: "Test Label 2",
+    color: "#00ff00",
+    createdAt: new Date("2025-01-10T12:52:56-08:00"),
+    updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+  },
+];
+
 const MOCK_PROFILE_ITEMS = [
   {
+    id: "123e4567-e89b-12d3-a456-426614174999",
     profileId: DEFAULT_TEST_PROFILE_ID,
     itemId: TEST_ITEM_ID,
     title: "Example 1",
@@ -69,6 +98,7 @@ const MOCK_PROFILE_ITEMS = [
     savedAt: new Date("2025-01-10T12:52:56-08:00"),
   },
   {
+    id: "123e4567-e89b-12d3-a456-426614174998",
     profileId: DEFAULT_TEST_PROFILE_ID,
     itemId: TEST_ITEM_ID_2,
     title: "Example item 2",
@@ -83,6 +113,7 @@ const MOCK_PROFILE_ITEMS = [
     savedAt: new Date("2025-01-10T12:52:57-08:00"),
   },
   {
+    id: "123e4567-e89b-12d3-a456-426614174997",
     profileId: DEFAULT_TEST_PROFILE_ID,
     itemId: TEST_ITEM_ID_3,
     title: "Example 3",
@@ -100,6 +131,7 @@ const MOCK_PROFILE_ITEMS = [
     versionName: "2024-01-01",
   },
   {
+    id: "123e4567-e89b-12d3-a456-426614174996",
     profileId: DEFAULT_TEST_PROFILE_ID,
     itemId: TEST_ITEM_ID_DELETED,
     title: "Example 3 New title",
@@ -113,6 +145,7 @@ const MOCK_PROFILE_ITEMS = [
     stateUpdatedAt: new Date("2024-04-12T12:52:59-08:00"),
   },
   {
+    id: "123e4567-e89b-12d3-a456-426614174995",
     profileId: DEFAULT_TEST_PROFILE_ID_2,
     itemId: TEST_ITEM_ID_3,
     title: "Example 3 New title",
@@ -125,6 +158,20 @@ const MOCK_PROFILE_ITEMS = [
     stateUpdatedAt: new Date("2024-05-31T12:52:59-08:00"),
   },
 ];
+
+const MOCK_PROFILE_ITEM_LABELS = [
+  {
+    id: "123e4567-e89b-12d3-a456-426614174007",
+    profileItemId: MOCK_PROFILE_ITEMS[0].id,
+    labelId: TEST_LABEL_ID_1,
+  },
+  {
+    id: "123e4567-e89b-12d3-a456-426614174008",
+    profileItemId: MOCK_PROFILE_ITEMS[0].id,
+    labelId: TEST_LABEL_ID_2,
+  },
+];
+
 describe("/api/v1/items", () => {
   describe("GET /api/v1/items", () => {
     test.each([
@@ -164,6 +211,71 @@ describe("/api/v1/items", () => {
         state: ItemState.ARCHIVED,
         versionName: null,
       });
+      expect(data.items[0].labels).toEqual([]);
+    });
+
+    it("should return items with their associated labels", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS[0]);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS[0]);
+      await testDb.db.insert(profileLabels).values(MOCK_LABELS);
+      await testDb.db
+        .insert(profileItemLabels)
+        .values(MOCK_PROFILE_ITEM_LABELS);
+
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "GET",
+      });
+
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data.items).toHaveLength(1);
+      expect(data.items[0].labels).toEqual([
+        {
+          id: TEST_LABEL_ID_1,
+          name: "Test Label 1",
+          color: "#ff0000",
+        },
+        {
+          id: TEST_LABEL_ID_2,
+          name: "Test Label 2",
+          color: "#00ff00",
+        },
+      ]);
+    });
+
+    it("should return 200 with the user's items via regular auth", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS[0]);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS[0]);
+
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "GET",
+      });
+
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data.items).toHaveLength(1);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID);
+      expect(data.total).toBe(1);
+      expect(data.items[0].metadata).toEqual({
+        author: "Test Author",
+        description: "First example item",
+        publishedAt: "2025-01-10T20:52:56.000Z",
+        thumbnail: "https://example.com/thumb1.jpg",
+        favicon: "https://example.com/favicon1.ico",
+        title: "Example 1",
+        savedAt: "2025-01-10T20:52:56.000Z",
+        stateUpdatedAt: "2024-04-30T20:52:59.000Z",
+        isFavorite: false,
+        lastReadAt: null,
+        readingProgress: 0,
+        state: ItemState.ARCHIVED,
+        versionName: null,
+      });
+      expect(data.items[0].labels).toEqual([]);
     });
 
     it("should return 200 with active items sorted by stateUpdatedAt desc", async () => {

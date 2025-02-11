@@ -7,7 +7,7 @@ const ColorSchema = z
     message: "Invalid color format. Must be a 6-digit hex color code.",
   });
 
-const LabelSchema = z.object({
+export const LabelSchema = z.object({
   id: z.string(),
   name: NameSchema,
   color: ColorSchema,

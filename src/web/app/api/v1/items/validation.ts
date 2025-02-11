@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { LabelSchema } from "@/app/api/v1/user/labels/validation";
 import { ItemState } from "@/db/schema";
 
 const UrlSchema = z.string().url().describe("Unique URL of the item.");
@@ -123,6 +124,7 @@ export const ItemResultSchema = z
     slug: SlugSchema,
     metadata: ItemMetadataSchema,
     createdAt: dateType,
+    labels: z.array(LabelSchema),
   })
   .strict();
 
