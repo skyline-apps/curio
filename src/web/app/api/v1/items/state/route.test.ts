@@ -157,7 +157,7 @@ describe("/api/v1/items/state", () => {
       ]);
     });
 
-    it("should return 200 when deleting items", async () => {
+    it("should return 200 when deleting items and set unique updatedAt", async () => {
       await testDb.db.insert(items).values(MOCK_ITEMS);
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
       const request: APIRequest = makeAuthenticatedMockRequest({
@@ -184,6 +184,9 @@ describe("/api/v1/items/state", () => {
       expect(updatedItems).toHaveLength(2);
       expect(updatedItems[0].stateUpdatedAt).toBeInstanceOf(Date);
       expect(updatedItems[1].stateUpdatedAt).toBeInstanceOf(Date);
+      expect(updatedItems[0].stateUpdatedAt.toISOString()).not.toEqual(
+        updatedItems[1].stateUpdatedAt.toISOString(),
+      );
     });
 
     it("should return 200 if item is already deleted", async () => {
