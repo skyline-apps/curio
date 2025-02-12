@@ -1,12 +1,10 @@
-import {
-  type RefObject,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { type RefObject, useCallback, useContext, useState } from "react";
 
-import { type NewHighlight } from "@/app/api/v1/items/highlights/validation";
+import {
+  type Highlight,
+  type NewHighlight,
+} from "@/app/api/v1/items/highlights/validation";
+import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import { createLogger } from "@/utils/logger";
 
 const log = createLogger("useHighlightSelection");
@@ -17,10 +15,9 @@ interface UseHighlightSelectionProps {
 
 interface UseHighlightSelectionResult {
   handleSelection: () => Promise<void>;
-  currentSelection: Selection | null;
-  currentHighlight: NewHighlight | null;
+  draftHighlight: Highlight | NewHighlight | null;
+  selectDraftHighlight: (highlight: Highlight) => void;
   clearSelection: () => void;
-  isScrolling: boolean;
 }
 
 function findPreviousOffset(node: Node): number {
@@ -37,45 +34,21 @@ function findPreviousOffset(node: Node): number {
 export function useHighlightSelection({
   contentRef,
 }: UseHighlightSelectionProps): UseHighlightSelectionResult {
-  const [currentSelection, setCurrentSelection] = useState<Selection | null>(
-    null,
+  const { setSidebarOpen } = useContext(CurrentItemContext);
+  const [draftHighlight, setDraftHighlight] = useState<
+    Highlight | NewHighlight | null
+  >(null);
+
+  const selectDraftHighlight = useCallback(
+    (highlight: Highlight) => {
+      setSidebarOpen(false);
+      setDraftHighlight(highlight);
+    },
+    [setSidebarOpen],
   );
-  const [currentHighlight, setCurrentHighlight] = useState<NewHighlight | null>(
-    null,
-  );
-  const [isScrolling, setIsScrolling] = useState(false);
-  const scrollTimeoutRef = useRef<number>();
 
   const clearSelection = useCallback(() => {
-    if (currentSelection) {
-      currentSelection.removeAllRanges();
-    }
-    setCurrentSelection(null);
-    setCurrentHighlight(null);
-  }, [currentSelection]);
-
-  useEffect(() => {
-    const handleScroll = (): void => {
-      setIsScrolling(true);
-
-      // Clear previous timeout
-      if (scrollTimeoutRef.current) {
-        window.clearTimeout(scrollTimeoutRef.current);
-      }
-
-      // Set new timeout to mark scrolling as done
-      scrollTimeoutRef.current = window.setTimeout(() => {
-        setIsScrolling(false);
-      }, 150);
-    };
-
-    window.addEventListener("scroll", handleScroll, true);
-    return () => {
-      window.removeEventListener("scroll", handleScroll, true);
-      if (scrollTimeoutRef.current) {
-        window.clearTimeout(scrollTimeoutRef.current);
-      }
-    };
+    setDraftHighlight(null);
   }, []);
 
   const handleSelection = useCallback(async () => {
@@ -141,8 +114,8 @@ export function useHighlightSelection({
         note: "",
       };
 
-      setCurrentSelection(selection);
-      setCurrentHighlight(highlight);
+      selection.removeAllRanges();
+      setDraftHighlight(highlight);
     } catch (error) {
       log.error("Error handling selection:", error);
     }
@@ -150,9 +123,8 @@ export function useHighlightSelection({
 
   return {
     handleSelection,
-    currentSelection,
-    currentHighlight,
+    draftHighlight,
+    selectDraftHighlight,
     clearSelection,
-    isScrolling,
   };
 }

@@ -1,59 +1,77 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { type NewHighlight } from "@/app/api/v1/items/highlights/validation";
-import Button from "@/components/ui/Button";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/Popover";
+  type Highlight,
+  type NewHighlight,
+} from "@/app/api/v1/items/highlights/validation";
+import Button from "@/components/ui/Button";
 
 interface SelectionTooltipProps {
-  selection: Selection;
-  highlight: NewHighlight;
-  onSave: (highlight: NewHighlight) => Promise<void>;
-  addNote: (highlight: NewHighlight) => Promise<void>;
+  highlight: NewHighlight | Highlight;
+  onSave: (highlight: NewHighlight | Highlight) => Promise<void>;
+  onDelete: (highlight: Highlight) => Promise<void>;
+  spanRef: React.RefObject<HTMLSpanElement>;
 }
 
-export const SelectionTooltip = ({
-  selection,
+export const isHighlightWithId = (
+  highlight: Highlight | NewHighlight,
+): highlight is Highlight => "id" in highlight;
+
+const SelectionTooltip = ({
   highlight,
   onSave,
-  addNote,
+  onDelete,
+  spanRef,
 }: SelectionTooltipProps): React.ReactElement | null => {
-  if (!selection || selection.rangeCount === 0) return null;
-
-  const range = selection.getRangeAt(0);
-  if (!range || range.collapsed) return null;
-
-  const rect = range.getBoundingClientRect();
-  const key = `${rect.top}-${rect.left}-${rect.width}-${rect.height}`;
+  const [topPosition, setTopPosition] = useState<number>(0);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const key = highlight.id || `${highlight.startOffset}-${highlight.endOffset}`;
+  useEffect(() => {
+    setTopPosition(spanRef.current?.offsetTop || 0);
+  }, [spanRef.current]);
 
   return createPortal(
-    <Popover defaultOpen key={key}>
-      <PopoverTrigger>
-        <div
-          className="fixed -translate-x-1/2"
-          style={{
-            top: rect.top,
-            left: rect.left + rect.width / 2,
-            width: 0,
-            height: 0,
+    <div
+      key={key}
+      className="absolute flex items-center gap-2 p-2 bg-background-300 rounded"
+      style={{ top: topPosition }}
+    >
+      {isHighlightWithId(highlight) ? (
+        <Button
+          size="xs"
+          onPress={() => {
+            onDelete(highlight);
           }}
-        />
-      </PopoverTrigger>
-      <PopoverContent className="z-50">
-        <div className="flex items-center gap-2">
-          <Button size="xs" onPress={() => onSave(highlight)}>
-            Save
-          </Button>
-          <Button size="xs" variant="flat" onPress={() => addNote(highlight)}>
-            Add note
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>,
-    document.body,
+        >
+          Delete
+        </Button>
+      ) : (
+        <Button
+          size="xs"
+          onPress={async () => {
+            setIsSaving(true);
+            try {
+              await onSave(highlight);
+            } finally {
+              setIsSaving(false);
+            }
+          }}
+          isLoading={isSaving}
+        >
+          Save
+        </Button>
+      )}
+      <Button
+        size="xs"
+        variant="flat"
+        onPress={() => onSave({ ...highlight, note: "" })}
+      >
+        Add note
+      </Button>
+    </div>,
+    document.getElementById("tooltip-container") || document.body,
   );
 };
+
+export default SelectionTooltip;
