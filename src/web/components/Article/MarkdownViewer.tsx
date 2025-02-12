@@ -15,7 +15,11 @@ import { cn } from "@/utils/cn";
 import { SelectionTooltip } from "./SelectionTooltip";
 import { useHighlightSelection } from "./useHighlightSelection";
 import { useScrollProgress } from "./useScrollProgress";
-import { ALL_COMPONENTS, wrapMarkdownComponent } from "./wrapMarkdownComponent";
+import {
+  ALL_COMPONENTS,
+  removeHighlightsOverlap,
+  wrapMarkdownComponent,
+} from "./wrapMarkdownComponent";
 
 interface MarkdownViewerProps {
   readingProgress: number;
@@ -64,10 +68,14 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
     clearSelection();
   };
 
+  const nonOverlappingHighlights = removeHighlightsOverlap(
+    highlights,
+    currentHighlight,
+  );
   const components: Components = Object.fromEntries(
     ALL_COMPONENTS.map((c) => [
       c,
-      wrapMarkdownComponent(c, highlights, currentHighlight),
+      wrapMarkdownComponent(c, nonOverlappingHighlights, currentHighlight),
     ]),
   );
 
