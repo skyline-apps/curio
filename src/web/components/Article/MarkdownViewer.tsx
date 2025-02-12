@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 
 import {
   CreateOrUpdateHighlightResponse,
+  DeleteHighlightResponse,
   type Highlight,
   type NewHighlight,
 } from "@/app/api/v1/items/highlights/validation";
@@ -12,7 +13,6 @@ import { ReadItemResponse } from "@/app/api/v1/items/read/validation";
 import { useAppPage } from "@/providers/AppPageProvider";
 import { cn } from "@/utils/cn";
 
-import { SelectionTooltip } from "./SelectionTooltip";
 import { useHighlightSelection } from "./useHighlightSelection";
 import { useScrollProgress } from "./useScrollProgress";
 import {
@@ -25,9 +25,10 @@ interface MarkdownViewerProps {
   readingProgress: number;
   onProgressChange?: (progress: number) => Promise<ReadItemResponse>;
   highlights: Highlight[];
-  onHighlight?: (
-    highlight: NewHighlight,
+  onCreateHighlight?: (
+    highlight: NewHighlight | Highlight,
   ) => Promise<CreateOrUpdateHighlightResponse>;
+  onDeleteHighlight?: (highlightId: string) => Promise<DeleteHighlightResponse>;
   className?: string;
   children?: string;
 }
@@ -36,7 +37,8 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
   readingProgress,
   onProgressChange,
   highlights,
-  onHighlight,
+  onCreateHighlight,
+  onDeleteHighlight,
   className,
   children,
 }) => {
@@ -51,59 +53,65 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
 
   const {
     handleSelection,
-    currentSelection,
-    currentHighlight,
+    draftHighlight,
+    selectDraftHighlight,
     clearSelection,
-    isScrolling,
   } = useHighlightSelection({
     contentRef,
   });
 
   const handleSaveHighlight = async (
-    highlight: NewHighlight,
+    highlight: NewHighlight | Highlight,
   ): Promise<void> => {
-    if (onHighlight) {
-      await onHighlight(highlight);
+    if (onCreateHighlight) {
+      await onCreateHighlight(highlight);
+    }
+    clearSelection();
+  };
+
+  const handleDeleteHighlight = async (highlight: Highlight): Promise<void> => {
+    if (onDeleteHighlight) {
+      await onDeleteHighlight(highlight.id);
     }
     clearSelection();
   };
 
   const nonOverlappingHighlights = removeHighlightsOverlap(
     highlights,
-    currentHighlight,
+    draftHighlight,
   );
   const components: Components = Object.fromEntries(
     ALL_COMPONENTS.map((c) => [
       c,
-      wrapMarkdownComponent(c, nonOverlappingHighlights, currentHighlight),
+      wrapMarkdownComponent(
+        c,
+        nonOverlappingHighlights,
+        draftHighlight,
+        selectDraftHighlight,
+        handleSaveHighlight,
+        handleDeleteHighlight,
+      ),
     ]),
   );
 
   return (
-    <div
-      ref={contentRef}
-      onMouseDown={clearSelection}
-      onMouseUp={handleSelection}
-      className={cn(
-        "prose prose-slate max-w-none overflow-y-auto h-full [&_*]:!text-default-foreground hover:prose-a:!text-primary dark:prose-invert",
-        className,
-      )}
-    >
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-        {children || ""}
-      </ReactMarkdown>
-
-      {currentSelection &&
-        currentHighlight &&
-        currentSelection.rangeCount > 0 &&
-        !isScrolling && (
-          <SelectionTooltip
-            selection={currentSelection}
-            highlight={currentHighlight}
-            onSave={handleSaveHighlight}
-            addNote={() => {}} /* TODO */
-          />
+    <div className="relative flex gap-4">
+      <div
+        ref={contentRef}
+        onMouseDown={clearSelection}
+        onTouchStart={clearSelection}
+        onMouseUp={handleSelection}
+        onTouchEnd={handleSelection}
+        className={cn(
+          "prose prose-slate max-w-none overflow-y-auto h-full [&_*]:!text-default-foreground hover:prose-a:!text-primary dark:prose-invert",
+          className,
         )}
+      >
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+          {children || ""}
+        </ReactMarkdown>
+      </div>
+      <div id="tooltip-container" className="w-48" />
     </div>
   );
 };

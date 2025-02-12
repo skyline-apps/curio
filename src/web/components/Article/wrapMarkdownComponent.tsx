@@ -106,11 +106,20 @@ export function removeHighlightsOverlap(
 export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
   tag: T,
   highlights: Highlight[],
-  newHighlight?: NewHighlight | null,
+  draftHighlight: NewHighlight | Highlight | null,
+  selectHighlight: (highlight: Highlight) => void,
+  saveHighlight: (highlight: NewHighlight | Highlight) => Promise<void>,
+  deleteHighlight: (highlight: Highlight) => Promise<void>,
 ): React.FC<MarkdownProps<T>> => {
-  const allHighlights = newHighlight
-    ? [...highlights, newHighlight]
+  const allHighlights = draftHighlight
+    ? [...highlights, draftHighlight]
     : highlights;
+
+  const highlightProps = {
+    onClick: selectHighlight,
+    onSave: saveHighlight,
+    onDelete: deleteHighlight,
+  };
 
   const MarkdownComponent = ({
     node,
@@ -139,6 +148,7 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
     );
 
     if (containingHighlight) {
+      const isFirstRegion = containingHighlight.startOffset === startOffset;
       return React.createElement(
         tag,
         {
@@ -147,9 +157,12 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
           ...rest,
         },
         <HighlightSpan
+          isSelected={containingHighlight?.id === draftHighlight?.id}
+          includesPopover={isFirstRegion}
           highlight={containingHighlight}
           startOffset={startOffset}
           endOffset={endOffset}
+          {...highlightProps}
         >
           {children}
         </HighlightSpan>,
@@ -192,6 +205,8 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
           processedChildren.push(text);
         } else {
           textHighlights.forEach((highlight) => {
+            const isFirstRegion =
+              highlight.startOffset >= pos && highlight.startOffset < textEnd;
             // Add non-highlighted text before this highlight
             if (highlight.startOffset > pos) {
               processedChildren.push(
@@ -212,10 +227,13 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
             if (highlightedText) {
               processedChildren.push(
                 <HighlightSpan
+                  includesPopover={isFirstRegion}
+                  isSelected={highlight.id === draftHighlight?.id}
                   key={`${highlight.startOffset}-${highlightEnd}`}
                   highlight={highlight}
                   startOffset={Math.max(currentOffset, highlight.startOffset)}
                   endOffset={highlightEnd}
+                  {...highlightProps}
                 >
                   {highlightedText}
                 </HighlightSpan>,

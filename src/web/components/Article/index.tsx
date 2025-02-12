@@ -10,7 +10,8 @@ interface ArticleProps {
 }
 
 const Article: React.FC<ArticleProps> = ({ content }: ArticleProps) => {
-  const { updateReadingProgress, createHighlight } = useArticleUpdate();
+  const { updateReadingProgress, createHighlight, deleteHighlight } =
+    useArticleUpdate();
   const { loadedItem } = useContext(CurrentItemContext);
 
   return (
@@ -19,7 +20,8 @@ const Article: React.FC<ArticleProps> = ({ content }: ArticleProps) => {
         readingProgress={loadedItem?.item.metadata.readingProgress || 0}
         highlights={loadedItem?.item.highlights || []}
         onProgressChange={updateReadingProgress}
-        onHighlight={createHighlight}
+        onCreateHighlight={createHighlight}
+        onDeleteHighlight={deleteHighlight}
         className="py-4"
       >
         {content}

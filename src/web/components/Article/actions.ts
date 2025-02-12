@@ -112,8 +112,17 @@ export const useArticleUpdate = (): UseArticleUpdate => {
         }),
       }).then(handleAPIResponse<DeleteHighlightResponse>);
     },
-    onSuccess: () => {
-      // Could potentially update the cache here if needed
+    onSuccess: (data) => {
+      if (loadedItem?.item) {
+        optimisticUpdateItems([
+          {
+            slug: loadedItem.item.slug,
+            highlights: loadedItem.item.highlights.filter(
+              (h) => !data.deleted.some((d) => d.id === h.id),
+            ),
+          },
+        ]);
+      }
     },
   };
 
