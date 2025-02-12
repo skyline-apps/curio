@@ -108,6 +108,10 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
   highlights: Highlight[],
   newHighlight?: NewHighlight | null,
 ): React.FC<MarkdownProps<T>> => {
+  const allHighlights = newHighlight
+    ? [...highlights, newHighlight]
+    : highlights;
+
   const MarkdownComponent = ({
     node,
     children,
@@ -129,30 +133,8 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
       );
     }
 
-    const allHighlights = newHighlight
-      ? [...highlights, newHighlight]
-      : highlights;
-
-    // Find highlights that overlap with this node
-    const nodeHighlights = allHighlights
-      .filter((h) => h.startOffset < endOffset && h.endOffset > startOffset)
-      .sort((a, b) => a.startOffset - b.startOffset);
-
-    // If no highlights in this node, render normally
-    if (nodeHighlights.length === 0) {
-      return React.createElement(
-        tag,
-        {
-          "data-start-offset": startOffset,
-          "data-end-offset": endOffset,
-          ...rest,
-        },
-        children,
-      );
-    }
-
     // Check if the entire node should be highlighted
-    const containingHighlight = nodeHighlights.find(
+    const containingHighlight = allHighlights.find(
       (h) => h.startOffset <= startOffset && h.endOffset >= endOffset,
     );
 
@@ -174,160 +156,95 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
       );
     }
 
-    // Process nodes recursively
-    const processNode = (
-      child: React.ReactNode,
-      offset: number,
-      parentNode?: MarkdownNode,
-    ): [React.ReactNode, number] => {
-      if (typeof child === "string") {
-        const childStart = offset;
-        const childEnd = childStart + child.length;
+    const overlappingHighlights = allHighlights
+      .filter((h) => h.startOffset < endOffset && h.endOffset > startOffset)
+      .sort((a, b) => a.startOffset - b.startOffset);
 
-        // Find all highlights that overlap with this text
-        const relevantHighlights = nodeHighlights
-          .filter((h) => h.startOffset < childEnd && h.endOffset > childStart)
-          .sort((a, b) => a.startOffset - b.startOffset);
+    if (overlappingHighlights.length === 0) {
+      return React.createElement(
+        tag,
+        {
+          "data-start-offset": startOffset,
+          "data-end-offset": endOffset,
+          ...rest,
+        },
+        children,
+      );
+    }
 
-        if (relevantHighlights.length === 0) {
-          return [child, childEnd];
-        }
-
-        const elements: React.ReactNode[] = [];
-        let pos = childStart;
-
-        relevantHighlights.forEach((highlight) => {
-          // Add non-highlighted text before
-          if (highlight.startOffset > pos) {
-            elements.push(
-              child.slice(pos - childStart, highlight.startOffset - childStart),
-            );
-          }
-
-          // Add highlighted text
-          const highlightEnd = Math.min(highlight.endOffset, childEnd);
-          elements.push(
-            <HighlightSpan
-              key={highlight.startOffset}
-              highlight={highlight}
-              startOffset={highlight.startOffset}
-              endOffset={highlightEnd}
-            >
-              {child.slice(
-                Math.max(0, highlight.startOffset - childStart),
-                highlightEnd - childStart,
-              )}
-            </HighlightSpan>,
-          );
-
-          pos = highlightEnd;
-        });
-
-        // Add remaining non-highlighted text
-        if (pos < childEnd) {
-          elements.push(child.slice(pos - childStart));
-        }
-
-        return [elements, childEnd];
-      }
-
-      if (React.isValidElement(child)) {
-        const childNode = child.props.node as MarkdownNode | undefined;
-        const elementType = child.type as string;
-
-        // For elements with position info, use their offsets
-        if (childNode?.position?.start?.offset !== undefined) {
-          const childStart = childNode.position.start.offset;
-          const childEnd = childNode.position.end?.offset ?? childStart;
-
-          // Skip highlighting for void elements
-          if (VOID_ELEMENTS.has(elementType)) {
-            return [child, childEnd];
-          }
-
-          // Check if this element is fully contained in a highlight
-          const childHighlight = nodeHighlights.find(
-            (h) => h.startOffset <= childStart && h.endOffset >= childEnd,
-          );
-
-          if (childHighlight) {
-            return [
-              React.cloneElement(child, {
-                ...child.props,
-                children: (
-                  <HighlightSpan
-                    highlight={childHighlight}
-                    startOffset={childStart}
-                    endOffset={childEnd}
-                  >
-                    {child.props.children}
-                  </HighlightSpan>
-                ),
-              }),
-              childEnd,
-            ];
-          }
-
-          // Process child's children with their own offset tracking
-          const processedChildren = React.Children.map(
-            child.props.children,
-            (grandChild) => {
-              const [processed, nextOffset] = processNode(
-                grandChild,
-                offset,
-                childNode,
-              );
-              offset = nextOffset;
-              return processed;
-            },
-          );
-
-          return [
-            React.cloneElement(child, {
-              ...child.props,
-              children: processedChildren,
-            }),
-            childEnd,
-          ];
-        } else {
-          // For elements without position info, continue with current offset
-          // Skip highlighting for void elements
-          if (VOID_ELEMENTS.has(elementType)) {
-            return [child, offset];
-          }
-
-          // Process child's children with current offset
-          const processedChildren = React.Children.map(
-            child.props.children,
-            (grandChild) => {
-              const [processed, nextOffset] = processNode(
-                grandChild,
-                offset,
-                parentNode,
-              );
-              offset = nextOffset;
-              return processed;
-            },
-          );
-
-          return [
-            React.cloneElement(child, {
-              ...child.props,
-              children: processedChildren,
-            }),
-            offset,
-          ];
-        }
-      }
-
-      return [child, offset];
-    };
-
+    // Process each child individually
+    const processedChildren: React.ReactNode[] = [];
     let currentOffset = startOffset;
-    const processedChildren = React.Children.map(children, (child) => {
-      const [processed, nextOffset] = processNode(child, currentOffset, node);
-      currentOffset = nextOffset;
-      return processed;
+
+    React.Children.forEach(children, (child) => {
+      if (typeof child === "string") {
+        // For text nodes, split and highlight as needed
+        let pos = currentOffset;
+        const text = child;
+        const textEnd = currentOffset + text.length;
+
+        // Find highlights that overlap with this text node
+        const textHighlights = overlappingHighlights.filter(
+          (h) => h.startOffset < textEnd && h.endOffset > pos,
+        );
+
+        if (textHighlights.length === 0) {
+          processedChildren.push(text);
+        } else {
+          textHighlights.forEach((highlight) => {
+            // Add non-highlighted text before this highlight
+            if (highlight.startOffset > pos) {
+              processedChildren.push(
+                text.slice(
+                  pos - currentOffset,
+                  highlight.startOffset - currentOffset,
+                ),
+              );
+            }
+
+            // Add highlighted text
+            const highlightEnd = Math.min(highlight.endOffset, textEnd);
+            const highlightedText = text.slice(
+              Math.max(0, highlight.startOffset - currentOffset),
+              highlightEnd - currentOffset,
+            );
+
+            if (highlightedText) {
+              processedChildren.push(
+                <HighlightSpan
+                  key={`${highlight.startOffset}-${highlightEnd}`}
+                  highlight={highlight}
+                  startOffset={Math.max(currentOffset, highlight.startOffset)}
+                  endOffset={highlightEnd}
+                >
+                  {highlightedText}
+                </HighlightSpan>,
+              );
+            }
+
+            pos = highlightEnd;
+          });
+
+          // Add remaining non-highlighted text
+          if (pos < textEnd) {
+            processedChildren.push(text.slice(pos - currentOffset));
+          }
+        }
+
+        currentOffset = textEnd;
+      } else if (React.isValidElement(child)) {
+        // For element nodes, check if they're fully contained in a highlight
+        const childNode = child.props.node as MarkdownNode | undefined;
+        const childStart = childNode?.position?.start?.offset ?? currentOffset;
+        const childEnd = childNode?.position?.end?.offset ?? childStart + 1;
+
+        processedChildren.push(child);
+
+        currentOffset = childEnd;
+      } else if (child != null) {
+        // For any other non-null children, preserve them
+        processedChildren.push(child);
+      }
     });
 
     return React.createElement(
@@ -340,5 +257,6 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
       processedChildren,
     );
   };
+
   return MarkdownComponent;
 };
