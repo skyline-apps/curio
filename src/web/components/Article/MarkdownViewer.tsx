@@ -65,12 +65,16 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
   };
 
   const components: Components = Object.fromEntries(
-    ALL_COMPONENTS.map((c) => [c, wrapMarkdownComponent(c, highlights)]),
+    ALL_COMPONENTS.map((c) => [
+      c,
+      wrapMarkdownComponent(c, highlights, currentHighlight),
+    ]),
   );
 
   return (
     <div
       ref={contentRef}
+      onMouseDown={clearSelection}
       onMouseUp={handleSelection}
       className={cn(
         "prose prose-slate max-w-none overflow-y-auto h-full [&_*]:!text-default-foreground hover:prose-a:!text-primary dark:prose-invert",
