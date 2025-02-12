@@ -71,6 +71,38 @@ export const ALL_COMPONENTS: (keyof JSX.IntrinsicElements)[] = [
   "th",
 ];
 
+export function removeHighlightsOverlap(
+  existingHighlights: Highlight[],
+  currentHighlight: NewHighlight | null,
+): Highlight[] {
+  if (!currentHighlight) return existingHighlights;
+  const resultHighlights: Highlight[] = [];
+  existingHighlights.forEach((h) => {
+    if (
+      h.startOffset >= currentHighlight.startOffset &&
+      h.endOffset <= currentHighlight.endOffset
+    ) {
+      // Completely contained, don't render
+    } else if (
+      h.endOffset > currentHighlight.startOffset &&
+      h.endOffset < currentHighlight.endOffset
+    ) {
+      // Overlaps before current highlight, truncate the end
+      resultHighlights.push({ ...h, endOffset: currentHighlight.startOffset });
+    } else if (
+      h.startOffset > currentHighlight.startOffset &&
+      h.startOffset < currentHighlight.endOffset
+    ) {
+      // Overlaps after current highlight, truncate the start
+      resultHighlights.push({ ...h, startOffset: currentHighlight.endOffset });
+    } else {
+      resultHighlights.push({ ...h });
+    }
+  });
+
+  return resultHighlights;
+}
+
 export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
   tag: T,
   highlights: Highlight[],
@@ -100,6 +132,7 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
     const allHighlights = newHighlight
       ? [...highlights, newHighlight]
       : highlights;
+
     // Find highlights that overlap with this node
     const nodeHighlights = allHighlights
       .filter((h) => h.startOffset < endOffset && h.endOffset > startOffset)
