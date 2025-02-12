@@ -1,6 +1,9 @@
 import React, { type ComponentPropsWithoutRef } from "react";
 
-import { type Highlight } from "@/app/api/v1/items/highlights/validation";
+import {
+  type Highlight,
+  type NewHighlight,
+} from "@/app/api/v1/items/highlights/validation";
 
 import { HighlightSpan } from "./HighlightSpan";
 
@@ -71,6 +74,7 @@ export const ALL_COMPONENTS: (keyof JSX.IntrinsicElements)[] = [
 export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
   tag: T,
   highlights: Highlight[],
+  newHighlight?: NewHighlight | null,
 ): React.FC<MarkdownProps<T>> => {
   const MarkdownComponent = ({
     node,
@@ -93,8 +97,11 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
       );
     }
 
+    const allHighlights = newHighlight
+      ? [...highlights, newHighlight]
+      : highlights;
     // Find highlights that overlap with this node
-    const nodeHighlights = highlights
+    const nodeHighlights = allHighlights
       .filter((h) => h.startOffset < endOffset && h.endOffset > startOffset)
       .sort((a, b) => a.startOffset - b.startOffset);
 
@@ -124,7 +131,11 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
           "data-end-offset": endOffset,
           ...rest,
         },
-        <HighlightSpan highlight={containingHighlight}>
+        <HighlightSpan
+          highlight={containingHighlight}
+          startOffset={startOffset}
+          endOffset={endOffset}
+        >
           {children}
         </HighlightSpan>,
       );
@@ -163,7 +174,12 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
           // Add highlighted text
           const highlightEnd = Math.min(highlight.endOffset, childEnd);
           elements.push(
-            <HighlightSpan key={highlight.startOffset} highlight={highlight}>
+            <HighlightSpan
+              key={highlight.startOffset}
+              highlight={highlight}
+              startOffset={highlight.startOffset}
+              endOffset={highlightEnd}
+            >
               {child.slice(
                 Math.max(0, highlight.startOffset - childStart),
                 highlightEnd - childStart,
@@ -206,7 +222,11 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
               React.cloneElement(child, {
                 ...child.props,
                 children: (
-                  <HighlightSpan highlight={childHighlight}>
+                  <HighlightSpan
+                    highlight={childHighlight}
+                    startOffset={childStart}
+                    endOffset={childEnd}
+                  >
                     {child.props.children}
                   </HighlightSpan>
                 ),
