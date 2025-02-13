@@ -94,7 +94,6 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   const clearSelectedItems = useCallback((): void => {
     setSelectedItems(new Set());
     setItemLoadedSlug(null);
-    setLastSelectionIndex(null);
     setInSelectionMode(false);
     setDraftHighlight(null);
     updateAppLayout({ rightSidebarOpen: false });
