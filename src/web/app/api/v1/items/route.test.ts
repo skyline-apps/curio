@@ -1062,6 +1062,114 @@ describe("/api/v1/items", () => {
       ).toBe(true);
     });
 
+    it("should return 200 with unique stateUpdatedAt for bulk item insert", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS.slice(0, 2));
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "POST",
+        body: {
+          items: [
+            {
+              url: "https://example.com",
+            },
+            {
+              url: "https://example2.com",
+            },
+          ],
+        },
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+
+      const updatedItems = await testDb.db
+        .select()
+        .from(profileItems)
+        .where(and(eq(profileItems.profileId, DEFAULT_TEST_PROFILE_ID)))
+        .orderBy(profileItems.itemId);
+
+      expect(updatedItems).toHaveLength(2);
+      expect(updatedItems[0].state).toBe(ItemState.ACTIVE);
+      expect(updatedItems[0].stateUpdatedAt.toISOString()).not.toEqual(
+        updatedItems[1].stateUpdatedAt.toISOString(),
+      );
+    });
+
+    it("should return 200 with unique stateUpdatedAt for bulk item update", async () => {
+      await testDb.db.insert(items).values([MOCK_ITEMS[0], MOCK_ITEMS[2]]);
+      await testDb.db
+        .insert(profileItems)
+        .values([MOCK_PROFILE_ITEMS[0], MOCK_PROFILE_ITEMS[2]]);
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "POST",
+        body: {
+          items: [
+            {
+              url: "https://example.com",
+            },
+            {
+              url: "https://example3.com",
+            },
+          ],
+        },
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+
+      const updatedItems = await testDb.db
+        .select()
+        .from(profileItems)
+        .where(and(eq(profileItems.profileId, DEFAULT_TEST_PROFILE_ID)))
+        .orderBy(profileItems.itemId);
+
+      expect(updatedItems).toHaveLength(2);
+      expect(updatedItems[0].state).toBe(ItemState.ACTIVE);
+      expect(updatedItems[0].stateUpdatedAt.toISOString()).not.toEqual(
+        updatedItems[1].stateUpdatedAt.toISOString(),
+      );
+    });
+    it("should return 200 and use provided stateUpdatedAt", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS.slice(0, 2));
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "POST",
+        body: {
+          items: [
+            {
+              url: "https://example.com",
+              metadata: {
+                stateUpdatedAt: new Date("2024-01-01"),
+              },
+            },
+            {
+              url: "https://example2.com",
+              metadata: {
+                stateUpdatedAt: new Date("2024-01-01"),
+              },
+            },
+          ],
+        },
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+
+      const updatedItems = await testDb.db
+        .select()
+        .from(profileItems)
+        .where(and(eq(profileItems.profileId, DEFAULT_TEST_PROFILE_ID)))
+        .orderBy(profileItems.itemId);
+
+      expect(updatedItems).toHaveLength(2);
+      expect(updatedItems[0].state).toBe(ItemState.ACTIVE);
+      expect(updatedItems[0].stateUpdatedAt.toISOString()).toEqual(
+        "2024-01-01T00:00:00.000Z",
+      );
+      expect(updatedItems[1].state).toBe(ItemState.ACTIVE);
+      expect(updatedItems[1].stateUpdatedAt.toISOString()).toEqual(
+        "2024-01-01T00:00:00.000Z",
+      );
+    });
+
     it("should return 400 if request body is invalid", async () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",

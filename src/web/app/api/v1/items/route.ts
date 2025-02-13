@@ -214,6 +214,8 @@ export async function POST(
         insertedItems.map((item) => [item.url, item.id]),
       );
 
+      const itemIds = insertedItems.map((item) => item.id);
+
       const profileItemsToInsert = newItems.map((item) => {
         const cleanedUrl = cleanUrl(item.url);
         const itemId = urlToItemId.get(cleanedUrl);
@@ -222,6 +224,7 @@ export async function POST(
             `Failed to find itemId for URL ${item.url}. This should never happen.`,
           );
         }
+        const itemIndex = itemIds.indexOf(itemId);
 
         return {
           title: item.metadata?.title || cleanedUrl,
@@ -237,7 +240,7 @@ export async function POST(
           state: ItemState.ACTIVE,
           stateUpdatedAt: item.metadata?.stateUpdatedAt
             ? new Date(item.metadata?.stateUpdatedAt)
-            : new Date(),
+            : new Date(new Date().getTime() + itemIndex),
           itemId,
         };
       });
@@ -258,7 +261,8 @@ export async function POST(
             favicon: sql`COALESCE(EXCLUDED.favicon, ${profileItems.favicon})`,
             publishedAt: sql`COALESCE(EXCLUDED.published_at, ${profileItems.publishedAt})`,
             stateUpdatedAt: sql`CASE
-              WHEN EXCLUDED.state <> profile_items.state THEN EXCLUDED.state_updated_at
+              WHEN EXCLUDED.state <> profile_items.state
+              THEN EXCLUDED.state_updated_at
               ELSE profile_items.state_updated_at
             END`,
             updatedAt: sql`now()`,
