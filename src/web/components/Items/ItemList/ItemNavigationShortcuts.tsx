@@ -11,7 +11,7 @@ import {
   useKeyboardShortcut,
 } from "@/providers/KeyboardShortcutProvider";
 
-export const ItemNavigation = (): null => {
+export const ItemNavigationShortcuts = (): null => {
   const { items } = useContext(ItemsContext);
   const {
     selectItems,
@@ -180,17 +180,20 @@ export const ItemNavigation = (): null => {
   useKeyboardShortcut({
     key: "o",
     name: "Open item",
-    category: ShortcutType.ACTIONS,
+    category: ShortcutType.NAVIGATION,
     handler: openItem,
     priority: 100,
   });
 
   useKeyboardShortcut({
-    key: "s",
+    key: "S",
     name: "Toggle favorite",
     category: ShortcutType.ACTIONS,
     handler: favoriteCurrentItem,
     priority: 100,
+    conditions: {
+      shiftKey: true,
+    },
   });
 
   useKeyboardShortcut({

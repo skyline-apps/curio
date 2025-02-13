@@ -3,6 +3,7 @@ import React, { useContext } from "react";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 
 import { useArticleUpdate } from "./actions";
+import { ItemActionShortcuts } from "./ItemActionShortcuts";
 import MarkdownViewer from "./MarkdownViewer";
 
 interface ArticleProps {
@@ -15,6 +16,7 @@ const Article: React.FC<ArticleProps> = ({ content }: ArticleProps) => {
 
   return (
     <>
+      <ItemActionShortcuts />
       <MarkdownViewer
         readingProgress={loadedItem?.item.metadata.readingProgress || 0}
         highlights={loadedItem?.item.highlights || []}
