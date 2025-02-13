@@ -28,6 +28,7 @@ export const ItemNavigationShortcuts = (): null => {
   const openItem = (): boolean => {
     if (selectedItems.size === 1) {
       router.push(`/items/${selectedItems.values().next().value}`);
+      clearSelectedItems();
       return true;
     }
     return false;

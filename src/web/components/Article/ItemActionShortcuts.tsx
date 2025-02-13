@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useContext } from "react";
 
 import { ItemState } from "@/db/schema";
+import { useAppPage } from "@/providers/AppPageProvider";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import { ItemsContext } from "@/providers/ItemsProvider";
 import {
@@ -18,6 +19,20 @@ export const ItemActionShortcuts = (): null => {
   const { updateItemsState, updateItemsFavorite } = useItemUpdate();
 
   const router = useRouter();
+  const { containerRef } = useAppPage();
+
+  const getNextItemSlug = (increment = 1): string | null => {
+    if (!items.length || !loadedItem?.item) {
+      return null;
+    }
+    const currentIndex = items.findIndex(
+      (item) => item.slug === loadedItem.item.slug,
+    );
+    if (currentIndex === -1) {
+      return null;
+    }
+    return items[(currentIndex + increment) % items.length].slug;
+  };
 
   const goHome = (): boolean => {
     router.push("/home");
@@ -25,34 +40,30 @@ export const ItemActionShortcuts = (): null => {
   };
 
   const goToNextItem = (): boolean => {
-    if (!items.length || !loadedItem?.item) {
-      return false;
+    const nextItemSlug = getNextItemSlug();
+    if (nextItemSlug) {
+      router.push(`/items/${nextItemSlug}`);
+      return true;
     }
-    const currentIndex = items.findIndex(
-      (item) => item.slug === loadedItem.item.slug,
-    );
-    if (currentIndex === -1) {
-      return false;
-    }
-    const nextIndex = (currentIndex + 1) % items.length;
-    const nextItem = items[nextIndex];
-    router.push(`/items/${nextItem.slug}`);
-    return true;
+    return false;
   };
 
   const goToPreviousItem = (): boolean => {
-    if (!items.length || !loadedItem?.item) {
-      return false;
+    const previousItemSlug = getNextItemSlug(-1);
+    if (previousItemSlug) {
+      router.push(`/items/${previousItemSlug}`);
+      return true;
     }
-    const currentIndex = items.findIndex(
-      (item) => item.slug === loadedItem.item.slug,
-    );
-    if (currentIndex === -1) {
-      return false;
-    }
-    const nextIndex = (currentIndex - 1) % items.length;
-    const nextItem = items[nextIndex];
-    router.push(`/items/${nextItem.slug}`);
+    return false;
+  };
+
+  const scrollDown = (): boolean => {
+    containerRef.current?.scrollBy(0, 300);
+    return true;
+  };
+
+  const scrollUp = (): boolean => {
+    containerRef.current?.scrollBy(0, -300);
     return true;
   };
 
@@ -69,17 +80,51 @@ export const ItemActionShortcuts = (): null => {
     if (!loadedItem?.item) {
       return false;
     }
-    await updateItemsState([loadedItem.item.slug], ItemState.ARCHIVED);
-    return true;
+    const nextItemSlug = getNextItemSlug();
+    return await updateItemsState([loadedItem.item.slug], ItemState.ARCHIVED)
+      .then(() => {
+        if (nextItemSlug) {
+          router.push(`/items/${nextItemSlug}`);
+        }
+        return true;
+      })
+      .catch(() => {
+        return false;
+      });
   };
 
   const deleteCurrentItem = async (): Promise<boolean> => {
     if (!loadedItem?.item) {
       return false;
     }
-    await updateItemsState([loadedItem.item.slug], ItemState.DELETED);
-    return true;
+    const nextItemSlug = getNextItemSlug();
+    return await updateItemsState([loadedItem.item.slug], ItemState.DELETED)
+      .then(() => {
+        if (nextItemSlug) {
+          router.push(`/items/${nextItemSlug}`);
+        }
+        return true;
+      })
+      .catch(() => {
+        return false;
+      });
   };
+
+  useKeyboardShortcut({
+    key: "j",
+    name: "Scroll down",
+    category: ShortcutType.NAVIGATION,
+    handler: scrollDown,
+    priority: 100,
+  });
+
+  useKeyboardShortcut({
+    key: "k",
+    name: "Scroll up",
+    category: ShortcutType.NAVIGATION,
+    handler: scrollUp,
+    priority: 100,
+  });
 
   useKeyboardShortcut({
     key: "Escape",
@@ -124,7 +169,7 @@ export const ItemActionShortcuts = (): null => {
 
   useKeyboardShortcut({
     key: "e",
-    name: "Archive item",
+    name: "Archive then open next item",
     category: ShortcutType.ACTIONS,
     handler: archiveCurrentItem,
     priority: 100,
@@ -132,7 +177,7 @@ export const ItemActionShortcuts = (): null => {
 
   useKeyboardShortcut({
     key: "#",
-    name: "Delete item",
+    name: "Delete then open next item",
     category: ShortcutType.ACTIONS,
     handler: deleteCurrentItem,
     priority: 100,
