@@ -51,7 +51,10 @@ export class Storage {
     slug: string,
     content: string,
     metadata: ExtractedMetadata,
-  ): Promise<Exclude<UploadStatus, UploadStatus.ERROR>> {
+  ): Promise<{
+    versionName: string;
+    status: Exclude<UploadStatus, UploadStatus.ERROR>;
+  }> {
     const storage = await this.getStorageClient();
     const timestamp = new Date().toISOString();
     const contentHash = this.computeContentHash(content);
@@ -76,7 +79,10 @@ export class Storage {
               slug,
               hash: contentHash,
             });
-            return UploadStatus.SKIPPED;
+            return {
+              versionName: version.name,
+              status: UploadStatus.SKIPPED,
+            };
           }
         } catch (e) {
           log.error("Failed to parse version metadata", {
@@ -123,7 +129,10 @@ export class Storage {
           throw new StorageError("Failed to upload version");
         }
 
-        return UploadStatus.STORED_VERSION;
+        return {
+          versionName: timestamp,
+          status: UploadStatus.STORED_VERSION,
+        };
       }
     } catch (error) {
       // Main file doesn't exist yet, or error reading it
@@ -161,35 +170,28 @@ export class Storage {
       throw new StorageError("Failed to update main file");
     }
 
-    return UploadStatus.UPDATED_MAIN;
+    return { versionName: timestamp, status: UploadStatus.UPDATED_MAIN };
   }
 
   async getItemContent(
     slug: string,
     version: string | null,
-  ): Promise<{ version: string | null; content: string }> {
+  ): Promise<{ version: string | null; versionName: string; content: string }> {
     const storage = await this.getStorageClient();
     const versionPath = version
       ? `${slug}/versions/${version}.md`
       : `${slug}/${DEFAULT_NAME}.md`;
 
-    const { data, error } = await storage
+    const { data: content, error } = await storage
       .from(ITEMS_BUCKET)
       .download(versionPath);
+    const { data: metadata, error: metadataError } = await storage
+      .from(ITEMS_BUCKET)
+      .info(versionPath);
 
-    if (error) {
+    if (error || metadataError || !metadata.metadata) {
       if (version) {
-        const { data: defaultData, error: defaultError } = await storage
-          .from(ITEMS_BUCKET)
-          .download(`${slug}/${DEFAULT_NAME}.md`);
-
-        if (defaultError) {
-          throw new StorageError("Failed to download content");
-        }
-        return {
-          version: null,
-          content: await defaultData.text(),
-        };
+        return this.getItemContent(slug, null);
       } else {
         throw new StorageError("Failed to download content");
       }
@@ -197,7 +199,8 @@ export class Storage {
 
     return {
       version,
-      content: await data.text(),
+      versionName: metadata.metadata.timestamp,
+      content: await content.text(),
     };
   }
 
@@ -228,8 +231,10 @@ export const uploadItemContent = (
   slug: string,
   content: string,
   metadata: ExtractedMetadata,
-): Promise<Exclude<UploadStatus, UploadStatus.ERROR>> =>
-  storage.uploadItemContent(slug, content, metadata);
+): Promise<{
+  versionName: string;
+  status: Exclude<UploadStatus, UploadStatus.ERROR>;
+}> => storage.uploadItemContent(slug, content, metadata);
 
 export const getItemContent = (
   slug: string,

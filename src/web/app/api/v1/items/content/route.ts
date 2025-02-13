@@ -2,6 +2,7 @@ import { LABELS_CLAUSE } from "@/app/api/v1/items/route";
 import { and, db, eq, sql, type TransactionDB } from "@/db";
 import {
   items,
+  ItemState,
   ItemStateNumber,
   profileItemHighlights,
   profileItems,
@@ -118,10 +119,11 @@ export async function GET(
     const itemResponse = ItemResultWithHighlightsSchema.parse(item[0]);
 
     try {
-      const { version, content } = await storage.getItemContent(
-        slug,
-        itemResponse.metadata.versionName,
-      );
+      const {
+        version,
+        versionName: retrievedVersionName,
+        content,
+      } = await storage.getItemContent(slug, itemResponse.metadata.versionName);
 
       let response: GetItemContentResponse = GetItemContentResponseSchema.parse(
         {
@@ -131,7 +133,7 @@ export async function GET(
       );
       // Clear out versionName if it can't be found.
       if (version !== itemResponse.metadata.versionName) {
-        await db
+        const updatedProfileItem = await db
           .update(profileItems)
           .set({ versionName: version })
           .where(
@@ -139,7 +141,19 @@ export async function GET(
               eq(profileItems.itemId, itemResponse.id),
               eq(profileItems.profileId, profileResult.profile.id),
             ),
-          );
+          )
+          .returning({
+            id: profileItems.id,
+          });
+
+        await indexDocuments([
+          {
+            profileItemId: updatedProfileItem[0].id,
+            profileId: profileResult.profile.id,
+            content: content,
+            contentVersionName: retrievedVersionName,
+          },
+        ]);
 
         response = GetItemContentResponseSchema.parse({
           content,
@@ -182,8 +196,13 @@ async function updateProfileItem(
   itemId: string,
   metadata: ExtractedMetadata,
   savedAt: Date,
-  markdownContent: string,
-): Promise<void> {
+): Promise<{
+  profileItemId: string;
+  title: string;
+  description: string;
+  state: ItemState;
+  isFavorite: boolean;
+}> {
   const newTitle = metadata.title || itemUrl;
   const profileItem = await tx
     .update(profileItems)
@@ -211,7 +230,7 @@ async function updateProfileItem(
     });
 
   if (!profileItem.length) {
-    return;
+    throw Error("Failed to save updated profile item information.");
   }
   // Delete previous highlights
   await tx
@@ -223,17 +242,13 @@ async function updateProfileItem(
       ),
     );
 
-  // Index profile item
-  await indexDocuments([
-    {
-      profileItemId: profileItem[0].id,
-      title: newTitle,
-      description: metadata.description || "",
-      content: markdownContent,
-      stateEnum: ItemStateNumber[profileItem[0].state],
-      isFavorite: profileItem[0].isFavorite ? 1 : 0,
-    },
-  ]);
+  return {
+    profileItemId: profileItem[0].id,
+    title: newTitle,
+    description: metadata.description || "",
+    state: profileItem[0].state,
+    isFavorite: profileItem[0].isFavorite,
+  };
 }
 
 export async function POST(
@@ -306,7 +321,7 @@ export async function POST(
         cleanedUrl,
         htmlContent,
       );
-      const status = await storage.uploadItemContent(
+      const { versionName, status } = await storage.uploadItemContent(
         slug,
         markdownContent,
         metadata,
@@ -330,15 +345,31 @@ export async function POST(
           .set({ updatedAt: newDate })
           .where(eq(items.id, item[0].id));
 
-        await updateProfileItem(
-          tx,
-          item[0].url,
-          profileResult.profile.id,
-          item[0].id,
-          metadata,
-          newDate,
-          markdownContent,
-        );
+        const { profileItemId, title, description, state, isFavorite } =
+          await updateProfileItem(
+            tx,
+            item[0].url,
+            profileResult.profile.id,
+            item[0].id,
+            metadata,
+            newDate,
+          );
+
+        // Index profile item with new main content
+        await indexDocuments([
+          {
+            profileItemId: profileItemId,
+            profileId: profileResult.profile.id,
+            title: title,
+            description: description,
+            content: markdownContent,
+            stateEnum: ItemStateNumber[state],
+            isFavorite: isFavorite ? 1 : 0,
+            url: item[0].url,
+            slug: slug,
+            contentVersionName: versionName,
+          },
+        ]);
         return APIResponseJSON(response);
       } else if (
         status === UploadStatus.STORED_VERSION ||
@@ -357,6 +388,7 @@ export async function POST(
           )
           .limit(1);
 
+        // TODO: Index here? Also do we need to update savedAt?
         // If the metadata hasn't previously been stored, update it here.
         if (profileItem.length > 0) {
           const defaultMetadata = await storage.getItemMetadata(slug);
@@ -367,7 +399,6 @@ export async function POST(
             item[0].id,
             defaultMetadata,
             newDate,
-            markdownContent,
           );
         }
         return APIResponseJSON(response);

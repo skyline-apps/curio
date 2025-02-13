@@ -10,23 +10,30 @@ export class Storage {
   async uploadItemContent(
     _slug: string,
     _content: string,
-  ): Promise<Exclude<UploadStatus, UploadStatus.ERROR>> {
-    return UploadStatus.UPDATED_MAIN;
+  ): Promise<{
+    versionName: string;
+    status: Exclude<UploadStatus, UploadStatus.ERROR>;
+  }> {
+    return {
+      versionName: MOCK_VERSION,
+      status: UploadStatus.UPDATED_MAIN,
+    };
   }
 
   async getItemContent(
     _slug: string,
     _version: string | null,
-  ): Promise<{ version: string | null; content: string }> {
+  ): Promise<{ version: string | null; versionName: string; content: string }> {
     return {
       version: null,
+      versionName: MOCK_VERSION,
       content: "",
     };
   }
 
   async getItemMetadata(_slug: string): Promise<VersionMetadata> {
     return {
-      timestamp: "2024-10-20T12:00:00.000Z",
+      timestamp: MOCK_VERSION,
       length: 100,
       hash: "contenthash",
       ...MOCK_METADATA,
@@ -46,11 +53,15 @@ export const storage = new Storage();
 // Create spies for each method
 export const uploadItemContent = jest
   .spyOn(storage, "uploadItemContent")
-  .mockImplementation(async () => UploadStatus.UPDATED_MAIN);
+  .mockImplementation(async () => ({
+    versionName: MOCK_VERSION,
+    status: UploadStatus.UPDATED_MAIN,
+  }));
 export const getItemContent = jest
   .spyOn(storage, "getItemContent")
   .mockImplementation(async () => ({
     version: null,
+    versionName: MOCK_VERSION,
     content: "test content",
   }));
 export const getItemMetadata = jest
