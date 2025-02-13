@@ -23,7 +23,7 @@ const ItemPage: React.FC = () => {
   return (
     <div className="flex-1 w-full h-full flex flex-col">
       {!loading && loadedItem ? (
-        <div className="w-full lg:w-4xl max-w-4xl mx-auto">
+        <div className="w-full lg:w-4xl max-w-4xl mx-auto pl-6">
           <h1 className="text-lg font-medium mb-2">{metadata?.title}</h1>
           {loadingError ? (
             <p className="text-sm text-danger">{loadingError}</p>

@@ -64,7 +64,6 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
       ),
     ]),
   );
-
   return (
     <div className="relative flex gap-4">
       <div
@@ -82,7 +81,6 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
           {children || ""}
         </ReactMarkdown>
       </div>
-      <div id="tooltip-container" className="w-48" />
     </div>
   );
 };

@@ -5,6 +5,7 @@ import {
   type NewHighlight,
 } from "@/app/api/v1/items/highlights/validation";
 
+import ArticleHeading from "./ArticleHeading";
 import { HighlightSpan } from "./HighlightSpan";
 
 interface MarkdownNode {
@@ -103,6 +104,22 @@ export function removeHighlightsOverlap(
   return resultHighlights;
 }
 
+function childrenToText(children: React.ReactNode): string {
+  if (Array.isArray(children)) {
+    return children.reduce((acc, child) => acc + childrenToText(child), "");
+  } else if (
+    children !== null &&
+    typeof children === "object" &&
+    "props" in children &&
+    children.props?.children
+  ) {
+    return childrenToText(children.props.children);
+  } else if (typeof children === "string") {
+    return children;
+  }
+  return "";
+}
+
 export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
   tag: T,
   highlights: Highlight[],
@@ -118,8 +135,33 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
     children,
     ...rest
   }: MarkdownProps<T>): JSX.Element => {
+    const selfRef = React.useRef<HTMLDivElement>(null);
     const startOffset = node?.position?.start?.offset ?? 0;
     const endOffset = node?.position?.end?.offset ?? 0;
+
+    const isHeading =
+      tag === "h1" || tag === "h2" || tag === "h3" || tag === "h4";
+    const childrenText = childrenToText(children);
+
+    const createElement = (
+      elementChildren: React.ReactNode,
+    ): React.ReactElement => {
+      return React.createElement(
+        tag,
+        {
+          "data-start-offset": startOffset,
+          "data-end-offset": endOffset,
+          ref: selfRef,
+          ...rest,
+        },
+        <>
+          {isHeading ? (
+            <ArticleHeading heading={selfRef}>{childrenText}</ArticleHeading>
+          ) : null}
+          {elementChildren}
+        </>,
+      );
+    };
 
     // Skip highlighting for list containers and void elements
     if (tag === "ul" || tag === "ol" || VOID_ELEMENTS.has(tag)) {
@@ -145,17 +187,20 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
         {
           "data-start-offset": startOffset,
           "data-end-offset": endOffset,
+          ref: selfRef,
           ...rest,
         },
-        <HighlightSpan
-          isSelected={containingHighlight?.id === draftHighlight?.id}
-          highlight={containingHighlight}
-          startOffset={startOffset}
-          endOffset={endOffset}
-          onClick={selectHighlight}
-        >
-          {children}
-        </HighlightSpan>,
+        createElement(
+          <HighlightSpan
+            isSelected={containingHighlight?.id === draftHighlight?.id}
+            highlight={containingHighlight}
+            startOffset={startOffset}
+            endOffset={endOffset}
+            onClick={selectHighlight}
+          >
+            {children}
+          </HighlightSpan>,
+        ),
       );
     }
 
@@ -164,15 +209,7 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
       .sort((a, b) => a.startOffset - b.startOffset);
 
     if (overlappingHighlights.length === 0) {
-      return React.createElement(
-        tag,
-        {
-          "data-start-offset": startOffset,
-          "data-end-offset": endOffset,
-          ...rest,
-        },
-        children,
-      );
+      return createElement(children);
     }
 
     // Process each child individually
@@ -252,15 +289,7 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
       }
     });
 
-    return React.createElement(
-      tag,
-      {
-        "data-start-offset": startOffset,
-        "data-end-offset": endOffset,
-        ...rest,
-      },
-      processedChildren,
-    );
+    return createElement(processedChildren);
   };
 
   return MarkdownComponent;
