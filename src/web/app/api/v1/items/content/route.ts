@@ -1,17 +1,16 @@
 import { LABELS_CLAUSE } from "@/app/api/v1/items/route";
 import { and, db, eq, sql, type TransactionDB } from "@/db";
 import { items, profileItemHighlights, profileItems } from "@/db/schema";
+import { extractMainContentAsMarkdown, extractMetadata } from "@/lib/extract";
+import {
+  ExtractedMetadata,
+  ExtractError,
+  MetadataError,
+} from "@/lib/extract/types";
 import { storage } from "@/lib/storage";
 import { StorageError } from "@/lib/storage/types";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
-import {
-  ExtractedMetadata,
-  ExtractError,
-  extractMainContentAsMarkdown,
-  extractMetadata,
-  MetadataError,
-} from "@/utils/extract";
 import { createLogger } from "@/utils/logger";
 import { cleanUrl } from "@/utils/url";
 

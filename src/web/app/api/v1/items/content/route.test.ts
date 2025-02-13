@@ -16,14 +16,10 @@ import {
   profileItems,
   profileLabels,
 } from "@/db/schema";
+import { extractMainContentAsMarkdown, extractMetadata } from "@/lib/extract";
+import { ExtractError, MetadataError } from "@/lib/extract/types";
 import { StorageError } from "@/lib/storage/types";
 import { APIRequest } from "@/utils/api";
-import {
-  ExtractError,
-  extractMainContentAsMarkdown,
-  extractMetadata,
-  MetadataError,
-} from "@/utils/extract";
 import {
   DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_PROFILE_ID,

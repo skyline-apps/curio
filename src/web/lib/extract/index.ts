@@ -10,19 +10,7 @@ import {
 } from "schema-dts";
 import TurndownService from "turndown";
 
-export class ExtractError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "ExtractError";
-  }
-}
-
-export class MetadataError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "MetadataError";
-  }
-}
+import { ExtractedMetadata, ExtractError, MetadataError } from "./types";
 
 const turndown = new TurndownService({
   headingStyle: "atx",
@@ -52,15 +40,6 @@ turndown.addRule("picture", {
     return `![${alt}](${src}${title})`;
   },
 });
-
-export interface ExtractedMetadata {
-  author: string | null;
-  title: string | null;
-  description: string | null;
-  thumbnail: string | null;
-  favicon: string | null;
-  publishedAt: Date | null;
-}
 
 type JsonLdGraph = {
   "@context"?: string;
