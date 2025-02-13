@@ -1,5 +1,5 @@
 import { LABELS_CLAUSE } from "@/app/api/v1/items/route";
-import { and, db, eq, sql } from "@/db";
+import { and, db, eq, sql, type TransactionDB } from "@/db";
 import { items, profileItemHighlights, profileItems } from "@/db/schema";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
@@ -170,6 +170,7 @@ export async function GET(
 }
 
 async function updateMetadata(
+  tx: TransactionDB,
   itemUrl: string,
   profileId: string,
   itemId: string,
@@ -177,7 +178,7 @@ async function updateMetadata(
   savedAt: Date,
 ): Promise<void> {
   const newTitle = metadata.title || itemUrl;
-  await db
+  await tx
     .update(profileItems)
     .set({
       savedAt: savedAt,
@@ -194,6 +195,15 @@ async function updateMetadata(
       and(
         eq(profileItems.itemId, itemId),
         eq(profileItems.profileId, profileId),
+      ),
+    );
+  // Delete previous highlights
+  await tx
+    .delete(profileItemHighlights)
+    .where(
+      eq(
+        profileItemHighlights.profileItemId,
+        sql`(SELECT id FROM ${profileItems} WHERE profile_id = ${profileId} AND id = ${profileItemHighlights.profileItemId} AND item_id = ${itemId})`,
       ),
     );
 }
@@ -219,122 +229,126 @@ export async function POST(
   try {
     const cleanedUrl = cleanUrl(url);
 
-    const item = await db
-      .select({
-        id: items.id,
-        slug: items.slug,
-        url: items.url,
-        metadata: {
-          title: profileItems.title,
-          description: profileItems.description,
-          author: profileItems.author,
-          thumbnail: profileItems.thumbnail,
-          favicon: profileItems.favicon,
-          publishedAt: profileItems.publishedAt,
-        },
-      })
-      .from(items)
-      .innerJoin(profileItems, eq(items.id, profileItems.itemId))
-      .where(
-        and(
-          eq(items.url, cleanedUrl),
-          eq(profileItems.profileId, profileResult.profile.id),
-        ),
-      )
-      .limit(1);
-
-    if (!item.length) {
-      return APIResponseJSON({ error: "Item not found." }, { status: 404 });
-    }
-
-    const slug = item[0].slug;
-
-    const newDate = new Date();
-    let metadata: ExtractedMetadata;
-    if (skipMetadataExtraction) {
-      metadata = {
-        title: item[0].metadata.title,
-        description: item[0].metadata.description,
-        author: item[0].metadata.author,
-        thumbnail: item[0].metadata.thumbnail,
-        favicon: item[0].metadata.favicon,
-        publishedAt: item[0].metadata.publishedAt,
-      };
-    } else {
-      metadata = await extractMetadata(cleanedUrl, htmlContent);
-    }
-    const markdownContent = await extractMainContentAsMarkdown(
-      cleanedUrl,
-      htmlContent,
-    );
-    const status = await storage.uploadItemContent(
-      slug,
-      markdownContent,
-      metadata,
-    );
-
-    const response: UpdateItemContentResponse =
-      UpdateItemContentResponseSchema.parse({
-        status,
-        slug: slug,
-        message:
-          status === UploadStatus.UPDATED_MAIN
-            ? "Content updated and set as main version"
-            : status === UploadStatus.SKIPPED
-              ? "Content already exists"
-              : "Content updated",
-      });
-
-    if (status === UploadStatus.UPDATED_MAIN) {
-      await db
-        .update(items)
-        .set({ updatedAt: newDate })
-        .where(eq(items.id, item[0].id));
-
-      await updateMetadata(
-        item[0].url,
-        profileResult.profile.id,
-        item[0].id,
-        metadata,
-        newDate,
-      );
-      return APIResponseJSON(response);
-    } else if (
-      status === UploadStatus.STORED_VERSION ||
-      status === UploadStatus.SKIPPED
-    ) {
-      const profileItem = await db
-        .select()
-        .from(profileItems)
+    return await db.transaction(async (tx) => {
+      const item = await tx
+        .select({
+          id: items.id,
+          slug: items.slug,
+          url: items.url,
+          metadata: {
+            title: profileItems.title,
+            description: profileItems.description,
+            author: profileItems.author,
+            thumbnail: profileItems.thumbnail,
+            favicon: profileItems.favicon,
+            publishedAt: profileItems.publishedAt,
+          },
+        })
+        .from(items)
+        .innerJoin(profileItems, eq(items.id, profileItems.itemId))
         .where(
           and(
-            eq(profileItems.itemId, item[0].id),
+            eq(items.url, cleanedUrl),
             eq(profileItems.profileId, profileResult.profile.id),
-            sql`${profileItems.versionName} IS NULL`,
-            sql`${profileItems.savedAt} IS NULL`,
           ),
         )
         .limit(1);
 
-      // If the metadata hasn't previously been stored, update it here.
-      if (profileItem.length > 0) {
-        const defaultMetadata = await storage.getItemMetadata(slug);
+      if (!item.length) {
+        return APIResponseJSON({ error: "Item not found." }, { status: 404 });
+      }
+
+      const slug = item[0].slug;
+
+      const newDate = new Date();
+      let metadata: ExtractedMetadata;
+      if (skipMetadataExtraction) {
+        metadata = {
+          title: item[0].metadata.title,
+          description: item[0].metadata.description,
+          author: item[0].metadata.author,
+          thumbnail: item[0].metadata.thumbnail,
+          favicon: item[0].metadata.favicon,
+          publishedAt: item[0].metadata.publishedAt,
+        };
+      } else {
+        metadata = await extractMetadata(cleanedUrl, htmlContent);
+      }
+      const markdownContent = await extractMainContentAsMarkdown(
+        cleanedUrl,
+        htmlContent,
+      );
+      const status = await storage.uploadItemContent(
+        slug,
+        markdownContent,
+        metadata,
+      );
+
+      const response: UpdateItemContentResponse =
+        UpdateItemContentResponseSchema.parse({
+          status,
+          slug: slug,
+          message:
+            status === UploadStatus.UPDATED_MAIN
+              ? "Content updated and set as main version"
+              : status === UploadStatus.SKIPPED
+                ? "Content already exists"
+                : "Content updated",
+        });
+
+      if (status === UploadStatus.UPDATED_MAIN) {
+        await tx
+          .update(items)
+          .set({ updatedAt: newDate })
+          .where(eq(items.id, item[0].id));
+
         await updateMetadata(
+          tx,
           item[0].url,
           profileResult.profile.id,
           item[0].id,
-          defaultMetadata,
+          metadata,
           newDate,
         );
+        return APIResponseJSON(response);
+      } else if (
+        status === UploadStatus.STORED_VERSION ||
+        status === UploadStatus.SKIPPED
+      ) {
+        const profileItem = await tx
+          .select()
+          .from(profileItems)
+          .where(
+            and(
+              eq(profileItems.itemId, item[0].id),
+              eq(profileItems.profileId, profileResult.profile.id),
+              sql`${profileItems.versionName} IS NULL`,
+              sql`${profileItems.savedAt} IS NULL`,
+            ),
+          )
+          .limit(1);
+
+        // If the metadata hasn't previously been stored, update it here.
+        if (profileItem.length > 0) {
+          const defaultMetadata = await storage.getItemMetadata(slug);
+          await updateMetadata(
+            tx,
+            item[0].url,
+            profileResult.profile.id,
+            item[0].id,
+            defaultMetadata,
+            newDate,
+          );
+        }
+        return APIResponseJSON(response);
+      } else {
+        log.error("Upload error", { status: status });
+        return APIResponseJSON(
+          { error: "Error uploading item content." },
+          { status: 500 },
+        );
       }
-      return APIResponseJSON(response);
-    } else {
-      log.error("Upload error", { status: status });
-      return APIResponseJSON(
-        { error: "Error uploading item content." },
-        { status: 500 },
-      );
-    }
+    });
   } catch (error: unknown) {
     if (error instanceof StorageError) {
       return APIResponseJSON({ error: error.message }, { status: 500 });
