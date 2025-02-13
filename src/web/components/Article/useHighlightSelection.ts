@@ -1,4 +1,4 @@
-import { type RefObject, useCallback, useContext, useState } from "react";
+import { type RefObject, useCallback, useContext } from "react";
 
 import {
   type Highlight,
@@ -34,22 +34,20 @@ function findPreviousOffset(node: Node): number {
 export function useHighlightSelection({
   contentRef,
 }: UseHighlightSelectionProps): UseHighlightSelectionResult {
-  const { setSidebarOpen } = useContext(CurrentItemContext);
-  const [draftHighlight, setDraftHighlight] = useState<
-    Highlight | NewHighlight | null
-  >(null);
+  const { setSidebarOpen, draftHighlight, setDraftHighlight } =
+    useContext(CurrentItemContext);
 
   const selectDraftHighlight = useCallback(
     (highlight: Highlight) => {
-      setSidebarOpen(false);
+      setSidebarOpen(true);
       setDraftHighlight(highlight);
     },
-    [setSidebarOpen],
+    [setSidebarOpen, setDraftHighlight],
   );
 
   const clearSelection = useCallback(() => {
     setDraftHighlight(null);
-  }, []);
+  }, [setDraftHighlight]);
 
   const handleSelection = useCallback(async () => {
     const selection = window.getSelection();
@@ -119,7 +117,7 @@ export function useHighlightSelection({
     } catch (error) {
       log.error("Error handling selection:", error);
     }
-  }, [contentRef]);
+  }, [contentRef, setDraftHighlight]);
 
   return {
     handleSelection,

@@ -3,12 +3,7 @@ import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-import {
-  CreateOrUpdateHighlightResponse,
-  DeleteHighlightResponse,
-  type Highlight,
-  type NewHighlight,
-} from "@/app/api/v1/items/highlights/validation";
+import { type Highlight } from "@/app/api/v1/items/highlights/validation";
 import { ReadItemResponse } from "@/app/api/v1/items/read/validation";
 import { useAppPage } from "@/providers/AppPageProvider";
 import { cn } from "@/utils/cn";
@@ -25,10 +20,6 @@ interface MarkdownViewerProps {
   readingProgress: number;
   onProgressChange?: (progress: number) => Promise<ReadItemResponse>;
   highlights: Highlight[];
-  onCreateHighlight?: (
-    highlight: NewHighlight | Highlight,
-  ) => Promise<CreateOrUpdateHighlightResponse>;
-  onDeleteHighlight?: (highlightId: string) => Promise<DeleteHighlightResponse>;
   className?: string;
   children?: string;
 }
@@ -37,8 +28,6 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
   readingProgress,
   onProgressChange,
   highlights,
-  onCreateHighlight,
-  onDeleteHighlight,
   className,
   children,
 }) => {
@@ -60,22 +49,6 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
     contentRef,
   });
 
-  const handleSaveHighlight = async (
-    highlight: NewHighlight | Highlight,
-  ): Promise<void> => {
-    if (onCreateHighlight) {
-      await onCreateHighlight(highlight);
-    }
-    clearSelection();
-  };
-
-  const handleDeleteHighlight = async (highlight: Highlight): Promise<void> => {
-    if (onDeleteHighlight) {
-      await onDeleteHighlight(highlight.id);
-    }
-    clearSelection();
-  };
-
   const nonOverlappingHighlights = removeHighlightsOverlap(
     highlights,
     draftHighlight,
@@ -88,8 +61,6 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
         nonOverlappingHighlights,
         draftHighlight,
         selectDraftHighlight,
-        handleSaveHighlight,
-        handleDeleteHighlight,
       ),
     ]),
   );
@@ -103,7 +74,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
         onMouseUp={handleSelection}
         onTouchEnd={handleSelection}
         className={cn(
-          "prose prose-slate max-w-none overflow-y-auto h-full [&_*]:!text-default-foreground hover:prose-a:!text-primary dark:prose-invert",
+          "prose prose-slate max-w-none overflow-y-auto h-full [&_*]:text-default-foreground hover:prose-a:!text-primary dark:prose-invert",
           className,
         )}
       >
