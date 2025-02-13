@@ -61,31 +61,21 @@ export async function POST(
       );
     }
 
+    const highlightsWithProfileItemId = highlights.map((h) => ({
+      id: h.id,
+      profileItemId: profileItem[0].id,
+      startOffset: h.startOffset,
+      endOffset: h.endOffset,
+      text: h.text,
+      note: h.note,
+    }));
+
     const savedHighlights = await db
       .insert(profileItemHighlights)
-      .values(
-        highlights.map((h) => ({
-          id: h.id,
-          profileItemId: profileItem[0].id,
-          startOffset: h.startOffset,
-          endOffset: h.endOffset,
-          text: h.text,
-          note: h.note,
-        })),
-      )
+      .values(highlightsWithProfileItemId)
       .onConflictDoUpdate({
         target: profileItemHighlights.id,
-        where: and(
-          eq(profileItemHighlights.profileItemId, profileItem[0].id),
-          eq(
-            profileItemHighlights.profileItemId,
-            db
-              .select({ id: profileItems.id })
-              .from(profileItems)
-              .where(eq(profileItems.profileId, profileResult.profile.id))
-              .limit(1),
-          ),
-        ),
+        where: eq(profileItemHighlights.profileItemId, profileItem[0].id),
         set: {
           startOffset: sql`excluded.start_offset`,
           endOffset: sql`excluded.end_offset`,
