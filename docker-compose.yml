@@ -18,8 +18,8 @@ services:
       POSTGRES_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}"
       NEXT_PUBLIC_SUPABASE_URL: ${API_EXTERNAL_URL}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
-      MEILI_API_KEY: ${MEILI_API_KEY}
-      MEILI_ENDPOINT_URL: ${MEILI_ENDPOINT_URL}
+      SEARCH_API_KEY: ${SEARCH_APPLICATION_API_KEY}
+      SEARCH_ENDPOINT_URL: ${SEARCH_ENDPOINT_URL}
     mem_limit: "6G"
     cpus: 4
     develop:
@@ -37,7 +37,7 @@ services:
     network_mode: host
     environment:
       MEILI_ENV: development
-      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+      MEILI_MASTER_KEY: ${SEARCH_MASTER_API_KEY}
     command:
       - /bin/sh
       - /init.sh

@@ -68,15 +68,15 @@ export class Search {
   private lastUsedEndpoint: string | null = null;
 
   private createAxiosInstance(): AxiosInstance {
-    const apiKey = process.env.MEILI_API_KEY;
-    const endpoint = process.env.MEILI_ENDPOINT_URL;
+    const apiKey = process.env.SEARCH_API_KEY;
+    const endpoint = process.env.SEARCH_ENDPOINT_URL;
 
     if (!apiKey) {
-      throw new SearchError("MEILI_API_KEY environment variable is not set");
+      throw new SearchError("SEARCH_API_KEY environment variable is not set");
     }
     if (!endpoint) {
       throw new SearchError(
-        "MEILI_ENDPOINT_URL environment variable is not set",
+        "SEARCH_ENDPOINT_URL environment variable is not set",
       );
     }
 
