@@ -84,6 +84,7 @@ describe("/api/v1/items/read", () => {
     it("should return 200 and update version name when default is set", async () => {
       jest.mocked(getItemContent).mockResolvedValueOnce({
         version: "2010-04-04",
+        versionName: "2010-04-04",
         content: "custom version content",
       });
       await testDb.db.insert(items).values(MOCK_ITEM);

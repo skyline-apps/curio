@@ -4,6 +4,7 @@ import { MOCK_METADATA } from "@/__mocks__/extract";
 import { indexDocuments } from "@/__mocks__/search";
 import {
   getItemContent,
+  MOCK_VERSION,
   storage,
   uploadItemContent,
 } from "@/__mocks__/storage";
@@ -185,6 +186,7 @@ describe("/api/v1/items/content", () => {
         .execute();
 
       expect(updatedItem[0].versionName).toBe(null);
+      expect(indexDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 200 with item and its labels", async () => {
@@ -216,11 +218,13 @@ describe("/api/v1/items/content", () => {
           color: "#00ff00",
         },
       ]);
+      expect(indexDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 200 with custom version content", async () => {
       jest.mocked(getItemContent).mockResolvedValueOnce({
         version: "2010-04-04",
+        versionName: "2010-04-04",
         content: "custom version content",
       });
       await testDb.db.insert(items).values(MOCK_ITEM);
@@ -279,6 +283,7 @@ describe("/api/v1/items/content", () => {
         .execute();
 
       expect(updatedItem[0].versionName).toBe("2010-04-04");
+      expect(indexDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 200 with metadata even if item content is missing", async () => {
@@ -351,11 +356,13 @@ describe("/api/v1/items/content", () => {
         .execute();
 
       expect(updatedItem[0].versionName).toBe(null);
+      expect(indexDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 200 with default content if version is missing", async () => {
       jest.mocked(getItemContent).mockResolvedValueOnce({
         version: null,
+        versionName: "blah-version",
         content: "test content",
       });
       await testDb.db.insert(items).values(MOCK_ITEM);
@@ -414,6 +421,15 @@ describe("/api/v1/items/content", () => {
         .execute();
 
       expect(updatedItem[0].versionName).toBe(null);
+      expect(indexDocuments).toHaveBeenCalledTimes(1);
+      expect(indexDocuments).toHaveBeenCalledWith([
+        {
+          profileItemId: TEST_PROFILE_ITEM_ID,
+          profileId: DEFAULT_TEST_PROFILE_ID,
+          content: "test content",
+          contentVersionName: "blah-version",
+        },
+      ]);
     });
 
     it("should return 401 if user profile not found", async () => {
@@ -526,6 +542,24 @@ describe("/api/v1/items/content", () => {
   });
 
   describe("POST /api/v1/items/content", () => {
+    const checkDocumentIndexed = (): void => {
+      expect(indexDocuments).toHaveBeenCalledTimes(1);
+      expect(indexDocuments).toHaveBeenCalledWith([
+        {
+          profileItemId: TEST_PROFILE_ITEM_ID,
+          profileId: DEFAULT_TEST_PROFILE_ID,
+          content: "Markdown content",
+          description: MOCK_METADATA.description,
+          isFavorite: 1,
+          stateEnum: 0,
+          title: MOCK_METADATA.title,
+          url: TEST_ITEM_URL,
+          slug: TEST_ITEM_SLUG,
+          contentVersionName: MOCK_VERSION,
+        },
+      ]);
+    };
+
     test.each([
       ["should return 200 when updating content via regular auth", ""],
       [
@@ -608,6 +642,7 @@ describe("/api/v1/items/content", () => {
       expect(updatedProfileItem[0].publishedAt).toEqual(
         ORIGINAL_PUBLISHED_DATE,
       );
+      checkDocumentIndexed();
     });
 
     it("should return 200 and overwrite previous reading state when content updated", async () => {
@@ -667,17 +702,7 @@ describe("/api/v1/items/content", () => {
       expect(updatedProfileItemHighlights[0].profileItemId).toEqual(
         EXTRA_PROFILE_ITEM_ID,
       );
-      expect(indexDocuments).toHaveBeenCalledTimes(1);
-      expect(indexDocuments).toHaveBeenCalledWith([
-        {
-          content: "Markdown content",
-          description: MOCK_METADATA.description,
-          isFavorite: 1,
-          profileItemId: TEST_PROFILE_ITEM_ID,
-          stateEnum: 0,
-          title: MOCK_METADATA.title,
-        },
-      ]);
+      checkDocumentIndexed();
     });
 
     it("should return 200 even when content URL does not match exactly", async () => {
@@ -711,6 +736,7 @@ describe("/api/v1/items/content", () => {
         TEST_ITEM_URL,
         "<div>Test content</div>",
       );
+      checkDocumentIndexed();
     });
 
     it("should return 200 and only update one profile item", async () => {
@@ -752,6 +778,7 @@ describe("/api/v1/items/content", () => {
 
       expect(profileItem[0].title).toEqual("Example not mine");
       expect(profileItem[1].title).toEqual(MOCK_METADATA.title);
+      checkDocumentIndexed();
     });
 
     test.each<[string, Exclude<UploadStatus, UploadStatus.ERROR>]>([
@@ -764,7 +791,10 @@ describe("/api/v1/items/content", () => {
         UploadStatus.STORED_VERSION,
       ],
     ])("%s", async (_, status) => {
-      uploadItemContent.mockResolvedValueOnce(status);
+      uploadItemContent.mockResolvedValueOnce({
+        versionName: "mock-old-version",
+        status,
+      });
       await testDb.db.insert(items).values(MOCK_ITEM);
       await testDb.db.insert(profileItems).values({
         ...MOCK_PROFILE_ITEM,
@@ -808,10 +838,14 @@ describe("/api/v1/items/content", () => {
         (profileItem[0].savedAt as Date).getTime() >
           ORIGINAL_CREATION_DATE.getTime(),
       ).toBe(true);
+      expect(indexDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 200 without overwrite previous reading state when content not updated", async () => {
-      uploadItemContent.mockResolvedValueOnce(UploadStatus.STORED_VERSION);
+      uploadItemContent.mockResolvedValueOnce({
+        versionName: "mock-old-version",
+        status: UploadStatus.STORED_VERSION,
+      });
       await testDb.db.insert(items).values(MOCK_ITEM);
       await testDb.db.insert(profileItems).values({
         ...MOCK_PROFILE_ITEM,
@@ -852,6 +886,7 @@ describe("/api/v1/items/content", () => {
           eq(profileItemHighlights.profileItemId, updatedProfileItem[0].id),
         );
       expect(updatedHighlights.length).toEqual(2);
+      expect(indexDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 200 and skip metadata update when configured", async () => {
@@ -891,6 +926,21 @@ describe("/api/v1/items/content", () => {
         .from(profileItemHighlights)
         .where(eq(profileItemHighlights.profileItemId, profileItem[0].id));
       expect(updatedHighlights.length).toEqual(0);
+      expect(indexDocuments).toHaveBeenCalledTimes(1);
+      expect(indexDocuments).toHaveBeenCalledWith([
+        {
+          profileItemId: profileItem[0].id,
+          profileId: DEFAULT_TEST_PROFILE_ID,
+          title: MOCK_PROFILE_ITEM.title,
+          description: MOCK_PROFILE_ITEM.description,
+          content: "Markdown content",
+          contentVersionName: MOCK_VERSION,
+          stateEnum: 0,
+          isFavorite: 1,
+          url: MOCK_ITEM.url,
+          slug: MOCK_ITEM.slug,
+        },
+      ]);
     });
 
     it("should return 500 when content extraction fails", async () => {

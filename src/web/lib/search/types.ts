@@ -18,10 +18,13 @@ export interface SearchOptions {
 
 export interface ItemDocument {
   profileItemId: string;
-  title: string;
-  description: string;
-  content: string;
-  stateEnum: number;
-  isFavorite: number;
-  [key: string]: unknown; // Allow for additional fields
+  profileId: string;
+  url?: string;
+  slug?: string;
+  title?: string;
+  description?: string;
+  content?: string;
+  contentVersionName?: string;
+  stateEnum?: number;
+  isFavorite?: number;
 }
