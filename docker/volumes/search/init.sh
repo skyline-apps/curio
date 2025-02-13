@@ -32,7 +32,7 @@ done
 until curl -s -X POST "${MEILI_URL}/keys" \
     -H "Authorization: Bearer ${MEILI_MASTER_KEY}" \
     -H "Content-Type: application/json" \
-    -d '{"description": "Curio API key", "actions": ["documents.*", "indexes.*", "search"], "indexes": ["*"], "expiresAt": null }' > /dev/null; do
+    -d '{"description": "Curio API key", "actions": ["documents.*", "indexes.*", "search"], "indexes": ["*"], "expiresAt": null, "uid": "9adc8f03-bfcd-4b0b-a943-df0b067fe626" }' > /dev/null; do
     echo "Retrying to create API key..."
     sleep 1
 done
