@@ -53,7 +53,7 @@ export const green = {
   200: "#CBD4A3",
   100: "#DBDFB6",
   50: "#E9EAC9",
-  foreground: lightBrown,
+  foreground: darkBrown,
   DEFAULT: "#92AB72",
 };
 
