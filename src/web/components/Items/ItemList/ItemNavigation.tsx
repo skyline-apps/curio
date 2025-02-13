@@ -1,5 +1,6 @@
 "use client";
 import { useItemUpdate } from "components/Items/ItemActions/actions";
+import { useRouter } from "next/navigation";
 import { useContext } from "react";
 
 import { ItemState } from "@/db/schema";
@@ -21,6 +22,16 @@ export const ItemNavigation = (): null => {
   } = useContext(CurrentItemContext);
 
   const { updateItemsState, updateItemsFavorite } = useItemUpdate();
+
+  const router = useRouter();
+
+  const openItem = (): boolean => {
+    if (selectedItems.size === 1) {
+      router.push(`/items/${selectedItems.values().next().value}`);
+      return true;
+    }
+    return false;
+  };
 
   const navigateDown = (): boolean => {
     if (lastSelectionIndex === null) {
@@ -163,6 +174,14 @@ export const ItemNavigation = (): null => {
       clearSelectedItems();
       return true;
     },
+    priority: 100,
+  });
+
+  useKeyboardShortcut({
+    key: "o",
+    name: "Open item",
+    category: ShortcutType.ACTIONS,
+    handler: openItem,
     priority: 100,
   });
 
