@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/Progress";
 import Spinner from "@/components/ui/Spinner";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import { ItemsContext } from "@/providers/ItemsProvider";
-import { SettingsContext } from "@/providers/SettingsProvider";
+import { useSettings } from "@/providers/SettingsProvider";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -18,7 +18,7 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { isFetching } = useContext(ItemsContext);
   const { loading: loadingItem } = useContext(CurrentItemContext);
-  const { settings } = useContext(SettingsContext);
+  const { settings } = useSettings();
 
   return settings ? (
     <div className="flex flex-row h-screen w-full">

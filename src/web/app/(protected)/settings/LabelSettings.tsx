@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useContext } from "react";
+import React from "react";
 
 import Labels from "@/components/Labels";
 import { FormSection } from "@/components/ui/Form";
-import { SettingsContext } from "@/providers/SettingsProvider";
+import { useSettings } from "@/providers/SettingsProvider";
 import { createLogger } from "@/utils/logger";
 
 const log = createLogger("LabelSettings");
 
 const LabelSettings: React.FC = () => {
   const { labels, loadingLabels, createLabel, updateLabel, deleteLabel } =
-    useContext(SettingsContext);
+    useSettings();
 
   return (
     <div className="space-y-4">

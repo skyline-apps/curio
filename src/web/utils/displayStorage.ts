@@ -1,9 +1,11 @@
 export interface AppLayoutSettings {
   leftSidebarOpen: boolean;
+  rightSidebarOpen: boolean;
 }
 
-const DEFAULT_LAYOUT: AppLayoutSettings = {
+export const DEFAULT_LAYOUT: AppLayoutSettings = {
   leftSidebarOpen: true,
+  rightSidebarOpen: false,
 };
 
 export function updateLayoutSettings(settings: AppLayoutSettings): void {
@@ -24,7 +26,7 @@ export function loadLayoutSettings(): AppLayoutSettings {
     if (!settings) {
       return DEFAULT_LAYOUT;
     }
-    return JSON.parse(settings);
+    return { ...DEFAULT_LAYOUT, ...JSON.parse(settings) };
   }
   return DEFAULT_LAYOUT;
 }

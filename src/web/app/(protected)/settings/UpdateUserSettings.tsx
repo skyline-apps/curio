@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { z } from "zod";
 
 import { SettingsSchema } from "@/app/api/v1/user/settings/validation";
@@ -8,7 +8,7 @@ import { type SettingsResponse } from "@/app/api/v1/user/settings/validation";
 import { FormSection } from "@/components/ui/Form";
 import { Radio, RadioGroup } from "@/components/ui/Radio";
 import Spinner from "@/components/ui/Spinner";
-import { SettingsContext } from "@/providers/SettingsProvider";
+import { useSettings } from "@/providers/SettingsProvider";
 import { useToast } from "@/providers/ToastProvider";
 import { createLogger } from "@/utils/logger";
 import { camelCaseToSentenceCase } from "@/utils/string";
@@ -16,7 +16,7 @@ import { camelCaseToSentenceCase } from "@/utils/string";
 const log = createLogger("UpdateUserSettings");
 
 const UpdateUserSettings: React.FC = () => {
-  const { settings, updateSettings } = useContext(SettingsContext);
+  const { settings, updateSettings } = useSettings();
   const { showToast } = useToast();
   const [submitting, setSubmitting] = useState<string>("");
 

@@ -15,7 +15,7 @@ import {
   BrowserMessageContext,
   EventType,
 } from "@/providers/BrowserMessageProvider";
-import { SettingsContext } from "@/providers/SettingsProvider";
+import { useSettings } from "@/providers/SettingsProvider";
 import { UserContext } from "@/providers/UserProvider";
 import { cn } from "@/utils/cn";
 
@@ -29,7 +29,7 @@ const LeftSidebar: React.FC = () => {
   const pathname = usePathname();
   const [selectedKey, setSelectedKey] = useState<string>(SidebarKey.NONE);
   const [showNewItemModal, setShowNewItemModal] = useState<boolean>(false);
-  const { appLayout, updateAppLayout } = useContext(SettingsContext);
+  const { appLayout, updateAppLayout } = useSettings();
   const { addMessageListener, removeMessageListener } = useContext(
     BrowserMessageContext,
   );
@@ -56,10 +56,6 @@ const LeftSidebar: React.FC = () => {
     setSelectedKey(newSelectedKey);
   }, [pathname]);
 
-  if (!appLayout) {
-    return null;
-  }
-
   const sidebarOpen = appLayout.leftSidebarOpen;
 
   const handleNavigation = (key: React.Key): void => {
@@ -68,7 +64,6 @@ const LeftSidebar: React.FC = () => {
 
   const toggleSidebar = (): void => {
     updateAppLayout({
-      ...appLayout,
       leftSidebarOpen: !sidebarOpen,
     });
   };
