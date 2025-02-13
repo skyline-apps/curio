@@ -15,6 +15,7 @@ const customConfig: Config = {
   clearMocks: true,
   moduleNameMapper: {
     "^.+\\.(svg)$": "<rootDir>/__mocks__/svg.ts",
+    "\\./lib/search$": "<rootDir>/__mocks__/search.ts",
     "\\./utils/extract$": "<rootDir>/__mocks__/extract.ts",
     "\\./utils/logger$": "<rootDir>/__mocks__/logger.ts",
     "\\./utils/storage$": "<rootDir>/__mocks__/storage.ts",
