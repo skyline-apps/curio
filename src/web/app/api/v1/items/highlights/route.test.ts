@@ -13,6 +13,7 @@ import { DELETE, POST } from "./route";
 
 const TEST_ITEM_ID_1 = "123e4567-e89b-12d3-a456-426614174001";
 const TEST_ITEM_ID_2 = "123e4567-e89b-12d3-a456-426614174002";
+const TEST_PROFILE_ITEM_ID = "123e4567-e89b-12d3-a456-426614174007";
 const TEST_PROFILE_ITEM_ID_1 = "123e4567-e89b-12d3-a456-426614174009";
 const TEST_PROFILE_ITEM_ID_2 = "123e4567-e89b-12d3-a456-426614174008";
 const TEST_HIGHLIGHT_ID_1 = "123e4567-e89b-12d3-a456-426614174111";
@@ -37,10 +38,16 @@ const MOCK_ITEMS = [
 
 const MOCK_PROFILE_ITEMS = [
   {
-    id: TEST_PROFILE_ITEM_ID_1,
+    id: TEST_PROFILE_ITEM_ID,
     profileId: DEFAULT_TEST_PROFILE_ID,
     itemId: TEST_ITEM_ID_1,
     title: "Example 1",
+  },
+  {
+    id: TEST_PROFILE_ITEM_ID_1,
+    profileId: DEFAULT_TEST_PROFILE_ID,
+    itemId: TEST_ITEM_ID_2,
+    title: "Example 2",
   },
   {
     id: TEST_PROFILE_ITEM_ID_2,
@@ -85,7 +92,7 @@ describe("/api/v1/items/highlights", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         body: {
-          slug: "example-com-1",
+          slug: "example-com-2",
           highlights: [
             {
               startOffset: 20,
@@ -115,6 +122,7 @@ describe("/api/v1/items/highlights", () => {
         .where(eq(profileItemHighlights.text, "New highlight"));
       expect(savedHighlight).toHaveLength(1);
       expect(savedHighlight[0]).toMatchObject({
+        id: expect.any(String),
         profileItemId: TEST_PROFILE_ITEM_ID_1,
         startOffset: 20,
         endOffset: 30,
@@ -127,7 +135,7 @@ describe("/api/v1/items/highlights", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         body: {
-          slug: "example-com-1",
+          slug: "example-com-2",
           highlights: [
             {
               id: TEST_HIGHLIGHT_ID_1,
@@ -164,6 +172,9 @@ describe("/api/v1/items/highlights", () => {
         text: "Updated highlight",
         note: "Updated note",
       });
+      expect(savedHighlight[0].updatedAt.getTime()).toBeGreaterThan(
+        savedHighlight[0].createdAt.getTime(),
+      );
     });
 
     it("should not update highlights from other profiles", async () => {
@@ -184,8 +195,10 @@ describe("/api/v1/items/highlights", () => {
       });
 
       const response = await POST(request);
-      expect(response.status).toBe(404);
+      expect(response.status).toBe(200);
 
+      const body = await response.json();
+      expect(body.highlights).toHaveLength(0);
       const savedHighlight = await testDb.db
         .select()
         .from(profileItemHighlights)
@@ -269,7 +282,7 @@ describe("/api/v1/items/highlights", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "DELETE",
         body: {
-          slug: "example-com-1",
+          slug: "example-com-2",
           highlightIds: [TEST_HIGHLIGHT_ID_1],
         },
       });
@@ -298,7 +311,10 @@ describe("/api/v1/items/highlights", () => {
       });
 
       const response = await DELETE(request);
-      expect(response.status).toBe(404);
+      expect(response.status).toBe(200);
+
+      const body = await response.json();
+      expect(body.deleted).toHaveLength(0);
 
       const savedHighlight = await testDb.db
         .select()
@@ -311,7 +327,7 @@ describe("/api/v1/items/highlights", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "DELETE",
         body: {
-          slug: "example-com-1",
+          slug: "example-com-2",
           highlightIds: [],
         },
       });
@@ -347,7 +363,7 @@ describe("/api/v1/items/highlights", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "DELETE",
         body: {
-          slug: "example-com-1",
+          slug: "example-com-2",
           highlightIds: [TEST_HIGHLIGHT_ID_1],
         },
       });
@@ -366,7 +382,7 @@ describe("/api/v1/items/highlights", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "DELETE",
         body: {
-          slug: "example-com-1",
+          slug: "example-com-2",
           highlightIds: [TEST_HIGHLIGHT_ID_1],
         },
       });
