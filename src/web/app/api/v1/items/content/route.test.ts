@@ -40,6 +40,7 @@ const TEST_ITEM_URL = "https://example.com";
 const NONEXISTENT_USER_ID = "123e4567-e89b-12d3-a456-426614174003";
 const ORIGINAL_PUBLISHED_DATE = new Date("2024-01-10T12:50:00-08:00");
 const ORIGINAL_CREATION_DATE = new Date("2025-01-10T12:52:56-08:00");
+const TEST_PROFILE_ITEM_ID = "123e4567-e89b-12d3-a456-426614174999";
 const TEST_LABEL_ID_1 = "123e4567-e89b-12d3-a456-426614174005";
 const TEST_LABEL_ID_2 = "123e4567-e89b-12d3-a456-426614174006";
 
@@ -47,6 +48,14 @@ const MOCK_ITEM = {
   id: TEST_ITEM_ID,
   url: TEST_ITEM_URL,
   slug: TEST_ITEM_SLUG,
+  createdAt: ORIGINAL_CREATION_DATE,
+  updatedAt: ORIGINAL_CREATION_DATE,
+};
+
+const MOCK_ITEM_2 = {
+  id: "123e4567-e89b-12d3-a456-426614174002",
+  url: "https://example2.com",
+  slug: "example2-com",
   createdAt: ORIGINAL_CREATION_DATE,
   updatedAt: ORIGINAL_CREATION_DATE,
 };
@@ -71,7 +80,7 @@ const MOCK_LABELS = [
 ];
 
 const MOCK_PROFILE_ITEM = {
-  id: "123e4567-e89b-12d3-a456-426614174999",
+  id: TEST_PROFILE_ITEM_ID,
   profileId: DEFAULT_TEST_PROFILE_ID,
   itemId: TEST_ITEM_ID,
   title: "Example",
@@ -529,15 +538,7 @@ describe("/api/v1/items/content", () => {
     ])("%s", async (_, apiKey) => {
       await testDb.db.insert(items).values(MOCK_ITEM);
       await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        favicon: "https://example.com/favicon.ico",
-        publishedAt: ORIGINAL_PUBLISHED_DATE,
-        stateUpdatedAt: ORIGINAL_CREATION_DATE,
+        ...MOCK_PROFILE_ITEM,
         readingProgress: 20,
         versionName: "2010-04-04",
       });
@@ -613,20 +614,29 @@ describe("/api/v1/items/content", () => {
     });
 
     it("should return 200 and overwrite previous reading state when content updated", async () => {
-      await testDb.db.insert(items).values(MOCK_ITEM);
-      await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        favicon: "https://example.com/favicon.ico",
-        publishedAt: ORIGINAL_PUBLISHED_DATE,
-        stateUpdatedAt: ORIGINAL_CREATION_DATE,
-        readingProgress: 20,
-        versionName: "2010-04-04",
-      });
+      const EXTRA_PROFILE_ITEM_ID = "123e4567-e89b-12d3-a456-426614174998";
+      await testDb.db.insert(items).values([MOCK_ITEM, MOCK_ITEM_2]);
+      await testDb.db.insert(profileItems).values([
+        {
+          ...MOCK_PROFILE_ITEM,
+          readingProgress: 20,
+          versionName: "2010-04-04",
+        },
+        {
+          id: EXTRA_PROFILE_ITEM_ID,
+          itemId: MOCK_ITEM_2.id,
+          profileId: DEFAULT_TEST_PROFILE_ID,
+          title: "Hello",
+        },
+      ]);
+      await testDb.db.insert(profileItemHighlights).values([
+        ...MOCK_HIGHLIGHTS,
+        {
+          profileItemId: EXTRA_PROFILE_ITEM_ID,
+          startOffset: 5,
+          endOffset: 10,
+        },
+      ]);
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
@@ -652,21 +662,19 @@ describe("/api/v1/items/content", () => {
         .limit(1);
       expect(updatedProfileItem[0].versionName).toEqual(null);
       expect(updatedProfileItem[0].readingProgress).toEqual(0);
+
+      const updatedProfileItemHighlights = await testDb.db
+        .select()
+        .from(profileItemHighlights);
+      expect(updatedProfileItemHighlights).toHaveLength(1);
+      expect(updatedProfileItemHighlights[0].profileItemId).toEqual(
+        EXTRA_PROFILE_ITEM_ID,
+      );
     });
 
     it("should return 200 even when content URL does not match exactly", async () => {
       await testDb.db.insert(items).values(MOCK_ITEM);
-      await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        favicon: "https://example.com/favicon.ico",
-        publishedAt: ORIGINAL_PUBLISHED_DATE,
-        stateUpdatedAt: ORIGINAL_CREATION_DATE,
-      });
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEM);
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
@@ -699,29 +707,14 @@ describe("/api/v1/items/content", () => {
 
     it("should return 200 and only update one profile item", async () => {
       await testDb.db.insert(items).values(MOCK_ITEM);
-      await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        favicon: "https://example.com/favicon.ico",
-        publishedAt: ORIGINAL_PUBLISHED_DATE,
-        stateUpdatedAt: ORIGINAL_CREATION_DATE,
-      });
-      await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID_2,
-        itemId: TEST_ITEM_ID,
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        favicon: "https://example.com/favicon.ico",
-        publishedAt: ORIGINAL_PUBLISHED_DATE,
-        stateUpdatedAt: ORIGINAL_CREATION_DATE,
-        savedAt: ORIGINAL_CREATION_DATE,
-      });
+      await testDb.db.insert(profileItems).values([
+        MOCK_PROFILE_ITEM,
+        {
+          profileId: DEFAULT_TEST_PROFILE_ID_2,
+          itemId: TEST_ITEM_ID,
+          title: "Example not mine",
+        },
+      ]);
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
@@ -749,8 +742,8 @@ describe("/api/v1/items/content", () => {
 
       expect(profileItem.length).toBe(2);
 
-      expect(profileItem[0].title).toEqual(MOCK_METADATA.title);
-      expect(profileItem[1].title).toEqual("Example");
+      expect(profileItem[0].title).toEqual("Example not mine");
+      expect(profileItem[1].title).toEqual(MOCK_METADATA.title);
     });
 
     test.each<[string, Exclude<UploadStatus, UploadStatus.ERROR>]>([
@@ -766,15 +759,8 @@ describe("/api/v1/items/content", () => {
       uploadItemContent.mockResolvedValueOnce(status);
       await testDb.db.insert(items).values(MOCK_ITEM);
       await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        favicon: "https://example.com/favicon.ico",
-        publishedAt: ORIGINAL_PUBLISHED_DATE,
-        stateUpdatedAt: ORIGINAL_CREATION_DATE,
+        ...MOCK_PROFILE_ITEM,
+        savedAt: null,
       });
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
@@ -820,18 +806,11 @@ describe("/api/v1/items/content", () => {
       uploadItemContent.mockResolvedValueOnce(UploadStatus.STORED_VERSION);
       await testDb.db.insert(items).values(MOCK_ITEM);
       await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        favicon: "https://example.com/favicon.ico",
-        publishedAt: ORIGINAL_PUBLISHED_DATE,
-        stateUpdatedAt: ORIGINAL_CREATION_DATE,
+        ...MOCK_PROFILE_ITEM,
         readingProgress: 20,
         versionName: "2010-04-04",
       });
+      await testDb.db.insert(profileItemHighlights).values(MOCK_HIGHLIGHTS);
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
@@ -857,21 +836,20 @@ describe("/api/v1/items/content", () => {
         .limit(1);
       expect(updatedProfileItem[0].versionName).toEqual("2010-04-04");
       expect(updatedProfileItem[0].readingProgress).toEqual(20);
+
+      const updatedHighlights = await testDb.db
+        .select()
+        .from(profileItemHighlights)
+        .where(
+          eq(profileItemHighlights.profileItemId, updatedProfileItem[0].id),
+        );
+      expect(updatedHighlights.length).toEqual(2);
     });
 
     it("should return 200 and skip metadata update when configured", async () => {
       await testDb.db.insert(items).values(MOCK_ITEM);
-      await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        favicon: "https://example.com/favicon.ico",
-        publishedAt: ORIGINAL_PUBLISHED_DATE,
-        stateUpdatedAt: ORIGINAL_CREATION_DATE,
-      });
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEM);
+      await testDb.db.insert(profileItemHighlights).values(MOCK_HIGHLIGHTS);
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
@@ -897,25 +875,19 @@ describe("/api/v1/items/content", () => {
         .from(profileItems)
         .where(eq(profileItems.itemId, TEST_ITEM_ID))
         .orderBy(desc(profileItems.savedAt));
-
       expect(profileItem.length).toBe(1);
-
       expect(profileItem[0].title).toEqual("Example");
+
+      const updatedHighlights = await testDb.db
+        .select()
+        .from(profileItemHighlights)
+        .where(eq(profileItemHighlights.profileItemId, profileItem[0].id));
+      expect(updatedHighlights.length).toEqual(0);
     });
 
     it("should return 500 when content extraction fails", async () => {
       await testDb.db.insert(items).values(MOCK_ITEM);
-      await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        favicon: "https://example.com/favicon.ico",
-        publishedAt: ORIGINAL_PUBLISHED_DATE,
-        stateUpdatedAt: ORIGINAL_CREATION_DATE,
-      });
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEM);
 
       jest
         .mocked(extractMainContentAsMarkdown)
@@ -940,22 +912,12 @@ describe("/api/v1/items/content", () => {
         .orderBy(desc(profileItems.savedAt));
 
       expect(profileItem.length).toBe(1);
-      expect(profileItem[0].savedAt).toEqual(null);
+      expect(profileItem[0].savedAt).toEqual(ORIGINAL_CREATION_DATE);
     });
 
     it("should return 500 when metadata extraction fails", async () => {
       await testDb.db.insert(items).values(MOCK_ITEM);
-      await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        favicon: "https://example.com/favicon.ico",
-        publishedAt: ORIGINAL_PUBLISHED_DATE,
-        stateUpdatedAt: ORIGINAL_CREATION_DATE,
-      });
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEM);
 
       jest
         .mocked(extractMetadata)
@@ -980,7 +942,7 @@ describe("/api/v1/items/content", () => {
         .orderBy(desc(profileItems.savedAt));
 
       expect(profileItem.length).toBe(1);
-      expect(profileItem[0].savedAt).toEqual(null);
+      expect(profileItem[0].savedAt).toEqual(ORIGINAL_CREATION_DATE);
     });
 
     it("should return 401 if user profile not found", async () => {
@@ -1042,27 +1004,8 @@ describe("/api/v1/items/content", () => {
     });
 
     it("should return 400 if content is missing", async () => {
-      const mockItem = {
-        id: TEST_ITEM_ID,
-        url: TEST_ITEM_URL,
-        slug: TEST_ITEM_SLUG,
-        createdAt: new Date("2025-01-10T12:52:56-08:00"),
-        updatedAt: new Date("2025-01-10T12:52:56-08:00"),
-      };
-
-      await testDb.db.insert(items).values(mockItem);
-      await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        favicon: "https://example.com/favicon.ico",
-        publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-        savedAt: new Date("2025-01-10T12:52:56-08:00"),
-        stateUpdatedAt: ORIGINAL_CREATION_DATE,
-      });
+      await testDb.db.insert(items).values(MOCK_ITEM);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEM);
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",

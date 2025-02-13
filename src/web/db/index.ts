@@ -1,5 +1,6 @@
 /* eslint-disable no-restricted-imports */
 import { drizzle } from "drizzle-orm/node-postgres";
+import { type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
 import * as schema from "@/db/schema";
@@ -27,4 +28,10 @@ export {
   or,
   sql,
 } from "drizzle-orm";
-export type { PgColumn, SelectedFields } from "drizzle-orm/pg-core";
+export type {
+  PgColumn,
+  PgTransaction,
+  SelectedFields,
+} from "drizzle-orm/pg-core";
+
+export type TransactionDB = NodePgDatabase<typeof schema>;
