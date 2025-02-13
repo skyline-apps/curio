@@ -86,6 +86,12 @@ export const itemState = pgEnum("item_state", [
   ItemState.DELETED,
 ]);
 
+export const ItemStateNumber = {
+  [ItemState.ACTIVE]: 0,
+  [ItemState.ARCHIVED]: 1,
+  [ItemState.DELETED]: 2,
+};
+
 export const profileLabels = pgTable(
   "profile_labels",
   {
