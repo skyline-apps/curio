@@ -41,7 +41,7 @@ interface UseItemUpdate {
 export const useItemUpdate = (): UseItemUpdate => {
   const { invalidateCache, optimisticUpdateItems, optimisticRemoveItems } =
     useCache();
-  const { clearSelectedItems } = useContext(CurrentItemContext);
+  const { clearSelectedItems, loadedItem } = useContext(CurrentItemContext);
   const { saveItemContent } = useContext(BrowserMessageContext);
 
   const updateItemsStateMutationOptions: UseMutationOptions<
@@ -50,6 +50,13 @@ export const useItemUpdate = (): UseItemUpdate => {
     { itemSlugs: string[]; state: ItemState }
   > = {
     mutationFn: async ({ itemSlugs, state }) => {
+      const newItems = itemSlugs.map((slug) => ({
+        slug,
+        metadata: {
+          state,
+        },
+      }));
+      optimisticUpdateItems(newItems);
       optimisticRemoveItems(itemSlugs);
 
       return await fetch("/api/v1/items/state", {
@@ -61,8 +68,10 @@ export const useItemUpdate = (): UseItemUpdate => {
       }).then(handleAPIResponse<UpdateStateResponse>);
     },
     onSuccess: () => {
-      invalidateCache();
-      clearSelectedItems();
+      if (!loadedItem) {
+        invalidateCache();
+        clearSelectedItems();
+      }
     },
   };
 
