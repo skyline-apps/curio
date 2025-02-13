@@ -34,9 +34,13 @@ export const AppPageProvider: React.FC<{
         >
           {children}
         </motion.div>
-        <div
-          className="fixed top-0 flex flex-col gap-1 p-2 text-xs max-h-96 opacity-0 hover:opacity-50 w-40 hover:w-80 overflow-x-hidden transition duration-150 ease-out"
+        <motion.div
+          className="fixed text-right top-0 right-0 lg:right-80 w-80 flex flex-col gap-1 p-2 text-xs max-h-96 overflow-x-hidden"
           ref={articleFixedInfoRef}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 0 }}
+          whileHover={{ opacity: 0.5, x: 0 }}
+          transition={{ duration: 0.2 }}
         />
       </div>
     </AppPageContext.Provider>
