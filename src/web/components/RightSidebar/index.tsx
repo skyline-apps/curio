@@ -9,11 +9,17 @@ import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import { ItemsContext } from "@/providers/ItemsProvider";
 import { cn } from "@/utils/cn";
 
+import HighlightMetadata from "./HighlightMetadata";
 import ItemMetadata from "./ItemMetadata";
 
 const RightSidebar: React.FC = () => {
-  const { selectedItems, currentItem, sidebarOpen, setSidebarOpen } =
-    useContext(CurrentItemContext);
+  const {
+    selectedItems,
+    currentItem,
+    sidebarOpen,
+    setSidebarOpen,
+    draftHighlight,
+  } = useContext(CurrentItemContext);
   const { totalItems } = useContext(ItemsContext);
 
   const toggleSidebar = (): void => {
@@ -39,7 +45,9 @@ const RightSidebar: React.FC = () => {
             )}
           >
             {sidebarOpen &&
-              (currentItem ? (
+              (draftHighlight ? (
+                <HighlightMetadata />
+              ) : currentItem ? (
                 <ItemMetadata item={currentItem || undefined} />
               ) : (
                 <>

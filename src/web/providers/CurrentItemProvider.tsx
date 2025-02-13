@@ -11,6 +11,10 @@ import React, {
 } from "react";
 
 import { GetItemContentResponse } from "@/app/api/v1/items/content/validation";
+import {
+  type Highlight,
+  type NewHighlight,
+} from "@/app/api/v1/items/highlights/validation";
 import { Item, ItemsContext } from "@/providers/ItemsProvider";
 import { handleAPIResponse } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
@@ -45,6 +49,9 @@ export type CurrentItemContextType = {
   loadingError: string | null;
   lastSelectionIndex: number | null;
   setLastSelectionIndex: (index: number | null) => void;
+  draftHighlight: Highlight | NewHighlight | null;
+  setDraftHighlight: (highlight: Highlight | NewHighlight | null) => void;
+  updateDraftHighlightNote: (note: string) => void;
 };
 
 interface CurrentItemProviderProps {
@@ -64,6 +71,9 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
   loadingError: null,
   lastSelectionIndex: null,
   setLastSelectionIndex: () => {},
+  draftHighlight: null,
+  setDraftHighlight: () => {},
+  updateDraftHighlightNote: () => {},
 });
 
 export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
@@ -78,6 +88,9 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     null,
   );
   const [inSelectionMode, setInSelectionMode] = useState<boolean>(false);
+  const [draftHighlight, setDraftHighlight] = useState<
+    Highlight | NewHighlight | null
+  >(null);
 
   const { items } = useContext(ItemsContext);
 
@@ -87,6 +100,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     setSidebarOpen(false);
     setLastSelectionIndex(null);
     setInSelectionMode(false);
+    setDraftHighlight(null);
   };
 
   useEffect(() => {
@@ -208,6 +222,17 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     return data || null;
   }, [data]);
 
+  const updateDraftHighlightNote = useCallback(
+    (note: string) => {
+      if (draftHighlight === null) return;
+      setDraftHighlight({
+        ...draftHighlight,
+        note,
+      });
+    },
+    [draftHighlight],
+  );
+
   return (
     <CurrentItemContext.Provider
       value={{
@@ -223,6 +248,9 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         loadingError: error ? error.message || "Error loading items." : null,
         lastSelectionIndex,
         setLastSelectionIndex,
+        draftHighlight,
+        setDraftHighlight,
+        updateDraftHighlightNote,
       }}
     >
       {children}
