@@ -84,6 +84,10 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
             <h1 className="text-2xl font-medium">New item</h1>
           </ModalHeader>
           <ModalBody>
+            <p className="text-sm text-secondary">
+              Add a new item to your library. This will open the page in a new
+              tab and automatically save its content.
+            </p>
             <Form onSubmit={openAndSave}>
               <Input
                 type="text"

@@ -155,7 +155,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
               View
             </Button>
           </div>,
-          { dismissable: true, disappearing: false },
+          { dismissable: true, disappearing: true, duration: 5000 },
         );
         listeners.forEach((listener) => listener(event));
         log.info("Content saved successfully", event.data);
