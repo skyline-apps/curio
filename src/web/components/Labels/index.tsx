@@ -240,7 +240,7 @@ const Labels: React.FC<LabelsProps> = (props) => {
           <Tooltip content={`${props.labels.map((l) => l.name).join(", ")}`}>
             <div className="text-xs h-6 w-8 flex items-center justify-start px-1 gap-1 rounded bg-secondary-400 text-default-50">
               {props.labels.length}
-              <Icon icon={<HiOutlineTag className="text-default-50" />} />
+              <Icon icon={<HiOutlineTag />} className="text-default-50" />
             </div>
           </Tooltip>
         ) : (
