@@ -6,13 +6,6 @@ import { MOCK_METADATA } from "./extract";
 
 export const MOCK_VERSION = "2024-10-20T12:00:00.000Z";
 
-export class StorageError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "StorageError";
-  }
-}
-
 export class Storage {
   async uploadItemContent(
     _slug: string,

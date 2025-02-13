@@ -1,13 +1,9 @@
 import { jest } from "@jest/globals";
 
-import {
-  getItemContent,
-  MOCK_VERSION,
-  storage,
-  StorageError,
-} from "@/__mocks__/storage";
+import { getItemContent, MOCK_VERSION, storage } from "@/__mocks__/storage";
 import { eq } from "@/db";
 import { items, ItemState, profileItems } from "@/db/schema";
+import { StorageError } from "@/lib/storage/types";
 import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_API_KEY,

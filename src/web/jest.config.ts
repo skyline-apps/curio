@@ -16,9 +16,9 @@ const customConfig: Config = {
   moduleNameMapper: {
     "^.+\\.(svg)$": "<rootDir>/__mocks__/svg.ts",
     "\\./lib/search$": "<rootDir>/__mocks__/search.ts",
+    "\\./lib/storage$": "<rootDir>/__mocks__/storage.ts",
     "\\./utils/extract$": "<rootDir>/__mocks__/extract.ts",
     "\\./utils/logger$": "<rootDir>/__mocks__/logger.ts",
-    "\\./utils/storage$": "<rootDir>/__mocks__/storage.ts",
     "\\./utils/supabase/client$": "<rootDir>/__mocks__/supabase-client.ts",
     "\\./utils/supabase/server$": "<rootDir>/__mocks__/supabase-server.ts",
     "^@/(.*)$": "<rootDir>/$1",
