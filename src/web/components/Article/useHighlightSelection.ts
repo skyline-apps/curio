@@ -5,6 +5,7 @@ import {
   type NewHighlight,
 } from "@/app/api/v1/items/highlights/validation";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
+import { useSettings } from "@/providers/SettingsProvider";
 import { createLogger } from "@/utils/logger";
 
 const log = createLogger("useHighlightSelection");
@@ -34,15 +35,15 @@ function findPreviousOffset(node: Node): number {
 export function useHighlightSelection({
   contentRef,
 }: UseHighlightSelectionProps): UseHighlightSelectionResult {
-  const { setSidebarOpen, draftHighlight, setDraftHighlight } =
-    useContext(CurrentItemContext);
+  const { updateAppLayout } = useSettings();
+  const { draftHighlight, setDraftHighlight } = useContext(CurrentItemContext);
 
   const selectDraftHighlight = useCallback(
     (highlight: Highlight) => {
-      setSidebarOpen(true);
+      updateAppLayout({ rightSidebarOpen: true });
       setDraftHighlight(highlight);
     },
-    [setSidebarOpen, setDraftHighlight],
+    [updateAppLayout, setDraftHighlight],
   );
 
   const clearSelection = useCallback(() => {

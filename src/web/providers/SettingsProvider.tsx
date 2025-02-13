@@ -1,6 +1,12 @@
 "use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { createContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 import type {
   CreateOrUpdateLabelsResponse,
@@ -16,6 +22,7 @@ import { useToast } from "@/providers/ToastProvider";
 import { handleAPIResponse } from "@/utils/api";
 import {
   type AppLayoutSettings,
+  DEFAULT_LAYOUT,
   initializeTheme,
   loadLayoutSettings,
   setDarkTheme,
@@ -25,8 +32,8 @@ import {
 } from "@/utils/displayStorage";
 
 export type SettingsContextType = {
-  appLayout?: AppLayoutSettings;
-  updateAppLayout: (settings: AppLayoutSettings) => void;
+  appLayout: AppLayoutSettings;
+  updateAppLayout: (settings: Partial<AppLayoutSettings>) => void;
   settings?: SettingsResponse;
   updateSettings: (
     field: keyof SettingsResponse,
@@ -47,6 +54,7 @@ interface SettingsProviderProps {
 }
 
 export const SettingsContext = createContext<SettingsContextType>({
+  appLayout: DEFAULT_LAYOUT,
   updateAppLayout: () => {},
   updateSettings: async () => {},
   createLabel: async () => true,
@@ -78,7 +86,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   children,
 }: SettingsProviderProps): React.ReactNode => {
   const queryClient = useQueryClient();
-  const [appLayout, setAppLayout] = useState<AppLayoutSettings>();
+  const [appLayout, setAppLayout] = useState<AppLayoutSettings>(DEFAULT_LAYOUT);
   const { showToast } = useToast();
 
   const { data: currentSettings } = useQuery({
@@ -183,10 +191,13 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     }
   }, [currentSettings?.colorScheme]);
 
-  const updateAppLayout = (settings: AppLayoutSettings): void => {
-    setAppLayout(settings);
-    updateLayoutSettings(settings);
-  };
+  const updateAppLayout = useCallback(
+    (settings: Partial<AppLayoutSettings>): void => {
+      setAppLayout({ ...appLayout, ...settings });
+      updateLayoutSettings({ ...appLayout, ...settings });
+    },
+    [appLayout],
+  );
 
   const updateSettings = async (
     field: keyof SettingsResponse,
@@ -279,3 +290,6 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     </SettingsContext.Provider>
   );
 };
+
+export const useSettings = (): SettingsContextType =>
+  useContext(SettingsContext);

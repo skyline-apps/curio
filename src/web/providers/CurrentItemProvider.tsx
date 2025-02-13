@@ -16,6 +16,7 @@ import {
   type NewHighlight,
 } from "@/app/api/v1/items/highlights/validation";
 import { Item, ItemsContext } from "@/providers/ItemsProvider";
+import { useSettings } from "@/providers/SettingsProvider";
 import { handleAPIResponse } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
 
@@ -31,8 +32,6 @@ export type ItemWithContent = Omit<
 export const ITEM_CONTENT_QUERY_KEY = "itemContent";
 
 export type CurrentItemContextType = {
-  sidebarOpen: boolean;
-  setSidebarOpen: (open: boolean) => void;
   currentItem: Item | null; // Metadata of currently loaded or selected item
   loadedItem: ItemWithContent | null; // Contents of currently loaded item
   selectedItems: Set<string>; // All selected item slugs
@@ -59,8 +58,6 @@ interface CurrentItemProviderProps {
 }
 
 export const CurrentItemContext = createContext<CurrentItemContextType>({
-  sidebarOpen: true,
-  setSidebarOpen: () => {},
   currentItem: null,
   loadedItem: null,
   selectedItems: new Set<string>(),
@@ -83,7 +80,6 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
 
   const [itemLoadedSlug, setItemLoadedSlug] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [lastSelectionIndex, setLastSelectionIndex] = useState<number | null>(
     null,
   );
@@ -92,22 +88,23 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     Highlight | NewHighlight | null
   >(null);
 
+  const { updateAppLayout } = useSettings();
   const { items } = useContext(ItemsContext);
 
-  const clearSelectedItems = (): void => {
+  const clearSelectedItems = useCallback((): void => {
     setSelectedItems(new Set());
     setItemLoadedSlug(null);
-    setSidebarOpen(false);
     setLastSelectionIndex(null);
     setInSelectionMode(false);
     setDraftHighlight(null);
-  };
+    updateAppLayout({ rightSidebarOpen: false });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!pathname.startsWith("/items/")) {
       clearSelectedItems();
     }
-  }, [pathname]);
+  }, [pathname, clearSelectedItems]);
 
   const selectItems = useCallback(
     (
@@ -119,7 +116,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     ) => {
       if (replace && !inSelectionMode) {
         setSelectedItems(new Set(slugs));
-        setSidebarOpen(!!slugs.length);
+        updateAppLayout({ rightSidebarOpen: !!slugs.length });
       } else if (selectRange && lastSelectionIndex !== null) {
         // Handle shift-click range selection
         const start = Math.min(lastSelectionIndex, index);
@@ -140,9 +137,9 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         });
         setSelectedItems(newSelection);
         if (typeof window !== "undefined" && window.innerWidth > 1048) {
-          setSidebarOpen(!!slugs.length);
+          updateAppLayout({ rightSidebarOpen: !!slugs.length });
         } else {
-          setSidebarOpen(false);
+          updateAppLayout({ rightSidebarOpen: false });
         }
       }
       setLastSelectionIndex(index);
@@ -150,7 +147,13 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         setInSelectionMode(true);
       }
     },
-    [items, lastSelectionIndex, selectedItems, inSelectionMode],
+    [
+      items,
+      lastSelectionIndex,
+      selectedItems,
+      inSelectionMode,
+      updateAppLayout,
+    ],
   );
 
   const { data, isLoading, error, refetch } = useQuery<ItemWithContent>({
@@ -179,9 +182,9 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
       }
       if (result) {
         if (typeof window !== "undefined" && window.innerWidth > 1048) {
-          setSidebarOpen(true);
+          updateAppLayout({ rightSidebarOpen: true });
         } else {
-          setSidebarOpen(false);
+          updateAppLayout({ rightSidebarOpen: false });
         }
       }
       return result;
@@ -236,8 +239,6 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   return (
     <CurrentItemContext.Provider
       value={{
-        sidebarOpen,
-        setSidebarOpen,
         currentItem,
         loadedItem,
         selectedItems,

@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { useCallback, useContext } from "react";
+import { useCallback } from "react";
 
 import Thumbnail from "@/components/Image/Thumbnail";
 import ItemActions from "@/components/Items/ItemActions";
 import { useItemUpdate } from "@/components/Items/ItemActions/actions";
 import Labels, { Label } from "@/components/Labels";
 import type { Item } from "@/providers/ItemsProvider";
-import { SettingsContext } from "@/providers/SettingsProvider";
+import { useSettings } from "@/providers/SettingsProvider";
 
 interface ItemMetadataProps {
   item?: Item;
@@ -15,7 +15,7 @@ interface ItemMetadataProps {
 const ItemMetadata: React.FC<ItemMetadataProps> = ({
   item,
 }: ItemMetadataProps) => {
-  const { labels } = useContext(SettingsContext);
+  const { labels } = useSettings();
   const { addItemsLabel, removeItemsLabel } = useItemUpdate();
 
   const handleAddLabel = useCallback(

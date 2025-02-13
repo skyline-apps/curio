@@ -2,6 +2,9 @@ import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import React, { createContext, useContext, useRef } from "react";
 
+import { useSettings } from "@/providers/SettingsProvider";
+import { cn } from "@/utils/cn";
+
 interface AppPageContextValue {
   containerRef: React.RefObject<HTMLDivElement>;
   articleFixedInfoRef: React.RefObject<HTMLDivElement>;
@@ -17,6 +20,9 @@ export const AppPageProvider: React.FC<{
   const containerRef = useRef<HTMLDivElement>(null);
   const articleFixedInfoRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const {
+    appLayout: { rightSidebarOpen },
+  } = useSettings();
 
   return (
     <AppPageContext.Provider value={{ containerRef, articleFixedInfoRef }}>
@@ -35,7 +41,10 @@ export const AppPageProvider: React.FC<{
           {children}
         </motion.div>
         <motion.div
-          className="fixed text-right top-0 right-0 lg:right-80 w-80 flex flex-col gap-1 p-2 text-xs max-h-96 overflow-x-hidden"
+          className={cn(
+            "fixed text-right top-0 right-0 lg:right-80 w-80 flex flex-col gap-1 p-2 text-xs max-h-96 overflow-x-hidden",
+            rightSidebarOpen ? "lg:right-80" : "lg:right-16",
+          )}
           ref={articleFixedInfoRef}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 0 }}
