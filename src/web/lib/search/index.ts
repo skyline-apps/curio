@@ -146,4 +146,10 @@ export class Search {
 // Export singleton instance
 export const search = new Search();
 
-export const { indexDocuments, searchDocuments } = search;
+// Export bound methods to preserve 'this' context
+export const indexDocuments = (documents: ItemDocument[]): Promise<void> =>
+  search.indexDocuments(documents);
+export const searchDocuments = (
+  query: string,
+  options?: SearchOptions,
+): Promise<ItemDocument[]> => search.searchDocuments(query, options);

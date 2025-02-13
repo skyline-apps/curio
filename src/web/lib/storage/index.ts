@@ -223,5 +223,19 @@ export class Storage {
 // Export singleton instance
 export const storage = new Storage();
 
-// Export individual methods for convenience
-export const { uploadItemContent, getItemContent, getItemMetadata } = storage;
+// Export bound methods to preserve 'this' context
+export const uploadItemContent = (
+  slug: string,
+  content: string,
+  metadata: ExtractedMetadata,
+): Promise<Exclude<UploadStatus, UploadStatus.ERROR>> =>
+  storage.uploadItemContent(slug, content, metadata);
+
+export const getItemContent = (
+  slug: string,
+  version: string | null,
+): Promise<{ version: string | null; content: string }> =>
+  storage.getItemContent(slug, version);
+
+export const getItemMetadata = (slug: string): Promise<VersionMetadata> =>
+  storage.getItemMetadata(slug);
