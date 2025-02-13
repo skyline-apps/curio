@@ -1,4 +1,5 @@
 import { createHash } from "crypto";
+import { ITEMS_BUCKET } from "utils/constants";
 
 import { UploadStatus } from "@/app/api/v1/items/content/validation";
 import { ExtractedMetadata } from "@/utils/extract";
@@ -6,17 +7,10 @@ import { createLogger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/server";
 import type { StorageClient } from "@/utils/supabase/types";
 
-import { ITEMS_BUCKET } from "./constants";
+import { StorageError } from "./types";
 
-const log = createLogger("utils/storage");
+const log = createLogger("lib/storage");
 const DEFAULT_NAME = "default";
-
-export class StorageError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "StorageError";
-  }
-}
 
 interface VersionMetadata extends ExtractedMetadata {
   timestamp: string;

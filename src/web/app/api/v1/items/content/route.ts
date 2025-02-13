@@ -1,6 +1,8 @@
 import { LABELS_CLAUSE } from "@/app/api/v1/items/route";
 import { and, db, eq, sql, type TransactionDB } from "@/db";
 import { items, profileItemHighlights, profileItems } from "@/db/schema";
+import { storage } from "@/lib/storage";
+import { StorageError } from "@/lib/storage/types";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
 import {
@@ -11,7 +13,6 @@ import {
   MetadataError,
 } from "@/utils/extract";
 import { createLogger } from "@/utils/logger";
-import { storage, StorageError } from "@/utils/storage";
 import { cleanUrl } from "@/utils/url";
 
 import {

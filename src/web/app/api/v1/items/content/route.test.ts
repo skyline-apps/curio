@@ -4,7 +4,6 @@ import { MOCK_METADATA } from "@/__mocks__/extract";
 import {
   getItemContent,
   storage,
-  StorageError,
   uploadItemContent,
 } from "@/__mocks__/storage";
 import { UploadStatus } from "@/app/api/v1/items/content/validation";
@@ -17,6 +16,7 @@ import {
   profileItems,
   profileLabels,
 } from "@/db/schema";
+import { StorageError } from "@/lib/storage/types";
 import { APIRequest } from "@/utils/api";
 import {
   ExtractError,
