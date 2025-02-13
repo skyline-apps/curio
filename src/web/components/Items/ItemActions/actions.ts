@@ -98,7 +98,9 @@ export const useItemUpdate = (): UseItemUpdate => {
       }).then(handleAPIResponse<UpdateFavoriteResponse>);
     },
     onSuccess: () => {
-      invalidateCache();
+      if (!loadedItem) {
+        invalidateCache();
+      }
     },
   };
 
@@ -129,7 +131,9 @@ export const useItemUpdate = (): UseItemUpdate => {
       }).then(handleAPIResponse<UpdateLabelsResponse>);
     },
     onSuccess: () => {
-      invalidateCache();
+      if (!loadedItem) {
+        invalidateCache();
+      }
     },
   };
 
@@ -162,7 +166,9 @@ export const useItemUpdate = (): UseItemUpdate => {
       }).then(handleAPIResponse<UpdateLabelsResponse>);
     },
     onSuccess: () => {
-      invalidateCache();
+      if (!loadedItem) {
+        invalidateCache();
+      }
     },
   };
 
