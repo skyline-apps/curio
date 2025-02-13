@@ -4,7 +4,7 @@ import React, { useContext, useEffect } from "react";
 import { LuBird, LuPartyPopper } from "react-icons/lu";
 
 import ItemCard from "@/components/Items/ItemCard";
-import { ItemNavigation } from "@/components/Items/ItemList/ItemNavigation";
+import { ItemNavigationShortcuts } from "@/components/Items/ItemList/ItemNavigationShortcuts";
 import ItemsActions from "@/components/Items/ItemList/ItemsActions";
 import ItemSearch from "@/components/Items/ItemList/ItemSearch";
 import Icon from "@/components/ui/Icon";
@@ -92,7 +92,7 @@ const ItemList: React.FC<ItemListProps> = ({}: ItemListProps) => {
 
   return (
     <>
-      <ItemNavigation />
+      <ItemNavigationShortcuts />
       <div className="flex h-8 w-full items-end gap-2 mb-2">
         <ItemSearch />
         <ItemsActions />

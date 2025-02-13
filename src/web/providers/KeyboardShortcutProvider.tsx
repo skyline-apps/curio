@@ -17,6 +17,7 @@ export enum ShortcutType {
   ITEMS = "Items",
   DEFAULT = "Default",
   ACTIONS = "Actions",
+  NAVIGATION = "Navigation",
 }
 
 export interface KeyboardShortcut {
