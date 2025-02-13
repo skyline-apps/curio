@@ -1,6 +1,10 @@
 import axios, { AxiosError, AxiosInstance } from "axios";
 
+import { createLogger } from "@/utils/logger";
+
 import { ItemDocument, SearchError, SearchOptions } from "./types";
+
+const log = createLogger("lib/search");
 
 interface RetryConfig {
   maxRetries: number;
@@ -106,6 +110,7 @@ export class Search {
     this.axiosInstance = null;
     this.lastUsedApiKey = null;
     this.lastUsedEndpoint = null;
+    log.info("Axios instance reset.");
   }
 
   async indexDocuments(documents: ItemDocument[]): Promise<void> {

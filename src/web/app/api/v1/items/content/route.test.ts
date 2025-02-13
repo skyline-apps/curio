@@ -1,6 +1,7 @@
 import { jest } from "@jest/globals";
 
 import { MOCK_METADATA } from "@/__mocks__/extract";
+import { indexDocuments } from "@/__mocks__/search";
 import {
   getItemContent,
   storage,
@@ -666,6 +667,17 @@ describe("/api/v1/items/content", () => {
       expect(updatedProfileItemHighlights[0].profileItemId).toEqual(
         EXTRA_PROFILE_ITEM_ID,
       );
+      expect(indexDocuments).toHaveBeenCalledTimes(1);
+      expect(indexDocuments).toHaveBeenCalledWith([
+        {
+          content: "Markdown content",
+          description: MOCK_METADATA.description,
+          isFavorite: 1,
+          profileItemId: TEST_PROFILE_ITEM_ID,
+          stateEnum: 0,
+          title: MOCK_METADATA.title,
+        },
+      ]);
     });
 
     it("should return 200 even when content URL does not match exactly", async () => {

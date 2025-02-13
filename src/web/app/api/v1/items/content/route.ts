@@ -1,12 +1,18 @@
 import { LABELS_CLAUSE } from "@/app/api/v1/items/route";
 import { and, db, eq, sql, type TransactionDB } from "@/db";
-import { items, profileItemHighlights, profileItems } from "@/db/schema";
+import {
+  items,
+  ItemStateNumber,
+  profileItemHighlights,
+  profileItems,
+} from "@/db/schema";
 import { extractMainContentAsMarkdown, extractMetadata } from "@/lib/extract";
 import {
   ExtractedMetadata,
   ExtractError,
   MetadataError,
 } from "@/lib/extract/types";
+import { indexDocuments } from "@/lib/search";
 import { storage } from "@/lib/storage";
 import { StorageError } from "@/lib/storage/types";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
@@ -169,16 +175,17 @@ export async function GET(
   }
 }
 
-async function updateMetadata(
+async function updateProfileItem(
   tx: TransactionDB,
   itemUrl: string,
   profileId: string,
   itemId: string,
   metadata: ExtractedMetadata,
   savedAt: Date,
+  markdownContent: string,
 ): Promise<void> {
   const newTitle = metadata.title || itemUrl;
-  await tx
+  const profileItem = await tx
     .update(profileItems)
     .set({
       savedAt: savedAt,
@@ -196,7 +203,16 @@ async function updateMetadata(
         eq(profileItems.itemId, itemId),
         eq(profileItems.profileId, profileId),
       ),
-    );
+    )
+    .returning({
+      id: profileItems.id,
+      state: profileItems.state,
+      isFavorite: profileItems.isFavorite,
+    });
+
+  if (!profileItem.length) {
+    return;
+  }
   // Delete previous highlights
   await tx
     .delete(profileItemHighlights)
@@ -206,6 +222,18 @@ async function updateMetadata(
         sql`(SELECT id FROM ${profileItems} WHERE profile_id = ${profileId} AND id = ${profileItemHighlights.profileItemId} AND item_id = ${itemId})`,
       ),
     );
+
+  // Index profile item
+  await indexDocuments([
+    {
+      profileItemId: profileItem[0].id,
+      title: newTitle,
+      description: metadata.description || "",
+      content: markdownContent,
+      stateEnum: ItemStateNumber[profileItem[0].state],
+      isFavorite: profileItem[0].isFavorite ? 1 : 0,
+    },
+  ]);
 }
 
 export async function POST(
@@ -302,13 +330,14 @@ export async function POST(
           .set({ updatedAt: newDate })
           .where(eq(items.id, item[0].id));
 
-        await updateMetadata(
+        await updateProfileItem(
           tx,
           item[0].url,
           profileResult.profile.id,
           item[0].id,
           metadata,
           newDate,
+          markdownContent,
         );
         return APIResponseJSON(response);
       } else if (
@@ -331,13 +360,14 @@ export async function POST(
         // If the metadata hasn't previously been stored, update it here.
         if (profileItem.length > 0) {
           const defaultMetadata = await storage.getItemMetadata(slug);
-          await updateMetadata(
+          await updateProfileItem(
             tx,
             item[0].url,
             profileResult.profile.id,
             item[0].id,
             defaultMetadata,
             newDate,
+            markdownContent,
           );
         }
         return APIResponseJSON(response);
