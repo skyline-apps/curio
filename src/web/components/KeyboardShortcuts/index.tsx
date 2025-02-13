@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 
-import { Kbd, type KbdKey } from "@/components/ui/Kbd";
+import Kbd, { type KbdKey } from "@/components/ui/Kbd";
 import Modal, {
   ModalBody,
   ModalContent,
