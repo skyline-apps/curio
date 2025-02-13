@@ -1,6 +1,7 @@
 import { jest } from "@jest/globals";
 
 import { UploadStatus } from "@/app/api/v1/items/content/validation";
+import { type VersionMetadata } from "@/lib/storage/types";
 
 import { MOCK_METADATA } from "./extract";
 
@@ -39,12 +40,6 @@ export class Storage {
       ...MOCK_METADATA,
     };
   }
-}
-
-interface VersionMetadata {
-  timestamp: string;
-  length: number;
-  hash: string;
 }
 
 // Export singleton instance
