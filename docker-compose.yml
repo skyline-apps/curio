@@ -29,3 +29,16 @@ services:
             - /app/node_modules
         - action: rebuild
           path: ./src/web/package.json
+  search:
+    image: getmeili/meilisearch:v1.12
+    container_name: search
+    network_mode: host
+    environment:
+      MEILI_ENV: development
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+    command:
+      - /bin/sh
+      - /init.sh
+    volumes:
+      - ./docker/volumes/search/data:/meili_data
+      - ./docker/volumes/search/init.sh:/init.sh
