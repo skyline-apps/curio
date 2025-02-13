@@ -2,7 +2,7 @@ import { createHash } from "crypto";
 import { ITEMS_BUCKET } from "utils/constants";
 
 import { UploadStatus } from "@/app/api/v1/items/content/validation";
-import { ExtractedMetadata } from "@/utils/extract";
+import { ExtractedMetadata } from "@/lib/extract/types";
 import { createLogger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/server";
 import type { StorageClient } from "@/utils/supabase/types";

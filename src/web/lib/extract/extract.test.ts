@@ -1,9 +1,10 @@
 import fs from "fs";
 import path from "path";
 
-import { Extract, ExtractError, MetadataError } from "@/utils/extract";
+import { Extract } from "@/lib/extract";
+import { ExtractError, MetadataError } from "@/lib/extract/types";
 
-jest.unmock("@/utils/extract");
+jest.unmock("@/lib/extract");
 
 describe("Extract", () => {
   let extract: Extract;
