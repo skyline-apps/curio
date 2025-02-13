@@ -21,10 +21,6 @@ export interface ItemDocument {
   profileId: string;
   url?: string;
   slug?: string;
-  title?: string;
-  description?: string;
   content?: string;
   contentVersionName?: string;
-  stateEnum?: number;
-  isFavorite?: number;
 }

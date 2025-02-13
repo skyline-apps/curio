@@ -7,16 +7,11 @@ import { createLogger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/server";
 import type { StorageClient } from "@/utils/supabase/types";
 
+import { type VersionMetadata } from "./types";
 import { StorageError } from "./types";
 
 const log = createLogger("lib/storage");
 const DEFAULT_NAME = "default";
-
-interface VersionMetadata extends ExtractedMetadata {
-  timestamp: string;
-  length: number;
-  hash: string;
-}
 
 export class Storage {
   private storage: StorageClient | null = null;

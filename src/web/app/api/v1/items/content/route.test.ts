@@ -4,6 +4,7 @@ import { MOCK_METADATA } from "@/__mocks__/extract";
 import { indexDocuments } from "@/__mocks__/search";
 import {
   getItemContent,
+  getItemMetadata,
   MOCK_VERSION,
   storage,
   uploadItemContent,
@@ -549,13 +550,9 @@ describe("/api/v1/items/content", () => {
           profileItemId: TEST_PROFILE_ITEM_ID,
           profileId: DEFAULT_TEST_PROFILE_ID,
           content: "Markdown content",
-          description: MOCK_METADATA.description,
-          isFavorite: 1,
-          stateEnum: 0,
-          title: MOCK_METADATA.title,
+          contentVersionName: MOCK_VERSION,
           url: TEST_ITEM_URL,
           slug: TEST_ITEM_SLUG,
-          contentVersionName: MOCK_VERSION,
         },
       ]);
     };
@@ -841,16 +838,33 @@ describe("/api/v1/items/content", () => {
       expect(indexDocuments).toHaveBeenCalledTimes(0);
     });
 
-    it("should return 200 without overwrite previous reading state when content not updated", async () => {
+    it("should return 200 and overwrite previous reading state when longer content exists", async () => {
       uploadItemContent.mockResolvedValueOnce({
         versionName: "mock-old-version",
         status: UploadStatus.STORED_VERSION,
+      });
+      // This is called on the default version
+      getItemMetadata.mockResolvedValueOnce({
+        timestamp: "2014-04-04",
+        length: 100,
+        hash: "contenthash",
+        title: "default title",
+        author: null,
+        description: null,
+        thumbnail: null,
+        favicon: null,
+        publishedAt: null,
+      });
+      getItemContent.mockResolvedValueOnce({
+        version: null,
+        versionName: "2014-04-04",
+        content: "new longer content",
       });
       await testDb.db.insert(items).values(MOCK_ITEM);
       await testDb.db.insert(profileItems).values({
         ...MOCK_PROFILE_ITEM,
         readingProgress: 20,
-        versionName: "2010-04-04",
+        versionName: "mock-old-version",
       });
       await testDb.db.insert(profileItemHighlights).values(MOCK_HIGHLIGHTS);
 
@@ -876,8 +890,10 @@ describe("/api/v1/items/content", () => {
         .from(profileItems)
         .where(eq(profileItems.itemId, TEST_ITEM_ID))
         .limit(1);
-      expect(updatedProfileItem[0].versionName).toEqual("2010-04-04");
-      expect(updatedProfileItem[0].readingProgress).toEqual(20);
+      expect(updatedProfileItem[0].title).toEqual("default title");
+      expect(updatedProfileItem[0].author).toBe(null);
+      expect(updatedProfileItem[0].versionName).toBe(null);
+      expect(updatedProfileItem[0].readingProgress).toEqual(0);
 
       const updatedHighlights = await testDb.db
         .select()
@@ -885,8 +901,18 @@ describe("/api/v1/items/content", () => {
         .where(
           eq(profileItemHighlights.profileItemId, updatedProfileItem[0].id),
         );
-      expect(updatedHighlights.length).toEqual(2);
-      expect(indexDocuments).toHaveBeenCalledTimes(0);
+      expect(updatedHighlights.length).toEqual(0);
+      expect(indexDocuments).toHaveBeenCalledTimes(1);
+      expect(indexDocuments).toHaveBeenCalledWith([
+        {
+          profileItemId: updatedProfileItem[0].id,
+          profileId: DEFAULT_TEST_PROFILE_ID,
+          content: "new longer content",
+          contentVersionName: "2014-04-04",
+          url: MOCK_ITEM.url,
+          slug: MOCK_ITEM.slug,
+        },
+      ]);
     });
 
     it("should return 200 and skip metadata update when configured", async () => {
@@ -931,12 +957,8 @@ describe("/api/v1/items/content", () => {
         {
           profileItemId: profileItem[0].id,
           profileId: DEFAULT_TEST_PROFILE_ID,
-          title: MOCK_PROFILE_ITEM.title,
-          description: MOCK_PROFILE_ITEM.description,
           content: "Markdown content",
           contentVersionName: MOCK_VERSION,
-          stateEnum: 0,
-          isFavorite: 1,
           url: MOCK_ITEM.url,
           slug: MOCK_ITEM.slug,
         },

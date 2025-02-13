@@ -1,12 +1,6 @@
 import { LABELS_CLAUSE } from "@/app/api/v1/items/route";
 import { and, db, eq, sql, type TransactionDB } from "@/db";
-import {
-  items,
-  ItemState,
-  ItemStateNumber,
-  profileItemHighlights,
-  profileItems,
-} from "@/db/schema";
+import { items, profileItemHighlights, profileItems } from "@/db/schema";
 import { extractMainContentAsMarkdown, extractMetadata } from "@/lib/extract";
 import {
   ExtractedMetadata,
@@ -196,13 +190,7 @@ async function updateProfileItem(
   itemId: string,
   metadata: ExtractedMetadata,
   savedAt: Date,
-): Promise<{
-  profileItemId: string;
-  title: string;
-  description: string;
-  state: ItemState;
-  isFavorite: boolean;
-}> {
+): Promise<string> {
   const newTitle = metadata.title || itemUrl;
   const profileItem = await tx
     .update(profileItems)
@@ -225,8 +213,6 @@ async function updateProfileItem(
     )
     .returning({
       id: profileItems.id,
-      state: profileItems.state,
-      isFavorite: profileItems.isFavorite,
     });
 
   if (!profileItem.length) {
@@ -242,13 +228,7 @@ async function updateProfileItem(
       ),
     );
 
-  return {
-    profileItemId: profileItem[0].id,
-    title: newTitle,
-    description: metadata.description || "",
-    state: profileItem[0].state,
-    isFavorite: profileItem[0].isFavorite,
-  };
+  return profileItem[0].id;
 }
 
 export async function POST(
@@ -345,29 +325,24 @@ export async function POST(
           .set({ updatedAt: newDate })
           .where(eq(items.id, item[0].id));
 
-        const { profileItemId, title, description, state, isFavorite } =
-          await updateProfileItem(
-            tx,
-            item[0].url,
-            profileResult.profile.id,
-            item[0].id,
-            metadata,
-            newDate,
-          );
+        const profileItemId = await updateProfileItem(
+          tx,
+          item[0].url,
+          profileResult.profile.id,
+          item[0].id,
+          metadata,
+          newDate,
+        );
 
         // Index profile item with new main content
         await indexDocuments([
           {
             profileItemId: profileItemId,
             profileId: profileResult.profile.id,
-            title: title,
-            description: description,
             content: markdownContent,
-            stateEnum: ItemStateNumber[state],
-            isFavorite: isFavorite ? 1 : 0,
+            contentVersionName: versionName,
             url: item[0].url,
             slug: slug,
-            contentVersionName: versionName,
           },
         ]);
         return APIResponseJSON(response);
@@ -376,22 +351,26 @@ export async function POST(
         status === UploadStatus.SKIPPED
       ) {
         const profileItem = await tx
-          .select()
+          .select({
+            versionName: profileItems.versionName,
+            savedAt: profileItems.savedAt,
+          })
           .from(profileItems)
           .where(
             and(
               eq(profileItems.itemId, item[0].id),
               eq(profileItems.profileId, profileResult.profile.id),
-              sql`${profileItems.versionName} IS NULL`,
-              sql`${profileItems.savedAt} IS NULL`,
             ),
           )
           .limit(1);
 
-        // TODO: Index here? Also do we need to update savedAt?
+        const defaultMetadata = await storage.getItemMetadata(slug);
         // If the metadata hasn't previously been stored, update it here.
-        if (profileItem.length > 0) {
-          const defaultMetadata = await storage.getItemMetadata(slug);
+        if (
+          profileItem[0].savedAt === null &&
+          profileItem[0].versionName === null
+        ) {
+          // No change to which version is being used, so no need to re-index
           await updateProfileItem(
             tx,
             item[0].url,
@@ -400,6 +379,33 @@ export async function POST(
             defaultMetadata,
             newDate,
           );
+        } else if (
+          profileItem[0].versionName !== null &&
+          profileItem[0].versionName !== defaultMetadata.timestamp
+        ) {
+          // The default content is longer, so update the item to use the default version and re-index
+          const { content, versionName } = await storage.getItemContent(
+            slug,
+            null,
+          );
+          const profileItemId = await updateProfileItem(
+            tx,
+            item[0].url,
+            profileResult.profile.id,
+            item[0].id,
+            defaultMetadata,
+            newDate,
+          );
+          await indexDocuments([
+            {
+              profileItemId: profileItemId,
+              profileId: profileResult.profile.id,
+              content: content,
+              contentVersionName: versionName,
+              url: item[0].url,
+              slug: slug,
+            },
+          ]);
         }
         return APIResponseJSON(response);
       } else {
