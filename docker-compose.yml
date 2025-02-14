@@ -20,6 +20,7 @@ services:
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
       SEARCH_API_KEY: ${SEARCH_APPLICATION_API_KEY}
       SEARCH_ENDPOINT_URL: ${SEARCH_ENDPOINT_URL}
+      SEARCH_EXTERNAL_ENDPOINT_URL: ${SEARCH_EXTERNAL_ENDPOINT_URL}
     mem_limit: "6G"
     cpus: 4
     develop:
@@ -34,13 +35,14 @@ services:
   search:
     image: getmeili/meilisearch:v1.12
     container_name: search
-    network_mode: host
     environment:
       MEILI_ENV: development
       MEILI_MASTER_KEY: ${SEARCH_MASTER_API_KEY}
     command:
       - /bin/sh
       - /init.sh
+    ports:
+      - 7700:7700
     volumes:
       - ./docker/volumes/search/data:/meili_data
       - ./docker/volumes/search/init.sh:/init.sh

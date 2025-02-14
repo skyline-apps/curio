@@ -1,5 +1,7 @@
 import axios, { AxiosError, AxiosInstance } from "axios";
 
+import { db, sql } from "@/db";
+import { appConfig } from "@/db/schema";
 import { createLogger } from "@/utils/logger";
 
 import { ItemDocument, SearchError, SearchOptions } from "./types";
@@ -71,18 +73,29 @@ export class Search {
   private lastUsedApiKey: string | null = null;
   private lastUsedEndpoint: string | null = null;
 
-  private createAxiosInstance(): AxiosInstance {
+  private getSearchConfig(useExternal = true): {
+    apiKey: string;
+    endpoint: string;
+  } {
     const apiKey = process.env.SEARCH_API_KEY;
-    const endpoint = process.env.SEARCH_ENDPOINT_URL;
+    const endpoint = useExternal
+      ? process.env.SEARCH_EXTERNAL_ENDPOINT_URL
+      : process.env.SEARCH_ENDPOINT_URL;
 
     if (!apiKey) {
       throw new SearchError("SEARCH_API_KEY environment variable is not set");
     }
     if (!endpoint) {
       throw new SearchError(
-        "SEARCH_ENDPOINT_URL environment variable is not set",
+        useExternal
+          ? "SEARCH_EXTERNAL_ENDPOINT_URL environment variable is not set"
+          : "SEARCH_ENDPOINT_URL environment variable is not set",
       );
     }
+    return { apiKey, endpoint };
+  }
+  private async createAxiosInstance(): Promise<AxiosInstance> {
+    const { apiKey, endpoint } = this.getSearchConfig();
 
     if (
       this.axiosInstance &&
@@ -101,6 +114,7 @@ export class Search {
       });
       this.lastUsedApiKey = apiKey;
       this.lastUsedEndpoint = endpoint;
+      this.populateSearchConfig();
     }
 
     return this.axiosInstance;
@@ -113,8 +127,29 @@ export class Search {
     log.info("Axios instance reset.");
   }
 
+  async populateSearchConfig(): Promise<void> {
+    // The database connects directly to the search endpoint on a shared Docker network in development mode.
+    const { apiKey, endpoint } = this.getSearchConfig(false);
+    await db
+      .insert(appConfig)
+      .values([
+        {
+          key: "SEARCH_ENDPOINT_URL",
+          value: endpoint,
+        },
+        {
+          key: "SEARCH_API_KEY",
+          value: apiKey,
+        },
+      ])
+      .onConflictDoUpdate({
+        target: [appConfig.key],
+        set: { value: sql`excluded.value` },
+      });
+  }
+
   async indexDocuments(documents: ItemDocument[]): Promise<void> {
-    const axiosInstance = this.createAxiosInstance();
+    const axiosInstance = await this.createAxiosInstance();
 
     await withRetry(async () => {
       const response = await axiosInstance.put(
@@ -131,7 +166,7 @@ export class Search {
     query: string,
     options: SearchOptions = {},
   ): Promise<ItemDocument[]> {
-    const axiosInstance = this.createAxiosInstance();
+    const axiosInstance = await this.createAxiosInstance();
 
     return withRetry(async () => {
       const response = await axiosInstance.post("/indexes/items/search", {

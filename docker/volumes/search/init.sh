@@ -23,8 +23,17 @@ done
 until curl -s -X PUT "${MEILI_URL}/indexes/items/settings/filterable-attributes" \
     -H "Authorization: Bearer ${MEILI_MASTER_KEY}" \
     -H "Content-Type: application/json" \
-    -d '["title", "description", "stateEnum", "isFavorite"]' > /dev/null; do
+    -d '["profileItemId", "profile", "title", "description", "stateEnum", "isFavorite"]' > /dev/null; do
     echo "Retrying to add filterable attributes..."
+    sleep 1
+done
+
+# Enable editing documents
+until curl -s -X PATCH "${MEILI_URL}/experimental-features/" \
+    -H "Authorization: Bearer ${MEILI_MASTER_KEY}" \
+    -H "Content-Type: application/json" \
+    -d '{"editDocumentsByFunction": true}' > /dev/null; do
+    echo "Retrying to enable editDocumentsByFunction..."
     sleep 1
 done
 
