@@ -1,3 +1,4 @@
+import { searchDocuments } from "@/__mocks__/search";
 import { and, desc, eq } from "@/db";
 import { DbErrorCode } from "@/db/errors";
 import {
@@ -7,6 +8,7 @@ import {
   profileItems,
   profileLabels,
 } from "@/db/schema";
+import { SearchError } from "@/lib/search/types";
 import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_API_KEY,
@@ -327,7 +329,6 @@ describe("/api/v1/items", () => {
     });
 
     it("should support cursor-based pagination", async () => {
-      // Create multiple test items with different IDs to test pagination
       await testDb.db.insert(items).values(MOCK_ITEMS);
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
 
@@ -368,6 +369,75 @@ describe("/api/v1/items", () => {
       expect(secondData.total).toBe(3);
       expect(secondData.nextCursor).toBeUndefined(); // No more pages
       expect(secondData.items[0].id).toBe(TEST_ITEM_ID_3); // Last item
+    });
+
+    it("should support offset-based pagination when searching", async () => {
+      searchDocuments.mockResolvedValueOnce({
+        hits: [
+          {
+            profileItemId: MOCK_PROFILE_ITEMS[1].id,
+            _formatted: { content: "blah2" },
+          },
+          {
+            profileItemId: MOCK_PROFILE_ITEMS[0].id,
+            _formatted: { content: "blah" },
+          },
+        ],
+        estimatedTotalHits: 3,
+      });
+
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+      const params = new URLSearchParams({
+        limit: "2",
+        search: "universal",
+      });
+      const firstRequest: APIRequest = makeAuthenticatedMockRequest({
+        method: "GET",
+        url: `http://localhost:3000/api/v1/items?${params.toString()}`,
+      });
+
+      const firstResponse = await GET(firstRequest);
+      expect(firstResponse.status).toBe(200);
+
+      const firstData = await firstResponse.json();
+      expect(firstData.items).toHaveLength(2);
+      expect(firstData.total).toBe(3);
+      expect(firstData.nextOffset).toBe(2);
+      expect(firstData.items[0].id).toBe(TEST_ITEM_ID_2);
+      expect(firstData.items[0].excerpt).toBe("blah2");
+      expect(firstData.items[1].id).toBe(TEST_ITEM_ID);
+      expect(firstData.items[1].excerpt).toBe("blah");
+      searchDocuments.mockResolvedValueOnce({
+        hits: [
+          {
+            profileItemId: MOCK_PROFILE_ITEMS[2].id,
+            _formatted: { content: "blah3" },
+          },
+        ],
+        estimatedTotalHits: 3,
+      });
+
+      const secondParams = new URLSearchParams({
+        limit: "2",
+        offset: "2",
+        search: "universal",
+      });
+      const secondRequest: APIRequest = makeAuthenticatedMockRequest({
+        method: "GET",
+        url: `http://localhost:3000/api/v1/items?${secondParams.toString()}`,
+      });
+
+      const secondResponse = await GET(secondRequest);
+      expect(secondResponse.status).toBe(200);
+
+      const secondData = await secondResponse.json();
+      expect(secondData.items).toHaveLength(1);
+      expect(secondData.total).toBe(3);
+      expect(secondData.nextOffset).toBeUndefined();
+      expect(secondData.items[0].id).toBe(TEST_ITEM_ID_3);
+      expect(secondData.items[0].excerpt).toBe("blah3");
     });
 
     it("should return 200 when fetching specific slugs", async () => {
@@ -448,6 +518,7 @@ describe("/api/v1/items", () => {
       expect(data.items).toHaveLength(1);
       expect(data.items[0].id).toBe(TEST_ITEM_ID_DELETED);
       expect(data.total).toBe(1);
+      expect(searchDocuments).not.toHaveBeenCalled();
     });
 
     it("should return 200 when applying multiple filters", async () => {
@@ -473,9 +544,44 @@ describe("/api/v1/items", () => {
       expect(data.items).toHaveLength(1);
       expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
       expect(data.total).toBe(1);
+      expect(searchDocuments).not.toHaveBeenCalled();
+    });
+
+    it("should return 200 with empty results if search has no results", async () => {
+      searchDocuments.mockResolvedValueOnce({
+        hits: [],
+        estimatedTotalHits: 0,
+      });
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+      const params = new URLSearchParams({
+        search: "NO MATCHES",
+      });
+
+      const request = makeAuthenticatedMockRequest({
+        method: "GET",
+        url: `http://localhost:3000/api/v1/items?${params.toString()}`,
+      });
+
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data.items).toHaveLength(0);
+      expect(data.total).toBe(0);
+      expect(searchDocuments).toHaveBeenCalledTimes(1);
     });
 
     it("should return 200 when fuzzy searching items", async () => {
+      searchDocuments.mockResolvedValueOnce({
+        hits: [
+          {
+            profileItemId: MOCK_PROFILE_ITEMS[1].id,
+            _formatted: { content: "blah blah" },
+          },
+        ],
+        estimatedTotalHits: 1,
+      });
       await testDb.db.insert(items).values(MOCK_ITEMS);
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
       const params = new URLSearchParams({
@@ -494,9 +600,23 @@ describe("/api/v1/items", () => {
       expect(data.items).toHaveLength(1);
       expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
       expect(data.total).toBe(1);
+      expect(searchDocuments).toHaveBeenCalledTimes(1);
+      expect(searchDocuments).toHaveBeenCalledWith(
+        "hellO",
+        DEFAULT_TEST_PROFILE_ID,
+        {
+          attributesToCrop: ["content"],
+          attributesToHighlight: ["content"],
+          attributesToRetrieve: ["profileItemId"],
+          filter: ["state != 3"],
+          limit: 20,
+          offset: 0,
+        },
+      );
     });
 
-    it("should return 200 when searching across title and description", async () => {
+    it("should return 200 when falling back to naive database search for title / description", async () => {
+      searchDocuments.mockRejectedValueOnce(new SearchError("Search failed"));
       await testDb.db.insert(items).values(MOCK_ITEMS);
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
       const params = new URLSearchParams({
@@ -516,9 +636,23 @@ describe("/api/v1/items", () => {
       expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
       expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
       expect(data.total).toBe(2);
+      expect(searchDocuments).toHaveBeenCalledTimes(1);
+      expect(searchDocuments).toHaveBeenCalledWith(
+        "item 2",
+        DEFAULT_TEST_PROFILE_ID,
+        {
+          attributesToCrop: ["content"],
+          attributesToHighlight: ["content"],
+          attributesToRetrieve: ["profileItemId"],
+          filter: ["state != 3"],
+          limit: 20,
+          offset: 0,
+        },
+      );
     });
 
-    it("should return 200 when searching across url", async () => {
+    it("should return 200 when falling back to naive database search for url", async () => {
+      searchDocuments.mockRejectedValueOnce(new SearchError("Search failed"));
       await testDb.db.insert(items).values(MOCK_ITEMS);
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
       const params = new URLSearchParams({
@@ -537,14 +671,37 @@ describe("/api/v1/items", () => {
       expect(data.items).toHaveLength(1);
       expect(data.items[0].id).toBe(TEST_ITEM_ID);
       expect(data.total).toBe(1);
+      expect(searchDocuments).toHaveBeenCalledTimes(1);
+      expect(searchDocuments).toHaveBeenCalledWith(
+        "https://example.com",
+        DEFAULT_TEST_PROFILE_ID,
+        {
+          attributesToCrop: ["content"],
+          attributesToHighlight: ["content"],
+          attributesToRetrieve: ["profileItemId"],
+          filter: ["state != 3"],
+          limit: 20,
+          offset: 0,
+        },
+      );
     });
 
     it("should return 200 when combining filters and search", async () => {
+      searchDocuments.mockResolvedValueOnce({
+        hits: [
+          {
+            profileItemId: MOCK_PROFILE_ITEMS[2].id,
+            _formatted: { content: "blah blah blah" },
+          },
+        ],
+        estimatedTotalHits: 1,
+      });
       await testDb.db.insert(items).values(MOCK_ITEMS);
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
       const params = new URLSearchParams({
         filters: JSON.stringify({
           state: ItemState.ARCHIVED,
+          isFavorite: false,
         }),
         search: "item 2",
       });
@@ -560,6 +717,19 @@ describe("/api/v1/items", () => {
       expect(data.items).toHaveLength(1);
       expect(data.items[0].id).toBe(TEST_ITEM_ID_3);
       expect(data.total).toBe(1);
+      expect(searchDocuments).toHaveBeenCalledTimes(1);
+      expect(searchDocuments).toHaveBeenCalledWith(
+        "item 2",
+        DEFAULT_TEST_PROFILE_ID,
+        {
+          attributesToCrop: ["content"],
+          attributesToHighlight: ["content"],
+          attributesToRetrieve: ["profileItemId"],
+          filter: ["isFavorite = 0", "state = 2"],
+          limit: 20,
+          offset: 0,
+        },
+      );
     });
 
     it("should return 200 when filtering by inactive state ordering by stateUpdatedAt", async () => {
@@ -703,6 +873,7 @@ describe("/api/v1/items", () => {
           {
             url: TEST_ITEM_URL_1,
             id: expect.any(String),
+            profileItemId: expect.any(String),
             slug: expect.stringMatching(/^example-com-[a-f0-9]{6}$/),
             metadata: expect.objectContaining({
               title: "https://example.com",
@@ -783,6 +954,7 @@ describe("/api/v1/items", () => {
           {
             url: TEST_ITEM_URL_1,
             id: expect.any(String),
+            profileItemId: expect.any(String),
             slug: expect.stringMatching(/^example-com-[a-f0-9]{6}$/),
             metadata: expect.objectContaining({
               title: "New title",
@@ -797,6 +969,7 @@ describe("/api/v1/items", () => {
           {
             url: TEST_ITEM_URL_2,
             id: expect.any(String),
+            profileItemId: expect.any(String),
             slug: expect.stringMatching(/^example2-com-[a-f0-9]{6}$/),
             metadata: expect.objectContaining({
               title: "Example title",

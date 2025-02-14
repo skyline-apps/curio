@@ -12,8 +12,10 @@ export class SearchError extends Error {
 export interface SearchOptions {
   limit?: number;
   offset?: number;
-  filter?: string;
-  sort?: string[];
+  filter?: string[];
+  attributesToCrop?: string[];
+  attributesToRetrieve?: string[];
+  attributesToHighlight?: string[];
 }
 
 export interface ItemDocument {
@@ -23,4 +25,16 @@ export interface ItemDocument {
   slug?: string;
   content?: string;
   contentVersionName?: string;
+}
+
+export interface ItemDocumentResult extends Omit<ItemDocument, "profileId"> {
+  profileId?: string;
+  _formatted: {
+    content?: string;
+  };
+}
+
+export interface SearchResults {
+  hits: ItemDocumentResult[];
+  estimatedTotalHits: number;
 }

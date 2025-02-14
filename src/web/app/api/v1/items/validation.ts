@@ -14,7 +14,7 @@ const dateType = z.union([z.string(), z.date()]).transform((val) => {
   return val;
 });
 
-const FilterSchema = z
+const FiltersSchema = z
   .string()
   .transform((val) => {
     return JSON.parse(val);
@@ -27,6 +27,8 @@ const FilterSchema = z
       })
       .strict(),
   );
+
+export type Filters = z.infer<typeof FiltersSchema>;
 
 const ItemMetadataBaseSchema = z
   .object({
@@ -120,11 +122,16 @@ const ItemMetadataSchema = ItemMetadataBaseSchema.merge(
 export const ItemResultSchema = z
   .object({
     id: z.string(),
+    profileItemId: z.string(),
     url: UrlSchema,
     slug: SlugSchema,
     metadata: ItemMetadataSchema,
     createdAt: dateType,
     labels: z.array(LabelSchema),
+    excerpt: z
+      .string()
+      .optional()
+      .describe("Included if the item is relevant for the search query"),
   })
   .strict();
 
@@ -162,12 +169,18 @@ export const GetItemsRequestSchema = z
       .describe(
         "A comma-separated list of URLs to retrieve. If the URL is not found, it will be ignored.",
       ),
-    limit: z.coerce.number().min(1).max(1000).optional().default(100),
+    limit: z.coerce.number().min(1).max(1000).optional().default(20),
     cursor: z
       .string()
       .optional()
       .describe("The savedAt timestamp to start from."),
-    filters: FilterSchema.optional().describe("The filters to apply."),
+    offset: z.coerce
+      .number()
+      .min(0)
+      .optional()
+      .describe("The search result offset to start from.")
+      .default(0),
+    filters: FiltersSchema.optional().describe("The filters to apply."),
     search: z
       .string()
       .max(100)
@@ -175,18 +188,24 @@ export const GetItemsRequestSchema = z
       .describe("The search query to apply."),
   })
   .refine(
-    (val) => !(val.slugs && val.urls),
-    "Cannot provide both slugs and urls",
+    (val) => [val.slugs, val.urls, val.search].filter(Boolean).length <= 1,
+    "Can provide at most one of slugs, urls, or search",
   );
 export type GetItemsRequest = Partial<z.infer<typeof GetItemsRequestSchema>> & {
   limit?: number;
 };
 
-export const GetItemsResponseSchema = z.object({
-  items: z.array(ItemResultSchema),
-  nextCursor: z.string().optional(),
-  total: z.number(),
-});
+export const GetItemsResponseSchema = z
+  .object({
+    items: z.array(ItemResultSchema),
+    nextCursor: z.string().optional(),
+    nextOffset: z.number().optional(),
+    total: z.number(),
+  })
+  .refine(
+    (val) => !(val.nextCursor && val.nextOffset),
+    "Cannot have both nextCursor and nextOffset",
+  );
 export type GetItemsResponse = z.infer<typeof GetItemsResponseSchema>;
 
 const ItemMetadataUpdateSchema = ItemMetadataSchema.merge(

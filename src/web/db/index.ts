@@ -11,6 +11,7 @@ const pool = new Pool({
 
 export const db = drizzle(pool, { schema });
 
+export type { SQL } from "drizzle-orm";
 export {
   and,
   asc,
@@ -33,5 +34,4 @@ export type {
   PgTransaction,
   SelectedFields,
 } from "drizzle-orm/pg-core";
-
 export type TransactionDB = NodePgDatabase<typeof schema>;

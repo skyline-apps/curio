@@ -1,10 +1,16 @@
+// TODO: Use the Meilisearch JS SDK?
 import axios, { AxiosError, AxiosInstance } from "axios";
 
 import { db, sql } from "@/db";
 import { appConfig } from "@/db/schema";
 import { createLogger } from "@/utils/logger";
 
-import { ItemDocument, SearchError, SearchOptions } from "./types";
+import {
+  ItemDocument,
+  SearchError,
+  SearchOptions,
+  SearchResults,
+} from "./types";
 
 const log = createLogger("lib/search");
 
@@ -164,21 +170,31 @@ export class Search {
 
   async searchDocuments(
     query: string,
+    profileId: string,
     options: SearchOptions = {},
-  ): Promise<ItemDocument[]> {
+  ): Promise<SearchResults> {
     const axiosInstance = await this.createAxiosInstance();
+
+    const searchOptions = {
+      ...options,
+      filter: [...(options.filter || []), `profileId = ${profileId}`],
+    };
 
     return withRetry(async () => {
       const response = await axiosInstance.post("/indexes/items/search", {
         q: query,
-        ...options,
+        attributesToRetrieve: ["profileItemId"],
+        ...searchOptions,
       });
 
       if (!response.data || !Array.isArray(response.data.hits)) {
         throw new SearchError("Invalid search response format");
       }
 
-      return response.data.hits;
+      return {
+        hits: response.data.hits,
+        estimatedTotalHits: response.data.estimatedTotalHits,
+      };
     });
   }
 }
@@ -191,5 +207,6 @@ export const indexDocuments = (documents: ItemDocument[]): Promise<void> =>
   search.indexDocuments(documents);
 export const searchDocuments = (
   query: string,
+  profileId: string,
   options?: SearchOptions,
-): Promise<ItemDocument[]> => search.searchDocuments(query, options);
+): Promise<SearchResults> => search.searchDocuments(query, profileId, options);
