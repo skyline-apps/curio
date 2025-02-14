@@ -5,6 +5,7 @@ import { HiCheck } from "react-icons/hi2";
 import Favicon from "@/components/Image/Favicon";
 import ItemActions from "@/components/Items/ItemActions";
 import Labels from "@/components/Labels";
+import Markdown from "@/components/Markdown";
 import Icon from "@/components/ui/Icon";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import type { Item } from "@/providers/ItemsProvider";
@@ -99,9 +100,15 @@ const ItemCard: React.FC<ItemCardProps> = ({
             )}
           </div>
           <div className="flex flex-col gap-1">
-            <p className="text-xs text-secondary-700 text-wrap truncate select-none">
-              {item.metadata.description}
-            </p>
+            {item.excerpt ? (
+              <Markdown className="text-xs text-secondary-700 text-wrap truncate select-none">
+                {item.excerpt}
+              </Markdown>
+            ) : (
+              <p className="text-xs text-secondary-700 text-wrap truncate select-none">
+                {item.metadata.description}
+              </p>
+            )}
           </div>
         </div>
         <ItemActions
