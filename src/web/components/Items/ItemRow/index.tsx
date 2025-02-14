@@ -11,7 +11,7 @@ import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import type { Item } from "@/providers/ItemsProvider";
 import { cn } from "@/utils/cn";
 
-interface ItemCardProps {
+interface ItemRowProps {
   height?: number;
   startPos?: number;
   item: Item;
@@ -20,14 +20,14 @@ interface ItemCardProps {
   onLongPress?: (ev: React.TouchEvent) => void;
 }
 
-const ItemCard: React.FC<ItemCardProps> = ({
+const ItemRow: React.FC<ItemRowProps> = ({
   height,
   startPos,
   item,
   index,
   onClick,
   onLongPress,
-}: ItemCardProps) => {
+}: ItemRowProps) => {
   const { currentItem, selectedItems, lastSelectionIndex } =
     useContext(CurrentItemContext);
   const getHostname = (url: string): string =>
@@ -124,4 +124,4 @@ const ItemCard: React.FC<ItemCardProps> = ({
   );
 };
 
-export default ItemCard;
+export default ItemRow;

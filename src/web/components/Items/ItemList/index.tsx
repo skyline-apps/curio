@@ -3,10 +3,10 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { useContext, useEffect } from "react";
 import { LuBird, LuPartyPopper } from "react-icons/lu";
 
-import ItemCard from "@/components/Items/ItemCard";
 import { ItemNavigationShortcuts } from "@/components/Items/ItemList/ItemNavigationShortcuts";
 import ItemsActions from "@/components/Items/ItemList/ItemsActions";
 import ItemSearch from "@/components/Items/ItemList/ItemSearch";
+import ItemRow from "@/components/Items/ItemRow";
 import Icon from "@/components/ui/Icon";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import { ItemsContext } from "@/providers/ItemsProvider";
@@ -151,7 +151,7 @@ const ItemList: React.FC<ItemListProps> = ({}: ItemListProps) => {
 
                 const item = items[virtualRow.index];
                 return (
-                  <ItemCard
+                  <ItemRow
                     key={item.id}
                     height={virtualRow.size}
                     startPos={virtualRow.start}
