@@ -31,9 +31,9 @@ begin
     filter_condition := 'profileItemId = "' || NEW.id || '"';
 
     update_function := '
-        doc.title = "' || NEW.title || '";
-        doc.author = "' || coalesce(NEW.author, '') || '";
-        doc.description = "' || coalesce(NEW.description, '') || '";
+        doc.title = "' || replace(NEW.title, '"', '\"') || '";
+        doc.author = "' || replace(COALESCE(NEW.author, ''), '"', '\"') || '";
+        doc.description = "' || replace(coalesce(NEW.description, ''), '"', '\"') || '";
         doc.state = ' || numeric_state || ';
         doc.isFavorite = ' || numeric_is_favorite || ';
     ';
