@@ -55,6 +55,7 @@ export async function GET(
         id: items.id,
         url: items.url,
         slug: items.slug,
+        profileItemId: profileItems.id,
         metadata: {
           title: profileItems.title,
           description: profileItems.description,

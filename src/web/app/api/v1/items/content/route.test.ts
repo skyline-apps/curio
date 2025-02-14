@@ -155,6 +155,7 @@ describe("/api/v1/items/content", () => {
         content: "test content",
         item: {
           id: TEST_ITEM_ID,
+          profileItemId: TEST_PROFILE_ITEM_ID,
           slug: TEST_ITEM_SLUG,
           createdAt: ORIGINAL_CREATION_DATE.toISOString(),
           labels: [],
@@ -249,6 +250,7 @@ describe("/api/v1/items/content", () => {
         content: "custom version content",
         item: {
           id: TEST_ITEM_ID,
+          profileItemId: TEST_PROFILE_ITEM_ID,
           slug: TEST_ITEM_SLUG,
           createdAt: ORIGINAL_CREATION_DATE.toISOString(),
           labels: [],
@@ -314,6 +316,7 @@ describe("/api/v1/items/content", () => {
       expect(data).toEqual({
         item: {
           id: TEST_ITEM_ID,
+          profileItemId: TEST_PROFILE_ITEM_ID,
           slug: TEST_ITEM_SLUG,
           createdAt: ORIGINAL_CREATION_DATE.toISOString(),
           labels: [
@@ -387,6 +390,7 @@ describe("/api/v1/items/content", () => {
         content: "test content",
         item: {
           id: TEST_ITEM_ID,
+          profileItemId: TEST_PROFILE_ITEM_ID,
           slug: TEST_ITEM_SLUG,
           createdAt: ORIGINAL_CREATION_DATE.toISOString(),
           labels: [],

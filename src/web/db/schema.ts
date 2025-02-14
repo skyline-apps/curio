@@ -86,10 +86,11 @@ export const itemState = pgEnum("item_state", [
   ItemState.DELETED,
 ]);
 
+// Keep this in sync with the mapping in `0016_add app_config and search triggers.sql`
 export const ItemStateNumber = {
-  [ItemState.ACTIVE]: 0,
-  [ItemState.ARCHIVED]: 1,
-  [ItemState.DELETED]: 2,
+  [ItemState.ACTIVE]: 1,
+  [ItemState.ARCHIVED]: 2,
+  [ItemState.DELETED]: 3,
 };
 
 export const profileLabels = pgTable(

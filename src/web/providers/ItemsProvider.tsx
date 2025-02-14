@@ -22,6 +22,7 @@ export interface ItemsPage {
   items: Item[];
   total: number;
   nextCursor?: string;
+  nextOffset?: number;
 }
 
 export type ItemsContextType = {
@@ -81,6 +82,7 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     enabled: !!currentOptions,
     queryKey: ["items", serializedOptions],
     queryFn: async ({ pageParam }): Promise<ItemsPage> => {
+      const isSearch = !!currentOptions?.search;
       const params = new URLSearchParams(
         Object.fromEntries(
           Object.entries({
@@ -91,7 +93,7 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
               ? { search: currentOptions?.search }
               : {}),
             limit: ITEMS_BATCH_SIZE,
-            cursor: pageParam,
+            ...(isSearch ? { offset: pageParam } : { cursor: pageParam }),
           })
             .filter(([_, value]) => value !== undefined)
             .map(([key, value]) => [key, String(value)]),
@@ -111,10 +113,16 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
         items: result.items,
         total: result.total,
         nextCursor: result.nextCursor,
+        nextOffset: result.nextOffset,
       };
     },
     initialPageParam: undefined,
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    getNextPageParam: (lastPage) => {
+      if (currentOptions?.search) {
+        return lastPage.nextOffset;
+      }
+      return lastPage.nextCursor;
+    },
   });
 
   const fetchItems = useCallback(
@@ -133,10 +141,20 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
 
   const searchQuery = currentOptions?.search || "";
   const setSearchQuery = useCallback((search: string) => {
-    setCurrentOptions((prev) => ({
-      ...prev,
-      search,
-    }));
+    setCurrentOptions((prev) => {
+      if (!search) {
+        // If clearing search, remove search and offset
+        const { search: _, offset: __, ...rest } = prev || {};
+        return rest;
+      }
+      // If setting search, remove cursor and ensure offset is undefined initially
+      const { cursor: _, ...rest } = prev || {};
+      return {
+        ...rest,
+        search,
+        offset: undefined,
+      };
+    });
   }, []);
 
   const contextValue: ItemsContextType = {

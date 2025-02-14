@@ -1,11 +1,14 @@
-import { and, db, desc, eq, ilike, not, or, sql } from "@/db";
+import { and, db, desc, eq, ilike, not, or, type SQL, sql } from "@/db";
 import {
   items,
   ItemState,
+  ItemStateNumber,
   profileItemLabels,
   profileItems,
   profileLabels,
 } from "@/db/schema";
+import { searchDocuments } from "@/lib/search";
+import { SearchError } from "@/lib/search/types";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
 import { createLogger } from "@/utils/logger";
@@ -15,6 +18,7 @@ import {
   CreateOrUpdateItemsRequestSchema,
   CreateOrUpdateItemsResponse,
   CreateOrUpdateItemsResponseSchema,
+  Filters,
   GetItemsRequestSchema,
   GetItemsResponse,
   GetItemsResponseSchema,
@@ -43,6 +47,80 @@ export const LABELS_CLAUSE = sql<
   )::json
 `;
 
+async function getRelevantProfileItemIds(
+  profileId: string,
+  limit: number,
+  offset: number,
+  search?: string,
+  filters?: Filters,
+): Promise<
+  | { success: false; searchResults: null; nextOffset: null; total: null }
+  | {
+      success: true;
+      searchResults: { id: string; excerpt: string }[];
+      nextOffset: number | undefined;
+      total: number;
+    }
+> {
+  if (!search) {
+    return {
+      success: false,
+      searchResults: null,
+      nextOffset: null,
+      total: null,
+    };
+  }
+  try {
+    const searchFilters = [];
+    if (filters?.isFavorite !== undefined) {
+      searchFilters.push(`isFavorite = ${filters.isFavorite ? 1 : 0}`);
+    }
+    if (filters && filters.state !== undefined) {
+      searchFilters.push(`state = ${ItemStateNumber[filters.state]}`);
+    } else {
+      searchFilters.push(`state != ${ItemStateNumber[ItemState.DELETED]}`);
+    }
+    const { hits, estimatedTotalHits } = await searchDocuments(
+      search,
+      profileId,
+      {
+        filter: searchFilters,
+        offset,
+        limit: limit,
+        attributesToRetrieve: ["profileItemId"],
+        attributesToCrop: ["content"],
+        attributesToHighlight: ["content"],
+      },
+    );
+
+    const hasNextPage = estimatedTotalHits > offset + limit;
+    const items = hits;
+    const nextOffset = hasNextPage ? offset + limit : undefined;
+    return {
+      success: true,
+      searchResults: items.map((item) => ({
+        id: item.profileItemId,
+        excerpt: item._formatted.content || "",
+      })),
+      nextOffset,
+      total: estimatedTotalHits,
+    };
+  } catch (error) {
+    if (error instanceof SearchError) {
+      log.error(
+        `Failed to search items for ${search}, falling back to normal search: ${error.message}`,
+      );
+      return {
+        success: false,
+        searchResults: null,
+        nextOffset: null,
+        total: null,
+      };
+    }
+    throw error;
+  }
+}
+
 export async function GET(
   request: APIRequest,
 ): Promise<APIResponse<GetItemsResponse>> {
@@ -63,52 +141,91 @@ export async function GET(
       return data.error;
     }
 
-    const { limit, slugs, urls, cursor, filters, search } = data;
+    const { limit, slugs, urls, cursor, filters, search, offset } = data;
     const cleanedUrls = urls?.map((url) => cleanUrl(url)) ?? [];
+    const response: Partial<GetItemsResponse> = {};
 
-    const cursorCondition = cursor
-      ? sql`${profileItems.stateUpdatedAt} < ${cursor}`
-      : undefined;
+    let whereClause: SQL<unknown> | undefined = eq(
+      profileItems.profileId,
+      profileResult.profile.id,
+    );
 
-    let whereClause = slugs
-      ? and(
-          eq(profileItems.profileId, profileResult.profile.id),
+    const { success, searchResults, nextOffset, total } =
+      await getRelevantProfileItemIds(
+        profileResult.profile.id,
+        limit,
+        offset,
+        search,
+        filters,
+      );
+    if (success) {
+      response.nextOffset = nextOffset;
+      response.total = total;
+      if (searchResults.length === 0) {
+        return APIResponseJSON(
+          GetItemsResponseSchema.parse({ ...response, items: [] }),
+        );
+      }
+      whereClause = and(
+        whereClause,
+        sql`${profileItems.id} = ANY(ARRAY[${sql.join(
+          searchResults.map((p) => sql`${p.id}::uuid`),
+          sql`, `,
+        )}])`,
+      );
+    } else {
+      // If search endpoint fails or is empty, fall back to applying all search conditions
+      if (slugs) {
+        whereClause = and(
+          whereClause,
           sql`${items.slug} = ANY(ARRAY[${sql.join(slugs, sql`, `)}]::text[])`,
-        )
-      : urls
-        ? and(
-            eq(profileItems.profileId, profileResult.profile.id),
-            sql`${items.url} = ANY(ARRAY[${sql.join(cleanedUrls, sql`, `)}]::text[])`,
-          )
-        : eq(profileItems.profileId, profileResult.profile.id);
-
-    if (filters) {
-      whereClause = and(
-        whereClause,
-        filters.state !== undefined
-          ? eq(profileItems.state, filters.state)
-          : undefined,
-        filters.isFavorite !== undefined
-          ? eq(profileItems.isFavorite, filters.isFavorite)
-          : undefined,
-      );
+        );
+      } else if (urls) {
+        whereClause = and(
+          whereClause,
+          sql`${items.url} = ANY(ARRAY[${sql.join(cleanedUrls, sql`, `)}]::text[])`,
+        );
+      }
+      if (filters) {
+        whereClause = and(
+          whereClause,
+          filters.state !== undefined
+            ? eq(profileItems.state, filters.state)
+            : undefined,
+          filters.isFavorite !== undefined
+            ? eq(profileItems.isFavorite, filters.isFavorite)
+            : undefined,
+        );
+      }
+      if (search) {
+        whereClause = and(
+          whereClause,
+          or(
+            search ? ilike(profileItems.title, `%${search}%`) : undefined,
+            search ? ilike(profileItems.description, `%${search}%`) : undefined,
+            search ? ilike(items.url, `%${search}%`) : undefined,
+          ),
+        );
+      }
+      if (!filters || filters.state !== ItemState.DELETED) {
+        whereClause = and(
+          whereClause,
+          not(eq(profileItems.state, ItemState.DELETED)),
+        );
+      }
+      response.total = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(items)
+        .innerJoin(profileItems, eq(items.id, profileItems.itemId))
+        .where(whereClause)
+        .then((res) => Number(res[0]?.count ?? 0));
     }
 
-    if (search) {
+    // Add in the cursor condition after calculating the total count
+    if (cursor) {
       whereClause = and(
         whereClause,
-        or(
-          search ? ilike(profileItems.title, `%${search}%`) : undefined,
-          search ? ilike(profileItems.description, `%${search}%`) : undefined,
-          search ? ilike(items.url, `%${search}%`) : undefined,
-        ),
-      );
-    }
-
-    if (!filters || filters.state !== ItemState.DELETED) {
-      whereClause = and(
-        whereClause,
-        not(eq(profileItems.state, ItemState.DELETED)),
+        sql`${profileItems.stateUpdatedAt} < ${cursor}`,
       );
     }
 
@@ -118,6 +235,7 @@ export async function GET(
         url: items.url,
         slug: items.slug,
         createdAt: items.createdAt,
+        profileItemId: profileItems.id,
         metadata: {
           title: profileItems.title,
           description: profileItems.description,
@@ -137,30 +255,29 @@ export async function GET(
       })
       .from(items)
       .innerJoin(profileItems, eq(items.id, profileItems.itemId))
-      .where(and(whereClause, cursorCondition))
+      .where(whereClause)
       // TODO: Fix pagination bug if multiple items have the same stateUpdatedAt
       .orderBy(desc(profileItems.stateUpdatedAt), desc(items.id))
       .limit(limit);
 
-    const total = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(items)
-      .innerJoin(profileItems, eq(items.id, profileItems.itemId))
-      .where(whereClause)
-      .then((res) => Number(res[0]?.count ?? 0));
-
-    const response: GetItemsResponse = GetItemsResponseSchema.parse({
-      items: results.map((item) => ItemResultSchema.parse(item)),
-      nextCursor:
+    if (success) {
+      response.items = searchResults.map((result) =>
+        ItemResultSchema.parse({
+          ...results.find((item) => item.profileItemId === result.id),
+          excerpt: result.excerpt,
+        }),
+      );
+    } else {
+      response.items = results.map((item) => ItemResultSchema.parse(item));
+      response.nextCursor =
         results.length === limit
           ? results[
               results.length - 1
             ].metadata.stateUpdatedAt?.toISOString() || undefined
-          : undefined,
-      total,
-    });
+          : undefined;
+    }
 
-    return APIResponseJSON(response);
+    return APIResponseJSON(GetItemsResponseSchema.parse(response));
   } catch (error) {
     log.error("Error fetching items:", error);
     return APIResponseJSON({ error: "Error fetching items." }, { status: 500 });
@@ -270,6 +387,7 @@ export async function POST(
           },
         })
         .returning({
+          profileItemId: profileItems.id,
           itemId: profileItems.itemId,
           title: profileItems.title,
           description: profileItems.description,
@@ -291,9 +409,14 @@ export async function POST(
             const metadata = insertedMetadata.find(
               (metadata) => metadata.itemId === item.id,
             );
-            const { itemId: _itemId, ...metadataWithoutId } = metadata || {};
+            const {
+              itemId: _itemId,
+              profileItemId,
+              ...metadataWithoutId
+            } = metadata || {};
             return ItemResultWithoutLabelsSchema.parse({
               ...item,
+              profileItemId,
               metadata: metadataWithoutId,
             });
           }),

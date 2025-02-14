@@ -1,15 +1,16 @@
 import { jest } from "@jest/globals";
 
-import { ItemDocument, SearchOptions } from "@/lib/search/types";
+import { ItemDocument, SearchOptions, SearchResults } from "@/lib/search/types";
 
 export class Search {
   async indexDocuments(_documents: ItemDocument[]): Promise<void> {}
 
   async searchDocuments(
     _query: string,
+    _profileId: string,
     _options?: SearchOptions,
-  ): Promise<ItemDocument[]> {
-    return [];
+  ): Promise<SearchResults> {
+    return { hits: [], estimatedTotalHits: 0 };
   }
 }
 
@@ -22,4 +23,7 @@ export const indexDocuments = jest
   .mockImplementation(async () => {});
 export const searchDocuments = jest
   .spyOn(search, "searchDocuments")
-  .mockImplementation(async () => []);
+  .mockImplementation(async () => ({
+    hits: [],
+    estimatedTotalHits: 0,
+  }));
