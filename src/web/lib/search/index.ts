@@ -184,6 +184,9 @@ export class Search {
       const response = await axiosInstance.post("/indexes/items/search", {
         q: query,
         attributesToRetrieve: ["profileItemId"],
+        highlightPreTag: "**",
+        highlightPostTag: "**",
+        cropLength: 40,
         ...searchOptions,
       });
 

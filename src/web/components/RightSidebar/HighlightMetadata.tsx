@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
-import ReactMarkdown from "react-markdown";
 
+import Markdown from "@/components/Markdown";
 import Button from "@/components/ui/Button";
 import Textarea from "@/components/ui/Textarea";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
@@ -23,13 +23,13 @@ const HighlightMetadata: React.FC = (): React.ReactElement => {
         <span className="bg-warning dark:text-default-950">{children}</span>
       </p>
     ),
-  } as React.ComponentProps<typeof ReactMarkdown>["components"];
+  };
 
   return (
     <div className="flex flex-col gap-2 p-4 h-full">
-      <ReactMarkdown className="h-20 overflow-y-hidden" components={components}>
+      <Markdown className="h-20 overflow-y-hidden" components={components}>
         {draftHighlight?.text}
-      </ReactMarkdown>
+      </Markdown>
 
       {isEditing ? (
         <Textarea
