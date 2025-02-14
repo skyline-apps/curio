@@ -77,7 +77,11 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
           className,
         )}
       >
-        <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+        <ReactMarkdown
+          className="select-text"
+          remarkPlugins={[remarkGfm]}
+          components={components}
+        >
           {children || ""}
         </ReactMarkdown>
       </div>

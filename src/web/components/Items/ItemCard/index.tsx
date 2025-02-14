@@ -81,7 +81,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
             </div>
             <Link
               href={`/items/${item.slug}`}
-              className="text-sm shrink-0 text-foreground hover:underline truncate select-none"
+              className="text-sm shrink-0 text-foreground hover:underline truncate"
               onClick={(ev) => ev.stopPropagation()}
             >
               {isRead ? (
@@ -90,7 +90,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
                 <div className="font-medium">{item.metadata.title}</div>
               )}
             </Link>
-            <p className="text-xs text-secondary-700 select-none hidden md:block">
+            <p className="text-xs text-secondary-700 hidden md:block">
               {getHostname(item.url)}
             </p>
             {item.labels && item.labels.length > 0 && (
@@ -101,11 +101,11 @@ const ItemCard: React.FC<ItemCardProps> = ({
           </div>
           <div className="flex flex-col gap-1">
             {item.excerpt ? (
-              <Markdown className="text-xs text-secondary-700 text-wrap truncate select-none">
+              <Markdown className="text-xs text-secondary-700 text-wrap truncate">
                 {item.excerpt}
               </Markdown>
             ) : (
-              <p className="text-xs text-secondary-700 text-wrap truncate select-none">
+              <p className="text-xs text-secondary-700 text-wrap truncate">
                 {item.metadata.description}
               </p>
             )}
