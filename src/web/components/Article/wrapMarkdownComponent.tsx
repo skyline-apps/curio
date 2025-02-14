@@ -1,4 +1,4 @@
-import React, { type ComponentPropsWithoutRef } from "react";
+import React, { type ComponentPropsWithoutRef, useEffect } from "react";
 
 import {
   type Highlight,
@@ -120,6 +120,16 @@ function childrenToText(children: React.ReactNode): string {
   return "";
 }
 
+// Clear failed image cache on initial load
+if (typeof window !== "undefined") {
+  const keys = Object.keys(sessionStorage);
+  keys.forEach((key) => {
+    if (key.startsWith("failed-img:")) {
+      sessionStorage.removeItem(key);
+    }
+  });
+}
+
 export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
   tag: T,
   highlights: Highlight[],
@@ -139,9 +149,48 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
     const startOffset = node?.position?.start?.offset ?? 0;
     const endOffset = node?.position?.end?.offset ?? 0;
 
-    const isHeading =
-      tag === "h1" || tag === "h2" || tag === "h3" || tag === "h4";
-    const childrenText = childrenToText(children);
+    useEffect(() => {
+      if (typeof window !== "undefined") {
+        const keys = Object.keys(sessionStorage);
+        keys.forEach((key) => {
+          if (key.startsWith("failed-img:")) {
+            sessionStorage.removeItem(key);
+          }
+        });
+      }
+    }, []);
+
+    if (tag === "img") {
+      const imgUrl = (rest as { src?: string }).src;
+      const hasFailed =
+        imgUrl && sessionStorage.getItem(`failed-img:${imgUrl}`);
+
+      return (
+        <div className="w-auto h-auto min-h-12 text-xs bg-background-400">
+          {React.createElement(
+            tag,
+            {
+              "data-start-offset": startOffset,
+              "data-end-offset": endOffset,
+              src: imgUrl,
+              style: {
+                display: hasFailed ? "none" : undefined,
+              },
+              onError: (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+                const target = e.target as HTMLImageElement;
+                target.style.height = "48px";
+                target.style.display = "none";
+                if (target.src) {
+                  sessionStorage.setItem(`failed-img:${target.src}`, "1");
+                }
+              },
+              ...rest,
+            },
+            children,
+          )}
+        </div>
+      );
+    }
 
     // Skip highlighting for list containers and void elements
     if (tag === "ul" || tag === "ol" || VOID_ELEMENTS.has(tag)) {
@@ -155,6 +204,11 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
         children,
       );
     }
+
+    const isHeading =
+      tag === "h1" || tag === "h2" || tag === "h3" || tag === "h4";
+
+    const childrenText = childrenToText(children);
 
     // Create base element without any highlights
     const createBaseElement = (
