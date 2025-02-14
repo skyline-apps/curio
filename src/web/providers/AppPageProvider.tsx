@@ -42,13 +42,14 @@ export const AppPageProvider: React.FC<{
         </motion.div>
         <motion.div
           className={cn(
-            "fixed text-right top-0 right-0 lg:right-80 w-80 flex flex-col gap-1 p-2 text-xs max-h-96 overflow-x-hidden",
+            "fixed text-right top-0 right-0 lg:right-80 w-80 flex flex-col gap-1 p-2 text-xs max-h-96 overflow-x-hidden text-secondary-600",
             rightSidebarOpen ? "lg:right-80" : "lg:right-16",
           )}
+          style={{ textShadow: "0 0 2em black, 0 0 0.2em black" }}
           ref={articleFixedInfoRef}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 0 }}
-          whileHover={{ opacity: 0.5, x: 0 }}
+          whileHover={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.2 }}
         />
       </div>
