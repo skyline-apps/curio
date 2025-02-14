@@ -44,7 +44,11 @@ export function useScrollProgress({
   }, [onProgressChange, debouncedScrollHandler, containerRef]);
 
   useEffect(() => {
-    if (!containerRef.current || !initialProgress) return;
+    if (!containerRef.current) return;
+    if (initialProgress === 0) {
+      onProgressChange?.(0);
+      return;
+    }
     const element = containerRef.current;
     const totalHeight = element.scrollHeight - element.clientHeight;
     element.scrollTop = (initialProgress / 100) * totalHeight;
