@@ -35,7 +35,7 @@ const ItemPage: React.FC = () => {
             </p>
           )}
           <hr className="border-secondary my-4" />
-          <p className="text-sm text-secondary italic py-4 select-none">
+          <p className="text-sm text-secondary italic py-4">
             {metadata?.savedAt &&
               `Saved on ${new Date(metadata.savedAt).toLocaleString()}`}
           </p>

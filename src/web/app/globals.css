@@ -10,34 +10,6 @@ body {
   color: rgb(var(--foreground-rgb));
 }
 
-* {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
-a,
-p,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-em,
-b,
-ul,
-li,
-ol,
-strong,
-pre {
-  -webkit-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
-  user-select: text;
-}
-
 ::selection {
   @apply bg-warning text-warning-foreground;
 }

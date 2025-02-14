@@ -69,7 +69,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({
           }}
         />
       </head>
-      <body className="text-foreground">
+      <body className="text-foreground select-none">
         <Providers>
           <main className="w-full h-full">{children}</main>
           {modal}
