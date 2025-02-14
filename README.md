@@ -9,6 +9,7 @@ First, set up environment variables and secrets.
     -H "Authorization: Bearer ${SEARCH_MASTER_API_KEY}" \
     -H "Content-Type: application/json"
     ```
+3. Secrets are also stored in the database. You might encounter an issue with initializing them on a fresh start - try to run a search before you add an item.
 
 To start the local development environment:
 1. Run `docker compose up -d` to start containers in detached mode.

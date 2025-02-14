@@ -246,6 +246,11 @@ export const apiKeys = pgTable(
   }),
 );
 
+export const appConfig = pgTable("app_config", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+});
+
 export type InsertProfile = typeof profiles.$inferInsert;
 export type SelectProfile = typeof profiles.$inferSelect;
 export type InsertItem = typeof items.$inferInsert;
