@@ -21,8 +21,8 @@ export const CurioBrand: React.FC<CurioProps> = ({ className }) => {
   return (
     <div className={cn("my-2", className)}>
       <Link href={homeLink}>
-        <CurioDark height="40px" className="block dark:hidden" />
-        <CurioLight height="40px" className="hidden dark:block" />
+        <CurioDark height="60px" className="block dark:hidden" />
+        <CurioLight height="60px" className="hidden dark:block" />
       </Link>
     </div>
   );
