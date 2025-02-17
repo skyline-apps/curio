@@ -90,7 +90,6 @@ const ItemMetadataSchema = ItemMetadataBaseSchema.merge(
   z.object({
     thumbnail: z
       .string()
-      .max(2048)
       .nullable()
       .optional()
       .transform((val) => {
@@ -104,7 +103,6 @@ const ItemMetadataSchema = ItemMetadataBaseSchema.merge(
       .describe("The thumbnail URL of the item."),
     favicon: z
       .string()
-      .max(2048)
       .nullable()
       .optional()
       .transform((val) => {
