@@ -29,6 +29,7 @@ const checkExistingItems = async () => {
 window.onload = () => {
     errorMessage.style.display = 'none';
     checkExistingItems().then(response => {
+        saveButton.disabled = false;
         if (response.items.length > 0) {
             saveButton.textContent = "Page already saved";
             curioLink = `${API_HOST}/items/${response.items[0].slug}`;
@@ -36,7 +37,8 @@ window.onload = () => {
             saveButton.textContent = "Save current page";
         }
     }).catch(error => {
-        errorMessage.textContent = `Error: ${error.message}`;
+        const message = JSON.parse(error.message);
+        errorMessage.textContent = `${message.error}`;
         errorMessage.style.display = 'block';
     });
 };
