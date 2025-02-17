@@ -97,7 +97,7 @@ const ItemList: React.FC<ItemListProps> = ({}: ItemListProps) => {
         <ItemSearch />
         <ItemsActions />
       </div>
-      {!isLoading && totalItems === 0 ? (
+      {!isLoading && totalItems === 0 && !loadingError ? (
         <div className="flex h-full gap-2 text-sm text-secondary-800 items-center justify-center p-4">
           <p>Nothing here yet.</p>
           <Icon className="text-secondary-800" icon={<LuBird />} />
