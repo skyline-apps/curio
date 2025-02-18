@@ -9,6 +9,7 @@ import {
   lightBrown,
   themeColors,
 } from "./utils/colors";
+import { textShadow } from "./utils/text-shadow";
 
 const config: Config = {
   content: [
@@ -55,6 +56,7 @@ const config: Config = {
   darkMode: "class",
   plugins: [
     require("@tailwindcss/typography"),
+    textShadow,
     heroui({
       layout: {
         boxShadow: {

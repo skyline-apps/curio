@@ -27,12 +27,7 @@ const CurioNavbar: React.FC = () => {
   };
 
   return (
-    <Navbar
-      classNames={{ wrapper: "px-4" }}
-      isBordered
-      maxWidth="full"
-      shouldHideOnScroll
-    >
+    <Navbar classNames={{ wrapper: "px-4" }} isBordered maxWidth="full">
       <NavbarBrand>
         <CurioBrand />
       </NavbarBrand>
