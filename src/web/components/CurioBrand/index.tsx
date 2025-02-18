@@ -40,19 +40,19 @@ export const CurioHomeLogo: React.FC<CurioProps> = ({ className }) => {
   );
 };
 
-export const CurioName: React.FC = () => {
+export const CurioName: React.FC<CurioProps> = ({ className }) => {
   return (
     <>
-      <CurioNameDark className="block dark:hidden" />
-      <CurioNameLight className="hidden dark:block" />
+      <CurioNameDark className={cn("block dark:hidden", className)} />
+      <CurioNameLight className={cn("hidden dark:block", className)} />
     </>
   );
 };
 
-export const CurioLogo: React.FC = () => {
+export const CurioLogo: React.FC<CurioProps> = ({ className }) => {
   return (
     <>
-      <CurioLogoSquare className="block" />
+      <CurioLogoSquare className={cn("block", className)} />
     </>
   );
 };
