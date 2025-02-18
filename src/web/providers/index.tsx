@@ -4,7 +4,6 @@ import React, { PropsWithChildren } from "react";
 
 import { db, eq } from "@/db";
 import { profiles } from "@/db/schema";
-import { createLogger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/server";
 
 import { BrowserMessageProvider } from "./BrowserMessageProvider";
@@ -16,7 +15,19 @@ import { SettingsProvider } from "./SettingsProvider";
 import { ToastProvider } from "./ToastProvider";
 import { type User, UserProvider } from "./UserProvider";
 
-const log = createLogger("Providers");
+const AuthenticatedProviders: React.FC<PropsWithChildren> = ({
+  children,
+}: PropsWithChildren) => {
+  return (
+    <ItemsProvider>
+      <CurrentItemProvider>
+        <CacheProvider>
+          <BrowserMessageProvider>{children}</BrowserMessageProvider>
+        </CacheProvider>
+      </CurrentItemProvider>
+    </ItemsProvider>
+  );
+};
 
 const Providers: React.FC<PropsWithChildren> = async ({
   children,
@@ -26,12 +37,7 @@ const Providers: React.FC<PropsWithChildren> = async ({
   const supabase = await createClient();
   const {
     data: { user },
-    error,
   } = await supabase.auth.getUser();
-
-  if (error) {
-    log.error("Error getting user:", error);
-  }
 
   if (user) {
     const profile = await db.query.profiles.findFirst({
@@ -52,15 +58,13 @@ const Providers: React.FC<PropsWithChildren> = async ({
       <HeroUIProvider>
         <ToastProvider>
           <UserProvider user={currentUser}>
-            <SettingsProvider>
-              <ItemsProvider>
-                <CurrentItemProvider>
-                  <CacheProvider>
-                    <BrowserMessageProvider>{children}</BrowserMessageProvider>
-                  </CacheProvider>
-                </CurrentItemProvider>
-              </ItemsProvider>
-            </SettingsProvider>
+            {user ? (
+              <SettingsProvider>
+                <AuthenticatedProviders>{children}</AuthenticatedProviders>
+              </SettingsProvider>
+            ) : (
+              children
+            )}
           </UserProvider>
         </ToastProvider>
       </HeroUIProvider>
