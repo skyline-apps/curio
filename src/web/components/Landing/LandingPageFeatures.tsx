@@ -1,10 +1,11 @@
 "use client";
 import React, { useState } from "react";
 
+import ItemRow from "@/components/Items/ItemRow";
 import Labels, { type Label } from "@/components/Labels";
 import { cn } from "@/utils/cn";
 
-import { sampleLabels } from "./sampleData";
+import { sampleItems, sampleLabels } from "./sampleData";
 
 interface FeatureProps extends React.PropsWithChildren {
   title: string;
@@ -35,7 +36,7 @@ const Feature: React.FC<FeatureProps> = ({
       <h4 className="italic text-lg">{title}</h4>
       <p className="mt-2 text-secondary">{description}</p>
     </div>
-    <div className="bg-background h-40 w-60 shrink-0 p-2 overflow-hidden">
+    <div className="bg-background border-4 border-background h-40 w-60 shrink-0 p-2 overflow-x-hidden overflow-y-auto">
       {children}
     </div>
   </div>
@@ -65,7 +66,13 @@ const LandingPageFeatures: React.FC = () => {
         title="Collect"
         description="Capture content that matters, all in one place. Save any link from the internet, and send email newsletters straight to your Curio inbox."
         isReversed
-      />
+      >
+        <div className="flex flex-col w-80 gap-1">
+          {sampleItems.map((item, index) => (
+            <ItemRow key={item.id} item={item} index={index} />
+          ))}
+        </div>
+      </Feature>
       <Feature
         title="Organize"
         description="Your ideas, beautifully organized. Tag, favorite, highlight, and add notes to build your personal library of insights."
