@@ -97,7 +97,7 @@ If you are building and marketing something that’s an extension of who you are
 export const sampleHighlights = [
   {
     id: "1",
-    startOffset: 250,
+    startOffset: 247,
     endOffset: 272,
     text: "",
     note: "",

@@ -1,8 +1,11 @@
 "use client";
 import React, { useState } from "react";
 
+import { type NewHighlight } from "@/app/api/v1/items/highlights/validation";
+import { calculateHighlight } from "@/components/Article/useHighlightSelection";
 import {
   ALL_COMPONENTS,
+  removeHighlightsOverlap,
   wrapMarkdownComponent,
 } from "@/components/Article/wrapMarkdownComponent";
 import ItemRow from "@/components/Items/ItemRow";
@@ -54,6 +57,9 @@ const Feature: React.FC<FeatureProps> = ({
 
 const LandingPageFeatures: React.FC = () => {
   const [labels, setLabels] = useState<Label[]>(sampleLabels);
+  const [draftHighlight, setDraftHighlight] = useState<NewHighlight | null>(
+    null,
+  );
 
   const handleAddLabel = (label: Omit<Label, "id">): void => {
     setLabels([
@@ -70,10 +76,32 @@ const LandingPageFeatures: React.FC = () => {
     setLabels(labels.filter((label) => label.id !== id));
   };
 
+  const clearSelection = (): void => {
+    setDraftHighlight(null);
+  };
+
+  const handleSelection = (): void => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      return;
+    }
+    const highlight = calculateHighlight(selection);
+    if (!highlight) {
+      return;
+    }
+    setDraftHighlight(highlight);
+    selection.removeAllRanges();
+  };
+
+  const nonOverlappingHighlights = removeHighlightsOverlap(
+    sampleHighlights,
+    draftHighlight,
+  );
+
   const markdownComponents: Components = Object.fromEntries(
     ALL_COMPONENTS.map((c) => [
       c,
-      wrapMarkdownComponent(c, sampleHighlights, null),
+      wrapMarkdownComponent(c, nonOverlappingHighlights, draftHighlight),
     ]),
   );
 
@@ -106,9 +134,19 @@ const LandingPageFeatures: React.FC = () => {
         description="Read on your terms, free from distractions. Dive into articles in a clean, streamlined markdown viewer that works online and offline."
         isReversed
       >
-        <Markdown className="text-xs" components={markdownComponents}>
-          {sampleArticle}
-        </Markdown>
+        <div
+          onMouseDown={clearSelection}
+          onTouchStart={clearSelection}
+          onMouseUp={handleSelection}
+          onTouchEnd={handleSelection}
+        >
+          <Markdown
+            className="text-xs select-text"
+            components={markdownComponents}
+          >
+            {sampleArticle}
+          </Markdown>
+        </div>
       </Feature>
     </>
   );
