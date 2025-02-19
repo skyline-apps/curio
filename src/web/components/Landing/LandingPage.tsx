@@ -1,11 +1,10 @@
 import React from "react";
 
 import { CurioLogo, CurioName } from "@/components/CurioBrand";
+import LandingPageFeatures from "@/components/Landing/LandingPageFeatures";
 import Button from "@/components/ui/Button";
 import LandingPageDark from "@/public/assets/landing_page_dark.svg";
 import LandingPageLight from "@/public/assets/landing_page_light.svg";
-
-import LandingPageFeatures from "./LandingPageFeatures";
 
 const LandingPage: React.FC = () => {
   return (
@@ -42,25 +41,28 @@ const LandingPage: React.FC = () => {
               />
             </div>
           </div>
-          <div className="flex flex-col items-center mx-auto my-12 p-4 md:p-8 gap-8">
-            <h3 className="text-xl text-center font-medium">
-              Curate your corner of the internet.
-            </h3>
-            <p className="max-w-lg text-center text-secondary">
-              I&rsquo;ve always been an avid reader, and most of my education
-              has come from the Internet. For a long time, I&rsquo;ve used
-              read-it-later apps to keep track of what I&rsquo;ve read and
-              highlight the most memorable parts. I built Curio as a passion
-              project to make my reading experience even better, and I&rsquo;m
-              excited to share it with you.
-            </p>
+          <div className="my-12 p-8">
+            <div className="flex flex-col items-center mx-auto gap-4 max-w-lg">
+              <h3 className="text-xl text-center font-medium mb-4">
+                Curate your corner of the internet.
+              </h3>
+              <p className="max-w-lg text-center text-secondary">
+                I&rsquo;ve always been an avid reader, and most of my education
+                has come from the Internet. For a long time, I&rsquo;ve used
+                read-it-later apps to keep track of what I&rsquo;ve read and
+                highlight the most memorable parts. I built Curio as a passion
+                project to make my reading experience even better, and I&rsquo;m
+                excited to share it with you.
+              </p>
+              <p className="self-end text-secondary">- Kim</p>
+            </div>
           </div>
-          <div className="flex flex-col items-center w-full my-12 p-4 md:p-8 bg-background-400">
+          <div className="flex flex-col items-center w-full my-12 p-8 bg-background-400">
             <div className="grid grid-cols-1 gap-6 my-8 max-w-2xl">
               <LandingPageFeatures />
             </div>
           </div>
-          <div className="flex flex-col justify-center items-center gap-8 w-full my-12 p-4 md:p-8">
+          <div className="flex flex-col justify-center items-center gap-8 w-full my-12 p-8">
             <p className="max-w-2xl text-center">
               Curio is currently in open beta, and I&rsquo;d love to hear your
               feedback. It&rsquo;s free to use, though future features may come
@@ -71,7 +73,7 @@ const LandingPage: React.FC = () => {
                 <h3 className="text-lg font-medium text-center">
                   Available today
                 </h3>
-                <ul className="list-disc text-sm">
+                <ul className="list-disc ml-4 text-sm">
                   <li>Save any link via browser extension</li>
                   <li>Send email newsletters to your Curio inbox</li>
                   <li>Extract text content for a focused reading experience</li>
@@ -81,7 +83,7 @@ const LandingPage: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-lg font-medium text-center">Coming soon</h3>
-                <ul className="list-disc text-sm">
+                <ul className="list-disc ml-4 text-sm">
                   <li>Android & iOS apps with offline reading support</li>
                   <li>PDF content extraction</li>
                   <li>Additional integrations and webhooks</li>
