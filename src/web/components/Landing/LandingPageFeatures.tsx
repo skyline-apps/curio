@@ -1,11 +1,21 @@
 "use client";
 import React, { useState } from "react";
 
+import {
+  ALL_COMPONENTS,
+  wrapMarkdownComponent,
+} from "@/components/Article/wrapMarkdownComponent";
 import ItemRow from "@/components/Items/ItemRow";
 import Labels, { type Label } from "@/components/Labels";
+import Markdown, { type Components } from "@/components/Markdown";
 import { cn } from "@/utils/cn";
 
-import { sampleItems, sampleLabels } from "./sampleData";
+import {
+  sampleArticle,
+  sampleHighlights,
+  sampleItems,
+  sampleLabels,
+} from "./sampleData";
 
 interface FeatureProps extends React.PropsWithChildren {
   title: string;
@@ -60,6 +70,13 @@ const LandingPageFeatures: React.FC = () => {
     setLabels(labels.filter((label) => label.id !== id));
   };
 
+  const markdownComponents: Components = Object.fromEntries(
+    ALL_COMPONENTS.map((c) => [
+      c,
+      wrapMarkdownComponent(c, sampleHighlights, null),
+    ]),
+  );
+
   return (
     <>
       <Feature
@@ -88,7 +105,11 @@ const LandingPageFeatures: React.FC = () => {
         title="Focus"
         description="Read on your terms, free from distractions. Dive into articles in a clean, streamlined markdown viewer that works online and offline."
         isReversed
-      />
+      >
+        <Markdown className="text-xs" components={markdownComponents}>
+          {sampleArticle}
+        </Markdown>
+      </Feature>
     </>
   );
 };

@@ -84,3 +84,22 @@ export const sampleLabels = [
     color: COLOR_PALETTE[3],
   },
 ];
+
+export const sampleArticle = `Sometimes you get trapped in the wrong game because you’re competing. The best way to escape competition—to get away from the specter of competition, which is not just stressful and nerve-wracking but also will drive you to the wrong answer—is to be authentic to yourself.
+
+
+**No one can compete with you on being you**
+
+
+If you are building and marketing something that’s an extension of who you are, no one can compete with you. Who’s going to compete with Joe Rogan or Scott Adams? It’s impossible. Is somebody else going write a better Dilbert? No. Is someone going to compete with Bill Watterson and create a better [Calvin and Hobbes](https://twitter.com/Calvinn_Hobbes?ref_src=twsrc%5Egoogle%7Ctwcamp%5Eserp%7Ctwgr%5Eauthor)? No.
+`;
+
+export const sampleHighlights = [
+  {
+    id: "1",
+    startOffset: 250,
+    endOffset: 272,
+    text: "",
+    note: "",
+  },
+];
