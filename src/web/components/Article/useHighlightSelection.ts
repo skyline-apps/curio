@@ -21,7 +21,7 @@ interface UseHighlightSelectionResult {
   clearSelection: () => void;
 }
 
-function findPreviousOffset(node: Node): number {
+export function findPreviousOffset(node: Node): number {
   let current = node.previousSibling;
   while (current) {
     if (current instanceof Element && current.hasAttribute("data-end-offset")) {
@@ -30,6 +30,64 @@ function findPreviousOffset(node: Node): number {
     current = current.previousSibling;
   }
   return 0;
+}
+
+export function calculateHighlight(selection: Selection): NewHighlight | null {
+  const range = selection.getRangeAt(0);
+  if (!range || range.collapsed) {
+    return null;
+  }
+
+  const selectedText = selection.toString().trim();
+  if (!selectedText) {
+    return null;
+  }
+  // Get the closest elements with data-start-offset and data-end-offset
+  const startElement =
+    range.startContainer instanceof Element
+      ? range.startContainer
+      : range.startContainer.parentElement;
+  const endElement =
+    range.endContainer instanceof Element
+      ? range.endContainer
+      : range.endContainer.parentElement;
+
+  // Check if both elements have data-start-offset
+  if (
+    !startElement?.hasAttribute("data-start-offset") ||
+    !endElement?.hasAttribute("data-start-offset")
+  ) {
+    log.debug("Ignoring selection - missing data-start-offset attribute");
+    return null;
+  }
+
+  // Get the offsets from the data attributes
+  const startBaseOffset = parseInt(
+    startElement.getAttribute("data-start-offset") || "0",
+    10,
+  );
+  const endBaseOffset = parseInt(
+    endElement.getAttribute("data-start-offset") || "0",
+    10,
+  );
+
+  // Find the offset from the previous sibling with data-end-offset
+  const startPrevOffset = findPreviousOffset(range.startContainer);
+  const endPrevOffset = findPreviousOffset(range.endContainer);
+
+  // Calculate final offsets using previous sibling's end offset
+  const finalStartOffset =
+    Math.max(startBaseOffset, startPrevOffset) + range.startOffset;
+  const finalEndOffset =
+    Math.max(endBaseOffset, endPrevOffset) + range.endOffset;
+
+  const highlight = {
+    text: selectedText,
+    startOffset: finalStartOffset,
+    endOffset: finalEndOffset,
+    note: "",
+  };
+  return highlight;
 }
 
 export function useHighlightSelection({
@@ -56,62 +114,11 @@ export function useHighlightSelection({
       return;
     }
 
-    const range = selection.getRangeAt(0);
-    if (!range || range.collapsed) {
-      return;
-    }
-
     try {
-      const selectedText = selection.toString().trim();
-      if (!selectedText) {
+      const highlight = calculateHighlight(selection);
+      if (!highlight) {
         return;
       }
-
-      // Get the closest elements with data-start-offset and data-end-offset
-      const startElement =
-        range.startContainer instanceof Element
-          ? range.startContainer
-          : range.startContainer.parentElement;
-      const endElement =
-        range.endContainer instanceof Element
-          ? range.endContainer
-          : range.endContainer.parentElement;
-
-      // Check if both elements have data-start-offset
-      if (
-        !startElement?.hasAttribute("data-start-offset") ||
-        !endElement?.hasAttribute("data-start-offset")
-      ) {
-        log.debug("Ignoring selection - missing data-start-offset attribute");
-        return;
-      }
-
-      // Get the offsets from the data attributes
-      const startBaseOffset = parseInt(
-        startElement.getAttribute("data-start-offset") || "0",
-        10,
-      );
-      const endBaseOffset = parseInt(
-        endElement.getAttribute("data-start-offset") || "0",
-        10,
-      );
-
-      // Find the offset from the previous sibling with data-end-offset
-      const startPrevOffset = findPreviousOffset(range.startContainer);
-      const endPrevOffset = findPreviousOffset(range.endContainer);
-
-      // Calculate final offsets using previous sibling's end offset
-      const finalStartOffset =
-        Math.max(startBaseOffset, startPrevOffset) + range.startOffset;
-      const finalEndOffset =
-        Math.max(endBaseOffset, endPrevOffset) + range.endOffset;
-
-      const highlight = {
-        text: selectedText,
-        startOffset: finalStartOffset,
-        endOffset: finalEndOffset,
-        note: "",
-      };
 
       selection.removeAllRanges();
       setDraftHighlight(highlight);
