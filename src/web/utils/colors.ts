@@ -53,7 +53,7 @@ export const green = {
   200: "#CBD4A3",
   100: "#DBDFB6",
   50: "#E9EAC9",
-  foreground: darkBrown,
+  foreground: brown[50],
   DEFAULT: "#92AB72",
 };
 
@@ -83,7 +83,7 @@ export const red = {
   200: "#CF9F9B",
   100: "#DCB4AF",
   50: "#E7C9C5",
-  foreground: lightBrown,
+  foreground: brown[50],
   DEFAULT: "#A26565",
 };
 
@@ -98,7 +98,7 @@ export const blue = {
   200: "#A3BCD4",
   100: "#B6CADF",
   50: "#C9D8EA",
-  foreground: lightBrown,
+  foreground: brown[50],
   DEFAULT: "#7293AB",
 };
 
