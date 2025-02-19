@@ -13,8 +13,8 @@ import { Label } from ".";
 interface LabelPickerProps {
   labels: Label[];
   availableLabels: Label[];
-  onAdd: (label: Label) => Promise<void>;
-  onDelete?: (labelId: string) => Promise<void>;
+  onAdd: (label: Label) => void | Promise<void>;
+  onDelete?: (labelId: string) => void | Promise<void>;
 }
 
 const LabelPicker: React.FC<LabelPickerProps> = ({

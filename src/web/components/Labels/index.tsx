@@ -20,23 +20,23 @@ export interface Label {
 interface BaseLabelsProps {
   labels: Label[];
   loading?: boolean;
-  onDelete?: (labelId: string) => Promise<void>;
+  onDelete?: (labelId: string) => void | Promise<void>;
   onRename?: (
     labelId: string,
     updates: { name?: string; color?: string },
-  ) => Promise<void>;
+  ) => void | Promise<void>;
   truncate?: boolean;
 }
 
 interface CreateLabelsProps extends BaseLabelsProps {
   mode?: "create";
-  onAdd?: (label: { name: string; color: string }) => Promise<void>;
+  onAdd?: (label: { name: string; color: string }) => void | Promise<void>;
 }
 
 interface PickerLabelsProps extends BaseLabelsProps {
   mode: "picker";
   availableLabels: Label[];
-  onAdd: (label: Label) => Promise<void>;
+  onAdd: (label: Label) => void | Promise<void>;
 }
 
 type LabelsProps = CreateLabelsProps | PickerLabelsProps;
