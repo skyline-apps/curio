@@ -134,7 +134,7 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
   tag: T,
   highlights: Highlight[],
   draftHighlight: NewHighlight | Highlight | null,
-  selectHighlight: (highlight: Highlight) => void,
+  selectHighlight?: (highlight: Highlight) => void,
 ): React.FC<MarkdownProps<T>> => {
   const allHighlights = draftHighlight
     ? [...highlights, draftHighlight]
@@ -220,6 +220,7 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
           "data-start-offset": startOffset,
           "data-end-offset": endOffset,
           ref: selfRef,
+          ...(tag === "a" ? { target: "_blank" } : {}),
           ...rest,
         },
         <>
