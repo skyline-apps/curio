@@ -80,7 +80,7 @@ export const ALL_COMPONENTS: (keyof JSX.IntrinsicElements)[] = [
 ];
 
 interface LinkInfoProps extends React.PropsWithChildren {
-  href?: string;
+  href: string;
 }
 
 const LinkInfo: React.FC<LinkInfoProps> = ({
@@ -93,15 +93,13 @@ const LinkInfo: React.FC<LinkInfoProps> = ({
     <Tooltip
       content={
         <span className="flex items-center justify-center w-60 p-1 overflow-x-hidden select-none">
-          {href && (
-            <a
-              href={href}
-              target="_blank"
-              className="underline text-xs truncate text-ellipsis"
-            >
-              {`${new URL(href).hostname}${new URL(href).pathname}`}
-            </a>
-          )}
+          <a
+            href={href}
+            target="_blank"
+            className="underline text-xs truncate text-ellipsis"
+          >
+            {`${new URL(href).hostname}${new URL(href).pathname}`}
+          </a>
           <Button
             className="shrink-0"
             size="xs"
@@ -261,13 +259,21 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
     ): React.ReactElement => {
       const isLink = tag === "a";
       const href = isLink ? (rest as { href?: string }).href : undefined;
+      let isUrl;
+      try {
+        new URL(href!);
+        isUrl = true;
+      } catch (error) {
+        isUrl = false;
+      }
+
       const element = React.createElement(
         tag,
         {
           "data-start-offset": startOffset,
           "data-end-offset": endOffset,
           ref: selfRef,
-          ...(isLink ? { target: "_blank" } : {}),
+          ...(isUrl ? { target: "_blank" } : {}),
           ...rest,
         },
         <>
@@ -277,7 +283,7 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
           {elementChildren}
         </>,
       );
-      if (isLink) {
+      if (isLink && href && isUrl) {
         return <LinkInfo href={href}>{element}</LinkInfo>;
       } else {
         return element;
