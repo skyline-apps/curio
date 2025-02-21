@@ -121,7 +121,7 @@ const ItemActions = ({
               text: "Reload content",
               icon: <HiOutlineArrowPath />,
             }}
-            isLoading={savingItem}
+            isLoading={savingItem === item.url}
           />
           <ActionButton
             action={async () =>

@@ -1,9 +1,16 @@
-import React, { type ComponentPropsWithoutRef, useEffect } from "react";
+import React, {
+  type ComponentPropsWithoutRef,
+  useContext,
+  useEffect,
+} from "react";
 
 import {
   type Highlight,
   type NewHighlight,
 } from "@/app/api/v1/items/highlights/validation";
+import Button from "@/components/ui/Button";
+import { Tooltip } from "@/components/ui/Tooltip";
+import { BrowserMessageContext } from "@/providers/BrowserMessageProvider";
 
 import ArticleHeading from "./ArticleHeading";
 import { HighlightSpan } from "./HighlightSpan";
@@ -71,6 +78,44 @@ export const ALL_COMPONENTS: (keyof JSX.IntrinsicElements)[] = [
   "td",
   "th",
 ];
+
+interface LinkInfoProps extends React.PropsWithChildren {
+  href?: string;
+}
+
+const LinkInfo: React.FC<LinkInfoProps> = ({
+  children,
+  href,
+}: LinkInfoProps) => {
+  const { saveItemContent } = useContext(BrowserMessageContext);
+
+  return (
+    <Tooltip
+      content={
+        <span className="flex items-center justify-center w-60 p-1 overflow-x-hidden select-none">
+          {href && (
+            <a
+              href={href}
+              target="_blank"
+              className="underline text-xs truncate text-ellipsis"
+            >
+              {`${new URL(href).hostname}${new URL(href).pathname}`}
+            </a>
+          )}
+          <Button
+            className="shrink-0"
+            size="xs"
+            onPress={() => href && saveItemContent(href)}
+          >
+            Save to Curio
+          </Button>
+        </span>
+      }
+    >
+      {children}
+    </Tooltip>
+  );
+};
 
 export function removeHighlightsOverlap(
   existingHighlights: Highlight[],
@@ -166,7 +211,7 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
         imgUrl && sessionStorage.getItem(`failed-img:${imgUrl}`);
 
       return (
-        <div className="w-auto h-auto min-h-12 text-xs bg-background-400">
+        <span className="w-auto h-auto min-h-12 text-xs bg-background-400 inline-block">
           {React.createElement(
             tag,
             {
@@ -188,7 +233,7 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
             },
             children,
           )}
-        </div>
+        </span>
       );
     }
 
@@ -214,13 +259,15 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
     const createBaseElement = (
       elementChildren: React.ReactNode,
     ): React.ReactElement => {
-      return React.createElement(
+      const isLink = tag === "a";
+      const href = isLink ? (rest as { href?: string }).href : undefined;
+      const element = React.createElement(
         tag,
         {
           "data-start-offset": startOffset,
           "data-end-offset": endOffset,
           ref: selfRef,
-          ...(tag === "a" ? { target: "_blank" } : {}),
+          ...(isLink ? { target: "_blank" } : {}),
           ...rest,
         },
         <>
@@ -230,6 +277,11 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
           {elementChildren}
         </>,
       );
+      if (isLink) {
+        return <LinkInfo href={href}>{element}</LinkInfo>;
+      } else {
+        return element;
+      }
     };
 
     // Process text node with highlights
