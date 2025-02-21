@@ -111,7 +111,7 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
               <Button
                 className="w-full sm:w-48 self-end"
                 onPress={openAndSave}
-                isLoading={savingItem}
+                isLoading={savingItem !== null}
               >
                 Open page and save
               </Button>

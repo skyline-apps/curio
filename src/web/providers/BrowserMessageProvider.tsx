@@ -31,7 +31,7 @@ interface BrowserMessageContextType {
   removeMessageListener: (callback: (event: MessageEvent) => void) => void;
   checkExtensionInstalled: (callback: (success: boolean) => void) => void;
   saveItemContent: (url: string) => Promise<void>;
-  savingItem: boolean;
+  savingItem: string | null;
   savingError: string | null;
   clearSavingError: () => void;
 }
@@ -41,7 +41,7 @@ export const BrowserMessageContext = createContext<BrowserMessageContextType>({
   removeMessageListener: () => {},
   checkExtensionInstalled: () => {},
   saveItemContent: () => Promise.resolve(),
-  savingItem: false,
+  savingItem: null,
   savingError: null,
   clearSavingError: () => {},
 });
@@ -57,7 +57,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
   children,
 }: BrowserMessageProviderProps) => {
   const { invalidateCache } = useCache();
-  const [savingItem, setSavingItem] = useState<boolean>(false);
+  const [savingItem, setSavingItem] = useState<string | null>(null);
   const [savingError, setSavingError] = useState<string | null>(null);
   const { fetchItems } = useContext(ItemsContext);
   const { fetchContent, loadedItem } = useContext(CurrentItemContext);
@@ -91,11 +91,11 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
 
   const saveItemContent = useCallback(async (url: string): Promise<void> => {
     try {
-      setSavingItem(true);
+      setSavingItem(url);
       setSavingError(null);
 
       const timeoutId = setTimeout(() => {
-        setSavingItem(false);
+        setSavingItem(null);
         setSavingError(
           "Request timed out. Please try again or check that the Curio extension is installed and enabled.",
         );
@@ -134,7 +134,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
       }
 
       if (event.data.type === EventType.SAVE_SUCCESS) {
-        setSavingItem(false);
+        setSavingItem(null);
         if (!event.data.data || event.data.data.status === UploadStatus.ERROR) {
           log.error("Error updating content", event.data);
           setSavingError(
@@ -160,7 +160,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
         listeners.forEach((listener) => listener(event));
         log.info("Content saved successfully", event.data);
       } else if (event.data.type === EventType.SAVE_ERROR) {
-        setSavingItem(false);
+        setSavingItem(null);
         log.error("Error saving content", event.data);
         setSavingError(
           "Error saving content. Contact us if this error persists.",
