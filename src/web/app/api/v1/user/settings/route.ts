@@ -7,7 +7,7 @@ import { createLogger } from "@/utils/logger";
 import {
   type SettingsResponse,
   SettingsResponseSchema,
-  UpdateableSettingsRequestSchema,
+  UpdatedSettingsRequestSchema,
   type UpdatedSettingsResponse,
   UpdatedSettingsResponseSchema,
 } from "./validation";
@@ -28,6 +28,7 @@ export async function GET(
     }
     const settings = SettingsResponseSchema.parse({
       colorScheme: profileResult.profile.colorScheme,
+      public: profileResult.profile.public,
     });
     return APIResponseJSON(settings);
   } catch (error) {
@@ -54,7 +55,7 @@ export async function POST(
     }
 
     const body = await request.json();
-    const data = await parseAPIRequest(UpdateableSettingsRequestSchema, body);
+    const data = await parseAPIRequest(UpdatedSettingsRequestSchema, body);
 
     if ("error" in data) {
       return data.error as APIResponse<UpdatedSettingsResponse>;

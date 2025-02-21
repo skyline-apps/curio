@@ -11,7 +11,7 @@ type ProfileResult =
       error?: never;
       profile: Pick<
         typeof profiles.$inferSelect,
-        "id" | "userId" | "colorScheme" | "username"
+        "id" | "userId" | "colorScheme" | "username" | "public"
       >;
     };
 
@@ -34,6 +34,7 @@ export async function checkUserProfile(
         username: profiles.username,
         userId: profiles.userId,
         colorScheme: profiles.colorScheme,
+        public: profiles.public,
       })
       .from(profiles)
       .innerJoin(apiKeys, eq(apiKeys.profileId, profiles.id))
@@ -52,6 +53,7 @@ export async function checkUserProfile(
         username: profiles.username,
         userId: profiles.userId,
         colorScheme: profiles.colorScheme,
+        public: profiles.public,
       })
       .from(profiles)
       .where(eq(profiles.userId, userId))

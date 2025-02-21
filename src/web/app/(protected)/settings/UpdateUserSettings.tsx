@@ -8,6 +8,7 @@ import { type SettingsResponse } from "@/app/api/v1/user/settings/validation";
 import { FormSection } from "@/components/ui/Form";
 import { Radio, RadioGroup } from "@/components/ui/Radio";
 import Spinner from "@/components/ui/Spinner";
+import { Switch } from "@/components/ui/Switch";
 import { useSettings } from "@/providers/SettingsProvider";
 import { useToast } from "@/providers/ToastProvider";
 import { createLogger } from "@/utils/logger";
@@ -76,18 +77,20 @@ const UpdateUserSettings: React.FC = () => {
           ))}
         </RadioGroup>
       );
-      // TODO(Kim): Enable this when there are boolean settings.
-      // } else if (schema instanceof z.ZodBoolean) {
-      //   return (
-      //     <Switch
-      //       isSelected={!!value}
-      //       onValueChange={(val) =>
-      //         updateSetting(fieldKey, val as Settings[typeof fieldKey])
-      //       }
-      //     >
-      //       {!!value ? "On" : "Off"}
-      //     </Switch>
-      //   );
+    } else if (schema instanceof z.ZodBoolean) {
+      return (
+        <Switch
+          isSelected={!!value}
+          onValueChange={(val) =>
+            updateSetting(
+              fieldKey,
+              val as SettingsResponse[keyof SettingsResponse],
+            )
+          }
+        >
+          {!!value ? "On" : "Off"}
+        </Switch>
+      );
     } else {
       return (
         <p className="text-sm text-secondary">{`(Unknown field type for ${fieldKey})`}</p>
