@@ -1,4 +1,5 @@
 "use client";
+import { usePathname } from "next/navigation";
 import React, { useContext } from "react";
 
 import AppPage from "@/app/(protected)/AppPage";
@@ -19,6 +20,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { isFetching } = useContext(ItemsContext);
   const { loading: loadingItem } = useContext(CurrentItemContext);
   const { settings } = useSettings();
+  const pathname = usePathname();
 
   return settings ? (
     <div className="flex flex-row h-screen w-full">
@@ -38,7 +40,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <div className="flex-1 overflow-y-auto">
         <AppPage>{children}</AppPage>
       </div>
-      <RightSidebar />
+      {pathname !== "/settings" && <RightSidebar />}
       <KeyboardShortcuts />
     </div>
   ) : (
