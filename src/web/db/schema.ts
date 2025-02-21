@@ -41,6 +41,7 @@ export const profiles = pgTable(
     colorScheme: colorSchemeEnum("color_scheme")
       .notNull()
       .default(ColorScheme.AUTO),
+    public: boolean("public").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
