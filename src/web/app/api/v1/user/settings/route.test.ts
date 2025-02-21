@@ -17,6 +17,7 @@ describe("/api/v1/user/settings", () => {
         .update(profiles)
         .set({
           colorScheme: ColorScheme.DARK,
+          public: false,
         })
         .where(eq(profiles.id, DEFAULT_TEST_PROFILE_ID));
     });
@@ -30,6 +31,7 @@ describe("/api/v1/user/settings", () => {
       const result = await response.json();
       expect(result).toEqual({
         colorScheme: ColorScheme.DARK,
+        public: false,
       });
     });
   });
@@ -53,6 +55,25 @@ describe("/api/v1/user/settings", () => {
         where: eq(profiles.id, DEFAULT_TEST_PROFILE_ID),
       });
       expect(profile?.colorScheme).toBe(colorScheme);
+    });
+
+    it("should return 200 when successfully updating the user's public status", async () => {
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        body: { public: true },
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+
+      const result = await response.json();
+      expect(result).toEqual({
+        public: true,
+      });
+
+      const profile = await testDb.db.query.profiles.findFirst({
+        where: eq(profiles.id, DEFAULT_TEST_PROFILE_ID),
+      });
+      expect(profile?.public).toBe(true);
     });
 
     it("should return 400 if the settings object is invalid", async () => {
