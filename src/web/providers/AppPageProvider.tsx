@@ -42,7 +42,7 @@ export const AppPageProvider: React.FC<{
         </motion.div>
         <motion.div
           className={cn(
-            "fixed text-right top-0 right-0 lg:right-80 w-80 flex flex-col items-end gap-1 p-2 text-xs max-h-96 overflow-x-hidden text-secondary-600 *:bg-background-700",
+            "fixed text-right top-0 right-0 lg:right-80 w-80 flex flex-col items-end gap-1 p-2 text-xs max-h-96 overflow-x-hidden overflow-y-auto text-secondary-600 *:bg-background-700 *:shrink-0",
             rightSidebarOpen ? "lg:right-80" : "lg:right-16",
           )}
           ref={articleFixedInfoRef}
