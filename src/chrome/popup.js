@@ -32,7 +32,7 @@ window.onload = () => {
         saveButton.disabled = false;
         if (response.items.length > 0) {
             saveButton.textContent = "Page already saved";
-            curioLink = `${API_HOST}/items/${response.items[0].slug}`;
+            curioLink = `${API_HOST}/item/${response.items[0].slug}`;
         } else {
             saveButton.textContent = "Save current page";
         }

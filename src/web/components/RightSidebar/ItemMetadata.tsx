@@ -55,7 +55,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
       />
       <div className="px-4 py-2 overflow-x-hidden">
         <div className="flex items-start justify-between">
-          <Link className="hover:underline" href={`/items/${item.slug}`}>
+          <Link className="hover:underline" href={`/item/${item.slug}`}>
             <h2>{metadata.title}</h2>
           </Link>
         </div>

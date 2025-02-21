@@ -151,7 +151,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
         showToast(
           <div className="flex gap-2 items-center">
             Item successfully saved!
-            <Button size="sm" href={`/items/${event.data.data.slug}`}>
+            <Button size="sm" href={`/item/${event.data.data.slug}`}>
               View
             </Button>
           </div>,

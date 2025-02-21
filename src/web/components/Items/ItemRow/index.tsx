@@ -80,7 +80,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
               />
             </div>
             <Link
-              href={`/items/${item.slug}`}
+              href={`/item/${item.slug}`}
               className="text-sm shrink-0 text-foreground hover:underline truncate"
               onClick={(ev) => ev.stopPropagation()}
             >
