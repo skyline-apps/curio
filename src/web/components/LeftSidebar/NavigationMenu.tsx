@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  HiOutlineArchiveBox,
-  HiOutlineHome,
-  HiOutlineStar,
-} from "react-icons/hi2";
+import { HiOutlineArchiveBox, HiOutlineHome } from "react-icons/hi2";
 
 import Icon from "@/components/ui/Icon";
 import { Tab, Tabs } from "@/components/ui/Tabs";
@@ -15,7 +11,6 @@ export enum SidebarKey {
   NONE = "",
   HOME = "/home",
   ARCHIVE = "/archive",
-  FAVORITES = "/favorites",
 }
 
 interface NavigationMenuProps {
@@ -31,7 +26,6 @@ const navigationItems = [
     label: "Archive",
     icon: <HiOutlineArchiveBox />,
   },
-  { key: SidebarKey.FAVORITES, label: "Favorites", icon: <HiOutlineStar /> },
 ];
 
 const NavigationMenu: React.FC<NavigationMenuProps> = ({

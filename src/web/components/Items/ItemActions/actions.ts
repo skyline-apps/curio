@@ -97,11 +97,7 @@ export const useItemUpdate = (): UseItemUpdate => {
         }),
       }).then(handleAPIResponse<UpdateFavoriteResponse>);
     },
-    onSuccess: () => {
-      if (!loadedItem) {
-        invalidateCache();
-      }
-    },
+    onSuccess: () => {},
   };
 
   const updateItemsLabelMutationOptions: UseMutationOptions<
