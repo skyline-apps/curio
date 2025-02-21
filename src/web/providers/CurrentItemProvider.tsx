@@ -100,7 +100,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (!pathname.startsWith("/items/")) {
+    if (!pathname.startsWith("/item/")) {
       clearSelectedItems();
     }
   }, [pathname, clearSelectedItems]);

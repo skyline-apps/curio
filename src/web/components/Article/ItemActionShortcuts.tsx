@@ -1,8 +1,8 @@
 "use client";
-import { useItemUpdate } from "components/Items/ItemActions/actions";
 import { useRouter } from "next/navigation";
 import { useContext } from "react";
 
+import { useItemUpdate } from "@/components/Items/ItemActions/actions";
 import { ItemState } from "@/db/schema";
 import { useAppPage } from "@/providers/AppPageProvider";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
@@ -42,7 +42,7 @@ export const ItemActionShortcuts = (): null => {
   const goToNextItem = (): boolean => {
     const nextItemSlug = getNextItemSlug();
     if (nextItemSlug) {
-      router.push(`/items/${nextItemSlug}`);
+      router.push(`/item/${nextItemSlug}`);
       return true;
     }
     return false;
@@ -51,7 +51,7 @@ export const ItemActionShortcuts = (): null => {
   const goToPreviousItem = (): boolean => {
     const previousItemSlug = getNextItemSlug(-1);
     if (previousItemSlug) {
-      router.push(`/items/${previousItemSlug}`);
+      router.push(`/item/${previousItemSlug}`);
       return true;
     }
     return false;
@@ -84,7 +84,7 @@ export const ItemActionShortcuts = (): null => {
     return await updateItemsState([loadedItem.item.slug], ItemState.ARCHIVED)
       .then(() => {
         if (nextItemSlug) {
-          router.push(`/items/${nextItemSlug}`);
+          router.push(`/item/${nextItemSlug}`);
         }
         return true;
       })
@@ -101,7 +101,7 @@ export const ItemActionShortcuts = (): null => {
     return await updateItemsState([loadedItem.item.slug], ItemState.DELETED)
       .then(() => {
         if (nextItemSlug) {
-          router.push(`/items/${nextItemSlug}`);
+          router.push(`/item/${nextItemSlug}`);
         }
         return true;
       })
