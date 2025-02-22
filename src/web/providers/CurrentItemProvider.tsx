@@ -10,11 +10,11 @@ import React, {
   useState,
 } from "react";
 
-import { GetItemContentResponse } from "@/app/api/v1/items/content/validation";
 import {
   type Highlight,
   type NewHighlight,
 } from "@/app/api/v1/items/highlights/validation";
+import { GetItemContentResponse } from "@/app/api/v1/public/items/content/validation";
 import { Item, ItemsContext } from "@/providers/ItemsProvider";
 import { useSettings } from "@/providers/SettingsProvider";
 import { handleAPIResponse } from "@/utils/api";
@@ -164,7 +164,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         slug: itemLoadedSlug,
       });
       const result = await fetch(
-        `/api/v1/items/content?${searchParams.toString()}`,
+        `/api/v1/public/items/content?${searchParams.toString()}`,
         {
           method: "GET",
           headers: {

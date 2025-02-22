@@ -135,7 +135,7 @@
                     },
                     "public": {
                       "type": "boolean",
-                      "description": "Whether your profile is public."
+                      "description": "Whether your profile and favorited items are public."
                     }
                   },
                   "required": [
@@ -211,7 +211,7 @@
                   },
                   "public": {
                     "type": "boolean",
-                    "description": "Whether your profile is public."
+                    "description": "Whether your profile and favorited items are public."
                   }
                 },
                 "additionalProperties": false
@@ -238,7 +238,7 @@
                     },
                     "public": {
                       "type": "boolean",
-                      "description": "Whether your profile is public."
+                      "description": "Whether your profile and favorited items are public."
                     }
                   },
                   "additionalProperties": false
@@ -816,6 +816,320 @@
                     "favoriteItems"
                   ],
                   "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/items/content": {
+      "get": {
+        "description": "GET /api/v1/public/items/content",
+        "tags": [
+          "V1"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "The unique slug of the item to retrieve."
+            },
+            "required": true,
+            "description": "The unique slug of the item to retrieve.",
+            "name": "slug",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "content": {
+                          "type": "string"
+                        },
+                        "item": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "profileItemId": {
+                              "type": "string"
+                            },
+                            "url": {
+                              "type": "string",
+                              "format": "uri",
+                              "description": "Unique URL of the item."
+                            },
+                            "slug": {
+                              "type": "string",
+                              "description": "Unique slug for the item used to identify it in its URL."
+                            },
+                            "metadata": {
+                              "type": "object",
+                              "properties": {
+                                "title": {
+                                  "type": "string",
+                                  "maxLength": 255,
+                                  "description": "The title of the item."
+                                },
+                                "description": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "maxLength": 2048,
+                                  "description": "The description of the item."
+                                },
+                                "author": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "maxLength": 255,
+                                  "description": "The author of the item."
+                                },
+                                "publishedAt": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "nullable": true
+                                    }
+                                  ],
+                                  "description": "The published date of the item."
+                                },
+                                "savedAt": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "nullable": true
+                                    }
+                                  ],
+                                  "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
+                                },
+                                "stateUpdatedAt": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "nullable": true
+                                    }
+                                  ],
+                                  "description": "The time the item's state was last updated. Used to sort items in the feed."
+                                },
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "active",
+                                    "archived",
+                                    "deleted"
+                                  ],
+                                  "description": "Whether the state is active or archived."
+                                },
+                                "isFavorite": {
+                                  "type": "boolean",
+                                  "description": "Whether the item is favorited."
+                                },
+                                "readingProgress": {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "maximum": 100,
+                                  "description": "Progress reading the item. Should only populated if versionName is set."
+                                },
+                                "lastReadAt": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "nullable": true
+                                    }
+                                  ],
+                                  "description": "The last read date of the item. Should only be populated if versionName is set."
+                                },
+                                "versionName": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "maxLength": 255,
+                                  "description": "The version name of the item."
+                                },
+                                "thumbnail": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "description": "The thumbnail URL of the item."
+                                },
+                                "favicon": {
+                                  "type": "string",
+                                  "nullable": true,
+                                  "description": "The favicon URL of the item."
+                                }
+                              },
+                              "required": [
+                                "title",
+                                "state",
+                                "isFavorite",
+                                "readingProgress",
+                                "versionName"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "createdAt": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "labels": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 255
+                                  },
+                                  "color": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name",
+                                  "color"
+                                ]
+                              }
+                            },
+                            "excerpt": {
+                              "type": "string",
+                              "description": "Included if the item is relevant for the search query"
+                            },
+                            "highlights": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "startOffset": {
+                                    "type": "number"
+                                  },
+                                  "endOffset": {
+                                    "type": "number"
+                                  },
+                                  "text": {
+                                    "type": "string",
+                                    "nullable": true
+                                  },
+                                  "note": {
+                                    "type": "string",
+                                    "nullable": true
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "startOffset",
+                                  "endOffset",
+                                  "text",
+                                  "note"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "profileItemId",
+                            "url",
+                            "slug",
+                            "metadata",
+                            "createdAt",
+                            "labels"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "item"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "error"
+                      ]
+                    }
+                  ]
                 }
               }
             }
@@ -2358,319 +2672,6 @@
       }
     },
     "/api/v1/items/content": {
-      "get": {
-        "description": "GET /api/v1/items/content",
-        "tags": [
-          "V1"
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "description": "The unique slug of the item to retrieve."
-            },
-            "required": true,
-            "description": "The unique slug of the item to retrieve.",
-            "name": "slug",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "anyOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "content": {
-                          "type": "string"
-                        },
-                        "item": {
-                          "type": "object",
-                          "properties": {
-                            "id": {
-                              "type": "string"
-                            },
-                            "profileItemId": {
-                              "type": "string"
-                            },
-                            "url": {
-                              "type": "string",
-                              "format": "uri",
-                              "description": "Unique URL of the item."
-                            },
-                            "slug": {
-                              "type": "string",
-                              "description": "Unique slug for the item used to identify it in its URL."
-                            },
-                            "metadata": {
-                              "type": "object",
-                              "properties": {
-                                "title": {
-                                  "type": "string",
-                                  "maxLength": 255,
-                                  "description": "The title of the item."
-                                },
-                                "description": {
-                                  "type": "string",
-                                  "nullable": true,
-                                  "maxLength": 2048,
-                                  "description": "The description of the item."
-                                },
-                                "author": {
-                                  "type": "string",
-                                  "nullable": true,
-                                  "maxLength": 255,
-                                  "description": "The author of the item."
-                                },
-                                "publishedAt": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "nullable": true
-                                    }
-                                  ],
-                                  "description": "The published date of the item."
-                                },
-                                "savedAt": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "nullable": true
-                                    }
-                                  ],
-                                  "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
-                                },
-                                "stateUpdatedAt": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "nullable": true
-                                    }
-                                  ],
-                                  "description": "The time the item's state was last updated. Used to sort items in the feed."
-                                },
-                                "state": {
-                                  "type": "string",
-                                  "enum": [
-                                    "active",
-                                    "archived",
-                                    "deleted"
-                                  ],
-                                  "description": "Whether the state is active or archived."
-                                },
-                                "isFavorite": {
-                                  "type": "boolean",
-                                  "description": "Whether the item is favorited."
-                                },
-                                "readingProgress": {
-                                  "type": "number",
-                                  "minimum": 0,
-                                  "maximum": 100,
-                                  "description": "Progress reading the item. Should only populated if versionName is set."
-                                },
-                                "lastReadAt": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "nullable": true
-                                    }
-                                  ],
-                                  "description": "The last read date of the item. Should only be populated if versionName is set."
-                                },
-                                "versionName": {
-                                  "type": "string",
-                                  "nullable": true,
-                                  "maxLength": 255,
-                                  "description": "The version name of the item."
-                                },
-                                "thumbnail": {
-                                  "type": "string",
-                                  "nullable": true,
-                                  "description": "The thumbnail URL of the item."
-                                },
-                                "favicon": {
-                                  "type": "string",
-                                  "nullable": true,
-                                  "description": "The favicon URL of the item."
-                                }
-                              },
-                              "required": [
-                                "title",
-                                "state",
-                                "isFavorite",
-                                "readingProgress",
-                                "versionName"
-                              ],
-                              "additionalProperties": false
-                            },
-                            "createdAt": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "labels": {
-                              "type": "array",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "id": {
-                                    "type": "string"
-                                  },
-                                  "name": {
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "maxLength": 255
-                                  },
-                                  "color": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "id",
-                                  "name",
-                                  "color"
-                                ]
-                              }
-                            },
-                            "excerpt": {
-                              "type": "string",
-                              "description": "Included if the item is relevant for the search query"
-                            },
-                            "highlights": {
-                              "type": "array",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "id": {
-                                    "type": "string"
-                                  },
-                                  "startOffset": {
-                                    "type": "number"
-                                  },
-                                  "endOffset": {
-                                    "type": "number"
-                                  },
-                                  "text": {
-                                    "type": "string",
-                                    "nullable": true
-                                  },
-                                  "note": {
-                                    "type": "string",
-                                    "nullable": true
-                                  }
-                                },
-                                "required": [
-                                  "id",
-                                  "startOffset",
-                                  "endOffset",
-                                  "text",
-                                  "note"
-                                ]
-                              }
-                            }
-                          },
-                          "required": [
-                            "id",
-                            "profileItemId",
-                            "url",
-                            "slug",
-                            "metadata",
-                            "createdAt",
-                            "labels",
-                            "highlights"
-                          ],
-                          "additionalProperties": false
-                        }
-                      },
-                      "required": [
-                        "item"
-                      ]
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "error": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "error"
-                      ]
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string",
-                      "description": "Error message"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string",
-                      "description": "Error message"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      },
       "post": {
         "description": "POST /api/v1/items/content",
         "tags": [
