@@ -5,7 +5,9 @@ import { ColorScheme } from "@/db/schema";
 export const SettingsSchema = z
   .object({
     colorScheme: z.nativeEnum(ColorScheme).describe("Color scheme to display."),
-    public: z.boolean().describe("Whether your profile is public."),
+    public: z
+      .boolean()
+      .describe("Whether your profile and favorited items are public."),
   })
   .strict();
 
