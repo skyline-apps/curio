@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-import { GetProfileResponse } from "@/app/api/v1/profile/validation";
+import { GetProfileResponse } from "@/app/api/v1/public/profile/validation";
 import { createLogger } from "@/utils/logger";
 
 const log = createLogger("Profile");
@@ -55,7 +55,9 @@ export function useProfile({
         params.set("cursor", pageParam);
       }
 
-      const response = await fetch(`/api/v1/profile?${params.toString()}`);
+      const response = await fetch(
+        `/api/v1/public/profile?${params.toString()}`,
+      );
       if (!response.ok) {
         throw new Error(`Failed to fetch profile: ${response.statusText}`);
       }

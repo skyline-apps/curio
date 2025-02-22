@@ -1,10 +1,9 @@
 "use client";
 import { useContext } from "react";
 
-import AppPage from "@/app/(protected)/AppPage";
 import LeftSidebar from "@/components/LeftSidebar";
+import Navbar from "@/components/Navbar";
 import Profile from "@/components/Profile";
-import RightSidebar from "@/components/RightSidebar";
 import { UserContext } from "@/providers/UserProvider";
 
 const UserPage = ({
@@ -13,15 +12,17 @@ const UserPage = ({
   params: { username: string };
 }): React.ReactElement => {
   const { user } = useContext(UserContext);
+  const isAuthenticated = user && user.id;
+
   return (
-    <div className="flex flex-row h-screen w-full">
-      {user && <LeftSidebar />}
-      <div className="flex-1 overflow-y-auto">
-        <AppPage>
+    <div className="flex flex-col w-full h-screen overflow-hidden">
+      {!isAuthenticated && <Navbar />}
+      <div className="flex flex-row h-full">
+        {isAuthenticated && <LeftSidebar />}
+        <div className="flex-1 overflow-y-auto">
           <Profile username={params.username} />
-        </AppPage>
+        </div>
       </div>
-      <RightSidebar />
     </div>
   );
 };

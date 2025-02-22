@@ -6,6 +6,8 @@ import { createLogger } from "@/utils/logger";
 
 const log = createLogger("supabase.middleware");
 
+const UNPROTECTED_ROUTES = ["/login", "/auth", "/api/", "/u/"];
+
 export const updateSession = async (
   request: NextRequest,
 ): Promise<NextResponse> => {
@@ -50,9 +52,9 @@ export const updateSession = async (
 
   if (
     !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth") &&
-    !request.nextUrl.pathname.startsWith("/api")
+    !UNPROTECTED_ROUTES.some((route) =>
+      request.nextUrl.pathname.startsWith(route),
+    )
   ) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
@@ -60,7 +62,11 @@ export const updateSession = async (
     return NextResponse.redirect(url);
   }
 
-  if (!user && request.nextUrl.pathname.startsWith("/api")) {
+  if (
+    !user &&
+    request.nextUrl.pathname.startsWith("/api") &&
+    !request.nextUrl.pathname.startsWith("/api/v1/public")
+  ) {
     if (request.headers.get("x-api-key")) {
       return supabaseResponse;
     }

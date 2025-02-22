@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import ItemGrid from "@/components/Items/ItemGrid";
 import Spinner from "@/components/ui/Spinner";
@@ -10,6 +10,7 @@ interface ProfileProps {
 }
 
 const Profile: React.FC<ProfileProps> = ({ username }: ProfileProps) => {
+  const [initializing, setInitializing] = useState<boolean>(true);
   const {
     profile,
     favoriteItems,
@@ -22,16 +23,16 @@ const Profile: React.FC<ProfileProps> = ({ username }: ProfileProps) => {
     username,
   });
 
-  // Track initial load
   const initialLoadRef = useRef(false);
   useEffect(() => {
     if (!initialLoadRef.current) {
       initialLoadRef.current = true;
       fetchItems(true);
+      setInitializing(false);
     }
   }, [fetchItems]);
 
-  if (isLoading && !profile) {
+  if (initializing || (isLoading && !profile)) {
     return <Spinner centered />;
   }
 
@@ -45,7 +46,7 @@ const Profile: React.FC<ProfileProps> = ({ username }: ProfileProps) => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex flex-col items-center border-b border-secondary-200 py-4">
+      <div className="flex flex-col items-center p-4 w-auto mx-auto border-b border-divider">
         <h1>{profile.username}</h1>
         <p className="text-xs text-secondary italic">
           Member since {new Date(profile.createdAt).toLocaleDateString()}
