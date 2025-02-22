@@ -68,12 +68,12 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
 
     if (href) {
       innerContent = (
-        <Link href={href} passHref>
+        <Link href={href} passHref data-testid="button">
           <Button ref={ref} {...buttonProps} />
         </Link>
       );
     } else {
-      innerContent = <Button ref={ref} {...buttonProps} />;
+      innerContent = <Button ref={ref} {...buttonProps} data-testid="button" />;
     }
 
     return tooltip ? (
