@@ -132,10 +132,15 @@
                         "dark"
                       ],
                       "description": "Color scheme to display."
+                    },
+                    "public": {
+                      "type": "boolean",
+                      "description": "Whether your profile is public."
                     }
                   },
                   "required": [
-                    "colorScheme"
+                    "colorScheme",
+                    "public"
                   ],
                   "additionalProperties": false
                 }
@@ -203,6 +208,10 @@
                       "dark"
                     ],
                     "description": "Color scheme to display."
+                  },
+                  "public": {
+                    "type": "boolean",
+                    "description": "Whether your profile is public."
                   }
                 },
                 "additionalProperties": false
@@ -226,11 +235,12 @@
                         "dark"
                       ],
                       "description": "Color scheme to display."
+                    },
+                    "public": {
+                      "type": "boolean",
+                      "description": "Whether your profile is public."
                     }
                   },
-                  "required": [
-                    "colorScheme"
-                  ],
                   "additionalProperties": false
                 }
               }
@@ -596,6 +606,261 @@
         }
       }
     },
+    "/api/v1/profile": {
+      "get": {
+        "description": "GET /api/v1/profile",
+        "tags": [
+          "V1"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "description": "Username of the profile to fetch."
+            },
+            "required": true,
+            "description": "Username of the profile to fetch.",
+            "name": "username",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 20
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "The savedAt timestamp to start from."
+            },
+            "required": false,
+            "description": "The savedAt timestamp to start from.",
+            "name": "cursor",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "profile": {
+                      "type": "object",
+                      "properties": {
+                        "username": {
+                          "type": "string",
+                          "description": "The username of the profile owner."
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "The creation date of the item."
+                        }
+                      },
+                      "required": [
+                        "username",
+                        "createdAt"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "favoriteItems": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "profileItemId": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string",
+                            "format": "uri",
+                            "description": "Unique URL of the item."
+                          },
+                          "slug": {
+                            "type": "string",
+                            "description": "Unique slug for the item used to identify it in its URL."
+                          },
+                          "metadata": {
+                            "type": "object",
+                            "properties": {
+                              "title": {
+                                "type": "string",
+                                "maxLength": 255,
+                                "description": "The title of the item."
+                              },
+                              "description": {
+                                "type": "string",
+                                "nullable": true,
+                                "maxLength": 2048,
+                                "description": "The description of the item."
+                              },
+                              "author": {
+                                "type": "string",
+                                "nullable": true,
+                                "maxLength": 255,
+                                "description": "The author of the item."
+                              },
+                              "publishedAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "nullable": true
+                                  }
+                                ],
+                                "description": "The published date of the item."
+                              },
+                              "savedAt": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "nullable": true
+                                  }
+                                ],
+                                "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
+                              },
+                              "thumbnail": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "The thumbnail URL of the item."
+                              },
+                              "favicon": {
+                                "type": "string",
+                                "nullable": true,
+                                "description": "The favicon URL of the item."
+                              }
+                            },
+                            "required": [
+                              "title"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "createdAt": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "labels": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 255
+                                },
+                                "color": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "name",
+                                "color"
+                              ]
+                            }
+                          },
+                          "excerpt": {
+                            "type": "string",
+                            "description": "Included if the item is relevant for the search query"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "profileItemId",
+                          "url",
+                          "slug",
+                          "metadata",
+                          "createdAt",
+                          "labels"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "List of favorited items."
+                    },
+                    "nextCursor": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "profile",
+                    "favoriteItems"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/items": {
       "get": {
         "description": "GET /api/v1/items",
@@ -619,11 +884,18 @@
                   "type": "number",
                   "minimum": 1,
                   "maximum": 1000,
-                  "default": 100
+                  "default": 20
                 },
                 "cursor": {
                   "type": "string",
-                  "description": "The savedAt timestamp to start from."
+                  "description": "The stateUpdatedAt timestamp to start from."
+                },
+                "offset": {
+                  "type": "number",
+                  "nullable": true,
+                  "minimum": 0,
+                  "default": 0,
+                  "description": "The search result offset to start from."
                 },
                 "filters": {
                   "type": "string",
@@ -655,6 +927,9 @@
                         "type": "object",
                         "properties": {
                           "id": {
+                            "type": "string"
+                          },
+                          "profileItemId": {
                             "type": "string"
                           },
                           "url": {
@@ -770,13 +1045,11 @@
                               "thumbnail": {
                                 "type": "string",
                                 "nullable": true,
-                                "maxLength": 2048,
                                 "description": "The thumbnail URL of the item."
                               },
                               "favicon": {
                                 "type": "string",
                                 "nullable": true,
-                                "maxLength": 2048,
                                 "description": "The favicon URL of the item."
                               }
                             },
@@ -822,10 +1095,15 @@
                                 "color"
                               ]
                             }
+                          },
+                          "excerpt": {
+                            "type": "string",
+                            "description": "Included if the item is relevant for the search query"
                           }
                         },
                         "required": [
                           "id",
+                          "profileItemId",
                           "url",
                           "slug",
                           "metadata",
@@ -837,6 +1115,9 @@
                     },
                     "nextCursor": {
                       "type": "string"
+                    },
+                    "nextOffset": {
+                      "type": "number"
                     },
                     "total": {
                       "type": "number"
@@ -1062,6 +1343,9 @@
                           "id": {
                             "type": "string"
                           },
+                          "profileItemId": {
+                            "type": "string"
+                          },
                           "url": {
                             "type": "string",
                             "format": "uri",
@@ -1175,13 +1459,11 @@
                               "thumbnail": {
                                 "type": "string",
                                 "nullable": true,
-                                "maxLength": 2048,
                                 "description": "The thumbnail URL of the item."
                               },
                               "favicon": {
                                 "type": "string",
                                 "nullable": true,
-                                "maxLength": 2048,
                                 "description": "The favicon URL of the item."
                               }
                             },
@@ -1203,10 +1485,15 @@
                                 "type": "string"
                               }
                             ]
+                          },
+                          "excerpt": {
+                            "type": "string",
+                            "description": "Included if the item is relevant for the search query"
                           }
                         },
                         "required": [
                           "id",
+                          "profileItemId",
                           "url",
                           "slug",
                           "metadata",
@@ -2107,6 +2394,9 @@
                             "id": {
                               "type": "string"
                             },
+                            "profileItemId": {
+                              "type": "string"
+                            },
                             "url": {
                               "type": "string",
                               "format": "uri",
@@ -2220,13 +2510,11 @@
                                 "thumbnail": {
                                   "type": "string",
                                   "nullable": true,
-                                  "maxLength": 2048,
                                   "description": "The thumbnail URL of the item."
                                 },
                                 "favicon": {
                                   "type": "string",
                                   "nullable": true,
-                                  "maxLength": 2048,
                                   "description": "The favicon URL of the item."
                                 }
                               },
@@ -2273,6 +2561,10 @@
                                 ]
                               }
                             },
+                            "excerpt": {
+                              "type": "string",
+                              "description": "Included if the item is relevant for the search query"
+                            },
                             "highlights": {
                               "type": "array",
                               "items": {
@@ -2308,6 +2600,7 @@
                           },
                           "required": [
                             "id",
+                            "profileItemId",
                             "url",
                             "slug",
                             "metadata",
