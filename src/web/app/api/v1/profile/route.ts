@@ -52,10 +52,7 @@ export async function GET(
     );
 
     if (cursor) {
-      whereClause = and(
-        whereClause,
-        sql`${profileItems.stateUpdatedAt} < ${cursor}`,
-      );
+      whereClause = and(whereClause, sql`${profileItems.savedAt} < ${cursor}`);
     }
 
     const favoriteItems = await db

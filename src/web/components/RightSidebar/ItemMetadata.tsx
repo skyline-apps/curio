@@ -65,7 +65,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
           </Link>
         ) : (
           <Link className="hover:underline" href={item.url} target="_blank">
-            <p className="text-sm text-primary overflow-hidden text-ellipsis truncate">
+            <p className="text-sm text-primary overflow-hidden truncate">
               {item.url}
             </p>
           </Link>
@@ -73,7 +73,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
         <div className="flex flex-col gap-2 py-2">
           <div className="flex flex-row gap-2 items-start">
             {metadata.author && (
-              <p className="text-xs overflow-hidden text-ellipsis truncate text-secondary-300 dark:text-secondary-600">
+              <p className="text-xs overflow-hidden truncate text-secondary-300 dark:text-secondary-600">
                 {metadata.author}
               </p>
             )}

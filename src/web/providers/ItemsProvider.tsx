@@ -6,6 +6,7 @@ import {
   type GetItemsRequest,
   type GetItemsResponse,
   type ItemResult,
+  type PublicItemResult,
 } from "@/app/api/v1/items/validation";
 import { handleAPIResponse } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
@@ -17,6 +18,7 @@ export const ITEMS_BATCH_SIZE = 20;
 export const ITEMS_QUERY_KEY = "items";
 
 export type Item = ItemResult;
+export type PublicItem = PublicItemResult;
 
 export interface ItemsPage {
   items: Item[];
