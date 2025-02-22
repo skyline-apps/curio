@@ -606,9 +606,9 @@
         }
       }
     },
-    "/api/v1/profile": {
+    "/api/v1/public/profile": {
       "get": {
-        "description": "GET /api/v1/profile",
+        "description": "GET /api/v1/public/profile",
         "tags": [
           "V1"
         ],
