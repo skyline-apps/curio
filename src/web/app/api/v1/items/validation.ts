@@ -30,31 +30,34 @@ const FiltersSchema = z
 
 export type Filters = z.infer<typeof FiltersSchema>;
 
-const ItemMetadataBaseSchema = z
-  .object({
-    title: z.string().max(255).describe("The title of the item."),
-    description: z
-      .string()
-      .max(2048)
-      .nullable()
-      .optional()
-      .describe("The description of the item."),
-    author: z
-      .string()
-      .max(255)
-      .nullable()
-      .optional()
-      .describe("The author of the item."),
-    publishedAt: dateType
-      .nullable()
-      .optional()
-      .describe("The published date of the item."),
-    savedAt: dateType
-      .nullable()
-      .optional()
-      .describe(
-        "The time the item was saved. Populated automatically and cannot be user-overridden.",
-      ),
+export const PublicItemMetadataSchema = z.object({
+  title: z.string().max(255).describe("The title of the item."),
+  description: z
+    .string()
+    .max(2048)
+    .nullable()
+    .optional()
+    .describe("The description of the item."),
+  author: z
+    .string()
+    .max(255)
+    .nullable()
+    .optional()
+    .describe("The author of the item."),
+  publishedAt: dateType
+    .nullable()
+    .optional()
+    .describe("The published date of the item."),
+  savedAt: dateType
+    .nullable()
+    .optional()
+    .describe(
+      "The time the item was saved. Populated automatically and cannot be user-overridden.",
+    ),
+});
+
+const ItemMetadataBaseSchema = PublicItemMetadataSchema.merge(
+  z.object({
     stateUpdatedAt: dateType
       .nullable()
       .optional()
@@ -83,11 +86,11 @@ const ItemMetadataBaseSchema = z
       .max(255)
       .nullable()
       .describe("The version name of the item."),
-  })
-  .strict();
+  }),
+).strict();
 
-const ItemMetadataSchema = ItemMetadataBaseSchema.merge(
-  z.object({
+export const ItemImagesSchema = z
+  .object({
     thumbnail: z
       .string()
       .nullable()
@@ -114,8 +117,11 @@ const ItemMetadataSchema = ItemMetadataBaseSchema.merge(
         }
       })
       .describe("The favicon URL of the item."),
-  }),
-).strict();
+  })
+  .strict();
+
+const ItemMetadataSchema =
+  ItemMetadataBaseSchema.merge(ItemImagesSchema).strict();
 
 export const ItemResultSchema = z
   .object({
@@ -134,6 +140,12 @@ export const ItemResultSchema = z
   .strict();
 
 export type ItemResult = z.infer<typeof ItemResultSchema>;
+
+export const PublicItemResultSchema = ItemResultSchema.extend({
+  metadata: PublicItemMetadataSchema.merge(ItemImagesSchema).strict(),
+}).strict();
+
+export type PublicItemResult = z.infer<typeof PublicItemResultSchema>;
 
 export const ItemResultWithoutLabelsSchema = ItemResultSchema.omit({
   labels: true,
@@ -171,7 +183,7 @@ export const GetItemsRequestSchema = z
     cursor: z
       .string()
       .optional()
-      .describe("The savedAt timestamp to start from."),
+      .describe("The stateUpdatedAt timestamp to start from."),
     offset: z.coerce
       .number()
       .min(0)

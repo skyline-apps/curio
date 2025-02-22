@@ -6,6 +6,8 @@ import {
   DEFAULT_TEST_PROFILE_ID_2,
   DEFAULT_TEST_USER_ID,
   DEFAULT_TEST_USER_ID_2,
+  DEFAULT_TEST_USERNAME,
+  DEFAULT_TEST_USERNAME_2,
 } from "./utils/test/api";
 import { testDb } from "./utils/test/provider";
 
@@ -48,7 +50,7 @@ beforeAll(async () => {
   await testDb.db.insert(profiles).values({
     id: DEFAULT_TEST_PROFILE_ID,
     userId: DEFAULT_TEST_USER_ID,
-    username: "defaultuser",
+    username: DEFAULT_TEST_USERNAME,
     colorScheme: ColorScheme.AUTO,
     createdAt: new Date("2025-01-10T12:52:56-08:00"),
     updatedAt: new Date("2025-01-10T12:52:56-08:00"),
@@ -57,7 +59,7 @@ beforeAll(async () => {
   await testDb.db.insert(profiles).values({
     id: DEFAULT_TEST_PROFILE_ID_2,
     userId: DEFAULT_TEST_USER_ID_2,
-    username: "defaultuser2",
+    username: DEFAULT_TEST_USERNAME_2,
     colorScheme: ColorScheme.AUTO,
     createdAt: new Date("2025-01-10T12:52:56-08:00"),
     updatedAt: new Date("2025-01-10T12:52:56-08:00"),
