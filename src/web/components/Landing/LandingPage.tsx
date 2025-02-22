@@ -32,10 +32,12 @@ const LandingPage: React.FC = () => {
             </svg>
             <div className="absolute inset-0 flex justify-center overflow-hidden">
               <LandingPageLight
+                data-testid="landing-page-light"
                 className="h-full block dark:hidden"
                 preserveAspectRatio="xMidYMax slice"
               />
               <LandingPageDark
+                data-testid="landing-page-dark"
                 className="h-full hidden dark:block"
                 preserveAspectRatio="xMidYMax slice"
               />
