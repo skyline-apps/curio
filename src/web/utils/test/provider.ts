@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { beforeAll, vi } from "vitest";
 
 import type { TestDatabase } from "./db";
 import { createTestDb } from "./db";
