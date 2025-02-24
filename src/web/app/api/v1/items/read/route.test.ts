@@ -1,8 +1,9 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
-import { getItemContent, MOCK_VERSION, storage } from "@/__mocks__/storage";
 import { eq } from "@/db";
 import { items, ItemState, profileItems } from "@/db/schema";
+import { getItemContent, getItemMetadata } from "@/lib/storage";
+import { MOCK_VERSION } from "@/lib/storage/__mocks__/index";
 import { StorageError } from "@/lib/storage/types";
 import { APIRequest } from "@/utils/api";
 import {
@@ -68,7 +69,7 @@ describe("/api/v1/items/read", () => {
         readingProgress: 50,
         versionName: MOCK_VERSION,
       });
-      expect(storage.getItemMetadata).not.toHaveBeenCalled();
+      expect(getItemMetadata).not.toHaveBeenCalled();
 
       const updatedItem = await testDb.db
         .select()
@@ -82,7 +83,7 @@ describe("/api/v1/items/read", () => {
     });
 
     it("should return 200 and update version name when default is set", async () => {
-      jest.mocked(getItemContent).mockResolvedValueOnce({
+      vi.mocked(getItemContent).mockResolvedValueOnce({
         version: "2010-04-04",
         versionName: "2010-04-04",
         content: "custom version content",
@@ -119,8 +120,8 @@ describe("/api/v1/items/read", () => {
         readingProgress: 24,
         versionName: MOCK_VERSION,
       });
-      expect(storage.getItemMetadata).toHaveBeenCalledTimes(1);
-      expect(storage.getItemMetadata).toHaveBeenCalledWith(TEST_ITEM_SLUG);
+      expect(getItemMetadata).toHaveBeenCalledTimes(1);
+      expect(getItemMetadata).toHaveBeenCalledWith(TEST_ITEM_SLUG);
 
       const updatedItem = await testDb.db
         .select()
@@ -183,11 +184,9 @@ describe("/api/v1/items/read", () => {
     });
 
     it("should return 500 if fails to fetch storage metadata", async () => {
-      jest
-        .mocked(storage.getItemMetadata)
-        .mockRejectedValueOnce(
-          new StorageError("Failed to verify metadata contents"),
-        );
+      vi.mocked(getItemMetadata).mockRejectedValueOnce(
+        new StorageError("Failed to verify metadata contents"),
+      );
       await testDb.db.insert(items).values(MOCK_ITEM);
       await testDb.db.insert(profileItems).values({
         profileId: DEFAULT_TEST_PROFILE_ID,

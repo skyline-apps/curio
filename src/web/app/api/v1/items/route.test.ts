@@ -1,4 +1,5 @@
-import { searchDocuments } from "@/__mocks__/search";
+import { vi } from "vitest";
+
 import { and, desc, eq } from "@/db";
 import { DbErrorCode } from "@/db/errors";
 import {
@@ -8,6 +9,7 @@ import {
   profileItems,
   profileLabels,
 } from "@/db/schema";
+import { searchDocuments } from "@/lib/search";
 import { SearchError } from "@/lib/search/types";
 import { APIRequest } from "@/utils/api";
 import {
@@ -372,7 +374,7 @@ describe("/api/v1/items", () => {
     });
 
     it("should support offset-based pagination when searching", async () => {
-      searchDocuments.mockResolvedValueOnce({
+      vi.mocked(searchDocuments).mockResolvedValueOnce({
         hits: [
           {
             profileItemId: MOCK_PROFILE_ITEMS[1].id,
@@ -409,7 +411,7 @@ describe("/api/v1/items", () => {
       expect(firstData.items[0].excerpt).toBe("blah2");
       expect(firstData.items[1].id).toBe(TEST_ITEM_ID);
       expect(firstData.items[1].excerpt).toBe("blah");
-      searchDocuments.mockResolvedValueOnce({
+      vi.mocked(searchDocuments).mockResolvedValueOnce({
         hits: [
           {
             profileItemId: MOCK_PROFILE_ITEMS[2].id,
@@ -548,7 +550,7 @@ describe("/api/v1/items", () => {
     });
 
     it("should return 200 with empty results if search has no results", async () => {
-      searchDocuments.mockResolvedValueOnce({
+      vi.mocked(searchDocuments).mockResolvedValueOnce({
         hits: [],
         estimatedTotalHits: 0,
       });
@@ -573,7 +575,7 @@ describe("/api/v1/items", () => {
     });
 
     it("should return 200 when fuzzy searching items", async () => {
-      searchDocuments.mockResolvedValueOnce({
+      vi.mocked(searchDocuments).mockResolvedValueOnce({
         hits: [
           {
             profileItemId: MOCK_PROFILE_ITEMS[1].id,
@@ -616,7 +618,9 @@ describe("/api/v1/items", () => {
     });
 
     it("should return 200 when falling back to naive database search for title / description", async () => {
-      searchDocuments.mockRejectedValueOnce(new SearchError("Search failed"));
+      vi.mocked(searchDocuments).mockRejectedValueOnce(
+        new SearchError("Search failed"),
+      );
       await testDb.db.insert(items).values(MOCK_ITEMS);
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
       const params = new URLSearchParams({
@@ -652,7 +656,9 @@ describe("/api/v1/items", () => {
     });
 
     it("should return 200 when falling back to naive database search for url", async () => {
-      searchDocuments.mockRejectedValueOnce(new SearchError("Search failed"));
+      vi.mocked(searchDocuments).mockRejectedValueOnce(
+        new SearchError("Search failed"),
+      );
       await testDb.db.insert(items).values(MOCK_ITEMS);
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
       const params = new URLSearchParams({
@@ -687,7 +693,7 @@ describe("/api/v1/items", () => {
     });
 
     it("should return 200 when combining filters and search", async () => {
-      searchDocuments.mockResolvedValueOnce({
+      vi.mocked(searchDocuments).mockResolvedValueOnce({
         hits: [
           {
             profileItemId: MOCK_PROFILE_ITEMS[2].id,
@@ -1478,16 +1484,16 @@ describe("/api/v1/items", () => {
 
       type PgTx = Parameters<Parameters<typeof testDb.db.transaction>[0]>[0];
 
-      jest
-        .spyOn(testDb.db, "transaction")
-        .mockImplementationOnce(async (callback) => {
+      vi.spyOn(testDb.db, "transaction").mockImplementationOnce(
+        async (callback) => {
           return callback({
             ...testDb.db,
             insert: () => {
               throw { code: DbErrorCode.UniqueViolation };
             },
           } as unknown as PgTx);
-        });
+        },
+      );
 
       const response = await POST(request);
       expect(response.status).toBe(500);

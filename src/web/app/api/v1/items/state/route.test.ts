@@ -1,3 +1,5 @@
+import { vi } from "vitest";
+
 import { eq } from "@/db";
 import { DbErrorCode } from "@/db/errors";
 import { items, ItemState, profileItems } from "@/db/schema";
@@ -394,7 +396,7 @@ describe("/api/v1/items/state", () => {
         },
       });
 
-      jest.spyOn(testDb.db, "update").mockImplementationOnce(() => {
+      vi.spyOn(testDb.db, "update").mockImplementationOnce(() => {
         throw { code: DbErrorCode.ConnectionFailure };
       });
 

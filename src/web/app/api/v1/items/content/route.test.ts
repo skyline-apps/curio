@@ -1,18 +1,18 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
-import { MOCK_METADATA } from "@/__mocks__/extract";
-import { indexDocuments } from "@/__mocks__/search";
-import {
-  getItemContent,
-  getItemMetadata,
-  MOCK_VERSION,
-  uploadItemContent,
-} from "@/__mocks__/storage";
 import { UploadStatus } from "@/app/api/v1/items/content/validation";
 import { desc, eq } from "@/db";
 import { items, profileItemHighlights, profileItems } from "@/db/schema";
 import { extractMainContentAsMarkdown, extractMetadata } from "@/lib/extract";
+import { MOCK_METADATA } from "@/lib/extract/__mocks__/index";
 import { ExtractError, MetadataError } from "@/lib/extract/types";
+import { indexDocuments } from "@/lib/search";
+import {
+  getItemContent,
+  getItemMetadata,
+  uploadItemContent,
+} from "@/lib/storage";
+import { MOCK_VERSION } from "@/lib/storage/__mocks__/index";
 import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_API_KEY,
@@ -333,7 +333,7 @@ describe("/api/v1/items/content", () => {
         UploadStatus.STORED_VERSION,
       ],
     ])("%s", async (_, status) => {
-      uploadItemContent.mockResolvedValueOnce({
+      vi.mocked(uploadItemContent).mockResolvedValueOnce({
         versionName: "mock-old-version",
         status,
       });
@@ -384,12 +384,12 @@ describe("/api/v1/items/content", () => {
     });
 
     it("should return 200 and overwrite previous reading state when longer content exists", async () => {
-      uploadItemContent.mockResolvedValueOnce({
+      vi.mocked(uploadItemContent).mockResolvedValueOnce({
         versionName: "mock-old-version",
         status: UploadStatus.STORED_VERSION,
       });
       // This is called on the default version
-      getItemMetadata.mockResolvedValueOnce({
+      vi.mocked(getItemMetadata).mockResolvedValueOnce({
         timestamp: "2014-04-04",
         length: 100,
         hash: "contenthash",
@@ -400,7 +400,7 @@ describe("/api/v1/items/content", () => {
         favicon: null,
         publishedAt: null,
       });
-      getItemContent.mockResolvedValueOnce({
+      vi.mocked(getItemContent).mockResolvedValueOnce({
         version: null,
         versionName: "2014-04-04",
         content: "new longer content",
@@ -514,9 +514,9 @@ describe("/api/v1/items/content", () => {
       await testDb.db.insert(items).values(MOCK_ITEM);
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEM);
 
-      jest
-        .mocked(extractMainContentAsMarkdown)
-        .mockRejectedValueOnce(new ExtractError("Failed to extract content"));
+      vi.mocked(extractMainContentAsMarkdown).mockRejectedValueOnce(
+        new ExtractError("Failed to extract content"),
+      );
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
@@ -544,9 +544,9 @@ describe("/api/v1/items/content", () => {
       await testDb.db.insert(items).values(MOCK_ITEM);
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEM);
 
-      jest
-        .mocked(extractMetadata)
-        .mockRejectedValueOnce(new MetadataError("Failed to extract metadata"));
+      vi.mocked(extractMetadata).mockRejectedValueOnce(
+        new MetadataError("Failed to extract metadata"),
+      );
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",

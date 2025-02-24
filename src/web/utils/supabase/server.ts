@@ -6,6 +6,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 export type { SupabaseClient } from "@supabase/supabase-js";
+export { AuthError } from "@supabase/supabase-js";
 
 export const createClient = async (): Promise<SupabaseClient> => {
   const cookieStore = cookies();

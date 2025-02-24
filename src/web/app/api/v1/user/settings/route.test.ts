@@ -1,3 +1,5 @@
+import { vi } from "vitest";
+
 import { eq } from "@/db";
 import { DbErrorCode } from "@/db/errors";
 import { ColorScheme, profiles } from "@/db/schema";
@@ -105,7 +107,7 @@ describe("/api/v1/user/settings", () => {
     });
 
     test("should return 500 if database error in update", async () => {
-      jest.spyOn(testDb.db, "update").mockImplementationOnce(() => {
+      vi.spyOn(testDb.db, "update").mockImplementationOnce(() => {
         throw { code: DbErrorCode.ConnectionFailure };
       });
 

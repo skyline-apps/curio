@@ -1,21 +1,15 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import fetchMock from "jest-fetch-mock";
 import React from "react";
+import { vi } from "vitest";
 
 import { User, UserContext, UserProvider } from "./UserProvider";
 
 describe("UserContext", () => {
-  fetchMock.enableMocks();
-
   const initialUser: User = {
     id: "123",
     username: "testuser",
     email: "test@example.com",
   };
-
-  beforeEach(() => {
-    fetchMock.resetMocks();
-  });
 
   it("provides initial user values", () => {
     render(
@@ -69,7 +63,16 @@ describe("UserContext", () => {
   });
 
   it("changes username when changeUsername is called", async () => {
-    fetch.mockResponseOnce(JSON.stringify({ updatedUsername: "newtestuser" }));
+    global.fetch = vi.fn(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ updatedUsername: "newtestuser" }), {
+          status: 200,
+          headers: new Headers({
+            "Content-Type": "application/json",
+          }),
+        }),
+      ),
+    );
 
     render(
       <UserProvider user={initialUser}>
@@ -91,7 +94,7 @@ describe("UserContext", () => {
       await fireEvent.click(screen.getByText("Change username"));
     });
 
-    expect(fetchMock).toHaveBeenCalledWith(
+    expect(global.fetch).toHaveBeenCalledWith(
       "/api/v1/user/username",
       expect.objectContaining({
         method: "POST",

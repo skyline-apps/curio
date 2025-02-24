@@ -1,10 +1,11 @@
 import fs from "fs";
 import path from "path";
+import { vi } from "vitest";
 
 import { Extract } from "@/lib/extract";
 import { ExtractError, MetadataError } from "@/lib/extract/types";
 
-jest.unmock("@/lib/extract");
+vi.unmock("@/lib/extract");
 
 describe("Extract", () => {
   let extract: Extract;

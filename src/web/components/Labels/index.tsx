@@ -213,7 +213,12 @@ const Labels: React.FC<LabelsProps> = (props) => {
           />
         )}
         {!draftLabel && props.onAdd && (
-          <Button isIconOnly onPress={addDraftLabel} size="xs">
+          <Button
+            data-testid="add-label-button"
+            isIconOnly
+            onPress={addDraftLabel}
+            size="xs"
+          >
             <Icon icon={<HiOutlinePlus />} />
           </Button>
         )}

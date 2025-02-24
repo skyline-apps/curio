@@ -1,19 +1,39 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
+import { vi } from "vitest";
 
 import LandingPage from "./LandingPage";
 
 // Mock CurioBrand components
-jest.mock("@/components/CurioBrand", () => ({
+vi.mock("@/components/CurioBrand", () => ({
   __esModule: true,
   CurioLogo: () => <div data-testid="curio-logo">CurioLogo</div>,
   CurioName: () => <div data-testid="curio-name">CurioName</div>,
 }));
 
 // Mock LandingPageFeatures component
-jest.mock("@/components/Landing/LandingPageFeatures", () => ({
+vi.mock("@/components/Landing/LandingPageFeatures", () => ({
   __esModule: true,
   default: () => <div data-testid="landing-page-features">Features</div>,
+}));
+
+// Mock SVG imports
+vi.mock("@/public/assets/landing_page_light.svg", () => ({
+  __esModule: true,
+  default: ({ className }: { className: string }) => (
+    <div data-testid="landing-page-light" className={className}>
+      Light SVG
+    </div>
+  ),
+}));
+
+vi.mock("@/public/assets/landing_page_dark.svg", () => ({
+  __esModule: true,
+  default: ({ className }: { className: string }) => (
+    <div data-testid="landing-page-dark" className={className}>
+      Dark SVG
+    </div>
+  ),
 }));
 
 describe("LandingPage", () => {

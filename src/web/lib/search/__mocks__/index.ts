@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
 import { ItemDocument, SearchOptions, SearchResults } from "@/lib/search/types";
 
@@ -18,10 +18,10 @@ export class Search {
 export const search = new Search();
 
 // Create spies for each method
-export const indexDocuments = jest
+export const indexDocuments = vi
   .spyOn(search, "indexDocuments")
   .mockImplementation(async () => {});
-export const searchDocuments = jest
+export const searchDocuments = vi
   .spyOn(search, "searchDocuments")
   .mockImplementation(async () => ({
     hits: [],

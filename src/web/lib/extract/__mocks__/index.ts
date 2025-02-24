@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
 import { ExtractedMetadata } from "@/lib/extract/types";
 
@@ -31,11 +31,11 @@ export class Extract {
 export const extract = new Extract();
 
 // Create spies for each method
-export const extractMainContentAsMarkdown = jest
+export const extractMainContentAsMarkdown = vi
   .spyOn(extract, "extractMainContentAsMarkdown")
   .mockImplementation(async () => "");
 
-export const extractMetadata = jest
+export const extractMetadata = vi
   .spyOn(extract, "extractMetadata")
   .mockImplementation(async () => ({
     author: null,

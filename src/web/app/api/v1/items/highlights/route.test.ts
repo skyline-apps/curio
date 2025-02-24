@@ -1,3 +1,5 @@
+import { vi } from "vitest";
+
 import { eq } from "@/db";
 import { DbErrorCode } from "@/db/errors";
 import { items, profileItemHighlights, profileItems } from "@/db/schema";
@@ -225,7 +227,7 @@ describe("/api/v1/items/highlights", () => {
     });
 
     it("should return 500 if db query fails", async () => {
-      jest.spyOn(testDb.db, "insert").mockImplementationOnce(() => {
+      vi.spyOn(testDb.db, "insert").mockImplementationOnce(() => {
         throw { code: DbErrorCode.ConnectionFailure };
       });
 
@@ -251,7 +253,7 @@ describe("/api/v1/items/highlights", () => {
     });
 
     it("should return 500 if profile item query fails", async () => {
-      jest.spyOn(testDb.db, "select").mockImplementationOnce(() => {
+      vi.spyOn(testDb.db, "select").mockImplementationOnce(() => {
         throw { code: DbErrorCode.ConnectionFailure };
       });
 
@@ -356,7 +358,7 @@ describe("/api/v1/items/highlights", () => {
     });
 
     it("should return 500 if profile item query fails", async () => {
-      jest.spyOn(testDb.db, "select").mockImplementationOnce(() => {
+      vi.spyOn(testDb.db, "select").mockImplementationOnce(() => {
         throw { code: DbErrorCode.ConnectionFailure };
       });
 
@@ -375,7 +377,7 @@ describe("/api/v1/items/highlights", () => {
     });
 
     it("should return 500 if delete query fails", async () => {
-      jest.spyOn(testDb.db, "delete").mockImplementationOnce(() => {
+      vi.spyOn(testDb.db, "delete").mockImplementationOnce(() => {
         throw { code: DbErrorCode.ConnectionFailure };
       });
 

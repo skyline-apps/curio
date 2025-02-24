@@ -1,5 +1,6 @@
-import { apiKeys, ColorScheme, profiles } from "@/db/schema";
+import { vi } from "vitest";
 
+import { apiKeys, ColorScheme, profiles } from "@/db/schema";
 import {
   DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_PROFILE_ID,
@@ -8,8 +9,15 @@ import {
   DEFAULT_TEST_USER_ID_2,
   DEFAULT_TEST_USERNAME,
   DEFAULT_TEST_USERNAME_2,
-} from "./utils/test/api";
-import { testDb } from "./utils/test/provider";
+} from "@/utils/test/api";
+import { testDb } from "@/utils/test/provider";
+
+// Set up global mocks
+vi.mock("@/lib/search");
+vi.mock("@/lib/extract");
+vi.mock("@/lib/storage");
+vi.mock("@/utils/logger");
+vi.mock("@/utils/supabase/server");
 
 // Mock the request context
 const requestStore = new Map();
@@ -18,15 +26,15 @@ requestStore.set("_nextRequestStore", {
 });
 
 // Mock the request context
-jest.mock("next/dist/client/components/request-async-storage.external", () => ({
+vi.mock("next/dist/client/components/request-async-storage.external", () => ({
   getRequestStore: () => requestStore,
 }));
 
 // Mock cookies
-jest.mock("next/headers", () => ({
-  cookies: jest.fn(() => ({
-    get: jest.fn(() => ({ value: "test-cookie" })),
-    getAll: jest.fn(() => [{ name: "sb-access-token", value: "test-cookie" }]),
+vi.mock("next/headers", () => ({
+  cookies: vi.fn(() => ({
+    get: vi.fn(() => ({ value: "test-cookie" })),
+    getAll: vi.fn(() => [{ name: "sb-access-token", value: "test-cookie" }]),
   })),
 }));
 
