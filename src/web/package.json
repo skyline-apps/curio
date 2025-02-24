@@ -11,7 +11,7 @@
     "lint:fix": "next lint --fix",
     "db:generate": "npx drizzle-kit generate --name",
     "db:migrate": "npx drizzle-kit migrate",
-    "test": "vitest --run",
+    "test": "vitest --run --no-file-parallelism",
     "test:watch": "vitest",
     "generate:openapi": "tsx scripts/generate-openapi.ts"
   },
