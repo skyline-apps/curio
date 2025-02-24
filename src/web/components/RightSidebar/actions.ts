@@ -55,7 +55,7 @@ export const useRightSidebarUpdate = (): UseRightSidebarUpdate => {
           {
             slug: loadedItem.item.slug,
             highlights: [
-              ...(loadedItem.item.highlights.filter(
+              ...(loadedItem.item.highlights?.filter(
                 (h) => !data.highlights.some((dh) => dh.id === h.id),
               ) || []),
               ...data.highlights,
@@ -94,9 +94,10 @@ export const useRightSidebarUpdate = (): UseRightSidebarUpdate => {
         optimisticUpdateItems([
           {
             slug: loadedItem.item.slug,
-            highlights: loadedItem.item.highlights.filter(
-              (h) => !data.deleted.some((d) => d.id === h.id),
-            ),
+            highlights:
+              loadedItem.item.highlights?.filter(
+                (h) => !data.deleted.some((d) => d.id === h.id),
+              ) || [],
           },
         ]);
       }

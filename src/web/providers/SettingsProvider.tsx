@@ -38,7 +38,7 @@ export type SettingsContextType = {
   updateSettings: (
     field: keyof SettingsResponse,
     value: SettingsResponse[keyof SettingsResponse],
-  ) => Promise<SettingsResponse | void>;
+  ) => Promise<UpdatedSettingsResponse | void>;
   labels?: GetLabelsResponse["labels"];
   loadingLabels?: boolean;
   createLabel: (label: { name: string; color?: string }) => Promise<boolean>;
@@ -202,7 +202,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   const updateSettings = async (
     field: keyof SettingsResponse,
     value: SettingsResponse[keyof SettingsResponse],
-  ): Promise<SettingsResponse | void> => {
+  ): Promise<UpdatedSettingsResponse | void> => {
     if (!currentSettings) {
       return;
     }
