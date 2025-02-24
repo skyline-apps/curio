@@ -51,9 +51,7 @@ export const Chip = React.forwardRef<HTMLDivElement, ChipProps>(
     const [editValue, setEditValue] = useState<string>(value);
     const [editColor, setEditColor] = useState<string>(color);
     const inputRef = useRef<HTMLInputElement>(null);
-    const colorButtonRef = useRef<HTMLButtonElement>(null);
     const chipContainerRef = useRef<HTMLDivElement>(null);
-    const colorPaletteRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
       if (isEditing) {
@@ -145,14 +143,12 @@ export const Chip = React.forwardRef<HTMLDivElement, ChipProps>(
             <PopoverTrigger>
               <Button
                 isIconOnly
-                ref={colorButtonRef}
                 className="min-w-4 w-4 h-4"
                 style={{ backgroundColor: editColor }}
               />
             </PopoverTrigger>
             <PopoverContent>
               <div
-                ref={colorPaletteRef}
                 className="flex space-x-1 p-2"
                 onMouseDown={(e) => e.preventDefault()}
               >
@@ -201,6 +197,7 @@ export const Chip = React.forwardRef<HTMLDivElement, ChipProps>(
         {isUpdating ? <Spinner size="xs" className="text-foreground" /> : value}
         {onDelete && (
           <button
+            data-testid="delete-button"
             onClick={handleDeleteClick}
             className="ml-2 opacity-70 hover:opacity-100 transition-opacity rounded"
           >

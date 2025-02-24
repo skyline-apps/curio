@@ -2,8 +2,9 @@ import {
   Autocomplete as HerouiAutocomplete,
   AutocompleteProps as HerouiAutocompleteProps,
 } from "@heroui/react";
-import { INPUT_CLASSES } from "components/ui/Input";
 import React from "react";
+
+import { INPUT_CLASSES } from "@/components/ui/Input";
 
 export { AutocompleteItem, AutocompleteSection } from "@heroui/react";
 

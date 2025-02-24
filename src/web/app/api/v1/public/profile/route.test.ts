@@ -1,3 +1,5 @@
+import { vi } from "vitest";
+
 import { eq } from "@/db";
 import { DbErrorCode } from "@/db/errors";
 import { items, ItemState, profileItems, profiles } from "@/db/schema";
@@ -394,7 +396,7 @@ describe("/api/v1/profile", () => {
         url: `http://localhost:3000/api/v1/profile?${params.toString()}`,
       });
 
-      jest.spyOn(testDb.db, "select").mockImplementationOnce(() => {
+      vi.spyOn(testDb.db, "select").mockImplementationOnce(() => {
         throw { code: DbErrorCode.ConnectionFailure };
       });
 

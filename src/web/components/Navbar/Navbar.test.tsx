@@ -1,4 +1,3 @@
-import { supabaseMock } from "__mocks__/supabase";
 import {
   act,
   fireEvent,
@@ -6,84 +5,24 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import fetchMock from "jest-fetch-mock";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { vi } from "vitest";
 
 import { UserContext } from "@/providers/UserProvider";
 
 import Navbar from ".";
 
 // Mock CurioBrand component
-jest.mock("@/components/CurioBrand", () => ({
+vi.mock("@/components/CurioBrand", () => ({
   __esModule: true,
   CurioBrand: () => <div data-testid="curio-brand">CurioBrand</div>,
 }));
 
-// Mock NextUI components
-jest.mock("@heroui/navbar", () => ({
-  Navbar: ({ children }: { children: React.ReactNode }) => (
-    <nav data-testid="navbar">{children}</nav>
-  ),
-  NavbarContent: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="navbar-content">{children}</div>
-  ),
-  NavbarItem: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="navbar-item">{children}</div>
-  ),
-  NavbarBrand: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="navbar-brand">{children}</div>
-  ),
-}));
-
-jest.mock("@heroui/button", () => ({
-  Button: ({
-    children,
-    onPress,
-  }: {
-    children: React.ReactNode;
-    onPress?: () => void;
-  }) => (
-    <button data-testid="button" onClick={onPress}>
-      {children}
-    </button>
-  ),
-}));
-
-jest.mock("@heroui/dropdown", () => ({
-  Dropdown: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="dropdown">{children}</div>
-  ),
-  DropdownTrigger: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="dropdown-trigger">{children}</div>
-  ),
-  DropdownMenu: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="dropdown-menu">{children}</div>
-  ),
-  DropdownItem: ({
-    children,
-    onPress,
-  }: {
-    children: React.ReactNode;
-    onPress?: () => void;
-  }) => (
-    <div data-testid="dropdown-item" onClick={onPress}>
-      {children}
-    </div>
-  ),
-}));
-
-// Mock the useRouter hook
-jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(),
-}));
-
 describe("Navbar", () => {
-  fetchMock.enableMocks();
-
-  const mockPush = jest.fn();
-  const mockClearUser = jest.fn();
-  const mockChangeUsername = jest.fn();
+  const mockPush = vi.fn();
+  const mockClearUser = vi.fn();
+  const mockChangeUsername = vi.fn();
   const MockNoUserProvider = ({
     children,
   }: React.PropsWithChildren): JSX.Element => (
@@ -112,11 +51,17 @@ describe("Navbar", () => {
   );
 
   beforeEach(() => {
-    fetchMock.resetMocks();
-    (useRouter as jest.Mock).mockImplementation(() => ({
+    vi.resetModules();
+    vi.clearAllMocks();
+
+    vi.mocked(useRouter).mockReturnValue({
       push: mockPush,
-    }));
-    jest.clearAllMocks();
+      replace: vi.fn(),
+      back: vi.fn(),
+      forward: vi.fn(),
+      refresh: vi.fn(),
+      prefetch: vi.fn(),
+    });
   });
 
   it("renders login button when user is not logged in", async () => {
@@ -151,8 +96,6 @@ describe("Navbar", () => {
   });
 
   it("calls clearUser and redirects on logout", async () => {
-    supabaseMock.auth.signOut.mockResolvedValue({ error: null });
-
     await act(async () => {
       render(
         <MockUserProvider>
@@ -195,5 +138,30 @@ describe("Navbar", () => {
 
     // Check if the router push was called with "/login"
     expect(mockPush).toHaveBeenCalledWith("/login");
+  });
+
+  it("handles logout click correctly", async () => {
+    await act(async () => {
+      render(
+        <MockUserProvider>
+          <Navbar />
+        </MockUserProvider>,
+      );
+    });
+
+    const userButton = screen.getByTestId("button");
+    await act(async () => {
+      fireEvent.click(userButton);
+    });
+
+    const logoutItem = screen.getByText("Log Out");
+    await act(async () => {
+      fireEvent.click(logoutItem);
+    });
+
+    await waitFor(() => {
+      expect(mockClearUser).toHaveBeenCalled();
+      expect(mockPush).toHaveBeenCalledWith("/");
+    });
   });
 });

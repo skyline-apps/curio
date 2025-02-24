@@ -1,3 +1,5 @@
+import { vi } from "vitest";
+
 import { desc, eq } from "@/db";
 import { profileLabels } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
@@ -80,7 +82,7 @@ describe("/api/v1/user/labels", () => {
     });
 
     it("should return 500 if database query fails", async () => {
-      jest.spyOn(testDb.db, "select").mockImplementationOnce(() => {
+      vi.spyOn(testDb.db, "select").mockImplementationOnce(() => {
         throw new Error("Database connection failed");
       });
 
@@ -219,7 +221,7 @@ describe("/api/v1/user/labels", () => {
     });
 
     it("should return 500 if database insert fails", async () => {
-      jest.spyOn(testDb.db, "insert").mockImplementationOnce(() => {
+      vi.spyOn(testDb.db, "insert").mockImplementationOnce(() => {
         throw new Error("Database insert failed");
       });
 
@@ -275,7 +277,7 @@ describe("/api/v1/user/labels", () => {
     });
 
     it("should return 500 if database delete fails", async () => {
-      jest.spyOn(testDb.db, "delete").mockImplementationOnce(() => {
+      vi.spyOn(testDb.db, "delete").mockImplementationOnce(() => {
         throw new Error("Database delete failed");
       });
 

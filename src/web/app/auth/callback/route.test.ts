@@ -1,13 +1,11 @@
-import { supabaseMock } from "__mocks__/supabase";
+import { vi } from "vitest";
+
+import { AuthError, createClient } from "@/utils/supabase/server";
 
 // eslint-disable-next-line no-restricted-imports
-import { GET } from "./route"; // adjust path
+import { GET } from "./route";
 
 describe("GET /auth/callback", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it("should redirect to error page if no code is provided", async () => {
     const request = new Request("http://localhost/auth/callback");
     const response = await GET(request);
@@ -24,11 +22,12 @@ describe("GET /auth/callback", () => {
     );
 
     const response = await GET(request);
+    const supabase = await createClient();
 
-    expect(supabaseMock.auth.exchangeCodeForSession).toHaveBeenCalledWith(
+    expect(supabase.auth.exchangeCodeForSession).toHaveBeenCalledWith(
       "valid_code",
     );
-    expect(supabaseMock.auth.getUser).toHaveBeenCalled();
+    expect(supabase.auth.getUser).toHaveBeenCalled();
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe("http://localhost/dashboard");
   });
@@ -38,14 +37,15 @@ describe("GET /auth/callback", () => {
       "http://localhost/auth/callback?code=valid_code",
     );
 
+    const supabase = await createClient();
     // Mock getUser to return null user to trigger profile creation failure
-    supabaseMock.auth.getUser.mockResolvedValueOnce({
+    vi.mocked(supabase.auth.getUser).mockResolvedValueOnce({
       data: { user: null },
-      error: null,
+      error: new AuthError("User not found"),
     });
 
     const response = await GET(request);
-    expect(supabaseMock.auth.getUser).toHaveBeenCalled();
+    expect(supabase.auth.getUser).toHaveBeenCalled();
 
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe(
@@ -53,13 +53,15 @@ describe("GET /auth/callback", () => {
     );
   });
 
-  it("should show error if exchange code fails", async () => {
+  it("should redirect to error page if code exchange fails", async () => {
     const request = new Request(
       "http://localhost/auth/callback?code=invalid_code",
     );
 
-    supabaseMock.auth.exchangeCodeForSession.mockResolvedValueOnce({
-      error: "Some error",
+    const supabase = await createClient();
+    vi.mocked(supabase.auth.exchangeCodeForSession).mockResolvedValueOnce({
+      data: { user: null, session: null },
+      error: new AuthError("Some error"),
     });
 
     const response = await GET(request);

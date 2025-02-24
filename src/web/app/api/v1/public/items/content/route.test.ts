@@ -1,7 +1,5 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
-import { indexDocuments } from "@/__mocks__/search";
-import { getItemContent, storage } from "@/__mocks__/storage";
 import { eq } from "@/db";
 import {
   items,
@@ -11,6 +9,8 @@ import {
   profileItems,
   profileLabels,
 } from "@/db/schema";
+import { indexDocuments } from "@/lib/search";
+import { getItemContent } from "@/lib/storage";
 import { StorageError } from "@/lib/storage/types";
 import { APIRequest } from "@/utils/api";
 import {
@@ -158,8 +158,8 @@ describe("/api/v1/public/items/content", () => {
           url: TEST_ITEM_URL,
         },
       });
-      expect(storage.getItemContent).toHaveBeenCalledTimes(1);
-      expect(storage.getItemContent).toHaveBeenCalledWith(TEST_ITEM_SLUG, null);
+      expect(getItemContent).toHaveBeenCalledTimes(1);
+      expect(getItemContent).toHaveBeenCalledWith(TEST_ITEM_SLUG, null);
 
       const updatedItem = await testDb.db
         .select()
@@ -187,7 +187,6 @@ describe("/api/v1/public/items/content", () => {
 
       const response = await GET(request);
       expect(response.status).toBe(200);
-
       const data = await response.json();
       expect(data.item.labels).toEqual([
         {
@@ -205,7 +204,7 @@ describe("/api/v1/public/items/content", () => {
     });
 
     it("should return 200 with custom version content", async () => {
-      jest.mocked(getItemContent).mockResolvedValueOnce({
+      vi.mocked(getItemContent).mockResolvedValueOnce({
         version: "2010-04-04",
         versionName: "2010-04-04",
         content: "custom version content",
@@ -253,11 +252,8 @@ describe("/api/v1/public/items/content", () => {
           url: TEST_ITEM_URL,
         },
       });
-      expect(storage.getItemContent).toHaveBeenCalledTimes(1);
-      expect(storage.getItemContent).toHaveBeenCalledWith(
-        TEST_ITEM_SLUG,
-        "2010-04-04",
-      );
+      expect(getItemContent).toHaveBeenCalledTimes(1);
+      expect(getItemContent).toHaveBeenCalledWith(TEST_ITEM_SLUG, "2010-04-04");
 
       const updatedItem = await testDb.db
         .select()
@@ -271,9 +267,9 @@ describe("/api/v1/public/items/content", () => {
     });
 
     it("should return 200 with metadata even if item content is missing", async () => {
-      jest
-        .mocked(getItemContent)
-        .mockRejectedValueOnce(new StorageError("Failed to download content"));
+      vi.mocked(getItemContent).mockRejectedValueOnce(
+        new StorageError("Failed to download content"),
+      );
       await testDb.db.insert(items).values(MOCK_ITEM);
       await testDb.db.insert(profileItems).values({
         ...MOCK_PROFILE_ITEM,
@@ -330,8 +326,8 @@ describe("/api/v1/public/items/content", () => {
           url: TEST_ITEM_URL,
         },
       });
-      expect(storage.getItemContent).toHaveBeenCalledTimes(1);
-      expect(storage.getItemContent).toHaveBeenCalledWith(TEST_ITEM_SLUG, null);
+      expect(getItemContent).toHaveBeenCalledTimes(1);
+      expect(getItemContent).toHaveBeenCalledWith(TEST_ITEM_SLUG, null);
 
       const updatedItem = await testDb.db
         .select()
@@ -345,7 +341,7 @@ describe("/api/v1/public/items/content", () => {
     });
 
     it("should return 200 with default content if version is missing", async () => {
-      jest.mocked(getItemContent).mockResolvedValueOnce({
+      vi.mocked(getItemContent).mockResolvedValueOnce({
         version: null,
         versionName: "blah-version",
         content: "test content",
@@ -393,11 +389,8 @@ describe("/api/v1/public/items/content", () => {
           url: TEST_ITEM_URL,
         },
       });
-      expect(storage.getItemContent).toHaveBeenCalledTimes(1);
-      expect(storage.getItemContent).toHaveBeenCalledWith(
-        TEST_ITEM_SLUG,
-        "2010-04-04",
-      );
+      expect(getItemContent).toHaveBeenCalledTimes(1);
+      expect(getItemContent).toHaveBeenCalledWith(TEST_ITEM_SLUG, "2010-04-04");
 
       const updatedItem = await testDb.db
         .select()

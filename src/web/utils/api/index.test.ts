@@ -1,10 +1,12 @@
+import { vi } from "vitest";
+
 import { handleAPIResponse } from ".";
 
 describe("handleAPIResponse", () => {
   it("should handle a successful response", async () => {
     const mockResponse = {
       status: 200,
-      json: jest.fn().mockResolvedValue({ data: "test data" }),
+      json: vi.fn().mockResolvedValue({ data: "test data" }),
     } as unknown as Response;
 
     const result = await handleAPIResponse<{ data: string }>(mockResponse);
@@ -16,7 +18,7 @@ describe("handleAPIResponse", () => {
   it("should throw an error for a response with status >= 300", async () => {
     const mockResponse = {
       status: 404,
-      json: jest.fn().mockResolvedValue({ error: "Not found" }),
+      json: vi.fn().mockResolvedValue({ error: "Not found" }),
     } as unknown as Response;
 
     await expect(handleAPIResponse(mockResponse)).rejects.toThrow("Not found");
@@ -26,7 +28,7 @@ describe("handleAPIResponse", () => {
   it("should handle a response with no error property", async () => {
     const mockResponse = {
       status: 400,
-      json: jest.fn().mockResolvedValue({ message: "Bad request" }),
+      json: vi.fn().mockResolvedValue({ message: "Bad request" }),
     } as unknown as Response;
 
     await expect(handleAPIResponse(mockResponse)).rejects.toThrow("");

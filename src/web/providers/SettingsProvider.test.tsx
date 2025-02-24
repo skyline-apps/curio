@@ -5,8 +5,8 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import fetchMock from "jest-fetch-mock";
 import React from "react";
+import { vi } from "vitest";
 
 import type { SettingsResponse } from "@/app/api/v1/user/settings/validation";
 import { ColorScheme } from "@/db/schema";
@@ -15,18 +15,22 @@ import { ClientProviders } from "./ClientProviders";
 import { SettingsContext, SettingsProvider } from "./SettingsProvider";
 
 describe("SettingsContext", () => {
-  fetchMock.enableMocks();
-
   const initialSettings: SettingsResponse = {
     colorScheme: ColorScheme.LIGHT,
+    public: false,
   };
 
-  beforeEach(() => {
-    fetchMock.resetMocks();
-  });
-
   it("fetches and provides initial settings values", async () => {
-    fetchMock.mockResponseOnce(JSON.stringify(initialSettings));
+    global.fetch = vi.fn(() =>
+      Promise.resolve(
+        new Response(JSON.stringify(initialSettings), {
+          status: 200,
+          headers: new Headers({
+            "Content-Type": "application/json",
+          }),
+        }),
+      ),
+    );
 
     render(
       <ClientProviders>
@@ -56,13 +60,22 @@ describe("SettingsContext", () => {
       expect(screen.getByTestId("color-scheme")).toHaveTextContent("light");
     });
 
-    expect(fetchMock).toHaveBeenCalledWith("/api/v1/user/settings", {
+    expect(global.fetch).toHaveBeenCalledWith("/api/v1/user/settings", {
       method: "GET",
     });
   });
 
   it("updates settings when updateSettings is called", async () => {
-    fetchMock.mockResponseOnce(JSON.stringify(initialSettings));
+    global.fetch = vi.fn(() =>
+      Promise.resolve(
+        new Response(JSON.stringify(initialSettings), {
+          status: 200,
+          headers: new Headers({
+            "Content-Type": "application/json",
+          }),
+        }),
+      ),
+    );
 
     render(
       <ClientProviders>
@@ -92,15 +105,22 @@ describe("SettingsContext", () => {
       expect(screen.getByTestId("color-scheme")).toHaveTextContent("light");
     });
 
-    fetchMock.mockResponseOnce(
-      JSON.stringify({ colorScheme: ColorScheme.DARK }),
+    global.fetch = vi.fn(() =>
+      Promise.resolve(
+        new Response(JSON.stringify({ colorScheme: ColorScheme.DARK }), {
+          status: 200,
+          headers: new Headers({
+            "Content-Type": "application/json",
+          }),
+        }),
+      ),
     );
 
     await act(async () => {
       fireEvent.click(screen.getByText("Change color scheme"));
     });
 
-    expect(fetchMock).toHaveBeenCalledWith(
+    expect(global.fetch).toHaveBeenCalledWith(
       "/api/v1/user/settings",
       expect.objectContaining({
         method: "POST",

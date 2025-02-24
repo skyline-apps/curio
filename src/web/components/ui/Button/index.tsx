@@ -36,6 +36,7 @@ interface CurioButtonProps extends Omit<ButtonProps, "size"> {
   href?: string;
   tooltip?: string;
   size?: "xs" | "sm" | "md" | "lg";
+  "data-testid"?: string;
 }
 
 // Add forwardRef to ensure Dropdowns are properly positioned.
@@ -68,12 +69,22 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
 
     if (href) {
       innerContent = (
-        <Link href={href} passHref data-testid="button">
+        <Link
+          href={href}
+          passHref
+          data-testid={props["data-testid"] || "button"}
+        >
           <Button ref={ref} {...buttonProps} />
         </Link>
       );
     } else {
-      innerContent = <Button ref={ref} {...buttonProps} data-testid="button" />;
+      innerContent = (
+        <Button
+          ref={ref}
+          {...buttonProps}
+          data-testid={props["data-testid"] || "button"}
+        />
+      );
     }
 
     return tooltip ? (

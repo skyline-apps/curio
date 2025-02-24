@@ -234,7 +234,7 @@ export const uploadItemContent = (
 export const getItemContent = (
   slug: string,
   version: string | null,
-): Promise<{ version: string | null; content: string }> =>
+): Promise<{ version: string | null; versionName: string; content: string }> =>
   storage.getItemContent(slug, version);
 
 export const getItemMetadata = (slug: string): Promise<VersionMetadata> =>
