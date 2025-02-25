@@ -38,6 +38,8 @@ export async function GET(
       return APIResponseJSON({ error: "Profile not found" }, { status: 404 });
     }
 
+    const isOwner = userProfile && profile.id === userProfile.id;
+
     // Check if user has access to view the profile
     const canView =
       profile.public || (userProfile && profile.id === userProfile.id);
@@ -60,7 +62,6 @@ export async function GET(
         id: items.id,
         url: items.url,
         slug: items.slug,
-        // TODO: Properly differentiate between ItemResultSchema and PublicItemResultSchema
         profileItemId: profileItems.id,
         createdAt: items.createdAt,
         metadata: {
@@ -84,7 +85,11 @@ export async function GET(
         username: profile.username,
         createdAt: profile.createdAt,
       },
-      favoriteItems: favoriteItems.map((item) => ({ ...item, labels: [] })),
+      favoriteItems: favoriteItems.map((item) => ({
+        ...item,
+        labels: [],
+        profileItemId: isOwner ? item.profileItemId : undefined,
+      })),
       nextCursor:
         favoriteItems.length === limit
           ? favoriteItems[

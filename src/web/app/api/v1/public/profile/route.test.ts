@@ -350,7 +350,6 @@ describe("/api/v1/profile", () => {
             title: "Example 3 New title",
             savedAt: "2025-01-10T20:56:56.000Z",
           },
-          profileItemId: MOCK_PROFILE_ITEMS[4].id,
           slug: "example3-com",
           url: TEST_ITEM_URL_3,
         },
