@@ -11,12 +11,15 @@ import {
 } from "@/db/schema";
 import { indexDocuments } from "@/lib/search";
 import { getItemContent } from "@/lib/storage";
+import { MOCK_VERSION } from "@/lib/storage/__mocks__/index";
 import { StorageError } from "@/lib/storage/types";
 import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_PROFILE_ID,
+  DEFAULT_TEST_USER_ID_2,
   makeAuthenticatedMockRequest,
+  makeUnauthenticatedMockRequest,
 } from "@/utils/test/api";
 import { testDb } from "@/utils/test/provider";
 
@@ -25,7 +28,6 @@ import { GET } from "./route";
 const TEST_ITEM_ID = "123e4567-e89b-12d3-a456-426614174001";
 const TEST_ITEM_SLUG = "example-com";
 const TEST_ITEM_URL = "https://example.com";
-const NONEXISTENT_USER_ID = "123e4567-e89b-12d3-a456-426614174003";
 const ORIGINAL_PUBLISHED_DATE = new Date("2024-01-10T12:50:00-08:00");
 const ORIGINAL_CREATION_DATE = new Date("2025-01-10T12:52:56-08:00");
 const TEST_PROFILE_ITEM_ID = "123e4567-e89b-12d3-a456-426614174999";
@@ -169,6 +171,124 @@ describe("/api/v1/public/items/content", () => {
         .execute();
 
       expect(updatedItem[0].versionName).toBe(null);
+      expect(indexDocuments).toHaveBeenCalledTimes(0);
+    });
+
+    it("should return 200 with basic item content when unauthenticated", async () => {
+      vi.mocked(getItemContent).mockResolvedValueOnce({
+        version: null,
+        versionName: "default-version",
+        content: "test content",
+      });
+      await testDb.db.insert(items).values(MOCK_ITEM);
+
+      const request: APIRequest = makeUnauthenticatedMockRequest({
+        method: "GET",
+        searchParams: { slug: TEST_ITEM_SLUG },
+      });
+
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data).toEqual({
+        content: "test content",
+        item: {
+          id: TEST_ITEM_ID,
+          slug: TEST_ITEM_SLUG,
+          url: TEST_ITEM_URL,
+          createdAt: ORIGINAL_CREATION_DATE.toISOString(),
+          metadata: {
+            title: "test title",
+            description: "test description",
+            publishedAt: ORIGINAL_PUBLISHED_DATE.toISOString(),
+            thumbnail: null,
+            favicon: null,
+            savedAt: MOCK_VERSION,
+          },
+        },
+      });
+      expect(getItemContent).toHaveBeenCalledTimes(1);
+      expect(getItemContent).toHaveBeenCalledWith(TEST_ITEM_SLUG, null);
+      expect(indexDocuments).toHaveBeenCalledTimes(0);
+    });
+
+    it("should return 200 with basic item metadata when unauthenticated and content not found", async () => {
+      vi.mocked(getItemContent).mockRejectedValueOnce(
+        new StorageError("Failed to download content"),
+      );
+      await testDb.db.insert(items).values(MOCK_ITEM);
+
+      const request: APIRequest = makeUnauthenticatedMockRequest({
+        method: "GET",
+        searchParams: { slug: TEST_ITEM_SLUG },
+      });
+
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data).toEqual({
+        item: {
+          id: TEST_ITEM_ID,
+          slug: TEST_ITEM_SLUG,
+          url: TEST_ITEM_URL,
+          createdAt: ORIGINAL_CREATION_DATE.toISOString(),
+        },
+      });
+      expect(getItemContent).toHaveBeenCalledTimes(1);
+      expect(getItemContent).toHaveBeenCalledWith(TEST_ITEM_SLUG, null);
+    });
+
+    it("should return 404 when item not found for unauthenticated request", async () => {
+      const request: APIRequest = makeUnauthenticatedMockRequest({
+        method: "GET",
+        searchParams: { slug: "nonexistent" },
+      });
+
+      const response = await GET(request);
+      expect(response.status).toBe(404);
+      const data = await response.json();
+      expect(data.error).toBe("Item not found.");
+    });
+
+    it("should return 200 with basic item content when authenticated but user doesn't have item", async () => {
+      vi.mocked(getItemContent).mockResolvedValueOnce({
+        version: null,
+        versionName: "default-version",
+        content: "test content",
+      });
+      await testDb.db.insert(items).values(MOCK_ITEM);
+
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "GET",
+        searchParams: { slug: TEST_ITEM_SLUG },
+        userId: DEFAULT_TEST_USER_ID_2,
+      });
+
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data).toEqual({
+        content: "test content",
+        item: {
+          id: TEST_ITEM_ID,
+          slug: TEST_ITEM_SLUG,
+          url: TEST_ITEM_URL,
+          createdAt: ORIGINAL_CREATION_DATE.toISOString(),
+          metadata: {
+            title: "test title",
+            description: "test description",
+            publishedAt: ORIGINAL_PUBLISHED_DATE.toISOString(),
+            thumbnail: null,
+            favicon: null,
+            savedAt: MOCK_VERSION,
+          },
+        },
+      });
+      expect(getItemContent).toHaveBeenCalledTimes(1);
+      expect(getItemContent).toHaveBeenCalledWith(TEST_ITEM_SLUG, null);
       expect(indexDocuments).toHaveBeenCalledTimes(0);
     });
 
@@ -409,28 +529,6 @@ describe("/api/v1/public/items/content", () => {
           contentVersionName: "blah-version",
         },
       ]);
-    });
-
-    it("should return 401 if user profile not found", async () => {
-      const request: APIRequest = makeAuthenticatedMockRequest({
-        method: "GET",
-        userId: NONEXISTENT_USER_ID,
-        searchParams: { slug: TEST_ITEM_SLUG },
-      });
-
-      const response = await GET(request);
-      expect(response.status).toBe(401);
-    });
-
-    it("should return 401 if invalid api key provided", async () => {
-      const request: APIRequest = makeAuthenticatedMockRequest({
-        method: "GET",
-        apiKey: "invalid-api-key",
-        searchParams: { slug: TEST_ITEM_SLUG },
-      });
-
-      const response = await GET(request);
-      expect(response.status).toBe(401);
     });
 
     it("should return 404 if item not found", async () => {
