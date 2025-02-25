@@ -289,6 +289,7 @@ describe("/api/v1/items/content", () => {
           profileId: DEFAULT_TEST_PROFILE_ID_2,
           itemId: TEST_ITEM_ID,
           title: "Example not mine",
+          savedAt: new Date("2025-01-15T11:50:50-08:00"),
         },
       ]);
 
@@ -318,8 +319,11 @@ describe("/api/v1/items/content", () => {
 
       expect(profileItem.length).toBe(2);
 
-      expect(profileItem[0].title).toEqual("Example not mine");
-      expect(profileItem[1].title).toEqual(MOCK_METADATA.title);
+      expect(profileItem[0].title).toEqual(MOCK_METADATA.title);
+      expect(profileItem[1].title).toEqual("Example not mine");
+      expect(profileItem[1].savedAt).toEqual(
+        new Date("2025-01-15T11:50:50-08:00"),
+      );
       checkDocumentIndexed();
     });
 
