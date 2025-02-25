@@ -3,6 +3,7 @@ import { items, ItemState, profileItems } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_PROFILE_ID,
+  DEFAULT_TEST_USER_ID_2,
   makeAuthenticatedMockRequest,
 } from "@/utils/test/api";
 import { testDb } from "@/utils/test/provider";
@@ -235,6 +236,24 @@ describe("/api/v1/items/save", () => {
       const data = await response.json();
       expect(data.updated).toEqual([
         { slug: "example3-com", profileItemId: expect.any(String) },
+      ]);
+    });
+
+    it("should return 200 when user has no items", async () => {
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "POST",
+        body: {
+          slugs: "example-com",
+        },
+        userId: DEFAULT_TEST_USER_ID_2,
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data.updated).toEqual([
+        { slug: "example-com", profileItemId: expect.any(String) },
       ]);
     });
 

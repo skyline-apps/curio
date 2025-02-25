@@ -42,7 +42,13 @@ export async function POST(
         url: items.url,
       })
       .from(items)
-      .leftJoin(profileItems, eq(profileItems.itemId, items.id))
+      .leftJoin(
+        profileItems,
+        and(
+          eq(profileItems.itemId, items.id),
+          eq(profileItems.profileId, profileResult.profile.id),
+        ),
+      )
       .where(
         and(
           inArray(items.slug, slugs),
