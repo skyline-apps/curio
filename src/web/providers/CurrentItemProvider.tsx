@@ -15,6 +15,7 @@ import {
   type NewHighlight,
 } from "@/app/api/v1/items/highlights/validation";
 import { GetItemContentResponse } from "@/app/api/v1/public/items/content/validation";
+import { ItemState } from "@/db/schema";
 import { useAppLayout } from "@/providers/AppLayoutProvider";
 import { Item, ItemsContext, PublicItem } from "@/providers/ItemsProvider";
 import { handleAPIResponse } from "@/utils/api";
@@ -218,7 +219,11 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   function isEditable(
     item: Item | PublicItem | null | undefined,
   ): item is Item {
-    return item ? typeof item.profileItemId === "string" : false;
+    return item
+      ? typeof item.profileItemId === "string" &&
+          "state" in item.metadata &&
+          item.metadata.state !== ItemState.DELETED
+      : false;
   }
 
   const currentItem = useMemo(() => {
