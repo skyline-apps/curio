@@ -2,13 +2,12 @@
 import { usePathname } from "next/navigation";
 import React, { useContext } from "react";
 
-import AppPage from "@/app/(protected)/AppPage";
+import AppPage from "@/app/AppPage";
 import KeyboardShortcuts from "@/components/KeyboardShortcuts";
 import LeftSidebar from "@/components/LeftSidebar";
 import RightSidebar from "@/components/RightSidebar";
 import { Progress } from "@/components/ui/Progress";
 import Spinner from "@/components/ui/Spinner";
-import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import { ItemsContext } from "@/providers/ItemsProvider";
 import { useSettings } from "@/providers/SettingsProvider";
 
@@ -18,13 +17,12 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { isFetching } = useContext(ItemsContext);
-  const { loading: loadingItem } = useContext(CurrentItemContext);
   const { settings } = useSettings();
   const pathname = usePathname();
 
   return settings ? (
     <div className="flex flex-row h-screen w-full">
-      {(isFetching || loadingItem) && (
+      {isFetching && (
         <Progress
           aria-label="Loading..."
           size="sm"
@@ -38,7 +36,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       )}
       <LeftSidebar />
       <div className="flex-1 overflow-y-auto">
-        <AppPage>{children}</AppPage>
+        <AppPage enforceAuth={true}>{children}</AppPage>
       </div>
       {pathname !== "/settings" && <RightSidebar />}
       <KeyboardShortcuts />

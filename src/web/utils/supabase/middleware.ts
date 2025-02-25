@@ -6,7 +6,7 @@ import { createLogger } from "@/utils/logger";
 
 const log = createLogger("supabase.middleware");
 
-const UNPROTECTED_ROUTES = ["/login", "/auth", "/api/", "/u/"];
+const UNPROTECTED_ROUTES = ["/login", "/auth", "/api/", "/u/", "/item/"];
 
 export const updateSession = async (
   request: NextRequest,

@@ -1,16 +1,17 @@
 "use client";
-import { useContext } from "react";
+import React, { useContext } from "react";
 
+import AppPage from "@/app/AppPage";
 import LeftSidebar from "@/components/LeftSidebar";
 import Navbar from "@/components/Navbar";
-import Profile from "@/components/Profile";
+import RightSidebar from "@/components/RightSidebar";
 import { UserContext } from "@/providers/UserProvider";
 
-const UserPage = ({
-  params,
-}: {
-  params: { username: string };
-}): React.ReactElement => {
+interface PublicLayoutProps {
+  children: React.ReactNode;
+}
+
+const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
   const { user } = useContext(UserContext);
   const isAuthenticated = user && user.id;
 
@@ -20,11 +21,12 @@ const UserPage = ({
       <div className="flex flex-row h-full">
         {isAuthenticated && <LeftSidebar />}
         <div className="flex-1 overflow-y-auto">
-          <Profile username={params.username} />
+          <AppPage enforceAuth={false}>{children}</AppPage>
         </div>
+        <RightSidebar />
       </div>
     </div>
   );
 };
 
-export default UserPage;
+export default PublicLayout;

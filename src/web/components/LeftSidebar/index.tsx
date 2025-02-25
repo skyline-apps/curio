@@ -11,11 +11,11 @@ import NewItemModal from "@/components/NewItemModal";
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
 import { useLogout } from "@/hooks/useLogout";
+import { useAppLayout } from "@/providers/AppLayoutProvider";
 import {
   BrowserMessageContext,
   EventType,
 } from "@/providers/BrowserMessageProvider";
-import { useSettings } from "@/providers/SettingsProvider";
 import { UserContext } from "@/providers/UserProvider";
 import { cn } from "@/utils/cn";
 
@@ -29,7 +29,7 @@ const LeftSidebar: React.FC = () => {
   const pathname = usePathname();
   const [selectedKey, setSelectedKey] = useState<string>(SidebarKey.NONE);
   const [showNewItemModal, setShowNewItemModal] = useState<boolean>(false);
-  const { appLayout, updateAppLayout } = useSettings();
+  const { appLayout, updateAppLayout } = useAppLayout();
   const { addMessageListener, removeMessageListener } = useContext(
     BrowserMessageContext,
   );

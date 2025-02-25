@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import React, { createContext, useContext, useRef } from "react";
 
-import { useSettings } from "@/providers/SettingsProvider";
+import { useAppLayout } from "@/providers/AppLayoutProvider";
 import { cn } from "@/utils/cn";
 
 interface AppPageContextValue {
@@ -22,7 +22,7 @@ export const AppPageProvider: React.FC<{
   const pathname = usePathname();
   const {
     appLayout: { rightSidebarOpen },
-  } = useSettings();
+  } = useAppLayout();
 
   return (
     <AppPageContext.Provider value={{ containerRef, articleFixedInfoRef }}>

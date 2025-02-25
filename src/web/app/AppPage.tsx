@@ -8,14 +8,18 @@ import { UserContext } from "@/providers/UserProvider";
 
 interface AppPageProps {
   children: React.ReactNode;
+  enforceAuth: boolean;
 }
 
-const AppPage: React.FC<AppPageProps> = ({ children }) => {
+const AppPage: React.FC<AppPageProps> = ({
+  children,
+  enforceAuth,
+}: AppPageProps): React.ReactElement => {
   const { user } = useContext(UserContext);
 
   return (
     <AppPageProvider>
-      {user.id ? children : <Spinner centered />}
+      {enforceAuth ? user.id ? children : <Spinner centered /> : children}
       <Dialog />
     </AppPageProvider>
   );

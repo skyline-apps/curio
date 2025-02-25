@@ -1,12 +1,6 @@
 "use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect } from "react";
 
 import type {
   CreateOrUpdateLabelsResponse,
@@ -21,19 +15,13 @@ import { showConfirm } from "@/components/ui/Modal/Dialog";
 import { useToast } from "@/providers/ToastProvider";
 import { handleAPIResponse } from "@/utils/api";
 import {
-  type AppLayoutSettings,
-  DEFAULT_LAYOUT,
   initializeTheme,
-  loadLayoutSettings,
   setDarkTheme,
   setLightTheme,
   setSystemTheme,
-  updateLayoutSettings,
 } from "@/utils/displayStorage";
 
 export type SettingsContextType = {
-  appLayout: AppLayoutSettings;
-  updateAppLayout: (settings: Partial<AppLayoutSettings>) => void;
   settings?: SettingsResponse;
   updateSettings: (
     field: keyof SettingsResponse,
@@ -54,8 +42,6 @@ interface SettingsProviderProps {
 }
 
 export const SettingsContext = createContext<SettingsContextType>({
-  appLayout: DEFAULT_LAYOUT,
-  updateAppLayout: () => {},
   updateSettings: async () => {},
   createLabel: async () => true,
   updateLabel: async () => true,
@@ -86,7 +72,6 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   children,
 }: SettingsProviderProps): React.ReactNode => {
   const queryClient = useQueryClient();
-  const [appLayout, setAppLayout] = useState<AppLayoutSettings>(DEFAULT_LAYOUT);
   const { showToast } = useToast();
 
   const { data: currentSettings } = useQuery({
@@ -176,7 +161,6 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
 
   useEffect(() => {
     initializeTheme();
-    setAppLayout(loadLayoutSettings());
   }, []);
 
   useEffect(() => {
@@ -190,14 +174,6 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       }
     }
   }, [currentSettings?.colorScheme]);
-
-  const updateAppLayout = useCallback(
-    (settings: Partial<AppLayoutSettings>): void => {
-      setAppLayout({ ...appLayout, ...settings });
-      updateLayoutSettings({ ...appLayout, ...settings });
-    },
-    [appLayout],
-  );
 
   const updateSettings = async (
     field: keyof SettingsResponse,
@@ -277,8 +253,6 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       value={{
         settings: currentSettings,
         updateSettings,
-        appLayout,
-        updateAppLayout,
         labels: currentLabels?.labels,
         loadingLabels,
         createLabel,
