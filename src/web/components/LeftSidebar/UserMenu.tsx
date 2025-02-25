@@ -42,7 +42,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
       key: "profile",
       label: "Profile",
       icon: <HiOutlineUser />,
-      onPress: () => onNavigate("/profile"),
+      onPress: () => onNavigate(`/u/${user.username}`),
     },
     {
       key: "settings",
