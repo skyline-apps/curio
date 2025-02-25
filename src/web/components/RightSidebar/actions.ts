@@ -49,7 +49,7 @@ export const useRightSidebarUpdate = (): UseRightSidebarUpdate => {
       }).then(handleAPIResponse<CreateOrUpdateHighlightResponse>);
     },
     onSuccess: (data) => {
-      if (loadedItem?.item) {
+      if (loadedItem?.item && "highlights" in loadedItem.item) {
         setDraftHighlight(null);
         optimisticUpdateItems([
           {
@@ -89,7 +89,7 @@ export const useRightSidebarUpdate = (): UseRightSidebarUpdate => {
       }).then(handleAPIResponse<DeleteHighlightResponse>);
     },
     onSuccess: (data) => {
-      if (loadedItem?.item) {
+      if (loadedItem?.item && "highlights" in loadedItem.item) {
         setDraftHighlight(null);
         optimisticUpdateItems([
           {
