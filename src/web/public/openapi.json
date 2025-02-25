@@ -796,12 +796,10 @@
                         },
                         "required": [
                           "id",
-                          "profileItemId",
                           "url",
                           "slug",
                           "metadata",
-                          "createdAt",
-                          "labels"
+                          "createdAt"
                         ],
                         "additionalProperties": false
                       },
@@ -893,225 +891,359 @@
                           "type": "string"
                         },
                         "item": {
-                          "type": "object",
-                          "properties": {
-                            "id": {
-                              "type": "string"
-                            },
-                            "profileItemId": {
-                              "type": "string"
-                            },
-                            "url": {
-                              "type": "string",
-                              "format": "uri",
-                              "description": "Unique URL of the item."
-                            },
-                            "slug": {
-                              "type": "string",
-                              "description": "Unique slug for the item used to identify it in its URL."
-                            },
-                            "metadata": {
+                          "anyOf": [
+                            {
                               "type": "object",
                               "properties": {
-                                "title": {
-                                  "type": "string",
-                                  "maxLength": 255,
-                                  "description": "The title of the item."
+                                "id": {
+                                  "type": "string"
                                 },
-                                "description": {
-                                  "type": "string",
-                                  "nullable": true,
-                                  "maxLength": 2048,
-                                  "description": "The description of the item."
+                                "profileItemId": {
+                                  "type": "string"
                                 },
-                                "author": {
+                                "url": {
                                   "type": "string",
-                                  "nullable": true,
-                                  "maxLength": 255,
-                                  "description": "The author of the item."
+                                  "format": "uri",
+                                  "description": "Unique URL of the item."
                                 },
-                                "publishedAt": {
+                                "slug": {
+                                  "type": "string",
+                                  "description": "Unique slug for the item used to identify it in its URL."
+                                },
+                                "metadata": {
+                                  "type": "object",
+                                  "properties": {
+                                    "title": {
+                                      "type": "string",
+                                      "maxLength": 255,
+                                      "description": "The title of the item."
+                                    },
+                                    "description": {
+                                      "type": "string",
+                                      "nullable": true,
+                                      "maxLength": 2048,
+                                      "description": "The description of the item."
+                                    },
+                                    "author": {
+                                      "type": "string",
+                                      "nullable": true,
+                                      "maxLength": 255,
+                                      "description": "The author of the item."
+                                    },
+                                    "publishedAt": {
+                                      "anyOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "nullable": true
+                                        }
+                                      ],
+                                      "description": "The published date of the item."
+                                    },
+                                    "savedAt": {
+                                      "anyOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "nullable": true
+                                        }
+                                      ],
+                                      "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
+                                    },
+                                    "stateUpdatedAt": {
+                                      "anyOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "nullable": true
+                                        }
+                                      ],
+                                      "description": "The time the item's state was last updated. Used to sort items in the feed."
+                                    },
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "active",
+                                        "archived",
+                                        "deleted"
+                                      ],
+                                      "description": "Whether the state is active or archived."
+                                    },
+                                    "isFavorite": {
+                                      "type": "boolean",
+                                      "description": "Whether the item is favorited."
+                                    },
+                                    "readingProgress": {
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 100,
+                                      "description": "Progress reading the item. Should only populated if versionName is set."
+                                    },
+                                    "lastReadAt": {
+                                      "anyOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "nullable": true
+                                        }
+                                      ],
+                                      "description": "The last read date of the item. Should only be populated if versionName is set."
+                                    },
+                                    "versionName": {
+                                      "type": "string",
+                                      "nullable": true,
+                                      "maxLength": 255,
+                                      "description": "The version name of the item."
+                                    },
+                                    "thumbnail": {
+                                      "type": "string",
+                                      "nullable": true,
+                                      "description": "The thumbnail URL of the item."
+                                    },
+                                    "favicon": {
+                                      "type": "string",
+                                      "nullable": true,
+                                      "description": "The favicon URL of the item."
+                                    }
+                                  },
+                                  "required": [
+                                    "title",
+                                    "state",
+                                    "isFavorite",
+                                    "readingProgress",
+                                    "versionName"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                "createdAt": {
                                   "anyOf": [
                                     {
                                       "type": "string"
                                     },
                                     {
                                       "type": "string"
-                                    },
-                                    {
-                                      "nullable": true
                                     }
-                                  ],
-                                  "description": "The published date of the item."
+                                  ]
                                 },
-                                "savedAt": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
+                                "labels": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 255
+                                      },
+                                      "color": {
+                                        "type": "string"
+                                      }
                                     },
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "nullable": true
-                                    }
-                                  ],
-                                  "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
+                                    "required": [
+                                      "id",
+                                      "name",
+                                      "color"
+                                    ]
+                                  }
                                 },
-                                "stateUpdatedAt": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "nullable": true
-                                    }
-                                  ],
-                                  "description": "The time the item's state was last updated. Used to sort items in the feed."
-                                },
-                                "state": {
+                                "excerpt": {
                                   "type": "string",
-                                  "enum": [
-                                    "active",
-                                    "archived",
-                                    "deleted"
-                                  ],
-                                  "description": "Whether the state is active or archived."
+                                  "description": "Included if the item is relevant for the search query"
                                 },
-                                "isFavorite": {
-                                  "type": "boolean",
-                                  "description": "Whether the item is favorited."
-                                },
-                                "readingProgress": {
-                                  "type": "number",
-                                  "minimum": 0,
-                                  "maximum": 100,
-                                  "description": "Progress reading the item. Should only populated if versionName is set."
-                                },
-                                "lastReadAt": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
+                                "highlights": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "startOffset": {
+                                        "type": "number"
+                                      },
+                                      "endOffset": {
+                                        "type": "number"
+                                      },
+                                      "text": {
+                                        "type": "string",
+                                        "nullable": true
+                                      },
+                                      "note": {
+                                        "type": "string",
+                                        "nullable": true
+                                      }
                                     },
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "nullable": true
-                                    }
-                                  ],
-                                  "description": "The last read date of the item. Should only be populated if versionName is set."
-                                },
-                                "versionName": {
-                                  "type": "string",
-                                  "nullable": true,
-                                  "maxLength": 255,
-                                  "description": "The version name of the item."
-                                },
-                                "thumbnail": {
-                                  "type": "string",
-                                  "nullable": true,
-                                  "description": "The thumbnail URL of the item."
-                                },
-                                "favicon": {
-                                  "type": "string",
-                                  "nullable": true,
-                                  "description": "The favicon URL of the item."
+                                    "required": [
+                                      "id",
+                                      "startOffset",
+                                      "endOffset",
+                                      "text",
+                                      "note"
+                                    ]
+                                  }
                                 }
                               },
                               "required": [
-                                "title",
-                                "state",
-                                "isFavorite",
-                                "readingProgress",
-                                "versionName"
+                                "id",
+                                "profileItemId",
+                                "url",
+                                "slug",
+                                "metadata",
+                                "createdAt",
+                                "labels"
                               ],
                               "additionalProperties": false
                             },
-                            "createdAt": {
-                              "anyOf": [
-                                {
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
                                   "type": "string"
                                 },
-                                {
+                                "profileItemId": {
                                   "type": "string"
+                                },
+                                "url": {
+                                  "type": "string",
+                                  "format": "uri",
+                                  "description": "Unique URL of the item."
+                                },
+                                "slug": {
+                                  "type": "string",
+                                  "description": "Unique slug for the item used to identify it in its URL."
+                                },
+                                "metadata": {
+                                  "type": "object",
+                                  "properties": {
+                                    "title": {
+                                      "type": "string",
+                                      "maxLength": 255,
+                                      "description": "The title of the item."
+                                    },
+                                    "description": {
+                                      "type": "string",
+                                      "nullable": true,
+                                      "maxLength": 2048,
+                                      "description": "The description of the item."
+                                    },
+                                    "author": {
+                                      "type": "string",
+                                      "nullable": true,
+                                      "maxLength": 255,
+                                      "description": "The author of the item."
+                                    },
+                                    "publishedAt": {
+                                      "anyOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "nullable": true
+                                        }
+                                      ],
+                                      "description": "The published date of the item."
+                                    },
+                                    "savedAt": {
+                                      "anyOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "nullable": true
+                                        }
+                                      ],
+                                      "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
+                                    },
+                                    "thumbnail": {
+                                      "type": "string",
+                                      "nullable": true,
+                                      "description": "The thumbnail URL of the item."
+                                    },
+                                    "favicon": {
+                                      "type": "string",
+                                      "nullable": true,
+                                      "description": "The favicon URL of the item."
+                                    }
+                                  },
+                                  "required": [
+                                    "title"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                "createdAt": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "labels": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 255
+                                      },
+                                      "color": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name",
+                                      "color"
+                                    ]
+                                  }
+                                },
+                                "excerpt": {
+                                  "type": "string",
+                                  "description": "Included if the item is relevant for the search query"
                                 }
-                              ]
-                            },
-                            "labels": {
-                              "type": "array",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "id": {
-                                    "type": "string"
-                                  },
-                                  "name": {
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "maxLength": 255
-                                  },
-                                  "color": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "id",
-                                  "name",
-                                  "color"
-                                ]
-                              }
-                            },
-                            "excerpt": {
-                              "type": "string",
-                              "description": "Included if the item is relevant for the search query"
-                            },
-                            "highlights": {
-                              "type": "array",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "id": {
-                                    "type": "string"
-                                  },
-                                  "startOffset": {
-                                    "type": "number"
-                                  },
-                                  "endOffset": {
-                                    "type": "number"
-                                  },
-                                  "text": {
-                                    "type": "string",
-                                    "nullable": true
-                                  },
-                                  "note": {
-                                    "type": "string",
-                                    "nullable": true
-                                  }
-                                },
-                                "required": [
-                                  "id",
-                                  "startOffset",
-                                  "endOffset",
-                                  "text",
-                                  "note"
-                                ]
-                              }
+                              },
+                              "required": [
+                                "id",
+                                "url",
+                                "slug",
+                                "metadata",
+                                "createdAt"
+                              ],
+                              "additionalProperties": false
                             }
-                          },
-                          "required": [
-                            "id",
-                            "profileItemId",
-                            "url",
-                            "slug",
-                            "metadata",
-                            "createdAt",
-                            "labels"
-                          ],
-                          "additionalProperties": false
+                          ]
                         }
                       },
                       "required": [
@@ -1936,6 +2068,108 @@
                         ]
                       },
                       "description": "A list of slugs that were successfully updated."
+                    }
+                  },
+                  "required": [
+                    "updated"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/items/save": {
+      "post": {
+        "description": "POST /api/v1/items/save",
+        "tags": [
+          "V1"
+        ],
+        "requestBody": {
+          "description": "Request body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "slugs": {
+                    "type": "string",
+                    "description": "A comma-separated list of slugs to update. If the slug is not found, it will be ignored."
+                  }
+                },
+                "required": [
+                  "slugs"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "updated": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "slug": {
+                            "type": "string"
+                          },
+                          "profileItemId": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "slug",
+                          "profileItemId"
+                        ]
+                      },
+                      "description": "A list of items that were successfully saved."
                     }
                   },
                   "required": [
