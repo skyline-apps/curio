@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import { ItemResultSchema } from "@/app/api/v1/items/validation";
+import {
+  ItemResultSchema,
+  PublicItemResultSchema,
+} from "@/app/api/v1/items/validation";
 
 export enum UploadStatus {
   UPDATED_MAIN = "UPDATED_MAIN",
@@ -28,7 +31,7 @@ export const GetItemContentRequestSchema = z.object({
 export const GetItemContentResponseSchema = z.union([
   z.object({
     content: z.string().optional(),
-    item: ItemResultWithHighlightsSchema,
+    item: z.union([ItemResultWithHighlightsSchema, PublicItemResultSchema]),
   }),
   z.object({
     error: z.string(),

@@ -17,15 +17,68 @@ import {
 
 const log = createLogger("api/v1/public/items/content");
 
+async function getDefaultContent(
+  slug: string,
+): Promise<APIResponse<GetItemContentResponse>> {
+  const itemResult = await db
+    .select({
+      id: items.id,
+      url: items.url,
+      slug: items.slug,
+      createdAt: items.createdAt,
+    })
+    .from(items)
+    .where(eq(items.slug, slug))
+    .limit(1);
+
+  if (!itemResult.length) {
+    return APIResponseJSON({ error: "Item not found." }, { status: 404 });
+  }
+
+  try {
+    const { content } = await storage.getItemContent(slug, null);
+    const metadata = await storage.getItemMetadata(slug);
+
+    const response = GetItemContentResponseSchema.parse({
+      content,
+      item: {
+        id: itemResult[0].id,
+        slug: itemResult[0].slug,
+        url: itemResult[0].url,
+        createdAt: itemResult[0].createdAt,
+        metadata: {
+          title: metadata.title,
+          description: metadata.description,
+          publishedAt: metadata.publishedAt,
+          thumbnail: metadata.thumbnail,
+          favicon: metadata.favicon,
+          savedAt: metadata.timestamp,
+        },
+      },
+    });
+
+    return APIResponseJSON(response);
+  } catch (error: unknown) {
+    if (error instanceof StorageError) {
+      return APIResponseJSON({
+        item: {
+          id: itemResult[0].id,
+          slug: itemResult[0].slug,
+          url: itemResult[0].url,
+          createdAt: itemResult[0].createdAt,
+        },
+      });
+    } else {
+      throw error;
+    }
+  }
+}
+
 export async function GET(
   request: APIRequest,
 ): Promise<APIResponse<GetItemContentResponse>> {
   const userId = request.headers.get("x-user-id");
   const apiKey = request.headers.get("x-api-key");
-  const profileResult = await checkUserProfile(userId, apiKey);
-  if ("error" in profileResult) {
-    return profileResult.error as APIResponse<GetItemContentResponse>;
-  }
 
   const url = new URL(request.url);
   const data = await parseAPIRequest(
@@ -39,6 +92,13 @@ export async function GET(
   const { slug } = data;
 
   try {
+    const profileResult = await checkUserProfile(userId, apiKey);
+    const isAuthenticated = !("error" in profileResult);
+
+    if (!isAuthenticated) {
+      return getDefaultContent(slug);
+    }
+
     const item = await db
       .select({
         id: items.id,
@@ -97,7 +157,7 @@ export async function GET(
       .limit(1);
 
     if (!item.length) {
-      return APIResponseJSON({ error: "Item not found." }, { status: 404 });
+      return getDefaultContent(slug);
     }
 
     const itemResponse = ItemResultWithHighlightsSchema.parse(item[0]);

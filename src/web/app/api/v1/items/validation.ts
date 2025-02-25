@@ -142,6 +142,8 @@ export const ItemResultSchema = z
 export type ItemResult = z.infer<typeof ItemResultSchema>;
 
 export const PublicItemResultSchema = ItemResultSchema.extend({
+  profileItemId: z.string().optional(),
+  labels: z.array(LabelSchema).optional(),
   metadata: PublicItemMetadataSchema.merge(ItemImagesSchema).strict(),
 }).strict();
 
