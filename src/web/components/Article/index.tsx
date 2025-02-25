@@ -12,15 +12,26 @@ interface ArticleProps {
 
 const Article: React.FC<ArticleProps> = ({ content }: ArticleProps) => {
   const { updateReadingProgress } = useArticleUpdate();
-  const { loadedItem } = useContext(CurrentItemContext);
+  const { loadedItem, isEditable } = useContext(CurrentItemContext);
+
+  const highlights =
+    loadedItem?.item && "highlights" in loadedItem?.item
+      ? loadedItem?.item.highlights || []
+      : [];
 
   return (
     <>
       <ItemActionShortcuts />
       <MarkdownViewer
-        readingProgress={loadedItem?.item.metadata.readingProgress || 0}
-        highlights={loadedItem?.item.highlights || []}
-        onProgressChange={updateReadingProgress}
+        readingProgress={
+          isEditable(loadedItem?.item)
+            ? loadedItem?.item.metadata.readingProgress || 0
+            : 0
+        }
+        highlights={highlights}
+        onProgressChange={
+          isEditable(loadedItem?.item) ? updateReadingProgress : undefined
+        }
         className="py-4"
       >
         {content}

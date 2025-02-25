@@ -60,6 +60,7 @@ export async function GET(
         id: items.id,
         url: items.url,
         slug: items.slug,
+        // TODO: Properly differentiate between ItemResultSchema and PublicItemResultSchema
         profileItemId: profileItems.id,
         createdAt: items.createdAt,
         metadata: {

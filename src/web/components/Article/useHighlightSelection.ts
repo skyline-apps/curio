@@ -4,8 +4,8 @@ import {
   type Highlight,
   type NewHighlight,
 } from "@/app/api/v1/items/highlights/validation";
+import { useAppLayout } from "@/providers/AppLayoutProvider";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
-import { useSettings } from "@/providers/SettingsProvider";
 import { createLogger } from "@/utils/logger";
 
 const log = createLogger("useHighlightSelection");
@@ -93,7 +93,7 @@ export function calculateHighlight(selection: Selection): NewHighlight | null {
 export function useHighlightSelection({
   contentRef,
 }: UseHighlightSelectionProps): UseHighlightSelectionResult {
-  const { updateAppLayout } = useSettings();
+  const { updateAppLayout } = useAppLayout();
   const { draftHighlight, setDraftHighlight } = useContext(CurrentItemContext);
 
   const selectDraftHighlight = useCallback(

@@ -6,6 +6,7 @@ import { db, eq } from "@/db";
 import { profiles } from "@/db/schema";
 import { createClient } from "@/utils/supabase/server";
 
+import { AppLayoutProvider } from "./AppLayoutProvider";
 import { BrowserMessageProvider } from "./BrowserMessageProvider";
 import { CacheProvider } from "./CacheProvider";
 import { ClientProviders } from "./ClientProviders";
@@ -58,13 +59,15 @@ const Providers: React.FC<PropsWithChildren> = async ({
       <HeroUIProvider>
         <ToastProvider>
           <UserProvider user={currentUser}>
-            {user ? (
-              <SettingsProvider>
-                <AuthenticatedProviders>{children}</AuthenticatedProviders>
-              </SettingsProvider>
-            ) : (
-              children
-            )}
+            <AppLayoutProvider>
+              {user ? (
+                <SettingsProvider>
+                  <AuthenticatedProviders>{children}</AuthenticatedProviders>
+                </SettingsProvider>
+              ) : (
+                <CurrentItemProvider>{children}</CurrentItemProvider>
+              )}
+            </AppLayoutProvider>
           </UserProvider>
         </ToastProvider>
       </HeroUIProvider>

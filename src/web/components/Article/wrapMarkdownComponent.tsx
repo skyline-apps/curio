@@ -11,6 +11,7 @@ import {
 import Button from "@/components/ui/Button";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { BrowserMessageContext } from "@/providers/BrowserMessageProvider";
+import { UserContext } from "@/providers/UserProvider";
 
 import ArticleHeading from "./ArticleHeading";
 import { HighlightSpan } from "./HighlightSpan";
@@ -87,6 +88,7 @@ const LinkInfo: React.FC<LinkInfoProps> = ({
   children,
   href,
 }: LinkInfoProps) => {
+  const { user } = useContext(UserContext);
   const { saveItemContent } = useContext(BrowserMessageContext);
 
   return (
@@ -100,13 +102,15 @@ const LinkInfo: React.FC<LinkInfoProps> = ({
           >
             {`${new URL(href).hostname}${new URL(href).pathname}`}
           </a>
-          <Button
-            className="shrink-0"
-            size="xs"
-            onPress={() => href && saveItemContent(href)}
-          >
-            Save to Curio
-          </Button>
+          {user.id && (
+            <Button
+              className="shrink-0"
+              size="xs"
+              onPress={() => href && saveItemContent(href)}
+            >
+              Save to Curio
+            </Button>
+          )}
         </span>
       }
     >

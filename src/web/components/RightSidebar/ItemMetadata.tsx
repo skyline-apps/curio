@@ -1,41 +1,43 @@
 import Link from "next/link";
-import { useCallback } from "react";
+import { useCallback, useContext } from "react";
 
 import Thumbnail from "@/components/Image/Thumbnail";
 import ItemActions from "@/components/Items/ItemActions";
 import { useItemUpdate } from "@/components/Items/ItemActions/actions";
 import Labels, { Label } from "@/components/Labels";
-import type { Item } from "@/providers/ItemsProvider";
+import { CurrentItemContext } from "@/providers/CurrentItemProvider";
+import type { Item, PublicItem } from "@/providers/ItemsProvider";
 import { useSettings } from "@/providers/SettingsProvider";
 
 interface ItemMetadataProps {
-  item?: Item;
+  item?: Item | PublicItem;
 }
 
 const ItemMetadata: React.FC<ItemMetadataProps> = ({
   item,
 }: ItemMetadataProps) => {
+  const { isEditable } = useContext(CurrentItemContext);
   const { labels } = useSettings();
   const { addItemsLabel, removeItemsLabel } = useItemUpdate();
 
   const handleAddLabel = useCallback(
     async (label: Label): Promise<void> => {
-      if (!item) return;
+      if (!item || !isEditable(item)) return;
       await addItemsLabel([item], label);
     },
-    [item, addItemsLabel],
+    [item, isEditable, addItemsLabel],
   );
 
   const handleDeleteLabel = useCallback(
     async (labelId: string): Promise<void> => {
-      if (!item || !item.labels) return;
+      if (!item || !isEditable(item) || !item.labels) return;
 
       const labelToRemove = item.labels.find((l) => l.id === labelId);
       if (labelToRemove) {
         await removeItemsLabel([item], labelToRemove);
       }
     },
-    [item, removeItemsLabel],
+    [item, isEditable, removeItemsLabel],
   );
 
   if (!item || !item.metadata) {
@@ -84,7 +86,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
               </p>
             )}
           </div>
-          <ItemActions item={item} showAdvanced />
+          {isEditable(item) && <ItemActions item={item} showAdvanced />}
         </div>
         {metadata.description && (
           <p className="text-sm text-secondary max-h-20 overflow-hidden">

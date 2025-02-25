@@ -15,8 +15,8 @@ import {
   type NewHighlight,
 } from "@/app/api/v1/items/highlights/validation";
 import { GetItemContentResponse } from "@/app/api/v1/public/items/content/validation";
-import { Item, ItemsContext } from "@/providers/ItemsProvider";
-import { useSettings } from "@/providers/SettingsProvider";
+import { useAppLayout } from "@/providers/AppLayoutProvider";
+import { Item, ItemsContext, PublicItem } from "@/providers/ItemsProvider";
 import { handleAPIResponse } from "@/utils/api";
 import { createLogger } from "@/utils/logger";
 
@@ -32,7 +32,7 @@ export type ItemWithContent = Omit<
 export const ITEM_CONTENT_QUERY_KEY = "itemContent";
 
 export type CurrentItemContextType = {
-  currentItem: Item | null; // Metadata of currently loaded or selected item
+  currentItem: Item | PublicItem | null; // Metadata of currently loaded or selected item
   loadedItem: ItemWithContent | null; // Contents of currently loaded item
   selectedItems: Set<string>; // All selected item slugs
   selectItems: (
@@ -51,6 +51,7 @@ export type CurrentItemContextType = {
   draftHighlight: Highlight | NewHighlight | null;
   setDraftHighlight: (highlight: Highlight | NewHighlight | null) => void;
   updateDraftHighlightNote: (note: string) => void;
+  isEditable: (item: Item | PublicItem | null | undefined) => item is Item;
 };
 
 interface CurrentItemProviderProps {
@@ -71,6 +72,9 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
   draftHighlight: null,
   setDraftHighlight: () => {},
   updateDraftHighlightNote: () => {},
+  isEditable: (item: Item | PublicItem | null | undefined): item is Item => {
+    return item ? typeof item.profileItemId === "string" : false;
+  },
 });
 
 export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
@@ -88,7 +92,9 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     Highlight | NewHighlight | null
   >(null);
 
-  const { updateAppLayout } = useSettings();
+  const { updateAppLayout } = useAppLayout();
+  // Note that this ItemsContext may not be available if CurrentItemProvider is being used for an
+  // unauthenticated user. The core functionality of getting current item content should still work.
   const { items } = useContext(ItemsContext);
 
   const clearSelectedItems = useCallback((): void => {
@@ -155,40 +161,41 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     ],
   );
 
-  const { data, isLoading, error, refetch } = useQuery<ItemWithContent>({
-    enabled: !!itemLoadedSlug,
-    queryKey: [ITEM_CONTENT_QUERY_KEY, itemLoadedSlug],
-    queryFn: async (): Promise<ItemWithContent> => {
-      if (!itemLoadedSlug) throw new Error("No item to fetch");
-      const searchParams = new URLSearchParams({
-        slug: itemLoadedSlug,
-      });
-      const result = await fetch(
-        `/api/v1/public/items/content?${searchParams.toString()}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
+  const { data, isLoading, error, refetch, isPending } =
+    useQuery<ItemWithContent>({
+      enabled: !!itemLoadedSlug,
+      queryKey: [ITEM_CONTENT_QUERY_KEY, itemLoadedSlug],
+      queryFn: async (): Promise<ItemWithContent> => {
+        if (!itemLoadedSlug) throw new Error("No item to fetch");
+        const searchParams = new URLSearchParams({
+          slug: itemLoadedSlug,
+        });
+        const result = await fetch(
+          `/api/v1/public/items/content?${searchParams.toString()}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
           },
-        },
-      ).then(handleAPIResponse<GetItemContentResponse>);
-      if (!result || "error" in result) {
-        log.error(
-          `Failed to fetch item content for ${itemLoadedSlug}`,
-          result?.error,
-        );
-        throw new Error(`Failed to fetch item content`);
-      }
-      if (result) {
-        if (typeof window !== "undefined" && window.innerWidth > 1048) {
-          updateAppLayout({ rightSidebarOpen: true });
-        } else {
-          updateAppLayout({ rightSidebarOpen: false });
+        ).then(handleAPIResponse<GetItemContentResponse>);
+        if (!result || "error" in result) {
+          log.error(
+            `Failed to fetch item content for ${itemLoadedSlug}`,
+            result?.error,
+          );
+          throw new Error(`Failed to fetch item content`);
         }
-      }
-      return result;
-    },
-  });
+        if (result) {
+          if (typeof window !== "undefined" && window.innerWidth > 1048) {
+            updateAppLayout({ rightSidebarOpen: true });
+          } else {
+            updateAppLayout({ rightSidebarOpen: false });
+          }
+        }
+        return result;
+      },
+    });
 
   const fetchContent = useCallback(
     async (slug: string, refresh?: boolean): Promise<void> => {
@@ -208,16 +215,29 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   const firstItem =
     selectedItems.size === 1 ? selectedItems.values().next().value : null;
 
+  function isEditable(
+    item: Item | PublicItem | null | undefined,
+  ): item is Item {
+    return item ? typeof item.profileItemId === "string" : false;
+  }
+
   const currentItem = useMemo(() => {
+    let item = null;
     if (itemLoadedSlug) {
       if (!data?.item && firstItem) {
-        return items.find((item) => item.slug === firstItem) || null;
+        item = items.find((item) => item.slug === firstItem) || null;
+      } else {
+        item = data?.item || null;
       }
-      return data?.item || null;
     } else if (firstItem) {
-      return items.find((item) => item.slug === firstItem) || null;
+      item = items.find((item) => item.slug === firstItem) || null;
     }
-    return null;
+
+    if (isEditable(item)) {
+      return item;
+    } else {
+      return item as PublicItem;
+    }
   }, [items, data, itemLoadedSlug, firstItem]);
 
   const loadedItem = useMemo(() => {
@@ -244,13 +264,14 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         selectItems,
         clearSelectedItems,
         fetchContent,
-        loading: isLoading,
+        loading: isLoading || isPending,
         loadingError: error ? error.message || "Error loading items." : null,
         lastSelectionIndex,
         setLastSelectionIndex,
         draftHighlight,
         setDraftHighlight,
         updateDraftHighlightNote,
+        isEditable,
       }}
     >
       {children}

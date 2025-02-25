@@ -5,21 +5,21 @@ import { HiChevronDoubleLeft, HiChevronDoubleRight } from "react-icons/hi2";
 import BulkActions from "@/components/Items/ItemActions/BulkActions";
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
+import { useAppLayout } from "@/providers/AppLayoutProvider";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import { ItemsContext } from "@/providers/ItemsProvider";
-import { useSettings } from "@/providers/SettingsProvider";
 import { cn } from "@/utils/cn";
 
 import HighlightMetadata from "./HighlightMetadata";
 import ItemMetadata from "./ItemMetadata";
 
 const RightSidebar: React.FC = () => {
-  const { selectedItems, currentItem, draftHighlight } =
+  const { selectedItems, currentItem, draftHighlight, isEditable } =
     useContext(CurrentItemContext);
   const {
     appLayout: { rightSidebarOpen },
     updateAppLayout,
-  } = useSettings();
+  } = useAppLayout();
   const { totalItems } = useContext(ItemsContext);
 
   const toggleSidebar = (): void => {
@@ -45,7 +45,7 @@ const RightSidebar: React.FC = () => {
             )}
           >
             {rightSidebarOpen &&
-              (draftHighlight ? (
+              (draftHighlight && isEditable(currentItem) ? (
                 <HighlightMetadata />
               ) : currentItem ? (
                 <ItemMetadata item={currentItem || undefined} />
