@@ -14,7 +14,7 @@ import {
 
 export const ItemActionShortcuts = (): null => {
   const { items } = useContext(ItemsContext);
-  const { loadedItem } = useContext(CurrentItemContext);
+  const { loadedItem, isEditable } = useContext(CurrentItemContext);
 
   const { updateItemsState, updateItemsFavorite } = useItemUpdate();
 
@@ -68,7 +68,7 @@ export const ItemActionShortcuts = (): null => {
   };
 
   const favoriteCurrentItem = async (): Promise<boolean> => {
-    if (!loadedItem?.item) {
+    if (!loadedItem?.item || !isEditable(loadedItem.item)) {
       return false;
     }
     const currentFavoriteState = loadedItem.item.metadata.isFavorite;
