@@ -9,6 +9,7 @@ import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_PROFILE_ID,
+  DEFAULT_TEST_PROFILE_ID_2,
   makeAuthenticatedMockRequest,
 } from "@/utils/test/api";
 import { testDb } from "@/utils/test/provider";
@@ -135,6 +136,68 @@ describe("/api/v1/items/read", () => {
         (updatedItem[0].lastReadAt as Date).getTime() >
           new Date("2015-02-10T12:50:00-08:00").getTime(),
       ).toBe(true);
+    });
+
+    it("should return 200 and not update items for other users", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEM);
+      await testDb.db.insert(profileItems).values([
+        {
+          profileId: DEFAULT_TEST_PROFILE_ID,
+          itemId: TEST_ITEM_ID,
+          title: "Example",
+          description: "An example item",
+          author: "Test Author",
+          thumbnail: "https://example.com/thumb.jpg",
+          favicon: "https://example.com/favicon.ico",
+          publishedAt: ORIGINAL_PUBLISHED_DATE,
+          savedAt: ORIGINAL_CREATION_DATE,
+          stateUpdatedAt: ORIGINAL_CREATION_DATE,
+          isFavorite: true,
+          versionName: MOCK_VERSION,
+        },
+        {
+          profileId: DEFAULT_TEST_PROFILE_ID_2,
+          itemId: TEST_ITEM_ID,
+          title: "Example 2",
+          description: "An example item",
+          author: "Test Author",
+          thumbnail: "https://example.com/thumb.jpg",
+          favicon: "https://example.com/favicon.ico",
+          publishedAt: ORIGINAL_PUBLISHED_DATE,
+          savedAt: ORIGINAL_CREATION_DATE,
+          stateUpdatedAt: ORIGINAL_CREATION_DATE,
+          isFavorite: true,
+          versionName: null,
+        },
+      ]);
+
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "POST",
+        body: { slug: TEST_ITEM_SLUG, readingProgress: 50 },
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data).toEqual({
+        slug: TEST_ITEM_SLUG,
+        readingProgress: 50,
+        versionName: MOCK_VERSION,
+      });
+      expect(getItemMetadata).not.toHaveBeenCalled();
+
+      const updatedItems = await testDb.db
+        .select()
+        .from(profileItems)
+        .where(eq(profileItems.itemId, TEST_ITEM_ID))
+        .orderBy(profileItems.title);
+
+      expect(updatedItems).toHaveLength(2);
+      expect(updatedItems[0].versionName).toBe(MOCK_VERSION);
+      expect(updatedItems[0].readingProgress).toBe(50);
+      expect(updatedItems[1].versionName).toBe(null);
+      expect(updatedItems[1].readingProgress).toBe(0);
     });
 
     it("should return 401 if user profile not found", async () => {

@@ -6,6 +6,7 @@ import { ColorScheme, profiles } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_PROFILE_ID,
+  DEFAULT_TEST_PROFILE_ID_2,
   makeAuthenticatedMockRequest,
 } from "@/utils/test/api";
 import { testDb } from "@/utils/test/provider";
@@ -72,10 +73,15 @@ describe("/api/v1/user/settings", () => {
         public: true,
       });
 
-      const profile = await testDb.db.query.profiles.findFirst({
-        where: eq(profiles.id, DEFAULT_TEST_PROFILE_ID),
-      });
-      expect(profile?.public).toBe(true);
+      const allProfiles = await testDb.db
+        .select()
+        .from(profiles)
+        .orderBy(profiles.id);
+      expect(allProfiles).toHaveLength(2);
+      expect(allProfiles[0].public).toBe(true);
+      expect(allProfiles[0].id).toBe(DEFAULT_TEST_PROFILE_ID);
+      expect(allProfiles[1].public).toBe(false);
+      expect(allProfiles[1].id).toBe(DEFAULT_TEST_PROFILE_ID_2);
     });
 
     it("should return 400 if the settings object is invalid", async () => {
