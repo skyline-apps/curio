@@ -4,6 +4,7 @@ import { useContext } from "react";
 
 import { UpdateFavoriteResponse } from "@/app/api/v1/items/favorite/validation";
 import { UpdateLabelsResponse } from "@/app/api/v1/items/labels/validation";
+import { SaveResponse } from "@/app/api/v1/items/save/validation";
 import { UpdateStateResponse } from "@/app/api/v1/items/state/validation";
 import { showConfirm } from "@/components/ui/Modal/Dialog";
 import { ItemState } from "@/db/schema";
@@ -36,6 +37,8 @@ interface UseItemUpdate {
     labelToRemove: ItemLabel,
   ) => Promise<UpdateLabelsResponse>;
   refetchItem: (item: Item) => Promise<void>;
+  saveExistingItems: (itemSlugs: string[]) => Promise<void>;
+  isSavingExisting: boolean;
 }
 
 export const useItemUpdate = (): UseItemUpdate => {
@@ -73,6 +76,9 @@ export const useItemUpdate = (): UseItemUpdate => {
         clearSelectedItems();
       }
     },
+    onError: () => {
+      invalidateCache();
+    },
   };
 
   const updateItemsFavoriteMutationOptions: UseMutationOptions<
@@ -97,7 +103,12 @@ export const useItemUpdate = (): UseItemUpdate => {
         }),
       }).then(handleAPIResponse<UpdateFavoriteResponse>);
     },
-    onSuccess: () => {},
+    onSuccess: () => {
+      invalidateCache();
+    },
+    onError: () => {
+      invalidateCache();
+    },
   };
 
   const updateItemsLabelMutationOptions: UseMutationOptions<
@@ -130,6 +141,9 @@ export const useItemUpdate = (): UseItemUpdate => {
       if (!loadedItem) {
         invalidateCache();
       }
+    },
+    onError: () => {
+      invalidateCache();
     },
   };
 
@@ -166,6 +180,9 @@ export const useItemUpdate = (): UseItemUpdate => {
         invalidateCache();
       }
     },
+    onError: () => {
+      invalidateCache();
+    },
   };
 
   const updateItemContentMutationOptions: UseMutationOptions<
@@ -197,6 +214,31 @@ export const useItemUpdate = (): UseItemUpdate => {
     },
   };
 
+  const saveItemsMutationOptions: UseMutationOptions<
+    void,
+    Error,
+    { itemSlugs: string[] }
+  > = {
+    mutationFn: async ({ itemSlugs }) => {
+      await fetch("/api/v1/items/save", {
+        method: "POST",
+        body: JSON.stringify({
+          slugs: itemSlugs.join(","),
+        }),
+      })
+        .then(handleAPIResponse<SaveResponse>)
+        .then((result) => {
+          optimisticUpdateItems(result.updated);
+        });
+    },
+    onSuccess: () => {
+      invalidateCache();
+    },
+    onError: () => {
+      invalidateCache();
+    },
+  };
+
   const updateItemsStateMutation = useMutation(updateItemsStateMutationOptions);
   const updateItemsFavoriteMutation = useMutation(
     updateItemsFavoriteMutationOptions,
@@ -206,6 +248,7 @@ export const useItemUpdate = (): UseItemUpdate => {
   const updateItemContentMutation = useMutation(
     updateItemContentMutationOptions,
   );
+  const saveItemsMutation = useMutation(saveItemsMutationOptions);
 
   const updateItemsState = async (
     itemSlugs: string[],
@@ -251,11 +294,17 @@ export const useItemUpdate = (): UseItemUpdate => {
     return await updateItemContentMutation.mutateAsync({ item });
   };
 
+  const saveExistingItems = async (itemSlugs: string[]): Promise<void> => {
+    return await saveItemsMutation.mutateAsync({ itemSlugs });
+  };
+
   return {
     updateItemsState,
     updateItemsFavorite,
     addItemsLabel,
     removeItemsLabel,
     refetchItem,
+    saveExistingItems,
+    isSavingExisting: saveItemsMutation.isPending,
   };
 };

@@ -68,7 +68,9 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
                 highlights:
                   "highlights" in item
                     ? item.highlights
-                    : oldData.item.highlights,
+                    : "highlights" in oldData.item
+                      ? oldData.item.highlights
+                      : [],
                 labels,
               },
             };

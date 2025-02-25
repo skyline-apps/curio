@@ -4,10 +4,12 @@ import { useCallback, useContext } from "react";
 import Thumbnail from "@/components/Image/Thumbnail";
 import ItemActions from "@/components/Items/ItemActions";
 import { useItemUpdate } from "@/components/Items/ItemActions/actions";
+import OtherItemActions from "@/components/Items/ItemActions/OtherItemActions";
 import Labels, { Label } from "@/components/Labels";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import type { Item, PublicItem } from "@/providers/ItemsProvider";
 import { useSettings } from "@/providers/SettingsProvider";
+import { UserContext } from "@/providers/UserProvider";
 
 interface ItemMetadataProps {
   item?: Item | PublicItem;
@@ -16,6 +18,7 @@ interface ItemMetadataProps {
 const ItemMetadata: React.FC<ItemMetadataProps> = ({
   item,
 }: ItemMetadataProps) => {
+  const { user } = useContext(UserContext);
   const { isEditable } = useContext(CurrentItemContext);
   const { labels } = useSettings();
   const { addItemsLabel, removeItemsLabel } = useItemUpdate();
@@ -86,7 +89,11 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
               </p>
             )}
           </div>
-          {isEditable(item) && <ItemActions item={item} showAdvanced />}
+          {isEditable(item) ? (
+            <ItemActions item={item} showAdvanced />
+          ) : user.id ? (
+            <OtherItemActions item={item} />
+          ) : null}
         </div>
         {metadata.description && (
           <p className="text-sm text-secondary max-h-20 overflow-hidden">
