@@ -15,166 +15,27 @@ import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_PROFILE_ID,
-  DEFAULT_TEST_PROFILE_ID_2,
   makeAuthenticatedMockRequest,
   makeUnauthenticatedMockRequest,
 } from "@/utils/test/api";
+import {
+  MOCK_ITEMS,
+  MOCK_LABELS,
+  MOCK_PROFILE_ITEM_LABELS,
+  MOCK_PROFILE_ITEMS,
+  NONEXISTENT_USER_ID,
+  TEST_ITEM_ID_1,
+  TEST_ITEM_ID_2,
+  TEST_ITEM_ID_3,
+  TEST_ITEM_ID_DELETED,
+  TEST_ITEM_URL_1,
+  TEST_ITEM_URL_2,
+  TEST_LABEL_ID_1,
+  TEST_LABEL_ID_2,
+} from "@/utils/test/data";
 import { testDb } from "@/utils/test/provider";
 
 import { GET, POST } from "./route";
-
-const TEST_ITEM_ID = "123e4567-e89b-12d3-a456-426614174001";
-const TEST_ITEM_URL_1 = "https://example.com";
-const TEST_ITEM_ID_2 = "123e4567-e89b-12d3-a456-426614174000";
-const TEST_ITEM_URL_2 = "https://example2.com";
-const TEST_ITEM_ID_3 = "123e4567-e89b-12d3-a456-426614174003";
-const TEST_ITEM_URL_3 = "https://example3.com";
-const TEST_ITEM_ID_DELETED = "123e4567-e89b-12d3-a456-426614174004";
-const TEST_ITEM_URL_DELETED = "https://example4.com";
-const NONEXISTENT_USER_ID = "123e4567-e89b-12d3-a456-426614174003";
-
-const TEST_LABEL_ID_1 = "123e4567-e89b-12d3-a456-426614174005";
-const TEST_LABEL_ID_2 = "123e4567-e89b-12d3-a456-426614174006";
-
-const MOCK_ITEMS = [
-  {
-    id: TEST_ITEM_ID,
-    url: TEST_ITEM_URL_1,
-    slug: "example-com",
-    createdAt: new Date("2025-01-10T12:52:56-08:00"),
-    updatedAt: new Date("2025-01-10T12:52:56-08:00"),
-  },
-  {
-    id: TEST_ITEM_ID_2,
-    url: TEST_ITEM_URL_2,
-    slug: "example2-com",
-    createdAt: new Date("2025-01-10T12:53:56-08:00"),
-    updatedAt: new Date("2025-01-10T12:53:56-08:00"),
-  },
-  {
-    id: TEST_ITEM_ID_3,
-    url: TEST_ITEM_URL_3,
-    slug: "example3-com",
-    createdAt: new Date("2025-01-10T12:54:56-08:00"),
-    updatedAt: new Date("2025-01-10T12:54:56-08:00"),
-  },
-  {
-    id: TEST_ITEM_ID_DELETED,
-    url: TEST_ITEM_URL_DELETED,
-    slug: "example4-com",
-    createdAt: new Date("2025-01-10T12:54:56-08:00"),
-    updatedAt: new Date("2025-01-10T12:54:56-08:00"),
-  },
-];
-
-const MOCK_LABELS = [
-  {
-    id: TEST_LABEL_ID_1,
-    profileId: DEFAULT_TEST_PROFILE_ID,
-    name: "Test Label 1",
-    color: "#ff0000",
-    createdAt: new Date("2025-01-10T12:52:56-08:00"),
-    updatedAt: new Date("2025-01-10T12:52:56-08:00"),
-  },
-  {
-    id: TEST_LABEL_ID_2,
-    profileId: DEFAULT_TEST_PROFILE_ID,
-    name: "Test Label 2",
-    color: "#00ff00",
-    createdAt: new Date("2025-01-10T12:52:56-08:00"),
-    updatedAt: new Date("2025-01-10T12:52:56-08:00"),
-  },
-];
-
-const MOCK_PROFILE_ITEMS = [
-  {
-    id: "123e4567-e89b-12d3-a456-426614174999",
-    profileId: DEFAULT_TEST_PROFILE_ID,
-    itemId: TEST_ITEM_ID,
-    title: "Example 1",
-    description: "First example item",
-    author: "Test Author",
-    state: ItemState.ARCHIVED,
-    stateUpdatedAt: new Date("2024-04-30T12:52:59-08:00"),
-    thumbnail: "https://example.com/thumb1.jpg",
-    favicon: "https://example.com/favicon1.ico",
-    publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-    savedAt: new Date("2025-01-10T12:52:56-08:00"),
-  },
-  {
-    id: "123e4567-e89b-12d3-a456-426614174998",
-    profileId: DEFAULT_TEST_PROFILE_ID,
-    itemId: TEST_ITEM_ID_2,
-    title: "Example item 2",
-    description: "Second example item HelLO",
-    author: "Test Author",
-    state: ItemState.ACTIVE,
-    stateUpdatedAt: new Date("2024-04-25T12:52:59-08:00"),
-    isFavorite: true,
-    thumbnail: "https://example.com/thumb2.jpg",
-    favicon: "https://example.com/favicon2.ico",
-    publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-    savedAt: new Date("2025-01-10T12:52:57-08:00"),
-  },
-  {
-    id: "123e4567-e89b-12d3-a456-426614174997",
-    profileId: DEFAULT_TEST_PROFILE_ID,
-    itemId: TEST_ITEM_ID_3,
-    title: "Example 3",
-    description: "Third example item 2",
-    author: "Test Author",
-    thumbnail: "https://example.com/thumb3.jpg",
-    favicon: "https://example.com/favicon3.ico",
-    publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-    savedAt: new Date("2025-01-10T12:52:58-08:00"),
-    state: ItemState.ARCHIVED,
-    stateUpdatedAt: new Date("2024-04-20T12:52:59-08:00"),
-    isFavorite: false,
-    readingProgress: 10,
-    lastReadAt: new Date("2025-01-15T12:00:00-08:00"),
-    versionName: "2024-01-01",
-  },
-  {
-    id: "123e4567-e89b-12d3-a456-426614174996",
-    profileId: DEFAULT_TEST_PROFILE_ID,
-    itemId: TEST_ITEM_ID_DELETED,
-    title: "Example 3 New title",
-    description: "Third example item",
-    author: "Test Author",
-    thumbnail: "https://example.com/thumb3.jpg",
-    favicon: "https://example.com/favicon3.ico",
-    publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-    savedAt: new Date("2025-01-10T12:52:56-08:04"),
-    state: ItemState.DELETED,
-    stateUpdatedAt: new Date("2024-04-12T12:52:59-08:00"),
-  },
-  {
-    id: "123e4567-e89b-12d3-a456-426614174995",
-    profileId: DEFAULT_TEST_PROFILE_ID_2,
-    itemId: TEST_ITEM_ID_3,
-    title: "Example 3 New title",
-    description: "Third example item",
-    author: "Test Author",
-    thumbnail: "https://example.com/thumb3.jpg",
-    favicon: "https://example.com/favicon3.ico",
-    publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-    savedAt: new Date("2025-01-10T12:52:56-08:04"),
-    stateUpdatedAt: new Date("2024-05-31T12:52:59-08:00"),
-  },
-];
-
-const MOCK_PROFILE_ITEM_LABELS = [
-  {
-    id: "123e4567-e89b-12d3-a456-426614174007",
-    profileItemId: MOCK_PROFILE_ITEMS[0].id,
-    labelId: TEST_LABEL_ID_1,
-  },
-  {
-    id: "123e4567-e89b-12d3-a456-426614174008",
-    profileItemId: MOCK_PROFILE_ITEMS[0].id,
-    labelId: TEST_LABEL_ID_2,
-  },
-];
 
 describe("/api/v1/items", () => {
   describe("GET /api/v1/items", () => {
@@ -198,7 +59,7 @@ describe("/api/v1/items", () => {
 
       const data = await response.json();
       expect(data.items).toHaveLength(1);
-      expect(data.items[0].id).toBe(TEST_ITEM_ID);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
       expect(data.total).toBe(1);
       expect(data.items[0].metadata).toEqual({
         author: "Test Author",
@@ -262,7 +123,7 @@ describe("/api/v1/items", () => {
 
       const data = await response.json();
       expect(data.items).toHaveLength(1);
-      expect(data.items[0].id).toBe(TEST_ITEM_ID);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
       expect(data.total).toBe(1);
       expect(data.items[0].metadata).toEqual({
         author: "Test Author",
@@ -287,7 +148,7 @@ describe("/api/v1/items", () => {
       await testDb.db.insert(profileItems).values([
         {
           profileId: DEFAULT_TEST_PROFILE_ID,
-          itemId: TEST_ITEM_ID,
+          itemId: TEST_ITEM_ID_1,
           title: "Item 1",
           state: ItemState.ACTIVE,
           stateUpdatedAt: new Date("2025-01-12T12:52:56-08:00"),
@@ -351,7 +212,7 @@ describe("/api/v1/items", () => {
       expect(firstData.nextCursor).toBe(
         MOCK_PROFILE_ITEMS[1].stateUpdatedAt.toISOString(),
       );
-      expect(firstData.items[0].id).toBe(TEST_ITEM_ID); // Most recent first
+      expect(firstData.items[0].id).toBe(TEST_ITEM_ID_1); // Most recent first
       expect(firstData.items[1].id).toBe(TEST_ITEM_ID_2);
 
       const secondParams = new URLSearchParams({
@@ -409,7 +270,7 @@ describe("/api/v1/items", () => {
       expect(firstData.nextOffset).toBe(2);
       expect(firstData.items[0].id).toBe(TEST_ITEM_ID_2);
       expect(firstData.items[0].excerpt).toBe("blah2");
-      expect(firstData.items[1].id).toBe(TEST_ITEM_ID);
+      expect(firstData.items[1].id).toBe(TEST_ITEM_ID_1);
       expect(firstData.items[1].excerpt).toBe("blah");
       vi.mocked(searchDocuments).mockResolvedValueOnce({
         hits: [
@@ -459,7 +320,7 @@ describe("/api/v1/items", () => {
 
       const data = await response.json();
       expect(data.items).toHaveLength(2);
-      expect(data.items[0].id).toBe(TEST_ITEM_ID);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
       expect(data.items[1].id).toBe(TEST_ITEM_ID_2);
       expect(data.total).toBe(2);
     });
@@ -675,7 +536,7 @@ describe("/api/v1/items", () => {
 
       const data = await response.json();
       expect(data.items).toHaveLength(1);
-      expect(data.items[0].id).toBe(TEST_ITEM_ID);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
       expect(data.total).toBe(1);
       expect(searchDocuments).toHaveBeenCalledTimes(1);
       expect(searchDocuments).toHaveBeenCalledWith(
@@ -758,7 +619,7 @@ describe("/api/v1/items", () => {
 
       const data = await response.json();
       expect(data.items).toHaveLength(2);
-      expect(data.items[0].id).toBe(TEST_ITEM_ID);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
       expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
       expect(data.total).toBe(2);
     });
@@ -767,7 +628,7 @@ describe("/api/v1/items", () => {
       await testDb.db.insert(items).values(MOCK_ITEMS[0]);
       await testDb.db.insert(profileItems).values({
         profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
+        itemId: TEST_ITEM_ID_1,
         title: "Example",
         description: "An example item",
         author: "Test Author",
@@ -784,7 +645,7 @@ describe("/api/v1/items", () => {
 
       const data = await response.json();
       expect(data.items).toHaveLength(1);
-      expect(data.items[0].id).toBe(TEST_ITEM_ID);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
       expect(data.items[0].metadata.thumbnail).toBe(null);
     });
 
@@ -912,7 +773,7 @@ describe("/api/v1/items", () => {
       ["should return 200 updating item via api key", DEFAULT_TEST_API_KEY],
     ])("%s", async (_, apiKey) => {
       await testDb.db.insert(items).values({
-        id: TEST_ITEM_ID,
+        id: TEST_ITEM_ID_1,
         url: TEST_ITEM_URL_1,
         slug: "example-com-123456",
         createdAt: new Date("2025-01-10T12:52:56-08:00"),
@@ -920,7 +781,7 @@ describe("/api/v1/items", () => {
       });
       await testDb.db.insert(profileItems).values({
         profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
+        itemId: TEST_ITEM_ID_1,
         title: "Old title",
         author: "Kim",
         savedAt: new Date("2024-01-10T12:52:56-08:00"),
@@ -1009,7 +870,7 @@ describe("/api/v1/items", () => {
           lastReadAt: null,
         }),
         expect.objectContaining({
-          itemId: TEST_ITEM_ID,
+          itemId: TEST_ITEM_ID_1,
           state: ItemState.ACTIVE,
           title: "New title",
           description: "New description",
@@ -1030,7 +891,7 @@ describe("/api/v1/items", () => {
 
     it("should return 200 if overwriting existing item with different URL", async () => {
       await testDb.db.insert(items).values({
-        id: TEST_ITEM_ID,
+        id: TEST_ITEM_ID_1,
         url: TEST_ITEM_URL_1,
         slug: "example-com-123456",
         createdAt: new Date("2025-01-10T12:52:56-08:00"),
@@ -1038,7 +899,7 @@ describe("/api/v1/items", () => {
       });
       await testDb.db.insert(profileItems).values({
         profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
+        itemId: TEST_ITEM_ID_1,
         title: "Old title",
         author: "Kim",
         state: ItemState.ACTIVE,
@@ -1122,7 +983,7 @@ describe("/api/v1/items", () => {
 
     it("should return 200 and leave existing title untouched", async () => {
       await testDb.db.insert(items).values({
-        id: TEST_ITEM_ID,
+        id: TEST_ITEM_ID_1,
         url: TEST_ITEM_URL_1,
         slug: "example-com-123456",
         createdAt: new Date("2025-01-10T12:52:56-08:00"),
@@ -1130,7 +991,7 @@ describe("/api/v1/items", () => {
       });
       await testDb.db.insert(profileItems).values({
         profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
+        itemId: TEST_ITEM_ID_1,
         title: "Old title",
         author: "Kim",
         state: ItemState.ACTIVE,
@@ -1180,7 +1041,7 @@ describe("/api/v1/items", () => {
         .where(
           and(
             eq(profileItems.profileId, DEFAULT_TEST_PROFILE_ID),
-            eq(profileItems.itemId, TEST_ITEM_ID),
+            eq(profileItems.itemId, TEST_ITEM_ID_1),
           ),
         );
       expect(updatedItems).toHaveLength(1);

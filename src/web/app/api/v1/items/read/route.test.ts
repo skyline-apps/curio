@@ -1,34 +1,31 @@
 import { vi } from "vitest";
 
 import { eq } from "@/db";
-import { items, ItemState, profileItems } from "@/db/schema";
+import { items, profileItems } from "@/db/schema";
 import { getItemContent, getItemMetadata } from "@/lib/storage";
 import { MOCK_VERSION } from "@/lib/storage/__mocks__/index";
 import { StorageError } from "@/lib/storage/types";
 import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_API_KEY,
-  DEFAULT_TEST_PROFILE_ID,
-  DEFAULT_TEST_PROFILE_ID_2,
   makeAuthenticatedMockRequest,
 } from "@/utils/test/api";
+import {
+  MOCK_ITEMS,
+  MOCK_PROFILE_ITEMS,
+  NONEXISTENT_USER_ID,
+} from "@/utils/test/data";
 import { testDb } from "@/utils/test/provider";
 
 import { POST } from "./route";
 
-const TEST_ITEM_ID = "123e4567-e89b-12d3-a456-426614174001";
-const TEST_ITEM_SLUG = "example-com";
-const TEST_ITEM_URL = "https://example.com";
-const NONEXISTENT_USER_ID = "123e4567-e89b-12d3-a456-426614174003";
-const ORIGINAL_PUBLISHED_DATE = new Date("2024-01-10T12:50:00-08:00");
-const ORIGINAL_CREATION_DATE = new Date("2025-01-10T12:52:56-08:00");
-const MOCK_ITEM = {
-  id: TEST_ITEM_ID,
-  url: TEST_ITEM_URL,
-  slug: TEST_ITEM_SLUG,
-  createdAt: ORIGINAL_CREATION_DATE,
-  updatedAt: ORIGINAL_CREATION_DATE,
+const MOCK_ITEM = MOCK_ITEMS[1];
+const MOCK_PROFILE_ITEM = MOCK_PROFILE_ITEMS[1];
+const MOCK_PROFILE_ITEM_WITH_VERSION = {
+  ...MOCK_PROFILE_ITEMS[1],
+  versionName: MOCK_VERSION,
 };
+const MOCK_SLUG = "example2-com";
 
 describe("/api/v1/items/read", () => {
   describe("POST /api/v1/items/read", () => {
@@ -40,25 +37,14 @@ describe("/api/v1/items/read", () => {
       ],
     ])("%s", async (_, apiKey) => {
       await testDb.db.insert(items).values(MOCK_ITEM);
-      await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        favicon: "https://example.com/favicon.ico",
-        publishedAt: ORIGINAL_PUBLISHED_DATE,
-        savedAt: ORIGINAL_CREATION_DATE,
-        stateUpdatedAt: ORIGINAL_CREATION_DATE,
-        isFavorite: true,
-        versionName: MOCK_VERSION,
-      });
+      await testDb.db
+        .insert(profileItems)
+        .values(MOCK_PROFILE_ITEM_WITH_VERSION);
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         apiKey,
-        body: { slug: TEST_ITEM_SLUG, readingProgress: 50 },
+        body: { slug: MOCK_SLUG, readingProgress: 50 },
       });
 
       const response = await POST(request);
@@ -66,7 +52,7 @@ describe("/api/v1/items/read", () => {
 
       const data = await response.json();
       expect(data).toEqual({
-        slug: TEST_ITEM_SLUG,
+        slug: MOCK_SLUG,
         readingProgress: 50,
         versionName: MOCK_VERSION,
       });
@@ -75,7 +61,7 @@ describe("/api/v1/items/read", () => {
       const updatedItem = await testDb.db
         .select()
         .from(profileItems)
-        .where(eq(profileItems.itemId, TEST_ITEM_ID))
+        .where(eq(profileItems.id, MOCK_PROFILE_ITEM_WITH_VERSION.id))
         .limit(1)
         .execute();
 
@@ -91,25 +77,14 @@ describe("/api/v1/items/read", () => {
       });
       await testDb.db.insert(items).values(MOCK_ITEM);
       await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        favicon: "https://example.com/favicon.ico",
-        publishedAt: ORIGINAL_PUBLISHED_DATE,
-        savedAt: ORIGINAL_CREATION_DATE,
-        stateUpdatedAt: ORIGINAL_CREATION_DATE,
-        state: ItemState.ACTIVE,
-        isFavorite: true,
+        ...MOCK_PROFILE_ITEM,
         readingProgress: 5,
         lastReadAt: new Date("2015-02-10T12:50:00-08:00"),
       });
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
-        body: { slug: TEST_ITEM_SLUG, readingProgress: 24 },
+        body: { slug: MOCK_SLUG, readingProgress: 24 },
       });
 
       const response = await POST(request);
@@ -117,17 +92,17 @@ describe("/api/v1/items/read", () => {
 
       const data = await response.json();
       expect(data).toEqual({
-        slug: TEST_ITEM_SLUG,
+        slug: MOCK_SLUG,
         readingProgress: 24,
         versionName: MOCK_VERSION,
       });
       expect(getItemMetadata).toHaveBeenCalledTimes(1);
-      expect(getItemMetadata).toHaveBeenCalledWith(TEST_ITEM_SLUG);
+      expect(getItemMetadata).toHaveBeenCalledWith(MOCK_SLUG);
 
       const updatedItem = await testDb.db
         .select()
         .from(profileItems)
-        .where(eq(profileItems.itemId, TEST_ITEM_ID))
+        .where(eq(profileItems.id, MOCK_PROFILE_ITEM.id))
         .limit(1)
         .execute();
 
@@ -139,41 +114,11 @@ describe("/api/v1/items/read", () => {
     });
 
     it("should return 200 and not update items for other users", async () => {
-      await testDb.db.insert(items).values(MOCK_ITEM);
-      await testDb.db.insert(profileItems).values([
-        {
-          profileId: DEFAULT_TEST_PROFILE_ID,
-          itemId: TEST_ITEM_ID,
-          title: "Example",
-          description: "An example item",
-          author: "Test Author",
-          thumbnail: "https://example.com/thumb.jpg",
-          favicon: "https://example.com/favicon.ico",
-          publishedAt: ORIGINAL_PUBLISHED_DATE,
-          savedAt: ORIGINAL_CREATION_DATE,
-          stateUpdatedAt: ORIGINAL_CREATION_DATE,
-          isFavorite: true,
-          versionName: MOCK_VERSION,
-        },
-        {
-          profileId: DEFAULT_TEST_PROFILE_ID_2,
-          itemId: TEST_ITEM_ID,
-          title: "Example 2",
-          description: "An example item",
-          author: "Test Author",
-          thumbnail: "https://example.com/thumb.jpg",
-          favicon: "https://example.com/favicon.ico",
-          publishedAt: ORIGINAL_PUBLISHED_DATE,
-          savedAt: ORIGINAL_CREATION_DATE,
-          stateUpdatedAt: ORIGINAL_CREATION_DATE,
-          isFavorite: true,
-          versionName: null,
-        },
-      ]);
-
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
-        body: { slug: TEST_ITEM_SLUG, readingProgress: 50 },
+        body: { slug: "example3-com", readingProgress: 50 },
       });
 
       const response = await POST(request);
@@ -181,20 +126,22 @@ describe("/api/v1/items/read", () => {
 
       const data = await response.json();
       expect(data).toEqual({
-        slug: TEST_ITEM_SLUG,
+        slug: "example3-com",
         readingProgress: 50,
-        versionName: MOCK_VERSION,
+        versionName: MOCK_PROFILE_ITEMS[2].versionName,
       });
       expect(getItemMetadata).not.toHaveBeenCalled();
 
       const updatedItems = await testDb.db
         .select()
         .from(profileItems)
-        .where(eq(profileItems.itemId, TEST_ITEM_ID))
+        .where(eq(profileItems.itemId, MOCK_ITEMS[2].id))
         .orderBy(profileItems.title);
 
       expect(updatedItems).toHaveLength(2);
-      expect(updatedItems[0].versionName).toBe(MOCK_VERSION);
+      expect(updatedItems[0].versionName).toBe(
+        MOCK_PROFILE_ITEMS[2].versionName,
+      );
       expect(updatedItems[0].readingProgress).toBe(50);
       expect(updatedItems[1].versionName).toBe(null);
       expect(updatedItems[1].readingProgress).toBe(0);
@@ -204,7 +151,7 @@ describe("/api/v1/items/read", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         userId: NONEXISTENT_USER_ID,
-        body: { slug: TEST_ITEM_SLUG, readingProgress: 24 },
+        body: { slug: "example-com", readingProgress: 24 },
       });
 
       const response = await POST(request);
@@ -215,7 +162,7 @@ describe("/api/v1/items/read", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         apiKey: "invalid-api-key",
-        body: { slug: TEST_ITEM_SLUG, readingProgress: 24 },
+        body: { slug: "example-com", readingProgress: 24 },
       });
 
       const response = await POST(request);
@@ -251,26 +198,11 @@ describe("/api/v1/items/read", () => {
         new StorageError("Failed to verify metadata contents"),
       );
       await testDb.db.insert(items).values(MOCK_ITEM);
-      await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
-        title: "Example",
-        description: "An example item",
-        author: "Test Author",
-        thumbnail: "https://example.com/thumb.jpg",
-        favicon: "https://example.com/favicon.ico",
-        publishedAt: ORIGINAL_PUBLISHED_DATE,
-        savedAt: ORIGINAL_CREATION_DATE,
-        stateUpdatedAt: ORIGINAL_CREATION_DATE,
-        state: ItemState.ACTIVE,
-        isFavorite: true,
-        readingProgress: 5,
-        lastReadAt: new Date("2025-02-10T12:50:00-08:00"),
-      });
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEM);
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
-        body: { slug: TEST_ITEM_SLUG, readingProgress: 24 },
+        body: { slug: MOCK_SLUG, readingProgress: 24 },
       });
 
       const response = await POST(request);

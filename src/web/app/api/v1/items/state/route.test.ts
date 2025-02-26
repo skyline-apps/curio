@@ -1,108 +1,27 @@
 import { vi } from "vitest";
 
-import { eq } from "@/db";
+import { and, eq, not } from "@/db";
 import { DbErrorCode } from "@/db/errors";
 import { items, ItemState, profileItems } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_PROFILE_ID,
-  DEFAULT_TEST_PROFILE_ID_2,
   makeAuthenticatedMockRequest,
   makeUnauthenticatedMockRequest,
 } from "@/utils/test/api";
+import {
+  MOCK_ITEMS,
+  MOCK_PROFILE_ITEMS,
+  NONEXISTENT_USER_ID,
+  TEST_ITEM_ID_1,
+  TEST_ITEM_ID_DELETED,
+} from "@/utils/test/data";
 import { testDb } from "@/utils/test/provider";
 
 import { POST } from "./route";
 
-const TEST_ITEM_ID = "123e4567-e89b-12d3-a456-426614174001";
-const TEST_ITEM_URL_1 = "https://example.com/";
-const TEST_ITEM_ID_2 = "123e4567-e89b-12d3-a456-426614174000";
-const TEST_ITEM_URL_2 = "https://example2.com/";
-const TEST_ITEM_ID_3 = "123e4567-e89b-12d3-a456-426614174003";
-const TEST_ITEM_URL_3 = "https://example3.com/";
-const NONEXISTENT_USER_ID = "123e4567-e89b-12d3-a456-426614174003";
 const ORIGINAL_ARCHIVED_TIME = new Date("2025-01-10T12:52:56-08:00");
-
-const MOCK_ITEMS = [
-  {
-    id: TEST_ITEM_ID,
-    url: TEST_ITEM_URL_1,
-    slug: "example-com",
-    createdAt: new Date("2025-01-10T12:52:56-08:00"),
-    updatedAt: new Date("2025-01-10T12:52:56-08:00"),
-  },
-  {
-    id: TEST_ITEM_ID_2,
-    url: TEST_ITEM_URL_2,
-    slug: "example2-com",
-    createdAt: new Date("2025-01-10T12:53:56-08:00"),
-    updatedAt: new Date("2025-01-10T12:53:56-08:00"),
-  },
-  {
-    id: TEST_ITEM_ID_3,
-    url: TEST_ITEM_URL_3,
-    slug: "example3-com",
-    createdAt: new Date("2025-01-10T12:54:56-08:00"),
-    updatedAt: new Date("2025-01-10T12:54:56-08:00"),
-  },
-];
-
-const MOCK_PROFILE_ITEMS = [
-  {
-    profileId: DEFAULT_TEST_PROFILE_ID,
-    itemId: TEST_ITEM_ID,
-    title: "Example 1",
-    description: "First example item",
-    author: "Test Author",
-    thumbnail: "https://example.com/thumb1.jpg",
-    favicon: "https://example.com/favicon1.ico",
-    publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-    savedAt: new Date("2025-01-10T12:52:56-08:00"),
-    stateUpdatedAt: new Date("2025-01-10T12:52:56-08:00"),
-  },
-  {
-    profileId: DEFAULT_TEST_PROFILE_ID,
-    itemId: TEST_ITEM_ID_2,
-    title: "Example 2",
-    description: "Second example item",
-    author: "Test Author",
-    thumbnail: "https://example.com/thumb2.jpg",
-    favicon: "https://example.com/favicon2.ico",
-    publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-    savedAt: new Date("2025-01-10T12:52:57-08:00"),
-    stateUpdatedAt: new Date("2025-01-10T12:52:57-08:00"),
-  },
-  {
-    profileId: DEFAULT_TEST_PROFILE_ID,
-    itemId: TEST_ITEM_ID_3,
-    title: "Example 3",
-    description: "Third example item",
-    author: "Test Author",
-    thumbnail: "https://example.com/thumb3.jpg",
-    favicon: "https://example.com/favicon3.ico",
-    publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-    savedAt: new Date("2025-01-10T12:52:58-08:00"),
-    stateUpdatedAt: new Date("2025-01-10T12:52:58-08:00"),
-    state: ItemState.ACTIVE,
-    isFavorite: false,
-    readingProgress: 10,
-    lastReadAt: new Date("2025-01-15T12:00:00-08:00"),
-    versionName: "2024-01-01",
-  },
-  {
-    profileId: DEFAULT_TEST_PROFILE_ID_2,
-    itemId: TEST_ITEM_ID_3,
-    title: "Example 3 New title",
-    description: "Third example item",
-    author: "Test Author",
-    thumbnail: "https://example.com/thumb3.jpg",
-    favicon: "https://example.com/favicon3.ico",
-    publishedAt: new Date("2025-01-10T12:52:56-08:00"),
-    savedAt: new Date("2025-01-10T12:52:56-08:04"),
-    stateUpdatedAt: new Date("2025-01-10T12:52:56-08:04"),
-  },
-];
 
 describe("/api/v1/items/state", () => {
   describe("POST /api/v1/items/state", () => {
@@ -181,7 +100,12 @@ describe("/api/v1/items/state", () => {
       const updatedItems = await testDb.db
         .select()
         .from(profileItems)
-        .where(eq(profileItems.state, ItemState.DELETED));
+        .where(
+          and(
+            eq(profileItems.state, ItemState.DELETED),
+            not(eq(profileItems.itemId, TEST_ITEM_ID_DELETED)),
+          ),
+        );
 
       expect(updatedItems).toHaveLength(2);
       expect(updatedItems[0].stateUpdatedAt).toBeInstanceOf(Date);
@@ -191,11 +115,11 @@ describe("/api/v1/items/state", () => {
       );
     });
 
-    it("should return 200 if item is already deleted", async () => {
+    it("should return 200 if item is already archived", async () => {
       await testDb.db.insert(items).values(MOCK_ITEMS[0]);
       await testDb.db.insert(profileItems).values({
         profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
+        itemId: TEST_ITEM_ID_1,
         title: "Old title",
         author: "Kim",
         state: ItemState.ARCHIVED,
@@ -236,7 +160,7 @@ describe("/api/v1/items/state", () => {
       await testDb.db.insert(items).values(MOCK_ITEMS[0]);
       await testDb.db.insert(profileItems).values({
         profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID,
+        itemId: TEST_ITEM_ID_1,
         title: "Old title",
         author: "Kim",
         state: ItemState.ARCHIVED,
@@ -344,6 +268,12 @@ describe("/api/v1/items/state", () => {
         },
       });
 
+      const currentItems = await testDb.db
+        .select()
+        .from(profileItems)
+        .where(eq(profileItems.state, ItemState.ARCHIVED));
+      expect(currentItems).toHaveLength(2);
+
       const response = await POST(request);
       expect(response.status).toBe(401);
 
@@ -351,7 +281,7 @@ describe("/api/v1/items/state", () => {
         .select()
         .from(profileItems)
         .where(eq(profileItems.state, ItemState.ARCHIVED));
-      expect(updatedItems).toHaveLength(0);
+      expect(updatedItems).toHaveLength(2);
     });
 
     it("should return 401 if no valid auth is provided", async () => {

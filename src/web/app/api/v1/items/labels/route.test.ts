@@ -8,90 +8,24 @@ import {
 import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_API_KEY,
-  DEFAULT_TEST_PROFILE_ID,
-  DEFAULT_TEST_PROFILE_ID_2,
+  DEFAULT_TEST_USER_ID_2,
   makeAuthenticatedMockRequest,
 } from "@/utils/test/api";
+import {
+  MOCK_ITEMS,
+  MOCK_LABELS,
+  MOCK_PROFILE_ITEMS,
+  TEST_LABEL_ID_1,
+  TEST_LABEL_ID_2,
+  TEST_LABEL_ID_3,
+} from "@/utils/test/data";
 import { testDb } from "@/utils/test/provider";
 
 import { DELETE, POST } from "./route";
 
-const TEST_ITEM_ID_1 = "123e4567-e89b-12d3-a456-426614174001";
-const TEST_ITEM_ID_2 = "123e4567-e89b-12d3-a456-426614174002";
-const TEST_ITEM_ID_3 = "123e4567-e89b-12d3-a456-426614174003";
-const TEST_PROFILE_ITEM_ID_1 = "123e4567-e89b-12d3-a456-426614174009";
-const TEST_PROFILE_ITEM_ID_2 = "123e4567-e89b-12d3-a456-426614174008";
-const TEST_PROFILE_ITEM_ID_3 = "123e4567-e89b-12d3-a456-426614174007";
-
-const MOCK_ITEMS = [
-  {
-    id: TEST_ITEM_ID_1,
-    url: "https://example.com/1",
-    slug: "example-com-1",
-    createdAt: new Date("2025-01-10T12:52:56-08:00"),
-    updatedAt: new Date("2025-01-10T12:52:56-08:00"),
-  },
-  {
-    id: TEST_ITEM_ID_2,
-    url: "https://example.com/2",
-    slug: "example-com-2",
-    createdAt: new Date("2025-01-10T12:53:56-08:00"),
-    updatedAt: new Date("2025-01-10T12:53:56-08:00"),
-  },
-  {
-    id: TEST_ITEM_ID_3,
-    url: "https://example.com/3",
-    slug: "example-com-3",
-    createdAt: new Date("2025-01-10T12:53:56-08:00"),
-    updatedAt: new Date("2025-01-10T12:53:56-08:00"),
-  },
-];
-
-const MOCK_PROFILE_ITEMS = [
-  {
-    id: TEST_PROFILE_ITEM_ID_1,
-    profileId: DEFAULT_TEST_PROFILE_ID,
-    itemId: TEST_ITEM_ID_1,
-    title: "Example 1",
-  },
-  {
-    id: TEST_PROFILE_ITEM_ID_2,
-    profileId: DEFAULT_TEST_PROFILE_ID,
-    itemId: TEST_ITEM_ID_2,
-    title: "Example 2",
-  },
-  {
-    id: TEST_PROFILE_ITEM_ID_3,
-    profileId: DEFAULT_TEST_PROFILE_ID_2,
-    itemId: TEST_ITEM_ID_2,
-    title: "Not mine",
-  },
-];
-
-const MOCK_LABEL_ID_1 = "123e4567-e89b-12d3-a456-426614174012";
-const MOCK_LABEL_ID_2 = "123e4567-e89b-12d3-a456-426614174014";
-const MOCK_LABEL_ID_3 = "123e4567-e89b-12d3-a456-426614174016";
-
-const MOCK_LABELS = [
-  {
-    id: MOCK_LABEL_ID_1,
-    profileId: DEFAULT_TEST_PROFILE_ID,
-    name: "Test label",
-    color: "#FFFFFF",
-  },
-  {
-    id: MOCK_LABEL_ID_2,
-    profileId: DEFAULT_TEST_PROFILE_ID,
-    name: "Another label",
-    color: "#000000",
-  },
-  {
-    id: MOCK_LABEL_ID_3,
-    profileId: DEFAULT_TEST_PROFILE_ID_2,
-    name: "Not my label",
-    color: "#010101",
-  },
-];
+const TEST_PROFILE_ITEM_ID_1 = MOCK_PROFILE_ITEMS[0].id;
+const TEST_PROFILE_ITEM_ID_2 = MOCK_PROFILE_ITEMS[1].id;
+const TEST_OTHER_PROFILE_ITEM_ID = MOCK_PROFILE_ITEMS[4].id;
 
 describe("/api/v1/items/labels", () => {
   beforeEach(async () => {
@@ -109,8 +43,8 @@ describe("/api/v1/items/labels", () => {
         method: "POST",
         apiKey: apiKey,
         body: {
-          slugs: "example-com-1,example-com-2",
-          labelIds: [MOCK_LABEL_ID_1, MOCK_LABEL_ID_2],
+          slugs: "example-com,example2-com",
+          labelIds: [TEST_LABEL_ID_1, TEST_LABEL_ID_2],
         },
       });
 
@@ -119,7 +53,7 @@ describe("/api/v1/items/labels", () => {
 
       const data = await response.json();
       expect(data).toEqual({
-        updated: [{ slug: "example-com-1" }, { slug: "example-com-2" }],
+        updated: [{ slug: "example2-com" }, { slug: "example-com" }],
       });
 
       const newLabels = await testDb.db
@@ -138,19 +72,19 @@ describe("/api/v1/items/labels", () => {
         expect.arrayContaining([
           {
             profileItemId: TEST_PROFILE_ITEM_ID_1,
-            labelId: MOCK_LABEL_ID_1,
+            labelId: TEST_LABEL_ID_1,
           },
           {
             profileItemId: TEST_PROFILE_ITEM_ID_1,
-            labelId: MOCK_LABEL_ID_2,
+            labelId: TEST_LABEL_ID_2,
           },
           {
             profileItemId: TEST_PROFILE_ITEM_ID_2,
-            labelId: MOCK_LABEL_ID_1,
+            labelId: TEST_LABEL_ID_1,
           },
           {
             profileItemId: TEST_PROFILE_ITEM_ID_2,
-            labelId: MOCK_LABEL_ID_2,
+            labelId: TEST_LABEL_ID_2,
           },
         ]),
       );
@@ -160,9 +94,10 @@ describe("/api/v1/items/labels", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         body: {
-          slugs: "example-com-3,example-com-2",
-          labelIds: [MOCK_LABEL_ID_2],
+          slugs: "example2-com,example3-com",
+          labelIds: [TEST_LABEL_ID_2],
         },
+        userId: DEFAULT_TEST_USER_ID_2,
       });
 
       const response = await POST(request);
@@ -170,7 +105,7 @@ describe("/api/v1/items/labels", () => {
 
       const data = await response.json();
       expect(data).toEqual({
-        updated: [{ slug: "example-com-2" }],
+        updated: [{ slug: "example3-com" }],
       });
 
       const newLabels = await testDb.db
@@ -188,11 +123,26 @@ describe("/api/v1/items/labels", () => {
       expect(newLabels).toEqual(
         expect.arrayContaining([
           {
-            profileItemId: TEST_PROFILE_ITEM_ID_2,
-            labelId: MOCK_LABEL_ID_2,
+            profileItemId: TEST_OTHER_PROFILE_ITEM_ID,
+            labelId: TEST_LABEL_ID_2,
           },
         ]),
       );
+    });
+
+    it("should return 404 if invalid slugs are provided", async () => {
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "POST",
+        body: {
+          slugs: "invalid-slug",
+          labelIds: [TEST_LABEL_ID_1],
+        },
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(404);
+      const data = await response.json();
+      expect(data).toEqual({ error: "No valid labels provided." });
     });
 
     it("should return 400 if no slugs are provided", async () => {
@@ -200,7 +150,7 @@ describe("/api/v1/items/labels", () => {
         method: "POST",
         body: {
           slugs: "",
-          labelIds: [MOCK_LABEL_ID_1],
+          labelIds: [TEST_LABEL_ID_1],
         },
       });
 
@@ -216,19 +166,19 @@ describe("/api/v1/items/labels", () => {
       await testDb.db.insert(profileItemLabels).values([
         {
           profileItemId: TEST_PROFILE_ITEM_ID_1,
-          labelId: MOCK_LABEL_ID_1,
+          labelId: TEST_LABEL_ID_1,
         },
         {
           profileItemId: TEST_PROFILE_ITEM_ID_1,
-          labelId: MOCK_LABEL_ID_2,
+          labelId: TEST_LABEL_ID_2,
         },
         {
           profileItemId: TEST_PROFILE_ITEM_ID_2,
-          labelId: MOCK_LABEL_ID_2,
+          labelId: TEST_LABEL_ID_2,
         },
         {
-          profileItemId: TEST_PROFILE_ITEM_ID_3,
-          labelId: MOCK_LABEL_ID_3,
+          profileItemId: TEST_OTHER_PROFILE_ITEM_ID,
+          labelId: TEST_LABEL_ID_3,
         },
       ]);
     });
@@ -240,8 +190,8 @@ describe("/api/v1/items/labels", () => {
         method: "DELETE",
         apiKey: apiKey,
         body: {
-          slugs: "example-com-1",
-          labelIds: [MOCK_LABEL_ID_1],
+          slugs: "example-com",
+          labelIds: [TEST_LABEL_ID_1],
         },
       });
 
@@ -250,7 +200,7 @@ describe("/api/v1/items/labels", () => {
 
       const data = await response.json();
       expect(data).toEqual({
-        deleted: [{ slug: "example-com-1" }],
+        deleted: [{ slug: "example-com" }],
       });
 
       const newLabels = await testDb.db
@@ -262,22 +212,23 @@ describe("/api/v1/items/labels", () => {
         .innerJoin(
           profileItems,
           eq(profileItems.id, profileItemLabels.profileItemId),
-        );
+        )
+        .orderBy(profileItemLabels.profileItemId);
 
       expect(newLabels.length).toEqual(3);
       expect(newLabels).toEqual(
         expect.arrayContaining([
           {
-            profileItemId: TEST_PROFILE_ITEM_ID_1,
-            labelId: MOCK_LABEL_ID_2,
+            profileItemId: TEST_OTHER_PROFILE_ITEM_ID,
+            labelId: TEST_LABEL_ID_3,
           },
           {
             profileItemId: TEST_PROFILE_ITEM_ID_2,
-            labelId: MOCK_LABEL_ID_2,
+            labelId: TEST_LABEL_ID_2,
           },
           {
-            profileItemId: TEST_PROFILE_ITEM_ID_3,
-            labelId: MOCK_LABEL_ID_3,
+            profileItemId: TEST_PROFILE_ITEM_ID_1,
+            labelId: TEST_LABEL_ID_2,
           },
         ]),
       );
@@ -287,8 +238,8 @@ describe("/api/v1/items/labels", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "DELETE",
         body: {
-          slugs: "example-com-1,example-com-2",
-          labelIds: [MOCK_LABEL_ID_1, MOCK_LABEL_ID_2],
+          slugs: "example-com,example2-com",
+          labelIds: [TEST_LABEL_ID_1, TEST_LABEL_ID_2],
         },
       });
 
@@ -297,7 +248,7 @@ describe("/api/v1/items/labels", () => {
 
       const data = await response.json();
       expect(data).toEqual({
-        deleted: [{ slug: "example-com-1" }, { slug: "example-com-2" }],
+        deleted: [{ slug: "example2-com" }, { slug: "example-com" }],
       });
 
       const newLabels = await testDb.db
@@ -315,19 +266,19 @@ describe("/api/v1/items/labels", () => {
       expect(newLabels).toEqual(
         expect.arrayContaining([
           {
-            profileItemId: TEST_PROFILE_ITEM_ID_3,
-            labelId: MOCK_LABEL_ID_3,
+            profileItemId: TEST_OTHER_PROFILE_ITEM_ID,
+            labelId: TEST_LABEL_ID_3,
           },
         ]),
       );
     });
 
-    it("should return 200 but not deleting profile item label that does not belong to profile", async () => {
+    it("should return 200 but not delete profile item label that does not belong to profile", async () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "DELETE",
         body: {
-          slugs: "example-com-3",
-          labelIds: [MOCK_LABEL_ID_3],
+          slugs: "example3-com",
+          labelIds: [TEST_LABEL_ID_3],
         },
       });
 
@@ -348,26 +299,27 @@ describe("/api/v1/items/labels", () => {
         .innerJoin(
           profileItems,
           eq(profileItems.id, profileItemLabels.profileItemId),
-        );
+        )
+        .orderBy(profileItemLabels.profileItemId);
 
       expect(newLabels.length).toEqual(4);
       expect(newLabels).toEqual(
         expect.arrayContaining([
           {
-            profileItemId: TEST_PROFILE_ITEM_ID_1,
-            labelId: MOCK_LABEL_ID_1,
-          },
-          {
-            profileItemId: TEST_PROFILE_ITEM_ID_1,
-            labelId: MOCK_LABEL_ID_2,
+            profileItemId: TEST_OTHER_PROFILE_ITEM_ID,
+            labelId: TEST_LABEL_ID_3,
           },
           {
             profileItemId: TEST_PROFILE_ITEM_ID_2,
-            labelId: MOCK_LABEL_ID_2,
+            labelId: TEST_LABEL_ID_2,
           },
           {
-            profileItemId: TEST_PROFILE_ITEM_ID_3,
-            labelId: MOCK_LABEL_ID_3,
+            profileItemId: TEST_PROFILE_ITEM_ID_1,
+            labelId: TEST_LABEL_ID_1,
+          },
+          {
+            profileItemId: TEST_PROFILE_ITEM_ID_1,
+            labelId: TEST_LABEL_ID_2,
           },
         ]),
       );
@@ -378,7 +330,7 @@ describe("/api/v1/items/labels", () => {
         method: "DELETE",
         body: {
           slugs: "",
-          labelIds: [MOCK_LABEL_ID_1],
+          labelIds: [TEST_LABEL_ID_1],
         },
       });
 

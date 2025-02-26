@@ -55,6 +55,13 @@ export async function POST(
         ),
       );
 
+    if (!insertValues.length) {
+      return APIResponseJSON(
+        { error: "No valid labels provided." },
+        { status: 404 },
+      );
+    }
+
     await db
       .insert(profileItemLabels)
       .values(insertValues)
