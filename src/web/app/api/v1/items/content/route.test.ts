@@ -17,56 +17,27 @@ import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_PROFILE_ID,
-  DEFAULT_TEST_PROFILE_ID_2,
   makeAuthenticatedMockRequest,
 } from "@/utils/test/api";
+import {
+  MOCK_ITEMS,
+  MOCK_PROFILE_ITEMS,
+  NONEXISTENT_USER_ID,
+  TEST_ITEM_ID_1,
+  TEST_ITEM_URL_1,
+} from "@/utils/test/data";
 import { testDb } from "@/utils/test/provider";
 
 import { POST } from "./route";
 
-const TEST_ITEM_ID = "123e4567-e89b-12d3-a456-426614174001";
 const TEST_ITEM_SLUG = "example-com";
-const TEST_ITEM_URL = "https://example.com";
-const NONEXISTENT_USER_ID = "123e4567-e89b-12d3-a456-426614174003";
 const ORIGINAL_PUBLISHED_DATE = new Date("2024-01-10T12:50:00-08:00");
 const ORIGINAL_CREATION_DATE = new Date("2025-01-10T12:52:56-08:00");
-const TEST_PROFILE_ITEM_ID = "123e4567-e89b-12d3-a456-426614174999";
-
-const MOCK_ITEM = {
-  id: TEST_ITEM_ID,
-  url: TEST_ITEM_URL,
-  slug: TEST_ITEM_SLUG,
-  createdAt: ORIGINAL_CREATION_DATE,
-  updatedAt: ORIGINAL_CREATION_DATE,
-};
-
-const MOCK_ITEM_2 = {
-  id: "123e4567-e89b-12d3-a456-426614174002",
-  url: "https://example2.com",
-  slug: "example2-com",
-  createdAt: ORIGINAL_CREATION_DATE,
-  updatedAt: ORIGINAL_CREATION_DATE,
-};
-
-const MOCK_PROFILE_ITEM = {
-  id: TEST_PROFILE_ITEM_ID,
-  profileId: DEFAULT_TEST_PROFILE_ID,
-  itemId: TEST_ITEM_ID,
-  title: "Example",
-  description: "An example item",
-  author: "Test Author",
-  thumbnail: "https://example.com/thumb.jpg",
-  favicon: "https://example.com/favicon.ico",
-  publishedAt: ORIGINAL_PUBLISHED_DATE,
-  savedAt: ORIGINAL_CREATION_DATE,
-  stateUpdatedAt: ORIGINAL_CREATION_DATE,
-  isFavorite: true,
-};
 
 const MOCK_HIGHLIGHTS = [
   {
     id: "123e4567-e89b-12d3-a456-426614174010",
-    profileItemId: MOCK_PROFILE_ITEM.id,
+    profileItemId: MOCK_PROFILE_ITEMS[0].id,
     startOffset: 10,
     endOffset: 20,
     text: "highlighted text",
@@ -76,7 +47,7 @@ const MOCK_HIGHLIGHTS = [
   },
   {
     id: "123e4567-e89b-12d3-a456-426614174011",
-    profileItemId: MOCK_PROFILE_ITEM.id,
+    profileItemId: MOCK_PROFILE_ITEMS[0].id,
     startOffset: 30,
     endOffset: 40,
     text: "another highlight",
@@ -92,11 +63,11 @@ describe("/api/v1/items/content", () => {
       expect(indexDocuments).toHaveBeenCalledTimes(1);
       expect(indexDocuments).toHaveBeenCalledWith([
         {
-          profileItemId: TEST_PROFILE_ITEM_ID,
+          profileItemId: MOCK_PROFILE_ITEMS[0].id,
           profileId: DEFAULT_TEST_PROFILE_ID,
           content: "Markdown content",
           contentVersionName: MOCK_VERSION,
-          url: TEST_ITEM_URL,
+          url: TEST_ITEM_URL_1,
           slug: TEST_ITEM_SLUG,
         },
       ]);
@@ -109,9 +80,9 @@ describe("/api/v1/items/content", () => {
         DEFAULT_TEST_API_KEY,
       ],
     ])("%s", async (_, apiKey) => {
-      await testDb.db.insert(items).values(MOCK_ITEM);
+      await testDb.db.insert(items).values(MOCK_ITEMS);
       await testDb.db.insert(profileItems).values({
-        ...MOCK_PROFILE_ITEM,
+        ...MOCK_PROFILE_ITEMS[0],
         readingProgress: 20,
         versionName: "2010-04-04",
       });
@@ -120,7 +91,7 @@ describe("/api/v1/items/content", () => {
         method: "POST",
         apiKey,
         body: {
-          url: TEST_ITEM_URL,
+          url: TEST_ITEM_URL_1,
           htmlContent: "<div>Test content</div>",
         },
       });
@@ -136,12 +107,12 @@ describe("/api/v1/items/content", () => {
       });
 
       expect(extractMetadata).toHaveBeenCalledWith(
-        TEST_ITEM_URL,
+        TEST_ITEM_URL_1,
         "<div>Test content</div>",
       );
 
       expect(extractMainContentAsMarkdown).toHaveBeenCalledWith(
-        TEST_ITEM_URL,
+        TEST_ITEM_URL_1,
         "<div>Test content</div>",
       );
 
@@ -154,7 +125,7 @@ describe("/api/v1/items/content", () => {
       const updatedItem = await testDb.db
         .select()
         .from(items)
-        .where(eq(items.id, TEST_ITEM_ID))
+        .where(eq(items.id, TEST_ITEM_ID_1))
         .limit(1);
       expect(
         (updatedItem[0].updatedAt as Date).getTime() >
@@ -167,7 +138,7 @@ describe("/api/v1/items/content", () => {
       const updatedProfileItem = await testDb.db
         .select()
         .from(profileItems)
-        .where(eq(profileItems.itemId, TEST_ITEM_ID))
+        .where(eq(profileItems.itemId, TEST_ITEM_ID_1))
         .limit(1);
       expect(
         (updatedProfileItem[0].savedAt as Date).getTime() >
@@ -189,24 +160,12 @@ describe("/api/v1/items/content", () => {
 
     it("should return 200 and overwrite previous reading state when content updated", async () => {
       const EXTRA_PROFILE_ITEM_ID = "123e4567-e89b-12d3-a456-426614174998";
-      await testDb.db.insert(items).values([MOCK_ITEM, MOCK_ITEM_2]);
-      await testDb.db.insert(profileItems).values([
-        {
-          ...MOCK_PROFILE_ITEM,
-          readingProgress: 20,
-          versionName: "2010-04-04",
-        },
-        {
-          id: EXTRA_PROFILE_ITEM_ID,
-          itemId: MOCK_ITEM_2.id,
-          profileId: DEFAULT_TEST_PROFILE_ID,
-          title: "Hello",
-        },
-      ]);
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
       await testDb.db.insert(profileItemHighlights).values([
         ...MOCK_HIGHLIGHTS,
         {
-          profileItemId: EXTRA_PROFILE_ITEM_ID,
+          profileItemId: MOCK_PROFILE_ITEMS[1].id,
           startOffset: 5,
           endOffset: 10,
         },
@@ -215,7 +174,7 @@ describe("/api/v1/items/content", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         body: {
-          url: TEST_ITEM_URL,
+          url: TEST_ITEM_URL_1,
           htmlContent: "<div>Test content</div>",
         },
       });
@@ -232,7 +191,7 @@ describe("/api/v1/items/content", () => {
       const updatedProfileItem = await testDb.db
         .select()
         .from(profileItems)
-        .where(eq(profileItems.itemId, TEST_ITEM_ID))
+        .where(eq(profileItems.itemId, TEST_ITEM_ID_1))
         .limit(1);
       expect(updatedProfileItem[0].versionName).toEqual(null);
       expect(updatedProfileItem[0].readingProgress).toEqual(0);
@@ -248,8 +207,8 @@ describe("/api/v1/items/content", () => {
     });
 
     it("should return 200 even when content URL does not match exactly", async () => {
-      await testDb.db.insert(items).values(MOCK_ITEM);
-      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEM);
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
@@ -275,28 +234,20 @@ describe("/api/v1/items/content", () => {
         MOCK_METADATA,
       );
       expect(extractMainContentAsMarkdown).toHaveBeenCalledWith(
-        TEST_ITEM_URL,
+        TEST_ITEM_URL_1,
         "<div>Test content</div>",
       );
       checkDocumentIndexed();
     });
 
     it("should return 200 and only update one profile item", async () => {
-      await testDb.db.insert(items).values(MOCK_ITEM);
-      await testDb.db.insert(profileItems).values([
-        MOCK_PROFILE_ITEM,
-        {
-          profileId: DEFAULT_TEST_PROFILE_ID_2,
-          itemId: TEST_ITEM_ID,
-          title: "Example not mine",
-          savedAt: new Date("2025-01-15T11:50:50-08:00"),
-        },
-      ]);
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         body: {
-          url: "https://example.com/",
+          url: "https://example3.com/",
           htmlContent: "<div>Test content</div>",
         },
       });
@@ -306,7 +257,7 @@ describe("/api/v1/items/content", () => {
 
       const data = await response.json();
       expect(data).toEqual({
-        slug: TEST_ITEM_SLUG,
+        slug: "example3-com",
         message: "Content updated and set as main version",
         status: "UPDATED_MAIN",
       });
@@ -314,17 +265,27 @@ describe("/api/v1/items/content", () => {
       const profileItem = await testDb.db
         .select()
         .from(profileItems)
-        .where(eq(profileItems.itemId, TEST_ITEM_ID))
+        .where(eq(profileItems.itemId, MOCK_ITEMS[2].id))
         .orderBy(desc(profileItems.savedAt));
 
       expect(profileItem.length).toBe(2);
 
       expect(profileItem[0].title).toEqual(MOCK_METADATA.title);
-      expect(profileItem[1].title).toEqual("Example not mine");
+      expect(profileItem[1].title).toEqual("Example 3 New title not mine");
       expect(profileItem[1].savedAt).toEqual(
-        new Date("2025-01-15T11:50:50-08:00"),
+        new Date("2025-01-10T12:55:56-08:00"),
       );
-      checkDocumentIndexed();
+      expect(indexDocuments).toHaveBeenCalledTimes(1);
+      expect(indexDocuments).toHaveBeenCalledWith([
+        {
+          profileItemId: MOCK_PROFILE_ITEMS[2].id,
+          profileId: DEFAULT_TEST_PROFILE_ID,
+          content: "Markdown content",
+          contentVersionName: MOCK_VERSION,
+          url: MOCK_ITEMS[2].url,
+          slug: MOCK_ITEMS[2].slug,
+        },
+      ]);
     });
 
     test.each<[string, Exclude<UploadStatus, UploadStatus.ERROR>]>([
@@ -341,11 +302,10 @@ describe("/api/v1/items/content", () => {
         versionName: "mock-old-version",
         status,
       });
-      await testDb.db.insert(items).values(MOCK_ITEM);
-      await testDb.db.insert(profileItems).values({
-        ...MOCK_PROFILE_ITEM,
-        savedAt: null,
-      });
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db
+        .insert(profileItems)
+        .values({ ...MOCK_PROFILE_ITEMS[0], savedAt: null });
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         body: {
@@ -370,7 +330,7 @@ describe("/api/v1/items/content", () => {
       const profileItem = await testDb.db
         .select()
         .from(profileItems)
-        .where(eq(profileItems.itemId, TEST_ITEM_ID))
+        .where(eq(profileItems.itemId, TEST_ITEM_ID_1))
         .orderBy(desc(profileItems.savedAt));
 
       expect(profileItem.length).toBe(1);
@@ -409,9 +369,9 @@ describe("/api/v1/items/content", () => {
         versionName: "2014-04-04",
         content: "new longer content",
       });
-      await testDb.db.insert(items).values(MOCK_ITEM);
+      await testDb.db.insert(items).values(MOCK_ITEMS);
       await testDb.db.insert(profileItems).values({
-        ...MOCK_PROFILE_ITEM,
+        ...MOCK_PROFILE_ITEMS[0],
         readingProgress: 20,
         versionName: "mock-old-version",
       });
@@ -420,7 +380,7 @@ describe("/api/v1/items/content", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         body: {
-          url: TEST_ITEM_URL,
+          url: TEST_ITEM_URL_1,
           htmlContent: "<div>Test content</div>",
         },
       });
@@ -437,7 +397,7 @@ describe("/api/v1/items/content", () => {
       const updatedProfileItem = await testDb.db
         .select()
         .from(profileItems)
-        .where(eq(profileItems.itemId, TEST_ITEM_ID))
+        .where(eq(profileItems.itemId, TEST_ITEM_ID_1))
         .limit(1);
       expect(updatedProfileItem[0].title).toEqual("default title");
       expect(updatedProfileItem[0].author).toBe(null);
@@ -458,15 +418,15 @@ describe("/api/v1/items/content", () => {
           profileId: DEFAULT_TEST_PROFILE_ID,
           content: "new longer content",
           contentVersionName: "2014-04-04",
-          url: MOCK_ITEM.url,
-          slug: MOCK_ITEM.slug,
+          url: MOCK_ITEMS[0].url,
+          slug: MOCK_ITEMS[0].slug,
         },
       ]);
     });
 
     it("should return 200 and skip metadata update when configured", async () => {
-      await testDb.db.insert(items).values(MOCK_ITEM);
-      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEM);
+      await testDb.db.insert(items).values(MOCK_ITEMS[0]);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS[0]);
       await testDb.db.insert(profileItemHighlights).values(MOCK_HIGHLIGHTS);
 
       const request: APIRequest = makeAuthenticatedMockRequest({
@@ -491,10 +451,10 @@ describe("/api/v1/items/content", () => {
       const profileItem = await testDb.db
         .select()
         .from(profileItems)
-        .where(eq(profileItems.itemId, TEST_ITEM_ID))
+        .where(eq(profileItems.itemId, TEST_ITEM_ID_1))
         .orderBy(desc(profileItems.savedAt));
       expect(profileItem.length).toBe(1);
-      expect(profileItem[0].title).toEqual("Example");
+      expect(profileItem[0].title).toEqual("Example 1");
 
       const updatedHighlights = await testDb.db
         .select()
@@ -508,15 +468,15 @@ describe("/api/v1/items/content", () => {
           profileId: DEFAULT_TEST_PROFILE_ID,
           content: "Markdown content",
           contentVersionName: MOCK_VERSION,
-          url: MOCK_ITEM.url,
-          slug: MOCK_ITEM.slug,
+          url: MOCK_ITEMS[0].url,
+          slug: MOCK_ITEMS[0].slug,
         },
       ]);
     });
 
     it("should return 500 when content extraction fails", async () => {
-      await testDb.db.insert(items).values(MOCK_ITEM);
-      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEM);
+      await testDb.db.insert(items).values(MOCK_ITEMS[0]);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS[0]);
 
       vi.mocked(extractMainContentAsMarkdown).mockRejectedValueOnce(
         new ExtractError("Failed to extract content"),
@@ -525,7 +485,7 @@ describe("/api/v1/items/content", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         body: {
-          url: TEST_ITEM_URL,
+          url: TEST_ITEM_URL_1,
           htmlContent: "<div>Invalid content</div>",
         },
       });
@@ -537,7 +497,7 @@ describe("/api/v1/items/content", () => {
       const profileItem = await testDb.db
         .select()
         .from(profileItems)
-        .where(eq(profileItems.itemId, TEST_ITEM_ID))
+        .where(eq(profileItems.itemId, TEST_ITEM_ID_1))
         .orderBy(desc(profileItems.savedAt));
 
       expect(profileItem.length).toBe(1);
@@ -545,8 +505,8 @@ describe("/api/v1/items/content", () => {
     });
 
     it("should return 500 when metadata extraction fails", async () => {
-      await testDb.db.insert(items).values(MOCK_ITEM);
-      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEM);
+      await testDb.db.insert(items).values(MOCK_ITEMS[0]);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS[0]);
 
       vi.mocked(extractMetadata).mockRejectedValueOnce(
         new MetadataError("Failed to extract metadata"),
@@ -555,7 +515,7 @@ describe("/api/v1/items/content", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         body: {
-          url: TEST_ITEM_URL,
+          url: TEST_ITEM_URL_1,
           htmlContent: "<div>Invalid content</div>",
         },
       });
@@ -567,7 +527,7 @@ describe("/api/v1/items/content", () => {
       const profileItem = await testDb.db
         .select()
         .from(profileItems)
-        .where(eq(profileItems.itemId, TEST_ITEM_ID))
+        .where(eq(profileItems.itemId, TEST_ITEM_ID_1))
         .orderBy(desc(profileItems.savedAt));
 
       expect(profileItem.length).toBe(1);
@@ -607,7 +567,7 @@ describe("/api/v1/items/content", () => {
         method: "POST",
         body: {
           htmlContent: "<div>Updated content</div>",
-          url: TEST_ITEM_URL,
+          url: TEST_ITEM_URL_1,
         },
       });
 
@@ -633,13 +593,13 @@ describe("/api/v1/items/content", () => {
     });
 
     it("should return 400 if content is missing", async () => {
-      await testDb.db.insert(items).values(MOCK_ITEM);
-      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEM);
+      await testDb.db.insert(items).values(MOCK_ITEMS[0]);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS[0]);
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         body: {
-          url: TEST_ITEM_URL,
+          url: TEST_ITEM_URL_1,
         },
       });
 

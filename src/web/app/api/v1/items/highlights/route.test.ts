@@ -4,65 +4,19 @@ import { eq } from "@/db";
 import { DbErrorCode } from "@/db/errors";
 import { items, profileItemHighlights, profileItems } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
-import {
-  DEFAULT_TEST_PROFILE_ID,
-  DEFAULT_TEST_PROFILE_ID_2,
-  makeAuthenticatedMockRequest,
-} from "@/utils/test/api";
+import { makeAuthenticatedMockRequest } from "@/utils/test/api";
+import { MOCK_ITEMS, MOCK_PROFILE_ITEMS } from "@/utils/test/data";
 import { testDb } from "@/utils/test/provider";
 
 import { DELETE, POST } from "./route";
 
-const TEST_ITEM_ID_1 = "123e4567-e89b-12d3-a456-426614174001";
-const TEST_ITEM_ID_2 = "123e4567-e89b-12d3-a456-426614174002";
-const TEST_PROFILE_ITEM_ID = "123e4567-e89b-12d3-a456-426614174007";
-const TEST_PROFILE_ITEM_ID_1 = "123e4567-e89b-12d3-a456-426614174009";
-const TEST_PROFILE_ITEM_ID_2 = "123e4567-e89b-12d3-a456-426614174008";
 const TEST_HIGHLIGHT_ID_1 = "123e4567-e89b-12d3-a456-426614174111";
 const TEST_HIGHLIGHT_ID_2 = "123e4567-e89b-12d3-a456-426614174222";
-
-const MOCK_ITEMS = [
-  {
-    id: TEST_ITEM_ID_1,
-    url: "https://example.com/1",
-    slug: "example-com-1",
-    createdAt: new Date("2025-01-10T12:52:56-08:00"),
-    updatedAt: new Date("2025-01-10T12:52:56-08:00"),
-  },
-  {
-    id: TEST_ITEM_ID_2,
-    url: "https://example.com/2",
-    slug: "example-com-2",
-    createdAt: new Date("2025-01-10T12:53:56-08:00"),
-    updatedAt: new Date("2025-01-10T12:53:56-08:00"),
-  },
-];
-
-const MOCK_PROFILE_ITEMS = [
-  {
-    id: TEST_PROFILE_ITEM_ID,
-    profileId: DEFAULT_TEST_PROFILE_ID,
-    itemId: TEST_ITEM_ID_1,
-    title: "Example 1",
-  },
-  {
-    id: TEST_PROFILE_ITEM_ID_1,
-    profileId: DEFAULT_TEST_PROFILE_ID,
-    itemId: TEST_ITEM_ID_2,
-    title: "Example 2",
-  },
-  {
-    id: TEST_PROFILE_ITEM_ID_2,
-    profileId: DEFAULT_TEST_PROFILE_ID_2,
-    itemId: TEST_ITEM_ID_2,
-    title: "Not mine",
-  },
-];
 
 const MOCK_HIGHLIGHTS = [
   {
     id: TEST_HIGHLIGHT_ID_1,
-    profileItemId: TEST_PROFILE_ITEM_ID_1,
+    profileItemId: MOCK_PROFILE_ITEMS[0].id,
     startOffset: 0,
     endOffset: 10,
     text: "Test highlight",
@@ -72,7 +26,7 @@ const MOCK_HIGHLIGHTS = [
   },
   {
     id: TEST_HIGHLIGHT_ID_2,
-    profileItemId: TEST_PROFILE_ITEM_ID_2,
+    profileItemId: MOCK_PROFILE_ITEMS[4].id,
     startOffset: 5,
     endOffset: 15,
     text: "Another highlight",
@@ -94,7 +48,7 @@ describe("/api/v1/items/highlights", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         body: {
-          slug: "example-com-2",
+          slug: "example-com",
           highlights: [
             {
               startOffset: 20,
@@ -125,7 +79,7 @@ describe("/api/v1/items/highlights", () => {
       expect(savedHighlight).toHaveLength(1);
       expect(savedHighlight[0]).toMatchObject({
         id: expect.any(String),
-        profileItemId: TEST_PROFILE_ITEM_ID_1,
+        profileItemId: MOCK_PROFILE_ITEMS[0].id,
         startOffset: 20,
         endOffset: 30,
         text: "New highlight",
@@ -137,7 +91,7 @@ describe("/api/v1/items/highlights", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         body: {
-          slug: "example-com-2",
+          slug: "example-com",
           highlights: [
             {
               id: TEST_HIGHLIGHT_ID_1,
@@ -183,7 +137,7 @@ describe("/api/v1/items/highlights", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         body: {
-          slug: "example-com-2",
+          slug: "example3-com",
           highlights: [
             {
               id: TEST_HIGHLIGHT_ID_2,
@@ -234,7 +188,7 @@ describe("/api/v1/items/highlights", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         body: {
-          slug: "example-com-1",
+          slug: "example-com",
           highlights: [
             {
               startOffset: 20,
@@ -260,7 +214,7 @@ describe("/api/v1/items/highlights", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         body: {
-          slug: "example-com-1",
+          slug: "example-com",
           highlights: [
             {
               startOffset: 20,
@@ -284,7 +238,7 @@ describe("/api/v1/items/highlights", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "DELETE",
         body: {
-          slug: "example-com-2",
+          slug: "example-com",
           highlightIds: [TEST_HIGHLIGHT_ID_1],
         },
       });
@@ -307,7 +261,7 @@ describe("/api/v1/items/highlights", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "DELETE",
         body: {
-          slug: "example-com-2",
+          slug: "example3-com",
           highlightIds: [TEST_HIGHLIGHT_ID_2],
         },
       });
@@ -329,7 +283,7 @@ describe("/api/v1/items/highlights", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "DELETE",
         body: {
-          slug: "example-com-2",
+          slug: "example-com",
           highlightIds: [],
         },
       });
@@ -365,7 +319,7 @@ describe("/api/v1/items/highlights", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "DELETE",
         body: {
-          slug: "example-com-2",
+          slug: "example-com",
           highlightIds: [TEST_HIGHLIGHT_ID_1],
         },
       });
@@ -384,7 +338,7 @@ describe("/api/v1/items/highlights", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "DELETE",
         body: {
-          slug: "example-com-2",
+          slug: "example-com",
           highlightIds: [TEST_HIGHLIGHT_ID_1],
         },
       });
