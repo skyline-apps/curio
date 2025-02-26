@@ -14,8 +14,13 @@ import HighlightMetadata from "./HighlightMetadata";
 import ItemMetadata from "./ItemMetadata";
 
 const RightSidebar: React.FC = () => {
-  const { selectedItems, currentItem, draftHighlight, isEditable } =
-    useContext(CurrentItemContext);
+  const {
+    selectedItems,
+    currentItem,
+    isCurrentlyPreviewing,
+    draftHighlight,
+    isEditable,
+  } = useContext(CurrentItemContext);
   const {
     appLayout: { rightSidebarOpen },
     updateAppLayout,
@@ -48,7 +53,10 @@ const RightSidebar: React.FC = () => {
               (draftHighlight && isEditable(currentItem) ? (
                 <HighlightMetadata />
               ) : currentItem ? (
-                <ItemMetadata item={currentItem || undefined} />
+                <ItemMetadata
+                  item={currentItem}
+                  readonly={isCurrentlyPreviewing}
+                />
               ) : (
                 <>
                   <p className="text-secondary text-center pt-16">

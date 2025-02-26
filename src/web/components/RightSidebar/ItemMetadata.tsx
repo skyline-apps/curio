@@ -13,10 +13,12 @@ import { UserContext } from "@/providers/UserProvider";
 
 interface ItemMetadataProps {
   item?: Item | PublicItem;
+  readonly?: boolean;
 }
 
 const ItemMetadata: React.FC<ItemMetadataProps> = ({
   item,
+  readonly,
 }: ItemMetadataProps) => {
   const { user } = useContext(UserContext);
   const { isEditable } = useContext(CurrentItemContext);
@@ -25,22 +27,22 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
 
   const handleAddLabel = useCallback(
     async (label: Label): Promise<void> => {
-      if (!item || !isEditable(item)) return;
+      if (readonly || !item || !isEditable(item)) return;
       await addItemsLabel([item], label);
     },
-    [item, isEditable, addItemsLabel],
+    [item, isEditable, addItemsLabel, readonly],
   );
 
   const handleDeleteLabel = useCallback(
     async (labelId: string): Promise<void> => {
-      if (!item || !isEditable(item) || !item.labels) return;
+      if (readonly || !item || !isEditable(item) || !item.labels) return;
 
       const labelToRemove = item.labels.find((l) => l.id === labelId);
       if (labelToRemove) {
         await removeItemsLabel([item], labelToRemove);
       }
     },
-    [item, isEditable, removeItemsLabel],
+    [item, isEditable, removeItemsLabel, readonly],
   );
 
   if (!item || !item.metadata) {
@@ -90,7 +92,9 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
             )}
           </div>
           {isEditable(item) ? (
-            <ItemActions item={item} showAdvanced />
+            !readonly ? (
+              <ItemActions item={item} showAdvanced />
+            ) : null
           ) : user.id ? (
             <OtherItemActions item={item} />
           ) : null}
@@ -101,13 +105,17 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
           </p>
         )}
         <div className="flex flex-col gap-2 py-2">
-          <Labels
-            availableLabels={labels || []}
-            labels={item.labels || []}
-            mode="picker"
-            onAdd={handleAddLabel}
-            onDelete={handleDeleteLabel}
-          />
+          {readonly ? (
+            <Labels labels={item.labels || []} mode="view" />
+          ) : (
+            <Labels
+              availableLabels={labels || []}
+              labels={item.labels || []}
+              mode="picker"
+              onAdd={handleAddLabel}
+              onDelete={handleDeleteLabel}
+            />
+          )}
         </div>
       </div>
     </div>

@@ -1,3 +1,8 @@
+import { LABELS_CLAUSE } from "@/app/api/v1/items/route";
+import {
+  ItemResultSchema,
+  PublicItemResultSchema,
+} from "@/app/api/v1/items/validation";
 import { and, db, desc, eq, sql } from "@/db";
 import { items, profileItems, profiles } from "@/db/schema";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
@@ -72,7 +77,13 @@ export async function GET(
           thumbnail: profileItems.thumbnail,
           favicon: profileItems.favicon,
           savedAt: profileItems.savedAt,
+          isFavorite: profileItems.isFavorite,
+          state: profileItems.state,
+          stateUpdatedAt: profileItems.stateUpdatedAt,
+          readingProgress: profileItems.readingProgress,
+          versionName: profileItems.versionName,
         },
+        labels: LABELS_CLAUSE,
       })
       .from(items)
       .innerJoin(profileItems, and(eq(profileItems.itemId, items.id)))
@@ -80,16 +91,22 @@ export async function GET(
       .orderBy(desc(profileItems.savedAt))
       .limit(limit);
 
+    const parsedItems = isOwner
+      ? favoriteItems.map((item) => ItemResultSchema.parse(item))
+      : favoriteItems.map((item) =>
+          PublicItemResultSchema.parse({
+            ...item,
+            labels: [],
+            profileItemId: null,
+          }),
+        );
+
     const response = GetProfileResponseSchema.parse({
       profile: {
         username: profile.username,
         createdAt: profile.createdAt,
       },
-      favoriteItems: favoriteItems.map((item) => ({
-        ...item,
-        labels: [],
-        profileItemId: isOwner ? item.profileItemId : undefined,
-      })),
+      favoriteItems: parsedItems,
       nextCursor:
         favoriteItems.length === limit
           ? favoriteItems[

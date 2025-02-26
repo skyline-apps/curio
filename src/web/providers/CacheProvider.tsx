@@ -3,6 +3,8 @@ import { InfiniteData, useQueryClient } from "@tanstack/react-query";
 import React, { createContext, useCallback, useContext } from "react";
 
 import { type Highlight } from "@/app/api/v1/items/highlights/validation";
+import { PROFILE_QUERY_KEY } from "@/components/Profile/useProfile";
+import { UserContext } from "@/providers/UserProvider";
 
 import {
   ITEM_CONTENT_QUERY_KEY,
@@ -12,7 +14,7 @@ import { type Item, ITEMS_QUERY_KEY, type ItemsPage } from "./ItemsProvider";
 
 type ItemUpdate = { slug: string } & {
   metadata?: Partial<Item["metadata"]>;
-  labels?: Partial<Item["labels"]>;
+  labels?: Item["labels"];
   highlights?: Highlight[];
 };
 
@@ -34,6 +36,7 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
   children,
 }: CacheProviderProps): React.ReactNode => {
   const queryClient = useQueryClient();
+  const { user } = useContext(UserContext);
 
   const invalidateCache = useCallback(
     (slug?: string) => {
@@ -45,8 +48,13 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
         queryClient.invalidateQueries({ queryKey: [ITEM_CONTENT_QUERY_KEY] });
       }
       queryClient.invalidateQueries({ queryKey: [ITEMS_QUERY_KEY] });
+      if (user.username) {
+        queryClient.invalidateQueries({
+          queryKey: [PROFILE_QUERY_KEY, user.username],
+        });
+      }
     },
-    [queryClient],
+    [queryClient, user.username],
   );
 
   const optimisticUpdateItems = useCallback(

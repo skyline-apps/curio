@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import { PublicItemResultSchema } from "@/app/api/v1/items/validation";
+import {
+  ItemResultSchema,
+  PublicItemResultSchema,
+} from "@/app/api/v1/items/validation";
 
 export const GetProfileRequestSchema = z
   .object({
@@ -24,7 +27,7 @@ export const GetProfileResponseSchema = z
       })
       .strict(),
     favoriteItems: z
-      .array(PublicItemResultSchema)
+      .array(z.union([PublicItemResultSchema, ItemResultSchema]))
       .describe("List of favorited items."),
     nextCursor: z.string().optional(),
   })

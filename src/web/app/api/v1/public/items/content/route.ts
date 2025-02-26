@@ -46,6 +46,7 @@ async function getDefaultContent(
         slug: itemResult[0].slug,
         url: itemResult[0].url,
         createdAt: itemResult[0].createdAt,
+        profileItemId: null,
         metadata: {
           title: metadata.title,
           description: metadata.description,

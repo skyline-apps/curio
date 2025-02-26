@@ -35,14 +35,17 @@ export const ITEM_CONTENT_QUERY_KEY = "itemContent";
 export type CurrentItemContextType = {
   currentItem: Item | PublicItem | null; // Metadata of currently loaded or selected item
   loadedItem: ItemWithContent | null; // Contents of currently loaded item
+  isCurrentlyPreviewing: boolean; // Whether the current item is stored in query results
   selectedItems: Set<string>; // All selected item slugs
   selectItems: (
+    // Selected items must be loaded by the ItemsProvider
     slugs: string[],
     index: number,
     replace?: boolean, // Clear out all other selections for this one
     selectRange?: boolean, // Select a range from the lastSelectionIndex to this index
     startSelecting?: boolean, // Start selecting, even if we're replacing
   ) => void;
+  previewItem: (item: Item | PublicItem) => void;
   clearSelectedItems: () => void;
   fetchContent: (slug: string, refresh?: boolean) => Promise<void>;
   loading: boolean;
@@ -62,8 +65,10 @@ interface CurrentItemProviderProps {
 export const CurrentItemContext = createContext<CurrentItemContextType>({
   currentItem: null,
   loadedItem: null,
+  isCurrentlyPreviewing: false,
   selectedItems: new Set<string>(),
   selectItems: () => {},
+  previewItem: () => {},
   clearSelectedItems: () => {},
   fetchContent: () => Promise.resolve(),
   loading: true,
@@ -88,6 +93,9 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   const [lastSelectionIndex, setLastSelectionIndex] = useState<number | null>(
     null,
   );
+  const [currentPreviewItem, setCurrentPreviewItem] = useState<
+    Item | PublicItem | null
+  >(null);
   const [inSelectionMode, setInSelectionMode] = useState<boolean>(false);
   const [draftHighlight, setDraftHighlight] = useState<
     Highlight | NewHighlight | null
@@ -101,6 +109,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   const clearSelectedItems = useCallback((): void => {
     setSelectedItems(new Set());
     setItemLoadedSlug(null);
+    setCurrentPreviewItem(null);
     setInSelectionMode(false);
     setDraftHighlight(null);
     updateAppLayout({ rightSidebarOpen: false });
@@ -112,6 +121,14 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     }
   }, [pathname, clearSelectedItems]);
 
+  const maybeOpenSidebar = useCallback((): void => {
+    if (typeof window !== "undefined" && window.innerWidth > 1048) {
+      updateAppLayout({ rightSidebarOpen: true });
+    } else {
+      updateAppLayout({ rightSidebarOpen: false });
+    }
+  }, [updateAppLayout]);
+
   const selectItems = useCallback(
     (
       slugs: string[],
@@ -120,6 +137,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
       selectRange: boolean = false,
       startSelecting: boolean = false,
     ) => {
+      setCurrentPreviewItem(null);
       if (replace && !inSelectionMode) {
         setSelectedItems(new Set(slugs));
         updateAppLayout({ rightSidebarOpen: !!slugs.length });
@@ -142,11 +160,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
           }
         });
         setSelectedItems(newSelection);
-        if (typeof window !== "undefined" && window.innerWidth > 1048) {
-          updateAppLayout({ rightSidebarOpen: !!slugs.length });
-        } else {
-          updateAppLayout({ rightSidebarOpen: false });
-        }
+        maybeOpenSidebar();
       }
       setLastSelectionIndex(index);
       if (startSelecting) {
@@ -158,8 +172,17 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
       lastSelectionIndex,
       selectedItems,
       inSelectionMode,
+      maybeOpenSidebar,
       updateAppLayout,
     ],
+  );
+
+  const previewItem = useCallback(
+    (item: Item | PublicItem) => {
+      setCurrentPreviewItem(item);
+      updateAppLayout({ rightSidebarOpen: true });
+    },
+    [setCurrentPreviewItem, updateAppLayout],
   );
 
   const { data, isLoading, error, refetch, isPending } =
@@ -188,11 +211,8 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
           throw new Error(`Failed to fetch item content`);
         }
         if (result) {
-          if (typeof window !== "undefined" && window.innerWidth > 1048) {
-            updateAppLayout({ rightSidebarOpen: true });
-          } else {
-            updateAppLayout({ rightSidebarOpen: false });
-          }
+          setCurrentPreviewItem(null);
+          maybeOpenSidebar();
         }
         return result;
       },
@@ -234,6 +254,8 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
       } else {
         item = data?.item || null;
       }
+    } else if (currentPreviewItem) {
+      item = currentPreviewItem;
     } else if (firstItem) {
       item = items.find((item) => item.slug === firstItem) || null;
     }
@@ -243,7 +265,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     } else {
       return item as PublicItem;
     }
-  }, [items, data, itemLoadedSlug, firstItem]);
+  }, [items, data, itemLoadedSlug, currentPreviewItem, firstItem]);
 
   const loadedItem = useMemo(() => {
     return data || null;
@@ -265,8 +287,10 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
       value={{
         currentItem,
         loadedItem,
+        isCurrentlyPreviewing: !!currentPreviewItem,
         selectedItems,
         selectItems,
+        previewItem,
         clearSelectedItems,
         fetchContent,
         loading: isLoading || isPending,
