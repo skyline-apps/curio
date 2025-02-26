@@ -29,7 +29,7 @@ interface BaseLabelsProps {
 }
 
 interface CreateLabelsProps extends BaseLabelsProps {
-  mode?: "create";
+  mode: "create";
   onAdd?: (label: { name: string; color: string }) => void | Promise<void>;
 }
 
@@ -39,7 +39,11 @@ interface PickerLabelsProps extends BaseLabelsProps {
   onAdd: (label: Label) => void | Promise<void>;
 }
 
-type LabelsProps = CreateLabelsProps | PickerLabelsProps;
+interface ViewLabelsProps extends BaseLabelsProps {
+  mode: "view";
+}
+
+type LabelsProps = CreateLabelsProps | PickerLabelsProps | ViewLabelsProps;
 
 const Labels: React.FC<LabelsProps> = (props) => {
   const [draftLabel, setDraftLabel] = useState<{

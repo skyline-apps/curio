@@ -95,7 +95,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
             </p>
             {item.labels && item.labels.length > 0 && (
               <div className="hidden md:block max-h-6 overflow-hidden">
-                <Labels labels={item.labels} truncate />
+                <Labels mode="view" labels={item.labels} truncate />
               </div>
             )}
           </div>

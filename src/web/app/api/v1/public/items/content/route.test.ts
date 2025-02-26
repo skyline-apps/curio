@@ -198,6 +198,7 @@ describe("/api/v1/public/items/content", () => {
           slug: TEST_ITEM_SLUG,
           url: TEST_ITEM_URL,
           createdAt: ORIGINAL_CREATION_DATE.toISOString(),
+          profileItemId: null,
           metadata: {
             title: "test title",
             description: "test description",
@@ -277,6 +278,7 @@ describe("/api/v1/public/items/content", () => {
           slug: TEST_ITEM_SLUG,
           url: TEST_ITEM_URL,
           createdAt: ORIGINAL_CREATION_DATE.toISOString(),
+          profileItemId: null,
           metadata: {
             title: "test title",
             description: "test description",

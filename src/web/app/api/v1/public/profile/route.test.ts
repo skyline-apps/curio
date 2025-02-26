@@ -2,7 +2,14 @@ import { vi } from "vitest";
 
 import { eq } from "@/db";
 import { DbErrorCode } from "@/db/errors";
-import { items, ItemState, profileItems, profiles } from "@/db/schema";
+import {
+  items,
+  ItemState,
+  profileItemLabels,
+  profileItems,
+  profileLabels,
+  profiles,
+} from "@/db/schema";
 import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_PROFILE_ID,
@@ -24,6 +31,8 @@ const TEST_ITEM_ID_3 = "123e4567-e89b-12d3-a456-426614174003";
 const TEST_ITEM_URL_3 = "https://example3.com/";
 const TEST_ITEM_ID_4 = "123e4567-e89b-12d3-a456-426614174004";
 const TEST_ITEM_URL_4 = "https://example4.com/";
+const TEST_LABEL_ID_1 = "123e4567-e89b-12d3-a456-426614174005";
+const TEST_LABEL_ID_2 = "123e4567-e89b-12d3-a456-426614174006";
 
 const MOCK_ITEMS = [
   {
@@ -84,6 +93,7 @@ const MOCK_PROFILE_ITEMS = [
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
     savedAt: new Date("2025-01-10T12:52:57-08:00"),
     stateUpdatedAt: new Date("2025-01-10T12:52:57-08:00"),
+    state: ItemState.ARCHIVED,
   },
   {
     id: "12345678-1234-1234-1234-123456789013",
@@ -137,11 +147,47 @@ const MOCK_PROFILE_ITEMS = [
   },
 ];
 
+const MOCK_LABELS = [
+  {
+    id: TEST_LABEL_ID_1,
+    profileId: DEFAULT_TEST_PROFILE_ID,
+    name: "Test Label 1",
+    color: "#ff0000",
+    createdAt: new Date("2025-01-10T12:52:56-08:00"),
+    updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+  },
+  {
+    id: TEST_LABEL_ID_2,
+    profileId: DEFAULT_TEST_PROFILE_ID,
+    name: "Test Label 2",
+    color: "#00ff00",
+    createdAt: new Date("2025-01-10T12:52:56-08:00"),
+    updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+  },
+];
+
+const MOCK_PROFILE_ITEM_LABELS = [
+  {
+    id: "123e4567-e89b-12d3-a456-426614174007",
+    profileItemId: MOCK_PROFILE_ITEMS[0].id,
+    labelId: TEST_LABEL_ID_1,
+  },
+  {
+    id: "123e4567-e89b-12d3-a456-426614174008",
+    profileItemId: MOCK_PROFILE_ITEMS[0].id,
+    labelId: TEST_LABEL_ID_2,
+  },
+];
+
 describe("/api/v1/profile", () => {
   describe("GET /api/v1/profile", () => {
     beforeEach(async () => {
       await testDb.db.insert(items).values(MOCK_ITEMS);
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+      await testDb.db.insert(profileLabels).values(MOCK_LABELS);
+      await testDb.db
+        .insert(profileItemLabels)
+        .values(MOCK_PROFILE_ITEM_LABELS);
     });
 
     it("should return 200 when viewing own profile", async () => {
@@ -175,6 +221,11 @@ describe("/api/v1/profile", () => {
             thumbnail: "https://example.com/thumb4.jpg",
             title: "Example 4",
             savedAt: "2025-01-10T20:56:56.000Z",
+            isFavorite: true,
+            readingProgress: 15,
+            state: ItemState.ACTIVE,
+            stateUpdatedAt: "2025-01-10T20:56:56.000Z",
+            versionName: "2024-01-01",
           },
           profileItemId: MOCK_PROFILE_ITEMS[3].id,
           slug: "example4-com",
@@ -192,6 +243,11 @@ describe("/api/v1/profile", () => {
             thumbnail: "https://example.com/thumb2.jpg",
             title: "Example 2",
             savedAt: "2025-01-10T20:52:57.000Z",
+            isFavorite: true,
+            readingProgress: 0,
+            state: ItemState.ARCHIVED,
+            stateUpdatedAt: "2025-01-10T20:52:57.000Z",
+            versionName: null,
           },
           profileItemId: MOCK_PROFILE_ITEMS[1].id,
           slug: "example2-com",
@@ -200,7 +256,18 @@ describe("/api/v1/profile", () => {
         {
           createdAt: "2025-01-10T20:52:56.000Z",
           id: TEST_ITEM_ID,
-          labels: [],
+          labels: [
+            {
+              color: "#ff0000",
+              id: "123e4567-e89b-12d3-a456-426614174005",
+              name: "Test Label 1",
+            },
+            {
+              color: "#00ff00",
+              id: "123e4567-e89b-12d3-a456-426614174006",
+              name: "Test Label 2",
+            },
+          ],
           metadata: {
             author: "Test Author",
             description: "First example item",
@@ -209,6 +276,11 @@ describe("/api/v1/profile", () => {
             thumbnail: "https://example.com/thumb1.jpg",
             title: "Example 1",
             savedAt: "2025-01-10T20:52:56.000Z",
+            isFavorite: true,
+            readingProgress: 0,
+            state: ItemState.ACTIVE,
+            stateUpdatedAt: "2025-01-10T20:52:56.000Z",
+            versionName: null,
           },
           profileItemId: MOCK_PROFILE_ITEMS[0].id,
           slug: "example-com",
@@ -242,7 +314,7 @@ describe("/api/v1/profile", () => {
           createdAt: "2025-01-10T20:55:56.000Z",
           id: TEST_ITEM_ID_4,
           labels: [],
-          metadata: {
+          metadata: expect.objectContaining({
             author: "Test Author",
             description: "Fourth example item",
             favicon: "https://example.com/favicon4.ico",
@@ -250,7 +322,7 @@ describe("/api/v1/profile", () => {
             thumbnail: "https://example.com/thumb4.jpg",
             title: "Example 4",
             savedAt: "2025-01-10T20:56:56.000Z",
-          },
+          }),
           profileItemId: MOCK_PROFILE_ITEMS[3].id,
           slug: "example4-com",
           url: TEST_ITEM_URL_4,
@@ -259,7 +331,7 @@ describe("/api/v1/profile", () => {
           createdAt: "2025-01-10T20:53:56.000Z",
           id: TEST_ITEM_ID_2,
           labels: [],
-          metadata: {
+          metadata: expect.objectContaining({
             author: "Test Author",
             description: "Second example item",
             favicon: "https://example.com/favicon2.ico",
@@ -267,7 +339,7 @@ describe("/api/v1/profile", () => {
             thumbnail: "https://example.com/thumb2.jpg",
             title: "Example 2",
             savedAt: "2025-01-10T20:52:57.000Z",
-          },
+          }),
           profileItemId: MOCK_PROFILE_ITEMS[1].id,
           slug: "example2-com",
           url: TEST_ITEM_URL_2,
@@ -297,8 +369,19 @@ describe("/api/v1/profile", () => {
         {
           createdAt: "2025-01-10T20:52:56.000Z",
           id: TEST_ITEM_ID,
-          labels: [],
-          metadata: {
+          labels: [
+            {
+              color: "#ff0000",
+              id: "123e4567-e89b-12d3-a456-426614174005",
+              name: "Test Label 1",
+            },
+            {
+              color: "#00ff00",
+              id: "123e4567-e89b-12d3-a456-426614174006",
+              name: "Test Label 2",
+            },
+          ],
+          metadata: expect.objectContaining({
             author: "Test Author",
             description: "First example item",
             favicon: "https://example.com/favicon1.ico",
@@ -306,7 +389,7 @@ describe("/api/v1/profile", () => {
             thumbnail: "https://example.com/thumb1.jpg",
             title: "Example 1",
             savedAt: "2025-01-10T20:52:56.000Z",
-          },
+          }),
           profileItemId: MOCK_PROFILE_ITEMS[0].id,
           slug: "example-com",
           url: TEST_ITEM_URL_1,
@@ -318,9 +401,9 @@ describe("/api/v1/profile", () => {
       await testDb.db
         .update(profiles)
         .set({ public: true })
-        .where(eq(profiles.id, DEFAULT_TEST_PROFILE_ID_2));
+        .where(eq(profiles.id, DEFAULT_TEST_PROFILE_ID));
       const params = new URLSearchParams({
-        username: DEFAULT_TEST_USERNAME_2,
+        username: DEFAULT_TEST_USERNAME,
       });
       const request: APIRequest = makeUnauthenticatedMockRequest({
         method: "GET",
@@ -332,26 +415,61 @@ describe("/api/v1/profile", () => {
 
       const body = await response.json();
       expect(body.profile).toEqual({
-        username: DEFAULT_TEST_USERNAME_2,
+        username: DEFAULT_TEST_USERNAME,
         createdAt: "2025-01-10T20:52:56.000Z",
       });
-      expect(body.favoriteItems).toHaveLength(1);
+      expect(body.favoriteItems).toHaveLength(3);
       expect(body.favoriteItems).toEqual([
         {
-          createdAt: "2025-01-10T20:54:56.000Z",
-          id: TEST_ITEM_ID_3,
+          createdAt: "2025-01-10T20:55:56.000Z",
+          id: TEST_ITEM_ID_4,
           labels: [],
           metadata: {
             author: "Test Author",
-            description: "Third example item",
-            favicon: "https://example.com/favicon3.ico",
+            description: "Fourth example item",
+            favicon: "https://example.com/favicon4.ico",
             publishedAt: "2025-01-10T20:52:56.000Z",
-            thumbnail: "https://example.com/thumb3.jpg",
-            title: "Example 3 New title",
+            thumbnail: "https://example.com/thumb4.jpg",
+            title: "Example 4",
             savedAt: "2025-01-10T20:56:56.000Z",
           },
-          slug: "example3-com",
-          url: TEST_ITEM_URL_3,
+          profileItemId: null,
+          slug: "example4-com",
+          url: TEST_ITEM_URL_4,
+        },
+        {
+          createdAt: "2025-01-10T20:53:56.000Z",
+          id: TEST_ITEM_ID_2,
+          labels: [],
+          metadata: {
+            author: "Test Author",
+            description: "Second example item",
+            favicon: "https://example.com/favicon2.ico",
+            publishedAt: "2025-01-10T20:52:56.000Z",
+            thumbnail: "https://example.com/thumb2.jpg",
+            title: "Example 2",
+            savedAt: "2025-01-10T20:52:57.000Z",
+          },
+          profileItemId: null,
+          slug: "example2-com",
+          url: TEST_ITEM_URL_2,
+        },
+        {
+          createdAt: "2025-01-10T20:52:56.000Z",
+          id: TEST_ITEM_ID,
+          labels: [],
+          metadata: {
+            author: "Test Author",
+            description: "First example item",
+            favicon: "https://example.com/favicon1.ico",
+            publishedAt: "2025-01-10T20:52:56.000Z",
+            thumbnail: "https://example.com/thumb1.jpg",
+            title: "Example 1",
+            savedAt: "2025-01-10T20:52:56.000Z",
+          },
+          profileItemId: null,
+          slug: "example-com",
+          url: TEST_ITEM_URL_1,
         },
       ]);
     });

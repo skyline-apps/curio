@@ -2,6 +2,7 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, {
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -9,16 +10,18 @@ import React, {
 } from "react";
 
 import ItemCard from "@/components/Items/ItemCard";
-import { type PublicItem } from "@/providers/ItemsProvider";
+import { CurrentItemContext } from "@/providers/CurrentItemProvider";
+import { type Item, type PublicItem } from "@/providers/ItemsProvider";
 
 interface ItemGridProps {
-  items: PublicItem[];
+  items: (PublicItem | Item)[];
   onLoadMore?: () => void;
   hasMore?: boolean;
   isLoading?: boolean;
 }
 
-const CARD_WIDTH = 320; // w-80
+// Keep in sync with dimensions of ItemCard/index.tsx
+const CARD_WIDTH = 288; // w-80
 const CARD_HEIGHT = 384; // h-96
 const GAP = 16; // gap-4
 
@@ -31,6 +34,7 @@ const ItemGrid: React.FC<ItemGridProps> = ({
   const parentRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef(false);
   const [containerWidth, setContainerWidth] = useState(0);
+  const { previewItem } = useContext(CurrentItemContext);
 
   // Calculate number of columns based on container width
   const columnCount = useMemo(() => {
@@ -132,7 +136,13 @@ const ItemGrid: React.FC<ItemGridProps> = ({
               }}
             >
               {rowItems.map((item) => (
-                <ItemCard key={item.profileItemId || item.id} item={item} />
+                <ItemCard
+                  key={item.id}
+                  item={item}
+                  onPress={() => {
+                    previewItem(item);
+                  }}
+                />
               ))}
             </div>
           );

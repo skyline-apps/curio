@@ -87,65 +87,60 @@ const ItemMetadataBaseSchema = PublicItemMetadataSchema.merge(
       .nullable()
       .describe("The version name of the item."),
   }),
-).strict();
+);
 
-export const ItemImagesSchema = z
-  .object({
-    thumbnail: z
-      .string()
-      .nullable()
-      .optional()
-      .transform((val) => {
-        if (!val) return null;
-        try {
-          return val ? new URL(val).toString() : null;
-        } catch {
-          return null;
-        }
-      })
-      .describe("The thumbnail URL of the item."),
-    favicon: z
-      .string()
-      .nullable()
-      .optional()
-      .transform((val) => {
-        if (!val) return null;
-        try {
-          return val ? new URL(val).toString() : null;
-        } catch {
-          return null;
-        }
-      })
-      .describe("The favicon URL of the item."),
-  })
-  .strict();
+export const ItemImagesSchema = z.object({
+  thumbnail: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((val) => {
+      if (!val) return null;
+      try {
+        return val ? new URL(val).toString() : null;
+      } catch {
+        return null;
+      }
+    })
+    .describe("The thumbnail URL of the item."),
+  favicon: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((val) => {
+      if (!val) return null;
+      try {
+        return val ? new URL(val).toString() : null;
+      } catch {
+        return null;
+      }
+    })
+    .describe("The favicon URL of the item."),
+});
 
-const ItemMetadataSchema =
-  ItemMetadataBaseSchema.merge(ItemImagesSchema).strict();
+const ItemMetadataSchema = ItemMetadataBaseSchema.merge(ItemImagesSchema);
 
-export const ItemResultSchema = z
-  .object({
-    id: z.string(),
-    profileItemId: z.string(),
-    url: UrlSchema,
-    slug: SlugSchema,
-    metadata: ItemMetadataSchema,
-    createdAt: dateType,
-    labels: z.array(LabelSchema),
-    excerpt: z
-      .string()
-      .optional()
-      .describe("Included if the item is relevant for the search query"),
-  })
-  .strict();
+export const ItemResultSchema = z.object({
+  id: z.string(),
+  profileItemId: z.string(),
+  url: UrlSchema,
+  slug: SlugSchema,
+  metadata: ItemMetadataSchema,
+  createdAt: dateType,
+  labels: z.array(LabelSchema),
+  excerpt: z
+    .string()
+    .optional()
+    .describe("Included if the item is relevant for the search query"),
+});
 
 export type ItemResult = z.infer<typeof ItemResultSchema>;
 
 export const PublicItemResultSchema = ItemResultSchema.extend({
-  profileItemId: z.string().optional(),
+  profileItemId: z.null(),
   labels: z.array(LabelSchema).optional(),
-  metadata: PublicItemMetadataSchema.merge(ItemImagesSchema).strict(),
-}).strict();
+  metadata: PublicItemMetadataSchema.merge(ItemImagesSchema),
+});
 
 export type PublicItemResult = z.infer<typeof PublicItemResultSchema>;
 
