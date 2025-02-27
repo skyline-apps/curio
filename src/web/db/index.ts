@@ -11,7 +11,7 @@ const pool = new Pool({
 
 export const db = drizzle(pool, { schema });
 
-export type { SQL } from "drizzle-orm";
+export type { InferSelectModel, SQL } from "drizzle-orm";
 export {
   and,
   asc,
@@ -32,6 +32,7 @@ export {
 } from "drizzle-orm";
 export type {
   PgColumn,
+  PgSelect,
   PgTransaction,
   SelectedFields,
 } from "drizzle-orm/pg-core";

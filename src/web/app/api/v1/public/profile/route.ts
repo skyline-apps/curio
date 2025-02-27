@@ -1,10 +1,10 @@
-import { LABELS_CLAUSE } from "@/app/api/v1/items/route";
 import {
   ItemResultSchema,
   PublicItemResultSchema,
 } from "@/app/api/v1/items/validation";
 import { and, db, desc, eq, sql } from "@/db";
-import { items, profileItems, profiles } from "@/db/schema";
+import { fetchOwnItemResults } from "@/db/queries";
+import { profileItems, profiles } from "@/db/schema";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
 import { createLogger } from "@/utils/logger";
@@ -62,31 +62,7 @@ export async function GET(
       whereClause = and(whereClause, sql`${profileItems.savedAt} < ${cursor}`);
     }
 
-    const favoriteItems = await db
-      .select({
-        id: items.id,
-        url: items.url,
-        slug: items.slug,
-        profileItemId: profileItems.id,
-        createdAt: items.createdAt,
-        metadata: {
-          title: profileItems.title,
-          description: profileItems.description,
-          author: profileItems.author,
-          publishedAt: profileItems.publishedAt,
-          thumbnail: profileItems.thumbnail,
-          favicon: profileItems.favicon,
-          savedAt: profileItems.savedAt,
-          isFavorite: profileItems.isFavorite,
-          state: profileItems.state,
-          stateUpdatedAt: profileItems.stateUpdatedAt,
-          readingProgress: profileItems.readingProgress,
-          versionName: profileItems.versionName,
-        },
-        labels: LABELS_CLAUSE,
-      })
-      .from(items)
-      .innerJoin(profileItems, and(eq(profileItems.itemId, items.id)))
+    const favoriteItems = await fetchOwnItemResults()
       .where(and(whereClause))
       .orderBy(desc(profileItems.savedAt))
       .limit(limit);

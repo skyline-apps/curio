@@ -1,8 +1,8 @@
-import { LABELS_CLAUSE } from "@/app/api/v1/items/route";
 import { and, db, eq, sql } from "@/db";
+import { fetchOwnItemResults } from "@/db/queries";
 import { items, profileItemHighlights, profileItems } from "@/db/schema";
 import { indexDocuments } from "@/lib/search";
-import { storage } from "@/lib/storage";
+import { getItemContent, getItemMetadata } from "@/lib/storage";
 import { StorageError } from "@/lib/storage/types";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
@@ -36,8 +36,8 @@ async function getDefaultContent(
   }
 
   try {
-    const { content } = await storage.getItemContent(slug, null);
-    const metadata = await storage.getItemMetadata(slug);
+    const { content } = await getItemContent(slug, null);
+    const metadata = await getItemMetadata(slug);
 
     const response = GetItemContentResponseSchema.parse({
       content,
@@ -100,36 +100,16 @@ export async function GET(
       return getDefaultContent(slug);
     }
 
-    const item = await db
-      .select({
-        id: items.id,
-        url: items.url,
-        slug: items.slug,
-        profileItemId: profileItems.id,
-        metadata: {
-          title: profileItems.title,
-          description: profileItems.description,
-          author: profileItems.author,
-          thumbnail: profileItems.thumbnail,
-          favicon: profileItems.favicon,
-          publishedAt: profileItems.publishedAt,
-          savedAt: profileItems.savedAt,
-          state: profileItems.state,
-          isFavorite: profileItems.isFavorite,
-          readingProgress: profileItems.readingProgress,
-          lastReadAt: profileItems.lastReadAt,
-          versionName: profileItems.versionName,
-        },
-        labels: LABELS_CLAUSE,
-        highlights: sql<
-          Array<{
-            id: string;
-            startOffset: number;
-            endOffset: number;
-            text: string | null;
-            note: string | null;
-          }>
-        >`(
+    const item = await fetchOwnItemResults({
+      highlights: sql<
+        Array<{
+          id: string;
+          startOffset: number;
+          endOffset: number;
+          text: string | null;
+          note: string | null;
+        }>
+      >`(
           SELECT COALESCE(
             json_agg(
               json_build_object(
@@ -145,10 +125,7 @@ export async function GET(
           FROM ${profileItemHighlights} h
           WHERE h.profile_item_id = ${profileItems.id}
         )`,
-        createdAt: items.createdAt,
-      })
-      .from(items)
-      .innerJoin(profileItems, eq(items.id, profileItems.itemId))
+    })
       .where(
         and(
           eq(items.slug, slug),
@@ -168,7 +145,7 @@ export async function GET(
         version,
         versionName: retrievedVersionName,
         content,
-      } = await storage.getItemContent(slug, itemResponse.metadata.versionName);
+      } = await getItemContent(slug, itemResponse.metadata.versionName);
 
       let response: GetItemContentResponse = GetItemContentResponseSchema.parse(
         {
