@@ -1,12 +1,6 @@
 import { and, db, desc, eq, ilike, not, or, type SQL, sql } from "@/db";
-import {
-  items,
-  ItemState,
-  ItemStateNumber,
-  profileItemLabels,
-  profileItems,
-  profileLabels,
-} from "@/db/schema";
+import { fetchOwnItemResults } from "@/db/queries";
+import { items, ItemState, ItemStateNumber, profileItems } from "@/db/schema";
 import { searchDocuments } from "@/lib/search";
 import { SearchError } from "@/lib/search/types";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
@@ -27,25 +21,6 @@ import {
 } from "./validation";
 
 const log = createLogger("api/v1/items");
-
-export const LABELS_CLAUSE = sql<
-  Array<{ id: string; name: string; color: string }>
->`COALESCE(
-    (
-      SELECT json_agg(
-        json_build_object(
-          'id', pl.id,
-          'name', pl.name,
-          'color', pl.color
-        )
-      )
-      FROM ${profileItemLabels} pil
-      INNER JOIN ${profileLabels} pl ON pl.id = pil.label_id
-      WHERE pil.profile_item_id = ${profileItems.id}
-    ),
-    '[]'
-  )::json
-`;
 
 async function getRelevantProfileItemIds(
   profileId: string,
@@ -229,32 +204,7 @@ export async function GET(
       );
     }
 
-    const results = await db
-      .select({
-        id: items.id,
-        url: items.url,
-        slug: items.slug,
-        createdAt: items.createdAt,
-        profileItemId: profileItems.id,
-        metadata: {
-          title: profileItems.title,
-          description: profileItems.description,
-          author: profileItems.author,
-          thumbnail: profileItems.thumbnail,
-          favicon: profileItems.favicon,
-          publishedAt: profileItems.publishedAt,
-          savedAt: profileItems.savedAt,
-          state: profileItems.state,
-          isFavorite: profileItems.isFavorite,
-          readingProgress: profileItems.readingProgress,
-          lastReadAt: profileItems.lastReadAt,
-          versionName: profileItems.versionName,
-          stateUpdatedAt: profileItems.stateUpdatedAt,
-        },
-        labels: LABELS_CLAUSE,
-      })
-      .from(items)
-      .innerJoin(profileItems, eq(items.id, profileItems.itemId))
+    const results = await fetchOwnItemResults()
       .where(whereClause)
       // TODO: Fix pagination bug if multiple items have the same stateUpdatedAt
       .orderBy(desc(profileItems.stateUpdatedAt), desc(items.id))
