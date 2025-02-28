@@ -127,6 +127,13 @@
       "when": 1740175493753,
       "tag": "0017_add_public_setting_to_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1740595300535,
+      "tag": "0018_add_recommendation_table",
+      "breakpoints": true
     }
   ]
 }

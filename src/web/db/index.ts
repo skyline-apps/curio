@@ -17,6 +17,7 @@ export {
   asc,
   desc,
   eq,
+  exists,
   gt,
   gte,
   ilike,
