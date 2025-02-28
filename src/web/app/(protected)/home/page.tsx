@@ -1,17 +1,21 @@
 "use client";
 import React, { useContext, useEffect } from "react";
 
-import { ItemState } from "@/db/schema";
-import { ItemsContext } from "@/providers/ItemsProvider";
+import Recommendations from "@/components/Recommendations";
+import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 
 const HomePage: React.FC = () => {
-  const { fetchItems } = useContext(ItemsContext);
+  const { clearSelectedItems } = useContext(CurrentItemContext);
 
   useEffect(() => {
-    fetchItems(true, { filters: { state: ItemState.ACTIVE } });
+    clearSelectedItems();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return <div className="flex-1 w-full h-full flex flex-col">TODO</div>;
+  return (
+    <div className="flex-1 w-full h-full flex flex-col p-2">
+      <Recommendations />
+    </div>
+  );
 };
 
 export default HomePage;

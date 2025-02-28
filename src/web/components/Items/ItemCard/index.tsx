@@ -15,7 +15,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
 }: ItemCardProps) => {
   // Keep card dimensions in sync with ItemGrid/index.tsx
   return (
-    <Card className="w-72 h-96" isPressable onPress={onPress}>
+    <Card className="shrink-0 w-72 h-96 p-2" isPressable onPress={onPress}>
       <Thumbnail
         key={item.metadata.thumbnail}
         thumbnail={
