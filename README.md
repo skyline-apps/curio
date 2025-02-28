@@ -60,3 +60,9 @@ Saved Markdown content can be viewed here in the Supabase Storage page.
 To clear the database, run
 1. `docker compose down -v`
 2. `rm -r docker/volumes/db/data`
+
+## Deployment
+1. Set up Supabase app.
+2. Set up Vercel app. Include the environment variables from the `web` service in `docker-compose.yml`. For the `POSTGRES_URL` variable, use the "Transaction pooler" Supabase Postgres URL.
+3. Copy the prod env variables locally with `vercel env pull .env.prod`.
+4. Run database migrations against the production database using `DOTENV_CONFIG_PATH=/path/to/.env.prod npm run db:migrate`.
