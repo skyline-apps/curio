@@ -35,10 +35,13 @@ window.onload = () => {
             curioLink = `${API_HOST}/item/${response.items[0].slug}`;
         } else {
             saveButton.textContent = "Save current page";
+            curioLink = "";
         }
-    }).catch(error => {
-        const message = JSON.parse(error.message);
-        errorMessage.textContent = `${message.error}`;
+    }).catch((_) => {
+        saveButton.disabled = false;
+        saveButton.textContent = "Open Curio";
+        curioLink = `${API_HOST}`;
+        errorMessage.textContent = "Please sign in to continue.";
         errorMessage.style.display = 'block';
     });
 };
