@@ -322,6 +322,30 @@ describe("GET /api/v1/items/recommended", () => {
       await db.insert(profileItems).values(mockProfileItems);
     });
 
+    it("should return recommendation sections in order", async () => {
+      const request = makeAuthenticatedMockRequest({
+        method: "GET",
+        url: "https://example.com/api/v1/items/recommended",
+      });
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      const { recommendations } = await response.json();
+
+      expect(recommendations[0].section).toBe(
+        RecommendationSectionType.POPULAR,
+      );
+      expect(recommendations[1].section).toBe(
+        RecommendationSectionType.NEWSLETTER,
+      );
+      expect(recommendations[2].section).toBe(
+        RecommendationSectionType.FAVORITE_AUTHOR,
+      );
+      expect(recommendations[3].section).toBe(
+        RecommendationSectionType.FAVORITES,
+      );
+    });
+
     it("should store and return consistent profileItemIds that belong to the user", async () => {
       const request = makeAuthenticatedMockRequest({
         method: "GET",

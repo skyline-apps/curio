@@ -99,13 +99,13 @@ export async function GET(
 
     // Group recommendations by section
     const recommendationsBySection: Record<string, RecommendationSection> = {};
+    for (const recType of Object.values(RecommendationSectionType)) {
+      recommendationsBySection[recType] = {
+        section: recType,
+        items: [],
+      };
+    }
     for (const rec of recommendationsFromDB) {
-      if (!recommendationsBySection[rec.sectionType]) {
-        recommendationsBySection[rec.sectionType] = {
-          section: rec.sectionType,
-          items: [],
-        };
-      }
       const itemResult = ownItemResults.find((i) => i.id === rec.itemId);
       if (itemResult) {
         recommendationsBySection[rec.sectionType].items.push(itemResult);
