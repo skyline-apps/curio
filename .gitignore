@@ -1,4 +1,5 @@
 .env
+.env.prod
 
 # dependencies
 node_modules
