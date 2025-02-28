@@ -5,6 +5,7 @@ import { HiChevronDoubleLeft, HiChevronDoubleRight } from "react-icons/hi2";
 import BulkActions from "@/components/Items/ItemActions/BulkActions";
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
+import Spinner from "@/components/ui/Spinner";
 import { useAppLayout } from "@/providers/AppLayoutProvider";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import { ItemsContext } from "@/providers/ItemsProvider";
@@ -20,6 +21,7 @@ const RightSidebar: React.FC = () => {
     isCurrentlyPreviewing,
     draftHighlight,
     isEditable,
+    fetching,
   } = useContext(CurrentItemContext);
   const {
     appLayout: { rightSidebarOpen },
@@ -57,7 +59,7 @@ const RightSidebar: React.FC = () => {
                   item={currentItem}
                   readonly={isCurrentlyPreviewing}
                 />
-              ) : (
+              ) : selectedItems.size > 0 ? (
                 <>
                   <p className="text-secondary text-center pt-16">
                     {selectedItems.size} items selected
@@ -67,7 +69,9 @@ const RightSidebar: React.FC = () => {
                   </p>
                   {selectedItems.size > 0 && <BulkActions />}
                 </>
-              ))}
+              ) : fetching ? (
+                <Spinner centered />
+              ) : null)}
           </div>
         </div>
         <Button

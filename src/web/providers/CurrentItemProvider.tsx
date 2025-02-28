@@ -49,6 +49,7 @@ export type CurrentItemContextType = {
   clearSelectedItems: () => void;
   fetchContent: (slug: string, refresh?: boolean) => Promise<void>;
   loading: boolean;
+  fetching: boolean;
   loadingError: string | null;
   lastSelectionIndex: number | null;
   setLastSelectionIndex: (index: number | null) => void;
@@ -72,6 +73,7 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
   clearSelectedItems: () => {},
   fetchContent: () => Promise.resolve(),
   loading: true,
+  fetching: false,
   loadingError: null,
   lastSelectionIndex: null,
   setLastSelectionIndex: () => {},
@@ -294,6 +296,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         clearSelectedItems,
         fetchContent,
         loading: isLoading || isPending,
+        fetching: isLoading,
         loadingError: error ? error.message || "Error loading items." : null,
         lastSelectionIndex,
         setLastSelectionIndex,
