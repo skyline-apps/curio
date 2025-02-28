@@ -253,6 +253,65 @@ export const appConfig = pgTable("app_config", {
   value: text("value").notNull(),
 });
 
+export enum RecommendationSectionType {
+  POPULAR = "popular",
+  NEWSLETTER = "newsletter",
+  FAVORITE_AUTHOR = "favorite_author",
+  FAVORITES = "favorites",
+}
+
+export const recommendationSectionType = pgEnum("recommendation_section_type", [
+  RecommendationSectionType.POPULAR,
+  RecommendationSectionType.NEWSLETTER,
+  RecommendationSectionType.FAVORITE_AUTHOR,
+  RecommendationSectionType.FAVORITES,
+]);
+
+export const profileItemRecommendations = pgTable(
+  "profile_item_recommendations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    profileId: uuid("profile_id").notNull(),
+    itemId: uuid("item_id").notNull(),
+    profileItemId: uuid("profile_item_id"),
+    sectionType: recommendationSectionType("section_type").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    profileForeignKey: foreignKey({
+      name: "profile_item_recommendations_profile_id_fk",
+      columns: [table.profileId],
+      foreignColumns: [profiles.id],
+    })
+      .onDelete("cascade")
+      .onUpdate("cascade"),
+    itemForeignKey: foreignKey({
+      name: "profile_item_recommendations_item_id_fk",
+      columns: [table.itemId],
+      foreignColumns: [items.id],
+    })
+      .onDelete("cascade")
+      .onUpdate("cascade"),
+    profileItemForeignKey: foreignKey({
+      name: "profile_item_recommendations_profile_item_id_fk",
+      columns: [table.profileItemId],
+      foreignColumns: [profileItems.id],
+    })
+      .onDelete("set null")
+      .onUpdate("cascade"),
+    uniqueProfileSectionItem: uniqueIndex("unique_profile_section_item").on(
+      table.profileId,
+      table.sectionType,
+      table.itemId,
+    ),
+  }),
+);
+
 export type InsertProfile = typeof profiles.$inferInsert;
 export type SelectProfile = typeof profiles.$inferSelect;
 export type InsertItem = typeof items.$inferInsert;
@@ -261,3 +320,5 @@ export type InsertProfileItem = typeof profileItems.$inferInsert;
 export type InsertProfileItemLabel = typeof profileItemLabels.$inferInsert;
 export type InsertApiKey = typeof apiKeys.$inferInsert;
 export type SelectApiKey = typeof apiKeys.$inferSelect;
+export type InsertProfileItemRecommendation =
+  typeof profileItemRecommendations.$inferInsert;
