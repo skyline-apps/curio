@@ -13,7 +13,7 @@ interface RecommendedSectionProps {
 }
 
 const SECTION_HEADERS = {
-  [RecommendationSectionType.POPULAR]: "Popular across Curio",
+  [RecommendationSectionType.POPULAR]: "Popular this week",
   [RecommendationSectionType.NEWSLETTER]: "From your newsletters",
   [RecommendationSectionType.FAVORITE_AUTHOR]:
     "More from your favorite authors",
