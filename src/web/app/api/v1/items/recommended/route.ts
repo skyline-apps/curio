@@ -86,7 +86,7 @@ export async function GET(
 
     const ownRecommendations = recommendationsFromDB
       .map((r) => r.profileItemId)
-      .filter((i) => i !== null);
+      .filter((i) => i !== null) as string[];
 
     const otherRecommendations = recommendationsFromDB.filter(
       (r) => r.profileItemId === null,
