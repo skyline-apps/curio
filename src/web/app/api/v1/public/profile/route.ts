@@ -36,7 +36,7 @@ export async function GET(
 
     const { username, limit, cursor } = data;
     const profile = await db.query.profiles.findFirst({
-      where: eq(profiles.username, username),
+      where: and(eq(profiles.username, username), eq(profiles.isEnabled, true)),
     });
 
     if (!profile) {

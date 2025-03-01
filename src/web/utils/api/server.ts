@@ -31,14 +31,20 @@ export async function checkUserProfile(
     results = await db
       .select({
         id: profiles.id,
-        username: profiles.username,
         userId: profiles.userId,
+        username: profiles.username,
         colorScheme: profiles.colorScheme,
         public: profiles.public,
       })
       .from(profiles)
       .innerJoin(apiKeys, eq(apiKeys.profileId, profiles.id))
-      .where(and(eq(apiKeys.key, apiKey), eq(apiKeys.isActive, true)))
+      .where(
+        and(
+          eq(apiKeys.key, apiKey),
+          eq(apiKeys.isActive, true),
+          eq(profiles.isEnabled, true),
+        ),
+      )
       .limit(1);
     if (results.length > 0) {
       await db
@@ -56,7 +62,7 @@ export async function checkUserProfile(
         public: profiles.public,
       })
       .from(profiles)
-      .where(eq(profiles.userId, userId))
+      .where(and(eq(profiles.userId, userId), eq(profiles.isEnabled, true)))
       .limit(1);
   }
   if (!results || results.length === 0) {

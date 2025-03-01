@@ -37,6 +37,7 @@ export const profiles = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     username: text("username").notNull().unique(),
+    isEnabled: boolean("is_enabled").notNull().default(true),
     userId: uuid("user_id").notNull(),
     colorScheme: colorSchemeEnum("color_scheme")
       .notNull()
