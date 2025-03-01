@@ -56,7 +56,7 @@ export const profiles = pgTable(
       foreignColumns: [authUsers.id],
     }),
   }),
-);
+).enableRLS();
 
 export const items = pgTable(
   "items",
@@ -74,7 +74,7 @@ export const items = pgTable(
   (table) => ({
     urlIndex: uniqueIndex("url_index").on(table.url),
   }),
-);
+).enableRLS();
 
 export enum ItemState {
   ACTIVE = "active",
@@ -121,7 +121,7 @@ export const profileLabels = pgTable(
       table.name,
     ),
   }),
-);
+).enableRLS();
 
 export const profileItems = pgTable(
   "profile_items",
@@ -170,7 +170,7 @@ export const profileItems = pgTable(
       table.itemId,
     ),
   }),
-);
+).enableRLS();
 
 export const profileItemLabels = pgTable(
   "profile_item_labels",
@@ -199,7 +199,7 @@ export const profileItemLabels = pgTable(
       table.labelId,
     ),
   }),
-);
+).enableRLS();
 
 export const profileItemHighlights = pgTable(
   "profile_item_highlights",
@@ -226,7 +226,7 @@ export const profileItemHighlights = pgTable(
       .onDelete("cascade")
       .onUpdate("cascade"),
   }),
-);
+).enableRLS();
 
 export const apiKeys = pgTable(
   "api_keys",
@@ -246,12 +246,12 @@ export const apiKeys = pgTable(
     profileIdIdx: index("api_keys_profile_id_idx").on(table.profileId),
     keyIdx: uniqueIndex("api_keys_key_idx").on(table.key),
   }),
-);
+).enableRLS();
 
 export const appConfig = pgTable("app_config", {
   key: text("key").primaryKey(),
   value: text("value").notNull(),
-});
+}).enableRLS();
 
 export enum RecommendationSectionType {
   POPULAR = "popular",
@@ -310,7 +310,7 @@ export const profileItemRecommendations = pgTable(
       table.itemId,
     ),
   }),
-);
+).enableRLS();
 
 export type InsertProfile = typeof profiles.$inferInsert;
 export type SelectProfile = typeof profiles.$inferSelect;
