@@ -67,3 +67,4 @@ To clear the database, run
 3. Copy the prod env variables locally with `vercel env pull .env.prod`.
 4. Run database migrations against the production database using `DOTENV_CONFIG_PATH=/path/to/.env.prod npm run db:migrate`.
 5. Set up a Google Cloud project with Google Auth Platform configured for a web application. Copy in the generated client ID and client secret into Supabase's Google auth provider, then copy the Supabase auth callback URL into the "Authorized redirect URIs" field.
+6. Configure the "URL Configuration" redirect settings in Supabase Auth with the app URL.
