@@ -66,3 +66,4 @@ To clear the database, run
 2. Set up Vercel app. Include the environment variables from the `web` service in `docker-compose.yml`. For the `POSTGRES_URL` variable, use the "Transaction pooler" Supabase Postgres URL.
 3. Copy the prod env variables locally with `vercel env pull .env.prod`.
 4. Run database migrations against the production database using `DOTENV_CONFIG_PATH=/path/to/.env.prod npm run db:migrate`.
+5. Set up a Google Cloud project with Google Auth Platform configured for a web application. Copy in the generated client ID and client secret into Supabase's Google auth provider, then copy the Supabase auth callback URL into the "Authorized redirect URIs" field.

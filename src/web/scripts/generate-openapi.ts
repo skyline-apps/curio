@@ -270,7 +270,7 @@ async function generateOpenAPI(): Promise<void> {
       version: "1.0.0",
       description: "API documentation for Curio",
     },
-    servers: [{ url: "http://localhost:3000" }],
+    servers: [{ url: process.env.NEXT_PUBLIC_CURIO_URL || "" }],
   });
 
   const outputPath = path.join(process.cwd(), "public", "openapi.json");

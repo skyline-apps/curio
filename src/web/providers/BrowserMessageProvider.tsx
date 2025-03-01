@@ -109,7 +109,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
           url,
           timeoutId: currentTimeoutId,
         },
-        "http://localhost:3000",
+        process.env.NEXT_PUBLIC_CURIO_URL || process.env.VERCEL_URL || "",
       );
     } catch (error) {
       log.error("Error sending save request:", error);
