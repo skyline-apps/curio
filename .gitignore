@@ -1,5 +1,6 @@
 .env
 .env.prod
+.env.staging
 
 # dependencies
 node_modules
