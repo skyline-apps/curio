@@ -141,6 +141,13 @@
       "when": 1740853318878,
       "tag": "0019_enable_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1740853735213,
+      "tag": "0020_add_ability_to_disable_profiles",
+      "breakpoints": true
     }
   ]
 }
