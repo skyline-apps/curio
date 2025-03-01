@@ -9,7 +9,7 @@ import Providers from "@/providers";
 export const metadata: Metadata = {
   metadataBase: new URL("https://curi.ooo"),
   title: "Curio",
-  description: "Curate your inspirations",
+  description: "Feed your curiosity.",
 };
 
 interface RootLayoutProps extends React.PropsWithChildren {
@@ -67,6 +67,20 @@ const RootLayout: React.FC<RootLayoutProps> = ({
         })();
       `,
           }}
+        />
+        <meta property="og:title" content="Curio" />
+        <meta property="og:description" content="Feed your curiosity." />
+        <meta
+          property="og:image"
+          content="https://curi.ooo/assets/curio_banner.png"
+        />
+        <meta property="og:url" content="https://curi.ooo" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Curio" />
+        <meta name="twitter:description" content="Feed your curiosity." />
+        <meta
+          name="twitter:image"
+          content="https://curi.ooo/assets/curio_banner.png"
         />
       </head>
       <body className="text-foreground select-none">
