@@ -134,6 +134,13 @@
       "when": 1740595300535,
       "tag": "0018_add_recommendation_table",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1740853318878,
+      "tag": "0019_enable_rls",
+      "breakpoints": true
     }
   ]
 }
