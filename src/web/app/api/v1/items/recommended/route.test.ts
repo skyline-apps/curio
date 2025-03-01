@@ -2,7 +2,7 @@ import { v4 } from "uuid";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { ItemResult, PublicItemResult } from "@/app/api/v1/items/validation";
-import { and, db, eq } from "@/db";
+import { and, db, eq, sql } from "@/db";
 import {
   items,
   profileItemRecommendations,
@@ -65,7 +65,7 @@ describe("GET /api/v1/items/recommended", () => {
       expect(response.status).toBe(200);
 
       const { recommendations } = await response.json();
-      expect(recommendations.length).toBe(2);
+      expect(recommendations.length).toBe(4);
 
       const favoritesSection = recommendations.find(
         (r: RecommendationSection) =>
@@ -102,6 +102,18 @@ describe("GET /api/v1/items/recommended", () => {
       expect(authorSection?.items[0].metadata.author).toBe(
         MOCK_PROFILE_ITEMS[3].author,
       );
+
+      const popularSection = recommendations.find(
+        (r: RecommendationSection) =>
+          r.section === RecommendationSectionType.POPULAR,
+      );
+      expect(popularSection.items).toHaveLength(0);
+
+      const newsletterSection = recommendations.find(
+        (r: RecommendationSection) =>
+          r.section === RecommendationSectionType.NEWSLETTER,
+      );
+      expect(newsletterSection.items).toHaveLength(0);
     });
 
     it("should compute new recommendations for user with no existing recommendations", async () => {
@@ -309,7 +321,7 @@ describe("GET /api/v1/items/recommended", () => {
       })),
     ];
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       new Array(2).fill(0).forEach(async (_, i) => {
         await testDb.raw.query(`
       INSERT INTO auth.users (id, email)
@@ -318,8 +330,27 @@ describe("GET /api/v1/items/recommended", () => {
     `);
       });
       await db.insert(profiles).values(mockProfiles);
+    });
+
+    beforeEach(async () => {
       await db.insert(items).values(mockItems);
       await db.insert(profileItems).values(mockProfileItems);
+    });
+
+    afterAll(async () => {
+      await db.delete(profiles).where(
+        eq(
+          profiles.id,
+          sql`ANY(ARRAY[${sql.join(
+            mockProfiles.map((p) => sql`${p.id}`),
+            sql`, `,
+          )}]::uuid[])`,
+        ),
+      );
+      await testDb.raw.query(
+        `DELETE FROM auth.users WHERE id = ANY($1::uuid[]);`,
+        [userIds],
+      );
     });
 
     it("should return recommendation sections in order", async () => {
