@@ -1,4 +1,4 @@
-const API_HOST = 'http://localhost:3000';
+const API_HOST = 'https://curi.ooo';
 const API_ENDPOINTS = {
     items: `${API_HOST}/api/v1/items`,
     content: `${API_HOST}/api/v1/items/content`,
