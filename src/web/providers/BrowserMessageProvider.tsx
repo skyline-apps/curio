@@ -103,14 +103,29 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
 
       const currentTimeoutId = timeoutId;
 
-      window.postMessage(
-        {
-          type: "CURIO_SAVE_REQUEST",
-          url,
-          timeoutId: currentTimeoutId,
-        },
-        process.env.NEXT_PUBLIC_CURIO_URL || process.env.VERCEL_URL || "",
-      );
+      const allowedOrigins = new Set<string>();
+      if (process.env.NEXT_PUBLIC_CURIO_URL) {
+        allowedOrigins.add(process.env.NEXT_PUBLIC_CURIO_URL);
+        if (process.env.NEXT_PUBLIC_CURIO_URL.startsWith("https://")) {
+          const withWww = new URL(process.env.NEXT_PUBLIC_CURIO_URL);
+          withWww.hostname = `www.${withWww.hostname}`;
+          allowedOrigins.add(withWww.toString());
+        }
+      }
+      if (process.env.VERCEL_URL) {
+        allowedOrigins.add(process.env.VERCEL_URL);
+      }
+
+      for (const origin of allowedOrigins) {
+        window.postMessage(
+          {
+            type: "CURIO_SAVE_REQUEST",
+            url,
+            timeoutId: currentTimeoutId,
+          },
+          origin,
+        );
+      }
     } catch (error) {
       log.error("Error sending save request:", error);
       setSavingError(
