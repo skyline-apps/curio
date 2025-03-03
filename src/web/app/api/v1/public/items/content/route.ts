@@ -61,6 +61,9 @@ async function getDefaultContent(
     return APIResponseJSON(response);
   } catch (error: unknown) {
     if (error instanceof StorageError) {
+      log.warn("Error fetching default content, returning item info", {
+        error: error.message,
+      });
       return APIResponseJSON({
         item: {
           id: itemResult[0].id,
@@ -189,6 +192,9 @@ export async function GET(
     } catch (error: unknown) {
       // Still return metadata if content can't be loaded
       if (error instanceof StorageError) {
+        log.warn("Error fetching default content, returning item info", {
+          error: error.message,
+        });
         return APIResponseJSON({ item: itemResponse });
       } else {
         throw error;
