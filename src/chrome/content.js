@@ -1,4 +1,4 @@
-const API_ORIGIN = 'http://localhost:3000';
+const API_ORIGIN = 'https://curi.ooo';
 
 window.addEventListener('message', function (event) {
     if (event.origin !== API_ORIGIN) return;
