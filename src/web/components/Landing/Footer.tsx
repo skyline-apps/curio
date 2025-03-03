@@ -23,6 +23,9 @@ const Footer: React.FC = () => {
             </a>
           </p>
           <p className="text-right text-sm">
+            <a href="mailto:team@curi.ooo">Contact us</a>
+          </p>
+          <p className="text-right text-sm">
             <a href="/privacy">Privacy policy</a>
           </p>
         </div>
