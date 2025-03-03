@@ -106,11 +106,6 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
       const allowedOrigins = new Set<string>();
       if (process.env.NEXT_PUBLIC_CURIO_URL) {
         allowedOrigins.add(process.env.NEXT_PUBLIC_CURIO_URL);
-        if (process.env.NEXT_PUBLIC_CURIO_URL.startsWith("https://")) {
-          const withWww = new URL(process.env.NEXT_PUBLIC_CURIO_URL);
-          withWww.hostname = `www.${withWww.hostname}`;
-          allowedOrigins.add(withWww.toString());
-        }
       }
       if (process.env.VERCEL_URL) {
         allowedOrigins.add(process.env.VERCEL_URL);
