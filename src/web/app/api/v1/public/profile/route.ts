@@ -31,7 +31,7 @@ export async function GET(
   }
 
   try {
-    const profileResult = await checkUserProfile(userId, null);
+    const profileResult = await checkUserProfile(userId);
     const userProfile = profileResult.profile;
 
     const { username, limit, cursor } = data;

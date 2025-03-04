@@ -17,9 +17,8 @@ export async function POST(
   request: APIRequest,
 ): Promise<APIResponse<SaveResponse>> {
   const userId = request.headers.get("x-user-id");
-  const apiKey = request.headers.get("x-api-key");
   try {
-    const profileResult = await checkUserProfile(userId, apiKey);
+    const profileResult = await checkUserProfile(userId);
     if (profileResult.error) {
       return profileResult.error;
     }

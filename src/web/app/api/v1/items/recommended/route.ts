@@ -31,9 +31,8 @@ export async function GET(
   request: APIRequest,
 ): Promise<APIResponse<GetRecommendationsResponse>> {
   const userId = request.headers.get("x-user-id");
-  const apiKey = request.headers.get("x-api-key");
   try {
-    const profileResult = await checkUserProfile(userId, apiKey);
+    const profileResult = await checkUserProfile(userId);
     if ("error" in profileResult) {
       return profileResult.error as APIResponse<GetRecommendationsResponse>;
     }

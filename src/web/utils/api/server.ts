@@ -1,7 +1,7 @@
 import { ZodType } from "zod";
 
 import { and, db, eq } from "@/db";
-import { apiKeys, profiles } from "@/db/schema";
+import { profiles } from "@/db/schema";
 
 import { APIResponse, APIResponseJSON } from "./index";
 
@@ -17,54 +17,24 @@ type ProfileResult =
 
 export async function checkUserProfile(
   userId: string | null,
-  apiKey: string | null,
 ): Promise<ProfileResult> {
-  if (!userId && !apiKey) {
-    return Promise.resolve({
+  if (!userId) {
+    return {
       error: APIResponseJSON({ error: "Unauthorized." }, { status: 401 }),
-    });
+    };
   }
 
-  let results;
-
-  if (apiKey) {
-    results = await db
-      .select({
-        id: profiles.id,
-        userId: profiles.userId,
-        username: profiles.username,
-        colorScheme: profiles.colorScheme,
-        public: profiles.public,
-      })
-      .from(profiles)
-      .innerJoin(apiKeys, eq(apiKeys.profileId, profiles.id))
-      .where(
-        and(
-          eq(apiKeys.key, apiKey),
-          eq(apiKeys.isActive, true),
-          eq(profiles.isEnabled, true),
-        ),
-      )
-      .limit(1);
-    if (results.length > 0) {
-      await db
-        .update(apiKeys)
-        .set({ lastUsedAt: new Date() })
-        .where(eq(apiKeys.key, apiKey));
-    }
-  } else if (userId) {
-    results = await db
-      .select({
-        id: profiles.id,
-        username: profiles.username,
-        userId: profiles.userId,
-        colorScheme: profiles.colorScheme,
-        public: profiles.public,
-      })
-      .from(profiles)
-      .where(and(eq(profiles.userId, userId), eq(profiles.isEnabled, true)))
-      .limit(1);
-  }
+  const results = await db
+    .select({
+      id: profiles.id,
+      username: profiles.username,
+      userId: profiles.userId,
+      colorScheme: profiles.colorScheme,
+      public: profiles.public,
+    })
+    .from(profiles)
+    .where(and(eq(profiles.userId, userId), eq(profiles.isEnabled, true)))
+    .limit(1);
   if (!results || results.length === 0) {
     return {
       error: APIResponseJSON({ error: "Unauthorized" }, { status: 401 }),
