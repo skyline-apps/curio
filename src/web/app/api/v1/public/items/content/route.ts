@@ -82,7 +82,6 @@ export async function GET(
   request: APIRequest,
 ): Promise<APIResponse<GetItemContentResponse>> {
   const userId = request.headers.get("x-user-id");
-  const apiKey = request.headers.get("x-api-key");
 
   const url = new URL(request.url);
   const data = await parseAPIRequest(
@@ -96,7 +95,7 @@ export async function GET(
   const { slug } = data;
 
   try {
-    const profileResult = await checkUserProfile(userId, apiKey);
+    const profileResult = await checkUserProfile(userId);
     const isAuthenticated = !("error" in profileResult);
 
     if (!isAuthenticated) {

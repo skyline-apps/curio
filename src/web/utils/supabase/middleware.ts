@@ -1,5 +1,6 @@
 /* eslint-disable no-restricted-imports */
 import { createServerClient } from "@supabase/ssr";
+import { PostgrestError } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { createLogger } from "@/utils/logger";
@@ -14,6 +15,7 @@ export const updateSession = async (
   let supabaseResponse = NextResponse.next({
     request,
   });
+  const apiKey = request.headers.get("x-api-key");
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -46,7 +48,8 @@ export const updateSession = async (
     data: { user },
     error,
   } = await supabase.auth.getUser();
-  if (error && !request.headers.get("x-api-key")) {
+
+  if (error && !apiKey) {
     log.error(error.message);
   }
 
@@ -67,7 +70,33 @@ export const updateSession = async (
     request.nextUrl.pathname.startsWith("/api") &&
     !request.nextUrl.pathname.startsWith("/api/v1/public")
   ) {
-    if (request.headers.get("x-api-key")) {
+    if (apiKey) {
+      const adminClient = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+          cookies: {
+            getAll: () => [],
+            setAll: () => {},
+          },
+        },
+      );
+      const {
+        data: keyData,
+        error: keyError,
+      }:
+        | { data: { profiles: { user_id: string } } | null; error: null }
+        | { data: null; error: PostgrestError } = await adminClient
+        .from("api_keys")
+        .select("profiles(user_id)")
+        .eq("key", apiKey)
+        .single();
+      if (keyError || !keyData) {
+        log.error("Invalid API key provided");
+        return NextResponse.json({ error: "Invalid API key" }, { status: 401 });
+      }
+      const userId = keyData.profiles.user_id;
+      supabaseResponse.headers.set("X-User-ID", userId);
       return supabaseResponse;
     }
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
