@@ -63,8 +63,17 @@ To clear the database, run
 
 ## Deployment
 1. Set up Supabase app.
-2. Set up Vercel app. Include the environment variables from the `web` service in `docker-compose.yml`. For the `POSTGRES_URL` variable, use the "Transaction pooler" Supabase Postgres URL.
+2. Set up Vercel app.
+  - Include the environment variables from the `web` service in `docker-compose.yml`.
+  - For the `POSTGRES_URL` variable, use the "Transaction pooler" Supabase Postgres URL.
 3. Copy the prod env variables locally with `vercel env pull .env.prod`.
 4. Run database migrations against the production database using `DOTENV_CONFIG_PATH=/path/to/.env.prod npm run db:migrate`.
 5. Set up a Google Cloud project with Google Auth Platform configured for a web application. Copy in the generated client ID and client secret into Supabase's Google auth provider, then copy the Supabase auth callback URL into the "Authorized redirect URIs" field.
-6. Configure the "URL Configuration" redirect settings in Supabase Auth with the app URL.
+6. Configure the "URL Configuration" site URL and redirect settings in Supabase Auth with the app URL.
+  - Site URL should be `$HOSTNAME/auth/callback?next=%2Fhome`
+  - Redirect URLs should include `$HOSTNAME/*`
+7. Configure the Supabase storage settings.
+  - Create a bucket `items`. Set it to be public with the allowed MIME type `text/markdown`.
+  - Create a policy under `storage.buckets`. Use the template "Enable read access for everyone".
+  - Create a policy for `items` for `SELECT` that uses this WITH CHECK expression: `bucket_id = 'items'` on all roles.
+  - Create policies for `items` for `INSERT` and `UPDATE` that use this WITH CHECK expression: `bucket_id = 'items'` on the `authenticated` role.
