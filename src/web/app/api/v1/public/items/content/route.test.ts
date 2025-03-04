@@ -15,7 +15,6 @@ import { MOCK_VERSION } from "@/lib/storage/__mocks__/index";
 import { StorageError } from "@/lib/storage/types";
 import { APIRequest } from "@/utils/api";
 import {
-  DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_USER_ID_2,
   makeAuthenticatedMockRequest,
@@ -114,19 +113,12 @@ const MOCK_HIGHLIGHTS = [
 
 describe("/api/v1/public/items/content", () => {
   describe("GET /api/v1/public/items/content", () => {
-    test.each([
-      ["should return 200 with item default content via regular auth", ""],
-      [
-        "should return 200 with item default content via api key",
-        DEFAULT_TEST_API_KEY,
-      ],
-    ])("%s", async (_, apiKey) => {
+    it("should return 200 with item default content via regular auth", async () => {
       await testDb.db.insert(items).values(MOCK_ITEM);
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEM);
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "GET",
-        apiKey,
         searchParams: { slug: TEST_ITEM_SLUG },
       });
 

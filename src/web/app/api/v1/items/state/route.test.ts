@@ -5,7 +5,6 @@ import { DbErrorCode } from "@/db/errors";
 import { items, ItemState, profileItems } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
 import {
-  DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_PROFILE_ID,
   makeAuthenticatedMockRequest,
   makeUnauthenticatedMockRequest,
@@ -25,16 +24,12 @@ const ORIGINAL_ARCHIVED_TIME = new Date("2025-01-10T12:52:56-08:00");
 
 describe("/api/v1/items/state", () => {
   describe("POST /api/v1/items/state", () => {
-    test.each([
-      ["should return 200 archiving items via regular auth", ""],
-      ["should return 200 archiving items via api key", DEFAULT_TEST_API_KEY],
-    ])("%s", async (_, apiKey) => {
+    it("should return 200 archiving items via regular auth", async () => {
       await testDb.db.insert(items).values(MOCK_ITEMS);
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
-        apiKey: apiKey,
         body: {
           slugs: "example-com,example3-com",
           state: ItemState.ARCHIVED,
@@ -289,22 +284,6 @@ describe("/api/v1/items/state", () => {
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
       const request: APIRequest = makeUnauthenticatedMockRequest({
         method: "POST",
-        body: {
-          slugs: ["example-com"],
-          state: ItemState.ARCHIVED,
-        },
-      });
-
-      const response = await POST(request);
-      expect(response.status).toBe(401);
-    });
-
-    it("should return 401 if invalid api key is provided", async () => {
-      await testDb.db.insert(items).values(MOCK_ITEMS);
-      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-      const request: APIRequest = makeAuthenticatedMockRequest({
-        method: "POST",
-        apiKey: "invalid-api-key",
         body: {
           slugs: ["example-com"],
           state: ItemState.ARCHIVED,

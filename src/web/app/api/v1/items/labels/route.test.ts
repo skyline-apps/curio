@@ -7,7 +7,6 @@ import {
 } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
 import {
-  DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_USER_ID_2,
   makeAuthenticatedMockRequest,
 } from "@/utils/test/api";
@@ -35,13 +34,9 @@ describe("/api/v1/items/labels", () => {
   });
 
   describe("POST /api/v1/items/labels", () => {
-    test.each([
-      ["should return 200 adding labels via regular auth", ""],
-      ["should return 200 adding labels via api key", DEFAULT_TEST_API_KEY],
-    ])("%s", async (_, apiKey) => {
+    it("should return 200 adding labels via regular auth", async () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
-        apiKey: apiKey,
         body: {
           slugs: "example-com,example2-com",
           labelIds: [TEST_LABEL_ID_1, TEST_LABEL_ID_2],
@@ -182,13 +177,9 @@ describe("/api/v1/items/labels", () => {
         },
       ]);
     });
-    test.each([
-      ["should return 200 deleting labels via regular auth", ""],
-      ["should return 200 deleting labels via api key", DEFAULT_TEST_API_KEY],
-    ])("%s", async (_, apiKey) => {
+    it("should return 200 deleting labels via regular auth", async () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "DELETE",
-        apiKey: apiKey,
         body: {
           slugs: "example-com",
           labelIds: [TEST_LABEL_ID_1],

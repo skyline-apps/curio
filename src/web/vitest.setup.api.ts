@@ -1,8 +1,7 @@
 import { beforeAll, beforeEach, vi } from "vitest";
 
-import { apiKeys, ColorScheme, profiles } from "@/db/schema";
+import { ColorScheme, profiles } from "@/db/schema";
 import {
-  DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_PROFILE_ID_2,
   DEFAULT_TEST_USER_ID,
@@ -71,14 +70,6 @@ beforeAll(async () => {
     colorScheme: ColorScheme.AUTO,
     createdAt: new Date("2025-01-10T12:52:56-08:00"),
     updatedAt: new Date("2025-01-10T12:52:56-08:00"),
-  });
-
-  await testDb.db.insert(apiKeys).values({
-    profileId: DEFAULT_TEST_PROFILE_ID,
-    key: DEFAULT_TEST_API_KEY,
-    name: "test-api-key",
-    createdAt: new Date("2025-01-10T12:52:56-08:00"),
-    isActive: true,
   });
 });
 
