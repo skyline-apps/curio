@@ -8,10 +8,12 @@ import URLMessage from "@/components/ui/URLMessage";
 const AuthCodeError: React.FC = () => {
   return (
     <Suspense>
-      <div className="flex flex-col h-dvh justify-center items-center">
+      <div className="flex flex-col h-dvh justify-center items-center gap-4">
         <h2 className="text-xl">Oops!</h2>
-        <URLMessage />
-        <Link href="/">Return home</Link>
+        <URLMessage fallbackMessage="Something went wrong." />
+        <Link className="underline" href="/">
+          Return home.
+        </Link>
       </div>
     </Suspense>
   );
