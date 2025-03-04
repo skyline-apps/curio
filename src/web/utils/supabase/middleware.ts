@@ -90,11 +90,17 @@ export const updateSession = async (
         .from("api_keys")
         .select("profiles(user_id)")
         .eq("key", apiKey)
+        .eq("is_active", true)
+        .eq("profiles.is_enabled", true)
         .single();
       if (keyError || !keyData) {
         log.error("Invalid API key provided");
         return NextResponse.json({ error: "Invalid API key" }, { status: 401 });
       }
+      await adminClient
+        .from("api_keys")
+        .update({ last_used_at: new Date() })
+        .eq("key", apiKey);
       const userId = keyData.profiles.user_id;
       supabaseResponse.headers.set("X-User-ID", userId);
       return supabaseResponse;
