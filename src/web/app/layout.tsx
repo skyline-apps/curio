@@ -70,6 +70,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({
         />
         <meta property="og:title" content="Curio" />
         <meta property="og:description" content="Feed your curiosity." />
+        <meta property="og:site_name" content="Curio" />
         <meta
           property="og:image"
           content="https://curi.ooo/assets/curio_banner.png"
