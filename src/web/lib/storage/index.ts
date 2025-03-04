@@ -188,6 +188,13 @@ export class Storage {
       if (version) {
         return this.getItemContent(slug, null);
       } else {
+        if (error) {
+          log.error(`Error getting content for ${slug}:`, error);
+        } else if (metadataError) {
+          log.error(`Error getting metadata for ${slug}:`, metadataError);
+        } else if (!metadata.metadata) {
+          log.error(`Error getting metadata for ${slug}:`, "metadata is null");
+        }
         throw new StorageError("Failed to download content");
       }
     }
