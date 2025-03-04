@@ -1,8 +1,43 @@
-FROM node:22.9-slim
+FROM google/cloud-sdk:alpine
 
-WORKDIR /app
+# Install required dependencies
+RUN apk add --no-cache curl bash openssh
 
-COPY ./src/web/package*.json ./
-RUN npm install
+# Install Terraform
+RUN LATEST_TERRAFORM=$(curl -s https://api.github.com/repos/hashicorp/terraform/releases/latest | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/') && \
+    curl -O https://releases.hashicorp.com/terraform/${LATEST_TERRAFORM}/terraform_${LATEST_TERRAFORM}_linux_amd64.zip && \
+    unzip terraform_${LATEST_TERRAFORM}_linux_amd64.zip && \
+    mv terraform /usr/local/bin/ && \
+    rm terraform_${LATEST_TERRAFORM}_linux_amd64.zip
 
-COPY ./src/web ./
+# Install kubectl
+RUN KUBECTL_VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt) && \
+    curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
+    chmod +x kubectl && \
+    mv kubectl /usr/local/bin/
+
+# Install gke-gcloud-auth-plugin
+RUN gcloud components install gke-gcloud-auth-plugin --quiet
+
+# Set environment variables
+ENV USE_GKE_GCLOUD_AUTH_PLUGIN=True
+ENV KUBECONFIG=/root/.kube/config
+
+# Create .kube directory
+RUN mkdir -p /root/.kube
+
+# Set working directory
+WORKDIR /workspace
+
+# Verify installations
+RUN terraform --version && \
+    gcloud --version && \
+    kubectl version --client && \
+    gke-gcloud-auth-plugin --version
+
+# Entrypoint script to handle authentication
+COPY docker/dev/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["tail", "-f", "/dev/null"]

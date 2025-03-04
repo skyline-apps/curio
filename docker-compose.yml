@@ -3,10 +3,27 @@ include:
   - ./docker/supabase.yml
 
 services:
-  web:
+  dev:
     build:
       context: ./
       dockerfile: ./docker/dev/Dockerfile
+    container_name: dev
+    volumes:
+      - ./src/infra:/workspace
+      - ./docker/volumes/search/init.sh:/data/search/init.sh
+      - ~/.config/gcloud:/root/.config/gcloud
+      - ~/.kube:/root/.kube
+    working_dir: /workspace
+    stdin_open: true  # Keep STDIN open
+    tty: true  # Allocate a pseudo-TTY
+    network_mode: host  # Use host network to resolve internal IP issues
+    environment:
+      - KUBECONFIG=/root/.kube/config
+      - USE_GKE_GCLOUD_AUTH_PLUGIN=True
+  web:
+    build:
+      context: ./
+      dockerfile: ./docker/curio/Dockerfile
     container_name: curio
     network_mode: host
     working_dir: /app
