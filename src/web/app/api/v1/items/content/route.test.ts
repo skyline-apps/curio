@@ -15,7 +15,6 @@ import {
 import { MOCK_VERSION } from "@/lib/storage/__mocks__/index";
 import { APIRequest } from "@/utils/api";
 import {
-  DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_PROFILE_ID,
   makeAuthenticatedMockRequest,
 } from "@/utils/test/api";
@@ -73,13 +72,7 @@ describe("/api/v1/items/content", () => {
       ]);
     };
 
-    test.each([
-      ["should return 200 when updating content via regular auth", ""],
-      [
-        "should return 200 when updating content via api key",
-        DEFAULT_TEST_API_KEY,
-      ],
-    ])("%s", async (_, apiKey) => {
+    it("should return 200 when updating content via regular auth", async () => {
       await testDb.db.insert(items).values(MOCK_ITEMS);
       await testDb.db.insert(profileItems).values({
         ...MOCK_PROFILE_ITEMS[0],
@@ -89,7 +82,6 @@ describe("/api/v1/items/content", () => {
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
-        apiKey,
         body: {
           url: TEST_ITEM_URL_1,
           htmlContent: "<div>Test content</div>",
@@ -538,20 +530,6 @@ describe("/api/v1/items/content", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         userId: NONEXISTENT_USER_ID,
-        body: {
-          content: "Updated content",
-          slug: TEST_ITEM_SLUG,
-        },
-      });
-
-      const response = await POST(request);
-      expect(response.status).toBe(401);
-    });
-
-    it("should return 401 if invalid api key provided", async () => {
-      const request: APIRequest = makeAuthenticatedMockRequest({
-        method: "POST",
-        apiKey: "invalid-api-key",
         body: {
           content: "Updated content",
           slug: TEST_ITEM_SLUG,

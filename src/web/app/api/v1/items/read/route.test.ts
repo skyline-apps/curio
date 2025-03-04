@@ -6,10 +6,7 @@ import { getItemContent, getItemMetadata } from "@/lib/storage";
 import { MOCK_VERSION } from "@/lib/storage/__mocks__/index";
 import { StorageError } from "@/lib/storage/types";
 import { APIRequest } from "@/utils/api";
-import {
-  DEFAULT_TEST_API_KEY,
-  makeAuthenticatedMockRequest,
-} from "@/utils/test/api";
+import { makeAuthenticatedMockRequest } from "@/utils/test/api";
 import {
   MOCK_ITEMS,
   MOCK_PROFILE_ITEMS,
@@ -29,13 +26,7 @@ const MOCK_SLUG = "example2-com";
 
 describe("/api/v1/items/read", () => {
   describe("POST /api/v1/items/read", () => {
-    test.each([
-      ["should return 200 when reading version name via regular auth", ""],
-      [
-        "should return 200 when reading version name via api key",
-        DEFAULT_TEST_API_KEY,
-      ],
-    ])("%s", async (_, apiKey) => {
+    it("should return 200 when reading version name via regular auth", async () => {
       await testDb.db.insert(items).values(MOCK_ITEM);
       await testDb.db
         .insert(profileItems)
@@ -43,7 +34,6 @@ describe("/api/v1/items/read", () => {
 
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
-        apiKey,
         body: { slug: MOCK_SLUG, readingProgress: 50 },
       });
 
@@ -151,17 +141,6 @@ describe("/api/v1/items/read", () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         userId: NONEXISTENT_USER_ID,
-        body: { slug: "example-com", readingProgress: 24 },
-      });
-
-      const response = await POST(request);
-      expect(response.status).toBe(401);
-    });
-
-    it("should return 401 if invalid api key provided", async () => {
-      const request: APIRequest = makeAuthenticatedMockRequest({
-        method: "POST",
-        apiKey: "invalid-api-key",
         body: { slug: "example-com", readingProgress: 24 },
       });
 

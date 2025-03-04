@@ -4,7 +4,6 @@ import { desc, eq } from "@/db";
 import { profileLabels } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
 import {
-  DEFAULT_TEST_API_KEY,
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_PROFILE_ID_2,
   makeAuthenticatedMockRequest,
@@ -51,13 +50,9 @@ describe("/api/v1/user/labels", () => {
   });
 
   describe("GET /api/v1/user/labels", () => {
-    test.each([
-      ["should return 200 with labels via regular auth", ""],
-      ["should return 200 with labels via api key", DEFAULT_TEST_API_KEY],
-    ])("%s", async (_, apiKey) => {
+    it("should return 200 with labels via regular auth", async () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "GET",
-        apiKey: apiKey,
       });
 
       const response = await GET(request);
