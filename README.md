@@ -70,10 +70,12 @@ To clear the database, run
 4. Run database migrations against the production database using `DOTENV_CONFIG_PATH=/path/to/.env.prod npm run db:migrate`.
 5. Set up a Google Cloud project with Google Auth Platform configured for a web application. Copy in the generated client ID and client secret into Supabase's Google auth provider, then copy the Supabase auth callback URL into the "Authorized redirect URIs" field.
 6. Configure the "URL Configuration" site URL and redirect settings in Supabase Auth with the app URL.
-  - Site URL should be `$HOSTNAME/auth/callback?next=%2Fhome`
-  - Redirect URLs should include `$HOSTNAME/*`
+  - Site URL should be `$HOSTNAME/auth/callback?next=%2Fhome`.
+  - Redirect URLs should include `$HOSTNAME/*`.
 7. Configure the Supabase storage settings.
   - Create a bucket `items`. Set it to be public with the allowed MIME type `text/markdown`.
-  - Create a policy under `storage.buckets`. Use the template "Enable read access for everyone".
-  - Create a policy for `items` for `SELECT` that uses this WITH CHECK expression: `bucket_id = 'items'` on all roles.
-  - Create policies for `items` for `INSERT` and `UPDATE` that use this WITH CHECK expression: `bucket_id = 'items'` on the `authenticated` role.
+  - Create a new policy on the `items` bucket from scratch. Title it "Allow read access for everyone", allow the `SELECT` operation for all roles, and keep the default policy definition `bucket_id = 'items'`.
+8. Set up a Meilisearch instance on your cloud provider.
+  - Use the dev environment: `docker exec -it dev bash`.
+  - Authenticate using `gcloud auth application-default login`.
+  - Run `terraform plan` to verify the correct resources will be created, then run `terraform apply`.
