@@ -21,7 +21,7 @@ export class Storage {
   private async getStorageClient(): Promise<StorageClient> {
     const now = Date.now();
     if (!this.storage || now - this.lastInitTime > this.REFRESH_INTERVAL) {
-      const supabase = await createClient();
+      const supabase = await createClient(true);
       this.storage = supabase.storage;
       this.lastInitTime = now;
 
