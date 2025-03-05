@@ -33,12 +33,6 @@ variable "disk_size_gb" {
   default     = 40
 }
 
-variable "persistent_volume_disk_count" {
-  description = "Number of persistent volume disks to create"
-  type        = number
-  default     = 2
-}
-
 variable "persistent_volume_disk_size_gb" {
   description = "Size of each persistent volume disk in GB"
   type        = number
