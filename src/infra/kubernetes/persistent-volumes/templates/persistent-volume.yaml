@@ -2,6 +2,8 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: "{{ .Values.cluster_name }}-{{ .Release.Namespace }}-pv"
+  labels:
+    environment: {{ .Release.Namespace }}
 spec:
   capacity:
     storage: {{ .Values.persistent_volume_disk_size_gb }}Gi

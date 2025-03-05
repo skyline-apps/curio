@@ -230,7 +230,7 @@ variable "addons_config" {
     http_lb_disabled                 = false
     gcp_filestore_csi_driver_enabled = false
     gcs_fuse_csi_driver_enabled      = false
-    gce_pd_csi_driver_enabled        = false
+    gce_pd_csi_driver_enabled        = true
     gke_backup_agent_enabled         = false
     config_connector_enabled         = false
     ray_operator_enabled             = false

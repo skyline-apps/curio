@@ -5,8 +5,7 @@ search:
     pullPolicy: IfNotPresent
 
   environment:
-    MEILI_ENV: development
-    MEILI_MASTER_KEY: {{ .Values.searchMasterApiKey }}
+    MEILI_ENV: production
 
   service:
     type: ClusterIP
@@ -15,4 +14,3 @@ search:
   persistence:
     storageClass: standard
     accessMode: ReadWriteOnce
-    size: {{ .Values.persistent_volume_disk_size_gb }}Gi

@@ -272,3 +272,18 @@ resource "google_container_node_pool" "primary" {
     ]
   }
 }
+
+resource "google_compute_disk" "persistent_volumes" {
+  for_each = toset(var.namespaces)
+  provider = google-beta
+
+  name = "${var.cluster_name}-${each.key}-pv"
+  type = var.persistent_volume_disk_type
+  size = var.persistent_volume_disk_size_gb
+  zone = var.zone
+
+  labels = {
+    cluster = var.cluster_name
+    purpose = "persistent-volume"
+  }
+}
