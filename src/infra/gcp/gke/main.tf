@@ -167,7 +167,7 @@ resource "google_container_cluster" "primary" {
     }
 
     gce_persistent_disk_csi_driver_config {
-      enabled = lookup(var.addons_config, "gce_pd_csi_driver_enabled", false)
+      enabled = lookup(var.addons_config, "gce_pd_csi_driver_enabled", true)
     }
 
     gke_backup_agent_config {
@@ -202,7 +202,7 @@ resource "random_pet" "node_pool" {
 resource "google_container_node_pool" "primary" {
   provider = google-beta
 
-  name     = random_pet.node_pool.id
+  name     = "${var.cluster_name}-primary"
   location = var.regional ? var.region : var.zone
   cluster  = google_container_cluster.primary.id
 
@@ -271,23 +271,5 @@ resource "google_container_node_pool" "primary" {
     ignore_changes = [
       node_config[0].resource_labels,
     ]
-  }
-}
-
-#------------------------------------------------------
-# Persistent Disks for Kubernetes Persistent Volumes
-#------------------------------------------------------
-resource "google_compute_disk" "persistent_volumes" {
-  for_each = toset(var.namespaces)
-  provider = google-beta
-
-  name = "${var.cluster_name}-pv-disk-${each.key}"
-  type = var.persistent_volume_disk_type
-  size = var.persistent_volume_disk_size_gb
-  zone = var.zone
-
-  labels = {
-    cluster = var.cluster_name
-    purpose = "persistent-volume"
   }
 }
