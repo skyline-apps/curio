@@ -1,16 +1,17 @@
-{{- range $i := until .Values.search.persistence.count }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ printf "%s-search-pvc-%d" $.Release.Name (add $i 1) }}
+  name: {{ $.Values.cluster_name }}-search-pvc
   namespace: {{ $.Release.Namespace }}
 spec:
   accessModes:
     - {{ $.Values.search.persistence.accessMode }}
   resources:
     requests:
-      storage: {{ $.Values.search.persistence.size }}
+      storage: {{ $.Values.persistent_volume_disk_size_gb }}Gi
   {{- if $.Values.search.persistence.storageClass }}
   storageClassName: {{ $.Values.search.persistence.storageClass }}
   {{- end }}
-{{- end }}
+  selector:
+    matchLabels:
+      environment: {{ $.Release.Namespace }}

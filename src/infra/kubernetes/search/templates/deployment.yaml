@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-search
+  name: {{ .Values.cluster_name }}-search
   namespace: {{ .Release.Namespace }}
   labels:
     app: search
@@ -27,19 +27,24 @@ spec:
         - name: MEILI_MASTER_KEY
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-search-master-key
+              name: {{ .Values.cluster_name }}-search-master-key
               key: SEARCH_MASTER_API_KEY
         command:
         - /bin/sh
         - /data/search/init.sh
         volumeMounts:
-        {{- range $i := until .Values.search.persistence.count }}
-        - name: data-{{ add $i 1 }}
-          mountPath: /meili_data-{{ add $i 1 }}
-        {{- end }}
+        - name: search-data
+          mountPath: /meili_data
       volumes:
-      {{- range $i := until .Values.search.persistence.count }}
-      - name: data-{{ add $i 1 }}
+      - name: search-data
         persistentVolumeClaim:
-          claimName: {{ printf "%s-search-pvc-%d" $.Release.Name (add $i 1) }}
-      {{- end }}
+          claimName: {{ .Values.cluster_name }}-search-pvc
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: curio/node-type
+                operator: In
+                values:
+                - "{{ .Values.primary_node_label }}"

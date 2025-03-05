@@ -20,6 +20,7 @@ services:
     environment:
       - KUBECONFIG=/root/.kube/config
       - USE_GKE_GCLOUD_AUTH_PLUGIN=True
+      - MEILI_MASTER_KEY=${SEARCH_MASTER_API_KEY}
   web:
     build:
       context: ./

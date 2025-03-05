@@ -23,10 +23,10 @@ PROJECT_ID=$(terraform output -raw project_id)
 ZONE=$(terraform output -raw zone)
 PRIMARY_NODE_LABEL=$(terraform output -raw primary_node_label)
 
-helm upgrade --install persistent-volumes-$NAMESPACE kubernetes/persistent-volumes \
+helm upgrade --install search-$NAMESPACE kubernetes/search \
   --namespace $NAMESPACE \
   --create-namespace \
   --set cluster_name=$CLUSTER_NAME \
   --set persistent_volume_disk_size_gb=$DISK_SIZE \
-  --set volume_handle=projects/${PROJECT_ID}/zones/${ZONE}/disks/${CLUSTER_NAME}-${NAMESPACE}-pv \
-  --set primary_node_label=$PRIMARY_NODE_LABEL
+  --set primary_node_label=$PRIMARY_NODE_LABEL \
+  --set searchMasterApiKey=$MEILI_MASTER_KEY

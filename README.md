@@ -76,6 +76,8 @@ To clear the database, run
   - Create a bucket `items`. Set it to be public with the allowed MIME type `text/markdown`.
   - Create a new policy on the `items` bucket from scratch. Title it "Allow read access for everyone", allow the `SELECT` operation for all roles, and keep the default policy definition `bucket_id = 'items'`.
 8. Set up a Meilisearch instance on your cloud provider.
-  - Use the dev environment: `docker exec -it dev bash`.
+  - Use the dev environment: `docker exec -it dev zsh`.
   - Authenticate using `gcloud auth application-default login`.
   - Run `terraform plan` to verify the correct resources will be created, then run `terraform apply`.
+  - Then run `script/deploy-volumes.sh [staging|prod]` to deploy a persistent volume to store the search index.
+  - Then run `script/deploy.sh [staging|prod]` to deploy the search application.
