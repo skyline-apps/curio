@@ -38,11 +38,19 @@ WORKDIR /workspace
 RUN terraform --version && \
     gcloud --version && \
     kubectl version --client && \
-    gke-gcloud-auth-plugin --version
+    gke-gcloud-auth-plugin --version && \
+    helm version
 
 # Entrypoint script to handle authentication
 COPY docker/dev/entrypoint.sh /entrypoint.sh
+
 RUN chmod +x /entrypoint.sh
+
+RUN apk add --no-cache jq
+
+RUN apk add --no-cache zsh
+
+RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["tail", "-f", "/dev/null"]
