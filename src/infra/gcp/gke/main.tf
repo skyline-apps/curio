@@ -278,16 +278,13 @@ resource "google_container_node_pool" "primary" {
 # Persistent Disks for Kubernetes Persistent Volumes
 #------------------------------------------------------
 resource "google_compute_disk" "persistent_volumes" {
+  for_each = toset(var.namespaces)
   provider = google-beta
-  
-  # Create multiple disks based on a count variable
-  count = var.persistent_volume_disk_count
 
-  # Disk naming convention
-  name  = "${var.cluster_name}-pv-disk-${count.index + 1}"
-  type  = var.persistent_volume_disk_type
-  size  = var.persistent_volume_disk_size_gb
-  zone  = var.zone
+  name = "${var.cluster_name}-pv-disk-${each.key}"
+  type = var.persistent_volume_disk_type
+  size = var.persistent_volume_disk_size_gb
+  zone = var.zone
 
   labels = {
     cluster = var.cluster_name
