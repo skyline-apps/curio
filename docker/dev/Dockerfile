@@ -19,6 +19,11 @@ RUN KUBECTL_VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt) && \
 # Install gke-gcloud-auth-plugin
 RUN gcloud components install gke-gcloud-auth-plugin --quiet
 
+# Install Helm
+RUN apk add --no-cache openssl && \
+    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | VERIFY_CHECKSUM=false bash && \
+    helm version
+
 # Set environment variables
 ENV USE_GKE_GCLOUD_AUTH_PLUGIN=True
 ENV KUBECONFIG=/root/.kube/config

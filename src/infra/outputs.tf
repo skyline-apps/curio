@@ -25,3 +25,7 @@ output "connection_string" {
 output "persistent_volume_disk_size_gb" {
   value = var.persistent_volume_disk_size_gb
 }
+
+output "primary_node_label" {
+  value = module.gke.primary_node_label
+}

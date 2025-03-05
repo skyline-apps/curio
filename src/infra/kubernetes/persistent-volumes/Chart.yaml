@@ -1,0 +1,4 @@
+apiVersion: v2
+name: persistent-volumes
+description: A Helm chart for Kubernetes Persistent Volumes
+version: 0.1.0

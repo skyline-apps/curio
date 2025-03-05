@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-search
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: search
+  ports:
+    - protocol: TCP
+      port: {{ .Values.search.service.port }}
+      targetPort: {{ .Values.search.service.port }}
+  type: {{ .Values.search.service.type }}
