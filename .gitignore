@@ -41,5 +41,13 @@ docker/volumes/db/data
 docker/volumes/storage
 docker/volumes/search/data
 
+# terraform
+.terraform
+.terraform.tfstate.lock.info
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate*.backup
+terraform.tfvars
+
 # generated
 src/script/generated
