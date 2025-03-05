@@ -25,3 +25,8 @@ output "cluster_project_id" {
   value       = var.project_id
   description = "Project ID of the GKE cluster"
 }
+
+output "primary_node_label" {
+  value       = "primary"
+  description = "Label of the primary node pool"
+}

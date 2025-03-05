@@ -219,6 +219,9 @@ resource "google_container_node_pool" "primary" {
   }
 
   node_config {
+    labels = {
+      "curio/node-type" = "primary"
+    }
     spot         = var.spot
     preemptible  = var.preemptible
     machine_type = var.machine_type
@@ -228,10 +231,6 @@ resource "google_container_node_pool" "primary" {
     shielded_instance_config {
       enable_secure_boot          = var.shielded_vm_enable_secure_boot
       enable_integrity_monitoring = var.shielded_vm_enable_integrity_monitoring
-    }
-
-    labels = {
-      mesh_id = "proj-${var.project_id}"
     }
 
     metadata = {

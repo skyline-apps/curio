@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-search
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: search
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: search
+  template:
+    metadata:
+      labels:
+        app: search
+    spec:
+      containers:
+      - name: search
+        image: {{ .Values.search.image.repository }}:{{ .Values.search.image.tag }}
+        imagePullPolicy: {{ .Values.search.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.search.service.port }}
+        env:
+        - name: MEILI_ENV
+          value: {{ .Values.search.environment.MEILI_ENV }}
+        - name: MEILI_MASTER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-search-master-key
+              key: SEARCH_MASTER_API_KEY
+        command:
+        - /bin/sh
+        - /data/search/init.sh
+        volumeMounts:
+        {{- range $i := until .Values.search.persistence.count }}
+        - name: data-{{ add $i 1 }}
+          mountPath: /meili_data-{{ add $i 1 }}
+        {{- end }}
+      volumes:
+      {{- range $i := until .Values.search.persistence.count }}
+      - name: data-{{ add $i 1 }}
+        persistentVolumeClaim:
+          claimName: {{ printf "%s-search-pvc-%d" $.Release.Name (add $i 1) }}
+      {{- end }}

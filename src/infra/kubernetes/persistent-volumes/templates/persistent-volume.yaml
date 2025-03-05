@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "{{ .Values.cluster_name }}-{{ .Release.Namespace }}-pv"
+spec:
+  capacity:
+    storage: {{ .Values.persistent_volume_disk_size_gb }}Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  csi:
+    driver: pd.csi.storage.gke.io
+    volumeHandle: "{{ .Values.volume_handle }}"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: curio/node-type
+              operator: In
+              values:
+                - "{{ .Values.primary_node_label }}"

@@ -1,0 +1,18 @@
+search:
+  image: 
+    repository: getmeili/meilisearch
+    tag: v1.12
+    pullPolicy: IfNotPresent
+
+  environment:
+    MEILI_ENV: development
+    MEILI_MASTER_KEY: {{ .Values.searchMasterApiKey }}
+
+  service:
+    type: ClusterIP
+    port: 7700
+
+  persistence:
+    storageClass: standard
+    accessMode: ReadWriteOnce
+    size: {{ .Values.persistent_volume_disk_size_gb }}Gi
