@@ -474,12 +474,6 @@ variable "workload_metadata_enabled" {
   default     = true
 }
 
-variable "persistent_volume_disk_count" {
-  description = "Number of persistent volume disks to create"
-  type        = number
-  default     = 0
-}
-
 variable "persistent_volume_disk_type" {
   description = "Type of persistent disk (pd-standard, pd-balanced, pd-ssd)"
   type        = string
@@ -489,5 +483,11 @@ variable "persistent_volume_disk_type" {
 variable "persistent_volume_disk_size_gb" {
   description = "Size of each persistent volume disk in GB"
   type        = number
-  default     = 10
+  default     = 20
+}
+
+variable "namespaces" {
+  description = "List of namespaces to create"
+  type        = list(string)
+  default     = ["staging", "prod"]
 }

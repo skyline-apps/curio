@@ -1,6 +1,6 @@
 # GCP Module
 module "gcp" {
-  source = "./gcp"
+  source     = "./gcp"
   project_id = var.gcp_project_id
 }
 
@@ -11,8 +11,8 @@ module "gke" {
   project_id = var.gcp_project_id
 
   # Use module defaults for region and zone
-  region     = module.gcp.region
-  zone       = module.gcp.zone
+  region = module.gcp.region
+  zone   = module.gcp.zone
 
   # Cluster configuration
   cluster_name       = var.cluster_name
@@ -22,6 +22,6 @@ module "gke" {
   disk_size_gb       = var.disk_size_gb
 
   # Persistent volume configuration
-  persistent_volume_disk_count       = var.persistent_volume_disk_count
-  persistent_volume_disk_size_gb     = var.persistent_volume_disk_size_gb
+  namespaces                     = ["staging", "prod"]
+  persistent_volume_disk_size_gb = var.persistent_volume_disk_size_gb
 }
