@@ -207,7 +207,11 @@ export const GetItemsResponseSchema = z
     items: z.array(ItemResultSchema),
     nextCursor: z.string().optional(),
     nextOffset: z.number().optional(),
-    total: z.number(),
+    total: z
+      .number()
+      .describe(
+        "Total results count. May be incorrect if search term is included.",
+      ),
   })
   .refine(
     (val) => !(val.nextCursor && val.nextOffset),

@@ -14,6 +14,7 @@ import { SearchError } from "@/lib/search/types";
 import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_PROFILE_ID,
+  DEFAULT_TEST_USER_ID_2,
   makeAuthenticatedMockRequest,
   makeUnauthenticatedMockRequest,
 } from "@/utils/test/api";
@@ -230,11 +231,15 @@ describe("/api/v1/items", () => {
       vi.mocked(searchDocuments).mockResolvedValueOnce({
         hits: [
           {
-            profileItemId: MOCK_PROFILE_ITEMS[1].id,
+            slug: MOCK_ITEMS[1].slug,
+            url: MOCK_ITEMS[1].url,
+            title: MOCK_PROFILE_ITEMS[1].title,
             _formatted: { content: "blah2" },
           },
           {
-            profileItemId: MOCK_PROFILE_ITEMS[0].id,
+            slug: MOCK_ITEMS[0].slug,
+            url: MOCK_ITEMS[0].url,
+            title: MOCK_PROFILE_ITEMS[0].title,
             _formatted: { content: "blah" },
           },
         ],
@@ -267,7 +272,9 @@ describe("/api/v1/items", () => {
       vi.mocked(searchDocuments).mockResolvedValueOnce({
         hits: [
           {
-            profileItemId: MOCK_PROFILE_ITEMS[2].id,
+            slug: MOCK_ITEMS[2].slug,
+            url: MOCK_ITEMS[2].url,
+            title: MOCK_PROFILE_ITEMS[2].title,
             _formatted: { content: "blah3" },
           },
         ],
@@ -431,7 +438,9 @@ describe("/api/v1/items", () => {
       vi.mocked(searchDocuments).mockResolvedValueOnce({
         hits: [
           {
-            profileItemId: MOCK_PROFILE_ITEMS[1].id,
+            slug: MOCK_ITEMS[1].slug,
+            url: MOCK_ITEMS[1].url,
+            title: MOCK_PROFILE_ITEMS[1].title,
             _formatted: { content: "blah blah" },
           },
         ],
@@ -456,18 +465,12 @@ describe("/api/v1/items", () => {
       expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
       expect(data.total).toBe(1);
       expect(searchDocuments).toHaveBeenCalledTimes(1);
-      expect(searchDocuments).toHaveBeenCalledWith(
-        "hellO",
-        DEFAULT_TEST_PROFILE_ID,
-        {
-          attributesToCrop: ["content"],
-          attributesToHighlight: ["content"],
-          attributesToRetrieve: ["profileItemId"],
-          filter: ["state != 3"],
-          limit: 20,
-          offset: 0,
-        },
-      );
+      expect(searchDocuments).toHaveBeenCalledWith("hellO", {
+        attributesToCrop: ["content"],
+        attributesToHighlight: ["content"],
+        limit: 20,
+        offset: 0,
+      });
     });
 
     it("should return 200 when falling back to naive database search for title / description", async () => {
@@ -494,18 +497,12 @@ describe("/api/v1/items", () => {
       expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
       expect(data.total).toBe(2);
       expect(searchDocuments).toHaveBeenCalledTimes(1);
-      expect(searchDocuments).toHaveBeenCalledWith(
-        "item 2",
-        DEFAULT_TEST_PROFILE_ID,
-        {
-          attributesToCrop: ["content"],
-          attributesToHighlight: ["content"],
-          attributesToRetrieve: ["profileItemId"],
-          filter: ["state != 3"],
-          limit: 20,
-          offset: 0,
-        },
-      );
+      expect(searchDocuments).toHaveBeenCalledWith("item 2", {
+        attributesToCrop: ["content"],
+        attributesToHighlight: ["content"],
+        limit: 20,
+        offset: 0,
+      });
     });
 
     it("should return 200 when falling back to naive database search for url", async () => {
@@ -531,29 +528,37 @@ describe("/api/v1/items", () => {
       expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
       expect(data.total).toBe(1);
       expect(searchDocuments).toHaveBeenCalledTimes(1);
-      expect(searchDocuments).toHaveBeenCalledWith(
-        "https://example.com",
-        DEFAULT_TEST_PROFILE_ID,
-        {
-          attributesToCrop: ["content"],
-          attributesToHighlight: ["content"],
-          attributesToRetrieve: ["profileItemId"],
-          filter: ["state != 3"],
-          limit: 20,
-          offset: 0,
-        },
-      );
+      expect(searchDocuments).toHaveBeenCalledWith("https://example.com", {
+        attributesToCrop: ["content"],
+        attributesToHighlight: ["content"],
+        limit: 20,
+        offset: 0,
+      });
     });
 
     it("should return 200 when combining filters and search", async () => {
       vi.mocked(searchDocuments).mockResolvedValueOnce({
         hits: [
           {
-            profileItemId: MOCK_PROFILE_ITEMS[2].id,
+            slug: MOCK_ITEMS[2].slug,
+            url: MOCK_ITEMS[2].url,
+            title: MOCK_PROFILE_ITEMS[2].title,
+            _formatted: { content: "blah blah blah" },
+          },
+          {
+            slug: MOCK_ITEMS[0].slug,
+            url: MOCK_ITEMS[0].url,
+            title: MOCK_PROFILE_ITEMS[0].title,
+            _formatted: { content: "blah blah blah" },
+          },
+          {
+            slug: MOCK_ITEMS[1].slug,
+            url: MOCK_ITEMS[1].url,
+            title: MOCK_PROFILE_ITEMS[1].title,
             _formatted: { content: "blah blah blah" },
           },
         ],
-        estimatedTotalHits: 1,
+        estimatedTotalHits: 3,
       });
       await testDb.db.insert(items).values(MOCK_ITEMS);
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
@@ -562,7 +567,7 @@ describe("/api/v1/items", () => {
           state: ItemState.ARCHIVED,
           isFavorite: false,
         }),
-        search: "item 2",
+        search: "item",
       });
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "GET",
@@ -573,22 +578,117 @@ describe("/api/v1/items", () => {
       expect(response.status).toBe(200);
 
       const data = await response.json();
+      expect(data.items).toHaveLength(2);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_3);
+      expect(data.items[1].id).toBe(TEST_ITEM_ID_1);
+      expect(data.total).toBe(3);
+      expect(searchDocuments).toHaveBeenCalledTimes(1);
+      expect(searchDocuments).toHaveBeenCalledWith("item", {
+        attributesToCrop: ["content"],
+        attributesToHighlight: ["content"],
+        limit: 20,
+        offset: 0,
+      });
+    });
+
+    it("should return 200 with empty results and incremented offset", async () => {
+      vi.mocked(searchDocuments).mockResolvedValueOnce({
+        hits: [
+          {
+            slug: MOCK_ITEMS[3].slug,
+            url: MOCK_ITEMS[3].url,
+            title: MOCK_PROFILE_ITEMS[3].title,
+            _formatted: { content: "blah blah blah" },
+          },
+        ],
+        estimatedTotalHits: 2,
+      });
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+      const params = new URLSearchParams({
+        search: "item",
+        limit: "1",
+      });
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "GET",
+        url: `http://localhost:3000/api/v1/items?${params.toString()}`,
+      });
+
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data.items).toHaveLength(0);
+      expect(data.nextOffset).toBe(1);
+      expect(data.total).toBe(2);
+      vi.mocked(searchDocuments).mockResolvedValueOnce({
+        hits: [
+          {
+            slug: MOCK_ITEMS[2].slug,
+            url: MOCK_ITEMS[2].url,
+            title: MOCK_PROFILE_ITEMS[2].title,
+            _formatted: { content: "blah blah blah" },
+          },
+        ],
+        estimatedTotalHits: 2,
+      });
+      const params2 = new URLSearchParams({
+        search: "item",
+        limit: "1",
+        offset: "1",
+      });
+      const request2: APIRequest = makeAuthenticatedMockRequest({
+        method: "GET",
+        url: `http://localhost:3000/api/v1/items?${params2.toString()}`,
+      });
+
+      const response2 = await GET(request2);
+      expect(response2.status).toBe(200);
+
+      const data2 = await response2.json();
+      expect(data2.items).toHaveLength(1);
+      expect(data2.nextOffset).toBe(undefined);
+      expect(data2.total).toBe(2);
+      expect(data2.items[0].id).toBe(TEST_ITEM_ID_3);
+    });
+
+    it("should return 200 and return only results belonging to the user", async () => {
+      vi.mocked(searchDocuments).mockResolvedValueOnce({
+        hits: [
+          {
+            slug: MOCK_ITEMS[2].slug,
+            url: MOCK_ITEMS[2].url,
+            title: MOCK_PROFILE_ITEMS[2].title,
+            _formatted: { content: "blah blah blah" },
+          },
+        ],
+        estimatedTotalHits: 1,
+      });
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+      const params = new URLSearchParams({
+        search: "itemsearch",
+      });
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "GET",
+        url: `http://localhost:3000/api/v1/items?${params.toString()}`,
+        userId: DEFAULT_TEST_USER_ID_2,
+      });
+
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
       expect(data.items).toHaveLength(1);
       expect(data.items[0].id).toBe(TEST_ITEM_ID_3);
       expect(data.total).toBe(1);
       expect(searchDocuments).toHaveBeenCalledTimes(1);
-      expect(searchDocuments).toHaveBeenCalledWith(
-        "item 2",
-        DEFAULT_TEST_PROFILE_ID,
-        {
-          attributesToCrop: ["content"],
-          attributesToHighlight: ["content"],
-          attributesToRetrieve: ["profileItemId"],
-          filter: ["isFavorite = 0", "state = 2"],
-          limit: 20,
-          offset: 0,
-        },
-      );
+      expect(searchDocuments).toHaveBeenCalledWith("itemsearch", {
+        attributesToCrop: ["content"],
+        attributesToHighlight: ["content"],
+        limit: 20,
+        offset: 0,
+      });
     });
 
     it("should return 200 when filtering by inactive state ordering by stateUpdatedAt", async () => {

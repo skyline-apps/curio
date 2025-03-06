@@ -1,6 +1,6 @@
 import { and, db, desc, eq, ilike, not, or, type SQL, sql } from "@/db";
 import { fetchOwnItemResults } from "@/db/queries";
-import { items, ItemState, ItemStateNumber, profileItems } from "@/db/schema";
+import { items, ItemState, profileItems } from "@/db/schema";
 import { searchDocuments } from "@/lib/search";
 import { SearchError } from "@/lib/search/types";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
@@ -12,7 +12,6 @@ import {
   CreateOrUpdateItemsRequestSchema,
   CreateOrUpdateItemsResponse,
   CreateOrUpdateItemsResponseSchema,
-  Filters,
   GetItemsRequestSchema,
   GetItemsResponse,
   GetItemsResponseSchema,
@@ -23,16 +22,14 @@ import {
 const log = createLogger("api/v1/items");
 
 async function getRelevantProfileItemIds(
-  profileId: string,
   limit: number,
   offset: number,
   search?: string,
-  filters?: Filters,
 ): Promise<
   | { success: false; searchResults: null; nextOffset: null; total: null }
   | {
       success: true;
-      searchResults: { id: string; excerpt: string }[];
+      searchResults: { slug: string; excerpt: string }[];
       nextOffset: number | undefined;
       total: number;
     }
@@ -46,27 +43,12 @@ async function getRelevantProfileItemIds(
     };
   }
   try {
-    const searchFilters = [];
-    if (filters?.isFavorite !== undefined) {
-      searchFilters.push(`isFavorite = ${filters.isFavorite ? 1 : 0}`);
-    }
-    if (filters && filters.state !== undefined) {
-      searchFilters.push(`state = ${ItemStateNumber[filters.state]}`);
-    } else {
-      searchFilters.push(`state != ${ItemStateNumber[ItemState.DELETED]}`);
-    }
-    const { hits, estimatedTotalHits } = await searchDocuments(
-      search,
-      profileId,
-      {
-        filter: searchFilters,
-        offset,
-        limit: limit,
-        attributesToRetrieve: ["profileItemId"],
-        attributesToCrop: ["content"],
-        attributesToHighlight: ["content"],
-      },
-    );
+    const { hits, estimatedTotalHits } = await searchDocuments(search, {
+      offset,
+      limit,
+      attributesToCrop: ["content"],
+      attributesToHighlight: ["content"],
+    });
 
     const hasNextPage = estimatedTotalHits > offset + limit;
     const items = hits;
@@ -74,7 +56,7 @@ async function getRelevantProfileItemIds(
     return {
       success: true,
       searchResults: items.map((item) => ({
-        id: item.profileItemId,
+        slug: item.slug,
         excerpt: item._formatted.content || "",
       })),
       nextOffset,
@@ -123,15 +105,26 @@ export async function GET(
       profileItems.profileId,
       profileResult.profile.id,
     );
+    if (filters) {
+      whereClause = and(
+        whereClause,
+        filters.state !== undefined
+          ? eq(profileItems.state, filters.state)
+          : undefined,
+        filters.isFavorite !== undefined
+          ? eq(profileItems.isFavorite, filters.isFavorite)
+          : undefined,
+      );
+    }
+    if (!filters || filters.state !== ItemState.DELETED) {
+      whereClause = and(
+        whereClause,
+        not(eq(profileItems.state, ItemState.DELETED)),
+      );
+    }
 
     const { success, searchResults, nextOffset, total } =
-      await getRelevantProfileItemIds(
-        profileResult.profile.id,
-        limit,
-        offset,
-        search,
-        filters,
-      );
+      await getRelevantProfileItemIds(limit, offset, search);
     if (success) {
       response.nextOffset = nextOffset;
       response.total = total;
@@ -142,8 +135,8 @@ export async function GET(
       }
       whereClause = and(
         whereClause,
-        sql`${profileItems.id} = ANY(ARRAY[${sql.join(
-          searchResults.map((p) => sql`${p.id}::uuid`),
+        sql`${items.slug} = ANY(ARRAY[${sql.join(
+          searchResults.map((p) => sql`${p.slug}::text`),
           sql`, `,
         )}])`,
       );
@@ -160,17 +153,6 @@ export async function GET(
           sql`${items.url} = ANY(ARRAY[${sql.join(cleanedUrls, sql`, `)}]::text[])`,
         );
       }
-      if (filters) {
-        whereClause = and(
-          whereClause,
-          filters.state !== undefined
-            ? eq(profileItems.state, filters.state)
-            : undefined,
-          filters.isFavorite !== undefined
-            ? eq(profileItems.isFavorite, filters.isFavorite)
-            : undefined,
-        );
-      }
       if (search) {
         whereClause = and(
           whereClause,
@@ -179,12 +161,6 @@ export async function GET(
             search ? ilike(profileItems.description, `%${search}%`) : undefined,
             search ? ilike(items.url, `%${search}%`) : undefined,
           ),
-        );
-      }
-      if (!filters || filters.state !== ItemState.DELETED) {
-        whereClause = and(
-          whereClause,
-          not(eq(profileItems.state, ItemState.DELETED)),
         );
       }
       response.total = await db
@@ -210,12 +186,14 @@ export async function GET(
       .limit(limit);
 
     if (success) {
-      response.items = searchResults.map((result) =>
-        ItemResultSchema.parse({
-          ...results.find((item) => item.profileItemId === result.id),
-          excerpt: result.excerpt,
-        }),
-      );
+      response.items = searchResults
+        .filter((result) => results.some((item) => item.slug === result.slug))
+        .map((result) =>
+          ItemResultSchema.parse({
+            ...results.find((item) => item.slug === result.slug),
+            excerpt: result.excerpt,
+          }),
+        );
     } else {
       response.items = results.map((item) => ItemResultSchema.parse(item));
       response.nextCursor =

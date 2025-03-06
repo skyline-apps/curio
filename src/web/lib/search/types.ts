@@ -19,16 +19,16 @@ export interface SearchOptions {
 }
 
 export interface ItemDocument {
-  profileItemId: string;
-  profileId: string;
-  url?: string;
-  slug?: string;
+  slug: string;
+  url: string;
+  title: string;
+  description?: string;
+  author?: string;
   content?: string;
   contentVersionName?: string;
 }
 
-export interface ItemDocumentResult extends Omit<ItemDocument, "profileId"> {
-  profileId?: string;
+export interface ItemDocumentResult extends ItemDocument {
   _formatted: {
     content?: string;
   };

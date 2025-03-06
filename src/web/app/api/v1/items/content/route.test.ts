@@ -14,10 +14,7 @@ import {
 } from "@/lib/storage";
 import { MOCK_VERSION } from "@/lib/storage/__mocks__/index";
 import { APIRequest } from "@/utils/api";
-import {
-  DEFAULT_TEST_PROFILE_ID,
-  makeAuthenticatedMockRequest,
-} from "@/utils/test/api";
+import { makeAuthenticatedMockRequest } from "@/utils/test/api";
 import {
   MOCK_ITEMS,
   MOCK_PROFILE_ITEMS,
@@ -62,8 +59,9 @@ describe("/api/v1/items/content", () => {
       expect(indexDocuments).toHaveBeenCalledTimes(1);
       expect(indexDocuments).toHaveBeenCalledWith([
         {
-          profileItemId: MOCK_PROFILE_ITEMS[0].id,
-          profileId: DEFAULT_TEST_PROFILE_ID,
+          title: MOCK_METADATA.title,
+          description: MOCK_METADATA.description,
+          author: MOCK_METADATA.author,
           content: "Markdown content",
           contentVersionName: MOCK_VERSION,
           url: TEST_ITEM_URL_1,
@@ -270,8 +268,9 @@ describe("/api/v1/items/content", () => {
       expect(indexDocuments).toHaveBeenCalledTimes(1);
       expect(indexDocuments).toHaveBeenCalledWith([
         {
-          profileItemId: MOCK_PROFILE_ITEMS[2].id,
-          profileId: DEFAULT_TEST_PROFILE_ID,
+          title: MOCK_METADATA.title,
+          description: MOCK_METADATA.description,
+          author: MOCK_METADATA.author,
           content: "Markdown content",
           contentVersionName: MOCK_VERSION,
           url: MOCK_ITEMS[2].url,
@@ -403,17 +402,7 @@ describe("/api/v1/items/content", () => {
           eq(profileItemHighlights.profileItemId, updatedProfileItem[0].id),
         );
       expect(updatedHighlights.length).toEqual(0);
-      expect(indexDocuments).toHaveBeenCalledTimes(1);
-      expect(indexDocuments).toHaveBeenCalledWith([
-        {
-          profileItemId: updatedProfileItem[0].id,
-          profileId: DEFAULT_TEST_PROFILE_ID,
-          content: "new longer content",
-          contentVersionName: "2014-04-04",
-          url: MOCK_ITEMS[0].url,
-          slug: MOCK_ITEMS[0].slug,
-        },
-      ]);
+      expect(indexDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 200 and skip metadata update when configured", async () => {
@@ -456,8 +445,9 @@ describe("/api/v1/items/content", () => {
       expect(indexDocuments).toHaveBeenCalledTimes(1);
       expect(indexDocuments).toHaveBeenCalledWith([
         {
-          profileItemId: profileItem[0].id,
-          profileId: DEFAULT_TEST_PROFILE_ID,
+          title: MOCK_PROFILE_ITEMS[0].title,
+          description: MOCK_PROFILE_ITEMS[0].description,
+          author: MOCK_PROFILE_ITEMS[0].author,
           content: "Markdown content",
           contentVersionName: MOCK_VERSION,
           url: MOCK_ITEMS[0].url,

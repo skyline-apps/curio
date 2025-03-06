@@ -1,7 +1,6 @@
 import { and, db, eq, sql } from "@/db";
 import { fetchOwnItemResults } from "@/db/queries";
 import { items, profileItemHighlights, profileItems } from "@/db/schema";
-import { indexDocuments } from "@/lib/search";
 import { getItemContent, getItemMetadata } from "@/lib/storage";
 import { StorageError } from "@/lib/storage/types";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
@@ -143,11 +142,10 @@ export async function GET(
     const itemResponse = ItemResultWithHighlightsSchema.parse(item[0]);
 
     try {
-      const {
-        version,
-        versionName: retrievedVersionName,
-        content,
-      } = await getItemContent(slug, itemResponse.metadata.versionName);
+      const { version, content } = await getItemContent(
+        slug,
+        itemResponse.metadata.versionName,
+      );
 
       let response: GetItemContentResponse = GetItemContentResponseSchema.parse(
         {
@@ -157,7 +155,7 @@ export async function GET(
       );
       // Clear out versionName if it can't be found.
       if (version !== itemResponse.metadata.versionName) {
-        const updatedProfileItem = await db
+        await db
           .update(profileItems)
           .set({ versionName: version })
           .where(
@@ -169,15 +167,6 @@ export async function GET(
           .returning({
             id: profileItems.id,
           });
-
-        await indexDocuments([
-          {
-            profileItemId: updatedProfileItem[0].id,
-            profileId: profileResult.profile.id,
-            content: content,
-            contentVersionName: retrievedVersionName,
-          },
-        ]);
 
         response = GetItemContentResponseSchema.parse({
           content,

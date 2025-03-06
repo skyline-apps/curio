@@ -9,7 +9,6 @@ import {
   profileItems,
   profileLabels,
 } from "@/db/schema";
-import { indexDocuments } from "@/lib/search";
 import { getItemContent } from "@/lib/storage";
 import { MOCK_VERSION } from "@/lib/storage/__mocks__/index";
 import { StorageError } from "@/lib/storage/types";
@@ -164,7 +163,6 @@ describe("/api/v1/public/items/content", () => {
         .execute();
 
       expect(updatedItem[0].versionName).toBe(null);
-      expect(indexDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 200 with basic item content when unauthenticated", async () => {
@@ -204,7 +202,6 @@ describe("/api/v1/public/items/content", () => {
       });
       expect(getItemContent).toHaveBeenCalledTimes(1);
       expect(getItemContent).toHaveBeenCalledWith(TEST_ITEM_SLUG, null);
-      expect(indexDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 200 with basic item metadata when unauthenticated and content not found", async () => {
@@ -284,7 +281,6 @@ describe("/api/v1/public/items/content", () => {
       });
       expect(getItemContent).toHaveBeenCalledTimes(1);
       expect(getItemContent).toHaveBeenCalledWith(TEST_ITEM_SLUG, null);
-      expect(indexDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 200 with item and its labels", async () => {
@@ -315,7 +311,6 @@ describe("/api/v1/public/items/content", () => {
           color: "#00ff00",
         },
       ]);
-      expect(indexDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 200 with custom version content", async () => {
@@ -379,7 +374,6 @@ describe("/api/v1/public/items/content", () => {
         .execute();
 
       expect(updatedItem[0].versionName).toBe("2010-04-04");
-      expect(indexDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 200 with metadata even if item content is missing", async () => {
@@ -454,7 +448,6 @@ describe("/api/v1/public/items/content", () => {
         .execute();
 
       expect(updatedItem[0].versionName).toBe(null);
-      expect(indexDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 200 with default content if version is missing", async () => {
@@ -518,15 +511,6 @@ describe("/api/v1/public/items/content", () => {
         .execute();
 
       expect(updatedItem[0].versionName).toBe(null);
-      expect(indexDocuments).toHaveBeenCalledTimes(1);
-      expect(indexDocuments).toHaveBeenCalledWith([
-        {
-          profileItemId: TEST_PROFILE_ITEM_ID,
-          profileId: DEFAULT_TEST_PROFILE_ID,
-          content: "test content",
-          contentVersionName: "blah-version",
-        },
-      ]);
     });
 
     it("should return 404 if item not found", async () => {
