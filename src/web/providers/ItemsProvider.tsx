@@ -161,7 +161,10 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
 
   const contextValue: ItemsContextType = {
     items: data?.pages.flatMap((p) => p.items) || [],
-    totalItems: data?.pages[0]?.total || 0,
+    // Total count may be inaccurate when search query is used, so just sum items received.
+    totalItems: currentOptions?.search
+      ? data?.pages.flatMap((p) => p.items).length || 0
+      : data?.pages[0]?.total || 0,
     isLoading,
     isFetching,
     isFetchingNextPage,
