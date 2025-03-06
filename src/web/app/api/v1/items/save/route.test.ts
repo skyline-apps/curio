@@ -1,6 +1,7 @@
 import { eq } from "@/db";
 import { DbErrorCode } from "@/db/errors";
 import { items, ItemState, profileItems } from "@/db/schema";
+import { getItemMetadata } from "@/lib/storage/__mocks__/index";
 import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_PROFILE_ID,
@@ -59,6 +60,40 @@ describe("/api/v1/items/save", () => {
       ).toBe(true);
     });
 
+    it("should return 200 when saving an item with publishedAt", async () => {
+      getItemMetadata.mockResolvedValueOnce({
+        title: "Blank title",
+        publishedAt: "2023-01-01T00:00:00.000Z",
+      });
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "POST",
+        body: {
+          slugs: "example-com",
+        },
+        userId: DEFAULT_TEST_USER_ID_2,
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data.updated).toEqual([
+        { slug: "example-com", profileItemId: expect.any(String) },
+      ]);
+
+      const updatedItems = await testDb.db
+        .select()
+        .from(profileItems)
+        .where(eq(profileItems.profileId, DEFAULT_TEST_PROFILE_ID_2))
+        .orderBy(profileItems.itemId);
+      expect(updatedItems).toHaveLength(2);
+      expect(updatedItems[0].itemId).toBe(TEST_ITEM_ID_1);
+      expect(updatedItems[1].itemId).toBe(TEST_ITEM_ID_3);
+      expect(
+        (updatedItems[0].savedAt as Date).getTime() >
+          (updatedItems[1].savedAt as Date).getTime(),
+      ).toBe(true);
+    });
     it("should return 200 when item is already saved", async () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",

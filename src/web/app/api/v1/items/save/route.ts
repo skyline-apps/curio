@@ -75,7 +75,9 @@ export async function POST(
           description: metadata.description,
           thumbnail: metadata.thumbnail,
           favicon: metadata.favicon,
-          publishedAt: metadata.publishedAt,
+          publishedAt: metadata.publishedAt
+            ? new Date(metadata.publishedAt)
+            : null,
           savedAt: newDate,
           state: ItemState.ACTIVE,
           stateUpdatedAt: newDate,
