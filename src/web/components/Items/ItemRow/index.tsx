@@ -101,7 +101,14 @@ const ItemRow: React.FC<ItemRowProps> = ({
           </div>
           <div className="flex flex-col gap-1">
             {item.excerpt ? (
-              <Markdown className="text-xs text-secondary-700 text-wrap truncate">
+              <Markdown
+                className="[&_*]:text-secondary-700 [&_*]:text-xs [&_*]:my-0 text-wrap truncate"
+                components={{
+                  strong: ({ children }) => (
+                    <strong className="!text-foreground">{children}</strong>
+                  ),
+                }}
+              >
                 {item.excerpt}
               </Markdown>
             ) : (
