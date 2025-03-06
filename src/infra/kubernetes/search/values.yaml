@@ -8,9 +8,4 @@ search:
     MEILI_ENV: production
 
   service:
-    type: ClusterIP
     port: 7700
-
-  persistence:
-    storageClass: standard
-    accessMode: ReadWriteOnce
