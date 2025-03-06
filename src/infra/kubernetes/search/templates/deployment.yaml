@@ -29,9 +29,6 @@ spec:
             secretKeyRef:
               name: {{ .Values.cluster_name }}-search-master-key
               key: SEARCH_MASTER_API_KEY
-        command:
-        - /bin/sh
-        - /data/search/init.sh
         volumeMounts:
         - name: search-data
           mountPath: /meili_data

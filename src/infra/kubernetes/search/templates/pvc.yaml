@@ -5,13 +5,11 @@ metadata:
   namespace: {{ $.Release.Namespace }}
 spec:
   accessModes:
-    - {{ $.Values.search.persistence.accessMode }}
+    - ReadWriteOnce
   resources:
     requests:
       storage: {{ $.Values.persistent_volume_disk_size_gb }}Gi
-  {{- if $.Values.search.persistence.storageClass }}
-  storageClassName: {{ $.Values.search.persistence.storageClass }}
-  {{- end }}
+  storageClassName: standard
   selector:
     matchLabels:
       environment: {{ $.Release.Namespace }}
