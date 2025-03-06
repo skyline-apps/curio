@@ -170,20 +170,19 @@ export class Search {
 
   async searchDocuments(
     query: string,
-    profileId: string,
     options: SearchOptions = {},
   ): Promise<SearchResults> {
     const axiosInstance = await this.createAxiosInstance();
 
     const searchOptions = {
       ...options,
-      filter: [...(options.filter || []), `profileId = ${profileId}`],
+      filter: [...(options.filter || [])],
     };
 
     return withRetry(async () => {
       const response = await axiosInstance.post("/indexes/items/search", {
         q: query,
-        attributesToRetrieve: ["profileItemId"],
+        attributesToRetrieve: ["slug"],
         highlightPreTag: "**",
         highlightPostTag: "**",
         cropLength: 40,
@@ -210,6 +209,5 @@ export const indexDocuments = (documents: ItemDocument[]): Promise<void> =>
   search.indexDocuments(documents);
 export const searchDocuments = (
   query: string,
-  profileId: string,
   options?: SearchOptions,
-): Promise<SearchResults> => search.searchDocuments(query, profileId, options);
+): Promise<SearchResults> => search.searchDocuments(query, options);

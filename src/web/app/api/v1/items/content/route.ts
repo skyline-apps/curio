@@ -164,7 +164,7 @@ export async function POST(
           .set({ updatedAt: newDate })
           .where(eq(items.id, item[0].id));
 
-        const profileItemId = await updateProfileItem(
+        await updateProfileItem(
           tx,
           item[0].url,
           profileResult.profile.id,
@@ -176,12 +176,13 @@ export async function POST(
         // Index profile item with new main content
         await indexDocuments([
           {
-            profileItemId: profileItemId,
-            profileId: profileResult.profile.id,
+            slug: slug,
+            url: item[0].url,
+            title: metadata.title || item[0].url,
+            description: metadata.description ?? undefined,
+            author: metadata.author ?? undefined,
             content: markdownContent,
             contentVersionName: versionName,
-            url: item[0].url,
-            slug: slug,
           },
         ]);
         return APIResponseJSON(response);
@@ -222,12 +223,8 @@ export async function POST(
           profileItem[0].versionName !== null &&
           profileItem[0].versionName !== defaultMetadata.timestamp
         ) {
-          // The default content is longer, so update the item to use the default version and re-index
-          const { content, versionName } = await storage.getItemContent(
-            slug,
-            null,
-          );
-          const profileItemId = await updateProfileItem(
+          // The default content is longer, so update the item to use the default version
+          await updateProfileItem(
             tx,
             item[0].url,
             profileResult.profile.id,
@@ -235,16 +232,6 @@ export async function POST(
             defaultMetadata,
             newDate,
           );
-          await indexDocuments([
-            {
-              profileItemId: profileItemId,
-              profileId: profileResult.profile.id,
-              content: content,
-              contentVersionName: versionName,
-              url: item[0].url,
-              slug: slug,
-            },
-          ]);
         }
         return APIResponseJSON(response);
       } else {
