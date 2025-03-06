@@ -93,8 +93,9 @@ const ItemList: React.FC<ItemListProps> = ({}: ItemListProps) => {
   return (
     <>
       <ItemNavigationShortcuts />
-      <div className="flex h-8 w-full items-end gap-2 mb-2">
+      <div className="flex h-8 w-full items-center gap-2 mb-2">
         <ItemSearch />
+        <p className="text-xs text-secondary-800">{totalItems} items</p>
         <ItemsActions />
       </div>
       {!isLoading && totalItems === 0 && !loadingError ? (
