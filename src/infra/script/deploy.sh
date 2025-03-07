@@ -14,19 +14,29 @@ if [ "$NAMESPACE" != "staging" ] && [ "$NAMESPACE" != "prod" ]; then
   exit 1
 fi
 
+# Read env values from the namespace
+set -a
+. .env.$NAMESPACE
+set +a
+
 CONNECTION_COMMAND=$(terraform output -raw connection_string)
 eval $CONNECTION_COMMAND
 
-CLUSTER_NAME=$(terraform output -raw cluster_name)
-DISK_SIZE=$(terraform output -raw persistent_volume_disk_size_gb)
-PROJECT_ID=$(terraform output -raw project_id)
-ZONE=$(terraform output -raw zone)
-PRIMARY_NODE_LABEL=$(terraform output -raw primary_node_label)
+TF_CLUSTER_NAME=$(terraform output -raw cluster_name)
+TF_DISK_SIZE=$(terraform output -raw persistent_volume_disk_size_gb)
+TF_PROJECT_ID=$(terraform output -raw project_id)
+TF_ZONE=$(terraform output -raw zone)
+TF_PRIMARY_NODE_LABEL=$(terraform output -raw primary_node_label)
+TF_ADDRESS_NAME=$(terraform output -raw address_name)
+
+HOSTNAME=${SEARCH_EXTERNAL_ENDPOINT_URL#https://}
 
 helm upgrade --install search-$NAMESPACE kubernetes/search \
   --namespace $NAMESPACE \
   --create-namespace \
-  --set cluster_name=$CLUSTER_NAME \
-  --set persistent_volume_disk_size_gb=$DISK_SIZE \
-  --set primary_node_label=$PRIMARY_NODE_LABEL \
-  --set searchMasterApiKey=$MEILI_MASTER_KEY
+  --set cluster_name=$TF_CLUSTER_NAME \
+  --set persistent_volume_disk_size_gb=$TF_DISK_SIZE \
+  --set primary_node_label=$TF_PRIMARY_NODE_LABEL \
+  --set ip_address=$TF_ADDRESS_NAME \
+  --set searchMasterApiKey=$SEARCH_MASTER_API_KEY \
+  --set hostname=$HOSTNAME

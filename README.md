@@ -85,3 +85,5 @@ To clear the database, run
   - Then run `script/deploy-volumes.sh [staging|prod]` to deploy a persistent volume to store the search index.
   - Then run `script/deploy.sh [staging|prod]` to deploy the search application.
   - It may take a while for the certificate to be issued. You can check the status of the `gateway`, `certificate`,  and `challenge` resources as well as logs of the `cert-manager` pod to check progress.
+  - Run `/data/search/init.sh [staging|prod]` to initialize the search application.
+  - Populate the `SEARCH_APPLICATION_API_KEY` after using the master API key to retrieve its value.

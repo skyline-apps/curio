@@ -30,3 +30,13 @@ output "primary_node_label" {
   value       = "primary"
   description = "Label of the primary node pool"
 }
+
+output "address_name" {
+  value       = google_compute_address.static_ip.name
+  description = "Name of the static IP address"
+}
+
+output "ip_address" {
+  value       = google_compute_address.static_ip.address
+  description = "IP address of the static IP address"
+}
