@@ -390,8 +390,75 @@ describe("/api/v1/items/content", () => {
         .from(profileItems)
         .where(eq(profileItems.itemId, TEST_ITEM_ID_1))
         .limit(1);
-      expect(updatedProfileItem[0].title).toEqual("default title");
-      expect(updatedProfileItem[0].author).toBe(null);
+      expect(updatedProfileItem[0].title).toEqual("test title");
+      expect(updatedProfileItem[0].author).toEqual("kim");
+      expect(updatedProfileItem[0].versionName).toBe(null);
+      expect(updatedProfileItem[0].readingProgress).toEqual(0);
+
+      const updatedHighlights = await testDb.db
+        .select()
+        .from(profileItemHighlights)
+        .where(
+          eq(profileItemHighlights.profileItemId, updatedProfileItem[0].id),
+        );
+      expect(updatedHighlights.length).toEqual(0);
+      expect(indexDocuments).toHaveBeenCalledTimes(0);
+    });
+
+    it("should return 200 and just force update metadata", async () => {
+      vi.mocked(uploadItemContent).mockResolvedValueOnce({
+        versionName: "mock-old-version",
+        status: UploadStatus.STORED_VERSION,
+      });
+      // This is called on the default version
+      vi.mocked(getItemMetadata).mockResolvedValueOnce({
+        timestamp: "2014-04-04",
+        length: 100,
+        hash: "contenthash",
+        title: "default title",
+        author: null,
+        description: null,
+        thumbnail: null,
+        favicon: null,
+        publishedAt: null,
+      });
+      vi.mocked(getItemContent).mockResolvedValueOnce({
+        version: null,
+        versionName: "2014-04-04",
+        content: "new longer content",
+      });
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values({
+        ...MOCK_PROFILE_ITEMS[0],
+        readingProgress: 20,
+        versionName: null,
+      });
+      await testDb.db.insert(profileItemHighlights).values(MOCK_HIGHLIGHTS);
+
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "POST",
+        body: {
+          url: TEST_ITEM_URL_1,
+          htmlContent: "<div>Test content</div>",
+        },
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data).toEqual({
+        slug: TEST_ITEM_SLUG,
+        message: "Content updated",
+        status: UploadStatus.STORED_VERSION,
+      });
+      const updatedProfileItem = await testDb.db
+        .select()
+        .from(profileItems)
+        .where(eq(profileItems.itemId, TEST_ITEM_ID_1))
+        .limit(1);
+      expect(updatedProfileItem[0].title).toEqual("test title");
+      expect(updatedProfileItem[0].author).toEqual("kim");
       expect(updatedProfileItem[0].versionName).toBe(null);
       expect(updatedProfileItem[0].readingProgress).toEqual(0);
 
