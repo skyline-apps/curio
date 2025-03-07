@@ -102,33 +102,12 @@ export class Storage {
     }
 
     // Check current main file content length
+    let defaultMetadata: VersionMetadata | null = null;
     try {
-      const { data, error } = await storage
+      const { data } = await storage
         .from(ITEMS_BUCKET)
         .info(`${slug}/${DEFAULT_NAME}.md`);
-
-      if (!error && data?.metadata && data.metadata.length >= content.length) {
-        // Current content is longer, just store the new version
-        const versionPath = `${slug}/versions/${timestamp}.md`;
-
-        const { error: versionError } = await storage
-          .from(ITEMS_BUCKET)
-          .upload(versionPath, content, {
-            contentType: "text/markdown",
-            upsert: false,
-            metadata: fileMetadata,
-          });
-
-        if (versionError) {
-          log.error(`Error uploading version for item ${slug}:`, versionError);
-          throw new StorageError("Failed to upload version");
-        }
-
-        return {
-          versionName: timestamp,
-          status: UploadStatus.STORED_VERSION,
-        };
-      }
+      defaultMetadata = (data?.metadata as VersionMetadata) || null;
     } catch (error) {
       // Main file doesn't exist yet, or error reading it
       log.info("No existing content for ${slug} or error reading it:", error);
@@ -149,6 +128,13 @@ export class Storage {
     if (versionError) {
       log.error(`Error uploading version for item ${slug}:`, versionError);
       throw new StorageError("Failed to upload version");
+    }
+
+    if (defaultMetadata?.length && defaultMetadata.length >= content.length) {
+      return {
+        versionName: timestamp,
+        status: UploadStatus.STORED_VERSION,
+      };
     }
 
     // Update main file since this is longer
