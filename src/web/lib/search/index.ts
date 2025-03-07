@@ -83,13 +83,15 @@ export class Search {
     apiKey: string;
     endpoint: string;
   } {
-    const apiKey = process.env.SEARCH_API_KEY;
+    const apiKey = process.env.SEARCH_APPLICATION_API_KEY;
     const endpoint = useExternal
       ? process.env.SEARCH_EXTERNAL_ENDPOINT_URL
       : process.env.SEARCH_ENDPOINT_URL;
 
     if (!apiKey) {
-      throw new SearchError("SEARCH_API_KEY environment variable is not set");
+      throw new SearchError(
+        "SEARCH_APPLICATION_API_KEY environment variable is not set",
+      );
     }
     if (!endpoint) {
       throw new SearchError(
@@ -144,7 +146,7 @@ export class Search {
           value: endpoint,
         },
         {
-          key: "SEARCH_API_KEY",
+          key: "SEARCH_APPLICATION_API_KEY",
           value: apiKey,
         },
       ])
