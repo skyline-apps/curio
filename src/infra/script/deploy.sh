@@ -31,9 +31,11 @@ TF_ADDRESS_NAME=$(terraform output -raw address_name)
 
 HOSTNAME=${SEARCH_EXTERNAL_ENDPOINT_URL#https://}
 
+kubectl create namespace $NAMESPACE
+kubectl label namespace $NAMESPACE namespace=$NAMESPACE
+
 helm upgrade --install search-$NAMESPACE kubernetes/search \
   --namespace $NAMESPACE \
-  --create-namespace \
   --set cluster_name=$TF_CLUSTER_NAME \
   --set persistent_volume_disk_size_gb=$TF_DISK_SIZE \
   --set primary_node_label=$TF_PRIMARY_NODE_LABEL \

@@ -13,9 +13,4 @@ spec:
           gatewayHTTPRoute:
             parentRefs:
             - name: {{ .Values.cluster_name }}-acme-gateway
-              namespace: staging
-      - http01:
-          gatewayHTTPRoute:
-            parentRefs:
-            - name: {{ .Values.cluster_name }}-acme-gateway
-              namespace: prod
+              namespace: infra

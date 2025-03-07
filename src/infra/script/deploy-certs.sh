@@ -1,10 +1,13 @@
 #!/bin/bash
 
+TF_CLUSTER_NAME=$(terraform output -raw cluster_name)
+TF_IP_ADDRESS=$(terraform output -raw address_name)
+STAGING_HOSTNAME=$(grep -E "^SEARCH_EXTERNAL_ENDPOINT_URL=" .env.staging | cut -d'=' -f2 | sed 's|^"https://||' | sed 's|"$||')
+PROD_HOSTNAME=$(grep -E "^SEARCH_EXTERNAL_ENDPOINT_URL=" .env.prod | cut -d'=' -f2 | sed 's|^"https://||' | sed 's|"$||')
+
 helm repo add jetstack https://charts.jetstack.io
 
 helm repo update
-
-TF_CLUSTER_NAME=$(terraform output -raw cluster_name)
 
 helm upgrade --install cert-manager jetstack/cert-manager \
   --namespace cert-manager \
@@ -17,4 +20,9 @@ helm upgrade --install cert-manager jetstack/cert-manager \
 
 
 helm upgrade --install curio-certs kubernetes/certs \
-  --set cluster_name=$TF_CLUSTER_NAME
+  --set cluster_name=$TF_CLUSTER_NAME \
+  --namespace infra \
+  --create-namespace \
+  --set staging_hostname=$STAGING_HOSTNAME \
+  --set prod_hostname=$PROD_HOSTNAME \
+  --set ip_address=$TF_IP_ADDRESS
