@@ -6,7 +6,7 @@ metadata:
 spec:
   parentRefs:
   - name: {{ .Values.cluster_name }}-gateway
-    namespace: {{ .Release.Namespace }}
+    namespace: infra
   hostnames:
   - {{ .Values.hostname }}
   rules:
