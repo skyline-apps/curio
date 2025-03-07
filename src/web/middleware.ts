@@ -22,6 +22,6 @@ export const config = {
      * - /
      * - /login
      */
-    "/((?!_next/static|_next/image|favicon.ico|auth|login$|api/v1/health|$|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|auth|privacy$|login$|api/v1/health|$|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
