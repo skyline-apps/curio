@@ -13,6 +13,8 @@ services:
       - ./docker/volumes/search/init.sh:/data/search/init.sh
       - ~/.config/gcloud:/root/.config/gcloud
       - ~/.kube:/root/.kube
+      - ./.env.staging:/workspace/.env.staging
+      - ./.env.prod:/workspace/.env.prod
     working_dir: /workspace
     stdin_open: true  # Keep STDIN open
     tty: true  # Allocate a pseudo-TTY
@@ -20,7 +22,6 @@ services:
     environment:
       - KUBECONFIG=/root/.kube/config
       - USE_GKE_GCLOUD_AUTH_PLUGIN=True
-      - MEILI_MASTER_KEY=${SEARCH_MASTER_API_KEY}
   web:
     build:
       context: ./
@@ -60,6 +61,7 @@ services:
     environment:
       MEILI_ENV: development
       MEILI_MASTER_KEY: ${SEARCH_MASTER_API_KEY}
+      SEARCH_APPLICATION_KEY_ID: ${SEARCH_APPLICATION_KEY_ID}
     command:
       - /bin/sh
       - /init.sh
