@@ -66,6 +66,7 @@ To clear the database, run
 2. Set up Vercel app.
   - Include the environment variables from the `web` service in `docker-compose.yml`.
   - For the `POSTGRES_URL` variable, use the "Transaction pooler" Supabase Postgres URL.
+  - Also include `SEARCH_MASTER_API_KEY` (at least 16 bytes) and `SEARCH_APPLICATION_API_KEY` (a UUID v4).
 3. Copy the prod env variables locally with `vercel env pull .env.prod`.
 4. Run database migrations against the production database using `DOTENV_CONFIG_PATH=/path/to/.env.prod npm run db:migrate`.
 5. Set up a Google Cloud project with Google Auth Platform configured for a web application. Copy in the generated client ID and client secret into Supabase's Google auth provider, then copy the Supabase auth callback URL into the "Authorized redirect URIs" field.
@@ -79,5 +80,8 @@ To clear the database, run
   - Use the dev environment: `docker exec -it dev zsh`.
   - Authenticate using `gcloud auth application-default login`.
   - Run `terraform plan` to verify the correct resources will be created, then run `terraform apply`.
+  - Create an A (Address) DNS record for `terraform output`'s `gke.ip_address` under the subdomain of `SEARCH_EXTERNAL_ENDPOINT_URL`.
+  - Set up `cert-manager` on the cluster using `script/deploy-certs.sh`.
   - Then run `script/deploy-volumes.sh [staging|prod]` to deploy a persistent volume to store the search index.
   - Then run `script/deploy.sh [staging|prod]` to deploy the search application.
+  - It may take a while for the certificate to be issued. You can check the status of the `gateway`, `certificate`,  and `challenge` resources as well as logs of the `cert-manager` pod to check progress.

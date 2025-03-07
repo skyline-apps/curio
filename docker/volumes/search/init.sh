@@ -1,8 +1,10 @@
 #!/bin/sh
-MEILI_URL="http://localhost:7700"
 
-# Start Meilisearch
-/bin/sh -c '/bin/meilisearch --master-key=${MEILI_MASTER_KEY}' &
+if [ -z "${MEILI_URL}" ]; then
+    MEILI_URL="http://localhost:7700"
+    # Start Meilisearch
+    /bin/sh -c '/bin/meilisearch --master-key=${MEILI_MASTER_KEY}' &
+fi
 
 # Wait for Meilisearch to be ready
 until curl -s "${MEILI_URL}/health" > /dev/null; do
@@ -32,7 +34,7 @@ done
 until curl -s -X POST "${MEILI_URL}/keys" \
     -H "Authorization: Bearer ${MEILI_MASTER_KEY}" \
     -H "Content-Type: application/json" \
-    -d '{"description": "Curio API key", "actions": ["documents.*", "indexes.*", "search"], "indexes": ["*"], "expiresAt": null, "uid": "9adc8f03-bfcd-4b0b-a943-df0b067fe626" }' > /dev/null; do
+    -d "{\"description\": \"Curio API key\", \"actions\": [\"documents.*\", \"indexes.*\", \"search\"], \"indexes\": [\"*\"], \"expiresAt\": null, \"uid\": \"${SEARCH_APPLICATION_KEY_ID}\" }" > /dev/null; do
     echo "Retrying to create API key..."
     sleep 1
 done
