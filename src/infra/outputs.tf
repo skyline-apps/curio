@@ -29,3 +29,7 @@ output "persistent_volume_disk_size_gb" {
 output "primary_node_label" {
   value = module.gke.primary_node_label
 }
+
+output "address_name" {
+  value = module.gke.address_name
+}

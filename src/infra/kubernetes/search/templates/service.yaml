@@ -3,13 +3,11 @@ kind: Service
 metadata:
   name: {{ .Values.cluster_name }}-search
   namespace: {{ .Release.Namespace }}
-  annotations:
-    cloud.google.com/l4-rbs: "enabled"
 spec:
   selector:
     app: search
   ports:
-    - protocol: TCP
+    - name: http
       port: {{ .Values.search.service.port }}
       targetPort: {{ .Values.search.service.port }}
-  type: LoadBalancer
+  type: ClusterIP

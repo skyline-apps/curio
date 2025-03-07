@@ -214,7 +214,7 @@ variable "cluster_dns_scope" {
 variable "gateway_api_channel" {
   description = "Specify the Gateway API channel to use."
   type        = string
-  default     = "CHANNEL_DISABLED"
+  default     = "CHANNEL_STANDARD"
 
   validation {
     condition     = contains(["CHANNEL_DISABLED", "CHANNEL_EXPERIMENTAL", "CHANNEL_STANDARD"], var.gateway_api_channel)

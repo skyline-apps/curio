@@ -60,11 +60,13 @@ services:
     container_name: search
     environment:
       MEILI_ENV: development
-      MEILI_MASTER_KEY: ${SEARCH_MASTER_API_KEY}
+      SEARCH_EXTERNAL_ENDPOINT_URL: ${SEARCH_EXTERNAL_ENDPOINT_URL}
+      SEARCH_MASTER_API_KEY: ${SEARCH_MASTER_API_KEY}
       SEARCH_APPLICATION_KEY_ID: ${SEARCH_APPLICATION_KEY_ID}
     command:
       - /bin/sh
       - /init.sh
+      - start
     ports:
       - 7700:7700
     volumes:

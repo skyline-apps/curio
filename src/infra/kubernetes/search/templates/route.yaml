@@ -1,0 +1,19 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: {{ .Values.cluster_name }}-search-route
+  namespace: {{ .Release.Namespace }}
+spec:
+  parentRefs:
+  - name: {{ .Values.cluster_name }}-gateway
+    namespace: {{ .Release.Namespace }}
+  hostnames:
+  - {{ .Values.hostname }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: {{ .Values.cluster_name }}-search
+      port: {{ .Values.search.service.port }}

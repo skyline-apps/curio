@@ -1,0 +1,4 @@
+apiVersion: v2
+name: curio-certs
+description: A Helm chart for setting up certificates
+version: 0.1.0

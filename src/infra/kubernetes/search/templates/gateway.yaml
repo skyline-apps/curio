@@ -1,0 +1,22 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: Gateway
+metadata:
+  name: {{ .Values.cluster_name }}-gateway
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  gatewayClassName: gke-l7-regional-external-managed
+  addresses:
+  - value: {{ .Values.ip_address }}
+    type: NamedAddress
+  listeners:
+  - name: https
+    hostname: {{ .Values.hostname }}
+    port: 443
+    protocol: HTTPS
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - name: {{ .Values.cluster_name }}-search-tls
+        kind: Secret
