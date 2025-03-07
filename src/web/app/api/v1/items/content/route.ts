@@ -190,49 +190,17 @@ export async function POST(
         status === UploadStatus.STORED_VERSION ||
         status === UploadStatus.SKIPPED
       ) {
-        const profileItem = await tx
-          .select({
-            versionName: profileItems.versionName,
-            savedAt: profileItems.savedAt,
-          })
-          .from(profileItems)
-          .where(
-            and(
-              eq(profileItems.itemId, item[0].id),
-              eq(profileItems.profileId, profileResult.profile.id),
-            ),
-          )
-          .limit(1);
-
         const defaultMetadata = await storage.getItemMetadata(slug);
-        // If the metadata hasn't previously been stored, update it here.
-        if (
-          profileItem[0].savedAt === null &&
-          profileItem[0].versionName === null
-        ) {
-          // No change to which version is being used, so no need to re-index
-          await updateProfileItem(
-            tx,
-            item[0].url,
-            profileResult.profile.id,
-            item[0].id,
-            defaultMetadata,
-            newDate,
-          );
-        } else if (
-          profileItem[0].versionName !== null &&
-          profileItem[0].versionName !== defaultMetadata.timestamp
-        ) {
-          // The default content is longer, so update the item to use the default version
-          await updateProfileItem(
-            tx,
-            item[0].url,
-            profileResult.profile.id,
-            item[0].id,
-            defaultMetadata,
-            newDate,
-          );
-        }
+        const newMetadata = { ...defaultMetadata, ...metadata };
+        // Update item metadata and clear reading state
+        await updateProfileItem(
+          tx,
+          item[0].url,
+          profileResult.profile.id,
+          item[0].id,
+          newMetadata,
+          newDate,
+        );
         return APIResponseJSON(response);
       } else {
         log.error("Upload error", { status: status });
