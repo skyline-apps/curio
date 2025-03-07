@@ -76,6 +76,7 @@ To clear the database, run
 7. Configure the Supabase storage settings.
   - Create a bucket `items`. Set it to be public with the allowed MIME type `text/markdown`.
   - Create a new policy on the `items` bucket from scratch. Title it "Allow read access for everyone", allow the `SELECT` operation for all roles, and keep the default policy definition `bucket_id = 'items'`.
+  - Create a new policy on the `items` bucket. Title it "Allow authenticated to upload", allow the `INSERT` and `UPDATE` operations for the `authenticated` role, and keep the default policy definition.
 8. Set up a Meilisearch instance on your cloud provider.
   - Use the dev environment: `docker exec -it dev zsh`.
   - Authenticate using `gcloud auth application-default login`.
