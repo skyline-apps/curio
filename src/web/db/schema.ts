@@ -254,19 +254,53 @@ export const appConfig = pgTable("app_config", {
   value: text("value").notNull(),
 }).enableRLS();
 
-export enum RecommendationSectionType {
+export enum RecommendationType {
   POPULAR = "popular",
+}
+
+export const recommendationType = pgEnum("recommendation_type", [
+  RecommendationType.POPULAR,
+]);
+
+export const itemRecommendations = pgTable(
+  "item_recommendations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    itemId: uuid("item_id").notNull(),
+    type: recommendationType("type").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    itemForeignKey: foreignKey({
+      name: "recommendations_item_id_fk",
+      columns: [table.itemId],
+      foreignColumns: [items.id],
+    })
+      .onDelete("cascade")
+      .onUpdate("cascade"),
+    uniqueSectionItem: uniqueIndex("unique_section_item").on(
+      table.type,
+      table.itemId,
+    ),
+  }),
+).enableRLS();
+
+export enum PersonalRecommendationType {
   NEWSLETTER = "newsletter",
   FAVORITE_AUTHOR = "favorite_author",
   FAVORITES = "favorites",
 }
 
-export const recommendationSectionType = pgEnum("recommendation_section_type", [
-  RecommendationSectionType.POPULAR,
-  RecommendationSectionType.NEWSLETTER,
-  RecommendationSectionType.FAVORITE_AUTHOR,
-  RecommendationSectionType.FAVORITES,
-]);
+export const personalRecommendationType = pgEnum(
+  "personal_recommendation_type",
+  [
+    PersonalRecommendationType.NEWSLETTER,
+    PersonalRecommendationType.FAVORITE_AUTHOR,
+    PersonalRecommendationType.FAVORITES,
+  ],
+);
 
 export const profileItemRecommendations = pgTable(
   "profile_item_recommendations",
@@ -275,11 +309,8 @@ export const profileItemRecommendations = pgTable(
     profileId: uuid("profile_id").notNull(),
     itemId: uuid("item_id").notNull(),
     profileItemId: uuid("profile_item_id"),
-    sectionType: recommendationSectionType("section_type").notNull(),
+    type: personalRecommendationType("type").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
@@ -307,7 +338,7 @@ export const profileItemRecommendations = pgTable(
       .onUpdate("cascade"),
     uniqueProfileSectionItem: uniqueIndex("unique_profile_section_item").on(
       table.profileId,
-      table.sectionType,
+      table.type,
       table.itemId,
     ),
   }),

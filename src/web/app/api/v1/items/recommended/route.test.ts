@@ -4,11 +4,13 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { ItemResult, PublicItemResult } from "@/app/api/v1/items/validation";
 import { and, db, eq, sql } from "@/db";
 import {
+  itemRecommendations,
   items,
+  PersonalRecommendationType,
   profileItemRecommendations,
   profileItems,
   profiles,
-  RecommendationSectionType,
+  RecommendationType,
 } from "@/db/schema";
 import {
   DEFAULT_TEST_PROFILE_ID,
@@ -31,28 +33,40 @@ import {
 
 describe("GET /api/v1/items/recommended", () => {
   describe("using default test data", () => {
+    const recentItem = {
+      id: "123e4567-e89b-12d3-a456-426614199999",
+      profileId: DEFAULT_TEST_PROFILE_ID_2,
+      itemId: MOCK_ITEMS[0].id,
+      title: "recent item",
+      savedAt: new Date(),
+    };
     beforeEach(async () => {
       await db.insert(items).values(MOCK_ITEMS);
       await db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
     });
 
     it("should return recommendations for a user with private pre-existing recommendations", async () => {
+      await db.insert(itemRecommendations).values([
+        {
+          itemId: MOCK_ITEMS[0].id,
+          type: RecommendationType.POPULAR,
+          createdAt: new Date(),
+        },
+      ]);
       await db.insert(profileItemRecommendations).values([
         {
           profileId: DEFAULT_TEST_PROFILE_ID,
           itemId: MOCK_ITEMS[1].id,
           profileItemId: MOCK_PROFILE_ITEMS[1].id,
-          sectionType: RecommendationSectionType.FAVORITES,
+          type: PersonalRecommendationType.FAVORITES,
           createdAt: new Date(),
-          updatedAt: new Date(),
         },
         {
           profileId: DEFAULT_TEST_PROFILE_ID,
           itemId: MOCK_ITEMS[3].id,
           profileItemId: MOCK_PROFILE_ITEMS[3].id,
-          sectionType: RecommendationSectionType.FAVORITE_AUTHOR,
+          type: PersonalRecommendationType.FAVORITE_AUTHOR,
           createdAt: new Date(),
-          updatedAt: new Date(),
         },
       ]);
 
@@ -67,9 +81,19 @@ describe("GET /api/v1/items/recommended", () => {
       const { recommendations } = await response.json();
       expect(recommendations.length).toBe(4);
 
+      const popularSection = recommendations.find(
+        (r: RecommendationSection) =>
+          r.sectionType === RecommendationType.POPULAR,
+      );
+      expect(popularSection.items).toHaveLength(1);
+      expect(popularSection.items[0].id).toBe(MOCK_ITEMS[0].id);
+      expect(popularSection.items[0].profileItemId).toBe(
+        MOCK_PROFILE_ITEMS[0].id,
+      );
+
       const favoritesSection = recommendations.find(
         (r: RecommendationSection) =>
-          r.section === RecommendationSectionType.FAVORITES,
+          r.sectionType === PersonalRecommendationType.FAVORITES,
       );
       expect(favoritesSection).toBeDefined();
       expect(favoritesSection?.items.length).toBe(1);
@@ -91,7 +115,7 @@ describe("GET /api/v1/items/recommended", () => {
 
       const authorSection = recommendations.find(
         (r: RecommendationSection) =>
-          r.section === RecommendationSectionType.FAVORITE_AUTHOR,
+          r.sectionType === PersonalRecommendationType.FAVORITE_AUTHOR,
       );
       expect(authorSection).toBeDefined();
       expect(authorSection?.items.length).toBe(1);
@@ -103,20 +127,15 @@ describe("GET /api/v1/items/recommended", () => {
         MOCK_PROFILE_ITEMS[3].author,
       );
 
-      const popularSection = recommendations.find(
-        (r: RecommendationSection) =>
-          r.section === RecommendationSectionType.POPULAR,
-      );
-      expect(popularSection.items).toHaveLength(0);
-
       const newsletterSection = recommendations.find(
         (r: RecommendationSection) =>
-          r.section === RecommendationSectionType.NEWSLETTER,
+          r.sectionType === PersonalRecommendationType.NEWSLETTER,
       );
       expect(newsletterSection.items).toHaveLength(0);
     });
 
     it("should compute new recommendations for user with no existing recommendations", async () => {
+      await db.insert(profileItems).values(recentItem);
       const request = makeAuthenticatedMockRequest({
         method: "GET",
         url: "https://example.com/api/v1/items/recommended",
@@ -126,6 +145,10 @@ describe("GET /api/v1/items/recommended", () => {
       expect(response.status).toBe(200);
 
       // Check that recommendations were created in the database
+      const globalRecommendations = await db.select().from(itemRecommendations);
+      expect(globalRecommendations.length).toBe(1);
+      expect(globalRecommendations[0].itemId).toBe(MOCK_ITEMS[0].id);
+
       const storedRecommendations = await db
         .select()
         .from(profileItemRecommendations)
@@ -142,7 +165,7 @@ describe("GET /api/v1/items/recommended", () => {
       // Should include favorites section since we have favorite items
       const favoritesSection = recommendations.find(
         (r: RecommendationSection) =>
-          r.section === RecommendationSectionType.FAVORITES,
+          r.sectionType === PersonalRecommendationType.FAVORITES,
       );
       expect(favoritesSection?.items.length).toBe(1);
       expect(favoritesSection?.items[0].id).toBe(MOCK_ITEMS[1].id);
@@ -153,7 +176,7 @@ describe("GET /api/v1/items/recommended", () => {
       // Should include favorite author section with our author's items
       const authorItems = recommendations.find(
         (r: RecommendationSection) =>
-          r.section === RecommendationSectionType.FAVORITE_AUTHOR,
+          r.sectionType === PersonalRecommendationType.FAVORITE_AUTHOR,
       );
       expect(authorItems?.items.length).toBe(1);
       expect(authorItems?.items[0].id).toBe(MOCK_ITEMS[3].id);
@@ -165,18 +188,15 @@ describe("GET /api/v1/items/recommended", () => {
       );
     });
 
-    it("should recompute recommendations if they are over a week old", async () => {
-      // Insert a test recommendation that's over a week old
+    it("should recompute global recommendations if they are over a week old", async () => {
       const oldDate = new Date();
       oldDate.setDate(oldDate.getDate() - 8);
 
-      await db.insert(profileItemRecommendations).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: MOCK_ITEMS[1].id,
-        profileItemId: MOCK_PROFILE_ITEMS[1].id,
-        sectionType: RecommendationSectionType.FAVORITES,
+      await db.insert(profileItems).values(recentItem);
+      await db.insert(itemRecommendations).values({
+        itemId: MOCK_ITEMS[3].id,
+        type: RecommendationType.POPULAR,
         createdAt: oldDate,
-        updatedAt: oldDate,
       });
 
       const request = makeAuthenticatedMockRequest({
@@ -184,7 +204,61 @@ describe("GET /api/v1/items/recommended", () => {
         url: "https://example.com/api/v1/items/recommended",
       });
 
-      await GET(request);
+      const response = await GET(request);
+      const { recommendations } = await response.json();
+
+      const globalRecommendations = await db.select().from(itemRecommendations);
+      expect(globalRecommendations.length).toBe(1);
+      expect(globalRecommendations[0].itemId).toBe(MOCK_ITEMS[0].id);
+      expect(globalRecommendations[0].createdAt.getTime()).toBeGreaterThan(
+        oldDate.getTime(),
+      );
+
+      const popularSection = recommendations.find(
+        (r: RecommendationSection) =>
+          r.sectionType === RecommendationType.POPULAR,
+      );
+      expect(popularSection?.items.length).toBe(1);
+      expect(popularSection?.items[0].id).toBe(MOCK_ITEMS[0].id);
+      expect(popularSection?.items[0].profileItemId).toBe(
+        MOCK_PROFILE_ITEMS[0].id,
+      );
+    });
+
+    it("should recompute personal recommendations if they are over a week old", async () => {
+      // Insert a test recommendation that's over a week old
+      const oldDate = new Date();
+      oldDate.setDate(oldDate.getDate() - 8);
+      await db.insert(itemRecommendations).values({
+        itemId: MOCK_ITEMS[0].id,
+        type: RecommendationType.POPULAR,
+        createdAt: new Date(),
+      });
+
+      await db.insert(profileItemRecommendations).values({
+        profileId: DEFAULT_TEST_PROFILE_ID,
+        itemId: MOCK_ITEMS[1].id,
+        profileItemId: MOCK_PROFILE_ITEMS[1].id,
+        type: PersonalRecommendationType.FAVORITES,
+        createdAt: oldDate,
+      });
+
+      const request = makeAuthenticatedMockRequest({
+        method: "GET",
+        url: "https://example.com/api/v1/items/recommended",
+      });
+
+      const response = await GET(request);
+      const { recommendations } = await response.json();
+
+      const popularSection = recommendations.find(
+        (r: RecommendationSection) =>
+          r.sectionType === RecommendationType.POPULAR,
+      );
+
+      expect(popularSection).toBeDefined();
+      expect(popularSection?.items.length).toBe(1);
+      expect(popularSection?.items[0].id).toBe(MOCK_ITEMS[0].id);
 
       // Check that the old recommendation was replaced with fresh ones
       const storedRecommendations = await db
@@ -194,14 +268,14 @@ describe("GET /api/v1/items/recommended", () => {
           eq(profileItemRecommendations.profileId, DEFAULT_TEST_PROFILE_ID),
         );
 
-      const newestRecommendation = storedRecommendations.reduce(
-        (newest, current) =>
-          current.createdAt > newest.createdAt ? current : newest,
+      const oldestRecommendation = storedRecommendations.reduce(
+        (oldest, current) =>
+          current.createdAt < oldest.createdAt ? current : oldest,
         storedRecommendations[0],
       );
 
       // Should have been created recently, not using the old date
-      expect(newestRecommendation.createdAt.getTime()).toBeGreaterThan(
+      expect(oldestRecommendation.createdAt.getTime()).toBeGreaterThan(
         oldDate.getTime(),
       );
 
@@ -215,9 +289,8 @@ describe("GET /api/v1/items/recommended", () => {
         profileId: DEFAULT_TEST_PROFILE_ID,
         itemId: MOCK_ITEMS[1].id,
         profileItemId: MOCK_PROFILE_ITEMS[1].id,
-        sectionType: RecommendationSectionType.FAVORITES,
+        type: PersonalRecommendationType.FAVORITES,
         createdAt: new Date(),
-        updatedAt: new Date(),
       });
 
       // Mark the item as read
@@ -363,17 +436,15 @@ describe("GET /api/v1/items/recommended", () => {
 
       const { recommendations } = await response.json();
 
-      expect(recommendations[0].section).toBe(
-        RecommendationSectionType.POPULAR,
+      expect(recommendations[0].sectionType).toBe(RecommendationType.POPULAR);
+      expect(recommendations[1].sectionType).toBe(
+        PersonalRecommendationType.NEWSLETTER,
       );
-      expect(recommendations[1].section).toBe(
-        RecommendationSectionType.NEWSLETTER,
+      expect(recommendations[2].sectionType).toBe(
+        PersonalRecommendationType.FAVORITE_AUTHOR,
       );
-      expect(recommendations[2].section).toBe(
-        RecommendationSectionType.FAVORITE_AUTHOR,
-      );
-      expect(recommendations[3].section).toBe(
-        RecommendationSectionType.FAVORITES,
+      expect(recommendations[3].sectionType).toBe(
+        PersonalRecommendationType.FAVORITES,
       );
     });
 
@@ -440,7 +511,7 @@ describe("GET /api/v1/items/recommended", () => {
       const { recommendations } = await response.json();
       const popularSection = recommendations.find(
         (r: RecommendationSection) =>
-          r.section === RecommendationSectionType.POPULAR,
+          r.sectionType === RecommendationType.POPULAR,
       );
       // Item 0: 1, 2, 3, 4
       // Item 1: 3, 4
@@ -485,7 +556,7 @@ describe("GET /api/v1/items/recommended", () => {
       const { recommendations } = await response.json();
       const popularSection = recommendations.find(
         (r: RecommendationSection) =>
-          r.section === RecommendationSectionType.POPULAR,
+          r.sectionType === RecommendationType.POPULAR,
       );
       expect(popularSection.items[0].profileItemId).toBe(
         mockProfileItems[mockProfileItems.length - 2].id,
@@ -510,7 +581,7 @@ describe("GET /api/v1/items/recommended", () => {
       const { recommendations } = await response.json();
       const authorSection = recommendations.find(
         (r: RecommendationSection) =>
-          r.section === RecommendationSectionType.FAVORITE_AUTHOR,
+          r.sectionType === PersonalRecommendationType.FAVORITE_AUTHOR,
       );
       expect(authorSection.items).toHaveLength(2);
       expect(authorSection.items[0].profileItemId).toBe(null);
@@ -530,7 +601,7 @@ describe("GET /api/v1/items/recommended", () => {
       const { recommendations } = await response.json();
       const favoritesSection = recommendations.find(
         (r: RecommendationSection) =>
-          r.section === RecommendationSectionType.FAVORITES,
+          r.sectionType === PersonalRecommendationType.FAVORITES,
       );
       expect(favoritesSection?.items.length).toBe(4);
       expect(favoritesSection.items.map((i: ItemResult) => i.id)).toEqual(
@@ -579,9 +650,9 @@ describe("GET /api/v1/items/recommended", () => {
 
     const { recommendations } = json;
 
-    Object.values(RecommendationSectionType).forEach((sectionType) => {
+    Object.values(PersonalRecommendationType).forEach((sectionType) => {
       const section = recommendations.find(
-        (r: RecommendationSection) => r.section === sectionType,
+        (r: RecommendationSection) => r.sectionType === sectionType,
       );
       expect(section?.items).toHaveLength(0);
     });

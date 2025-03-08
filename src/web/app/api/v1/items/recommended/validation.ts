@@ -4,10 +4,12 @@ import {
   ItemResultSchema,
   PublicItemResultSchema,
 } from "@/app/api/v1/items/validation";
-import { RecommendationSectionType } from "@/db/schema";
+import { PersonalRecommendationType, RecommendationType } from "@/db/schema";
 
 export const RecommendationSectionSchema = z.object({
-  section: z.nativeEnum(RecommendationSectionType),
+  sectionType: z
+    .nativeEnum(PersonalRecommendationType)
+    .or(z.nativeEnum(RecommendationType)),
   items: z.array(z.union([ItemResultSchema, PublicItemResultSchema])),
 });
 

@@ -155,6 +155,20 @@
       "when": 1741222312549,
       "tag": "0021_drop_auto_search_index",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1741400139739,
+      "tag": "0022_add_global_recommendations",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1741400473180,
+      "tag": "0023_fix_unique_constraint",
+      "breakpoints": true
     }
   ]
 }
