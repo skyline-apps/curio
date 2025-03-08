@@ -30,7 +30,7 @@ const Recommendations: React.FC = () => {
   return (
     <div className="w-full h-full flex flex-col gap-4">
       {recommendations.map((section) => (
-        <RecommendedSection key={section.section} section={section} />
+        <RecommendedSection key={section.sectionType} section={section} />
       ))}
     </div>
   );
