@@ -15,7 +15,7 @@ export const sampleItems = [
   {
     id: "1",
     url: "https://ridewithian.substack.com/p/why-i-bike",
-    slug: "why-i-bike",
+    slug: "ridewithian-substack-com-why-i-bike-62daf9",
     labels: [],
     profileItemId: "1",
     createdAt: "",
@@ -30,25 +30,10 @@ export const sampleItems = [
   },
   {
     id: "2",
-    url: "https://darioamodei.com/machines-of-loving-grace",
-    slug: "machines-of-loving-grace",
+    url: "https://www.thenewatlantis.com/publications/we-live-like-royalty-and-dont-know-it",
+    slug: "thenewatlantis-com-we-live-like-royalty-and-dont-know-e37518",
     labels: [],
     profileItemId: "2",
-    createdAt: "",
-    metadata: {
-      title: "Machines of Loving Grace",
-      description: "How AI Could Transform the World for the Better",
-      author: "Dario Amodei",
-      favicon: "https://darioamodei.com/favicon.svg",
-      ...ITEM_METADATA,
-    },
-  },
-  {
-    id: "3",
-    url: "https://www.thenewatlantis.com/publications/we-live-like-royalty-and-dont-know-it",
-    slug: "we-live-like-royalty-and-dont-know-it",
-    labels: [],
-    profileItemId: "3",
     createdAt: "",
     metadata: {
       title: "We Live Like Royalty and Don’t Know It",
@@ -57,6 +42,21 @@ export const sampleItems = [
       author: "Dario Amodei",
       favicon:
         "https://www.thenewatlantis.com/wp-content/uploads/2020/08/cropped-NA_white-1-32x32.jpg",
+      ...ITEM_METADATA,
+    },
+  },
+  {
+    id: "3",
+    url: "https://darioamodei.com/machines-of-loving-grace",
+    slug: "darioamodei-com-machines-of-loving-grace-c22c01",
+    labels: [],
+    profileItemId: "3",
+    createdAt: "",
+    metadata: {
+      title: "Machines of Loving Grace",
+      description: "How AI Could Transform the World for the Better",
+      author: "Dario Amodei",
+      favicon: "https://darioamodei.com/favicon.svg",
       ...ITEM_METADATA,
     },
   },
