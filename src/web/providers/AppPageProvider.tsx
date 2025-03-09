@@ -26,7 +26,7 @@ export const AppPageProvider: React.FC<{
 
   return (
     <AppPageContext.Provider value={{ containerRef, articleFixedInfoRef }}>
-      <div className="relative w-full h-screen">
+      <div className="relative w-full h-dvh">
         <motion.div
           ref={containerRef}
           className="h-full p-2 overflow-y-auto grow"

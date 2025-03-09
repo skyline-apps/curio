@@ -37,7 +37,7 @@ const RightSidebar: React.FC = () => {
   return (
     <aside
       className={cn(
-        "h-screen border-l-1 border-divider transition-all duration-300 ease-in-out absolute right-0 lg:relative bg-background-400 shadow-lg",
+        "h-dvh border-l-1 border-divider transition-all duration-300 ease-in-out absolute right-0 lg:relative bg-background-400 shadow-lg",
         rightSidebarOpen ? "w-80" : "w-0 lg:w-16",
       )}
     >

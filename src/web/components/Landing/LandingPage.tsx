@@ -9,9 +9,9 @@ import LandingPageLight from "@/public/assets/landing_page_light.svg";
 const LandingPage: React.FC = () => {
   return (
     <>
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-dvh flex flex-col">
         <main className="w-full relative overflow-hidden">
-          <div className="h-[calc(100vh-4rem)] relative flex justify-center">
+          <div className="h-[calc(100dvh-4rem)] relative flex justify-center">
             <div className="flex flex-col items-center justify-end h-1/2 z-10">
               <CurioName className="h-20" />
               <h2 className="text-xl text-center">Feed your curiosity.</h2>

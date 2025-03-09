@@ -104,7 +104,7 @@ const ItemList: React.FC<ItemListProps> = ({}: ItemListProps) => {
           <Icon className="text-secondary-800" icon={<LuBird />} />
         </div>
       ) : (
-        <div ref={parentRef} className="h-[calc(100vh-4rem)] overflow-y-auto">
+        <div ref={parentRef} className="h-[calc(100dvh-4rem)] overflow-y-auto">
           {loadingError ? (
             <p className="text-sm text-secondary-800 p-4">{loadingError}</p>
           ) : (

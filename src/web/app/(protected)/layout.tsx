@@ -21,7 +21,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const pathname = usePathname();
 
   return settings ? (
-    <div className="flex flex-row h-screen w-full">
+    <div className="flex flex-row h-dvh w-full">
       {isFetching && (
         <Progress
           aria-label="Loading..."
@@ -42,7 +42,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <KeyboardShortcuts />
     </div>
   ) : (
-    <div className="h-screen">
+    <div className="h-dvh">
       <Spinner centered />
     </div>
   );
