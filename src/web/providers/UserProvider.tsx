@@ -39,10 +39,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({
   const [currentUser, setCurrentUser] = useState<User>(user);
 
   useEffect(() => {
-    posthog.identify(currentUser.id, {
-      username: currentUser.username,
-      email: currentUser.email,
-    });
+    if (currentUser.id) {
+      posthog.identify(currentUser.id, {
+        username: currentUser.username,
+        email: currentUser.email,
+      });
+    }
   }, [currentUser]);
 
   const clearUser = (): void => {
