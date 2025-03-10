@@ -25,14 +25,17 @@ describe("Extract", () => {
         "http://example.com",
         html,
       );
-
-      expect(markdown).toContain("# Main Content");
-      expect(markdown).toContain(
-        "This is a simple paragraph with some **bold text**",
+      const lines = markdown.split("\n");
+      expect(lines[0]).toBe("## Main Content");
+      expect(lines[1]).toBe("");
+      expect(lines[2]).toBe(
+        "This is a simple paragraph with some **bold text**.",
       );
-      expect(markdown).toContain("![Test image](http://example.com/test.jpg)");
-      expect(markdown).toContain("-   List item 1");
-      expect(markdown).toContain("-   List item 2");
+      expect(lines[3]).toBe("");
+      expect(lines[4]).toBe("![Test image](http://example.com/test.jpg)");
+      expect(lines[5]).toBe("");
+      expect(lines[6]).toBe("-   List item 1");
+      expect(lines[7]).toBe("-   List item 2");
 
       expect(markdown).not.toContain("Menu items that should be ignored");
       expect(markdown).not.toContain("Footer content that should be ignored");
@@ -49,18 +52,57 @@ describe("Extract", () => {
         html,
       );
 
-      expect(markdown).toContain("# Complex Article");
-      expect(markdown).toContain("_various_");
-      expect(markdown).toContain("`code blocks`");
-      expect(markdown).toMatch(/```[\s\S]*function test\(\)[\s\S]*```/);
-      expect(markdown).toMatch(/>\s*This is a blockquote/);
-      expect(markdown).toContain(
-        "![Complex test image](http://example.com/complex.jpg)",
-      );
+      expect(markdown).toBe(`## Complex Article
+
+This is a more complex article with _various_ formatting and \`code blocks\`.
+
+\`\`\`
+function test() {
+    console.log("Hello");
+}
+\`\`\`
+
+> This is a blockquote with nested content
+> 
+> -   Nested list item
+> -   Another nested item
+
+![Complex test image](http://example.com/complex.jpg)`);
 
       expect(markdown).not.toContain("Navigation that should be ignored");
       expect(markdown).not.toContain("Sidebar content to ignore");
       expect(markdown).not.toContain("Aside content to ignore");
+    });
+
+    it("should extract and convert links to markdown", async () => {
+      const html = fs.readFileSync(
+        path.join(fixturesPath, "links.html"),
+        "utf-8",
+      );
+
+      const markdown = await extract.extractMainContentAsMarkdown(
+        "http://host.com",
+        html,
+      );
+      const lines = markdown.split("\n");
+
+      expect(lines[0]).toBe("[Link with href](https://example.com/)  ");
+      expect(lines[1]).toBe(
+        "[Link with _emphasized text_](https://google.com/)  ",
+      );
+      expect(lines[2]).toBe("[Link with **strong text**](https://bold.com/)  ");
+      expect(lines[3]).toBe(
+        "[Link with](https://github.com/) [nested link](https://github.com/)  ",
+      );
+      expect(lines[4]).toBe("[Link with heading](https://curi.ooo/)  ");
+      expect(lines[5]).toBe(
+        "[![Test Image](https://example.com/image.jpg)](https://test.com/)  ",
+      );
+      expect(lines[6]).toBe(
+        ' [ ![Test Image](https://example.com/thumb.jpg "Example Title")Extra child](https://picture.com/)  ',
+      );
+      expect(lines[7]).toBe("");
+      expect(lines[8]).toBe("-   [content](http://host.com/content)");
     });
 
     it("should extract and convert img content to markdown", async () => {
@@ -73,17 +115,38 @@ describe("Extract", () => {
         "http://host.com",
         html,
       );
+      const lines = markdown.split("\n");
 
-      expect(markdown).toContain(
-        "[with alt text](http://host.com/relative.jpg)",
+      expect(lines[0]).toBe("## My blog pictures");
+      expect(lines[1]).toBe("");
+      expect(lines[2]).toBe("![with alt text](http://host.com/relative.jpg)  ");
+      expect(lines[3]).toBe("![](https://example.com/image.jpg)  ");
+      expect(lines[4]).toBe(
+        "![Dog](http://host.com/dog.jpg?width=1100&height=825)  ",
       );
-      expect(markdown).toContain("![](https://example.com/image.jpg)");
-      expect(markdown).toContain(
-        "http://host.com/dog.jpg?width=1100&height=825",
+      expect(lines[5]).toBe(
+        ' ![Test Image](https://example.com/thumb.jpg "Example Title")',
       );
-      expect(markdown).toContain(
-        '[![Test Image](https://example.com/thumb.jpg "Example Title") ](https://example.com/fullsize.jpg)',
+    });
+
+    it("should extract and convert headers to markdown", async () => {
+      const html = fs.readFileSync(
+        path.join(fixturesPath, "headers.html"),
+        "utf-8",
       );
+
+      const markdown = await extract.extractMainContentAsMarkdown(
+        "http://host.com",
+        html,
+      );
+      const lines = markdown.split("\n");
+
+      expect(lines[0]).toBe("## Main Content");
+      expect(lines[2]).toBe("## Header [Link](https://example.com/)");
+      expect(lines[4]).toBe("### Subheader");
+      expect(lines[6]).toBe("#### Subsubheader");
+      expect(lines[8]).toBe("##### Subsubsubheader");
+      expect(lines[10]).toBe("###### Subsubsubsubheader");
     });
 
     it("should throw ExtractError when content extraction fails", async () => {

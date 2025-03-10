@@ -8,9 +8,35 @@ import {
   Person,
   Thing,
 } from "schema-dts";
-import TurndownService from "turndown";
+import TurndownService, { Node as TurndownNode } from "turndown";
 
 import { ExtractedMetadata, ExtractError, MetadataError } from "./types";
+
+function isElementNode(
+  node: TurndownNode | ChildNode | HTMLElement,
+): node is HTMLElement {
+  return "tagName" in node;
+}
+
+const HEADER_TAGS: (keyof HTMLElementTagNameMap)[] = [
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+];
+
+const BLOCK_TAGS: (keyof HTMLElementTagNameMap)[] = [
+  "p",
+  "div",
+  "section",
+  "article",
+  "main",
+  "header",
+  "footer",
+  ...HEADER_TAGS,
+];
 
 const turndown = new TurndownService({
   headingStyle: "atx",
@@ -18,26 +44,51 @@ const turndown = new TurndownService({
   bulletListMarker: "-",
 });
 
-turndown.addRule("picture", {
-  filter: ["picture"],
-  replacement: function (content, node) {
-    const img = node.querySelector("img");
-    if (!img) return "";
-
-    const parentAnchor = (node as Element).closest("a");
-    const href = parentAnchor?.getAttribute("href");
-
-    const src = img.getAttribute("src") || "";
-    const alt = img.getAttribute("alt") || "";
-    const title = img.getAttribute("title")
-      ? ` "${img.getAttribute("title")}"`
-      : "";
-
-    if (href) {
-      return `[![${alt}](${src}${title}) ](${href})`;
+const recursivelyRemoveBlockElements = (html: string): string => {
+  let resultHtml = "";
+  const dom = new JSDOM(html);
+  const node = dom.window.document.body;
+  for (const child of node.childNodes) {
+    if (child.nodeType === 1 && isElementNode(child)) {
+      const tag = child.tagName.toLowerCase();
+      if (BLOCK_TAGS.includes(tag as keyof HTMLElementTagNameMap)) {
+        resultHtml += recursivelyRemoveBlockElements(child.innerHTML);
+      } else {
+        const attributes = Array.from(child.attributes)
+          .map((attr) => `${attr.name}="${attr.value}"`)
+          .join(" ");
+        resultHtml += `<${tag} ${attributes}>${recursivelyRemoveBlockElements(child.innerHTML)}</${tag}>`;
+      }
+    } else if (child.nodeType === 3) {
+      resultHtml += child.textContent;
     }
+  }
+  return resultHtml;
+};
 
-    return `![${alt}](${src}${title})`;
+turndown.addRule("header", {
+  filter: HEADER_TAGS,
+  replacement: function (content: string, node: TurndownNode) {
+    if (isElementNode(node)) {
+      const headerLevel = node.tagName.slice(1);
+      const cleanedContent = content.replace(/\s+/g, " ").trim();
+      return `${"#".repeat(Number(headerLevel))} ${cleanedContent}\n\n`;
+    } else {
+      return content;
+    }
+  },
+});
+
+turndown.addRule("link", {
+  filter: ["a"],
+  replacement: function (content: string, node: TurndownNode) {
+    let linkText = "";
+    if (!isElementNode(node)) return content;
+    const href = node.getAttribute("href");
+    if (!href) return content;
+    const cleanedContent = recursivelyRemoveBlockElements(node.innerHTML);
+    linkText += turndown.turndown(cleanedContent);
+    return `[${linkText}](${href})`;
   },
 });
 
