@@ -390,7 +390,7 @@ describe("/api/v1/items/content", () => {
         .from(profileItems)
         .where(eq(profileItems.itemId, TEST_ITEM_ID_1))
         .limit(1);
-      expect(updatedProfileItem[0].title).toEqual("test title");
+      expect(updatedProfileItem[0].title).toEqual("default title");
       expect(updatedProfileItem[0].author).toEqual("kim");
       expect(updatedProfileItem[0].versionName).toBe(null);
       expect(updatedProfileItem[0].readingProgress).toEqual(0);
@@ -457,7 +457,7 @@ describe("/api/v1/items/content", () => {
         .from(profileItems)
         .where(eq(profileItems.itemId, TEST_ITEM_ID_1))
         .limit(1);
-      expect(updatedProfileItem[0].title).toEqual("test title");
+      expect(updatedProfileItem[0].title).toEqual("default title");
       expect(updatedProfileItem[0].author).toEqual("kim");
       expect(updatedProfileItem[0].versionName).toBe(null);
       expect(updatedProfileItem[0].readingProgress).toEqual(0);

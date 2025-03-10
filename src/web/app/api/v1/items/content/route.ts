@@ -191,7 +191,12 @@ export async function POST(
         status === UploadStatus.SKIPPED
       ) {
         const defaultMetadata = await storage.getItemMetadata(slug);
-        const newMetadata = { ...defaultMetadata, ...metadata };
+        const newMetadata = { ...metadata };
+        Object.entries(defaultMetadata).forEach(([key, value]) => {
+          if (value !== null && value !== undefined) {
+            newMetadata[key as keyof ExtractedMetadata] = value;
+          }
+        });
         // Update item metadata and clear reading state
         await updateProfileItem(
           tx,
