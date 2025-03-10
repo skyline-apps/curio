@@ -262,10 +262,9 @@ describe("Extract", () => {
         extract.extractMetadata("https://example.com", invalidHtml),
       ).rejects.toThrow(MetadataError);
     });
-  });
 
-  it("should extract 32x32 favicon when available", async () => {
-    const html = `
+    it("should extract 32x32 favicon when available", async () => {
+      const html = `
         <html>
           <head>
             <link rel="icon" sizes="16x16" href="/favicon-16.png">
@@ -274,85 +273,86 @@ describe("Extract", () => {
           </head>
         </html>
       `;
-    const { favicon } = await extract.extractMetadata(
-      "https://example.com",
-      html,
-    );
-    expect(favicon).toBe("https://example.com/favicon-32.png");
-  });
+      const { favicon } = await extract.extractMetadata(
+        "https://example.com",
+        html,
+      );
+      expect(favicon).toBe("https://example.com/favicon-32.png");
+    });
 
-  it("should extract any favicon when 32x32 is not available", async () => {
-    const html = `
+    it("should extract any favicon when 32x32 is not available", async () => {
+      const html = `
         <html>
           <head>
             <link rel="icon" href="/favicon.png">
           </head>
         </html>
       `;
-    const { favicon } = await extract.extractMetadata(
-      "https://example.com",
-      html,
-    );
-    expect(favicon).toBe("https://example.com/favicon.png");
-  });
+      const { favicon } = await extract.extractMetadata(
+        "https://example.com",
+        html,
+      );
+      expect(favicon).toBe("https://example.com/favicon.png");
+    });
 
-  it("should extract favicon with relative path", async () => {
-    const html = `
+    it("should extract favicon with relative path", async () => {
+      const html = `
         <html>
           <head>
             <link rel="icon" href="./favicon.png">
           </head>
         </html>
       `;
-    const { favicon } = await extract.extractMetadata(
-      "https://example.com/page",
-      html,
-    );
-    expect(favicon).toBe("https://example.com/page/favicon.png");
-  });
+      const { favicon } = await extract.extractMetadata(
+        "https://example.com/page",
+        html,
+      );
+      expect(favicon).toBe("https://example.com/page/favicon.png");
+    });
 
-  it("should extract favicon with absolute path", async () => {
-    const html = `
+    it("should extract favicon with absolute path", async () => {
+      const html = `
         <html>
           <head>
             <link rel="icon" href="https://cdn.example.com/favicon.png">
           </head>
         </html>
       `;
-    const { favicon } = await extract.extractMetadata(
-      "https://example.com",
-      html,
-    );
-    expect(favicon).toBe("https://cdn.example.com/favicon.png");
-  });
+      const { favicon } = await extract.extractMetadata(
+        "https://example.com",
+        html,
+      );
+      expect(favicon).toBe("https://cdn.example.com/favicon.png");
+    });
 
-  it("should extract shortcut icon as fallback", async () => {
-    const html = `
+    it("should extract shortcut icon as fallback", async () => {
+      const html = `
         <html>
           <head>
             <link rel="shortcut icon" href="/shortcut-favicon.png">
           </head>
         </html>
       `;
-    const { favicon } = await extract.extractMetadata(
-      "https://example.com",
-      html,
-    );
-    expect(favicon).toBe("https://example.com/shortcut-favicon.png");
-  });
+      const { favicon } = await extract.extractMetadata(
+        "https://example.com",
+        html,
+      );
+      expect(favicon).toBe("https://example.com/shortcut-favicon.png");
+    });
 
-  it("should return null when no favicon is found", async () => {
-    const html = `
+    it("should return null when no favicon is found", async () => {
+      const html = `
         <html>
           <head>
             <title>No Favicon</title>
           </head>
         </html>
       `;
-    const { favicon } = await extract.extractMetadata(
-      "https://example.com",
-      html,
-    );
-    expect(favicon).toBeNull();
+      const { favicon } = await extract.extractMetadata(
+        "https://example.com",
+        html,
+      );
+      expect(favicon).toBeNull();
+    });
   });
 });
