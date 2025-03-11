@@ -1,0 +1,48 @@
+{
+    "manifest_version": 3,
+    "name": "Curio Saver",
+    "version": "1.0",
+    "description": "Add a webpage to Curio",
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "gecko@curi.ooo"
+        }
+    },
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "tabs",
+        "storage"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "https://curi.ooo/*"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "icons/curio_logo_16.png",
+            "48": "icons/curio_logo_48.png",
+            "128": "icons/curio_logo_128.png"
+        }
+    },
+    "background": {
+        "scripts": [
+            "background.js"
+        ]
+    },
+    "icons": {
+        "16": "icons/curio_logo_16.png",
+        "48": "icons/curio_logo_48.png",
+        "128": "icons/curio_logo_128.png"
+    }
+}

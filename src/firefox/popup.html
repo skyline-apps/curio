@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Curio Saver</title>
+    <style>
+        body {
+            width: 300px;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+        }
+
+        button {
+            width: 100%;
+            height: 32px;
+            padding: 8px;
+            margin: 12px 0;
+            cursor: pointer;
+            background-color: #759763;
+            border: none;
+            border-radius: 2px;
+            color: white;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button:hover {
+            background-color: #5A8254;
+        }
+
+        button:disabled {
+            cursor: auto;
+            background-color: #92AB72;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #logo {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 2px solid white;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
+        }
+
+        .error-message {
+            color: #A26565;
+            margin-top: 8px;
+            font-size: 12px;
+            display: none;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="https://curi.ooo" target="_blank"><img id="logo" src="curio_dark.svg" alt="Curio Logo" height="40px" /></a>
+    <button id="saveCurioPage" disabled><span class="spinner"></span></button>
+    <div id="errorMessage" class="error-message"></div>
+    <script src="popup.js"></script>
+</body>
+
+</html>
