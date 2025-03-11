@@ -253,7 +253,7 @@ variable "binary_auth_enabled" {
 variable "enable_managed_prometheus" {
   description = "Enable Managed Prometheus."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "enable_intranode_visibility" {

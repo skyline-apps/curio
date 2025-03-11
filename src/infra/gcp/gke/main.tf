@@ -108,6 +108,8 @@ resource "google_container_cluster" "primary" {
   }
 
   monitoring_config {
+    enable_components = ["SYSTEM_COMPONENTS", "APISERVER", "SCHEDULER", "CONTROLLER_MANAGER", "POD", "DAEMONSET", "DEPLOYMENT", "STATEFULSET", "KUBELET", "CADVISOR"]
+
     managed_prometheus {
       enabled = var.enable_managed_prometheus
     }
