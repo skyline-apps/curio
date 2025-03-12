@@ -12,3 +12,10 @@ export interface VersionMetadata extends ExtractedMetadata {
   length: number;
   hash: string;
 }
+
+export enum UploadStatus {
+  UPDATED_MAIN = "UPDATED_MAIN",
+  STORED_VERSION = "STORED_VERSION",
+  SKIPPED = "SKIPPED",
+  ERROR = "ERROR",
+}

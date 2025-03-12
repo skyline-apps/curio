@@ -8,7 +8,7 @@ import {
 } from "@/lib/extract/types";
 import { indexDocuments } from "@/lib/search";
 import { storage } from "@/lib/storage";
-import { StorageError } from "@/lib/storage/types";
+import { StorageError, UploadStatus } from "@/lib/storage/types";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
 import { createLogger } from "@/utils/logger";
@@ -18,7 +18,6 @@ import {
   UpdateItemContentRequestSchema,
   UpdateItemContentResponse,
   UpdateItemContentResponseSchema,
-  UploadStatus,
 } from "./validation";
 
 const log = createLogger("api/v1/items/content");

@@ -1,6 +1,5 @@
 import { vi } from "vitest";
 
-import { UploadStatus } from "@/app/api/v1/items/content/validation";
 import { desc, eq } from "@/db";
 import { items, profileItemHighlights, profileItems } from "@/db/schema";
 import { extractMainContentAsMarkdown, extractMetadata } from "@/lib/extract";
@@ -13,6 +12,7 @@ import {
   uploadItemContent,
 } from "@/lib/storage";
 import { MOCK_VERSION } from "@/lib/storage/__mocks__/index";
+import { UploadStatus } from "@/lib/storage/types";
 import { APIRequest } from "@/utils/api";
 import { makeAuthenticatedMockRequest } from "@/utils/test/api";
 import {

@@ -10,9 +10,9 @@ import React, {
   useState,
 } from "react";
 
-import { UploadStatus } from "@/app/api/v1/items/content/validation";
 import Button from "@/components/ui/Button";
 import config from "@/lib/config.json";
+import { UploadStatus } from "@/lib/storage/types";
 import { useToast } from "@/providers/ToastProvider";
 import { createLogger } from "@/utils/logger";
 

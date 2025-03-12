@@ -5,13 +5,6 @@ import {
   PublicItemResultSchema,
 } from "@/app/api/v1/items/validation";
 
-export enum UploadStatus {
-  UPDATED_MAIN = "UPDATED_MAIN",
-  STORED_VERSION = "STORED_VERSION",
-  SKIPPED = "SKIPPED",
-  ERROR = "ERROR",
-}
-
 export const HighlightSchema = z.object({
   id: z.string(),
   startOffset: z.number(),

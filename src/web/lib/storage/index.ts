@@ -1,14 +1,13 @@
 import { createHash } from "crypto";
 import { ITEMS_BUCKET } from "utils/constants";
 
-import { UploadStatus } from "@/app/api/v1/items/content/validation";
 import { ExtractedMetadata } from "@/lib/extract/types";
+import { StorageError, UploadStatus } from "@/lib/storage/types";
 import { createLogger } from "@/utils/logger";
 import { createClient } from "@/utils/supabase/server";
 import type { StorageClient } from "@/utils/supabase/types";
 
 import { type VersionMetadata } from "./types";
-import { StorageError } from "./types";
 
 const log = createLogger("lib/storage");
 const DEFAULT_NAME = "default";
