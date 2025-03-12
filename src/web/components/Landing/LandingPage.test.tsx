@@ -118,9 +118,5 @@ describe("LandingPage", () => {
       expect(button).toHaveAttribute("href", "/login");
       expect(button).toHaveTextContent("Get started now");
     });
-
-    it("renders the Curio logo at the bottom", () => {
-      expect(screen.getByTestId("curio-logo")).toBeInTheDocument();
-    });
   });
 });

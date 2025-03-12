@@ -1,10 +1,12 @@
 import React from "react";
 
-import { CurioLogo, CurioName } from "@/components/CurioBrand";
-import LandingPageFeatures from "@/components/Landing/LandingPageFeatures";
+import { CurioName } from "@/components/CurioBrand";
 import Button from "@/components/ui/Button";
 import LandingPageDark from "@/public/assets/landing_page_dark.svg";
 import LandingPageLight from "@/public/assets/landing_page_light.svg";
+
+import AppLinks from "./AppLinks";
+import LandingPageFeatures from "./LandingPageFeatures";
 
 const LandingPage: React.FC = () => {
   return (
@@ -92,10 +94,10 @@ const LandingPage: React.FC = () => {
                 </ul>
               </div>
             </div>
+            <AppLinks />
             <Button href="/login" color="success" size="lg">
               Get started now
             </Button>
-            <CurioLogo className="w-24 h-24 mb-4" />
           </div>
         </main>
       </div>
