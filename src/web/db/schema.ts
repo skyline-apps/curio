@@ -78,24 +78,6 @@ export const items = pgTable(
   }),
 ).enableRLS();
 
-export enum ItemState {
-  ACTIVE = "active",
-  ARCHIVED = "archived",
-  DELETED = "deleted",
-}
-export const itemState = pgEnum("item_state", [
-  ItemState.ACTIVE,
-  ItemState.ARCHIVED,
-  ItemState.DELETED,
-]);
-
-// Keep this in sync with the mapping in `0016_add app_config and search triggers.sql`
-export const ItemStateNumber = {
-  [ItemState.ACTIVE]: 1,
-  [ItemState.ARCHIVED]: 2,
-  [ItemState.DELETED]: 3,
-};
-
 export const profileLabels = pgTable(
   "profile_labels",
   {
@@ -125,6 +107,30 @@ export const profileLabels = pgTable(
   }),
 ).enableRLS();
 
+export enum ItemState {
+  ACTIVE = "active",
+  ARCHIVED = "archived",
+  DELETED = "deleted",
+}
+export const itemState = pgEnum("item_state", [
+  ItemState.ACTIVE,
+  ItemState.ARCHIVED,
+  ItemState.DELETED,
+]);
+
+// Keep this in sync with the mapping in `0016_add app_config and search triggers.sql`
+export const ItemStateNumber = {
+  [ItemState.ACTIVE]: 1,
+  [ItemState.ARCHIVED]: 2,
+  [ItemState.DELETED]: 3,
+};
+
+export enum ItemSource {
+  EMAIL = "email",
+}
+
+export const itemSource = pgEnum("item_source", [ItemSource.EMAIL]);
+
 export const profileItems = pgTable(
   "profile_items",
   {
@@ -151,6 +157,7 @@ export const profileItems = pgTable(
       .notNull()
       .defaultNow(),
     versionName: text("version_name"),
+    source: itemSource("source"),
   },
   (table) => ({
     profileForeignKey: foreignKey({

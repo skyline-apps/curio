@@ -176,6 +176,13 @@
       "when": 1741807644375,
       "tag": "0024_add-newsletter-email-addresses",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1741820721334,
+      "tag": "0025_add-source-profile-items",
+      "breakpoints": true
     }
   ]
 }
