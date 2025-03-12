@@ -2,7 +2,7 @@ import { type ParsedMail, simpleParser } from "mailparser";
 
 import { ExtractedMetadata } from "@/lib/extract/types";
 import { createLogger } from "@/utils/logger";
-import { FALLBACK_HOSTNAME, getRootDomain } from "@/utils/url";
+import { cleanUrl, FALLBACK_HOSTNAME, getRootDomain } from "@/utils/url";
 
 import {
   type Email,
@@ -150,7 +150,7 @@ export function extractUrlFromEmail({
   // 1. Check List-Post header
   const urlFromHeaders = extractUrlFromHeaders(senderDomain, headers);
   if (urlFromHeaders) {
-    return urlFromHeaders;
+    return cleanUrl(urlFromHeaders);
   }
 
   // 2. Search for matching links in content
@@ -186,7 +186,7 @@ export function extractUrlFromEmail({
     }
 
     if (bestUrl) {
-      return bestUrl;
+      return cleanUrl(bestUrl);
     }
   }
 

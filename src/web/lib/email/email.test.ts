@@ -156,6 +156,21 @@ Or https://other-site.com`,
       );
     });
 
+    it("should strip query parameters from email", () => {
+      const result = extractUrlFromEmail(
+        makeTestEmail(
+          "news@substack.com",
+          "Sender Name",
+          "Weekly Tech Update: AI Revolution",
+          `Check these out:
+https://substack.com/tech-weekly/ai-revolution?param1=value1
+https://substack.com/another-post-weekly?param2=value2
+`,
+        ),
+      );
+      expect(result).toBe("https://substack.com/tech-weekly/ai-revolution");
+    });
+
     it("should generate fallback URL when no matches found", () => {
       const result = extractUrlFromEmail(
         makeTestEmail(
