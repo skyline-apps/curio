@@ -199,12 +199,14 @@ describe("url", () => {
 
     it("ignores curio-newsletter URLs", () => {
       const url = "https://curio-newsletter/example-com/my-newsletter";
-      expect(generateSlug(url)).toBe(url);
+      expect(generateSlug(url)).toMatch(
+        /^example-com-my-newsletter-[a-f0-9]{6}$/,
+      );
 
       const urlWithQuery =
         "https://curio-newsletter/example-com/my-newsletter?utm_source=email";
-      expect(generateSlug(urlWithQuery)).toBe(
-        "https://curio-newsletter/example-com/my-newsletter",
+      expect(generateSlug(urlWithQuery)).toMatch(
+        /^example-com-my-newsletter-[a-f0-9]{6}$/,
       );
     });
 

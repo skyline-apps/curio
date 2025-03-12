@@ -1,4 +1,3 @@
-"use server";
 import { type ParsedMail, simpleParser } from "mailparser";
 
 import { ExtractedMetadata } from "@/lib/extract/types";
