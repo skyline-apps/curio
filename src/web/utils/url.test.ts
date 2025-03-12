@@ -1,4 +1,4 @@
-import { cleanUrl, generateSlug } from "./url";
+import { cleanUrl, generateSlug, slugifyString } from "./url";
 
 describe("url", () => {
   describe("cleanUrl", () => {
@@ -232,6 +232,77 @@ describe("url", () => {
       for (const test of tests) {
         expect(generateSlug(test.input)).toMatch(test.expected);
       }
+    });
+  });
+
+  describe("slugifyString", () => {
+    it("converts to lowercase and appends hash", () => {
+      expect(slugifyString("Hello World")).toMatch(/^hello-world-[a-f0-9]{6}$/);
+      expect(slugifyString("UPPER CASE")).toMatch(/^upper-case-[a-f0-9]{6}$/);
+    });
+
+    it("replaces spaces with hyphens", () => {
+      expect(slugifyString("multiple   spaces")).toMatch(
+        /^multiple-spaces-[a-f0-9]{6}$/,
+      );
+      expect(slugifyString("tabs	and spaces")).toMatch(
+        /^tabs-and-spaces-[a-f0-9]{6}$/,
+      );
+    });
+
+    it("removes special characters", () => {
+      expect(slugifyString("special!@#$%^&*()")).toMatch(
+        /^special-[a-f0-9]{6}$/,
+      );
+      expect(slugifyString("punctuation.,;:'\"[]{}\\|")).toMatch(
+        /^punctuation-[a-f0-9]{6}$/,
+      );
+      expect(slugifyString("Newsletter: My Day's Newsletter")).toMatch(
+        /^newsletter-my-day-s-newsletter-[a-f0-9]{6}$/,
+      );
+    });
+
+    it("handles non-ASCII characters", () => {
+      expect(slugifyString("café")).toMatch(/^cafe-[a-f0-9]{6}$/);
+      expect(slugifyString("über")).toMatch(/^uber-[a-f0-9]{6}$/);
+      expect(slugifyString("piñata")).toMatch(/^pinata-[a-f0-9]{6}$/);
+    });
+
+    it("handles complex Unicode that can't be slugified", () => {
+      expect(slugifyString("emoji 🎉")).toMatch(/^emoji-[a-f0-9]{6}$/);
+      expect(slugifyString("symbols ♠♣♥♦")).toMatch(
+        /^symbols-[a-f0-9]{6}$/,
+      );
+    });
+
+    it("removes leading and trailing hyphens", () => {
+      expect(slugifyString("-leading-")).toMatch(/^leading-[a-f0-9]{6}$/);
+      expect(slugifyString("--multiple--hyphens--")).toMatch(
+        /^multiple-hyphens-[a-f0-9]{6}$/,
+      );
+    });
+
+    it("collapses multiple hyphens", () => {
+      expect(slugifyString("multiple---hyphens")).toMatch(
+        /^multiple-hyphens-[a-f0-9]{6}$/,
+      );
+      expect(slugifyString("double--hyphens")).toMatch(
+        /^double-hyphens-[a-f0-9]{6}$/,
+      );
+    });
+
+    it("truncates to 7 parts", () => {
+      const longInput = "one two three four five six seven eight nine ten";
+      expect(slugifyString(longInput)).toMatch(
+        /^one-two-three-four-five-six-seven-[a-f0-9]{6}$/,
+      );
+    });
+
+    it("generates consistent hash for same input", () => {
+      const input = "Hello World";
+      const slug1 = slugifyString(input);
+      const slug2 = slugifyString(input);
+      expect(slug1).toBe(slug2);
     });
   });
 });

@@ -125,3 +125,33 @@ export function generateSlug(url: string): string {
     return `item-${hash}`;
   }
 }
+
+/**
+ * Slugifies a string by:
+ * 1. Converting to lowercase
+ * 2. Replacing non-alphanumeric characters with hyphens
+ * 3. Replacing multiple hyphens with a single hyphen
+ * 4. Removing leading and trailing hyphens
+ * 5. Converting to ASCII
+ * 6. Trimming to at most 7 parts
+ * 7. Appending a 6-character hash
+ */
+export function slugifyString(input: string): string {
+  // Convert to lowercase
+  const lowered = input.toLowerCase();
+
+  // Replace special characters with spaces
+  const cleaned = lowered.replace(/[^a-z0-9\s\u00C0-\u017F]/g, " ");
+
+  // Split into words, convert to ASCII, and filter empty strings
+  const words = cleaned.split(/\s+/).filter(Boolean);
+  const slug = slugify(words.join(" "));
+
+  // Truncate to at most 7 parts
+  const truncated = truncateWords(slug, 7);
+
+  // Append hash
+  const hash = createHash("sha256").update(input).digest("hex").slice(0, 6);
+
+  return `${truncated}-${hash}`;
+}
