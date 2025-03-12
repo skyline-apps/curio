@@ -2,6 +2,7 @@
 import posthog from "posthog-js";
 import React, { createContext, useEffect, useState } from "react";
 
+import { type UpdateEmailResponse } from "@/app/api/v1/user/email/validation";
 import { type UpdateUsernameResponse } from "@/app/api/v1/user/username/validation";
 import { handleAPIResponse } from "@/utils/api";
 
@@ -9,12 +10,14 @@ export type User = {
   id: string | null;
   username: string | null;
   email: string | null;
+  newsletterEmail: string | null;
 };
 
 export type UserContextType = {
   user: User;
   clearUser: () => void;
   changeUsername: (username: string) => Promise<void>;
+  updateNewsletterEmail: () => Promise<void>;
 };
 
 interface UserProviderProps {
@@ -27,9 +30,11 @@ export const UserContext = createContext<UserContextType>({
     id: null,
     username: null,
     email: null,
+    newsletterEmail: null,
   },
   clearUser: () => {},
   changeUsername: (_username: string) => Promise.resolve(),
+  updateNewsletterEmail: () => Promise.resolve(),
 });
 
 export const UserProvider: React.FC<UserProviderProps> = ({
@@ -48,7 +53,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({
   }, [currentUser.id, currentUser.username, currentUser.email]);
 
   const clearUser = (): void => {
-    setCurrentUser({ id: null, username: null, email: null });
+    setCurrentUser({
+      id: null,
+      username: null,
+      email: null,
+      newsletterEmail: null,
+    });
   };
 
   const changeUsername = async (username: string): Promise<void> => {
@@ -69,9 +79,31 @@ export const UserProvider: React.FC<UserProviderProps> = ({
       });
   };
 
+  const updateNewsletterEmail = async (): Promise<void> => {
+    return fetch("/api/v1/user/email", {
+      method: "POST",
+    })
+      .then(handleAPIResponse<UpdateEmailResponse>)
+      .then((result) => {
+        const { updatedNewsletterEmail } = result;
+        if (!updatedNewsletterEmail) {
+          throw Error("Failed to update newsletter email");
+        }
+        setCurrentUser({
+          ...currentUser,
+          newsletterEmail: updatedNewsletterEmail,
+        });
+      });
+  };
+
   return (
     <UserContext.Provider
-      value={{ user: currentUser, clearUser, changeUsername }}
+      value={{
+        user: currentUser,
+        clearUser,
+        changeUsername,
+        updateNewsletterEmail,
+      }}
     >
       {children}
     </UserContext.Provider>

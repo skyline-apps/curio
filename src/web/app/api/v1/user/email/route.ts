@@ -24,6 +24,12 @@ export async function POST(
     }
 
     const randomString = generateRandomAlphabetString();
+    if (!CURIO_EMAIL_DOMAIN) {
+      return APIResponseJSON(
+        { error: "Failed to update newsletter email without domain." },
+        { status: 500 },
+      ) as APIResponse<UpdateEmailResponse>;
+    }
     const newsletterEmail = `${randomString}@${CURIO_EMAIL_DOMAIN}`;
 
     const updates = await db

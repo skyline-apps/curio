@@ -33,7 +33,12 @@ const AuthenticatedProviders: React.FC<PropsWithChildren> = ({
 const Providers: React.FC<PropsWithChildren> = async ({
   children,
 }: PropsWithChildren) => {
-  let currentUser: User = { id: null, username: null, email: null };
+  let currentUser: User = {
+    id: null,
+    username: null,
+    email: null,
+    newsletterEmail: null,
+  };
 
   const supabase = await createClient();
   const {
@@ -50,6 +55,7 @@ const Providers: React.FC<PropsWithChildren> = async ({
         id: profile.userId,
         username: profile.username,
         email: user.email || null,
+        newsletterEmail: profile.newsletterEmail,
       };
     }
   }

@@ -37,6 +37,7 @@ const AllProviders = ({
             id: DEFAULT_TEST_USER_ID,
             username: DEFAULT_TEST_USERNAME,
             email: "test@curi.ooo",
+            newsletterEmail: null,
           }}
         >
           <SettingsProvider>

@@ -1,15 +1,18 @@
 "use client";
 
 import React, { useContext, useEffect, useState } from "react";
+import { HiOutlineClipboard } from "react-icons/hi2";
 
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { FormSection } from "@/components/ui/Form";
+import Icon from "@/components/ui/Icon";
 import Input from "@/components/ui/Input";
 import { Dialog, showAlert, showConfirm } from "@/components/ui/Modal/Dialog";
 import Snippet from "@/components/ui/Snippet";
 import Spinner from "@/components/ui/Spinner";
 import { SelectApiKey } from "@/db/schema";
+import { useToast } from "@/providers/ToastProvider";
 import { UserContext } from "@/providers/UserProvider";
 import { createLogger } from "@/utils/logger";
 
@@ -18,11 +21,15 @@ import { createApiKey, listApiKeys, revokeApiKey } from "./actions";
 const log = createLogger("AccountSettings");
 
 const AccountSettings: React.FC = () => {
-  const { user, changeUsername } = useContext(UserContext);
+  const { showToast } = useToast();
+  const { user, changeUsername, updateNewsletterEmail } =
+    useContext(UserContext);
   const [newUsername, setNewUsername] = useState<string>(user.username || "");
   const [usernameSuccess, setUsernameSuccess] = useState<string>("");
   const [usernameError, setUsernameError] = useState<string>("");
   const [submittingUsername, setSubmittingUsername] = useState<boolean>(false);
+  const [updatingNewsletterEmail, setUpdatingNewsletterEmail] =
+    useState<boolean>(false);
 
   const [keyName, setKeyName] = useState<string>("");
   const [apiKeys, setApiKeys] = useState<SelectApiKey[]>([]);
@@ -111,6 +118,36 @@ const AccountSettings: React.FC = () => {
     }
   };
 
+  const refreshNewsletterEmail = async (): Promise<void> => {
+    if (user?.newsletterEmail) {
+      showConfirm(
+        "Are you sure you want to update your newsletter email? Newsletters using your existing email will no longer arrive in your inbox.",
+        async () => {
+          setUpdatingNewsletterEmail(true);
+          try {
+            await updateNewsletterEmail();
+          } catch (error) {
+            log.error("Error updating newsletter email: ", error);
+            setUsernameError(`${error}`);
+          } finally {
+            setUpdatingNewsletterEmail(false);
+          }
+        },
+        "Update newsletter email",
+      );
+    } else {
+      setUpdatingNewsletterEmail(true);
+      try {
+        await updateNewsletterEmail();
+      } catch (error) {
+        log.error("Error updating newsletter email: ", error);
+        setUsernameError(`${error}`);
+      } finally {
+        setUpdatingNewsletterEmail(false);
+      }
+    }
+  };
+
   if (!user?.id) {
     return <Spinner />;
   }
@@ -145,6 +182,46 @@ const AccountSettings: React.FC = () => {
         </div>
       </FormSection>
 
+      <FormSection
+        title="Newsletter Email"
+        description="Update your newsletter email. Subscribe to email newsletters with this email to receive them in your Curio inbox."
+      >
+        <div className="flex gap-2 w-full max-w-96">
+          {user?.newsletterEmail && (
+            <>
+              <Input
+                type="text"
+                name="newsletterEmail"
+                value={user.newsletterEmail}
+                className="flex-1"
+                disabled
+              />
+              <Button
+                isIconOnly
+                tooltip="Copy to clipboard"
+                size="sm"
+                onPress={() => {
+                  if (user.newsletterEmail) {
+                    navigator.clipboard.writeText(user.newsletterEmail);
+                    showToast("Newsletter email copied to clipboard!", {
+                      disappearing: true,
+                    });
+                  }
+                }}
+              >
+                <Icon icon={<HiOutlineClipboard />} />
+              </Button>
+            </>
+          )}
+          <Button
+            size="sm"
+            isLoading={updatingNewsletterEmail}
+            onPress={refreshNewsletterEmail}
+          >
+            Generate
+          </Button>
+        </div>
+      </FormSection>
       <FormSection
         title="API keys"
         description="Create and manage API keys to access your account programmatically."
