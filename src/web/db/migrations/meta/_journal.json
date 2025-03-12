@@ -169,6 +169,13 @@
       "when": 1741400473180,
       "tag": "0023_fix_unique_constraint",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1741807644375,
+      "tag": "0024_add-newsletter-email-addresses",
+      "breakpoints": true
     }
   ]
 }

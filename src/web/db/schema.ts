@@ -49,6 +49,7 @@ export const profiles = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    newsletterEmail: text("newsletter_email").unique(),
   },
   (table) => ({
     usernameIndex: uniqueIndex("username_index").on(table.username),
