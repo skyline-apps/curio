@@ -1,5 +1,5 @@
-import { and, db, eq, sql, type TransactionDB } from "@/db";
-import { items, profileItemHighlights, profileItems } from "@/db/schema";
+import { and, db, eq } from "@/db";
+import { items, profileItems } from "@/db/schema";
 import { extractMainContentAsMarkdown, extractMetadata } from "@/lib/extract";
 import {
   ExtractedMetadata,
@@ -14,6 +14,7 @@ import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
 import { createLogger } from "@/utils/logger";
 import { cleanUrl } from "@/utils/url";
 
+import { updateProfileItem } from "./updateProfileItem";
 import {
   UpdateItemContentRequestSchema,
   UpdateItemContentResponse,
@@ -21,54 +22,6 @@ import {
 } from "./validation";
 
 const log = createLogger("api/v1/items/content");
-
-async function updateProfileItem(
-  tx: TransactionDB,
-  itemUrl: string,
-  profileId: string,
-  itemId: string,
-  metadata: ExtractedMetadata,
-  savedAt: Date,
-): Promise<string> {
-  const newTitle = metadata.title || itemUrl;
-  const profileItem = await tx
-    .update(profileItems)
-    .set({
-      savedAt: savedAt,
-      title: newTitle,
-      author: metadata.author,
-      description: metadata.description,
-      thumbnail: metadata.thumbnail,
-      favicon: metadata.favicon,
-      publishedAt: metadata.publishedAt ? new Date(metadata.publishedAt) : null,
-      readingProgress: 0,
-      versionName: null,
-    })
-    .where(
-      and(
-        eq(profileItems.itemId, itemId),
-        eq(profileItems.profileId, profileId),
-      ),
-    )
-    .returning({
-      id: profileItems.id,
-    });
-
-  if (!profileItem.length) {
-    throw Error("Failed to save updated profile item information.");
-  }
-  // Delete previous highlights
-  await tx
-    .delete(profileItemHighlights)
-    .where(
-      eq(
-        profileItemHighlights.profileItemId,
-        sql`(SELECT id FROM ${profileItems} WHERE profile_id = ${profileId} AND id = ${profileItemHighlights.profileItemId} AND item_id = ${itemId})`,
-      ),
-    );
-
-  return profileItem[0].id;
-}
 
 export async function POST(
   request: APIRequest,
