@@ -43,7 +43,6 @@ const ActionButton = <T,>({
   const { fetchItems } = useContext(ItemsContext);
   const { showToast } = useToast();
 
-  // TODO: Clear selection in certain cases after action
   const onPress = useCallback(async () => {
     await action()
       .then(async () => {

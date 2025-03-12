@@ -33,7 +33,6 @@ const RightSidebar: React.FC = () => {
     updateAppLayout({ rightSidebarOpen: !rightSidebarOpen });
   };
 
-  // TODO: Add transition for content appearing
   return (
     <aside
       className={cn(

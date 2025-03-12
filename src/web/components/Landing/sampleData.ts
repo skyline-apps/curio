@@ -10,7 +10,6 @@ const ITEM_METADATA = {
   versionName: null,
 };
 
-// TODO: use real item slugs
 export const sampleItems = [
   {
     id: "1",
