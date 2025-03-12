@@ -27,6 +27,7 @@ const AccountSettings: React.FC = () => {
   const [newUsername, setNewUsername] = useState<string>(user.username || "");
   const [usernameSuccess, setUsernameSuccess] = useState<string>("");
   const [usernameError, setUsernameError] = useState<string>("");
+  const [newsletterError, setNewsletterError] = useState<string>("");
   const [submittingUsername, setSubmittingUsername] = useState<boolean>(false);
   const [updatingNewsletterEmail, setUpdatingNewsletterEmail] =
     useState<boolean>(false);
@@ -119,6 +120,7 @@ const AccountSettings: React.FC = () => {
   };
 
   const refreshNewsletterEmail = async (): Promise<void> => {
+    setNewsletterError("");
     if (user?.newsletterEmail) {
       showConfirm(
         "Are you sure you want to update your newsletter email? Newsletters using your existing email will no longer arrive in your inbox.",
@@ -128,7 +130,7 @@ const AccountSettings: React.FC = () => {
             await updateNewsletterEmail();
           } catch (error) {
             log.error("Error updating newsletter email: ", error);
-            setUsernameError(`${error}`);
+            setNewsletterError(`${error}`);
           } finally {
             setUpdatingNewsletterEmail(false);
           }
@@ -141,7 +143,7 @@ const AccountSettings: React.FC = () => {
         await updateNewsletterEmail();
       } catch (error) {
         log.error("Error updating newsletter email: ", error);
-        setUsernameError(`${error}`);
+        setNewsletterError(`${error}`);
       } finally {
         setUpdatingNewsletterEmail(false);
       }
@@ -185,6 +187,7 @@ const AccountSettings: React.FC = () => {
       <FormSection
         title="Newsletter Email"
         description="Update your newsletter email. Subscribe to email newsletters with this email to receive them in your Curio inbox."
+        errorMessage={newsletterError}
       >
         <div className="flex gap-2 w-full max-w-96">
           {user?.newsletterEmail && (
