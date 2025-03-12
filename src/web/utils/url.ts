@@ -2,6 +2,8 @@ import { createHash } from "crypto";
 import slugify from "limax";
 import punycode from "punycode";
 
+export const FALLBACK_HOSTNAME = "curio-newsletter";
+
 /**
  * Removes query parameters from a URL and returns the cleaned URL
  */
@@ -70,7 +72,7 @@ function parseUrlPreserveUnicode(url: string): {
 /**
  * Generates a deterministic slug from a URL by:
  * 1. Strip URL of query parameters
- * 2. Get the domain and longest path component
+ * 2. Get the domain (if not FALLBACK_HOSTNAME) and longest path component
  * 3. Take the first 7 words of both domain and path component
  * 4. Join words from domain and longest path component with -
  * 5. Convert characters to ASCII
@@ -90,7 +92,10 @@ export function generateSlug(url: string): string {
       .slice(0, 6);
 
     // Get domain and longest path component
-    const domain = hostname.replace(/^www\./, "");
+    const domain =
+      hostname === FALLBACK_HOSTNAME
+        ? pathname.split("/")[1]
+        : hostname.replace(/^www\./, "");
     const longestPath = getLongestPathComponent(pathname);
 
     // Take first 7 words of both domain and path
@@ -154,4 +159,23 @@ export function slugifyString(input: string): string {
   const hash = createHash("sha256").update(input).digest("hex").slice(0, 6);
 
   return `${truncated}-${hash}`;
+}
+
+/**
+ * Extract the root domain from a hostname
+ * e.g., "blog.example.co.uk" -> "example.co.uk"
+ */
+export function getRootDomain(hostname: string): string {
+  // Handle special cases for known TLDs with additional segments
+  const knownTlds = [".co.uk", ".com.au", ".co.jp"];
+  for (const tld of knownTlds) {
+    if (hostname.endsWith(tld)) {
+      const parts = hostname.slice(0, -tld.length).split(".");
+      return `${parts[parts.length - 1]}${tld}`;
+    }
+  }
+
+  // Default case: take last two segments
+  const parts = hostname.split(".");
+  return parts.length > 2 ? parts.slice(-2).join(".") : hostname;
 }

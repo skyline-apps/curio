@@ -1,4 +1,10 @@
-import { cleanUrl, generateSlug, slugifyString } from "./url";
+import {
+  cleanUrl,
+  FALLBACK_HOSTNAME,
+  generateSlug,
+  getRootDomain,
+  slugifyString,
+} from "./url";
 
 describe("url", () => {
   describe("cleanUrl", () => {
@@ -95,6 +101,14 @@ describe("url", () => {
       expect(slug1).toBe(slug2);
     });
 
+    it("ignores FALLBACK_HOSTNAME from email newsletters", () => {
+      const url = `https://${FALLBACK_HOSTNAME}/medium-com/this-is-my-article-with-a-very-long-title`;
+      const slug = generateSlug(url);
+      expect(slug).toMatch(
+        /^medium-com-this-is-my-article-with-a-very-[a-f0-9]{6}$/,
+      );
+    });
+
     it("handles invalid URLs", () => {
       const invalidUrl = "not-a-url";
       const slug = generateSlug(invalidUrl);
@@ -180,6 +194,17 @@ describe("url", () => {
 
       expect(generateSlug("https://example.com/my.website.html")).toMatch(
         /^example-com-my-website-[a-f0-9]{6}$/,
+      );
+    });
+
+    it("ignores curio-newsletter URLs", () => {
+      const url = "https://curio-newsletter/example-com/my-newsletter";
+      expect(generateSlug(url)).toBe(url);
+
+      const urlWithQuery =
+        "https://curio-newsletter/example-com/my-newsletter?utm_source=email";
+      expect(generateSlug(urlWithQuery)).toBe(
+        "https://curio-newsletter/example-com/my-newsletter",
       );
     });
 
@@ -303,6 +328,43 @@ describe("url", () => {
       const slug1 = slugifyString(input);
       const slug2 = slugifyString(input);
       expect(slug1).toBe(slug2);
+    });
+  });
+
+  describe("getRootDomain", () => {
+    it("extracts root domain from simple hostname", () => {
+      expect(getRootDomain("example.com")).toBe("example.com");
+      expect(getRootDomain("subdomain.example.com")).toBe("example.com");
+      expect(getRootDomain("deep.sub.example.com")).toBe("example.com");
+    });
+
+    it("handles special TLD cases correctly", () => {
+      // .co.uk domains
+      expect(getRootDomain("example.co.uk")).toBe("example.co.uk");
+      expect(getRootDomain("sub.example.co.uk")).toBe("example.co.uk");
+
+      // .com.au domains
+      expect(getRootDomain("example.com.au")).toBe("example.com.au");
+      expect(getRootDomain("blog.example.com.au")).toBe("example.com.au");
+
+      // .co.jp domains
+      expect(getRootDomain("example.co.jp")).toBe("example.co.jp");
+      expect(getRootDomain("news.example.co.jp")).toBe("example.co.jp");
+    });
+
+    it("handles single-level domains", () => {
+      expect(getRootDomain("localhost")).toBe("localhost");
+      expect(getRootDomain("internal")).toBe("internal");
+    });
+
+    it("handles two-level domains", () => {
+      expect(getRootDomain("example.com")).toBe("example.com");
+      expect(getRootDomain("example.org")).toBe("example.org");
+      expect(getRootDomain("example.net")).toBe("example.net");
+    });
+
+    it("ignores curio-newsletter domain", () => {
+      expect(getRootDomain("curio-newsletter")).toBe("curio-newsletter");
     });
   });
 });
