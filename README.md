@@ -10,36 +10,23 @@ First, set up environment variables and secrets.
     -H "Content-Type: application/json"
     ```
   - Secrets are also stored in the database. You might encounter an issue with initializing them on a fresh start - try to run a search before you add an item.
-3. Set up a Posthog account and populate the environment variables `NEXT_PUBLIC_POSTHOG_KEY` and `NEXT_PUBLIC_POSTHOG_HOST`.
 
 To start the local development environment:
 1. Run `docker compose up -d` to start containers in detached mode.
 2. Start file syncing with `docker compose watch`.
 3. Navigate to `http://localhost:3000` to view the application.
 
-### Chrome extension
-To develop locally using the Chrome extension, first make sure that the API hostname is correctly set in `src/chrome/background.js`, `src/chrome/content.js`, and `src/chrome/manifest.json`.
+### Browser extensions
+The Chrome extension is at `src/chrome`, and the Firefox extension is at `src/firefox`.
+To develop locally using the extensions, first make sure that the API hostname values are correctly set in all the files of the extension.
 
 * For local development, this should be set to `http://localhost:3000/*`.
 * For production, this should be set to `https://curi.ooo/*`.
+* For Firefox local development, you may have to set `content_scripts.matches` to be `<all_urls>`.
 
-The manifest should contain something like
-```
-    "content_scripts": [
-        {
-            "matches": [
-                "http://localhost:3000/*"
-            ],
-            "js": [
-                "content.js"
-            ]
-        },
-    ],
-```
-
-Next, install the extension in development mode. In Chrome, open `chrome://extensions`. Click on "Load unpacked" and select the `src/chrome` directory.
-
-Finally, update `NEXT_PUBLIC_CHROME_EXTENSION_ID` in `.env` based on the Chrome extension ID in the chrome://extensions page.
+Next, install the extension in development mode.
+In Chrome, open `chrome://extensions`. Click on "Load unpacked" and select the `src/chrome` directory.
+In Firefox, open `about:debugging#/runtime/this-firefox`, click "Load Temporary Add-on", and upload the `manifest.json` from the unpacked folder.
 
 ### Linting
 To install the local eslint plugins, run
@@ -62,22 +49,24 @@ To clear the database, run
 2. `rm -r docker/volumes/db/data`
 
 ## Deployment
+### Web app
 1. Set up Supabase app.
 2. Set up Vercel app.
   - Include the environment variables from the `web` service in `docker-compose.yml`.
   - For the `POSTGRES_URL` variable, use the "Transaction pooler" Supabase Postgres URL.
   - Also include `SEARCH_MASTER_API_KEY` (at least 16 bytes) and `SEARCH_APPLICATION_API_KEY` (a UUID v4).
-3. Copy the prod env variables locally with `vercel env pull .env.prod`.
-4. Run database migrations against the production database using `DOTENV_CONFIG_PATH=/path/to/.env.prod npm run db:migrate`.
-5. Set up a Google Cloud project with Google Auth Platform configured for a web application. Copy in the generated client ID and client secret into Supabase's Google auth provider, then copy the Supabase auth callback URL into the "Authorized redirect URIs" field.
-6. Configure the "URL Configuration" site URL and redirect settings in Supabase Auth with the app URL.
+3. Set up a Posthog account and populate the environment variables `NEXT_PUBLIC_POSTHOG_KEY` and `NEXT_PUBLIC_POSTHOG_HOST`.
+4. Copy the prod env variables locally with `vercel env pull .env.prod`.
+5. Run database migrations against the production database using `DOTENV_CONFIG_PATH=/path/to/.env.prod npm run db:migrate`.
+6. Set up a Google Cloud project with Google Auth Platform configured for a web application. Copy in the generated client ID and client secret into Supabase's Google auth provider, then copy the Supabase auth callback URL into the "Authorized redirect URIs" field.
+7. Configure the "URL Configuration" site URL and redirect settings in Supabase Auth with the app URL.
   - Site URL should be `$HOSTNAME/auth/callback?next=%2Fhome`.
   - Redirect URLs should include `$HOSTNAME/*`.
-7. Configure the Supabase storage settings.
+8. Configure the Supabase storage settings.
   - Create a bucket `items`. Set it to be public with the allowed MIME type `text/markdown`.
   - Create a new policy on the `items` bucket from scratch. Title it "Allow read access for everyone", allow the `SELECT` operation for all roles, and keep the default policy definition `bucket_id = 'items'`.
   - Create a new policy on the `items` bucket. Title it "Allow authenticated to upload", allow the `INSERT` and `UPDATE` operations for the `authenticated` role, and keep the default policy definition.
-8. Set up a Meilisearch instance on your cloud provider.
+9. Set up a Meilisearch instance on your cloud provider.
   - Use the dev environment: `docker exec -it dev zsh`.
   - Authenticate using `gcloud auth application-default login`.
   - Run `terraform plan` to verify the correct resources will be created, then run `terraform apply`.
@@ -88,3 +77,4 @@ To clear the database, run
   - It may take a while for the certificate to be issued. You can check the status of the `gateway`, `certificate`,  and `challenge` resources as well as logs of the `cert-manager` pod to check progress.
   - Run `/data/search/init.sh [staging|prod]` to initialize the search application.
   - Populate the `SEARCH_APPLICATION_API_KEY` after using the master API key to retrieve its value.
+10. Publish the browser extensions and update the values in `src/web/lib/config.json`.
