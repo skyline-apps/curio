@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
-import { ITEMS_BUCKET } from "utils/constants";
 
+import config from "@/lib/config.json";
 import { ExtractedMetadata } from "@/lib/extract/types";
 import { StorageError, UploadStatus } from "@/lib/storage/types";
 import { createLogger } from "@/utils/logger";
@@ -11,6 +11,7 @@ import { type VersionMetadata } from "./types";
 
 const log = createLogger("lib/storage");
 const DEFAULT_NAME = "default";
+const ITEMS_BUCKET = config.storageItemsBucket;
 
 export class Storage {
   private storage: StorageClient | null = null;
