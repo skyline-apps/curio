@@ -41,16 +41,11 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
   }, [onClose, clearSavingError]);
 
   useEffect((): void => {
-    checkExtensionInstalled((success: boolean) => {
-      if (success) {
-        setError(null);
-      } else {
-        setError(
-          "Unable to connect to the browser extension. Please ensure it's installed correctly.",
-        );
-      }
-    });
-  }, [checkExtensionInstalled]);
+    if (isOpen) {
+      clearSavingError();
+      checkExtensionInstalled();
+    }
+  }, [isOpen, clearSavingError, checkExtensionInstalled]);
 
   const openAndSave = async (
     event: React.FormEvent<HTMLFormElement> | PressEvent,
