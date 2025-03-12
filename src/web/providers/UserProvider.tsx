@@ -45,7 +45,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
         email: currentUser.email,
       });
     }
-  }, [currentUser]);
+  }, [currentUser.id, currentUser.username, currentUser.email]);
 
   const clearUser = (): void => {
     setCurrentUser({ id: null, username: null, email: null });
