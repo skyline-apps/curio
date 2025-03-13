@@ -15,20 +15,23 @@ async function sendHealthcheck(endpoint, success, error = "") {
     };
 
     const submitEndpoint = `${endpoint}?success=${success}&error=${error}`;
+    try {
 
-    await new Promise((resolve, reject) => {
-        const req = https.request(submitEndpoint, options, (res) => {
-            if (res.statusCode >= 200 && res.statusCode < 300) {
-                resolve();
-            } else {
-                console.error("Failed to send healthcheck", res.statusCode);
-                reject();
-            }
+        await new Promise((resolve, reject) => {
+            const req = https.request(submitEndpoint, options, (res) => {
+                if (res.statusCode >= 200 && res.statusCode < 300) {
+                    resolve();
+                } else {
+                    reject(res.statusCode);
+                }
+            });
+
+            req.on('error', reject);
+            req.end();
         });
-
-        req.on('error', reject);
-        req.end();
-    });
+    } catch (error) {
+        console.warn("Failed to send healthcheck", error);
+    }
 }
 
 exports.handler = async (event) => {
@@ -113,6 +116,14 @@ exports.handler = async (event) => {
         }
         throw new Error(`API request errored with status ${response.statusCode}: ${response.data}`);
     } catch (error) {
+        if ('Code' in error && error.Code === 'NoSuchKey') {
+            console.warn(`Cannot find S3 object ${objectKey || 'unknown'}`);
+            await sendHealthcheck(WARN_ENDPOINT, false, JSON.stringify({ ...error, objectKey }));
+            return {
+                statusCode: 404,
+                body: 'Email not found'
+            };
+        }
         console.error(`Error processing email from S3 object ${objectKey || 'unknown'}:`, error);
         await sendHealthcheck(ERROR_ENDPOINT, false, JSON.stringify({ ...error, objectKey }));
         // Throw error to trigger Lambda's retry mechanism
