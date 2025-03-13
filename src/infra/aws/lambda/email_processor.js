@@ -4,15 +4,19 @@ const https = require('https');
 const s3Client = new S3Client();
 
 exports.handler = async (event) => {
-    let messageId = "";
+    if (!event.Records || !event.Records[0] || !event.Records[0].s3) {
+        console.error('Invalid event structure:', event);
+        return {
+            statusCode: 400,
+            body: 'Invalid event structure'
+        };
+    }
+
+    // Get bucket and key from the S3 event
+    const bucketName = event.Records[0].s3.bucket.name;
+    const objectKey = event.Records[0].s3.object.key;
+
     try {
-        const snsMessage = JSON.parse(event.Records[0].Sns.Message);
-
-        // Get message ID from the email metadata
-        messageId = snsMessage.mail.messageId;
-        const bucketName = process.env.S3_BUCKET_NAME;
-        const objectKey = `${process.env.S3_OBJECT_PREFIX}${messageId}`;
-
         // Get email from S3
         const getCommand = new GetObjectCommand({
             Bucket: bucketName,
@@ -41,68 +45,43 @@ exports.handler = async (event) => {
             }
         };
 
-        const makeRequest = async (attempt = 1) => {
-            const maxAttempts = 3;
-            const baseDelay = 1000 * 60; // 1 minute
-
-            try {
-                const response = await new Promise((resolve, reject) => {
-                    const req = https.request(process.env.API_ENDPOINT, options, (res) => {
-                        let data = '';
-                        res.on('data', chunk => { data += chunk; });
-                        res.on('end', () => {
-                            resolve({ statusCode: res.statusCode, data });
-                        });
-                    });
-
-                    req.on('error', reject);
-                    req.write(postData);
-                    req.end();
+        const response = await new Promise((resolve, reject) => {
+            const req = https.request(process.env.API_ENDPOINT, options, (res) => {
+                let data = '';
+                res.on('data', chunk => { data += chunk; });
+                res.on('end', () => {
+                    resolve({ statusCode: res.statusCode, data });
                 });
+            });
 
-                if (response.statusCode >= 200 && response.statusCode < 300) {
-                    // Delete processed email
-                    const deleteCommand = new DeleteObjectCommand({
-                        Bucket: bucketName,
-                        Key: objectKey
-                    });
-                    await s3Client.send(deleteCommand);
+            req.on('error', reject);
+            req.write(postData);
+            req.end();
+        });
 
-                    return response.data;
-                }
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+            // Delete processed email
+            const deleteCommand = new DeleteObjectCommand({
+                Bucket: bucketName,
+                Key: objectKey
+            });
+            await s3Client.send(deleteCommand);
 
-                // Retry on 5xx errors
-                if (response.statusCode >= 500 && attempt < maxAttempts) {
-                    const delay = baseDelay * Math.pow(2, attempt - 1); // Exponential backoff
-                    console.log(`Attempt ${attempt} failed with status ${response.statusCode}. Retrying in ${delay}ms...`);
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    return makeRequest(attempt + 1);
-                }
-
-                throw new Error(`API request failed with status ${response.statusCode}: ${response.data}`);
-            } catch (error) {
-                if (attempt < maxAttempts && (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT')) {
-                    const delay = baseDelay * Math.pow(2, attempt - 1);
-                    console.log(`Attempt ${attempt} failed with error: ${error.message}. Retrying in ${delay}ms...`);
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    return makeRequest(attempt + 1);
-                }
-                throw error;
-            }
-        };
-
-        await makeRequest();
-
-        return {
-            statusCode: 200,
-            body: 'Email processed successfully'
-        };
+            return {
+                statusCode: 200,
+                body: `Email ${response.slug} processed successfully`
+            };
+        } else if (response.statusCode < 500) {
+            // Return error status but don't throw to prevent S3 event retries
+            return {
+                statusCode: 401,
+                body: 'Processed with errors'
+            };
+        }
+        throw new Error(`API request failed with status ${response.statusCode}: ${response.data}`);
     } catch (error) {
-        console.error(`Error in processing email function for ${messageId}:`, error);
-        // Don't throw the error to prevent SES retries
-        return {
-            statusCode: 200,
-            body: 'Processed with errors'
-        };
+        console.error(`Error processing email from S3 object ${objectKey || 'unknown'}:`, error);
+        // Throw error to trigger Lambda's retry mechanism
+        throw error;
     }
 };

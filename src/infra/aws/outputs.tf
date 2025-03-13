@@ -37,9 +37,3 @@ output "email_storage_bucket" {
   description = "Name of the S3 bucket where emails will be stored"
   value       = aws_s3_bucket.email_storage.id
 }
-
-# SNS Topic ARN
-output "email_notifications_topic" {
-  description = "ARN of the SNS topic for email notifications"
-  value       = aws_sns_topic.email_notifications.arn
-}

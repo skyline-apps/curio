@@ -85,12 +85,6 @@ resource "aws_ses_receipt_rule" "store_and_notify" {
     position          = 1
   }
 
-  # Then notify SNS
-  sns_action {
-    topic_arn = aws_sns_topic.email_notifications.arn
-    encoding  = "UTF-8" # Ensure proper encoding
-    position  = 2
-  }
 }
 
 # Lambda function
@@ -111,6 +105,7 @@ resource "aws_lambda_function" "email_processor" {
   role             = aws_iam_role.lambda_role.arn
   handler          = "index.handler"
   runtime          = "nodejs18.x"
+  timeout          = 30
 
   environment {
     variables = {
@@ -118,7 +113,6 @@ resource "aws_lambda_function" "email_processor" {
       VERCEL_PROTECTION_BYPASS = var.vercel_protection_bypass
       CURIO_APP_SECRET         = var.curio_app_secret
       S3_BUCKET_NAME           = aws_s3_bucket.email_storage.id
-      S3_OBJECT_PREFIX         = "incoming/"
     }
   }
 }
@@ -175,67 +169,31 @@ resource "aws_iam_role_policy" "lambda_policy" {
   })
 }
 
-# Configure SNS topic with delivery status logging
-resource "aws_sns_topic" "email_notifications" {
-  name                                = "${var.project_prefix}-${var.environment}-email-notifications"
-  lambda_success_feedback_sample_rate = 0
-  lambda_success_feedback_role_arn    = aws_iam_role.sns_feedback_role.arn
-  lambda_failure_feedback_role_arn    = aws_iam_role.sns_feedback_role.arn
+# Configure S3 bucket notification to trigger Lambda
+resource "aws_s3_bucket_notification" "bucket_notification" {
+  bucket     = aws_s3_bucket.email_storage.id
+  depends_on = [aws_lambda_permission.allow_s3]
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.email_processor.arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = "incoming/"
+  }
 }
 
-# IAM role for SNS delivery status logging
-resource "aws_iam_role" "sns_feedback_role" {
-  name = "${var.project_prefix}-${var.environment}-sns-feedback-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "sns.amazonaws.com"
-        }
-      }
-    ]
-  })
-}
-
-# IAM policy for SNS delivery status logging
-resource "aws_iam_role_policy" "sns_feedback_policy" {
-  name = "${var.project_prefix}-${var.environment}-sns-feedback-policy"
-  role = aws_iam_role.sns_feedback_role.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "logs:PutMetricFilter",
-          "logs:PutRetentionPolicy"
-        ]
-        Resource = ["arn:aws:logs:*:*:*"]
-      }
-    ]
-  })
-}
-
-# SNS Lambda Permission
-resource "aws_lambda_permission" "sns" {
-  statement_id  = "AllowSNSInvoke"
+# Allow S3 to invoke Lambda
+resource "aws_lambda_permission" "allow_s3" {
+  statement_id  = "AllowS3Invoke"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.email_processor.function_name
-  principal     = "sns.amazonaws.com"
-  source_arn    = aws_sns_topic.email_notifications.arn
+  principal     = "s3.amazonaws.com"
+  source_arn    = aws_s3_bucket.email_storage.arn
 }
 
-# SNS Lambda Subscription
-resource "aws_sns_topic_subscription" "lambda" {
-  topic_arn = aws_sns_topic.email_notifications.arn
-  protocol  = "lambda"
-  endpoint  = aws_lambda_function.email_processor.arn
+# Set Lambda CloudWatch log retention to 7 days
+resource "aws_cloudwatch_log_group" "lambda_logs" {
+  name              = "/aws/lambda/${aws_lambda_function.email_processor.function_name}"
+  retention_in_days = 7
 }
+
+

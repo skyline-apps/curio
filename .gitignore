@@ -51,3 +51,4 @@ terraform.tfvars
 
 # generated
 src/script/generated
+lambda.zip
