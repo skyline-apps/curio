@@ -1,4 +1,4 @@
-import { and, db, desc, eq, gt, inArray, not, sql } from "@/db";
+import { and, db, desc, eq, gt, inArray, isNotNull, not, sql } from "@/db";
 import {
   itemRecommendations,
   ItemSource,
@@ -123,6 +123,7 @@ async function computeAndStoreGlobalRecommendations(): Promise<void> {
             not(eq(profileItems.state, ItemState.DELETED)),
             gt(profileItems.savedAt, oneWeekAgo),
             not(eq(profileItems.source, ItemSource.EMAIL)),
+            isNotNull(profileItems.thumbnail),
           ),
         )
         .groupBy(profileItems.itemId)
