@@ -36,3 +36,19 @@ variable "project_prefix" {
   type        = string
   default     = "curio"
 }
+
+variable "email_healthcheck_warn_endpoint" {
+  description = "Endpoint URL to send warnings on email ingestion"
+  type        = string
+}
+
+variable "email_healthcheck_error_endpoint" {
+  description = "Endpoint URL to send errors on email ingestion"
+  type        = string
+}
+
+variable "email_healthcheck_token" {
+  description = "Token for email healthcheck"
+  type        = string
+  sensitive   = true
+}

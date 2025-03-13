@@ -113,6 +113,10 @@ resource "aws_lambda_function" "email_processor" {
       VERCEL_PROTECTION_BYPASS = var.vercel_protection_bypass
       CURIO_APP_SECRET         = var.curio_app_secret
       S3_BUCKET_NAME           = aws_s3_bucket.email_storage.id
+
+      HEALTHCHECK_TOKEN          = var.email_healthcheck_token
+      HEALTHCHECK_ERROR_ENDPOINT = var.email_healthcheck_error_endpoint
+      HEALTHCHECK_WARN_ENDPOINT  = var.email_healthcheck_warn_endpoint
     }
   }
 }

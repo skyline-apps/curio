@@ -45,6 +45,22 @@ variable "curio_app_secret" {
   sensitive   = true
 }
 
+variable "email_healthcheck_warn_endpoint" {
+  description = "Endpoint URL to send warnings on email ingestion"
+  type        = string
+}
+
+variable "email_healthcheck_error_endpoint" {
+  description = "Endpoint URL to send errors on email ingestion"
+  type        = string
+}
+
+variable "email_healthcheck_token" {
+  description = "Token for email healthcheck"
+  type        = string
+  sensitive   = true
+}
+
 variable "curio_email_api_endpoint" {
   description = "Curio email receipt API endpoint URL"
   type        = string

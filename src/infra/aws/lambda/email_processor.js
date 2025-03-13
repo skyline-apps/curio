@@ -3,6 +3,34 @@ const https = require('https');
 
 const s3Client = new S3Client();
 
+const ERROR_ENDPOINT = process.env.HEALTHCHECK_ERROR_ENDPOINT;
+const WARN_ENDPOINT = process.env.HEALTHCHECK_WARN_ENDPOINT;
+
+async function sendHealthcheck(endpoint, success, error = "") {
+    const options = {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${process.env.HEALTHCHECK_TOKEN}`
+        }
+    };
+
+    const submitEndpoint = `${endpoint}?success=${success}&error=${error}`;
+
+    await new Promise((resolve, reject) => {
+        const req = https.request(submitEndpoint, options, (res) => {
+            if (res.statusCode >= 200 && res.statusCode < 300) {
+                resolve();
+            } else {
+                console.error("Failed to send healthcheck", res.statusCode);
+                reject();
+            }
+        });
+
+        req.on('error', reject);
+        req.end();
+    });
+}
+
 exports.handler = async (event) => {
     if (!event.Records || !event.Records[0] || !event.Records[0].s3) {
         console.error('Invalid event structure:', event);
@@ -67,20 +95,26 @@ exports.handler = async (event) => {
             });
             await s3Client.send(deleteCommand);
 
+            await sendHealthcheck(ERROR_ENDPOINT, true);
+            await sendHealthcheck(WARN_ENDPOINT, true);
+
             return {
                 statusCode: 200,
-                body: `Email ${response.slug} processed successfully`
+                body: `Email ${response.data.slug} processed successfully`
             };
         } else if (response.statusCode < 500) {
             // Return error status but don't throw to prevent S3 event retries
+            console.warn(`API request for ${objectKey} failed with status ${response.statusCode}: ${response.data}`);
+            await sendHealthcheck(WARN_ENDPOINT, false, JSON.stringify({ ...response.data, objectKey }));
             return {
                 statusCode: 401,
                 body: 'Processed with errors'
             };
         }
-        throw new Error(`API request failed with status ${response.statusCode}: ${response.data}`);
+        throw new Error(`API request errored with status ${response.statusCode}: ${response.data}`);
     } catch (error) {
         console.error(`Error processing email from S3 object ${objectKey || 'unknown'}:`, error);
+        await sendHealthcheck(ERROR_ENDPOINT, false, JSON.stringify({ ...error, objectKey }));
         // Throw error to trigger Lambda's retry mechanism
         throw error;
     }

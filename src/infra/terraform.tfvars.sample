@@ -3,3 +3,6 @@ curio_email_api_endpoint = "https://staging.curi.ooo/api/v1/public/items/email"
 email_domain = "mail.curi.ooo"  # Keep in sync with `CURIO_EMAIL_DOMAIN` in `.env`
 gcp_project_id = "my-project-id"
 vercel_protection_bypass = "xxxxxx"  # If running against a protected Vercel environment
+email_healthcheck_error_endpoint = "xxxxxx"  # Should take query params ?success={success}&error={error}
+email_healthcheck_warn_endpoint = "xxxxxx"  # Should take query params ?success={success}&error={error}
+email_healthcheck_token = "xxxxxx"  # Passed in Authorization: Bearer header
