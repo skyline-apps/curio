@@ -40,8 +40,8 @@ const RecommendedSection: React.FC<RecommendedSectionProps> = ({
               Sign up for newsletters with your{" "}
               <Link className="underline" href="/settings">
                 curi.ooo email
-              </Link>{" "}
-              (coming soon!)
+              </Link>
+              .
             </p>
           </>
         );

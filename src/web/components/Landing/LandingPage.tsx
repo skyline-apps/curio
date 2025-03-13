@@ -81,12 +81,12 @@ const LandingPage: React.FC = () => {
                   <li>Save any link via browser extension</li>
                   <li>Extract text content for a focused reading experience</li>
                   <li>Add notes, highlights, and labels to your items</li>
+                  <li>Send email newsletters to your Curio inbox</li>
                 </ul>
               </div>
               <div>
                 <h3 className="text-lg font-medium text-center">Coming soon</h3>
                 <ul className="list-disc ml-4 text-sm">
-                  <li>Send email newsletters to your Curio inbox</li>
                   <li>Skim AI-powered summaries and memorable quotes</li>
                   <li>Android & iOS apps with offline reading support</li>
                   <li>PDF content extraction</li>
