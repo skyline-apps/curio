@@ -1,6 +1,7 @@
 import { and, db, desc, eq, gt, inArray, not, sql } from "@/db";
 import {
   itemRecommendations,
+  ItemSource,
   ItemState,
   profileItems,
   RecommendationType,
@@ -121,6 +122,7 @@ async function computeAndStoreGlobalRecommendations(): Promise<void> {
           and(
             not(eq(profileItems.state, ItemState.DELETED)),
             gt(profileItems.savedAt, oneWeekAgo),
+            not(eq(profileItems.source, ItemSource.EMAIL)),
           ),
         )
         .groupBy(profileItems.itemId)
