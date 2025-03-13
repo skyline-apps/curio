@@ -90,8 +90,9 @@ export async function parseIncomingEmail(
 
   return simpleParser(mimeEmail)
     .then((parsed: ParsedMail) => {
-      // eslint-disable-next-line no-console
-      console.log(parsed.to);
+      if (!parsed) {
+        throw new EmailError("Unknown email contents");
+      }
       const recipient = Array.isArray(parsed.to)
         ? parsed.to
             .find((r) =>

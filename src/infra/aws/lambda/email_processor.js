@@ -4,11 +4,12 @@ const https = require('https');
 const s3Client = new S3Client();
 
 exports.handler = async (event) => {
+    let messageId = "";
     try {
         const snsMessage = JSON.parse(event.Records[0].Sns.Message);
 
         // Get message ID from the email metadata
-        const messageId = snsMessage.mail.messageId;
+        messageId = snsMessage.mail.messageId;
         const bucketName = process.env.S3_BUCKET_NAME;
         const objectKey = `${process.env.S3_OBJECT_PREFIX}${messageId}`;
 
@@ -18,7 +19,12 @@ exports.handler = async (event) => {
             Key: objectKey
         });
         const s3Response = await s3Client.send(getCommand);
-        const emailBody = await s3Response.Body.transformToString('base64');
+        // Keep raw email content in MIME format for proper parsing by mailparser
+        const chunks = [];
+        for await (const chunk of s3Response.Body) {
+            chunks.push(chunk);
+        }
+        const emailBody = Buffer.concat(chunks).toString('base64');
 
         // Send to API with complete email data and retry on 5xx
         const postData = JSON.stringify({
@@ -92,7 +98,7 @@ exports.handler = async (event) => {
             body: 'Email processed successfully'
         };
     } catch (error) {
-        console.error('Error in processing email function:', error);
+        console.error(`Error in processing email function for ${messageId}:`, error);
         // Don't throw the error to prevent SES retries
         return {
             statusCode: 200,

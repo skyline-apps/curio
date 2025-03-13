@@ -48,11 +48,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "email_storage" {
 # Get current AWS account ID
 data "aws_caller_identity" "current" {}
 
-# SNS topic for email notifications
-resource "aws_sns_topic" "email_notifications" {
-  name = "${var.project_prefix}-${var.environment}-email-notifications"
-}
-
 # SES configuration
 resource "aws_ses_domain_identity" "main" {
   domain = var.ses_email_identity
@@ -173,6 +168,55 @@ resource "aws_iam_role_policy" "lambda_policy" {
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
           "logs:PutLogEvents"
+        ]
+        Resource = ["arn:aws:logs:*:*:*"]
+      }
+    ]
+  })
+}
+
+# Configure SNS topic with delivery status logging
+resource "aws_sns_topic" "email_notifications" {
+  name                                = "${var.project_prefix}-${var.environment}-email-notifications"
+  lambda_success_feedback_sample_rate = 0
+  lambda_success_feedback_role_arn    = aws_iam_role.sns_feedback_role.arn
+  lambda_failure_feedback_role_arn    = aws_iam_role.sns_feedback_role.arn
+}
+
+# IAM role for SNS delivery status logging
+resource "aws_iam_role" "sns_feedback_role" {
+  name = "${var.project_prefix}-${var.environment}-sns-feedback-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "sns.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# IAM policy for SNS delivery status logging
+resource "aws_iam_role_policy" "sns_feedback_policy" {
+  name = "${var.project_prefix}-${var.environment}-sns-feedback-policy"
+  role = aws_iam_role.sns_feedback_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:PutMetricFilter",
+          "logs:PutRetentionPolicy"
         ]
         Resource = ["arn:aws:logs:*:*:*"]
       }

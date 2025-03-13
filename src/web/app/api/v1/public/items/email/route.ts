@@ -42,8 +42,9 @@ export async function POST(
   }
 
   try {
-    console.log(data); // eslint-disable-line no-console
-    const email = await parseIncomingEmail(data.emailBody);
+    // Decode base64 email content back to raw MIME format
+    const rawEmail = Buffer.from(data.emailBody, "base64").toString("binary");
+    const email = await parseIncomingEmail(rawEmail);
     if (!email) {
       return APIResponseJSON(
         { error: "Failed to parse email" },
