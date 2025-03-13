@@ -1,0 +1,29 @@
+Return-Path: <sender@sender.com>
+Received: from mail.google.com (mail.google.com)
+ by inbound-smtp.us-west-2.amazonaws.com with SMTP id smtpmessageid1
+ for test@testmail.curi.ooo;
+ Thu, 13 Mar 2025 02:35:31 +0000 (UTC)
+X-SES-Spam-Verdict: PASS
+X-SES-Virus-Verdict: PASS
+Received: by mail.google.com with SMTP id ididididid
+        for <test@testmail.curi.ooo>; Wed, 12 Mar 2025 19:35:30 -0700 (PDT)
+MIME-Version: 1.0
+From: Test Sender <sender@sender.com>
+Date: Wed, 12 Mar 2025 19:34:54 -0700
+Subject: Test multiple recipients
+To: "One recipient" <one@email.com>,
+    test@testmail.curi.ooo, 
+    "Another recipient" <another@email.com>
+Content-Type: multipart/alternative; boundary="000000000000e648720630302cdb"
+
+--000000000000e648720630302cdb
+Content-Type: text/plain; charset="UTF-8"
+
+Test test 123
+
+--000000000000e648720630302cdb
+Content-Type: text/html; charset="UTF-8"
+
+<div dir="ltr">Test test 123</div>
+
+--000000000000e648720630302cdb--

@@ -11,6 +11,8 @@ import {
 } from "@/utils/test/api";
 import { testDb } from "@/utils/test/provider";
 
+vi.stubEnv("CURIO_EMAIL_DOMAIN", "testmail.curi.ooo");
+
 // Set up global mocks
 vi.mock("@/lib/search");
 vi.mock("@/lib/extract");
@@ -62,7 +64,7 @@ beforeAll(async () => {
     colorScheme: ColorScheme.AUTO,
     createdAt: new Date("2025-01-10T12:52:56-08:00"),
     updatedAt: new Date("2025-01-10T12:52:56-08:00"),
-    newsletterEmail: "test@mail.curi.ooo",
+    newsletterEmail: "test@testmail.curi.ooo",
   });
 
   await testDb.db.insert(profiles).values({

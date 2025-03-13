@@ -1,4 +1,12 @@
-import { extractMetadataFromEmail, extractUrlFromEmail } from ".";
+import fs from "fs";
+import path from "path";
+import { vi } from "vitest";
+
+import {
+  extractMetadataFromEmail,
+  extractUrlFromEmail,
+  parseIncomingEmail,
+} from ".";
 import type { Email } from "./types";
 
 function makeTestEmail(
@@ -25,8 +33,57 @@ function makeTestEmail(
 vi.unmock("@/lib/email");
 
 describe("@/lib/email", () => {
-  // TODO: Add tests
-  // describe("parseIncomingEmail", () => {});
+  const fixturesPath = path.join(process.cwd(), "test/fixtures");
+
+  describe("parseIncomingEmail", () => {
+    it("should parse raw email with single recipient", async () => {
+      const email = fs.readFileSync(
+        path.join(fixturesPath, "email-single.txt"),
+        "utf-8",
+      );
+      const parsedEmail = await parseIncomingEmail(email);
+      expect(parsedEmail).toBeDefined();
+      expect(parsedEmail!.recipient).toBe("test@testmail.curi.ooo");
+      expect(parsedEmail!.subject).toBe("Test email");
+      expect(parsedEmail!.sender).toEqual({
+        address: "sender@sender.com",
+        name: "Test Sender",
+      });
+      expect(parsedEmail!.htmlContent).toBe(
+        '<div dir="ltr">This is my email newsletter<div><br></div><div><ol><li style="margin-left:15px">Item 1</li><li style="margin-left:15px">Item 2</li><li style="margin-left:15px">Item 3</li></ol><div><br></div></div><div>Thanks!</div></div>\n',
+      );
+      expect(parsedEmail!.textContent).toBe(
+        "This is my email newsletter\n" +
+          "\n" +
+          "\n" +
+          "   1. Item 1\n" +
+          "   2. Item 2\n" +
+          "   3. Item 3\n" +
+          "\n" +
+          "\n" +
+          "Thanks!\n",
+      );
+      expect(parsedEmail!.textContent).toEqual(parsedEmail!.content);
+      expect(parsedEmail!.headers.get("mime-version")).toBe("1.0");
+    });
+
+    it("should parse raw email with multiple recipients", async () => {
+      const email = fs.readFileSync(
+        path.join(fixturesPath, "email-multiple.txt"),
+        "utf-8",
+      );
+      const parsedEmail = await parseIncomingEmail(email);
+      expect(parsedEmail).toBeDefined();
+      expect(parsedEmail!.recipient).toBe("test@testmail.curi.ooo");
+      expect(parsedEmail!.subject).toBe("Test multiple recipients");
+      expect(parsedEmail!.sender).toEqual({
+        address: "sender@sender.com",
+        name: "Test Sender",
+      });
+      expect(parsedEmail!.htmlContent?.length).toBeGreaterThan(0);
+      expect(parsedEmail!.textContent?.length).toBeGreaterThan(0);
+    });
+  });
 
   describe("extractUrlFromEmail", () => {
     it("should extract URL from List-Post header with various formats", () => {

@@ -104,7 +104,9 @@ export async function parseIncomingEmail(
           )?.address;
 
       if (!recipient) {
-        throw new EmailError("Invalid recipient");
+        throw new EmailError(
+          `Invalid recipient, expected ${CURIO_EMAIL_DOMAIN}`,
+        );
       }
 
       const sender = parsed.from?.value[0];

@@ -7,8 +7,8 @@ import { vi } from "vitest";
 global.React = React;
 
 // Mock environment variables
-process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
-process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "test-key";
+vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
+vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "test-key");
 
 // Set up global mocks
 vi.mock("@/lib/search");

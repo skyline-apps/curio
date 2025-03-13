@@ -148,7 +148,7 @@ describe("/api/v1/items/email", () => {
     it("should return 401 when unable to identify user from recipient email", async () => {
       vi.mocked(parseIncomingEmail).mockResolvedValueOnce({
         ...MOCK_EMAIL,
-        recipient: "invalid@mail.curi.ooo",
+        recipient: "invalid@testmail.curi.ooo",
       });
 
       const request: APIRequest = makeUnauthenticatedMockRequest({
