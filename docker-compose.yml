@@ -15,6 +15,7 @@ services:
       - ~/.kube:/root/.kube
       - ./.env.staging:/workspace/.env.staging
       - ./.env.prod:/workspace/.env.prod
+      - ~/.aws:/root/.aws
     working_dir: /workspace
     stdin_open: true  # Keep STDIN open
     tty: true  # Allocate a pseudo-TTY
