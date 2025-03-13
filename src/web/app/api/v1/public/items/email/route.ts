@@ -42,6 +42,7 @@ export async function POST(
   }
 
   try {
+    console.log(data); // eslint-disable-line no-console
     const email = await parseIncomingEmail(data.emailBody);
     if (!email) {
       return APIResponseJSON(

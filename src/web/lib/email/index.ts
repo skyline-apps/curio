@@ -90,6 +90,8 @@ export async function parseIncomingEmail(
 
   return simpleParser(mimeEmail)
     .then((parsed: ParsedMail) => {
+      // eslint-disable-next-line no-console
+      console.log(parsed.to);
       const recipient = Array.isArray(parsed.to)
         ? parsed.to
             .find((r) =>
