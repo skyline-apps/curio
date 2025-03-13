@@ -10,6 +10,7 @@ const InboxPage: React.FC = () => {
 
   useEffect(() => {
     fetchItems(true, { filters: { state: ItemState.ACTIVE } });
+    document.title = `Curio - Inbox`;
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (

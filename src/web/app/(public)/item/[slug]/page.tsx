@@ -1,4 +1,5 @@
 "use client";
+
 import { useParams } from "next/navigation";
 import React, { useContext, useEffect } from "react";
 
@@ -20,6 +21,12 @@ const ItemPage: React.FC = () => {
   }, [fetchContent, slug]);
 
   const { metadata } = loadedItem?.item || {};
+
+  useEffect(() => {
+    if (metadata?.title) {
+      document.title = `Curio - ${metadata.title}`;
+    }
+  }, [metadata?.title]);
 
   return (
     <>

@@ -9,6 +9,7 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     clearSelectedItems();
+    document.title = `Curio - Home`;
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (

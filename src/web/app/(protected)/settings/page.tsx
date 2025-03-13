@@ -1,11 +1,15 @@
 "use client";
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 
 import { UserContext } from "@/providers/UserProvider";
 
 import SettingsForm from "./SettingsForm";
 
 const SettingsPage: React.FC = () => {
+  useEffect(() => {
+    document.title = `Curio - Settings`;
+  }, []);
+
   const { user } = useContext(UserContext);
   if (!user.id || !user.username) {
     return <p className="text-danger">User not found.</p>;

@@ -10,6 +10,7 @@ const ArchivePage: React.FC = () => {
 
   useEffect(() => {
     fetchItems(true, { filters: { state: ItemState.ARCHIVED } });
+    document.title = `Curio - Archive`;
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
