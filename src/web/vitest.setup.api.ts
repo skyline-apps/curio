@@ -14,6 +14,7 @@ import { testDb } from "@/utils/test/provider";
 // Set up global mocks
 vi.mock("@/lib/search");
 vi.mock("@/lib/extract");
+vi.mock("@/lib/email");
 vi.mock("@/lib/storage");
 vi.mock("@/utils/logger");
 vi.mock("@/utils/supabase/server");
@@ -61,6 +62,7 @@ beforeAll(async () => {
     colorScheme: ColorScheme.AUTO,
     createdAt: new Date("2025-01-10T12:52:56-08:00"),
     updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+    newsletterEmail: "test@mail.curi.ooo",
   });
 
   await testDb.db.insert(profiles).values({

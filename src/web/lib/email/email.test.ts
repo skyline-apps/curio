@@ -22,6 +22,8 @@ function makeTestEmail(
   };
 }
 
+vi.unmock("@/lib/email");
+
 describe("@/lib/email", () => {
   // TODO: Add tests
   // describe("parseIncomingEmail", () => {});
