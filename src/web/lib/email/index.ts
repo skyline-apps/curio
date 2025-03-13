@@ -253,7 +253,7 @@ export function extractUrlFromEmail({
         const urlDomain = new URL(url).hostname.toLowerCase();
         if (!domainsMatch(urlDomain, senderDomain)) continue;
 
-        const urlLower = url.toLowerCase();
+        const urlLower = cleanUrl(url).toLowerCase();
         const matchingWords = words.filter((word) => urlLower.includes(word));
         const score = matchingWords.length;
 

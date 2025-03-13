@@ -205,6 +205,24 @@ https://substack.com/tech-weekly/ai-revolution
       expect(result).toBe("https://substack.com/tech-weekly/ai-revolution");
     });
 
+    it("should ignore matching words in query parameters", () => {
+      const result = extractUrlFromEmail(
+        makeTestEmail(
+          "news@substack.com",
+          "Sender Name",
+          "Weekly Tech Update: AI Revolution",
+          `Check these out:
+https://substack.com/unrelated-post-update
+https://substack.com/another-post-weekly
+https://other-site.com
+Read this article at:
+https://substack.com?newsletter=tech-weekly&post=ai-revolution
+`,
+        ),
+      );
+      expect(result).toBe("https://substack.com/another-post-weekly");
+    });
+
     it("should find URL with most matching words even if not in order", () => {
       const result = extractUrlFromEmail(
         makeTestEmail(
