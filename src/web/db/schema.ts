@@ -43,6 +43,7 @@ export const profiles = pgTable(
       .notNull()
       .default(ColorScheme.AUTO),
     public: boolean("public").notNull().default(false),
+    analyticsTracking: boolean("analytics_tracking").notNull().default(true),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

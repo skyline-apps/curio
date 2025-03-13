@@ -183,6 +183,13 @@
       "when": 1741820721334,
       "tag": "0025_add-source-profile-items",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1741891480569,
+      "tag": "0026_add-analytics-tracking",
+      "breakpoints": true
     }
   ]
 }
