@@ -3,8 +3,8 @@ variable "gcp_project_id" {
   type        = string
 }
 
-variable "cluster_name" {
-  description = "Name of the cluster"
+variable "project_prefix" {
+  description = "Project name"
   type        = string
   default     = "curio"
 }
@@ -37,4 +37,26 @@ variable "persistent_volume_disk_size_gb" {
   description = "Size of each persistent volume disk in GB"
   type        = number
   default     = 20
+}
+
+variable "curio_app_secret" {
+  description = "Curio app secret for API authentication"
+  type        = string
+  sensitive   = true
+}
+
+variable "curio_email_api_endpoint" {
+  description = "Curio email receipt API endpoint URL"
+  type        = string
+}
+
+variable "email_domain" {
+  description = "Domain to use for receiving mail"
+  type        = string
+}
+
+variable "vercel_protection_bypass" {
+  description = "Vercel protection bypass token (optional)"
+  type        = string
+  sensitive   = true
 }

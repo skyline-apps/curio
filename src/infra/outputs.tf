@@ -1,3 +1,7 @@
+output "aws" {
+  value = module.aws
+}
+
 output "gcp" {
   value = module.gcp
 }
@@ -15,7 +19,7 @@ output "zone" {
 }
 
 output "cluster_name" {
-  value = var.cluster_name
+  value = var.project_prefix
 }
 
 output "connection_string" {

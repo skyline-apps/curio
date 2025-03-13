@@ -1,3 +1,15 @@
+module "aws" {
+  source = "./aws"
+
+  environment    = "prod"
+  project_prefix = var.project_prefix
+
+  api_endpoint             = var.curio_email_api_endpoint
+  ses_email_identity       = var.email_domain
+  curio_app_secret         = var.curio_app_secret
+  vercel_protection_bypass = var.vercel_protection_bypass
+}
+
 # GCP Module
 module "gcp" {
   source     = "./gcp"
@@ -15,7 +27,7 @@ module "gke" {
   zone   = module.gcp.zone
 
   # Cluster configuration
-  cluster_name       = var.cluster_name
+  cluster_name       = var.project_prefix
   initial_node_count = var.initial_node_count
   min_nodes          = var.min_nodes
   max_nodes          = var.max_nodes

@@ -1,1 +1,5 @@
+curio_app_secret = "xxxxxx"  # Keep in sync with `CURIO_APP_SECRET` in `.env`
+curio_email_api_endpoint = "https://staging.curi.ooo/api/v1/public/items/email"
+email_domain = "mail.curi.ooo"  # Keep in sync with `CURIO_EMAIL_DOMAIN` in `.env`
 gcp_project_id = "my-project-id"
+vercel_protection_bypass = "xxxxxx"  # If running against a protected Vercel environment

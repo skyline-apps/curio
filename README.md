@@ -59,17 +59,25 @@ To clear the database, run
 4. Copy the prod env variables locally with `vercel env pull .env.prod`.
 5. Run database migrations against the production database using `DOTENV_CONFIG_PATH=/path/to/.env.prod npm run db:migrate`.
 6. Set up a Google Cloud project with Google Auth Platform configured for a web application. Copy in the generated client ID and client secret into Supabase's Google auth provider, then copy the Supabase auth callback URL into the "Authorized redirect URIs" field.
-7. Configure the "URL Configuration" site URL and redirect settings in Supabase Auth with the app URL.
+7. Set up an AWS account, along with an IAM user with programmatic access.
+8. Configure the "URL Configuration" site URL and redirect settings in Supabase Auth with the app URL.
   - Site URL should be `$HOSTNAME/auth/callback?next=%2Fhome`.
   - Redirect URLs should include `$HOSTNAME/*`.
-8. Configure the Supabase storage settings.
+9. Configure the Supabase storage settings.
   - Create a bucket `items`. Set it to be public with the allowed MIME type `text/markdown`.
   - Create a new policy on the `items` bucket from scratch. Title it "Allow read access for everyone", allow the `SELECT` operation for all roles, and keep the default policy definition `bucket_id = 'items'`.
   - Create a new policy on the `items` bucket. Title it "Allow authenticated to upload", allow the `INSERT` and `UPDATE` operations for the `authenticated` role, and keep the default policy definition.
-9. Set up a Meilisearch instance on your cloud provider.
+10. Provision cloud resources on GCP and AWS.
   - Use the dev environment: `docker exec -it dev zsh`.
   - Authenticate using `gcloud auth application-default login`.
-  - Run `terraform plan` to verify the correct resources will be created, then run `terraform apply`.
+  - Authenticate using `aws configure`.
+  - Populate `src/infra/terraform.tfvars` based on `src/infra/terraform.tfvars.sample`.
+  - Run `terraform apply`
+11. Set up the email newsletter service on AWS.
+  - From `terraform output`, create the listed records (should be 3 CNAME, 1 MX, and 1 TXT) on your DNS provider. Note the 10 on the MX record is for priority.
+12. Set up a Meilisearch instance on GCP.
+  - Use the dev environment: `docker exec -it dev zsh`.
+  - Authenticate using `gcloud auth application-default login`.
   - Create an A (Address) DNS record for `terraform output`'s `gke.ip_address` under the subdomain of `SEARCH_EXTERNAL_ENDPOINT_URL`.
   - Set up `cert-manager` on the cluster using `script/deploy-certs.sh`.
   - Then run `script/deploy-volumes.sh [staging|prod]` to deploy a persistent volume to store the search index.
@@ -77,4 +85,4 @@ To clear the database, run
   - It may take a while for the certificate to be issued. You can check the status of the `gateway`, `certificate`,  and `challenge` resources as well as logs of the `cert-manager` pod to check progress.
   - Run `/data/search/init.sh [staging|prod]` to initialize the search application.
   - Populate the `SEARCH_APPLICATION_API_KEY` after using the master API key to retrieve its value.
-10. Publish the browser extensions and update the values in `src/web/lib/config.json`.
+13. Publish the browser extensions and update the values in `src/web/lib/config.json`.
