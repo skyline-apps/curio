@@ -11,7 +11,12 @@ type ProfileResult =
       error?: never;
       profile: Pick<
         typeof profiles.$inferSelect,
-        "id" | "userId" | "colorScheme" | "username" | "public"
+        | "id"
+        | "userId"
+        | "username"
+        | "colorScheme"
+        | "analyticsTracking"
+        | "public"
       >;
     };
 
@@ -27,9 +32,10 @@ export async function checkUserProfile(
   const results = await db
     .select({
       id: profiles.id,
-      username: profiles.username,
       userId: profiles.userId,
+      username: profiles.username,
       colorScheme: profiles.colorScheme,
+      analyticsTracking: profiles.analyticsTracking,
       public: profiles.public,
     })
     .from(profiles)

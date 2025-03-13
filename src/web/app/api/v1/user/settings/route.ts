@@ -25,10 +25,7 @@ export async function GET(
     if ("error" in profileResult) {
       return profileResult.error as APIResponse<UpdatedSettingsResponse>;
     }
-    const settings = SettingsResponseSchema.parse({
-      colorScheme: profileResult.profile.colorScheme,
-      public: profileResult.profile.public,
-    });
+    const settings = SettingsResponseSchema.parse(profileResult.profile);
     return APIResponseJSON(settings);
   } catch (error) {
     log.error(

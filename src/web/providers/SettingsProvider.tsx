@@ -1,5 +1,6 @@
 "use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import posthog from "posthog-js";
 import React, { createContext, useContext, useEffect } from "react";
 
 import type {
@@ -174,6 +175,17 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       }
     }
   }, [currentSettings?.colorScheme]);
+
+  useEffect(() => {
+    if (!currentSettings) {
+      return;
+    }
+    if (currentSettings.analyticsTracking) {
+      posthog.opt_in_capturing();
+    } else {
+      posthog.opt_out_capturing();
+    }
+  }, [currentSettings?.analyticsTracking]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateSettings = async (
     field: keyof SettingsResponse,

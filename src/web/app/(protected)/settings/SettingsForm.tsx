@@ -10,9 +10,9 @@ const SettingsForm: React.FC = () => {
       <h2 className="text-lg my-2">Account settings</h2>
       <AccountSettings />
       <h2 className="text-lg my-2">Preferences</h2>
-      <LabelSettings />
-      <h2 className="text-lg my-2">Display</h2>
       <UpdateUserSettings />
+      <h2 className="text-lg my-2">Organization</h2>
+      <LabelSettings />
       <div className="flex flex-col h-full justify-end items-center text-xs text-secondary py-4">
         <p>
           Questions? Contact us at{" "}
