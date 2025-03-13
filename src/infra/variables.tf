@@ -59,4 +59,5 @@ variable "vercel_protection_bypass" {
   description = "Vercel protection bypass token (optional)"
   type        = string
   sensitive   = true
+  default     = ""
 }
