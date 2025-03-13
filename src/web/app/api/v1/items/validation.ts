@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { LabelSchema } from "@/app/api/v1/user/labels/validation";
-import { ItemState } from "@/db/schema";
+import { ItemSource, ItemState } from "@/db/schema";
 
 const UrlSchema = z.string().url().describe("Unique URL of the item.");
 const SlugSchema = z
@@ -67,6 +67,10 @@ const ItemMetadataBaseSchema = PublicItemMetadataSchema.merge(
     state: z
       .nativeEnum(ItemState)
       .describe("Whether the state is active or archived."),
+    source: z
+      .nativeEnum(ItemSource)
+      .nullable()
+      .describe("Where the item was saved from."),
     isFavorite: z.boolean().describe("Whether the item is favorited."),
     readingProgress: z
       .number()

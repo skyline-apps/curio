@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { useContext, useRef } from "react";
-import { HiCheck } from "react-icons/hi2";
+import { HiCheck, HiOutlineEnvelope } from "react-icons/hi2";
 
 import Favicon from "@/components/Image/Favicon";
 import ItemActions from "@/components/Items/ItemActions";
 import Labels from "@/components/Labels";
 import Markdown from "@/components/Markdown";
 import Icon from "@/components/ui/Icon";
+import { ItemSource } from "@/db/schema";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import type { Item } from "@/providers/ItemsProvider";
 import { cn } from "@/utils/cn";
@@ -74,10 +75,14 @@ const ItemRow: React.FC<ItemRowProps> = ({
         <div className="grow h-full block overflow-hidden">
           <div className="flex flex-row gap-2 items-center h-6">
             <div className="flex shrink-0 items-center justify-center w-4 h-4">
-              <Favicon
-                className={isRead ? "opacity-50" : ""}
-                url={item.metadata.favicon}
-              />
+              {item.metadata.source === ItemSource.EMAIL ? (
+                <Icon icon={<HiOutlineEnvelope />} />
+              ) : (
+                <Favicon
+                  className={isRead ? "opacity-50" : ""}
+                  url={item.metadata.favicon}
+                />
+              )}
             </div>
             <Link
               href={`/item/${item.slug}`}

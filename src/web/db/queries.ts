@@ -45,6 +45,7 @@ export function fetchOwnItemResults<T extends Record<string, SQL>>(
         publishedAt: profileItems.publishedAt,
         savedAt: profileItems.savedAt,
         state: profileItems.state,
+        source: profileItems.source,
         isFavorite: profileItems.isFavorite,
         readingProgress: profileItems.readingProgress,
         lastReadAt: profileItems.lastReadAt,
