@@ -60,5 +60,7 @@ RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master
 # Set Zsh as default shell
 RUN chsh -s $(which zsh)
 
+RUN echo "alias kc=kubectl" >> /root/.zshrc
+
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["tail", "-f", "/dev/null"]
