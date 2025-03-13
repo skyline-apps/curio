@@ -33,6 +33,7 @@ describe("/api/v1/user/settings", () => {
 
       const result = await response.json();
       expect(result).toEqual({
+        analyticsTracking: true,
         colorScheme: ColorScheme.DARK,
         public: false,
       });

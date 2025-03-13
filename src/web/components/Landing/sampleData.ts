@@ -8,6 +8,7 @@ const ITEM_METADATA = {
   state: ItemState.ACTIVE,
   isFavorite: false,
   versionName: null,
+  source: null,
 };
 
 export const sampleItems = [

@@ -14,7 +14,7 @@ export const SettingsSchema = z.object({
     ),
 });
 
-export const UpdateableSettingsSchema = SettingsSchema.partial();
+export const UpdateableSettingsSchema = SettingsSchema.strict().partial();
 
 export const SettingsResponseSchema = SettingsSchema;
 export type SettingsResponse = z.infer<typeof SettingsResponseSchema>;

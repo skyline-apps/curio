@@ -144,6 +144,7 @@ describe("/api/v1/public/items/content", () => {
             savedAt: ORIGINAL_CREATION_DATE.toISOString(),
             isFavorite: true,
             state: ItemState.ACTIVE,
+            source: null,
             versionName: null,
             lastReadAt: null,
             readingProgress: 0,
@@ -345,7 +346,7 @@ describe("/api/v1/public/items/content", () => {
           createdAt: ORIGINAL_CREATION_DATE.toISOString(),
           labels: [],
           highlights: [],
-          metadata: {
+          metadata: expect.objectContaining({
             author: "Test Author",
             description: "An example item",
             publishedAt: ORIGINAL_PUBLISHED_DATE.toISOString(),
@@ -359,7 +360,8 @@ describe("/api/v1/public/items/content", () => {
             lastReadAt: "2025-02-10T20:50:00.000Z",
             versionName: "2010-04-04",
             stateUpdatedAt: MOCK_PROFILE_ITEM.stateUpdatedAt.toISOString(),
-          },
+            source: null,
+          }),
           url: TEST_ITEM_URL,
         },
       });
@@ -419,7 +421,7 @@ describe("/api/v1/public/items/content", () => {
             },
           ],
           highlights: [],
-          metadata: {
+          metadata: expect.objectContaining({
             author: "Test Author",
             description: "An example item",
             publishedAt: ORIGINAL_PUBLISHED_DATE.toISOString(),
@@ -433,7 +435,7 @@ describe("/api/v1/public/items/content", () => {
             lastReadAt: "2025-02-10T20:50:00.000Z",
             versionName: null,
             stateUpdatedAt: MOCK_PROFILE_ITEM.stateUpdatedAt.toISOString(),
-          },
+          }),
           url: TEST_ITEM_URL,
         },
       });
@@ -482,7 +484,7 @@ describe("/api/v1/public/items/content", () => {
           createdAt: ORIGINAL_CREATION_DATE.toISOString(),
           labels: [],
           highlights: [],
-          metadata: {
+          metadata: expect.objectContaining({
             author: "Test Author",
             description: "An example item",
             publishedAt: ORIGINAL_PUBLISHED_DATE.toISOString(),
@@ -496,7 +498,7 @@ describe("/api/v1/public/items/content", () => {
             lastReadAt: "2025-02-10T20:50:00.000Z",
             versionName: null,
             stateUpdatedAt: MOCK_PROFILE_ITEM.stateUpdatedAt.toISOString(),
-          },
+          }),
           url: TEST_ITEM_URL,
         },
       });

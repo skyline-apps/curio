@@ -67,6 +67,7 @@ describe("/api/v1/items", () => {
         lastReadAt: null,
         readingProgress: 0,
         state: ItemState.ARCHIVED,
+        source: null,
         versionName: null,
       });
       expect(data.items[0].labels).toEqual([]);
@@ -131,6 +132,7 @@ describe("/api/v1/items", () => {
         lastReadAt: null,
         readingProgress: 0,
         state: ItemState.ARCHIVED,
+        source: null,
         versionName: null,
       });
       expect(data.items[0].labels).toEqual([]);
