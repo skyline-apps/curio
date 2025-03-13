@@ -83,6 +83,27 @@ describe("@/lib/email", () => {
       expect(parsedEmail!.htmlContent?.length).toBeGreaterThan(0);
       expect(parsedEmail!.textContent?.length).toBeGreaterThan(0);
     });
+
+    it("should parse forwarded email", async () => {
+      const email = fs.readFileSync(
+        path.join(fixturesPath, "email-forwarded.txt"),
+        "utf-8",
+      );
+      const parsedEmail = await parseIncomingEmail(email);
+      expect(parsedEmail).toBeDefined();
+      expect(parsedEmail!.recipient).toBe("test@testmail.curi.ooo");
+      expect(parsedEmail!.subject).toBe("My newsletter forwarded");
+      expect(parsedEmail!.sender).toEqual({
+        address: "testnewsletter@substack.com",
+        name: "Test Newsletter",
+      });
+      expect(parsedEmail!.htmlContent).toBe(
+        '<div dir="ltr"><br><br><div class="gmail_quote gmail_quote_container"><p>Newsletter content: link to <a href="https://testnewsletter.substack.com/p/my-newsletter-forwarded?ref=newsletter">original</a></p><br></div></div>\n',
+      );
+      expect(parsedEmail!.textContent).toBe(
+        "\nNewsletter content: link to original (https://testnewsletter.substack.com/p/my-newsletter-forwarded?ref=newsletter)\n",
+      );
+    });
   });
 
   describe("extractUrlFromEmail", () => {

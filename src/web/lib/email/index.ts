@@ -112,18 +112,95 @@ export async function parseIncomingEmail(
         );
       }
 
-      const sender = parsed.from?.value[0];
-      if (!sender || !sender.address) {
+      // Extract original sender from forwarded email if present
+      // Extract and validate the initial sender
+      const initialSender = parsed.from?.value[0];
+      if (!initialSender?.address) {
         throw new EmailError("Invalid sender");
+      }
+
+      // Initialize sender with validated fields
+      let sender: { name: string; address: string } = {
+        name: initialSender.name || "",
+        address: initialSender.address,
+      };
+      let subject = parsed.subject || "";
+      let htmlContent = parsed.html;
+      let textContent = parsed.text;
+
+      // Check heuristics for forwarded emails
+      if (
+        subject.toLowerCase().startsWith("fwd") ||
+        subject.toLowerCase().startsWith("[fwd]") ||
+        parsed.text?.startsWith("---------- Forwarded message ---------") ||
+        (parsed.html &&
+          parsed.html.includes("---------- Forwarded message ----------"))
+      ) {
+        if (subject.toLowerCase().startsWith("fwd: ")) {
+          subject = subject.slice(5).trim();
+        } else if (subject.toLowerCase().startsWith("[fwd] ")) {
+          subject = subject.slice(6).trim();
+        }
+
+        // Try to extract original sender from forwarded email
+        let originalSender: { name: string; address: string } | null = null;
+
+        // Check for forwarded email pattern in text content first
+        if (parsed.text) {
+          const textMatch = parsed.text.match(/From:\s*([^<\n]+)\s*<([^>]+)>/);
+          if (textMatch) {
+            const [, name, address] = textMatch;
+            if (name && address) {
+              originalSender = {
+                name: name.trim(),
+                address: address.trim(),
+              };
+            }
+          }
+        }
+        // Fallback to HTML content if no match in text
+        else if (parsed.html) {
+          // Match the forwarded email pattern in HTML, handling both mailto: links and plain email addresses
+          const htmlMatch = parsed.html.match(
+            /From:\s*(?:<([a-z]+)[^>]*>)?([^<]+)(?:<\/([a-z]+)>)?[^<]*(?:<[^>]*>)*[^<]*&lt;([^&]+)&gt;/,
+          );
+          if (htmlMatch?.[1] && htmlMatch?.[2]) {
+            originalSender = {
+              name: htmlMatch[1].trim(),
+              address: htmlMatch[2].trim(),
+            };
+          }
+        }
+
+        // Use original sender if found, otherwise keep the current sender
+        if (originalSender) {
+          sender = originalSender;
+        }
+
+        // Remove forwarded header from content
+        if (htmlContent) {
+          // Remove the Gmail forwarded header while preserving the quote container and content
+          htmlContent = htmlContent.replace(
+            /(<div[^>]*class="gmail_attr">[\s\S]*?<\/div>\s*<br>\s*<br>)/,
+            "",
+          );
+        }
+
+        if (textContent) {
+          textContent = textContent.replace(
+            /[-]+\s*Forwarded message\s*[-]+[\s\S]*?(?:\n\n|$)/,
+            "",
+          );
+        }
       }
 
       return {
         recipient,
         sender: { address: sender.address, name: sender.name },
-        subject: parsed.subject || "",
-        htmlContent: parsed.html ? parsed.html : parsed.textAsHtml || undefined,
-        textContent: parsed.text,
-        content: parsed.text || parsed.html || "",
+        subject,
+        htmlContent: htmlContent || parsed.textAsHtml || undefined,
+        textContent: textContent,
+        content: textContent || htmlContent || "",
         headers: parsed.headers || new Map(),
       };
     })
