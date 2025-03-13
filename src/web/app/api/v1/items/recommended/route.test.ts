@@ -6,6 +6,7 @@ import { and, db, eq, sql } from "@/db";
 import {
   itemRecommendations,
   items,
+  ItemSource,
   PersonalRecommendationType,
   profileItemRecommendations,
   profileItems,
@@ -39,6 +40,7 @@ describe("GET /api/v1/items/recommended", () => {
       itemId: MOCK_ITEMS[0].id,
       title: "recent item",
       savedAt: new Date(),
+      thumbnail: "https://example.com/thumb5.jpg",
     };
     beforeEach(async () => {
       await db.insert(items).values(MOCK_ITEMS);
@@ -135,7 +137,7 @@ describe("GET /api/v1/items/recommended", () => {
     });
 
     it("should compute new recommendations for user with no existing recommendations", async () => {
-      await db.insert(profileItems).values(recentItem);
+      await db.insert(profileItems).values([recentItem]);
       const request = makeAuthenticatedMockRequest({
         method: "GET",
         url: "https://example.com/api/v1/items/recommended",
@@ -192,7 +194,7 @@ describe("GET /api/v1/items/recommended", () => {
       const oldDate = new Date();
       oldDate.setDate(oldDate.getDate() - 8);
 
-      await db.insert(profileItems).values(recentItem);
+      await db.insert(profileItems).values([recentItem]);
       await db.insert(itemRecommendations).values({
         itemId: MOCK_ITEMS[3].id,
         type: RecommendationType.POPULAR,
@@ -324,6 +326,47 @@ describe("GET /api/v1/items/recommended", () => {
       expect(
         storedRecommendations.some((r) => r.itemId !== MOCK_ITEMS[1].id),
       ).toBe(true);
+    });
+
+    it("should ignore items without thumbnails", async () => {
+      await db.insert(profileItems).values({ ...recentItem, thumbnail: null });
+      const request = makeAuthenticatedMockRequest({
+        method: "GET",
+        url: "https://example.com/api/v1/items/recommended",
+      });
+
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      // Check that recommendations were created in the database
+      const globalRecommendations = await db.select().from(itemRecommendations);
+      expect(globalRecommendations.length).toBe(0);
+    });
+
+    it("should not include newsletters in newsletters but not popular section", async () => {
+      await db
+        .insert(profileItems)
+        .values({ ...recentItem, source: ItemSource.EMAIL });
+      const request = makeAuthenticatedMockRequest({
+        method: "GET",
+        url: "https://example.com/api/v1/items/recommended",
+        userId: DEFAULT_TEST_USER_ID_2,
+      });
+
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      // Check that recommendations were created in the database
+      const globalRecommendations = await db.select().from(itemRecommendations);
+      expect(globalRecommendations.length).toBe(0);
+
+      const { recommendations } = await response.json();
+      const newsletterSection = recommendations.find(
+        (r: RecommendationSection) =>
+          r.sectionType === PersonalRecommendationType.NEWSLETTER,
+      );
+      expect(newsletterSection?.items.length).toBe(1);
+      expect(newsletterSection?.items[0].id).toBe(MOCK_ITEMS[0].id);
     });
   });
 

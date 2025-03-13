@@ -1,6 +1,7 @@
 import { and, db, desc, eq, exists, isNull, not, or, sql } from "@/db";
 import {
   items,
+  ItemSource,
   ItemState,
   PersonalRecommendationType,
   profileItemRecommendations,
@@ -208,7 +209,26 @@ async function computeAndStorePersonalRecommendations(
       }
 
       // Populate sections from user's own items
-      // TODO: Populate from email newsletters
+      const newsletterItems = await tx
+        .select({
+          itemId: profileItems.itemId,
+          profileItemId: profileItems.id,
+        })
+        .from(profileItems)
+        .where(
+          and(
+            eq(profileItems.profileId, profileId),
+            eq(profileItems.state, ItemState.ACTIVE),
+            eq(profileItems.source, ItemSource.EMAIL),
+            isNull(profileItems.lastReadAt),
+          ),
+        )
+        .orderBy(desc(profileItems.savedAt))
+        .limit(5);
+      recommendedItems[PersonalRecommendationType.NEWSLETTER].push(
+        ...newsletterItems,
+      );
+
       const favoriteItems = await tx
         .select({
           itemId: profileItems.itemId,
@@ -226,10 +246,7 @@ async function computeAndStorePersonalRecommendations(
         .limit(5);
 
       recommendedItems[PersonalRecommendationType.FAVORITES].push(
-        ...favoriteItems.map((item) => ({
-          itemId: item.itemId,
-          profileItemId: item.profileItemId,
-        })),
+        ...favoriteItems,
       );
 
       // Delete old recommendations
