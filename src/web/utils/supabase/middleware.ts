@@ -46,18 +46,14 @@ export const updateSession = async (
 
   const {
     data: { user },
-    error,
   } = await supabase.auth.getUser();
-
-  if (error && !apiKey) {
-    log.error(error.message);
-  }
 
   if (
     !user &&
     !UNPROTECTED_ROUTES.some((route) =>
       request.nextUrl.pathname.startsWith(route),
-    )
+    ) &&
+    request.nextUrl.pathname !== "/"
   ) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
@@ -70,6 +66,7 @@ export const updateSession = async (
     request.nextUrl.pathname.startsWith("/api") &&
     !request.nextUrl.pathname.startsWith("/api/v1/public")
   ) {
+    // Validate API key if passed in
     if (apiKey) {
       const adminClient = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -110,6 +107,12 @@ export const updateSession = async (
 
   if (user) {
     supabaseResponse.headers.set("X-User-ID", user.id);
+  }
+
+  if (user && request.nextUrl.pathname === "/") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/home";
+    return NextResponse.redirect(url);
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
