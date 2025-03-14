@@ -14,7 +14,7 @@ async function sendHealthcheck(endpoint, success, error = "") {
         }
     };
 
-    const submitEndpoint = `${endpoint}?success=${success}&error=${error}`;
+    const submitEndpoint = `${endpoint}?success=${success}&error=${encodeURIComponent(error)}`;
     try {
 
         await new Promise((resolve, reject) => {
