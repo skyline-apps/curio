@@ -17,6 +17,7 @@ export type GlobalRecommendation = {
 
 const log = createLogger("api/v1/items/recommended");
 
+// Returns items with profileItemId if they are already in the user's library.
 export async function maybeUpdateAndGetGlobalRecommendations(
   profileId: string,
 ): Promise<GlobalRecommendation[]> {
@@ -44,6 +45,7 @@ export async function maybeUpdateAndGetGlobalRecommendations(
     .where(
       and(
         eq(profileItems.profileId, profileId),
+        not(eq(profileItems.state, ItemState.DELETED)),
         inArray(
           profileItems.itemId,
           recommendationsFromDB.map((r) => r.itemId),

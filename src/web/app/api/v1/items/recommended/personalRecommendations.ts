@@ -156,10 +156,11 @@ async function computeAndStorePersonalRecommendations(
               eq(profileItems.author, author),
               // The item must either:
               or(
-                // Be owned by me and unread
+                // Be owned by me, unread, and not deleted
                 and(
                   eq(profileItems.profileId, profileId),
                   isNull(profileItems.lastReadAt),
+                  not(eq(profileItems.state, ItemState.DELETED)),
                 ),
                 // OR be owned by someone else AND not also read by me in another record
                 and(

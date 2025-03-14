@@ -136,6 +136,34 @@ describe("GET /api/v1/items/recommended", () => {
       expect(newsletterSection.items).toHaveLength(0);
     });
 
+    it("should filter out deleted items' profileItemId", async () => {
+      await db.insert(itemRecommendations).values([
+        {
+          itemId: MOCK_ITEMS[3].id,
+          type: RecommendationType.POPULAR,
+          createdAt: new Date(),
+        },
+      ]);
+      const request = makeAuthenticatedMockRequest({
+        method: "GET",
+        url: "https://example.com/api/v1/items/recommended",
+      });
+
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      const { recommendations } = await response.json();
+      expect(recommendations.length).toBe(4);
+
+      const popularSection = recommendations.find(
+        (r: RecommendationSection) =>
+          r.sectionType === RecommendationType.POPULAR,
+      );
+      expect(popularSection.items).toHaveLength(1);
+      expect(popularSection.items[0].id).toBe(MOCK_ITEMS[3].id);
+      expect(popularSection.items[0].profileItemId).toBe(null);
+    });
+
     it("should compute new recommendations for user with no existing recommendations", async () => {
       await db.insert(profileItems).values([recentItem]);
       const request = makeAuthenticatedMockRequest({
@@ -181,12 +209,12 @@ describe("GET /api/v1/items/recommended", () => {
           r.sectionType === PersonalRecommendationType.FAVORITE_AUTHOR,
       );
       expect(authorItems?.items.length).toBe(1);
-      expect(authorItems?.items[0].id).toBe(MOCK_ITEMS[3].id);
+      expect(authorItems?.items[0].id).toBe(MOCK_ITEMS[1].id);
       expect(authorItems?.items[0].profileItemId).toBe(
-        MOCK_PROFILE_ITEMS[3].id,
+        MOCK_PROFILE_ITEMS[1].id,
       );
       expect(authorItems?.items[0].metadata.author).toBe(
-        MOCK_PROFILE_ITEMS[3].author,
+        MOCK_PROFILE_ITEMS[1].author,
       );
     });
 

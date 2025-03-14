@@ -111,9 +111,12 @@ export async function GET(
         items: [],
       };
     }
+
+    // Populate recommendation item metadata. If the recommendation came with a profileItemId, include
+    // personal metadata
     for (const rec of allRecommendations) {
       const itemResult = ownItemResults.find((i) => i.id === rec.itemId);
-      if (itemResult) {
+      if (itemResult && rec.profileItemId) {
         recommendationsBySection[rec.type].items.push(itemResult);
       } else {
         const publicItemResult = publicItemResults.find(
