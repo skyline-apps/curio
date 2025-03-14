@@ -82,6 +82,7 @@ const LandingPage: React.FC = () => {
                   <li>Extract text content for a focused reading experience</li>
                   <li>Add notes, highlights, and labels to your items</li>
                   <li>Send email newsletters to your Curio inbox</li>
+                  <li>Search over your entire article library</li>
                 </ul>
               </div>
               <div>
