@@ -36,6 +36,7 @@ export type CurrentItemContextType = {
   currentItem: Item | PublicItem | null; // Metadata of currently loaded or selected item
   loadedItem: ItemWithContent | null; // Contents of currently loaded item
   isCurrentlyPreviewing: boolean; // Whether the current item is stored in query results
+  inSelectionMode: boolean; // Whether the user is currently in selection mode
   selectedItems: Set<string>; // All selected item slugs
   selectItems: (
     // Selected items must be loaded by the ItemsProvider
@@ -67,6 +68,7 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
   currentItem: null,
   loadedItem: null,
   isCurrentlyPreviewing: false,
+  inSelectionMode: false,
   selectedItems: new Set<string>(),
   selectItems: () => {},
   previewItem: () => {},
@@ -290,6 +292,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         currentItem,
         loadedItem,
         isCurrentlyPreviewing: !!currentPreviewItem,
+        inSelectionMode,
         selectedItems,
         selectItems,
         previewItem,

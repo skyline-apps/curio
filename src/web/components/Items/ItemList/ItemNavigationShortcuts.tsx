@@ -15,6 +15,7 @@ export const ItemNavigationShortcuts = (): null => {
   const { items } = useContext(ItemsContext);
   const {
     selectItems,
+    inSelectionMode,
     lastSelectionIndex,
     setLastSelectionIndex,
     clearSelectedItems,
@@ -35,26 +36,34 @@ export const ItemNavigationShortcuts = (): null => {
   };
 
   const navigateDown = (): boolean => {
-    if (lastSelectionIndex === null) {
-      setLastSelectionIndex(0);
-    } else if (lastSelectionIndex < items.length - 1) {
-      setLastSelectionIndex(lastSelectionIndex + 1);
+    if (lastSelectionIndex === items.length - 1) return false;
+    const newIndex = lastSelectionIndex === null ? 0 : lastSelectionIndex + 1;
+    if (!inSelectionMode && selectedItems.size <= 1) {
+      selectItems([items[newIndex].slug], newIndex);
     }
+    setLastSelectionIndex(newIndex);
     return true;
   };
 
   const navigateUp = (): boolean => {
-    if (lastSelectionIndex === null) {
-      setLastSelectionIndex(0);
-    } else if (lastSelectionIndex > 0) {
-      setLastSelectionIndex(lastSelectionIndex - 1);
+    if (lastSelectionIndex === 0) return false;
+    const newIndex = lastSelectionIndex === null ? 0 : lastSelectionIndex - 1;
+    if (!inSelectionMode && selectedItems.size <= 1) {
+      selectItems([items[newIndex].slug], newIndex);
     }
+    setLastSelectionIndex(newIndex);
     return true;
   };
 
   const selectCurrentItem = (): boolean => {
     if (lastSelectionIndex !== null) {
-      selectItems([items[lastSelectionIndex].slug], lastSelectionIndex, false);
+      selectItems(
+        [items[lastSelectionIndex].slug],
+        lastSelectionIndex,
+        false,
+        false,
+        true,
+      );
     }
     return true;
   };
