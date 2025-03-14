@@ -4,12 +4,7 @@ import { ExtractedMetadata } from "@/lib/extract/types";
 import { createLogger } from "@/utils/logger";
 import { cleanUrl, FALLBACK_HOSTNAME, getRootDomain } from "@/utils/url";
 
-import {
-  type Email,
-  EmailError,
-  type EmailHeaders,
-  type HeaderValue,
-} from "./types";
+import { type Email, EmailError, type EmailHeaders } from "./types";
 
 export const CURIO_EMAIL_DOMAIN = process.env.CURIO_EMAIL_DOMAIN || "";
 
@@ -19,53 +14,22 @@ function domainsMatch(domain1: string, domain2: string): boolean {
   return getRootDomain(domain1) === getRootDomain(domain2);
 }
 
-function extractHeaderString(header: HeaderValue | null): string | null {
-  if (!header) return null;
-  if (typeof header === "string") {
-    return header;
-  }
-  if (Array.isArray(header)) {
-    if (header.length === 0) return null;
-    const first = header[0];
-    if (typeof first === "string") {
-      return first;
-    }
-    return null;
-  }
-  if (typeof header === "object" && header !== null && "value" in header) {
-    const value = header.value;
-    if (typeof value === "string") {
-      return value;
-    }
-    return null;
-  }
-  return header.toString();
-}
-
 function extractUrlFromHeaders(
-  senderDomain: string,
   headers: EmailHeaders,
+  words: string[],
 ): string | null {
-  const listPostHeader = headers.get("list-post");
-  if (!listPostHeader) return null;
+  // https://github.com/nodemailer/mailparser/blob/da665c8dad5662e1d05b93e7e9c68dc7c706b2bd/lib/mail-parser.js#L380-L383
+  const listHeader = headers.get("list");
+  if (!listHeader) return null;
 
-  const listPost = extractHeaderString(listPostHeader);
-  if (listPost) {
-    // Extract URL from List-Post, handling various formats
-    const urlMatch = listPost.match(/<?([^<>\s]+)>?/);
-    if (urlMatch && urlMatch[1].startsWith("http")) {
-      const url = urlMatch[1];
-      // Verify the URL matches the sender domain
-      try {
-        const urlDomain = new URL(url).hostname.toLowerCase();
-        if (domainsMatch(urlDomain, senderDomain)) {
-          return url;
-        }
-      } catch {
-        // Invalid URL, continue to other methods
-        return null;
-      }
-    }
+  // @ts-expect-error https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/69199
+  const headerUrl = listHeader?.post?.url;
+  if (
+    headerUrl &&
+    headerUrl.startsWith("http") &&
+    words.some((word) => headerUrl.toLowerCase().includes(word))
+  ) {
+    return headerUrl;
   }
   return null;
 }
@@ -228,9 +192,14 @@ export function extractUrlFromEmail({
   if (!senderDomain) {
     return generateFallbackUrl(senderAddress, subject);
   }
+  // Extract words from email subject (assume it's title)
+  const words = subject
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((word) => word.length > 3); // Only consider meaningful words
 
   // 1. Check List-Post header
-  const urlFromHeaders = extractUrlFromHeaders(senderDomain, headers);
+  const urlFromHeaders = extractUrlFromHeaders(headers, words);
   if (urlFromHeaders) {
     return cleanUrl(urlFromHeaders);
   }
@@ -240,10 +209,6 @@ export function extractUrlFromEmail({
   const matches = content.match(urlRegex);
   if (matches) {
     // Score URLs based on matching words from subject
-    const words = subject
-      .toLowerCase()
-      .split(/\s+/)
-      .filter((word) => word.length > 3); // Only consider meaningful words
 
     let bestUrl = null;
     let bestScore = 0;

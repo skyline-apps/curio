@@ -14,7 +14,7 @@ function makeTestEmail(
   senderName: string,
   subject: string,
   content: string,
-  headers: Record<string, string> = {},
+  headers: Record<string, string | Record<string, Record<string, string>>> = {},
   htmlContent?: string,
 ): Email {
   return {
@@ -24,6 +24,7 @@ function makeTestEmail(
     content,
     textContent: content,
     htmlContent,
+    // @ts-expect-error https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/69199
     headers: new Map(
       Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v]),
     ),
@@ -84,6 +85,18 @@ describe("@/lib/email", () => {
       expect(parsedEmail!.textContent?.length).toBeGreaterThan(0);
     });
 
+    it("should parse email with url in headers", async () => {
+      const email = fs.readFileSync(
+        path.join(fixturesPath, "email-headers.txt"),
+        "utf-8",
+      );
+      const parsedEmail = await parseIncomingEmail(email);
+      // @ts-expect-error https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/69199
+      expect(parsedEmail!.headers.get("list")?.post.url).toEqual(
+        "https://www.sender.com/p/another-test-newsletter",
+      );
+    });
+
     it("should parse forwarded email", async () => {
       const email = fs.readFileSync(
         path.join(fixturesPath, "email-forwarded.txt"),
@@ -107,26 +120,30 @@ describe("@/lib/email", () => {
   });
 
   describe("extractUrlFromEmail", () => {
-    it("should extract URL from List-Post header with various formats", () => {
-      const formats = [
-        "https://blog.example.com/post",
-        "<https://blog.example.com/post>",
-        " https://blog.example.com/post ", // with whitespace
-        "<https://blog.example.com/post> ",
-      ];
+    it("should extract URL from List-Post header parsed into object", () => {
+      const result = extractUrlFromEmail(
+        makeTestEmail(
+          "sender@example.com",
+          "Sender Name",
+          "This is my new post",
+          "Some content",
+          { list: { post: { url: "https://blog.example.com/post" } } },
+        ),
+      );
+      expect(result).toBe("https://blog.example.com/post");
+    });
 
-      for (const format of formats) {
-        const result = extractUrlFromEmail(
-          makeTestEmail(
-            "sender@example.com",
-            "Sender Name",
-            "Test Subject",
-            "Some content",
-            { "List-Post": format },
-          ),
-        );
-        expect(result).toBe("https://blog.example.com/post");
-      }
+    it("should ignore List-Post header if doesn't match subject", () => {
+      const result = extractUrlFromEmail(
+        makeTestEmail(
+          "sender@example.com",
+          "Sender Name",
+          "Test Subject",
+          "Some content",
+          { list: { post: { url: "https://blog.example.com/post" } } },
+        ),
+      );
+      expect(result).toBe("https://curio-newsletter/example-com/test-subject");
     });
 
     it("should match URLs based on root domain", () => {
@@ -136,9 +153,9 @@ describe("@/lib/email", () => {
           makeTestEmail(
             "news@blog.medium.com",
             "Sender Name",
-            "Test Subject",
+            "Test Post",
             "Some content",
-            { "List-Post": "https://writers.medium.com/post" },
+            { list: { post: { url: "https://writers.medium.com/post" } } },
           ),
         ),
       ).toBe("https://writers.medium.com/post");
@@ -149,9 +166,9 @@ describe("@/lib/email", () => {
           makeTestEmail(
             "news@site.co.uk",
             "Sender Name",
-            "Test Subject",
+            "Test Post",
             "Some content",
-            { "List-Post": "https://blog.site.co.uk/post" },
+            { list: { post: { url: "https://blog.site.co.uk/post" } } },
           ),
         ),
       ).toBe("https://blog.site.co.uk/post");
