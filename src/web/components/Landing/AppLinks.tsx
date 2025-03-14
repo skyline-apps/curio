@@ -1,23 +1,35 @@
 import Link from "next/link";
-import { FaChrome, FaDesktop, FaFirefoxBrowser } from "react-icons/fa6";
+import {
+  FaAndroid,
+  FaApple,
+  FaChrome,
+  FaDesktop,
+  FaFirefoxBrowser,
+} from "react-icons/fa6";
 
 import Icon from "@/components/ui/Icon";
 import config from "@/lib/config.json";
 
 interface AppLinkProps {
-  href: string;
+  href?: string;
   icon: React.ReactNode;
 }
 
 const AppLink: React.FC<AppLinkProps> = ({ href, icon }: AppLinkProps) => {
   return (
-    <Link
-      href={href}
-      target="_blank"
-      className="text-success-600 hover:text-success-700"
-    >
-      <Icon icon={icon} />
-    </Link>
+    <div className="opacity-80 hover:opacity-100">
+      {!!href ? (
+        <Link
+          href={href}
+          target="_blank"
+          className="text-success-600 hover:text-success-700"
+        >
+          <Icon icon={icon} />
+        </Link>
+      ) : (
+        <Icon icon={icon} />
+      )}
+    </div>
   );
 };
 
@@ -43,6 +55,8 @@ const AppLinks: React.FC = () => {
           icon={<FaFirefoxBrowser size={48} />}
         />
       )}
+      <AppLink key="android" icon={<FaAndroid size={48} />} />
+      <AppLink key="ios" icon={<FaApple size={48} />} />
     </div>
   );
 };

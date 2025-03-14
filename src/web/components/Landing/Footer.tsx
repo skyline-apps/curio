@@ -7,8 +7,18 @@ const Footer: React.FC = () => {
             Curio © {new Date().getFullYear()}
           </p>
           <p className="text-left text-sm">
-            <a href="https://kimberli.me" target="_blank" rel="me">
+            <a
+              href="https://kimberli.me"
+              target="_blank"
+              rel="me"
+              className="hover:text-secondary-800"
+            >
               About me
+            </a>
+          </p>
+          <p className="text-left text-sm">
+            <a href="mailto:team@curi.ooo" className="hover:text-secondary-800">
+              Contact us
             </a>
           </p>
         </div>
@@ -18,15 +28,25 @@ const Footer: React.FC = () => {
               href="https://github.com/kimberli/curio"
               target="_blank"
               rel="noreferrer"
+              className="hover:text-secondary-800"
             >
               We&rsquo;re open source!
             </a>
           </p>
           <p className="text-right text-sm">
-            <a href="mailto:team@curi.ooo">Contact us</a>
+            <a
+              href="https://status.curi.ooo"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-secondary-800"
+            >
+              Status page
+            </a>
           </p>
           <p className="text-right text-sm">
-            <a href="/privacy">Privacy policy</a>
+            <a href="/privacy" className="hover:text-secondary-800">
+              Privacy policy
+            </a>
           </p>
         </div>
       </div>
