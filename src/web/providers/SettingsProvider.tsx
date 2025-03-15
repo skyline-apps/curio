@@ -234,7 +234,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   };
 
   const deleteLabel = async (labelId: string): Promise<void> => {
-    await showConfirm(
+    showConfirm(
       "Are you sure you want to delete this label? This action cannot be undone.",
       async () => {
         try {

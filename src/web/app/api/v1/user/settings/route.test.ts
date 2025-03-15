@@ -2,7 +2,13 @@ import { vi } from "vitest";
 
 import { eq } from "@/db";
 import { DbErrorCode } from "@/db/errors";
-import { ColorScheme, profiles } from "@/db/schema";
+import {
+  ColorScheme,
+  DisplayFont,
+  DisplayFontSize,
+  DisplayLineHeight,
+  profiles,
+} from "@/db/schema";
 import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_PROFILE_ID,
@@ -20,6 +26,9 @@ describe("/api/v1/user/settings", () => {
         .update(profiles)
         .set({
           colorScheme: ColorScheme.DARK,
+          displayFont: DisplayFont.SANS,
+          displayFontSize: DisplayFontSize.MD,
+          displayLineHeight: DisplayLineHeight.SM,
           public: false,
         })
         .where(eq(profiles.id, DEFAULT_TEST_PROFILE_ID));
@@ -35,6 +44,9 @@ describe("/api/v1/user/settings", () => {
       expect(result).toEqual({
         analyticsTracking: true,
         colorScheme: ColorScheme.DARK,
+        displayFont: DisplayFont.SANS,
+        displayFontSize: DisplayFontSize.MD,
+        displayLineHeight: DisplayLineHeight.SM,
         public: false,
       });
     });

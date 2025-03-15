@@ -4,13 +4,32 @@ import { useParams } from "next/navigation";
 import React, { useContext, useEffect } from "react";
 
 import Article from "@/components/Article";
+import {
+  displayFontClass,
+  displayFontSizeClass,
+  displayHeaderSizeClass,
+  displayLineHeightClass,
+} from "@/components/Article/displaySettings";
 import { Progress } from "@/components/ui/Progress";
+import { DisplayFont, DisplayFontSize, DisplayLineHeight } from "@/db/schema";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
+import { useSettings } from "@/providers/SettingsProvider";
+import { cn } from "@/utils/cn";
 
 const ItemPage: React.FC = () => {
   const { fetchContent, loading, loadingError, loadedItem } =
     useContext(CurrentItemContext);
   const { slug } = useParams();
+  const { settings } = useSettings();
+  const { displayFont, displayFontSize, displayLineHeight } = settings || {};
+
+  const fontClass = displayFontClass[displayFont || DisplayFont.SANS];
+  const headerSizeClass =
+    displayHeaderSizeClass[displayFontSize || DisplayFontSize.MD];
+  const proseSizeClass =
+    displayFontSizeClass[displayFontSize || DisplayFontSize.MD];
+  const lineHeightClass =
+    displayLineHeightClass[displayLineHeight || DisplayLineHeight.SM];
 
   useEffect(() => {
     if (typeof slug === "string") {
@@ -44,12 +63,22 @@ const ItemPage: React.FC = () => {
       )}
       <div className="flex-1 w-full h-full flex flex-col">
         {!loading && loadedItem ? (
-          <div className="w-full lg:w-4xl max-w-4xl self-start pl-6 mx-auto">
-            <h1 className="text-lg font-medium mb-2">{metadata?.title}</h1>
+          <div
+            className={cn(
+              "w-full lg:w-4xl max-w-4xl self-start pl-6 pt-4 mx-auto",
+              fontClass,
+            )}
+          >
+            <h1 className={cn("font-medium mb-2", headerSizeClass)}>
+              {metadata?.title}
+            </h1>
             {loadingError ? (
               <p className="text-sm text-danger">{loadingError}</p>
             ) : loadedItem.content ? (
-              <Article content={loadedItem.content} />
+              <Article
+                content={loadedItem.content}
+                className={cn(proseSizeClass, lineHeightClass)}
+              />
             ) : (
               <p className="text-sm text-secondary italic py-4">
                 Content unavailable.

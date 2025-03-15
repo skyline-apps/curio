@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
+import { cn } from "@/utils/cn";
 
 import { useArticleUpdate } from "./actions";
 import { ItemActionShortcuts } from "./ItemActionShortcuts";
@@ -8,9 +9,13 @@ import MarkdownViewer from "./MarkdownViewer";
 
 interface ArticleProps {
   content: string;
+  className?: string;
 }
 
-const Article: React.FC<ArticleProps> = ({ content }: ArticleProps) => {
+const Article: React.FC<ArticleProps> = ({
+  content,
+  className,
+}: ArticleProps) => {
   const { updateReadingProgress } = useArticleUpdate();
   const { loadedItem, isEditable } = useContext(CurrentItemContext);
 
@@ -32,7 +37,7 @@ const Article: React.FC<ArticleProps> = ({ content }: ArticleProps) => {
         onProgressChange={
           isEditable(loadedItem?.item) ? updateReadingProgress : undefined
         }
-        className="py-4"
+        className={cn("py-4", className)}
       >
         {content}
       </MarkdownViewer>
