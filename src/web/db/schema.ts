@@ -32,6 +32,44 @@ export const colorSchemeEnum = pgEnum("color_scheme", [
   ColorScheme.DARK,
 ]);
 
+export enum DisplayFont {
+  MONO = "monospace",
+  SANS = "sans-serif",
+  SERIF = "serif",
+}
+
+export const displayFontEnum = pgEnum("display_font", [
+  DisplayFont.MONO,
+  DisplayFont.SANS,
+  DisplayFont.SERIF,
+]);
+
+export enum DisplayFontSize {
+  SM = "sm",
+  MD = "md",
+  LG = "lg",
+  XL = "xl",
+}
+
+export const displayFontSizeEnum = pgEnum("display_font_size", [
+  DisplayFontSize.SM,
+  DisplayFontSize.MD,
+  DisplayFontSize.LG,
+  DisplayFontSize.XL,
+]);
+
+export enum DisplayLineHeight {
+  SM = "sm",
+  MD = "md",
+  LG = "lg",
+}
+
+export const displayLineHeightEnum = pgEnum("display_line_height", [
+  DisplayLineHeight.SM,
+  DisplayLineHeight.MD,
+  DisplayLineHeight.LG,
+]);
+
 export const profiles = pgTable(
   "profiles",
   {
@@ -42,6 +80,15 @@ export const profiles = pgTable(
     colorScheme: colorSchemeEnum("color_scheme")
       .notNull()
       .default(ColorScheme.AUTO),
+    displayFont: displayFontEnum("display_font")
+      .notNull()
+      .default(DisplayFont.SANS),
+    displayFontSize: displayFontSizeEnum("display_font_size")
+      .notNull()
+      .default(DisplayFontSize.MD),
+    displayLineHeight: displayLineHeightEnum("display_line_height")
+      .notNull()
+      .default(DisplayLineHeight.SM),
     public: boolean("public").notNull().default(false),
     analyticsTracking: boolean("analytics_tracking").notNull().default(true),
     createdAt: timestamp("created_at", { withTimezone: true })
