@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 import React from "react";
 
+import EmailSignIn from "@/components/Auth/EmailSignIn";
+import GoogleSignIn from "@/components/Auth/GoogleSignIn";
 import { CurioName } from "@/components/CurioBrand";
-import GoogleSignIn from "@/components/GoogleSignIn";
 import Modal, {
   ModalBody,
   ModalContent,
@@ -33,10 +34,14 @@ const LoginPage: React.FC<LoginPageProps> = ({}: LoginPageProps) => {
           </div>
         </ModalHeader>
         <ModalBody>
-          <div className="flex flex-col items-center gap-4">
-            <YarnLight className="w-24 h-24 mb-4 block dark:hidden" />
-            <YarnDark className="w-24 h-24 mb-4 block hidden dark:block" />
+          <div className="flex flex-col items-center gap-2 w-64 mx-auto">
             <GoogleSignIn nextUrl="/home" />
+            <p className="text-secondary text-xs">or</p>
+            <EmailSignIn />
+            <div className="mt-4">
+              <YarnLight className="w-24 h-24 mb-4 block dark:hidden" />
+              <YarnDark className="w-24 h-24 mb-4 block hidden dark:block" />
+            </div>
           </div>
         </ModalBody>
       </ModalContent>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FaGoogle } from "react-icons/fa6";
 
 import Button from "@/components/ui/Button";
 import { createClient } from "@/utils/supabase/client";
@@ -29,11 +30,19 @@ const GoogleOAuthButton: React.FC<GoogleOAuthButtonProps> = ({
   };
 
   return (
-    <div id="google-signin-button">
-      <Button isDisabled={isSigningIn} onPress={handleSignInWithGoogle}>
-        Sign in with Google
+    <div
+      id="google-signin-button"
+      className="flex flex-col gap-2 items-center w-full"
+    >
+      <Button
+        isLoading={isSigningIn}
+        onPress={handleSignInWithGoogle}
+        fullWidth
+        size="sm"
+      >
+        <FaGoogle className="mr-2" /> Sign in with Google
       </Button>
-      <p className="text-red-500">{errorMessage}</p>
+      <p className="text-danger text-sm">{errorMessage}</p>
     </div>
   );
 };
