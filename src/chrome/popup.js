@@ -13,31 +13,31 @@ let curioLink = '';
 const checkExistingItems = async () => {
     const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
     const params = new URLSearchParams({ urls: tab.url });
-    const itemResponse = await fetch(`${API_ENDPOINTS.items}?${params.toString()}`, {
+    return await fetch(`${API_ENDPOINTS.items}?${params.toString()}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
         },
-    });
-    if (!itemResponse.ok) {
-        const text = await itemResponse.text();
-        throw new Error(text);
-    }
-    return await itemResponse.json();
-};
-
-window.onload = () => {
-    errorMessage.style.display = 'none';
-    checkExistingItems().then(response => {
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error(response.statusText);
+        }
+        return response.json();
+    }).then((data) => {
         saveButton.disabled = false;
-        if (response.items.length > 0) {
-            saveButton.textContent = "Page already saved";
-            curioLink = `${API_HOST}/item/${response.items[0].slug}`;
+        if (data.items.length > 0) {
+            saveButton.textContent = "Open page in Curio";
+            curioLink = `${API_HOST}/item/${data.items[0].slug}`;
         } else {
             saveButton.textContent = "Save current page";
             curioLink = "";
         }
-    }).catch((_) => {
+    });
+};
+
+window.onload = () => {
+    errorMessage.style.display = 'none';
+    checkExistingItems().catch((_) => {
         saveButton.disabled = false;
         saveButton.textContent = "Open Curio";
         curioLink = `${API_HOST}`;
@@ -53,19 +53,19 @@ saveButton.addEventListener('click', async () => {
     }
     try {
         errorMessage.style.display = 'none';
+        successMessage.style.display = 'none';
+        errorMessage.textContent = "";
+        successMessage.textContent = "";
         saveButton.disabled = true;
         saveButton.appendChild(spinner);
 
         const response = await chrome.runtime.sendMessage({ action: 'saveCurioPage' });
         if (response.success) {
-            checkExistingItems().then(() => {
-                setTimeout(() => {
-                    window.close();
-                }, 1000);
-            }).catch(error => {
-                errorMessage.textContent = `Error: ${error.message}`;
-                errorMessage.style.display = 'block';
-            });
+            saveButton.disabled = false;
+            saveButton.textContent = "Open page in Curio";
+            curioLink = `${API_HOST}/item/${response.data.slug}`;
+            successMessage.textContent = "Page saved successfully.";
+            successMessage.style.display = 'block';
         } else {
             throw new Error(response.error);
         }

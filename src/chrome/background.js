@@ -5,19 +5,6 @@ const API_ENDPOINTS = {
 };
 
 async function saveContent(url, htmlContent) {
-    const itemResponse = await fetch(API_ENDPOINTS.items, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ items: [{ url }] })
-    });
-
-    if (!itemResponse.ok) {
-        const text = await itemResponse.text();
-        throw new Error(`HTTP error status: ${itemResponse.status}, message: ${text}`);
-    }
-
     const contentResponse = await fetch(API_ENDPOINTS.content, {
         method: 'POST',
         headers: {
