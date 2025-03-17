@@ -38,6 +38,7 @@ const GoogleOAuthButton: React.FC<GoogleOAuthButtonProps> = ({
         isLoading={isSigningIn}
         onPress={handleSignInWithGoogle}
         fullWidth
+        color="primary"
         size="sm"
       >
         <FaGoogle className="mr-2" /> Sign in with Google

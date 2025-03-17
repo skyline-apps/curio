@@ -40,11 +40,13 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({}: EmailSignInProps) => {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          contrast
         />
         <Button
           isDisabled={!email}
           isLoading={isSigningIn}
           onPress={handleSignInWithEmail}
+          color="primary"
           type="submit"
           size="sm"
         >
