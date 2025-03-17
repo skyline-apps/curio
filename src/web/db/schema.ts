@@ -123,6 +123,7 @@ export const items = pgTable(
   },
   (table) => ({
     urlIndex: uniqueIndex("url_index").on(table.url),
+    slugIndex: uniqueIndex("slug_index").on(table.slug),
   }),
 ).enableRLS();
 
