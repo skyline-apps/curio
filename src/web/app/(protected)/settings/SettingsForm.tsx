@@ -1,5 +1,7 @@
 import React from "react";
 
+import { Accordion, AccordionItem } from "@/components/ui/Accordion";
+
 import AccountSettings from "./AccountSettings";
 import LabelSettings from "./LabelSettings";
 import UpdateUserSettings from "./UpdateUserSettings";
@@ -7,12 +9,32 @@ import UpdateUserSettings from "./UpdateUserSettings";
 const SettingsForm: React.FC = () => {
   return (
     <>
-      <h2 className="text-lg my-2">Account settings</h2>
-      <AccountSettings />
-      <h2 className="text-lg my-2">Preferences</h2>
-      <UpdateUserSettings />
-      <h2 className="text-lg my-2">Organization</h2>
-      <LabelSettings />
+      <Accordion>
+        <AccordionItem
+          key="organization"
+          title="Organization"
+          subtitle="Manage labels"
+          aria-label="Organization"
+        >
+          <LabelSettings />
+        </AccordionItem>
+        <AccordionItem
+          key="preferences"
+          title="Preferences"
+          subtitle="Display & privacy settings"
+          aria-label="Preferences"
+        >
+          <UpdateUserSettings />
+        </AccordionItem>
+        <AccordionItem
+          key="account"
+          title="Account settings"
+          subtitle="Authentication & newsletter subscriptions"
+          aria-label="Account settings"
+        >
+          <AccountSettings />
+        </AccordionItem>
+      </Accordion>
       <div className="flex flex-col h-full justify-end items-center text-xs text-secondary py-4">
         <p>
           Questions? Contact us at{" "}
