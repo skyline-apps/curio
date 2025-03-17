@@ -3,6 +3,7 @@ import { vi } from "vitest";
 import { desc, eq } from "@/db";
 import {
   items,
+  ItemState,
   profileItemHighlights,
   profileItems,
   TextDirection,
@@ -564,6 +565,44 @@ describe("/api/v1/items/content", () => {
       expect(newProfileItem[0].author).toEqual("kim");
       expect(newProfileItem[0].versionName).toBe(null);
       expect(newProfileItem[0].readingProgress).toEqual(0);
+      expect(newProfileItem[0].state).toBe(ItemState.ACTIVE);
+    });
+
+    it("should return 200 and update item to be active if deleted", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS[0]);
+      await testDb.db
+        .insert(profileItems)
+        .values({ ...MOCK_PROFILE_ITEMS[0], state: ItemState.DELETED });
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "POST",
+        body: {
+          htmlContent: "<div>New content</div>",
+          url: TEST_ITEM_URL_1,
+        },
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+      const data = await response.json();
+      expect(data).toEqual({
+        slug: expect.any(String),
+        message: "Content updated and set as main version",
+        status: "UPDATED_MAIN",
+      });
+
+      const newItems = await testDb.db.select().from(items);
+      expect(newItems.length).toBe(1);
+      const newProfileItem = await testDb.db
+        .select()
+        .from(profileItems)
+        .where(eq(profileItems.itemId, newItems[0].id))
+        .orderBy(desc(profileItems.savedAt));
+      expect(newProfileItem.length).toBe(1);
+      expect(newProfileItem[0].title).toEqual("test title");
+      expect(newProfileItem[0].author).toEqual("kim");
+      expect(newProfileItem[0].versionName).toBe(null);
+      expect(newProfileItem[0].readingProgress).toEqual(0);
+      expect(newProfileItem[0].state).toBe(ItemState.ACTIVE);
     });
 
     it("should return 404 if item not found and skipMetadataExtraction is true", async () => {

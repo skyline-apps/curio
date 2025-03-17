@@ -1,5 +1,10 @@
 import { eq, sql, type TransactionDB } from "@/db";
-import { ItemSource, profileItemHighlights, profileItems } from "@/db/schema";
+import {
+  ItemSource,
+  ItemState,
+  profileItemHighlights,
+  profileItems,
+} from "@/db/schema";
 import { ExtractedMetadata } from "@/lib/extract/types";
 
 export interface ExportOptions {
@@ -30,6 +35,7 @@ export async function updateProfileItem(
     textDirection: metadata.textDirection,
     readingProgress: 0,
     versionName: null,
+    state: ItemState.ACTIVE,
     ...(source ? { source } : {}),
   };
   const profileItem = await tx
