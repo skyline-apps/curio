@@ -57,6 +57,7 @@ export async function POST(
             favicon: profileItems.favicon,
             publishedAt: profileItems.publishedAt,
             textDirection: profileItems.textDirection,
+            textLanguage: profileItems.textLanguage,
           },
         })
         .from(items)
@@ -86,6 +87,7 @@ export async function POST(
           favicon: item[0].metadata.favicon,
           publishedAt: item[0].metadata.publishedAt,
           textDirection: item[0].metadata.textDirection,
+          textLanguage: item[0].metadata.textLanguage,
         };
       } else {
         metadata = await extractMetadata(cleanedUrl, htmlContent);
