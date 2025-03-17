@@ -27,6 +27,9 @@ const HEADER_TAGS: (keyof HTMLElementTagNameMap)[] = [
   "h6",
 ];
 
+const LIST_CONTAINER_TAGS: (keyof HTMLElementTagNameMap)[] = ["ul", "ol", "dl"];
+const LIST_ITEM_TAGS: (keyof HTMLElementTagNameMap)[] = ["li", "dt", "dd"];
+
 const BLOCK_TAGS: (keyof HTMLElementTagNameMap)[] = [
   "p",
   "div",
@@ -35,6 +38,8 @@ const BLOCK_TAGS: (keyof HTMLElementTagNameMap)[] = [
   "main",
   "header",
   "footer",
+  ...LIST_CONTAINER_TAGS,
+  ...LIST_ITEM_TAGS,
   ...HEADER_TAGS,
 ];
 
@@ -89,6 +94,31 @@ turndown.addRule("link", {
     const cleanedContent = recursivelyRemoveBlockElements(node.innerHTML);
     linkText += turndown.turndown(cleanedContent);
     return `[${linkText}](${href})`;
+  },
+});
+
+turndown.addRule("dir", {
+  filter: function (node, _options) {
+    return node.hasAttribute && node.hasAttribute("dir");
+  },
+  replacement: function (content, node, _options) {
+    if (!isElementNode(node)) return content;
+    const dir = node.getAttribute("dir");
+    const tag = node.tagName.toLowerCase();
+    const otherAttributes = Array.from(node.attributes)
+      .filter((attr) => attr.name !== "dir")
+      .map((attr) => `${attr.name}="${attr.value}"`)
+      .join(" ");
+    if (dir === "rtl" || dir === "ltr") {
+      if (HEADER_TAGS.includes(tag as keyof HTMLElementTagNameMap)) {
+        return `<${tag} dir="${dir}" ${otherAttributes}>${turndown.turndown(node.innerHTML)}</${tag}>`;
+      } else if (BLOCK_TAGS.includes(tag as keyof HTMLElementTagNameMap)) {
+        return `\n<div dir="${dir}" ${otherAttributes}>\n\n${turndown.turndown(node.innerHTML)}\n\n</div>`;
+      } else {
+        return `<span dir="${dir}">${turndown.turndown(`<${tag} ${otherAttributes}>${content}</${tag}>`)}</span>`;
+      }
+    }
+    return turndown.turndown(content);
   },
 });
 
@@ -351,6 +381,17 @@ export class Extract {
   ): Promise<string> {
     try {
       const dom = new JSDOM(html, { url });
+      const htmlElement = dom.window.document.querySelector("html");
+      const bodyElement = dom.window.document.querySelector("body");
+      let documentDir = "ltr"; // Default to LTR
+
+      if (htmlElement && htmlElement.hasAttribute("dir")) {
+        documentDir = htmlElement.getAttribute("dir") || documentDir;
+      }
+
+      if (bodyElement && bodyElement.hasAttribute("dir")) {
+        documentDir = bodyElement.getAttribute("dir") || documentDir;
+      }
 
       const reader = new Readability(dom.window.document);
       const article = reader.parse();
@@ -358,7 +399,11 @@ export class Extract {
         throw new ExtractError("Failed to extract content");
       }
 
-      return turndown.turndown(article.content);
+      const content = turndown.turndown(article.content);
+      if (documentDir !== "ltr") {
+        return `<div dir="${documentDir}">\n\n${content}\n\n</div>`;
+      }
+      return content;
     } catch (error) {
       throw error instanceof Error ? error : new Error(String(error));
     }

@@ -156,6 +156,78 @@ function test() {
         extract.extractMainContentAsMarkdown("http://example.com", invalidHtml),
       ).rejects.toThrow(ExtractError);
     });
+
+    it("should insert rtl tag when entire html is rtl", async () => {
+      const html = fs.readFileSync(
+        path.join(fixturesPath, "rtl-html.html"),
+        "utf-8",
+      );
+
+      const markdown = await extract.extractMainContentAsMarkdown(
+        "http://host.com",
+        html,
+      );
+      const lines = markdown.split("\n");
+      expect(lines[0]).toBe('<div dir="rtl">');
+      expect(lines[1]).toBe("");
+      expect(lines[2]).toBe("## هذه صفحة عربية");
+      expect(lines[3]).toBe("");
+      expect(lines[4]).toBe("هذه فقرة عربية");
+      expect(lines[5]).toBe("");
+      expect(lines[6]).toBe("</div>");
+    });
+
+    it("should insert rtl tag when body is rtl", async () => {
+      const html = fs.readFileSync(
+        path.join(fixturesPath, "rtl-body.html"),
+        "utf-8",
+      );
+
+      const markdown = await extract.extractMainContentAsMarkdown(
+        "http://host.com",
+        html,
+      );
+      const lines = markdown.split("\n");
+      expect(lines[0]).toBe('<div dir="rtl">');
+      expect(lines[1]).toBe("");
+      expect(lines[2]).toBe("## هذه صفحة عربية");
+      expect(lines[3]).toBe("");
+      expect(lines[4]).toBe("هذه فقرة عربية");
+      expect(lines[5]).toBe("");
+      expect(lines[6]).toBe("</div>");
+    });
+
+    it("should extract nested rtl tags", async () => {
+      const html = fs.readFileSync(
+        path.join(fixturesPath, "rtl-nested.html"),
+        "utf-8",
+      );
+
+      const markdown = await extract.extractMainContentAsMarkdown(
+        "http://host.com",
+        html,
+      );
+      const lines = markdown.split("\n");
+      expect(lines[0]).toBe('<h2 dir="rtl" >هذه هي اللغة العربية!</h2>');
+      expect(lines[1]).toBe("");
+      expect(lines[2]).toBe("This is an English opening paragraph.");
+      expect(lines[3]).toBe("");
+      expect(lines[4]).toBe(
+        'This is a paragraph with <span dir="rtl">**عربي.**</span>',
+      );
+      expect(lines[5]).toBe("");
+      expect(lines[6]).toBe('<div dir="rtl" >');
+      expect(lines[7]).toBe("");
+      expect(lines[8]).toBe("هذه فقرة عربية");
+      expect(lines[9]).toBe("");
+      expect(lines[10]).toBe("</div>");
+      expect(lines[11]).toBe('<div dir="rtl" >');
+      expect(lines[12]).toBe("");
+      expect(lines[13]).toBe("-   البند 1");
+      expect(lines[14]).toBe("-   البند 2");
+      expect(lines[15]).toBe("");
+      expect(lines[16]).toBe("</div>");
+    });
   });
 
   describe("extractMetadata", () => {
