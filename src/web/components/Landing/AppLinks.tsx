@@ -15,6 +15,8 @@ interface AppLinkProps {
   icon: React.ReactNode;
 }
 
+const ICON_SIZE = 40;
+
 const AppLink: React.FC<AppLinkProps> = ({ href, icon }: AppLinkProps) => {
   return (
     <div className="opacity-80 hover:opacity-100">
@@ -39,24 +41,24 @@ const AppLinks: React.FC = () => {
       <AppLink
         key="web"
         href={process.env.NEXT_PUBLIC_CURIO_URL || "/"}
-        icon={<FaDesktop size={48} />}
+        icon={<FaDesktop size={ICON_SIZE} />}
       />
       {config.chromeExtensionLink && (
         <AppLink
           key="chrome"
           href={config.chromeExtensionLink}
-          icon={<FaChrome size={48} />}
+          icon={<FaChrome size={ICON_SIZE} />}
         />
       )}
       {config.firefoxExtensionLink && (
         <AppLink
           key="firefox"
           href={config.firefoxExtensionLink}
-          icon={<FaFirefoxBrowser size={48} />}
+          icon={<FaFirefoxBrowser size={ICON_SIZE} />}
         />
       )}
-      <AppLink key="android" icon={<FaAndroid size={48} />} />
-      <AppLink key="ios" icon={<FaApple size={48} />} />
+      <AppLink key="android" icon={<FaAndroid size={ICON_SIZE} />} />
+      <AppLink key="ios" icon={<FaApple size={ICON_SIZE} />} />
     </div>
   );
 };
