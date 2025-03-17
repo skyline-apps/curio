@@ -1,4 +1,5 @@
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import { useContext } from "react";
 
 import { UserContext } from "@/providers/UserProvider";
@@ -24,6 +25,7 @@ export const useLogout = (): (() => Promise<void>) => {
     clearUser();
     clearTheme();
     initializeTheme();
+    posthog.reset();
     // Redirect to the landing page.
     router.push("/");
   };
