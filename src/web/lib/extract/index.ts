@@ -373,7 +373,7 @@ export class Extract {
           }
         }
         if (htmlElement.hasAttribute("lang")) {
-          textLanguage = htmlElement.getAttribute("lang");
+          textLanguage = htmlElement.getAttribute("lang") || "";
         }
       }
 
