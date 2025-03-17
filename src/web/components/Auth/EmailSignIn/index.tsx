@@ -11,18 +11,21 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({}: EmailSignInProps) => {
   const [email, setEmail] = useState<string>("");
   const [isSigningIn, setIsSigningIn] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSignInWithEmail = async (): Promise<void> => {
     setIsSigningIn(true);
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${location.origin}/home`,
+        emailRedirectTo: `${location.origin}/auth/callback`,
       },
     });
     setIsSigningIn(false);
     if (error) {
       setErrorMessage(error.message);
+    } else {
+      setSuccessMessage("Check your email for a link to sign in.");
     }
   };
 
@@ -31,7 +34,7 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({}: EmailSignInProps) => {
       id="email-signin-button"
       className="flex flex-col gap-2 items-center w-full"
     >
-      <div className="flex gap-2 w-full">
+      <form className="flex gap-2 w-full">
         <Input
           type="email"
           placeholder="Email"
@@ -42,12 +45,14 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({}: EmailSignInProps) => {
           isDisabled={!email}
           isLoading={isSigningIn}
           onPress={handleSignInWithEmail}
+          type="submit"
           size="sm"
         >
           Sign in
         </Button>
-      </div>
+      </form>
       <p className="text-danger text-sm">{errorMessage}</p>
+      <p className="text-success text-sm">{successMessage}</p>
     </div>
   );
 };
