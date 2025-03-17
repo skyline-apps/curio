@@ -80,6 +80,7 @@ const MOCK_PROFILE_ITEMS = [
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
     savedAt: new Date("2025-01-10T12:52:56-08:00"),
     stateUpdatedAt: new Date("2025-01-10T12:52:56-08:00"),
+    textLanguage: "en",
   },
   {
     id: "12345678-1234-1234-1234-123456789012",
@@ -95,6 +96,7 @@ const MOCK_PROFILE_ITEMS = [
     savedAt: new Date("2025-01-10T12:52:57-08:00"),
     stateUpdatedAt: new Date("2025-01-10T12:52:57-08:00"),
     state: ItemState.ARCHIVED,
+    textLanguage: "en",
   },
   {
     id: "12345678-1234-1234-1234-123456789013",
@@ -113,6 +115,7 @@ const MOCK_PROFILE_ITEMS = [
     readingProgress: 10,
     lastReadAt: new Date("2025-01-15T12:00:00-08:00"),
     versionName: "2024-01-01",
+    textLanguage: "en",
   },
   {
     id: "12345678-1234-1234-1234-123456789014",
@@ -131,6 +134,7 @@ const MOCK_PROFILE_ITEMS = [
     readingProgress: 15,
     lastReadAt: new Date("2025-01-15T12:00:00-08:00"),
     versionName: "2024-01-01",
+    textLanguage: "en",
   },
   {
     id: "12345678-1234-1234-1234-123456789015",
@@ -145,6 +149,7 @@ const MOCK_PROFILE_ITEMS = [
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
     savedAt: new Date("2025-01-10T12:52:56-08:04"),
     stateUpdatedAt: new Date("2025-01-10T12:52:56-08:04"),
+    textLanguage: "en",
   },
 ];
 
@@ -221,6 +226,7 @@ describe("/api/v1/profile", () => {
             publishedAt: "2025-01-10T20:52:56.000Z",
             thumbnail: "https://example.com/thumb4.jpg",
             textDirection: TextDirection.LTR,
+            textLanguage: "en",
             title: "Example 4",
             savedAt: "2025-01-10T20:56:56.000Z",
             isFavorite: true,
@@ -246,6 +252,7 @@ describe("/api/v1/profile", () => {
             publishedAt: "2025-01-10T20:52:56.000Z",
             thumbnail: "https://example.com/thumb2.jpg",
             textDirection: TextDirection.LTR,
+            textLanguage: "en",
             title: "Example 2",
             savedAt: "2025-01-10T20:52:57.000Z",
             isFavorite: true,
@@ -282,6 +289,7 @@ describe("/api/v1/profile", () => {
             publishedAt: "2025-01-10T20:52:56.000Z",
             thumbnail: "https://example.com/thumb1.jpg",
             textDirection: TextDirection.LTR,
+            textLanguage: "en",
             title: "Example 1",
             savedAt: "2025-01-10T20:52:56.000Z",
             isFavorite: true,
@@ -442,6 +450,7 @@ describe("/api/v1/profile", () => {
             thumbnail: "https://example.com/thumb4.jpg",
             title: "Example 4",
             textDirection: TextDirection.LTR,
+            textLanguage: "en",
             savedAt: "2025-01-10T20:56:56.000Z",
           },
           profileItemId: null,
@@ -460,6 +469,7 @@ describe("/api/v1/profile", () => {
             thumbnail: "https://example.com/thumb2.jpg",
             title: "Example 2",
             textDirection: TextDirection.LTR,
+            textLanguage: "en",
             savedAt: "2025-01-10T20:52:57.000Z",
           },
           profileItemId: null,
@@ -478,6 +488,7 @@ describe("/api/v1/profile", () => {
             thumbnail: "https://example.com/thumb1.jpg",
             title: "Example 1",
             textDirection: TextDirection.LTR,
+            textLanguage: "en",
             savedAt: "2025-01-10T20:52:56.000Z",
           },
           profileItemId: null,

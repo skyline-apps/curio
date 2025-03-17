@@ -194,6 +194,7 @@ async function fetchPublicItemResults(
           favicon: metadata.favicon,
           savedAt: metadata.timestamp,
           textDirection: metadata.textDirection,
+          textLanguage: metadata.textLanguage,
         },
       }),
     );

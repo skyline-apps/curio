@@ -53,6 +53,7 @@ async function getDefaultContent(
           thumbnail: metadata.thumbnail,
           favicon: metadata.favicon,
           textDirection: metadata.textDirection,
+          textLanguage: metadata.textLanguage,
           savedAt: metadata.timestamp,
         },
       },

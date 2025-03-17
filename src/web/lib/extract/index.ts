@@ -363,11 +363,17 @@ export class Extract {
       const htmlElement = dom.window.document.querySelector("html");
       const bodyElement = dom.window.document.querySelector("body");
       let documentDir = TextDirection.LTR; // Default to LTR
+      let textLanguage = "";
 
-      if (htmlElement && htmlElement.hasAttribute("dir")) {
-        const dir = htmlElement.getAttribute("dir");
-        if (dir === "rtl") {
-          documentDir = TextDirection.RTL;
+      if (htmlElement) {
+        if (htmlElement.hasAttribute("dir")) {
+          const dir = htmlElement.getAttribute("dir");
+          if (dir === "rtl") {
+            documentDir = TextDirection.RTL;
+          }
+        }
+        if (htmlElement.hasAttribute("lang")) {
+          textLanguage = htmlElement.getAttribute("lang");
         }
       }
 
@@ -394,6 +400,7 @@ export class Extract {
         favicon,
         publishedAt: publishedAt ? new Date(publishedAt) : null,
         textDirection: documentDir,
+        textLanguage,
       };
     } catch (error) {
       if (error instanceof Error) {

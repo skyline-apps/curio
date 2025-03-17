@@ -73,6 +73,7 @@ const MOCK_PROFILE_ITEM = {
   savedAt: ORIGINAL_CREATION_DATE,
   stateUpdatedAt: ORIGINAL_CREATION_DATE,
   isFavorite: true,
+  textLanguage: "en",
 };
 
 const MOCK_PROFILE_ITEM_LABELS = [
@@ -142,6 +143,7 @@ describe("/api/v1/public/items/content", () => {
             thumbnail: "https://example.com/thumb.jpg",
             favicon: "https://example.com/favicon.ico",
             textDirection: TextDirection.LTR,
+            textLanguage: "en",
             title: "Example",
             savedAt: ORIGINAL_CREATION_DATE.toISOString(),
             isFavorite: true,
@@ -200,6 +202,7 @@ describe("/api/v1/public/items/content", () => {
             thumbnail: null,
             favicon: null,
             textDirection: TextDirection.LTR,
+            textLanguage: "en",
             savedAt: MOCK_VERSION,
           },
         },
@@ -280,6 +283,7 @@ describe("/api/v1/public/items/content", () => {
             thumbnail: null,
             favicon: null,
             textDirection: TextDirection.LTR,
+            textLanguage: "en",
             savedAt: MOCK_VERSION,
           },
         },

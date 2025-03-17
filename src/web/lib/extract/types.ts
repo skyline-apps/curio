@@ -22,4 +22,5 @@ export interface ExtractedMetadata {
   favicon: string | null;
   publishedAt: Date | null;
   textDirection: TextDirection;
+  textLanguage: string | null;
 }

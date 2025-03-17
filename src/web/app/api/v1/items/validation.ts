@@ -57,6 +57,11 @@ export const PublicItemMetadataSchema = z.object({
   textDirection: z
     .nativeEnum(TextDirection)
     .describe("The text direction of the item."),
+  textLanguage: z
+    .string()
+    .max(10)
+    .nullable()
+    .describe("The language of the item."),
 });
 
 const ItemMetadataBaseSchema = PublicItemMetadataSchema.merge(

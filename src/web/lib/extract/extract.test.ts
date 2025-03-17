@@ -259,6 +259,7 @@ function test() {
         author: "John Doe",
         publishedAt: new Date("2024-01-31T08:00:00Z"),
         textDirection: TextDirection.LTR,
+        textLanguage: "",
       });
     });
 
@@ -301,6 +302,7 @@ function test() {
         author: "Jane Smith",
         publishedAt: new Date("2024-01-31T08:00:00Z"),
         textDirection: TextDirection.LTR,
+        textLanguage: "",
       });
     });
 
@@ -346,6 +348,7 @@ function test() {
         author: "Jane Smith",
         publishedAt: new Date("2024-01-31T08:00:00Z"),
         textDirection: TextDirection.LTR,
+        textLanguage: "",
       });
     });
 
@@ -374,6 +377,7 @@ function test() {
         favicon: null,
         publishedAt: null,
         textDirection: TextDirection.LTR,
+        textLanguage: "",
       });
     });
 
@@ -393,6 +397,7 @@ function test() {
         favicon: null,
         publishedAt: null,
         textDirection: TextDirection.LTR,
+        textLanguage: "",
       });
     });
 
@@ -540,6 +545,18 @@ function test() {
         html,
       );
       expect(textDirection).toBe(TextDirection.RTL);
+    });
+
+    it("should extract text language from html", async () => {
+      const html = `
+        <html lang="fr">
+        </html>
+      `;
+      const { textLanguage } = await extract.extractMetadata(
+        "https://example.com",
+        html,
+      );
+      expect(textLanguage).toBe("fr");
     });
   });
 });

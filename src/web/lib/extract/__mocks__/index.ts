@@ -11,6 +11,7 @@ export const MOCK_METADATA: ExtractedMetadata = {
   favicon: "test favicon",
   publishedAt: new Date("2024-01-10T12:50:00-08:00"),
   textDirection: TextDirection.LTR,
+  textLanguage: "en",
 };
 
 export class Extract {
@@ -29,6 +30,7 @@ export class Extract {
       favicon: null,
       publishedAt: null,
       textDirection: TextDirection.LTR,
+      textLanguage: "en",
     };
   }
 }
@@ -53,6 +55,7 @@ export const extractMetadata = vi
     favicon: null,
     publishedAt: null,
     textDirection: TextDirection.LTR,
+    textLanguage: "en",
   }));
 
 // Set default mock values

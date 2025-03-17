@@ -276,6 +276,7 @@ export async function POST(
           thumbnail: item.metadata?.thumbnail || sql`NULL`,
           favicon: item.metadata?.favicon || sql`NULL`,
           textDirection: item.metadata?.textDirection || TextDirection.LTR,
+          textLanguage: item.metadata?.textLanguage || "",
           publishedAt: item.metadata?.publishedAt
             ? new Date(item.metadata.publishedAt)
             : sql`NULL`,
@@ -304,6 +305,7 @@ export async function POST(
             thumbnail: sql`COALESCE(EXCLUDED.thumbnail, ${profileItems.thumbnail})`,
             favicon: sql`COALESCE(EXCLUDED.favicon, ${profileItems.favicon})`,
             textDirection: sql`COALESCE(EXCLUDED.text_direction, ${profileItems.textDirection})`,
+            textLanguage: sql`COALESCE(EXCLUDED.text_language, ${profileItems.textLanguage})`,
             publishedAt: sql`COALESCE(EXCLUDED.published_at, ${profileItems.publishedAt})`,
             stateUpdatedAt: sql`CASE
               WHEN EXCLUDED.state <> profile_items.state
@@ -323,6 +325,7 @@ export async function POST(
           thumbnail: profileItems.thumbnail,
           favicon: profileItems.favicon,
           textDirection: profileItems.textDirection,
+          textLanguage: profileItems.textLanguage,
           publishedAt: profileItems.publishedAt,
           savedAt: profileItems.savedAt,
           state: profileItems.state,

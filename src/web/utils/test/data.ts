@@ -90,6 +90,7 @@ export const MOCK_PROFILE_ITEMS = [
     favicon: "https://example.com/favicon1.ico",
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
     savedAt: new Date("2025-01-10T12:52:56-08:00"),
+    textLanguage: "en",
   },
   {
     id: "123e4567-e89b-12d3-a456-426614174998",
@@ -105,6 +106,7 @@ export const MOCK_PROFILE_ITEMS = [
     favicon: "https://example.com/favicon2.ico",
     publishedAt: new Date("2025-01-10T12:52:57-08:00"),
     savedAt: new Date("2025-01-10T12:52:57-08:00"),
+    textLanguage: "en",
   },
   {
     id: "123e4567-e89b-12d3-a456-426614174997",
@@ -123,6 +125,7 @@ export const MOCK_PROFILE_ITEMS = [
     readingProgress: 10,
     lastReadAt: new Date("2025-01-15T12:00:00-08:00"),
     versionName: "2024-01-01",
+    textLanguage: "en",
   },
   {
     id: "123e4567-e89b-12d3-a456-426614174996",
@@ -137,6 +140,7 @@ export const MOCK_PROFILE_ITEMS = [
     savedAt: new Date("2025-01-10T12:52:59-08:00"),
     state: ItemState.DELETED,
     stateUpdatedAt: new Date("2024-04-12T12:52:59-08:00"),
+    textLanguage: "de",
   },
   {
     id: "123e4567-e89b-12d3-a456-426614174995",
@@ -150,6 +154,7 @@ export const MOCK_PROFILE_ITEMS = [
     publishedAt: new Date("2025-01-10T12:55:56-08:00"),
     savedAt: new Date("2025-01-10T12:55:56-08:00"),
     stateUpdatedAt: new Date("2024-05-31T12:55:55-08:00"),
+    textLanguage: "en",
   },
 ];
 

@@ -212,7 +212,9 @@ export class Storage {
     if (!data.metadata.textDirection) {
       data.metadata.textDirection = TextDirection.LTR;
     }
-
+    if (!data.metadata.textLanguage) {
+      data.metadata.textLanguage = "";
+    }
     return data.metadata as VersionMetadata;
   }
 }
