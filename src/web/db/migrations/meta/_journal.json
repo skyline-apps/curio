@@ -211,6 +211,13 @@
       "when": 1742186931727,
       "tag": "0029_add-slug-index",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1742194316695,
+      "tag": "0030_add-text-language",
+      "breakpoints": true
     }
   ]
 }

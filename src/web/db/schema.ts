@@ -219,6 +219,7 @@ export const profileItems = pgTable(
     textDirection: textDirection("text_direction")
       .notNull()
       .default(TextDirection.LTR),
+    textLanguage: text("text_language"),
   },
   (table) => ({
     profileForeignKey: foreignKey({
