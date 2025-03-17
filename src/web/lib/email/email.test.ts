@@ -394,7 +394,21 @@ https://substack.com/another-post-weekly?param2=value2
       expect(result.description!).not.toContain("Previous message");
     });
 
-    it("should detect rtl characters on Hebrew and set textDirection", () => {
+    it("should set text attributes on Japanese", () => {
+      const result = extractMetadataFromEmail(
+        makeTestEmail(
+          "sender@example.com",
+          "Sender",
+          "Subject",
+          "これは日本語のメールです",
+          {},
+        ),
+      );
+      expect(result.textDirection).toBe(TextDirection.LTR);
+      expect(result.textLanguage).toBe("ja");
+    });
+
+    it("should detect rtl characters on Hebrew and set text attributes", () => {
       const result = extractMetadataFromEmail(
         makeTestEmail(
           "sender@example.com",
@@ -405,9 +419,10 @@ https://substack.com/another-post-weekly?param2=value2
         ),
       );
       expect(result.textDirection).toBe(TextDirection.RTL);
+      expect(result.textLanguage).toBe("he");
     });
 
-    it("should detect rtl characters on Arabic and set textDirection", () => {
+    it("should detect rtl characters on Arabic and set text attributes", () => {
       const result = extractMetadataFromEmail(
         makeTestEmail(
           "sender@example.com",
@@ -418,6 +433,7 @@ https://substack.com/another-post-weekly?param2=value2
         ),
       );
       expect(result.textDirection).toBe(TextDirection.RTL);
+      expect(result.textLanguage).toBe("ar");
     });
   });
 });

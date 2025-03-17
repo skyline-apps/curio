@@ -1,3 +1,5 @@
+import { franc } from "franc";
+import { iso6393To1 } from "iso-639-3";
 import { type ParsedMail, simpleParser } from "mailparser";
 
 import { TextDirection } from "@/db/schema";
@@ -284,6 +286,15 @@ export function extractMetadataFromEmail({
     }
   }
 
+  let language = "";
+  const language3 = franc(cleanedContent);
+  if (language3 === "arb") {
+    // Handle standard Arabic separately
+    language = "ar";
+  } else if (language3) {
+    language = iso6393To1[language3];
+  }
+
   const snippet = cleanedContent.substring(0, 100).trim();
   return {
     title: subject,
@@ -294,5 +305,6 @@ export function extractMetadataFromEmail({
     favicon: null,
     publishedAt,
     textDirection,
+    textLanguage: language,
   };
 }
