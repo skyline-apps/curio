@@ -1,6 +1,5 @@
 "use client";
-import posthog from "posthog-js";
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useState } from "react";
 
 import { type UpdateEmailResponse } from "@/app/api/v1/user/email/validation";
 import { type UpdateUsernameResponse } from "@/app/api/v1/user/username/validation";
@@ -42,15 +41,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({
   user,
 }: UserProviderProps): React.ReactNode => {
   const [currentUser, setCurrentUser] = useState<User>(user);
-
-  useEffect(() => {
-    if (currentUser.id) {
-      posthog.identify(currentUser.id, {
-        username: currentUser.username,
-        email: currentUser.email,
-      });
-    }
-  }, [currentUser.id, currentUser.username, currentUser.email]);
 
   const clearUser = (): void => {
     setCurrentUser({

@@ -14,6 +14,7 @@ import type {
 } from "@/app/api/v1/user/settings/validation";
 import { showConfirm } from "@/components/ui/Modal/Dialog";
 import { useToast } from "@/providers/ToastProvider";
+import { UserContext } from "@/providers/UserProvider";
 import { handleAPIResponse } from "@/utils/api";
 import {
   initializeTheme,
@@ -72,6 +73,7 @@ enum LabelAction {
 export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   children,
 }: SettingsProviderProps): React.ReactNode => {
+  const { user } = useContext(UserContext);
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
@@ -180,12 +182,16 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     if (!currentSettings) {
       return;
     }
-    if (currentSettings.analyticsTracking) {
+    if (currentSettings.analyticsTracking && user.id) {
       posthog.opt_in_capturing();
+      posthog.identify(user.id, {
+        username: user.username,
+        email: user.email,
+      });
     } else {
       posthog.opt_out_capturing();
     }
-  }, [currentSettings?.analyticsTracking]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentSettings?.analyticsTracking, user.id, user.username]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateSettings = async (
     field: keyof SettingsResponse,
