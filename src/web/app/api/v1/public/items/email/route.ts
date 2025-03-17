@@ -89,14 +89,14 @@ export async function POST(
       const itemId = item[0].id;
       const newDate = new Date();
 
-      const markdownContent = await extractMainContentAsMarkdown(
+      const { content, textDirection } = await extractMainContentAsMarkdown(
         itemUrl,
         email.htmlContent || email.content,
       );
 
       const { versionName, status } = await storage.uploadItemContent(
         itemSlug,
-        markdownContent,
+        content,
         metadata,
       );
       const response: UploadEmailResponse = UploadEmailResponseSchema.parse({
@@ -122,7 +122,7 @@ export async function POST(
           itemId,
           metadata,
           newDate,
-          ItemSource.EMAIL,
+          { textDirection, source: ItemSource.EMAIL },
         );
 
         // Index profile item with new main content
@@ -133,7 +133,7 @@ export async function POST(
             title: metadata.title || itemUrl,
             description: metadata.description ?? undefined,
             author: metadata.author ?? undefined,
-            content: markdownContent,
+            content,
             contentVersionName: versionName,
           },
         ]);
@@ -157,7 +157,7 @@ export async function POST(
           itemId,
           newMetadata,
           newDate,
-          ItemSource.EMAIL,
+          { textDirection, source: ItemSource.EMAIL },
         );
         return APIResponseJSON(response);
       } else {

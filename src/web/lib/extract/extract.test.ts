@@ -21,11 +21,10 @@ describe("Extract", () => {
         path.join(fixturesPath, "simple.html"),
         "utf-8",
       );
-      const markdown = await extract.extractMainContentAsMarkdown(
-        "http://example.com",
-        html,
-      );
-      const lines = markdown.split("\n");
+      const { content, textDirection } =
+        await extract.extractMainContentAsMarkdown("http://example.com", html);
+      expect(textDirection).toBe("ltr");
+      const lines = content.split("\n");
       expect(lines[0]).toBe("## Main Content");
       expect(lines[1]).toBe("");
       expect(lines[2]).toBe(
@@ -37,8 +36,8 @@ describe("Extract", () => {
       expect(lines[6]).toBe("-   List item 1");
       expect(lines[7]).toBe("-   List item 2");
 
-      expect(markdown).not.toContain("Menu items that should be ignored");
-      expect(markdown).not.toContain("Footer content that should be ignored");
+      expect(content).not.toContain("Menu items that should be ignored");
+      expect(content).not.toContain("Footer content that should be ignored");
     });
 
     it("should handle complex HTML with nested elements and code blocks", async () => {
@@ -47,12 +46,12 @@ describe("Extract", () => {
         "utf-8",
       );
 
-      const markdown = await extract.extractMainContentAsMarkdown(
+      const { content } = await extract.extractMainContentAsMarkdown(
         "http://example.com",
         html,
       );
 
-      expect(markdown).toBe(`## Complex Article
+      expect(content).toBe(`## Complex Article
 
 This is a more complex article with _various_ formatting and \`code blocks\`.
 
@@ -69,9 +68,9 @@ function test() {
 
 ![Complex test image](http://example.com/complex.jpg)`);
 
-      expect(markdown).not.toContain("Navigation that should be ignored");
-      expect(markdown).not.toContain("Sidebar content to ignore");
-      expect(markdown).not.toContain("Aside content to ignore");
+      expect(content).not.toContain("Navigation that should be ignored");
+      expect(content).not.toContain("Sidebar content to ignore");
+      expect(content).not.toContain("Aside content to ignore");
     });
 
     it("should extract and convert links to markdown", async () => {
@@ -80,11 +79,11 @@ function test() {
         "utf-8",
       );
 
-      const markdown = await extract.extractMainContentAsMarkdown(
+      const { content } = await extract.extractMainContentAsMarkdown(
         "http://host.com",
         html,
       );
-      const lines = markdown.split("\n");
+      const lines = content.split("\n");
 
       expect(lines[0]).toBe("[Link with href](https://example.com/)  ");
       expect(lines[1]).toBe(
@@ -111,11 +110,11 @@ function test() {
         "utf-8",
       );
 
-      const markdown = await extract.extractMainContentAsMarkdown(
+      const { content } = await extract.extractMainContentAsMarkdown(
         "http://host.com",
         html,
       );
-      const lines = markdown.split("\n");
+      const lines = content.split("\n");
 
       expect(lines[0]).toBe("## My blog pictures");
       expect(lines[1]).toBe("");
@@ -135,11 +134,11 @@ function test() {
         "utf-8",
       );
 
-      const markdown = await extract.extractMainContentAsMarkdown(
+      const { content } = await extract.extractMainContentAsMarkdown(
         "http://host.com",
         html,
       );
-      const lines = markdown.split("\n");
+      const lines = content.split("\n");
 
       expect(lines[0]).toBe("## Main Content");
       expect(lines[2]).toBe("## Header [Link](https://example.com/)");
@@ -163,11 +162,10 @@ function test() {
         "utf-8",
       );
 
-      const markdown = await extract.extractMainContentAsMarkdown(
-        "http://host.com",
-        html,
-      );
-      const lines = markdown.split("\n");
+      const { content, textDirection } =
+        await extract.extractMainContentAsMarkdown("http://host.com", html);
+      expect(textDirection).toBe("rtl");
+      const lines = content.split("\n");
       expect(lines[0]).toBe('<div dir="rtl">');
       expect(lines[1]).toBe("");
       expect(lines[2]).toBe("## هذه صفحة عربية");
@@ -183,11 +181,10 @@ function test() {
         "utf-8",
       );
 
-      const markdown = await extract.extractMainContentAsMarkdown(
-        "http://host.com",
-        html,
-      );
-      const lines = markdown.split("\n");
+      const { content, textDirection } =
+        await extract.extractMainContentAsMarkdown("http://host.com", html);
+      expect(textDirection).toBe("rtl");
+      const lines = content.split("\n");
       expect(lines[0]).toBe('<div dir="rtl">');
       expect(lines[1]).toBe("");
       expect(lines[2]).toBe("## هذه صفحة عربية");
@@ -203,11 +200,10 @@ function test() {
         "utf-8",
       );
 
-      const markdown = await extract.extractMainContentAsMarkdown(
-        "http://host.com",
-        html,
-      );
-      const lines = markdown.split("\n");
+      const { content, textDirection } =
+        await extract.extractMainContentAsMarkdown("http://host.com", html);
+      expect(textDirection).toBe("ltr");
+      const lines = content.split("\n");
       expect(lines[0]).toBe('<h2 dir="rtl" >هذه هي اللغة العربية!</h2>');
       expect(lines[1]).toBe("");
       expect(lines[2]).toBe("This is an English opening paragraph.");

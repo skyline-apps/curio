@@ -10,6 +10,8 @@ import {
 } from "schema-dts";
 import TurndownService, { Node as TurndownNode } from "turndown";
 
+import { TextDirection } from "@/db/schema";
+
 import { ExtractedMetadata, ExtractError, MetadataError } from "./types";
 
 function isElementNode(
@@ -378,19 +380,25 @@ export class Extract {
   async extractMainContentAsMarkdown(
     url: string,
     html: string,
-  ): Promise<string> {
+  ): Promise<{ content: string; textDirection: TextDirection }> {
     try {
       const dom = new JSDOM(html, { url });
       const htmlElement = dom.window.document.querySelector("html");
       const bodyElement = dom.window.document.querySelector("body");
-      let documentDir = "ltr"; // Default to LTR
+      let documentDir = TextDirection.LTR; // Default to LTR
 
       if (htmlElement && htmlElement.hasAttribute("dir")) {
-        documentDir = htmlElement.getAttribute("dir") || documentDir;
+        const dir = htmlElement.getAttribute("dir");
+        if (dir === "rtl") {
+          documentDir = TextDirection.RTL;
+        }
       }
 
       if (bodyElement && bodyElement.hasAttribute("dir")) {
-        documentDir = bodyElement.getAttribute("dir") || documentDir;
+        const dir = bodyElement.getAttribute("dir");
+        if (dir === "rtl") {
+          documentDir = TextDirection.RTL;
+        }
       }
 
       const reader = new Readability(dom.window.document);
@@ -401,9 +409,12 @@ export class Extract {
 
       const content = turndown.turndown(article.content);
       if (documentDir !== "ltr") {
-        return `<div dir="${documentDir}">\n\n${content}\n\n</div>`;
+        return {
+          content: `<div dir="${documentDir}">\n\n${content}\n\n</div>`,
+          textDirection: documentDir,
+        };
       }
-      return content;
+      return { content, textDirection: documentDir };
     } catch (error) {
       throw error instanceof Error ? error : new Error(String(error));
     }

@@ -88,13 +88,13 @@ export async function POST(
       } else {
         metadata = await extractMetadata(cleanedUrl, htmlContent);
       }
-      const markdownContent = await extractMainContentAsMarkdown(
+      const { content, textDirection } = await extractMainContentAsMarkdown(
         cleanedUrl,
         htmlContent,
       );
       const { versionName, status } = await storage.uploadItemContent(
         slug,
-        markdownContent,
+        content,
         metadata,
       );
 
@@ -123,6 +123,7 @@ export async function POST(
           item[0].id,
           metadata,
           newDate,
+          { textDirection },
         );
 
         // Index profile item with new main content
@@ -133,7 +134,7 @@ export async function POST(
             title: metadata.title || item[0].url,
             description: metadata.description ?? undefined,
             author: metadata.author ?? undefined,
-            content: markdownContent,
+            content: content,
             contentVersionName: versionName,
           },
         ]);
@@ -157,6 +158,7 @@ export async function POST(
           item[0].id,
           newMetadata,
           newDate,
+          { textDirection },
         );
         return APIResponseJSON(response);
       } else {

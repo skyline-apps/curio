@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 
+import { TextDirection } from "@/db/schema";
 import { ExtractedMetadata } from "@/lib/extract/types";
 
 export const MOCK_METADATA: ExtractedMetadata = {
@@ -12,8 +13,11 @@ export const MOCK_METADATA: ExtractedMetadata = {
 };
 
 export class Extract {
-  async extractMainContentAsMarkdown(_url: string): Promise<string> {
-    return "";
+  async extractMainContentAsMarkdown(
+    _url: string,
+    _html: string,
+  ): Promise<{ content: string; textDirection: TextDirection }> {
+    return { content: "", textDirection: TextDirection.LTR };
   }
   async extractMetadata(_url: string): Promise<ExtractedMetadata> {
     return {
@@ -33,7 +37,10 @@ export const extract = new Extract();
 // Create spies for each method
 export const extractMainContentAsMarkdown = vi
   .spyOn(extract, "extractMainContentAsMarkdown")
-  .mockImplementation(async () => "");
+  .mockImplementation(async () => ({
+    content: "",
+    textDirection: TextDirection.LTR,
+  }));
 
 export const extractMetadata = vi
   .spyOn(extract, "extractMetadata")
@@ -47,6 +54,9 @@ export const extractMetadata = vi
   }));
 
 // Set default mock values
-extractMainContentAsMarkdown.mockResolvedValue("Markdown content");
+extractMainContentAsMarkdown.mockResolvedValue({
+  content: "Markdown content",
+  textDirection: TextDirection.LTR,
+});
 
 extractMetadata.mockResolvedValue(MOCK_METADATA);
