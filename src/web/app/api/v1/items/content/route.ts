@@ -12,7 +12,7 @@ import { StorageError, UploadStatus } from "@/lib/storage/types";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
 import { createLogger } from "@/utils/logger";
-import { cleanUrl } from "@/utils/url";
+import { cleanUrl, generateSlug } from "@/utils/url";
 
 import { updateProfileItem } from "./updateProfileItem";
 import {
@@ -40,16 +40,38 @@ export async function POST(
 
   const { url, htmlContent, skipMetadataExtraction } = data;
 
+  if (!url || !htmlContent) {
+    return APIResponseJSON(
+      { error: "URL and HTML content are required." },
+      { status: 400 },
+    );
+  }
+
   try {
     const cleanedUrl = cleanUrl(url);
+    let slug: string = generateSlug(cleanedUrl);
+    let metadata: ExtractedMetadata;
+    const newDate = new Date();
 
     return await db.transaction(async (tx) => {
       const item = await tx
-        .select({
-          id: items.id,
-          slug: items.slug,
-          url: items.url,
-          metadata: {
+        .insert(items)
+        .values({
+          slug,
+          url: cleanedUrl,
+        })
+        .onConflictDoUpdate({
+          target: [items.url],
+          set: {
+            updatedAt: newDate,
+          },
+        })
+        .returning({ id: items.id, slug: items.slug, url: items.url });
+      slug = item[0].slug;
+
+      if (skipMetadataExtraction) {
+        const itemMetadata = await tx
+          .select({
             title: profileItems.title,
             description: profileItems.description,
             author: profileItems.author,
@@ -58,40 +80,27 @@ export async function POST(
             publishedAt: profileItems.publishedAt,
             textDirection: profileItems.textDirection,
             textLanguage: profileItems.textLanguage,
-          },
-        })
-        .from(items)
-        .innerJoin(profileItems, eq(items.id, profileItems.itemId))
-        .where(
-          and(
-            eq(items.url, cleanedUrl),
-            eq(profileItems.profileId, profileResult.profile.id),
-          ),
-        )
-        .limit(1);
-
-      if (!item.length) {
-        return APIResponseJSON({ error: "Item not found." }, { status: 404 });
-      }
-
-      const slug = item[0].slug;
-
-      const newDate = new Date();
-      let metadata: ExtractedMetadata;
-      if (skipMetadataExtraction) {
-        metadata = {
-          title: item[0].metadata.title,
-          description: item[0].metadata.description,
-          author: item[0].metadata.author,
-          thumbnail: item[0].metadata.thumbnail,
-          favicon: item[0].metadata.favicon,
-          publishedAt: item[0].metadata.publishedAt,
-          textDirection: item[0].metadata.textDirection,
-          textLanguage: item[0].metadata.textLanguage,
-        };
+          })
+          .from(profileItems)
+          .where(
+            and(
+              eq(profileItems.itemId, item[0].id),
+              eq(profileItems.profileId, profileResult.profile.id),
+            ),
+          )
+          .limit(1);
+        if (!itemMetadata.length) {
+          return APIResponseJSON(
+            { error: "Item not found and metadata not provided." },
+            { status: 404 },
+          );
+        } else {
+          metadata = itemMetadata[0];
+        }
       } else {
         metadata = await extractMetadata(cleanedUrl, htmlContent);
       }
+
       const { content } = await extractMainContentAsMarkdown(
         cleanedUrl,
         htmlContent,

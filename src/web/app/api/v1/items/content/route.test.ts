@@ -532,6 +532,58 @@ describe("/api/v1/items/content", () => {
       ]);
     });
 
+    it("should return 200 and create a new item if it doesn't exist", async () => {
+      const existingItems = await testDb.db.select().from(items);
+      expect(existingItems.length).toBe(0);
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "POST",
+        body: {
+          htmlContent: "<div>New content</div>",
+          url: TEST_ITEM_URL_1,
+        },
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+      const data = await response.json();
+      expect(data).toEqual({
+        slug: expect.any(String),
+        message: "Content updated and set as main version",
+        status: "UPDATED_MAIN",
+      });
+
+      const newItems = await testDb.db.select().from(items);
+      expect(newItems.length).toBe(1);
+      const newProfileItem = await testDb.db
+        .select()
+        .from(profileItems)
+        .where(eq(profileItems.itemId, newItems[0].id))
+        .orderBy(desc(profileItems.savedAt));
+      expect(newProfileItem.length).toBe(1);
+      expect(newProfileItem[0].title).toEqual("test title");
+      expect(newProfileItem[0].author).toEqual("kim");
+      expect(newProfileItem[0].versionName).toBe(null);
+      expect(newProfileItem[0].readingProgress).toEqual(0);
+    });
+
+    it("should return 404 if item not found and skipMetadataExtraction is true", async () => {
+      const existingItems = await testDb.db.select().from(items);
+      expect(existingItems.length).toBe(0);
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "POST",
+        body: {
+          htmlContent: "<div>New content</div>",
+          url: TEST_ITEM_URL_1,
+          skipMetadataExtraction: true,
+        },
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(404);
+      const data = await response.json();
+      expect(data.error).toBe("Item not found and metadata not provided.");
+    });
+
     it("should return 500 when content extraction fails", async () => {
       await testDb.db.insert(items).values(MOCK_ITEMS[0]);
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS[0]);
@@ -606,22 +658,7 @@ describe("/api/v1/items/content", () => {
       expect(response.status).toBe(401);
     });
 
-    it("should return 404 if item not found", async () => {
-      const request: APIRequest = makeAuthenticatedMockRequest({
-        method: "POST",
-        body: {
-          htmlContent: "<div>Updated content</div>",
-          url: TEST_ITEM_URL_1,
-        },
-      });
-
-      const response = await POST(request);
-      expect(response.status).toBe(404);
-      const data = await response.json();
-      expect(data.error).toBe("Item not found.");
-    });
-
-    it("should return 404 if url is missing", async () => {
+    it("should return 400 if url is missing", async () => {
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         body: {
@@ -631,9 +668,24 @@ describe("/api/v1/items/content", () => {
       });
 
       const response = await POST(request);
-      expect(response.status).toBe(404);
+      expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toBe("Item not found.");
+      expect(data.error).toBe("URL and HTML content are required.");
+    });
+
+    it("should return 400 if content is missing", async () => {
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "POST",
+        body: {
+          htmlContent: "",
+          url: TEST_ITEM_URL_1,
+        },
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(400);
+      const data = await response.json();
+      expect(data.error).toBe("URL and HTML content are required.");
     });
 
     it("should return 400 if content is missing", async () => {
