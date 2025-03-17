@@ -1,5 +1,5 @@
 import { COLOR_PALETTE } from "@/components/ui/Chip";
-import { ItemState } from "@/db/schema";
+import { ItemState, TextDirection } from "@/db/schema";
 
 const ITEM_METADATA = {
   thumbnail: null,
@@ -9,6 +9,8 @@ const ITEM_METADATA = {
   isFavorite: false,
   versionName: null,
   source: null,
+  textDirection: TextDirection.LTR,
+  textLanguage: "en",
 };
 
 export const sampleItems = [
