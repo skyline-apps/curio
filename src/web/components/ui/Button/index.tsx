@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, ButtonProps } from "@heroui/react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { forwardRef } from "react";
 import { useFormStatus } from "react-dom";
 
@@ -46,6 +46,7 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
     ref,
   ) => {
     let innerContent: React.ReactNode;
+    const router = useRouter();
 
     const buttonProps: ButtonProps = {
       ...props,
@@ -68,14 +69,16 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
     };
 
     if (href) {
+      const handlePress = (): void => {
+        router.push(href);
+      };
       innerContent = (
-        <Link
-          href={href}
-          passHref
+        <Button
+          ref={ref}
+          {...buttonProps}
+          onPress={handlePress}
           data-testid={props["data-testid"] || "button"}
-        >
-          <Button ref={ref} {...buttonProps} />
-        </Link>
+        />
       );
     } else {
       innerContent = (

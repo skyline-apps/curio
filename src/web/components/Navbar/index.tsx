@@ -1,7 +1,5 @@
 "use client";
 import { Navbar, NavbarBrand, NavbarContent } from "@heroui/navbar";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import React, { useContext } from "react";
 import { HiOutlineUser } from "react-icons/hi2";
 
@@ -18,13 +16,8 @@ import { useLogout } from "@/hooks/useLogout";
 import { UserContext } from "@/providers/UserProvider";
 
 const CurioNavbar: React.FC = () => {
-  const router = useRouter();
   const { user } = useContext(UserContext);
   const handleLogout = useLogout();
-
-  const handleLogin = (): void => {
-    router.push("/login");
-  };
 
   return (
     <Navbar classNames={{ wrapper: "px-4" }} isBordered maxWidth="full">
@@ -50,9 +43,7 @@ const CurioNavbar: React.FC = () => {
             </DropdownMenu>
           </Dropdown>
         ) : (
-          <Link href="/login">
-            <Button onPress={handleLogin}>Log In</Button>
-          </Link>
+          <Button href="/login">Log In</Button>
         )}
       </NavbarContent>
     </Navbar>
