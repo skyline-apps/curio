@@ -52,6 +52,7 @@ async function getDefaultContent(
           publishedAt: metadata.publishedAt,
           thumbnail: metadata.thumbnail,
           favicon: metadata.favicon,
+          textDirection: metadata.textDirection,
           savedAt: metadata.timestamp,
         },
       },

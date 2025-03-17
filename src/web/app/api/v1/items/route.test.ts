@@ -8,6 +8,7 @@ import {
   profileItemLabels,
   profileItems,
   profileLabels,
+  TextDirection,
 } from "@/db/schema";
 import { searchDocuments } from "@/lib/search";
 import { SearchError } from "@/lib/search/types";
@@ -60,6 +61,7 @@ describe("/api/v1/items", () => {
         publishedAt: "2025-01-10T20:52:56.000Z",
         thumbnail: "https://example.com/thumb1.jpg",
         favicon: "https://example.com/favicon1.ico",
+        textDirection: TextDirection.LTR,
         title: "Example 1",
         savedAt: "2025-01-10T20:52:56.000Z",
         stateUpdatedAt: "2024-04-30T20:52:59.000Z",
@@ -125,6 +127,7 @@ describe("/api/v1/items", () => {
         publishedAt: "2025-01-10T20:52:56.000Z",
         thumbnail: "https://example.com/thumb1.jpg",
         favicon: "https://example.com/favicon1.ico",
+        textDirection: TextDirection.LTR,
         title: "Example 1",
         savedAt: "2025-01-10T20:52:56.000Z",
         stateUpdatedAt: "2024-04-30T20:52:59.000Z",

@@ -10,14 +10,15 @@ export const MOCK_METADATA: ExtractedMetadata = {
   thumbnail: "test thumbnail",
   favicon: "test favicon",
   publishedAt: new Date("2024-01-10T12:50:00-08:00"),
+  textDirection: TextDirection.LTR,
 };
 
 export class Extract {
   async extractMainContentAsMarkdown(
     _url: string,
     _html: string,
-  ): Promise<{ content: string; textDirection: TextDirection }> {
-    return { content: "", textDirection: TextDirection.LTR };
+  ): Promise<{ content: string }> {
+    return { content: "" };
   }
   async extractMetadata(_url: string): Promise<ExtractedMetadata> {
     return {
@@ -27,6 +28,7 @@ export class Extract {
       thumbnail: null,
       favicon: null,
       publishedAt: null,
+      textDirection: TextDirection.LTR,
     };
   }
 }
@@ -39,7 +41,6 @@ export const extractMainContentAsMarkdown = vi
   .spyOn(extract, "extractMainContentAsMarkdown")
   .mockImplementation(async () => ({
     content: "",
-    textDirection: TextDirection.LTR,
   }));
 
 export const extractMetadata = vi
@@ -51,12 +52,12 @@ export const extractMetadata = vi
     thumbnail: null,
     favicon: null,
     publishedAt: null,
+    textDirection: TextDirection.LTR,
   }));
 
 // Set default mock values
 extractMainContentAsMarkdown.mockResolvedValue({
   content: "Markdown content",
-  textDirection: TextDirection.LTR,
 });
 
 extractMetadata.mockResolvedValue(MOCK_METADATA);

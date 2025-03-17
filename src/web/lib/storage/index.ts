@@ -1,5 +1,6 @@
 import { createHash } from "crypto";
 
+import { TextDirection } from "@/db/schema";
 import config from "@/lib/config.json";
 import { ExtractedMetadata } from "@/lib/extract/types";
 import { StorageError, UploadStatus } from "@/lib/storage/types";
@@ -205,6 +206,11 @@ export class Storage {
 
     if (!data.metadata?.title) {
       throw new StorageError("Failed to verify metadata contents");
+    }
+
+    // Backwards-compatible metadata defaults
+    if (!data.metadata.textDirection) {
+      data.metadata.textDirection = TextDirection.LTR;
     }
 
     return data.metadata as VersionMetadata;

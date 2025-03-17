@@ -1,3 +1,5 @@
+import { TextDirection } from "@/db/schema";
+
 export class ExtractError extends Error {
   constructor(message: string) {
     super(message);
@@ -19,4 +21,5 @@ export interface ExtractedMetadata {
   thumbnail: string | null;
   favicon: string | null;
   publishedAt: Date | null;
+  textDirection: TextDirection;
 }

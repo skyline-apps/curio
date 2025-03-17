@@ -51,6 +51,7 @@ export function fetchOwnItemResults<T extends Record<string, SQL>>(
         lastReadAt: profileItems.lastReadAt,
         versionName: profileItems.versionName,
         stateUpdatedAt: profileItems.stateUpdatedAt,
+        textDirection: profileItems.textDirection,
       },
       labels: LABELS_CLAUSE,
       ...additionalFields,

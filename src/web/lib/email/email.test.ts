@@ -2,6 +2,8 @@ import fs from "fs";
 import path from "path";
 import { vi } from "vitest";
 
+import { TextDirection } from "@/db/schema";
+
 import {
   extractMetadataFromEmail,
   extractUrlFromEmail,
@@ -390,6 +392,32 @@ https://substack.com/another-post-weekly?param2=value2
       expect(result.description!).not.toContain("wrote:");
       expect(result.description!).not.toContain("Sent from my");
       expect(result.description!).not.toContain("Previous message");
+    });
+
+    it("should detect rtl characters on Hebrew and set textDirection", () => {
+      const result = extractMetadataFromEmail(
+        makeTestEmail(
+          "sender@example.com",
+          "Sender",
+          "Subject",
+          "זה כתב עברי Email",
+          {},
+        ),
+      );
+      expect(result.textDirection).toBe(TextDirection.RTL);
+    });
+
+    it("should detect rtl characters on Arabic and set textDirection", () => {
+      const result = extractMetadataFromEmail(
+        makeTestEmail(
+          "sender@example.com",
+          "Sender",
+          "Subject",
+          "بريدي الإلكتروني باللغة العربية",
+          {},
+        ),
+      );
+      expect(result.textDirection).toBe(TextDirection.RTL);
     });
   });
 });

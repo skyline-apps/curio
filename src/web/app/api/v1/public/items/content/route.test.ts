@@ -8,6 +8,7 @@ import {
   profileItemLabels,
   profileItems,
   profileLabels,
+  TextDirection,
 } from "@/db/schema";
 import { getItemContent } from "@/lib/storage";
 import { MOCK_VERSION } from "@/lib/storage/__mocks__/index";
@@ -140,6 +141,7 @@ describe("/api/v1/public/items/content", () => {
             publishedAt: ORIGINAL_PUBLISHED_DATE.toISOString(),
             thumbnail: "https://example.com/thumb.jpg",
             favicon: "https://example.com/favicon.ico",
+            textDirection: TextDirection.LTR,
             title: "Example",
             savedAt: ORIGINAL_CREATION_DATE.toISOString(),
             isFavorite: true,
@@ -197,6 +199,7 @@ describe("/api/v1/public/items/content", () => {
             publishedAt: ORIGINAL_PUBLISHED_DATE.toISOString(),
             thumbnail: null,
             favicon: null,
+            textDirection: TextDirection.LTR,
             savedAt: MOCK_VERSION,
           },
         },
@@ -276,6 +279,7 @@ describe("/api/v1/public/items/content", () => {
             publishedAt: ORIGINAL_PUBLISHED_DATE.toISOString(),
             thumbnail: null,
             favicon: null,
+            textDirection: TextDirection.LTR,
             savedAt: MOCK_VERSION,
           },
         },

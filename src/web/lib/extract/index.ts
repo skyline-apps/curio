@@ -360,6 +360,32 @@ export class Extract {
           : null) ||
         null;
 
+      const htmlElement = dom.window.document.querySelector("html");
+      const bodyElement = dom.window.document.querySelector("body");
+      let documentDir = TextDirection.LTR; // Default to LTR
+
+      if (htmlElement && htmlElement.hasAttribute("dir")) {
+        const dir = htmlElement.getAttribute("dir");
+        if (dir === "rtl") {
+          documentDir = TextDirection.RTL;
+        }
+      }
+
+      if (bodyElement) {
+        if (bodyElement.hasAttribute("dir")) {
+          const dir = bodyElement.getAttribute("dir");
+          if (dir === "rtl") {
+            documentDir = TextDirection.RTL;
+          }
+        } else {
+          const bodyStyle = dom.window.getComputedStyle(bodyElement);
+          const bodyStyleDir = bodyStyle.getPropertyValue("direction");
+          if (bodyStyleDir === "rtl") {
+            documentDir = TextDirection.RTL;
+          }
+        }
+      }
+
       return {
         title,
         description,
@@ -367,6 +393,7 @@ export class Extract {
         thumbnail,
         favicon,
         publishedAt: publishedAt ? new Date(publishedAt) : null,
+        textDirection: documentDir,
       };
     } catch (error) {
       if (error instanceof Error) {
@@ -380,7 +407,7 @@ export class Extract {
   async extractMainContentAsMarkdown(
     url: string,
     html: string,
-  ): Promise<{ content: string; textDirection: TextDirection }> {
+  ): Promise<{ content: string }> {
     try {
       const dom = new JSDOM(html, { url });
       const htmlElement = dom.window.document.querySelector("html");
@@ -408,13 +435,12 @@ export class Extract {
       }
 
       const content = turndown.turndown(article.content);
-      if (documentDir !== "ltr") {
+      if (documentDir !== TextDirection.LTR) {
         return {
           content: `<div dir="${documentDir}">\n\n${content}\n\n</div>`,
-          textDirection: documentDir,
         };
       }
-      return { content, textDirection: documentDir };
+      return { content };
     } catch (error) {
       throw error instanceof Error ? error : new Error(String(error));
     }

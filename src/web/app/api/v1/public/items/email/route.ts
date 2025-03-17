@@ -89,7 +89,7 @@ export async function POST(
       const itemId = item[0].id;
       const newDate = new Date();
 
-      const { content, textDirection } = await extractMainContentAsMarkdown(
+      const { content } = await extractMainContentAsMarkdown(
         itemUrl,
         email.htmlContent || email.content,
       );
@@ -122,7 +122,7 @@ export async function POST(
           itemId,
           metadata,
           newDate,
-          { textDirection, source: ItemSource.EMAIL },
+          { source: ItemSource.EMAIL },
         );
 
         // Index profile item with new main content
@@ -157,7 +157,7 @@ export async function POST(
           itemId,
           newMetadata,
           newDate,
-          { textDirection, source: ItemSource.EMAIL },
+          { source: ItemSource.EMAIL },
         );
         return APIResponseJSON(response);
       } else {

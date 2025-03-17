@@ -56,6 +56,7 @@ export async function POST(
             thumbnail: profileItems.thumbnail,
             favicon: profileItems.favicon,
             publishedAt: profileItems.publishedAt,
+            textDirection: profileItems.textDirection,
           },
         })
         .from(items)
@@ -84,11 +85,12 @@ export async function POST(
           thumbnail: item[0].metadata.thumbnail,
           favicon: item[0].metadata.favicon,
           publishedAt: item[0].metadata.publishedAt,
+          textDirection: item[0].metadata.textDirection,
         };
       } else {
         metadata = await extractMetadata(cleanedUrl, htmlContent);
       }
-      const { content, textDirection } = await extractMainContentAsMarkdown(
+      const { content } = await extractMainContentAsMarkdown(
         cleanedUrl,
         htmlContent,
       );
@@ -123,7 +125,6 @@ export async function POST(
           item[0].id,
           metadata,
           newDate,
-          { textDirection },
         );
 
         // Index profile item with new main content
@@ -158,7 +159,6 @@ export async function POST(
           item[0].id,
           newMetadata,
           newDate,
-          { textDirection },
         );
         return APIResponseJSON(response);
       } else {

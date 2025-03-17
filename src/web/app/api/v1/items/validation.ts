@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { LabelSchema } from "@/app/api/v1/user/labels/validation";
-import { ItemSource, ItemState } from "@/db/schema";
+import { ItemSource, ItemState, TextDirection } from "@/db/schema";
 
 const UrlSchema = z.string().url().describe("Unique URL of the item.");
 const SlugSchema = z
@@ -54,6 +54,9 @@ export const PublicItemMetadataSchema = z.object({
     .describe(
       "The time the item was saved. Populated automatically and cannot be user-overridden.",
     ),
+  textDirection: z
+    .nativeEnum(TextDirection)
+    .describe("The text direction of the item."),
 });
 
 const ItemMetadataBaseSchema = PublicItemMetadataSchema.merge(

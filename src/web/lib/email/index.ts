@@ -1,5 +1,6 @@
 import { type ParsedMail, simpleParser } from "mailparser";
 
+import { TextDirection } from "@/db/schema";
 import { ExtractedMetadata } from "@/lib/extract/types";
 import { createLogger } from "@/utils/logger";
 import { cleanUrl, FALLBACK_HOSTNAME, getRootDomain } from "@/utils/url";
@@ -271,6 +272,18 @@ export function extractMetadataFromEmail({
     .replace(/\s+/g, " ") // Normalize whitespace
     .trim();
 
+  const rtlChars =
+    /[\u0591-\u07FF\u200F\u202B\u202E\uFB1D-\uFDFD\uFE70-\uFEFC]/g;
+
+  let textDirection = TextDirection.LTR;
+  const matches = cleanedContent.match(rtlChars);
+  if (matches && matches.length > 0) {
+    const percent = matches.length / cleanedContent.length;
+    if (percent > 0.5) {
+      textDirection = TextDirection.RTL;
+    }
+  }
+
   const snippet = cleanedContent.substring(0, 100).trim();
   return {
     title: subject,
@@ -280,5 +293,6 @@ export function extractMetadataFromEmail({
     thumbnail: null,
     favicon: null,
     publishedAt,
+    textDirection,
   };
 }

@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { vi } from "vitest";
 
+import { TextDirection } from "@/db/schema";
 import { Extract } from "@/lib/extract";
 import { ExtractError, MetadataError } from "@/lib/extract/types";
 
@@ -21,9 +22,10 @@ describe("Extract", () => {
         path.join(fixturesPath, "simple.html"),
         "utf-8",
       );
-      const { content, textDirection } =
-        await extract.extractMainContentAsMarkdown("http://example.com", html);
-      expect(textDirection).toBe("ltr");
+      const { content } = await extract.extractMainContentAsMarkdown(
+        "http://example.com",
+        html,
+      );
       const lines = content.split("\n");
       expect(lines[0]).toBe("## Main Content");
       expect(lines[1]).toBe("");
@@ -162,9 +164,10 @@ function test() {
         "utf-8",
       );
 
-      const { content, textDirection } =
-        await extract.extractMainContentAsMarkdown("http://host.com", html);
-      expect(textDirection).toBe("rtl");
+      const { content } = await extract.extractMainContentAsMarkdown(
+        "http://host.com",
+        html,
+      );
       const lines = content.split("\n");
       expect(lines[0]).toBe('<div dir="rtl">');
       expect(lines[1]).toBe("");
@@ -181,9 +184,10 @@ function test() {
         "utf-8",
       );
 
-      const { content, textDirection } =
-        await extract.extractMainContentAsMarkdown("http://host.com", html);
-      expect(textDirection).toBe("rtl");
+      const { content } = await extract.extractMainContentAsMarkdown(
+        "http://host.com",
+        html,
+      );
       const lines = content.split("\n");
       expect(lines[0]).toBe('<div dir="rtl">');
       expect(lines[1]).toBe("");
@@ -200,9 +204,10 @@ function test() {
         "utf-8",
       );
 
-      const { content, textDirection } =
-        await extract.extractMainContentAsMarkdown("http://host.com", html);
-      expect(textDirection).toBe("ltr");
+      const { content } = await extract.extractMainContentAsMarkdown(
+        "http://host.com",
+        html,
+      );
       const lines = content.split("\n");
       expect(lines[0]).toBe('<h2 dir="rtl" >هذه هي اللغة العربية!</h2>');
       expect(lines[1]).toBe("");
@@ -253,6 +258,7 @@ function test() {
         favicon: null,
         author: "John Doe",
         publishedAt: new Date("2024-01-31T08:00:00Z"),
+        textDirection: TextDirection.LTR,
       });
     });
 
@@ -294,6 +300,7 @@ function test() {
         favicon: "https://example.com/logo.jpg",
         author: "Jane Smith",
         publishedAt: new Date("2024-01-31T08:00:00Z"),
+        textDirection: TextDirection.LTR,
       });
     });
 
@@ -338,6 +345,7 @@ function test() {
         favicon: "https://example.com/logo.jpg",
         author: "Jane Smith",
         publishedAt: new Date("2024-01-31T08:00:00Z"),
+        textDirection: TextDirection.LTR,
       });
     });
 
@@ -365,6 +373,7 @@ function test() {
         thumbnail: null,
         favicon: null,
         publishedAt: null,
+        textDirection: TextDirection.LTR,
       });
     });
 
@@ -383,6 +392,7 @@ function test() {
         thumbnail: null,
         favicon: null,
         publishedAt: null,
+        textDirection: TextDirection.LTR,
       });
     });
 
@@ -484,6 +494,52 @@ function test() {
         html,
       );
       expect(favicon).toBeNull();
+    });
+
+    it("should extract text direction from html", async () => {
+      const html = `
+        <html dir="rtl">
+        </html>
+      `;
+      const { textDirection } = await extract.extractMetadata(
+        "https://example.com",
+        html,
+      );
+      expect(textDirection).toBe(TextDirection.RTL);
+    });
+
+    it("should extract text direction from body", async () => {
+      const html = `
+        <html>
+          <body dir="rtl">
+          </body>
+        </html>
+      `;
+      const { textDirection } = await extract.extractMetadata(
+        "https://example.com",
+        html,
+      );
+      expect(textDirection).toBe(TextDirection.RTL);
+    });
+
+    it("should extract text direction from style", async () => {
+      const html = `
+        <html>
+          <head>
+            <style>
+              body {
+                direction: rtl;
+              }
+            </style>
+          </head>
+          <body></body>
+        </html>
+      `;
+      const { textDirection } = await extract.extractMetadata(
+        "https://example.com",
+        html,
+      );
+      expect(textDirection).toBe(TextDirection.RTL);
     });
   });
 });

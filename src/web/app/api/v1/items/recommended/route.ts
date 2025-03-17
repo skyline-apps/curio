@@ -193,6 +193,7 @@ async function fetchPublicItemResults(
           thumbnail: metadata.thumbnail,
           favicon: metadata.favicon,
           savedAt: metadata.timestamp,
+          textDirection: metadata.textDirection,
         },
       }),
     );

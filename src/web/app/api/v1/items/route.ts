@@ -1,6 +1,6 @@
 import { and, db, desc, eq, ilike, not, or, type SQL, sql } from "@/db";
 import { fetchOwnItemResults } from "@/db/queries";
-import { items, ItemState, profileItems } from "@/db/schema";
+import { items, ItemState, profileItems, TextDirection } from "@/db/schema";
 import { searchDocuments } from "@/lib/search";
 import { SearchError } from "@/lib/search/types";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
@@ -275,6 +275,7 @@ export async function POST(
           author: item.metadata?.author || sql`NULL`,
           thumbnail: item.metadata?.thumbnail || sql`NULL`,
           favicon: item.metadata?.favicon || sql`NULL`,
+          textDirection: item.metadata?.textDirection || TextDirection.LTR,
           publishedAt: item.metadata?.publishedAt
             ? new Date(item.metadata.publishedAt)
             : sql`NULL`,
@@ -302,6 +303,7 @@ export async function POST(
             author: sql`COALESCE(EXCLUDED.author, ${profileItems.author})`,
             thumbnail: sql`COALESCE(EXCLUDED.thumbnail, ${profileItems.thumbnail})`,
             favicon: sql`COALESCE(EXCLUDED.favicon, ${profileItems.favicon})`,
+            textDirection: sql`COALESCE(EXCLUDED.text_direction, ${profileItems.textDirection})`,
             publishedAt: sql`COALESCE(EXCLUDED.published_at, ${profileItems.publishedAt})`,
             stateUpdatedAt: sql`CASE
               WHEN EXCLUDED.state <> profile_items.state
@@ -320,6 +322,7 @@ export async function POST(
           author: profileItems.author,
           thumbnail: profileItems.thumbnail,
           favicon: profileItems.favicon,
+          textDirection: profileItems.textDirection,
           publishedAt: profileItems.publishedAt,
           savedAt: profileItems.savedAt,
           state: profileItems.state,
