@@ -177,6 +177,15 @@ export enum ItemSource {
   EMAIL = "email",
 }
 
+export enum TextDirection {
+  LTR = "ltr",
+  RTL = "rtl",
+}
+export const textDirection = pgEnum("text_direction", [
+  TextDirection.LTR,
+  TextDirection.RTL,
+]);
+
 export const itemSource = pgEnum("item_source", [ItemSource.EMAIL]);
 
 export const profileItems = pgTable(
@@ -206,6 +215,9 @@ export const profileItems = pgTable(
       .defaultNow(),
     versionName: text("version_name"),
     source: itemSource("source"),
+    textDirection: textDirection("text_direction")
+      .notNull()
+      .default(TextDirection.LTR),
   },
   (table) => ({
     profileForeignKey: foreignKey({
