@@ -104,4 +104,4 @@ To clear the database, run
     - `SMTP_PASS=password`
     - `SMTP_SENDER_EMAIL=admin@example.com`
     - `SMTP_SENDER_NAME=Curio`
-  - In production, use the SendGrid API SMTP information on the Supabase auth SMTP settings.
+  - In production, use the SendGrid API SMTP information on the Supabase auth SMTP settings. Populate the email templates using `src/email/templates`.
