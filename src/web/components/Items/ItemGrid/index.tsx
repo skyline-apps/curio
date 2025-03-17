@@ -18,6 +18,7 @@ interface ItemGridProps {
   onLoadMore?: () => void;
   hasMore?: boolean;
   isLoading?: boolean;
+  emptyMessage?: string;
 }
 
 // Keep in sync with dimensions of ItemCard/index.tsx
@@ -30,6 +31,7 @@ const ItemGrid: React.FC<ItemGridProps> = ({
   onLoadMore,
   hasMore = false,
   isLoading = false,
+  emptyMessage,
 }: ItemGridProps) => {
   const parentRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef(false);
@@ -103,6 +105,14 @@ const ItemGrid: React.FC<ItemGridProps> = ({
 
     return () => observer.disconnect();
   }, []);
+
+  if (items.length === 0) {
+    return (
+      <div className="w-full flex justify-center my-8 text-sm text-secondary">
+        {emptyMessage}
+      </div>
+    );
+  }
 
   return (
     <div

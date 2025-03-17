@@ -59,6 +59,7 @@ const Profile: React.FC<ProfileProps> = ({ username }: ProfileProps) => {
           onLoadMore={() => fetchItems()}
           hasMore={hasNextPage}
           isLoading={isFetchingNextPage}
+          emptyMessage="No favorites yet."
         />
       </div>
     </div>
