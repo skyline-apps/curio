@@ -1,7 +1,12 @@
 import { vi } from "vitest";
 
 import { desc, eq } from "@/db";
-import { items, profileItemHighlights, profileItems } from "@/db/schema";
+import {
+  items,
+  profileItemHighlights,
+  profileItems,
+  TextDirection,
+} from "@/db/schema";
 import { extractMainContentAsMarkdown, extractMetadata } from "@/lib/extract";
 import { MOCK_METADATA } from "@/lib/extract/__mocks__/index";
 import { ExtractError, MetadataError } from "@/lib/extract/types";
@@ -354,6 +359,8 @@ describe("/api/v1/items/content", () => {
         thumbnail: null,
         favicon: null,
         publishedAt: null,
+        textDirection: TextDirection.LTR,
+        textLanguage: null,
       });
       vi.mocked(getItemContent).mockResolvedValueOnce({
         version: null,
@@ -421,6 +428,8 @@ describe("/api/v1/items/content", () => {
         thumbnail: null,
         favicon: null,
         publishedAt: null,
+        textDirection: TextDirection.LTR,
+        textLanguage: null,
       });
       vi.mocked(getItemContent).mockResolvedValueOnce({
         version: null,
