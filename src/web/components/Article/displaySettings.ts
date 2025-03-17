@@ -1,9 +1,50 @@
+import { lookup } from "bcp-47-match";
+
 import { DisplayFont, DisplayFontSize, DisplayLineHeight } from "@/db/schema";
 
-export const displayFontClass = {
-  [DisplayFont.MONO]: "font-mono",
-  [DisplayFont.SANS]: "font-sans",
-  [DisplayFont.SERIF]: "font-serif",
+export const getDisplayFontClass = (
+  font: DisplayFont,
+  language: string,
+): string => {
+  const arabic = !!lookup([language], "ar");
+  const other = !!lookup(
+    [language],
+    [
+      "ru",
+      "uk",
+      "be",
+      "bg",
+      "sr",
+      "mk",
+      "me",
+      "kk",
+      "ky",
+      "tg",
+      "mn",
+      "el",
+      "vi",
+    ],
+  );
+  switch (font) {
+    case DisplayFont.MONO:
+      return arabic
+        ? "font-mono-arabic"
+        : other
+          ? "font-mono-other"
+          : "font-mono";
+    case DisplayFont.SANS:
+      return arabic
+        ? "font-sans-arabic"
+        : other
+          ? "font-sans-other"
+          : "font-sans";
+    case DisplayFont.SERIF:
+      return arabic
+        ? "font-serif-arabic"
+        : other
+          ? "font-serif-other"
+          : "font-serif";
+  }
 };
 
 export const displayFontSizeClass = {

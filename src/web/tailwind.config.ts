@@ -14,14 +14,20 @@ const config: Config = {
   content: [
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./styles/**/*.{js,ts,jsx,tsx,mdx}",
     "./providers/**/*.{js,ts,jsx,tsx,mdx}",
     "./node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     fontFamily: {
-      sans: ["var(--font-sans)", "sans-serif"],
-      serif: ["var(--font-serif)", "sans-serif"],
-      mono: ["var(--font-mono)", "monospace"],
+      sans: [
+        "var(--font-sans-arabic)",
+        "var(--font-sans-other)",
+        "var(--font-sans-default)",
+        "sans-serif",
+      ],
+      serif: ["var(--font-serif-default)", "serif"],
+      mono: ["var(--font-mono-default)", "monospace"],
     },
     extend: {
       animation: {

@@ -5,10 +5,10 @@ import React, { useContext, useEffect } from "react";
 
 import Article from "@/components/Article";
 import {
-  displayFontClass,
   displayFontSizeClass,
   displayHeaderSizeClass,
   displayLineHeightClass,
+  getDisplayFontClass,
 } from "@/components/Article/displaySettings";
 import { Progress } from "@/components/ui/Progress";
 import {
@@ -28,7 +28,11 @@ const ItemPage: React.FC = () => {
   const { settings } = useSettings();
   const { displayFont, displayFontSize, displayLineHeight } = settings || {};
 
-  const fontClass = displayFontClass[displayFont || DisplayFont.SANS];
+  const fontClass = getDisplayFontClass(
+    displayFont || DisplayFont.SANS,
+    loadedItem?.item.metadata.textLanguage || "",
+  );
+
   const headerSizeClass =
     displayHeaderSizeClass[displayFontSize || DisplayFontSize.MD];
   const proseSizeClass =

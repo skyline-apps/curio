@@ -1,9 +1,9 @@
 import "./globals.css";
 
 import type { Metadata } from "next";
-import { Noto_Sans, Noto_Sans_Mono, Noto_Serif } from "next/font/google";
 import React from "react";
 
+import { monoFonts, sansFonts, serifFonts } from "@/app/styles/fonts";
 import Providers from "@/providers";
 
 export const metadata: Metadata = {
@@ -16,34 +16,17 @@ interface RootLayoutProps extends React.PropsWithChildren {
   modal: React.ReactNode;
 }
 
-const sans = Noto_Sans({
-  display: "swap",
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
-
-const serif = Noto_Serif({
-  display: "swap",
-  subsets: ["latin"],
-  variable: "--font-serif",
-});
-
-const mono = Noto_Sans_Mono({
-  display: "swap",
-  subsets: ["latin"],
-  variable: "--font-mono",
-});
-
 const RootLayout: React.FC<RootLayoutProps> = ({
   children,
   modal,
 }: RootLayoutProps) => {
+  const fontClasses = [
+    ...sansFonts.map((font) => font.variable),
+    ...serifFonts.map((font) => font.variable),
+    ...monoFonts.map((font) => font.variable),
+  ];
   return (
-    <html
-      lang="en"
-      className={`${sans.variable} ${serif.variable} ${mono.variable}`}
-      suppressHydrationWarning
-    >
+    <html lang="en" className={fontClasses.join(" ")} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
