@@ -2,7 +2,9 @@ import Link from "next/link";
 
 import Thumbnail from "@/components/Image/Thumbnail";
 import Card from "@/components/ui/Card";
+import { TextDirection } from "@/db/schema";
 import { type Item, type PublicItem } from "@/providers/ItemsProvider";
+import { cn } from "@/utils/cn";
 
 interface ItemCardProps {
   item: PublicItem | Item;
@@ -15,7 +17,12 @@ const ItemCard: React.FC<ItemCardProps> = ({
 }: ItemCardProps) => {
   // Keep card dimensions in sync with ItemGrid/index.tsx
   return (
-    <Card className="shrink-0 w-72 h-96 p-2" isPressable onPress={onPress}>
+    <Card
+      className="shrink-0 w-72 h-96 p-2"
+      isPressable
+      onPress={onPress}
+      dir={item.metadata.textDirection}
+    >
       <Thumbnail
         key={item.metadata.thumbnail}
         thumbnail={
@@ -41,12 +48,19 @@ const ItemCard: React.FC<ItemCardProps> = ({
           </Link>
         ) : (
           <Link
-            className="hover:underline"
+            className="hover:underline w-full"
             href={item.url}
             target="_blank"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="text-sm text-primary overflow-hidden truncate">
+            <p
+              dir="ltr"
+              className={cn(
+                "text-sm text-primary overflow-hidden truncate",
+                item.metadata.textDirection === TextDirection.RTL &&
+                  "text-right",
+              )}
+            >
               {item.url}
             </p>
           </Link>
