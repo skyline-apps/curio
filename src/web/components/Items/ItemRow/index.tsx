@@ -40,6 +40,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
   return (
     <div
       key={item.id}
+      dir={item.metadata.textDirection}
       className={cn(
         "w-full group flex flex-row bg-background-400 pl-4 pr-1 py-1 h-16 rounded-sm overflow-hidden hover:bg-background-300 data-[selected=true]:bg-background-300 data-[focus=true]:outline-focus data-[focus=true]:outline",
         startPos !== undefined && "absolute top-0 left-0",

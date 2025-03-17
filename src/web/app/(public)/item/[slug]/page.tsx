@@ -11,7 +11,12 @@ import {
   displayLineHeightClass,
 } from "@/components/Article/displaySettings";
 import { Progress } from "@/components/ui/Progress";
-import { DisplayFont, DisplayFontSize, DisplayLineHeight } from "@/db/schema";
+import {
+  DisplayFont,
+  DisplayFontSize,
+  DisplayLineHeight,
+  TextDirection,
+} from "@/db/schema";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import { useSettings } from "@/providers/SettingsProvider";
 import { cn } from "@/utils/cn";
@@ -69,7 +74,10 @@ const ItemPage: React.FC = () => {
               fontClass,
             )}
           >
-            <h1 className={cn("font-medium mb-2", headerSizeClass)}>
+            <h1
+              className={cn("font-medium mb-2", headerSizeClass)}
+              dir={metadata?.textDirection}
+            >
               {metadata?.title}
             </h1>
             {loadingError ? (
@@ -85,7 +93,12 @@ const ItemPage: React.FC = () => {
               </p>
             )}
             <hr className="border-secondary my-4" />
-            <p className="text-sm text-secondary italic py-4">
+            <p
+              className={cn(
+                "text-sm text-secondary italic py-4",
+                metadata?.textDirection === TextDirection.RTL && "text-right",
+              )}
+            >
               {metadata?.savedAt &&
                 `Saved on ${new Date(metadata.savedAt).toLocaleString()}`}
             </p>

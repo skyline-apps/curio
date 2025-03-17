@@ -6,10 +6,12 @@ import ItemActions from "@/components/Items/ItemActions";
 import { useItemUpdate } from "@/components/Items/ItemActions/actions";
 import OtherItemActions from "@/components/Items/ItemActions/OtherItemActions";
 import Labels, { Label } from "@/components/Labels";
+import { TextDirection } from "@/db/schema";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import type { Item, PublicItem } from "@/providers/ItemsProvider";
 import { useSettings } from "@/providers/SettingsProvider";
 import { UserContext } from "@/providers/UserProvider";
+import { cn } from "@/utils/cn";
 
 interface ItemMetadataProps {
   item?: Item | PublicItem;
@@ -55,7 +57,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
   const { metadata } = item;
 
   return (
-    <div className="flex-1">
+    <div className="flex-1" dir={metadata.textDirection}>
       <Thumbnail
         key={metadata.thumbnail}
         thumbnail={metadata.thumbnail ? metadata.thumbnail : undefined}
@@ -72,7 +74,13 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
           </Link>
         ) : (
           <Link className="hover:underline" href={item.url} target="_blank">
-            <p className="text-sm text-primary overflow-hidden truncate">
+            <p
+              dir="ltr"
+              className={cn(
+                "text-sm text-primary overflow-hidden truncate",
+                metadata.textDirection === TextDirection.RTL && "text-right",
+              )}
+            >
               {item.url}
             </p>
           </Link>

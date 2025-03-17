@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 
 import { type Highlight } from "@/app/api/v1/items/highlights/validation";
@@ -80,6 +81,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
         <ReactMarkdown
           className="select-text"
           remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeRaw]}
           components={components}
         >
           {children || ""}
