@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import React from "react";
 import { vi } from "vitest";
 
@@ -115,8 +115,18 @@ describe("LandingPage", () => {
   describe("Call to Action", () => {
     it("renders the get started button with correct link", () => {
       const button = screen.getByTestId("button");
-      expect(button).toHaveAttribute("href", "/login");
       expect(button).toHaveTextContent("Get started now");
+    });
+
+    it("navigates to /login on button click", async () => {
+      const button = screen.getByTestId("button");
+      await act(async () => {
+        button.click();
+      });
+
+      const { useRouter } = await import("next/navigation");
+      const mockRouter = useRouter();
+      expect(mockRouter.push).toHaveBeenCalledWith("/login");
     });
   });
 });
