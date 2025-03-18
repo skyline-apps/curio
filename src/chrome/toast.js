@@ -1,6 +1,8 @@
-// Create and inject toast styles
-const style = document.createElement('style');
-style.textContent = `
+// Create and inject toast styles if not already present
+if (!document.querySelector('#curio-toast-styles')) {
+    const style = document.createElement('style');
+    style.id = 'curio-toast-styles';
+    style.textContent = `
   .curio-toast {
     position: fixed;
     display: flex;
@@ -43,7 +45,8 @@ style.textContent = `
     background: #5A8254;
   }
 `;
-document.head.appendChild(style);
+    document.head.appendChild(style);
+}
 
 function showToast(message, actionText = "", actionLink = "", isError = false) {
     // Remove any existing toast
