@@ -731,6 +731,34 @@ describe("/api/v1/items", () => {
       expect(data.total).toBe(2);
     });
 
+    it("should return 200 with no label filters if list is empty", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+      await testDb.db.insert(profileLabels).values(MOCK_LABELS);
+      await testDb.db
+        .insert(profileItemLabels)
+        .values(MOCK_PROFILE_ITEM_LABELS);
+
+      const params = new URLSearchParams({
+        filters: JSON.stringify({
+          labels: {
+            ids: [],
+          },
+        }),
+      });
+
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "GET",
+        url: `http://localhost:3000/api/v1/items?${params.toString()}`,
+      });
+
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data.items).toHaveLength(3);
+    });
+
     it("should return 200 with label filters specified with AND", async () => {
       await testDb.db.insert(items).values(MOCK_ITEMS);
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);

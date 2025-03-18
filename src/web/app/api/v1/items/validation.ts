@@ -26,7 +26,7 @@ const FiltersSchema = z
         isFavorite: z.boolean().optional(),
         labels: z
           .object({
-            operator: z.enum(["and", "or"]).optional().default("and"),
+            operator: z.enum(["and", "or"]).optional().default("or"),
             ids: z
               .array(z.string())
               .describe(
