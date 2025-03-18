@@ -91,7 +91,7 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
     }
 
     return tooltip ? (
-      <Tooltip delay={2000} closeDelay={0} content={tooltip}>
+      <Tooltip delay={1000} closeDelay={0} content={tooltip}>
         {innerContent}
       </Tooltip>
     ) : (

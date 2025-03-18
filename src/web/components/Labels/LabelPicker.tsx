@@ -51,6 +51,9 @@ const LabelPicker: React.FC<LabelPickerProps> = ({
     }
   };
 
+  const noLabelsDefined = availableLabels.length === 0;
+  const hasLabelsRemaining = unusedLabels.length > 0;
+
   return (
     <div className="flex flex-wrap items-center gap-2">
       {labels.map((label) => (
@@ -61,17 +64,26 @@ const LabelPicker: React.FC<LabelPickerProps> = ({
           value={label.name}
         />
       ))}
-      {!showAutocomplete && unusedLabels.length > 0 && (
-        <Button
-          ref={addButtonRef}
-          isIconOnly
-          onPress={() => setShowAutocomplete(true)}
-          size="xs"
-          isLoading={isLoading}
-        >
-          <Icon icon={<HiOutlinePlus />} />
-        </Button>
-      )}
+      {(!showAutocomplete && hasLabelsRemaining) ||
+        (noLabelsDefined && (
+          <Button
+            ref={addButtonRef}
+            isIconOnly
+            onPress={() => {
+              if (hasLabelsRemaining) {
+                setShowAutocomplete(true);
+              }
+            }}
+            size="xs"
+            isLoading={isLoading}
+            disabled={!hasLabelsRemaining}
+            tooltip={
+              noLabelsDefined ? "Define labels in Settings" : "Add label"
+            }
+          >
+            <Icon icon={<HiOutlinePlus />} />
+          </Button>
+        ))}
       {showAutocomplete && (
         <Autocomplete<Label>
           aria-label="Search labels"
