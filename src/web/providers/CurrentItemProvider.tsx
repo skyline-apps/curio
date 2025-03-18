@@ -56,7 +56,6 @@ export type CurrentItemContextType = {
   setLastSelectionIndex: (index: number | null) => void;
   draftHighlight: Highlight | NewHighlight | null;
   setDraftHighlight: (highlight: Highlight | NewHighlight | null) => void;
-  updateDraftHighlightNote: (note: string) => void;
   isEditable: (item: Item | PublicItem | null | undefined) => item is Item;
 };
 
@@ -81,7 +80,6 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
   setLastSelectionIndex: () => {},
   draftHighlight: null,
   setDraftHighlight: () => {},
-  updateDraftHighlightNote: () => {},
   isEditable: (item: Item | PublicItem | null | undefined): item is Item => {
     return item ? typeof item.profileItemId === "string" : false;
   },
@@ -275,17 +273,6 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     return data || null;
   }, [data]);
 
-  const updateDraftHighlightNote = useCallback(
-    (note: string) => {
-      if (draftHighlight === null) return;
-      setDraftHighlight({
-        ...draftHighlight,
-        note,
-      });
-    },
-    [draftHighlight],
-  );
-
   return (
     <CurrentItemContext.Provider
       value={{
@@ -305,7 +292,6 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         setLastSelectionIndex,
         draftHighlight,
         setDraftHighlight,
-        updateDraftHighlightNote,
         isEditable,
       }}
     >

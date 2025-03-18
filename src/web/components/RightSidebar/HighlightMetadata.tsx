@@ -8,18 +8,20 @@ import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import { isHighlightWithId, useRightSidebarUpdate } from "./actions";
 
 const HighlightMetadata: React.FC = (): React.ReactElement => {
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-  const { draftHighlight, updateDraftHighlightNote } =
-    useContext(CurrentItemContext);
+  const { draftHighlight } = useContext(CurrentItemContext);
   const { isDeleting, isUpdating, createOrUpdateHighlight, deleteHighlight } =
     useRightSidebarUpdate();
+  const [draftNote, setDraftNote] = useState<string>(
+    draftHighlight?.note || "",
+  );
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   const components = {
     p: ({
       children,
       ...props
     }: React.PropsWithChildren<React.HTMLAttributes<HTMLParagraphElement>>) => (
-      <p className="text-sm line-clamp-4 ellipsis" {...props}>
+      <p className="text-sm line-clamp-4 ellipsis leading-6 my-1" {...props}>
         <span className="bg-warning dark:text-default-950">{children}</span>
       </p>
     ),
@@ -27,18 +29,18 @@ const HighlightMetadata: React.FC = (): React.ReactElement => {
 
   return (
     <div className="flex flex-col gap-2 p-4 h-full">
-      <Markdown className="h-20 overflow-y-hidden" components={components}>
+      <Markdown className="h-24 overflow-y-hidden" components={components}>
         {draftHighlight?.text}
       </Markdown>
 
       {isEditing ? (
         <Textarea
           className="max-w-xs"
-          value={draftHighlight?.note || ""}
-          onValueChange={(note) => updateDraftHighlightNote(note)}
+          value={draftNote}
+          onValueChange={(note) => setDraftNote(note)}
           label="Note"
           variant="faded"
-          onClear={() => updateDraftHighlightNote("")}
+          onClear={() => setDraftNote("")}
         />
       ) : (
         <p className="text-sm text-secondary overflow-auto">
@@ -57,7 +59,7 @@ const HighlightMetadata: React.FC = (): React.ReactElement => {
             {isEditing && (
               <Button
                 size="sm"
-                onPress={createOrUpdateHighlight}
+                onPress={() => createOrUpdateHighlight(draftNote)}
                 isLoading={isUpdating}
                 color="success"
               >
@@ -77,7 +79,7 @@ const HighlightMetadata: React.FC = (): React.ReactElement => {
         ) : (
           <Button
             size="sm"
-            onPress={createOrUpdateHighlight}
+            onPress={() => createOrUpdateHighlight(draftNote)}
             isLoading={isUpdating}
             color="success"
           >
