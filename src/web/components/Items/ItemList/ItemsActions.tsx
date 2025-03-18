@@ -12,7 +12,7 @@ const ItemsActions: React.FC = (): React.ReactElement => {
   }, [fetchItems]);
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 hidden md:block">
       <Button
         size="sm"
         isIconOnly

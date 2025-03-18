@@ -2,6 +2,7 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { useContext, useEffect } from "react";
 import { LuBird, LuPartyPopper } from "react-icons/lu";
+import PullToRefresh from "react-simple-pull-to-refresh";
 
 import { ItemNavigationShortcuts } from "@/components/Items/ItemList/ItemNavigationShortcuts";
 import ItemsActions from "@/components/Items/ItemList/ItemsActions";
@@ -94,97 +95,117 @@ const ItemList: React.FC<ItemListProps> = ({}: ItemListProps) => {
     <>
       <ItemNavigationShortcuts />
       <div className="flex h-8 w-full items-center gap-2 mb-2">
-        <ItemSearch />
-        <p className="text-xs text-secondary-800">{totalItems} items</p>
+        <ItemSearch itemCount={totalItems} />
         <ItemsActions />
       </div>
-      {!isLoading && totalItems === 0 && !loadingError ? (
-        <div className="flex h-full gap-2 text-sm text-secondary-800 items-center justify-center p-4">
-          <p>Nothing here yet.</p>
-          <Icon className="text-secondary-800" icon={<LuBird />} />
-        </div>
-      ) : (
-        <div ref={parentRef} className="h-[calc(100dvh-4rem)] overflow-y-auto">
-          {loadingError ? (
-            <p className="text-sm text-secondary-800 p-4">{loadingError}</p>
-          ) : (
-            <div
-              ref={innerRef}
-              className="relative m-1"
-              style={{
-                height: `${rowVirtualizer.getTotalSize()}px`,
-              }}
-            >
-              {virtualizedItems.map((virtualRow) => {
-                const isLoaderRow = virtualRow.index > items.length - 1;
+      <PullToRefresh
+        onRefresh={async () => {
+          await fetchItems(true);
+        }}
+        pullingContent={
+          <div className="text-sm text-secondary-800 text-center py-2">
+            Pull to refresh...
+          </div>
+        }
+        refreshingContent={
+          <div className="text-sm text-secondary-800 text-center py-2">
+            Refreshing...
+          </div>
+        }
+        pullDownThreshold={67}
+        className="h-full"
+      >
+        {!isLoading && totalItems === 0 && !loadingError ? (
+          <div className="flex h-full gap-2 text-sm text-secondary-800 items-center justify-center p-4">
+            <p>Nothing here yet.</p>
+            <Icon className="text-secondary-800" icon={<LuBird />} />
+          </div>
+        ) : (
+          <div
+            ref={parentRef}
+            className="h-[calc(100dvh-4rem)] overflow-y-auto"
+          >
+            {loadingError ? (
+              <p className="text-sm text-secondary-800 p-4">{loadingError}</p>
+            ) : (
+              <div
+                ref={innerRef}
+                className="relative m-1"
+                style={{
+                  height: `${rowVirtualizer.getTotalSize()}px`,
+                }}
+              >
+                {virtualizedItems.map((virtualRow) => {
+                  const isLoaderRow = virtualRow.index > items.length - 1;
 
-                if (isLoaderRow) {
-                  return hasNextPage ? (
-                    <div
-                      key="loader"
-                      className="absolute left-0 top-0 w-full flex items-center justify-center text-secondary-800 text-sm py-4"
-                      style={{
-                        height: `${virtualRow.size}px`,
-                        transform: `translateY(${virtualRow.start}px)`,
-                      }}
-                    >
-                      Loading more...
-                    </div>
-                  ) : (
-                    !isLoading && (
+                  if (isLoaderRow) {
+                    return hasNextPage ? (
                       <div
-                        key="no-more"
-                        className="absolute left-0 top-0 w-full flex gap-2 items-center justify-center text-secondary-800 text-sm py-4"
+                        key="loader"
+                        className="absolute left-0 top-0 w-full flex items-center justify-center text-secondary-800 text-sm py-4"
                         style={{
                           height: `${virtualRow.size}px`,
                           transform: `translateY(${virtualRow.start}px)`,
                         }}
                       >
-                        <p>You&apos;re all caught up!</p>
-                        <Icon
-                          className="text-secondary-800"
-                          icon={<LuPartyPopper />}
-                        />
+                        Loading more...
                       </div>
-                    )
-                  );
-                }
+                    ) : (
+                      !isLoading && (
+                        <div
+                          key="no-more"
+                          className="absolute left-0 top-0 w-full flex gap-2 items-center justify-center text-secondary-800 text-sm py-4"
+                          style={{
+                            height: `${virtualRow.size}px`,
+                            transform: `translateY(${virtualRow.start}px)`,
+                          }}
+                        >
+                          <p>You&apos;re all caught up!</p>
+                          <Icon
+                            className="text-secondary-800"
+                            icon={<LuPartyPopper />}
+                          />
+                        </div>
+                      )
+                    );
+                  }
 
-                const item = items[virtualRow.index];
-                return (
-                  <ItemRow
-                    key={item.id}
-                    height={virtualRow.size}
-                    startPos={virtualRow.start}
-                    index={virtualRow.index}
-                    item={item}
-                    onLongPress={() => {
-                      selectItems(
-                        [item.slug],
-                        virtualRow.index,
-                        false,
-                        false,
-                        true,
-                      );
-                    }}
-                    onClick={(e: React.MouseEvent) => {
-                      e.preventDefault();
-                      const isCtrlPressed = e.ctrlKey || e.metaKey;
-                      const isShiftPressed = e.shiftKey;
-                      selectItems(
-                        [item.slug],
-                        virtualRow.index,
-                        !isCtrlPressed && !isShiftPressed,
-                        isShiftPressed,
-                      );
-                    }}
-                  />
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
+                  const item = items[virtualRow.index];
+                  return (
+                    <ItemRow
+                      key={item.id}
+                      height={virtualRow.size}
+                      startPos={virtualRow.start}
+                      index={virtualRow.index}
+                      item={item}
+                      onLongPress={() => {
+                        selectItems(
+                          [item.slug],
+                          virtualRow.index,
+                          false,
+                          false,
+                          true,
+                        );
+                      }}
+                      onClick={(e: React.MouseEvent) => {
+                        e.preventDefault();
+                        const isCtrlPressed = e.ctrlKey || e.metaKey;
+                        const isShiftPressed = e.shiftKey;
+                        selectItems(
+                          [item.slug],
+                          virtualRow.index,
+                          !isCtrlPressed && !isShiftPressed,
+                          isShiftPressed,
+                        );
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </PullToRefresh>
     </>
   );
 };

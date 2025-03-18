@@ -4,7 +4,14 @@ import { useDebouncedCallback } from "use-debounce";
 import Input from "@/components/ui/Input";
 import { ItemsContext } from "@/providers/ItemsProvider";
 
-const ItemSearch: React.FC = (): React.ReactElement => {
+
+interface ItemSearchProps {
+  itemCount: number;
+}
+
+const ItemSearch: React.FC<ItemSearchProps> = ({
+  itemCount,
+}: ItemSearchProps): React.ReactElement => {
   const [searchString, setSearchString] = useState<string>("");
   const { fetchItems, setSearchQuery } = useContext(ItemsContext);
 
@@ -27,7 +34,9 @@ const ItemSearch: React.FC = (): React.ReactElement => {
         className="grow"
         value={searchString}
         onChange={(ev) => handleSearchChange(ev.target.value)}
-        placeholder="Search items..."
+        placeholder={
+          itemCount ? `Search ${itemCount} items...` : "Search items..."
+        }
         isClearable
         onClear={() => {
           setSearchString("");
