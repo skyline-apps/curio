@@ -5,19 +5,6 @@ const API_ENDPOINTS = {
 };
 
 async function saveContent(url, htmlContent) {
-    const itemResponse = await fetch(API_ENDPOINTS.items, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ items: [{ url }] })
-    });
-
-    if (!itemResponse.ok) {
-        const text = await itemResponse.text();
-        throw new Error(`HTTP error status: ${itemResponse.status}, message: ${text}`);
-    }
-
     const contentResponse = await fetch(API_ENDPOINTS.content, {
         method: 'POST',
         headers: {
@@ -34,15 +21,61 @@ async function saveContent(url, htmlContent) {
     return contentResponse.json();
 }
 
-async function handleSaveRequest(request, sender, sendResponse) {
-    try {
-        let pageData;
+// Function to show toast using content script
+function showToast(tab, message, actionText = "", actionLink = "", isError = false) {
+    browser.tabs.sendMessage(tab.id, {
+        action: 'showToast',
+        message,
+        actionText,
+        actionLink,
+        isError
+    });
+}
 
-        if (request.targetUrl) {
-            // Handle new tab creation
+let spinnerInterval;
+const spinnerFrames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+
+async function setLoadingIcon() {
+    let frameIndex = 0;
+    // Clear any existing interval
+    if (spinnerInterval) {
+        clearInterval(spinnerInterval);
+    }
+    // Start spinner animation
+    browser.browserAction.setBadgeBackgroundColor({ color: '#759763' });
+    spinnerInterval = setInterval(() => {
+        browser.browserAction.setBadgeText({ text: spinnerFrames[frameIndex] });
+        frameIndex = (frameIndex + 1) % spinnerFrames.length;
+    }, 80); // Update every 80ms for smooth animation
+}
+
+async function resetIcon() {
+    // Stop spinner animation
+    if (spinnerInterval) {
+        clearInterval(spinnerInterval);
+        spinnerInterval = null;
+    }
+    // Clear the badge
+    browser.browserAction.setBadgeText({ text: '' });
+}
+
+async function handleSaveRequest(request, sender, sendResponse) {
+    let pageData;
+    await setLoadingIcon();
+
+    if (request.targetUrl) {
+        try {
+            // Handle new tab creation - no toast needed
             const tab = await new Promise(resolve =>
                 browser.tabs.create({ url: request.targetUrl, active: false }, resolve)
             );
+
+            if (request.fromTab) {
+                browser.scripting.executeScript({
+                    target: { tabId: request.fromTab.id },
+                    files: ['toast.js']
+                });
+            }
 
             pageData = await new Promise((resolve, reject) => {
                 browser.tabs.onUpdated.addListener(function listener(tabId, info) {
@@ -67,14 +100,35 @@ async function handleSaveRequest(request, sender, sendResponse) {
             });
 
             const response = await saveContent(pageData.url, pageData.html);
+            if (request.fromTab) {
+                showToast(request.fromTab, "Link saved!", "Open in Curio", `${API_HOST}/item/${response.slug}`);
+            }
             browser.tabs.remove(tab.id);
             return { success: true, data: response };
-        } else {
-            // Handle existing tab from popup
-            const [tab] = await new Promise(resolve =>
-                browser.tabs.query({ active: true, currentWindow: true }, resolve)
-            );
+        } catch (error) {
+            if (request.fromTab) {
+                showToast(request.fromTab, "Failed to save link", "", "", true);
+            }
+            console.error("Failed to save page", error);
+            return {
+                success: false,
+                error: error.message
+            };
+        } finally {
+            await resetIcon();
+        }
 
+    } else {
+        const tab = await new Promise(resolve =>
+            browser.tabs.query({ active: true, currentWindow: true }, resolve)
+        ).then(tabs => tabs[0]);
+
+        try {
+            // Handle existing tab from popup
+            browser.scripting.executeScript({
+                target: { tabId: tab.id },
+                files: ['toast.js']
+            });
             pageData = await new Promise((resolve, reject) => {
                 browser.scripting.executeScript({
                     target: { tabId: tab.id },
@@ -93,16 +147,39 @@ async function handleSaveRequest(request, sender, sendResponse) {
             });
 
             const response = await saveContent(pageData.url, pageData.html);
+            showToast(tab, "Saved successfully!", "Open in Curio", `${API_HOST}/item/${response.slug}`);
             return { success: true, data: response };
+        } catch (error) {
+            showToast(tab, "Failed to save page", "", "", true);
+            console.error("Failed to save page", error);
+            return {
+                success: false,
+                error: error.message
+            };
+        } finally {
+            await resetIcon();
         }
-    } catch (error) {
-        return {
-            success: false,
-            error: error.message || 'Failed to save page'
-        };
     }
 }
 
+// Create context menu item
+browser.runtime.onInstalled.addListener(() => {
+    browser.contextMenus.create({
+        id: 'saveToCurio',
+        title: 'Save to Curio',
+        contexts: ['page', 'link']
+    });
+});
+
+// Handle context menu clicks
+browser.contextMenus.onClicked.addListener((info, tab) => {
+    if (info.menuItemId === 'saveToCurio') {
+        const targetUrl = info.linkUrl;
+        handleSaveRequest({ targetUrl, fromTab: tab });
+    }
+});
+
+// Listen for messages from popup
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'saveCurioPage') {
         handleSaveRequest(request, sender, sendResponse)

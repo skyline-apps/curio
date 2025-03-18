@@ -11,10 +11,21 @@
     "permissions": [
         "activeTab",
         "scripting",
-        "tabs"
+        "tabs",
+        "contextMenus"
     ],
     "host_permissions": [
         "<all_urls>"
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "toast.js"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
     ],
     "content_scripts": [
         {

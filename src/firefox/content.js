@@ -1,5 +1,6 @@
 const API_ORIGIN = 'https://curi.ooo';
 
+// Listen for messages from the web app
 window.addEventListener('message', function (event) {
     if (event.origin !== API_ORIGIN) return;
 
