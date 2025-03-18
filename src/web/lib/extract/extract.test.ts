@@ -130,6 +130,35 @@ function test() {
       );
     });
 
+    it("should extract and convert figures with captions", async () => {
+      const html = fs.readFileSync(
+        path.join(fixturesPath, "img-figcaption.html"),
+        "utf-8",
+      );
+
+      const { content } = await extract.extractMainContentAsMarkdown(
+        "http://example.com",
+        html,
+      );
+      const lines = content.split("\n");
+
+      expect(lines[0]).toBe("This is _paragraph_ 1.");
+      expect(lines[1]).toBe("");
+      expect(lines[2]).toBe(
+        "[![](https://example.com/image.jpg)](https://example.com/image.jpg)",
+      );
+      expect(lines[3]).toBe("");
+      expect(lines[4]).toBe("Figure 2 from _[source](https://source.com/)_.");
+      expect(lines[5]).toBe("");
+      expect(lines[6]).toBe(
+        "This is a long paragraph with lots of text [and even a hyperlink](https://example.com/link). And it continues onward here with another sentence and [a second hyperlink](https://example.com/link2).",
+      );
+      expect(lines[7]).toBe("");
+      expect(lines[8]).toBe(
+        "And it even has another paragraph here with another [link to another page](https://example.com/link3). It continues on with another sentence and another _[cool link](https://example.com/link4)_.[1](https://example.com/article#footnote1) This is another really long sentence with another [link to this long-read article (on this website)](https://example.com/link5). This article was thoroughly enjoyable and made many good points, even though it was pretty short and didn't cover much ground. Now it's the final sentence of this paragraph and it's ending with a few more words and then punctuation.",
+      );
+    });
+
     it("should extract and convert headers to markdown", async () => {
       const html = fs.readFileSync(
         path.join(fixturesPath, "headers.html"),
