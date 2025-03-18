@@ -42,9 +42,9 @@ async function setLoadingIcon() {
         clearInterval(spinnerInterval);
     }
     // Start spinner animation
-    browser.browserAction.setBadgeBackgroundColor({ color: '#759763' });
+    browser.action.setBadgeBackgroundColor({ color: '#759763' });
     spinnerInterval = setInterval(() => {
-        browser.browserAction.setBadgeText({ text: spinnerFrames[frameIndex] });
+        browser.action.setBadgeText({ text: spinnerFrames[frameIndex] });
         frameIndex = (frameIndex + 1) % spinnerFrames.length;
     }, 80); // Update every 80ms for smooth animation
 }
@@ -56,7 +56,7 @@ async function resetIcon() {
         spinnerInterval = null;
     }
     // Clear the badge
-    browser.browserAction.setBadgeText({ text: '' });
+    browser.action.setBadgeText({ text: '' });
 }
 
 async function handleSaveRequest(request, sender, sendResponse) {
