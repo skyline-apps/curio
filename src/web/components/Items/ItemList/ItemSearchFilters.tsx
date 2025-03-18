@@ -75,6 +75,7 @@ const ItemSearchFilters: React.FC = (): React.ReactElement => {
       <PopoverTrigger>
         <Button
           variant={hasFiltersApplied() ? "solid" : "flat"}
+          color={hasFiltersApplied() ? "primary" : "default"}
           size="sm"
           isIconOnly
         >
