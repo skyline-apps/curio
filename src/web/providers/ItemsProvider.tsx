@@ -38,6 +38,7 @@ export type ItemsContextType = {
   fetchItems: (refresh?: boolean, options?: GetItemsRequest) => Promise<void>;
   searchQuery: string;
   setSearchQuery: (search: string) => void;
+  currentFilters: GetItemsRequest["filters"];
 };
 
 interface ItemsProviderProps extends React.PropsWithChildren {}
@@ -53,6 +54,7 @@ export const ItemsContext = createContext<ItemsContextType>({
   fetchItems: () => Promise.resolve(),
   searchQuery: "",
   setSearchQuery: () => {},
+  currentFilters: {},
 });
 
 export const ItemsProvider: React.FC<ItemsProviderProps> = ({
@@ -130,6 +132,12 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
   const fetchItems = useCallback(
     async (refresh?: boolean, options?: GetItemsRequest): Promise<void> => {
       if (options) {
+        if (options.search || options.filters) {
+          options.filters = {
+            state: currentOptions?.filters?.state || undefined,
+            ...options.filters,
+          };
+        }
         setCurrentOptions(options);
       }
       if (refresh) {
@@ -173,6 +181,7 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     fetchItems,
     searchQuery,
     setSearchQuery,
+    currentFilters: currentOptions?.filters || {},
   };
 
   return (

@@ -10,6 +10,7 @@ import Icon from "@/components/ui/Icon";
 import { ItemSource } from "@/db/schema";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import type { Item } from "@/providers/ItemsProvider";
+import { ItemsContext } from "@/providers/ItemsProvider";
 import { cn } from "@/utils/cn";
 
 interface ItemRowProps {
@@ -29,6 +30,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
   onClick,
   onLongPress,
 }: ItemRowProps) => {
+  const { searchQuery } = useContext(ItemsContext);
   const { currentItem, selectedItems, lastSelectionIndex } =
     useContext(CurrentItemContext);
   const getHostname = (url: string): string =>
@@ -105,7 +107,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
             )}
           </div>
           <div className="flex flex-col gap-1">
-            {item.excerpt ? (
+            {item.excerpt && searchQuery ? (
               <Markdown
                 className="[&_*]:text-secondary-700 [&_*]:text-xs [&_*]:my-0 text-wrap truncate"
                 components={{
