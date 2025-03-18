@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 
 import { Accordion, AccordionItem } from "@/components/ui/Accordion";
@@ -36,6 +37,13 @@ const SettingsForm: React.FC = () => {
         </AccordionItem>
       </Accordion>
       <div className="flex flex-col h-full justify-end items-center text-xs text-secondary py-4">
+        <p>
+          Having issues? Check the{" "}
+          <Link href="https://status.curi.ooo" target="_blank">
+            status page
+          </Link>
+          .
+        </p>
         <p>
           Questions? Contact us at{" "}
           <a className="hover:underline" href="mailto:team@curi.ooo">
