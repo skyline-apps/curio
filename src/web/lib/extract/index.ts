@@ -120,7 +120,7 @@ turndown.addRule("dir", {
         return `<span dir="${dir}">${turndown.turndown(`<${tag} ${otherAttributes}>${content}</${tag}>`)}</span>`;
       }
     }
-    return turndown.turndown(content);
+    return content;
   },
 });
 
@@ -188,6 +188,57 @@ export class Extract {
       }
     }
     return null;
+  }
+
+  private extractDocumentMetadata(doc: Document): {
+    textDirection: TextDirection;
+    textLanguage: string;
+  } {
+    const htmlElement = doc.querySelector("html");
+    const bodyElement = doc.querySelector("body");
+    let textDirection = TextDirection.LTR; // Default to LTR
+    let textLanguage = "";
+
+    if (htmlElement) {
+      if (htmlElement.hasAttribute("dir")) {
+        const dir = htmlElement.getAttribute("dir");
+        if (dir === "rtl") {
+          textDirection = TextDirection.RTL;
+        } else if (dir === "ltr") {
+          textDirection = TextDirection.LTR;
+        } else if (dir === "auto") {
+          textDirection = TextDirection.AUTO;
+        }
+      }
+      if (htmlElement.hasAttribute("lang")) {
+        textLanguage = htmlElement.getAttribute("lang") || "";
+      }
+    }
+
+    if (bodyElement) {
+      if (bodyElement.hasAttribute("dir")) {
+        const dir = bodyElement.getAttribute("dir");
+        if (dir === "rtl") {
+          textDirection = TextDirection.RTL;
+        } else if (dir === "ltr") {
+          textDirection = TextDirection.LTR;
+        } else if (dir === "auto") {
+          textDirection = TextDirection.AUTO;
+        }
+      } else {
+        const bodyStyle = doc.defaultView?.getComputedStyle(bodyElement);
+        const bodyStyleDir = bodyStyle?.getPropertyValue("direction");
+        if (bodyStyleDir === "rtl") {
+          textDirection = TextDirection.RTL;
+        } else if (bodyStyleDir === "ltr") {
+          textDirection = TextDirection.LTR;
+        } else if (bodyStyleDir === "auto") {
+          textDirection = TextDirection.AUTO;
+        }
+      }
+    }
+
+    return { textDirection, textLanguage };
   }
 
   private parseJsonLd(jsonString: string): JsonLdGraph | null {
@@ -360,37 +411,9 @@ export class Extract {
           : null) ||
         null;
 
-      const htmlElement = dom.window.document.querySelector("html");
-      const bodyElement = dom.window.document.querySelector("body");
-      let documentDir = TextDirection.LTR; // Default to LTR
-      let textLanguage = "";
-
-      if (htmlElement) {
-        if (htmlElement.hasAttribute("dir")) {
-          const dir = htmlElement.getAttribute("dir");
-          if (dir === "rtl") {
-            documentDir = TextDirection.RTL;
-          }
-        }
-        if (htmlElement.hasAttribute("lang")) {
-          textLanguage = htmlElement.getAttribute("lang") || "";
-        }
-      }
-
-      if (bodyElement) {
-        if (bodyElement.hasAttribute("dir")) {
-          const dir = bodyElement.getAttribute("dir");
-          if (dir === "rtl") {
-            documentDir = TextDirection.RTL;
-          }
-        } else {
-          const bodyStyle = dom.window.getComputedStyle(bodyElement);
-          const bodyStyleDir = bodyStyle.getPropertyValue("direction");
-          if (bodyStyleDir === "rtl") {
-            documentDir = TextDirection.RTL;
-          }
-        }
-      }
+      const { textDirection, textLanguage } = this.extractDocumentMetadata(
+        dom.window.document,
+      );
 
       return {
         title,
@@ -399,7 +422,7 @@ export class Extract {
         thumbnail,
         favicon,
         publishedAt: publishedAt ? new Date(publishedAt) : null,
-        textDirection: documentDir,
+        textDirection,
         textLanguage,
       };
     } catch (error) {
@@ -417,23 +440,9 @@ export class Extract {
   ): Promise<{ content: string }> {
     try {
       const dom = new JSDOM(html, { url });
-      const htmlElement = dom.window.document.querySelector("html");
-      const bodyElement = dom.window.document.querySelector("body");
-      let documentDir = TextDirection.LTR; // Default to LTR
-
-      if (htmlElement && htmlElement.hasAttribute("dir")) {
-        const dir = htmlElement.getAttribute("dir");
-        if (dir === "rtl") {
-          documentDir = TextDirection.RTL;
-        }
-      }
-
-      if (bodyElement && bodyElement.hasAttribute("dir")) {
-        const dir = bodyElement.getAttribute("dir");
-        if (dir === "rtl") {
-          documentDir = TextDirection.RTL;
-        }
-      }
+      const { textDirection } = this.extractDocumentMetadata(
+        dom.window.document,
+      );
 
       const reader = new Readability(dom.window.document);
       const article = reader.parse();
@@ -442,9 +451,9 @@ export class Extract {
       }
 
       const content = turndown.turndown(article.content);
-      if (documentDir !== TextDirection.LTR) {
+      if (textDirection !== TextDirection.LTR) {
         return {
-          content: `<div dir="${documentDir}">\n\n${content}\n\n</div>`,
+          content: `<div dir="${textDirection}">\n\n${content}\n\n</div>`,
         };
       }
       return { content };

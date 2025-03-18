@@ -225,6 +225,13 @@
       "when": 1742278260425,
       "tag": "0031_remove-line-height",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1742333874247,
+      "tag": "0032_add auto text direction",
+      "breakpoints": true
     }
   ]
 }

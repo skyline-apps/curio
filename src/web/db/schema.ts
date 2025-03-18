@@ -166,10 +166,12 @@ export enum ItemSource {
 export enum TextDirection {
   LTR = "ltr",
   RTL = "rtl",
+  AUTO = "auto",
 }
 export const textDirection = pgEnum("text_direction", [
   TextDirection.LTR,
   TextDirection.RTL,
+  TextDirection.AUTO,
 ]);
 
 export const itemSource = pgEnum("item_source", [ItemSource.EMAIL]);

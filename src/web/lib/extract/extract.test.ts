@@ -229,6 +229,27 @@ function test() {
       expect(lines[15]).toBe("");
       expect(lines[16]).toBe("</div>");
     });
+
+    it("should extract auto text direction", async () => {
+      const html = fs.readFileSync(
+        path.join(fixturesPath, "dir-auto.html"),
+        "utf-8",
+      );
+      const { content } = await extract.extractMainContentAsMarkdown(
+        "http://example.com",
+        html,
+      );
+      const lines = content.split("\n");
+      expect(lines[0]).toBe("Hello this is **a bold statement**.");
+      expect(lines[1]).toBe("");
+      expect(lines[2]).toBe(
+        "[![](https://image.com/1.jpg)](http://image.com/)",
+      );
+      expect(lines[3]).toBe("");
+      expect(lines[4]).toBe("## Header");
+      expect(lines[5]).toBe("");
+      expect(lines[6]).toBe("Another paragraph");
+    });
   });
 
   describe("extractMetadata", () => {
@@ -525,6 +546,20 @@ function test() {
         html,
       );
       expect(textDirection).toBe(TextDirection.RTL);
+    });
+
+    it("should extract auto text direction from body", async () => {
+      const html = `
+        <html>
+          <body dir="auto">
+          </body>
+        </html>
+      `;
+      const { textDirection } = await extract.extractMetadata(
+        "https://example.com",
+        html,
+      );
+      expect(textDirection).toBe(TextDirection.AUTO);
     });
 
     it("should extract text direction from style", async () => {
