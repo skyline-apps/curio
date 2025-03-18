@@ -77,8 +77,8 @@ describe("/api/v1/items", () => {
     });
 
     it("should return items with their associated labels", async () => {
-      await testDb.db.insert(items).values(MOCK_ITEMS[0]);
-      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS[0]);
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
       await testDb.db.insert(profileLabels).values(MOCK_LABELS);
       await testDb.db
         .insert(profileItemLabels)
@@ -92,7 +92,7 @@ describe("/api/v1/items", () => {
       expect(response.status).toBe(200);
 
       const data = await response.json();
-      expect(data.items).toHaveLength(1);
+      expect(data.items).toHaveLength(3);
       expect(data.items[0].labels).toEqual([
         {
           id: TEST_LABEL_ID_1,
@@ -105,6 +105,14 @@ describe("/api/v1/items", () => {
           color: "#00ff00",
         },
       ]);
+      expect(data.items[1].labels).toEqual([
+        {
+          id: TEST_LABEL_ID_1,
+          name: "Test Label 1",
+          color: "#ff0000",
+        },
+      ]);
+      expect(data.items[2].labels).toEqual([]);
     });
 
     it("should return 200 with the user's items via regular auth", async () => {
@@ -720,6 +728,69 @@ describe("/api/v1/items", () => {
       expect(data.items).toHaveLength(2);
       expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
       expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
+      expect(data.total).toBe(2);
+    });
+
+    it("should return 200 with label filters specified with AND", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+      await testDb.db.insert(profileLabels).values(MOCK_LABELS);
+      await testDb.db
+        .insert(profileItemLabels)
+        .values(MOCK_PROFILE_ITEM_LABELS);
+
+      const params = new URLSearchParams({
+        filters: JSON.stringify({
+          labels: {
+            operator: "and",
+            ids: [TEST_LABEL_ID_1, TEST_LABEL_ID_2],
+          },
+        }),
+      });
+
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "GET",
+        url: `http://localhost:3000/api/v1/items?${params.toString()}`,
+      });
+
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data.items).toHaveLength(1);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
+      expect(data.total).toBe(1);
+    });
+
+    it("should return 200 with label filters specified with OR", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+      await testDb.db.insert(profileLabels).values(MOCK_LABELS);
+      await testDb.db
+        .insert(profileItemLabels)
+        .values(MOCK_PROFILE_ITEM_LABELS);
+
+      const params = new URLSearchParams({
+        filters: JSON.stringify({
+          labels: {
+            operator: "or",
+            ids: [TEST_LABEL_ID_1, TEST_LABEL_ID_2],
+          },
+        }),
+      });
+
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "GET",
+        url: `http://localhost:3000/api/v1/items?${params.toString()}`,
+      });
+
+      const response = await GET(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data.items).toHaveLength(2);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
+      expect(data.items[1].id).toBe(TEST_ITEM_ID_2);
       expect(data.total).toBe(2);
     });
 

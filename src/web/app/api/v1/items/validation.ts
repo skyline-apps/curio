@@ -24,6 +24,16 @@ const FiltersSchema = z
       .object({
         state: z.nativeEnum(ItemState).optional(),
         isFavorite: z.boolean().optional(),
+        labels: z
+          .object({
+            operator: z.enum(["and", "or"]).optional().default("and"),
+            ids: z
+              .array(z.string())
+              .describe(
+                "A list of label IDs to retrieve. If a label is not found, it will be ignored.",
+              ),
+          })
+          .optional(),
       })
       .strict(),
   );

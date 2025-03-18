@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:3000"
+      "url": ""
     }
   ],
   "components": {
@@ -133,16 +133,41 @@
                       ],
                       "description": "Color scheme to display."
                     },
+                    "displayFont": {
+                      "type": "string",
+                      "enum": [
+                        "monospace",
+                        "sans-serif",
+                        "serif"
+                      ],
+                      "description": "Typeface to use for reading."
+                    },
+                    "displayFontSize": {
+                      "type": "string",
+                      "enum": [
+                        "sm",
+                        "md",
+                        "lg",
+                        "xl"
+                      ],
+                      "description": "Font size to use for reading."
+                    },
                     "public": {
                       "type": "boolean",
                       "description": "Whether your profile and favorited items are public."
+                    },
+                    "analyticsTracking": {
+                      "type": "boolean",
+                      "description": "Send usage data and product analytics to help improve our service."
                     }
                   },
                   "required": [
                     "colorScheme",
-                    "public"
-                  ],
-                  "additionalProperties": false
+                    "displayFont",
+                    "displayFontSize",
+                    "public",
+                    "analyticsTracking"
+                  ]
                 }
               }
             }
@@ -209,9 +234,32 @@
                     ],
                     "description": "Color scheme to display."
                   },
+                  "displayFont": {
+                    "type": "string",
+                    "enum": [
+                      "monospace",
+                      "sans-serif",
+                      "serif"
+                    ],
+                    "description": "Typeface to use for reading."
+                  },
+                  "displayFontSize": {
+                    "type": "string",
+                    "enum": [
+                      "sm",
+                      "md",
+                      "lg",
+                      "xl"
+                    ],
+                    "description": "Font size to use for reading."
+                  },
                   "public": {
                     "type": "boolean",
                     "description": "Whether your profile and favorited items are public."
+                  },
+                  "analyticsTracking": {
+                    "type": "boolean",
+                    "description": "Send usage data and product analytics to help improve our service."
                   }
                 },
                 "additionalProperties": false
@@ -236,9 +284,32 @@
                       ],
                       "description": "Color scheme to display."
                     },
+                    "displayFont": {
+                      "type": "string",
+                      "enum": [
+                        "monospace",
+                        "sans-serif",
+                        "serif"
+                      ],
+                      "description": "Typeface to use for reading."
+                    },
+                    "displayFontSize": {
+                      "type": "string",
+                      "enum": [
+                        "sm",
+                        "md",
+                        "lg",
+                        "xl"
+                      ],
+                      "description": "Font size to use for reading."
+                    },
                     "public": {
                       "type": "boolean",
                       "description": "Whether your profile and favorited items are public."
+                    },
+                    "analyticsTracking": {
+                      "type": "boolean",
+                      "description": "Send usage data and product analytics to help improve our service."
                     }
                   },
                   "additionalProperties": false
@@ -606,6 +677,72 @@
         }
       }
     },
+    "/api/v1/user/email": {
+      "post": {
+        "description": "POST /api/v1/user/email",
+        "tags": [
+          "V1"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "updatedNewsletterEmail": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "updatedNewsletterEmail"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/public/profile": {
       "get": {
         "description": "GET /api/v1/public/profile",
@@ -741,6 +878,20 @@
                                     ],
                                     "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
                                   },
+                                  "textDirection": {
+                                    "type": "string",
+                                    "enum": [
+                                      "ltr",
+                                      "rtl"
+                                    ],
+                                    "description": "The text direction of the item."
+                                  },
+                                  "textLanguage": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "maxLength": 10,
+                                    "description": "The language of the item."
+                                  },
                                   "thumbnail": {
                                     "type": "string",
                                     "nullable": true,
@@ -753,7 +904,9 @@
                                   }
                                 },
                                 "required": [
-                                  "title"
+                                  "title",
+                                  "textDirection",
+                                  "textLanguage"
                                 ]
                               },
                               "createdAt": {
@@ -870,6 +1023,20 @@
                                     ],
                                     "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
                                   },
+                                  "textDirection": {
+                                    "type": "string",
+                                    "enum": [
+                                      "ltr",
+                                      "rtl"
+                                    ],
+                                    "description": "The text direction of the item."
+                                  },
+                                  "textLanguage": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "maxLength": 10,
+                                    "description": "The language of the item."
+                                  },
                                   "stateUpdatedAt": {
                                     "anyOf": [
                                       {
@@ -892,6 +1059,14 @@
                                       "deleted"
                                     ],
                                     "description": "Whether the state is active or archived."
+                                  },
+                                  "source": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "enum": [
+                                      "email"
+                                    ],
+                                    "description": "Where the item was saved from."
                                   },
                                   "isFavorite": {
                                     "type": "boolean",
@@ -936,7 +1111,10 @@
                                 },
                                 "required": [
                                   "title",
+                                  "textDirection",
+                                  "textLanguage",
                                   "state",
+                                  "source",
                                   "isFavorite",
                                   "readingProgress",
                                   "versionName"
@@ -1004,6 +1182,169 @@
                     "favoriteItems"
                   ],
                   "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/items/email": {
+      "post": {
+        "description": "POST /api/v1/public/items/email",
+        "tags": [
+          "V1"
+        ],
+        "requestBody": {
+          "description": "Request body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "emailBody": {
+                    "type": "string",
+                    "description": "The email body content, base64-encoded"
+                  }
+                },
+                "required": [
+                  "emailBody"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "UPDATED_MAIN"
+                          ]
+                        },
+                        "slug": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "slug",
+                        "message"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "STORED_VERSION"
+                          ]
+                        },
+                        "slug": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "slug",
+                        "message"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "SKIPPED"
+                          ]
+                        },
+                        "slug": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "slug",
+                        "message"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "ERROR"
+                          ]
+                        },
+                        "error": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "error"
+                      ]
+                    }
+                  ]
                 }
               }
             }
@@ -1148,6 +1489,20 @@
                                       ],
                                       "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
                                     },
+                                    "textDirection": {
+                                      "type": "string",
+                                      "enum": [
+                                        "ltr",
+                                        "rtl"
+                                      ],
+                                      "description": "The text direction of the item."
+                                    },
+                                    "textLanguage": {
+                                      "type": "string",
+                                      "nullable": true,
+                                      "maxLength": 10,
+                                      "description": "The language of the item."
+                                    },
                                     "stateUpdatedAt": {
                                       "anyOf": [
                                         {
@@ -1170,6 +1525,14 @@
                                         "deleted"
                                       ],
                                       "description": "Whether the state is active or archived."
+                                    },
+                                    "source": {
+                                      "type": "string",
+                                      "nullable": true,
+                                      "enum": [
+                                        "email"
+                                      ],
+                                      "description": "Where the item was saved from."
                                     },
                                     "isFavorite": {
                                       "type": "boolean",
@@ -1214,7 +1577,10 @@
                                   },
                                   "required": [
                                     "title",
+                                    "textDirection",
+                                    "textLanguage",
                                     "state",
+                                    "source",
                                     "isFavorite",
                                     "readingProgress",
                                     "versionName"
@@ -1367,6 +1733,20 @@
                                       ],
                                       "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
                                     },
+                                    "textDirection": {
+                                      "type": "string",
+                                      "enum": [
+                                        "ltr",
+                                        "rtl"
+                                      ],
+                                      "description": "The text direction of the item."
+                                    },
+                                    "textLanguage": {
+                                      "type": "string",
+                                      "nullable": true,
+                                      "maxLength": 10,
+                                      "description": "The language of the item."
+                                    },
                                     "thumbnail": {
                                       "type": "string",
                                       "nullable": true,
@@ -1379,7 +1759,9 @@
                                     }
                                   },
                                   "required": [
-                                    "title"
+                                    "title",
+                                    "textDirection",
+                                    "textLanguage"
                                   ]
                                 },
                                 "createdAt": {
@@ -1622,6 +2004,20 @@
                                 ],
                                 "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
                               },
+                              "textDirection": {
+                                "type": "string",
+                                "enum": [
+                                  "ltr",
+                                  "rtl"
+                                ],
+                                "description": "The text direction of the item."
+                              },
+                              "textLanguage": {
+                                "type": "string",
+                                "nullable": true,
+                                "maxLength": 10,
+                                "description": "The language of the item."
+                              },
                               "stateUpdatedAt": {
                                 "anyOf": [
                                   {
@@ -1644,6 +2040,14 @@
                                   "deleted"
                                 ],
                                 "description": "Whether the state is active or archived."
+                              },
+                              "source": {
+                                "type": "string",
+                                "nullable": true,
+                                "enum": [
+                                  "email"
+                                ],
+                                "description": "Where the item was saved from."
                               },
                               "isFavorite": {
                                 "type": "boolean",
@@ -1688,7 +2092,10 @@
                             },
                             "required": [
                               "title",
+                              "textDirection",
+                              "textLanguage",
                               "state",
+                              "source",
                               "isFavorite",
                               "readingProgress",
                               "versionName"
@@ -1751,7 +2158,8 @@
                       "type": "number"
                     },
                     "total": {
-                      "type": "number"
+                      "type": "number",
+                      "description": "Total results count. May be incorrect if search term is included."
                     }
                   },
                   "required": [
@@ -1873,6 +2281,20 @@
                               ],
                               "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
                             },
+                            "textDirection": {
+                              "type": "string",
+                              "enum": [
+                                "ltr",
+                                "rtl"
+                              ],
+                              "description": "The text direction of the item."
+                            },
+                            "textLanguage": {
+                              "type": "string",
+                              "nullable": true,
+                              "maxLength": 10,
+                              "description": "The language of the item."
+                            },
                             "stateUpdatedAt": {
                               "anyOf": [
                                 {
@@ -1895,6 +2317,14 @@
                                 "deleted"
                               ],
                               "description": "Whether the state is active or archived."
+                            },
+                            "source": {
+                              "type": "string",
+                              "nullable": true,
+                              "enum": [
+                                "email"
+                              ],
+                              "description": "Where the item was saved from."
                             },
                             "isFavorite": {
                               "type": "boolean",
@@ -2034,6 +2464,20 @@
                                 ],
                                 "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
                               },
+                              "textDirection": {
+                                "type": "string",
+                                "enum": [
+                                  "ltr",
+                                  "rtl"
+                                ],
+                                "description": "The text direction of the item."
+                              },
+                              "textLanguage": {
+                                "type": "string",
+                                "nullable": true,
+                                "maxLength": 10,
+                                "description": "The language of the item."
+                              },
                               "stateUpdatedAt": {
                                 "anyOf": [
                                   {
@@ -2056,6 +2500,14 @@
                                   "deleted"
                                 ],
                                 "description": "Whether the state is active or archived."
+                              },
+                              "source": {
+                                "type": "string",
+                                "nullable": true,
+                                "enum": [
+                                  "email"
+                                ],
+                                "description": "Where the item was saved from."
                               },
                               "isFavorite": {
                                 "type": "boolean",
@@ -2100,7 +2552,10 @@
                             },
                             "required": [
                               "title",
+                              "textDirection",
+                              "textLanguage",
                               "state",
+                              "source",
                               "isFavorite",
                               "readingProgress",
                               "versionName"
@@ -2422,13 +2877,22 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "section": {
-                            "type": "string",
-                            "enum": [
-                              "popular",
-                              "newsletter",
-                              "favorite_author",
-                              "favorites"
+                          "sectionType": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "newsletter",
+                                  "favorite_author",
+                                  "favorites"
+                                ]
+                              },
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "popular"
+                                ]
+                              }
                             ]
                           },
                           "items": {
@@ -2501,6 +2965,20 @@
                                           ],
                                           "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
                                         },
+                                        "textDirection": {
+                                          "type": "string",
+                                          "enum": [
+                                            "ltr",
+                                            "rtl"
+                                          ],
+                                          "description": "The text direction of the item."
+                                        },
+                                        "textLanguage": {
+                                          "type": "string",
+                                          "nullable": true,
+                                          "maxLength": 10,
+                                          "description": "The language of the item."
+                                        },
                                         "stateUpdatedAt": {
                                           "anyOf": [
                                             {
@@ -2523,6 +3001,14 @@
                                             "deleted"
                                           ],
                                           "description": "Whether the state is active or archived."
+                                        },
+                                        "source": {
+                                          "type": "string",
+                                          "nullable": true,
+                                          "enum": [
+                                            "email"
+                                          ],
+                                          "description": "Where the item was saved from."
                                         },
                                         "isFavorite": {
                                           "type": "boolean",
@@ -2567,7 +3053,10 @@
                                       },
                                       "required": [
                                         "title",
+                                        "textDirection",
+                                        "textLanguage",
                                         "state",
+                                        "source",
                                         "isFavorite",
                                         "readingProgress",
                                         "versionName"
@@ -2688,6 +3177,20 @@
                                           ],
                                           "description": "The time the item was saved. Populated automatically and cannot be user-overridden."
                                         },
+                                        "textDirection": {
+                                          "type": "string",
+                                          "enum": [
+                                            "ltr",
+                                            "rtl"
+                                          ],
+                                          "description": "The text direction of the item."
+                                        },
+                                        "textLanguage": {
+                                          "type": "string",
+                                          "nullable": true,
+                                          "maxLength": 10,
+                                          "description": "The language of the item."
+                                        },
                                         "thumbnail": {
                                           "type": "string",
                                           "nullable": true,
@@ -2700,7 +3203,9 @@
                                         }
                                       },
                                       "required": [
-                                        "title"
+                                        "title",
+                                        "textDirection",
+                                        "textLanguage"
                                       ]
                                     },
                                     "createdAt": {
@@ -2756,7 +3261,7 @@
                           }
                         },
                         "required": [
-                          "section",
+                          "sectionType",
                           "items"
                         ]
                       }

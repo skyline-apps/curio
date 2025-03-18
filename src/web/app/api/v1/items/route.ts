@@ -115,6 +115,25 @@ export async function GET(
           ? eq(profileItems.isFavorite, filters.isFavorite)
           : undefined,
       );
+      if (filters.labels?.ids.length) {
+        const { operator = "and", ids } = filters.labels;
+        whereClause = and(
+          whereClause,
+          operator === "and"
+            ? sql`NOT EXISTS (
+                SELECT 1 FROM unnest(ARRAY[${sql.join(ids, sql`, `)}]::uuid[]) AS label_id
+                WHERE label_id NOT IN (
+                  SELECT label_id FROM profile_item_labels
+                  WHERE profile_item_labels.profile_item_id = profile_items.id
+                )
+              )`
+            : sql`EXISTS (
+                SELECT 1 FROM profile_item_labels
+                WHERE profile_item_labels.profile_item_id = profile_items.id
+                AND label_id = ANY(ARRAY[${sql.join(ids, sql`, `)}]::uuid[])
+              )`,
+        );
+      }
     }
     if (!filters || filters.state !== ItemState.DELETED) {
       whereClause = and(

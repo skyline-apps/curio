@@ -169,4 +169,9 @@ export const MOCK_PROFILE_ITEM_LABELS = [
     profileItemId: MOCK_PROFILE_ITEMS[0].id,
     labelId: TEST_LABEL_ID_2,
   },
+  {
+    id: "123e4567-e89b-12d3-a456-426614174009",
+    profileItemId: MOCK_PROFILE_ITEMS[1].id,
+    labelId: TEST_LABEL_ID_1,
+  },
 ];
