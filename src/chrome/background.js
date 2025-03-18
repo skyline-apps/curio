@@ -32,8 +32,36 @@ function showToast(tab, message, actionText = "", actionLink = "", isError = fal
     });
 }
 
+let spinnerInterval;
+const spinnerFrames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+
+async function setLoadingIcon() {
+    let frameIndex = 0;
+    // Clear any existing interval
+    if (spinnerInterval) {
+        clearInterval(spinnerInterval);
+    }
+    // Start spinner animation
+    chrome.action.setBadgeBackgroundColor({ color: '#759763' });
+    spinnerInterval = setInterval(() => {
+        chrome.action.setBadgeText({ text: spinnerFrames[frameIndex] });
+        frameIndex = (frameIndex + 1) % spinnerFrames.length;
+    }, 80); // Update every 80ms for smooth animation
+}
+
+async function resetIcon() {
+    // Stop spinner animation
+    if (spinnerInterval) {
+        clearInterval(spinnerInterval);
+        spinnerInterval = null;
+    }
+    // Clear the badge
+    chrome.action.setBadgeText({ text: '' });
+}
+
 async function handleSaveRequest(request, sender, sendResponse) {
     let pageData;
+    await setLoadingIcon();
 
     if (request.targetUrl) {
         try {
@@ -86,6 +114,8 @@ async function handleSaveRequest(request, sender, sendResponse) {
                 success: false,
                 error: error.message
             };
+        } finally {
+            await resetIcon();
         }
 
     } else {
@@ -126,6 +156,8 @@ async function handleSaveRequest(request, sender, sendResponse) {
                 success: false,
                 error: error.message
             };
+        } finally {
+            await resetIcon();
         }
     }
 }
