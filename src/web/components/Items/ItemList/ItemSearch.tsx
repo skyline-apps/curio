@@ -28,6 +28,11 @@ const ItemSearch: React.FC = (): React.ReactElement => {
         value={searchString}
         onChange={(ev) => handleSearchChange(ev.target.value)}
         placeholder="Search items..."
+        isClearable
+        onClear={() => {
+          setSearchString("");
+          fetchItems(false, {});
+        }}
       />
     </div>
   );
