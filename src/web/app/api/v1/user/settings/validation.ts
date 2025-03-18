@@ -1,11 +1,6 @@
 import { z } from "zod";
 
-import {
-  ColorScheme,
-  DisplayFont,
-  DisplayFontSize,
-  DisplayLineHeight,
-} from "@/db/schema";
+import { ColorScheme, DisplayFont, DisplayFontSize } from "@/db/schema";
 
 export const SettingsSchema = z.object({
   colorScheme: z.nativeEnum(ColorScheme).describe("Color scheme to display."),
@@ -15,9 +10,6 @@ export const SettingsSchema = z.object({
   displayFontSize: z
     .nativeEnum(DisplayFontSize)
     .describe("Font size to use for reading."),
-  displayLineHeight: z
-    .nativeEnum(DisplayLineHeight)
-    .describe("Line height to use for reading."),
   public: z
     .boolean()
     .describe("Whether your profile and favorited items are public."),

@@ -7,16 +7,10 @@ import Article from "@/components/Article";
 import {
   displayFontSizeClass,
   displayHeaderSizeClass,
-  displayLineHeightClass,
   getDisplayFontClass,
 } from "@/components/Article/displaySettings";
 import { Progress } from "@/components/ui/Progress";
-import {
-  DisplayFont,
-  DisplayFontSize,
-  DisplayLineHeight,
-  TextDirection,
-} from "@/db/schema";
+import { DisplayFont, DisplayFontSize, TextDirection } from "@/db/schema";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import { useSettings } from "@/providers/SettingsProvider";
 import { cn } from "@/utils/cn";
@@ -26,7 +20,7 @@ const ItemPage: React.FC = () => {
     useContext(CurrentItemContext);
   const { slug } = useParams();
   const { settings } = useSettings();
-  const { displayFont, displayFontSize, displayLineHeight } = settings || {};
+  const { displayFont, displayFontSize } = settings || {};
 
   const fontClass = getDisplayFontClass(
     displayFont || DisplayFont.SANS,
@@ -37,8 +31,6 @@ const ItemPage: React.FC = () => {
     displayHeaderSizeClass[displayFontSize || DisplayFontSize.MD];
   const proseSizeClass =
     displayFontSizeClass[displayFontSize || DisplayFontSize.MD];
-  const lineHeightClass =
-    displayLineHeightClass[displayLineHeight || DisplayLineHeight.SM];
 
   useEffect(() => {
     if (typeof slug === "string") {
@@ -89,7 +81,7 @@ const ItemPage: React.FC = () => {
             ) : loadedItem.content ? (
               <Article
                 content={loadedItem.content}
-                className={cn(proseSizeClass, lineHeightClass)}
+                className={cn(proseSizeClass)}
               />
             ) : (
               <p className="text-sm text-secondary italic py-4">

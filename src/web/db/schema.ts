@@ -58,18 +58,6 @@ export const displayFontSizeEnum = pgEnum("display_font_size", [
   DisplayFontSize.XL,
 ]);
 
-export enum DisplayLineHeight {
-  SM = "sm",
-  MD = "md",
-  LG = "lg",
-}
-
-export const displayLineHeightEnum = pgEnum("display_line_height", [
-  DisplayLineHeight.SM,
-  DisplayLineHeight.MD,
-  DisplayLineHeight.LG,
-]);
-
 export const profiles = pgTable(
   "profiles",
   {
@@ -86,9 +74,6 @@ export const profiles = pgTable(
     displayFontSize: displayFontSizeEnum("display_font_size")
       .notNull()
       .default(DisplayFontSize.MD),
-    displayLineHeight: displayLineHeightEnum("display_line_height")
-      .notNull()
-      .default(DisplayLineHeight.SM),
     public: boolean("public").notNull().default(false),
     analyticsTracking: boolean("analytics_tracking").notNull().default(true),
     createdAt: timestamp("created_at", { withTimezone: true })

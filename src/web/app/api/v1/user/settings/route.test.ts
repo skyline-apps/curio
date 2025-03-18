@@ -6,7 +6,6 @@ import {
   ColorScheme,
   DisplayFont,
   DisplayFontSize,
-  DisplayLineHeight,
   profiles,
 } from "@/db/schema";
 import { APIRequest } from "@/utils/api";
@@ -28,7 +27,6 @@ describe("/api/v1/user/settings", () => {
           colorScheme: ColorScheme.DARK,
           displayFont: DisplayFont.SANS,
           displayFontSize: DisplayFontSize.MD,
-          displayLineHeight: DisplayLineHeight.SM,
           public: false,
         })
         .where(eq(profiles.id, DEFAULT_TEST_PROFILE_ID));
@@ -46,7 +44,6 @@ describe("/api/v1/user/settings", () => {
         colorScheme: ColorScheme.DARK,
         displayFont: DisplayFont.SANS,
         displayFontSize: DisplayFontSize.MD,
-        displayLineHeight: DisplayLineHeight.SM,
         public: false,
       });
     });

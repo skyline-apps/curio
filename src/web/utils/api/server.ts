@@ -17,7 +17,6 @@ type ProfileResult =
         | "colorScheme"
         | "displayFont"
         | "displayFontSize"
-        | "displayLineHeight"
         | "analyticsTracking"
         | "public"
       >;
@@ -40,7 +39,6 @@ export async function checkUserProfile(
       colorScheme: profiles.colorScheme,
       displayFont: profiles.displayFont,
       displayFontSize: profiles.displayFontSize,
-      displayLineHeight: profiles.displayLineHeight,
       analyticsTracking: profiles.analyticsTracking,
       public: profiles.public,
     })
