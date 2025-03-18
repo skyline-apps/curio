@@ -32,7 +32,8 @@ if (!document.querySelector('#curio-toast-styles')) {
   }
   .curio-toast a {
     display: inline-block;
-    padding: 8px;
+    padding: 4px 8px;
+    height: 32px;
     cursor: pointer;
     border-radius: 2px;
     text-decoration: none;
