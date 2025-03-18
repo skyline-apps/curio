@@ -91,7 +91,7 @@ To clear the database, run
 ### Authentication
 1. Set up a Google Cloud project with Google Auth Platform configured for a web application. Copy in the generated client ID and client secret into Supabase's Google auth provider, then copy the Supabase auth callback URL into the "Auhorized redirect URIs" field.
 2. Configure the "URL Configuration" site URL and redirect settings in Supabase Auth with the app URL.
-  - Site URL should be `$HOSTNAME/auth/callback?next=%2Fhome`.
+  - Site URL should be `$HOSTNAME`.
   - Redirect URLs should include `$HOSTNAME/*`.
 3. Set up Sendgrid API access with SMTP server. You'll have to verify the sender domain and single sender authorization.
   - For local development, populate these variables in `.env` and view emails at `http://localhost:9000`.
