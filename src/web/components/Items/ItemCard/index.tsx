@@ -9,26 +9,30 @@ import { cn } from "@/utils/cn";
 interface ItemCardProps {
   item: PublicItem | Item;
   onPress?: () => void;
+  hideThumbnail?: boolean;
 }
 
 const ItemCard: React.FC<ItemCardProps> = ({
   item,
   onPress,
+  hideThumbnail,
 }: ItemCardProps) => {
   // Keep card dimensions in sync with ItemGrid/index.tsx
   return (
     <Card
-      className="shrink-0 w-72 h-96 p-2"
+      className={cn("shrink-0 w-72 p-2", hideThumbnail ? "h-48" : "h-96")}
       isPressable
       onPress={onPress}
       dir={item.metadata.textDirection}
     >
-      <Thumbnail
-        key={item.metadata.thumbnail}
-        thumbnail={
-          item.metadata.thumbnail ? item.metadata.thumbnail : undefined
-        }
-      />
+      {!hideThumbnail && (
+        <Thumbnail
+          key={item.metadata.thumbnail}
+          thumbnail={
+            item.metadata.thumbnail ? item.metadata.thumbnail : undefined
+          }
+        />
+      )}
       <div className="flex flex-col items-start text-left w-full p-1 overflow-hidden">
         <Link
           className="hover:underline"

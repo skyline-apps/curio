@@ -72,6 +72,9 @@ const RecommendedSection: React.FC<RecommendedSectionProps> = ({
               key={item.id}
               item={item}
               onPress={() => previewItem(item)}
+              hideThumbnail={
+                sectionType === PersonalRecommendationType.NEWSLETTER
+              }
             />
           ))
         )}
