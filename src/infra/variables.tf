@@ -66,8 +66,13 @@ variable "curio_email_api_endpoint" {
   type        = string
 }
 
-variable "email_domain" {
+variable "receiver_email_domain" {
   description = "Domain to use for receiving mail"
+  type        = string
+}
+
+variable "sender_email_domain" {
+  description = "Domain to use for sending mail"
   type        = string
 }
 

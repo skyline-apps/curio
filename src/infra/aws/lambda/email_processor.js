@@ -91,12 +91,13 @@ exports.handler = async (event) => {
         });
 
         if (response.statusCode >= 200 && response.statusCode < 300) {
+            // TODO: Re-enable to clean up bucket faster
             // Delete processed email
-            const deleteCommand = new DeleteObjectCommand({
-                Bucket: bucketName,
-                Key: objectKey
-            });
-            await s3Client.send(deleteCommand);
+            // const deleteCommand = new DeleteObjectCommand({
+            //     Bucket: bucketName,
+            //     Key: objectKey
+            // });
+            // await s3Client.send(deleteCommand);
 
             await sendHealthcheck(ERROR_ENDPOINT, true);
             await sendHealthcheck(WARN_ENDPOINT, true);

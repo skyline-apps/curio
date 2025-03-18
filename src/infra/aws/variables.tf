@@ -14,8 +14,13 @@ variable "api_endpoint" {
   type        = string
 }
 
-variable "ses_email_identity" {
-  description = "Email domain to verify for SES"
+variable "ses_email_identity_receiver" {
+  description = "Email domain to verify for SES (receiver)"
+  type        = string
+}
+
+variable "ses_email_identity_sender" {
+  description = "Email domain to verify for SES (sender)"
   type        = string
 }
 

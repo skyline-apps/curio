@@ -73,7 +73,7 @@ To clear the database, run
   - Populate `src/infra/terraform.tfvars` based on `src/infra/terraform.tfvars.sample`.
   - Run `terraform apply`
 4. Set up the email newsletter service on AWS.
-  - From `terraform output`, create the listed records (should be 3 CNAME, 1 MX, and 1 TXT) on your DNS provider. Note the 10 on the MX record is for priority.
+  - From `terraform output`, create the listed records (should be 3 CNAME, 1 MX, and 3 TXT) on your DNS provider. Note the 10 on the MX record is for priority.
 5. Set up a Meilisearch instance on GCP.
   - Use the dev environment: `docker exec -it dev zsh`.
   - Authenticate using `gcloud auth application-default login`.
@@ -93,16 +93,22 @@ To clear the database, run
 2. Configure the "URL Configuration" site URL and redirect settings in Supabase Auth with the app URL.
   - Site URL should be `$HOSTNAME`.
   - Redirect URLs should include `$HOSTNAME/*`.
-3. Set up Sendgrid API access with SMTP server. You'll have to verify the sender domain and single sender authorization.
-  - For local development, populate these variables in `.env` and view emails at `http://localhost:9000`.
-    - `ENABLE_EMAIL_SIGNUP=true`
-    - `ENABLE_EMAIL_AUTOCONFIRM=false`
-    - `SMTP_ADMIN_EMAIL=admin@example.com`
-    - `SMTP_HOST=supabase-mail`
-    - `SMTP_PORT=2500`
-    - `SMTP_USER=admin`
-    - `SMTP_PASS=password`
-    - `SMTP_SENDER_EMAIL=admin@example.com`
-    - `SMTP_SENDER_NAME=Curio`
-  - In production, use the SendGrid API SMTP information on the Supabase auth SMTP settings. Populate the email templates using `src/email/templates`.
+3. For local development, populate these variables in `.env` and view emails at `http://localhost:9000`.
+  - `ENABLE_EMAIL_SIGNUP=true`
+  - `ENABLE_EMAIL_AUTOCONFIRM=false`
+  - `SMTP_ADMIN_EMAIL=admin@example.com`
+  - `SMTP_HOST=supabase-mail`
+  - `SMTP_PORT=2500`
+  - `SMTP_USER=admin`
+  - `SMTP_PASS=password`
+  - `SMTP_SENDER_EMAIL=admin@example.com`
+  - `SMTP_SENDER_NAME=Curio`
+4. Set up a production SMTP server.
+  - Set up DNS records for the email sending domain. Populate the values from `terraform output` (should be 3 CNAME, 1 MX, and 4 TXT records).
+  - Verify the sending email address by uncommenting `src/infra/aws/email_verification_forward.tf` and running `terraform apply`.
+    - You'll have to create a new MX and TXT DNS record to allow receiving email at this domain.
+    - You'll need to go to the AWS console > SES > Configuration: Identities > `auth@no-reply.curi.ooo` and send the verification email.
+  - Populate the SMTP settings in Supabase. Use the AWS SMTP information in `terraform output`.
+    - Generate STMP credentials using `src/infra/script/generate_smtp_password.py`.
+  - Populate the email templates in Supabase using `src/email/templates`.
   - Make sure to change the default sending email rate limit :)
