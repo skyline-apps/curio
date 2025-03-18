@@ -57,18 +57,9 @@ saveButton.addEventListener('click', async () => {
         errorMessage.textContent = "";
         successMessage.textContent = "";
         saveButton.disabled = true;
-        saveButton.appendChild(spinner);
 
-        const response = await chrome.runtime.sendMessage({ action: 'saveCurioPage' });
-        if (response.success) {
-            saveButton.disabled = false;
-            saveButton.textContent = "Open page in Curio";
-            curioLink = `${API_HOST}/item/${response.data.slug}`;
-            successMessage.textContent = "Page saved successfully.";
-            successMessage.style.display = 'block';
-        } else {
-            throw new Error(response.error);
-        }
+        chrome.runtime.sendMessage({ action: 'saveCurioPage' });
+        window.close();
     } catch (error) {
         saveButton.disabled = false;
         spinner.remove();

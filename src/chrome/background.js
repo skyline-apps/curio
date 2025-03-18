@@ -21,12 +21,23 @@ async function saveContent(url, htmlContent) {
     return contentResponse.json();
 }
 
-async function handleSaveRequest(request, sender, sendResponse) {
-    try {
-        let pageData;
+// Function to show toast using content script
+function showToast(tab, message, actionText = "", actionLink = "", isError = false) {
+    chrome.tabs.sendMessage(tab.id, {
+        action: 'showToast',
+        message,
+        actionText,
+        actionLink,
+        isError
+    });
+}
 
-        if (request.targetUrl) {
-            // Handle new tab creation
+async function handleSaveRequest(request, sender, sendResponse) {
+    let pageData;
+
+    if (request.targetUrl) {
+        try {
+            // Handle new tab creation - no toast needed
             const tab = await new Promise(resolve =>
                 chrome.tabs.create({ url: request.targetUrl, active: false }, resolve)
             );
@@ -56,12 +67,25 @@ async function handleSaveRequest(request, sender, sendResponse) {
             const response = await saveContent(pageData.url, pageData.html);
             chrome.tabs.remove(tab.id);
             return { success: true, data: response };
-        } else {
-            // Handle existing tab from popup
-            const [tab] = await new Promise(resolve =>
-                chrome.tabs.query({ active: true, currentWindow: true }, resolve)
-            );
+        } catch (error) {
+            console.error("Failed to save page", error);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
 
+    } else {
+        const tab = await new Promise(resolve =>
+            chrome.tabs.query({ active: true, currentWindow: true }, resolve)
+        ).then(tabs => tabs[0]);
+
+        try {
+            // Handle existing tab from popup
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                files: ['toast.js']
+            });
             pageData = await new Promise((resolve, reject) => {
                 chrome.scripting.executeScript({
                     target: { tabId: tab.id },
@@ -80,13 +104,16 @@ async function handleSaveRequest(request, sender, sendResponse) {
             });
 
             const response = await saveContent(pageData.url, pageData.html);
+            showToast(tab, "Saved successfully!", "Open in Curio", `${API_HOST}/item/${response.slug}`);
             return { success: true, data: response };
+        } catch (error) {
+            showToast(tab, "Failed to save page", "", "", true);
+            console.error("Failed to save page", error);
+            return {
+                success: false,
+                error: error.message
+            };
         }
-    } catch (error) {
-        return {
-            success: false,
-            error: error.message || 'Failed to save page'
-        };
     }
 }
 
