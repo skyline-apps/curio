@@ -42,6 +42,13 @@ async function handleSaveRequest(request, sender, sendResponse) {
                 chrome.tabs.create({ url: request.targetUrl, active: false }, resolve)
             );
 
+            if (request.fromTab) {
+                chrome.scripting.executeScript({
+                    target: { tabId: request.fromTab.id },
+                    files: ['toast.js']
+                });
+            }
+
             pageData = await new Promise((resolve, reject) => {
                 chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
                     if (tabId === tab.id && info.status === 'complete') {
@@ -65,9 +72,15 @@ async function handleSaveRequest(request, sender, sendResponse) {
             });
 
             const response = await saveContent(pageData.url, pageData.html);
+            if (request.fromTab) {
+                showToast(request.fromTab, "Link saved!", "Open in Curio", `${API_HOST}/item/${response.slug}`);
+            }
             chrome.tabs.remove(tab.id);
             return { success: true, data: response };
         } catch (error) {
+            if (request.fromTab) {
+                showToast(request.fromTab, "Failed to save link", "", "", true);
+            }
             console.error("Failed to save page", error);
             return {
                 success: false,
@@ -117,6 +130,24 @@ async function handleSaveRequest(request, sender, sendResponse) {
     }
 }
 
+// Create context menu item
+chrome.runtime.onInstalled.addListener(() => {
+    chrome.contextMenus.create({
+        id: 'saveToCurio',
+        title: 'Save to Curio',
+        contexts: ['page', 'link']
+    });
+});
+
+// Handle context menu clicks
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+    if (info.menuItemId === 'saveToCurio') {
+        const targetUrl = info.linkUrl;
+        handleSaveRequest({ targetUrl, fromTab: tab });
+    }
+});
+
+// Listen for messages from popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'saveCurioPage') {
         handleSaveRequest(request, sender, sendResponse)
