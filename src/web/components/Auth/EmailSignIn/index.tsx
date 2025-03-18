@@ -14,6 +14,8 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({}: EmailSignInProps) => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSignInWithEmail = async (): Promise<void> => {
+    setErrorMessage(null);
+    setSuccessMessage(null);
     setIsSigningIn(true);
     const { error } = await supabase.auth.signInWithOtp({
       email,
