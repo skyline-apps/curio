@@ -22,7 +22,7 @@ export const ClientProviders: React.FC<PropsWithChildren> = ({ children }) => {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 5 * 60 * 1000, // 5 minutes
+            staleTime: 30 * 60 * 1000, // 30 minutes
             retry: 1,
           },
         },

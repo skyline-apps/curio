@@ -71,8 +71,6 @@ export function useProfile({
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     initialPageParam: undefined as string | undefined,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
