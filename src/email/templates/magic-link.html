@@ -11,4 +11,4 @@
 <h2>Log in</h2>
 
 <p>Follow this link to log in to your Curio account:</p>
-<p><a href="{{ .ConfirmationURL }}">Log In</a></p>
+<p><a href="{{ .SiteURL }}/login/redirect?email={{ .Email }}&redirectTo={{ .ConfirmationURL }}">Log In</a></p>
