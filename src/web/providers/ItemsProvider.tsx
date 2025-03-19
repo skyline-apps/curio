@@ -146,7 +146,7 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
         await fetchNextPage();
       }
     },
-    [refetch, fetchNextPage, hasNextPage],
+    [refetch, fetchNextPage, hasNextPage, currentOptions?.filters?.state],
   );
 
   const searchQuery = currentOptions?.search || "";
