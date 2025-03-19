@@ -12,6 +12,7 @@ import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import type { Item } from "@/providers/ItemsProvider";
 import { ItemsContext } from "@/providers/ItemsProvider";
 import { cn } from "@/utils/cn";
+import { FALLBACK_HOSTNAME } from "@/utils/url";
 
 interface ItemRowProps {
   height?: number;
@@ -34,7 +35,9 @@ const ItemRow: React.FC<ItemRowProps> = ({
   const { currentItem, selectedItems, lastSelectionIndex } =
     useContext(CurrentItemContext);
   const getHostname = (url: string): string =>
-    new URL(url).hostname.replace(/www./, "");
+    new URL(url).hostname
+      .replace(/www./, "")
+      .replace(FALLBACK_HOSTNAME, "newsletter");
   const timer = useRef<number | null>(null);
 
   const isRead = item.metadata.lastReadAt !== null;

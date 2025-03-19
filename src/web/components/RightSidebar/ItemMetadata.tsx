@@ -12,6 +12,7 @@ import type { Item, PublicItem } from "@/providers/ItemsProvider";
 import { useSettings } from "@/providers/SettingsProvider";
 import { UserContext } from "@/providers/UserProvider";
 import { cn } from "@/utils/cn";
+import { FALLBACK_HOSTNAME } from "@/utils/url";
 
 interface ItemMetadataProps {
   item?: Item | PublicItem;
@@ -72,7 +73,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
           <Link className="hover:underline" href={item.url} target="_blank">
             <p className="text-sm text-primary">Original page</p>
           </Link>
-        ) : (
+        ) : !item.url.startsWith(`https://${FALLBACK_HOSTNAME}`) ? (
           <Link className="hover:underline" href={item.url} target="_blank">
             <p
               dir="ltr"
@@ -84,7 +85,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
               {item.url}
             </p>
           </Link>
-        )}
+        ) : null}
         <div className="flex flex-col gap-2 py-2">
           <div className="flex flex-row gap-2 items-start">
             {metadata.author && (
