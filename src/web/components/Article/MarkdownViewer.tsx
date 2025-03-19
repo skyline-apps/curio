@@ -69,7 +69,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
     <div className="relative flex gap-4">
       <div
         ref={contentRef}
-        onMouseDown={clearSelection}
+        onMouseDown={(event) => event.button === 0 && clearSelection()}
         onTouchStart={clearSelection}
         onMouseUp={handleSelection}
         onTouchEnd={handleSelection}
