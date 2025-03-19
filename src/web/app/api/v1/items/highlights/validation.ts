@@ -25,6 +25,52 @@ export const NewHighlightSchema = HighlightSchema.extend({
 export type Highlight = z.infer<typeof HighlightSchema>;
 export type NewHighlight = z.infer<typeof NewHighlightSchema>;
 
+export const GetHighlightsRequestSchema = z.object({
+  cursor: z
+    .string()
+    .optional()
+    .describe("The updatedAt timestamp to start from."),
+  limit: z.number().int().min(1).max(100).default(20),
+  filter: z
+    .object({
+      search: z
+        .string()
+        .optional()
+        .describe("Term to search across highlight text"),
+    })
+    .optional(),
+});
+
+export type GetHighlightsRequest = z.infer<typeof GetHighlightsRequestSchema>;
+
+export const GetHighlightsResponseSchema = z.object({
+  highlights: z.array(
+    HighlightSchema.extend({
+      item: z.object({
+        slug: z
+          .string()
+          .describe("The slug of the item containing the highlight."),
+        url: z
+          .string()
+          .url()
+          .describe("The URL of the item containing the highlight."),
+        metadata: z.object({
+          title: z
+            .string()
+            .describe("The title of the item containing the highlight."),
+        }),
+      }),
+    }),
+  ),
+  total: z.number().int().min(0),
+  cursor: z
+    .string()
+    .optional()
+    .describe("The updatedAt timestamp to start from."),
+});
+
+export type GetHighlightsResponse = z.infer<typeof GetHighlightsResponseSchema>;
+
 export const CreateOrUpdateHighlightRequestSchema = z.object({
   slug: z.string().describe("The slug of the item to add highlights to."),
   highlights: z.array(NewHighlightSchema),
