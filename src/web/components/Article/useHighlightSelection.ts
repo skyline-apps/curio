@@ -120,7 +120,6 @@ export function useHighlightSelection({
         return;
       }
 
-      selection.removeAllRanges();
       setDraftHighlight(highlight);
     } catch (error) {
       log.error("Error handling selection:", error);

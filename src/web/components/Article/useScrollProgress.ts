@@ -13,7 +13,7 @@ export function useScrollProgress({
   initialProgress,
   containerRef,
   onProgressChange,
-}: UseScrollProgressProps): number {
+}: UseScrollProgressProps): { progress: number } {
   const [progress, setProgress] = useState<number>(initialProgress);
 
   const debouncedScrollHandler = useDebouncedCallback(
@@ -55,5 +55,5 @@ export function useScrollProgress({
     // Only manually scroll on component initialization
   }, [containerRef.current]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return progress;
+  return { progress };
 }
