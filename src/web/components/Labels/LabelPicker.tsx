@@ -64,26 +64,23 @@ const LabelPicker: React.FC<LabelPickerProps> = ({
           value={label.name}
         />
       ))}
-      {(!showAutocomplete && hasLabelsRemaining) ||
-        (noLabelsDefined && (
-          <Button
-            ref={addButtonRef}
-            isIconOnly
-            onPress={() => {
-              if (hasLabelsRemaining) {
-                setShowAutocomplete(true);
-              }
-            }}
-            size="xs"
-            isLoading={isLoading}
-            disabled={!hasLabelsRemaining}
-            tooltip={
-              noLabelsDefined ? "Define labels in Settings" : "Add label"
+      {((!showAutocomplete && hasLabelsRemaining) || noLabelsDefined) && (
+        <Button
+          ref={addButtonRef}
+          isIconOnly
+          onPress={() => {
+            if (hasLabelsRemaining) {
+              setShowAutocomplete(true);
             }
-          >
-            <Icon icon={<HiOutlinePlus />} />
-          </Button>
-        ))}
+          }}
+          size="xs"
+          isLoading={isLoading}
+          disabled={!hasLabelsRemaining}
+          tooltip={noLabelsDefined ? "Define labels in Settings" : "Add label"}
+        >
+          <Icon icon={<HiOutlinePlus />} />
+        </Button>
+      )}
       {showAutocomplete && (
         <Autocomplete<Label>
           aria-label="Search labels"

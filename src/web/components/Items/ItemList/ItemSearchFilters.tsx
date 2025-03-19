@@ -93,7 +93,7 @@ const ItemSearchFilters: React.FC = (): React.ReactElement => {
           >
             Favorited
           </Checkbox>
-          <Divider className="bg-secondary-700" />
+          <Divider />
           <h3 className="text-xs">Labels</h3>
           <Labels
             availableLabels={labels || []}
@@ -113,8 +113,8 @@ const ItemSearchFilters: React.FC = (): React.ReactElement => {
           <div className="flex self-end gap-2">
             <Button
               size="sm"
-              variant="flat"
-              color="secondary"
+              variant="light"
+              color="danger"
               className="self-end"
               onPress={clearFilters}
             >
