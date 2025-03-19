@@ -1,10 +1,20 @@
 "use client";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useContext } from "react";
 
 import Button from "@/components/ui/Button";
+import Spinner from "@/components/ui/Spinner";
+import { UserContext } from "@/providers/UserProvider";
 
 const RedirectPage: React.FC = () => {
+  const { user } = useContext(UserContext);
   const searchParams = useSearchParams();
+  const router = useRouter();
+  if (user && user.id) {
+    // Already signed in; redirect to home
+    router.push("/home");
+    return <Spinner centered />;
+  }
   const redirectTo = searchParams.get("redirectTo");
   const email = searchParams.get("email");
 

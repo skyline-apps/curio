@@ -2,7 +2,7 @@
 
 import { Button, ButtonProps } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import React, { forwardRef } from "react";
+import React, { forwardRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import Spinner from "@/components/ui/Spinner";
@@ -45,6 +45,7 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
     { href, tooltip, size = "md", className, ...props }: CurioButtonProps,
     ref,
   ) => {
+    const [pressed, setPressed] = useState<boolean>(false);
     let innerContent: React.ReactNode;
     const router = useRouter();
 
@@ -70,12 +71,14 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
 
     if (href) {
       const handlePress = (): void => {
+        setPressed(true);
         router.push(href);
       };
       innerContent = (
         <Button
           ref={ref}
           {...buttonProps}
+          isLoading={pressed || buttonProps.isLoading}
           onPress={handlePress}
           data-testid={props["data-testid"] || "button"}
         />
