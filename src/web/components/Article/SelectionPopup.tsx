@@ -7,7 +7,7 @@ import Icon from "@/components/ui/Icon";
 
 interface SelectionPopupProps {
   selection: Selection | null;
-  onHighlightSave: () => Promise<void>;
+  onHighlightSave?: () => Promise<void>;
   isSaving?: boolean;
   containerRef: React.RefObject<HTMLElement>;
 }
@@ -63,14 +63,22 @@ export const SelectionPopup = ({
     setPosition(newPosition);
   }, [updatePosition, selection]);
 
-  // Handle scroll
+  // Handle scroll and window resize
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const handleScroll = (): void => setPosition(updatePosition());
-    container.addEventListener("scroll", handleScroll);
-    return () => container.removeEventListener("scroll", handleScroll);
+    const handlePositionUpdate = (): void => setPosition(updatePosition());
+
+    // Add scroll listener to container
+    container.addEventListener("scroll", handlePositionUpdate);
+    // Add resize listener to window
+    window.addEventListener("resize", handlePositionUpdate);
+
+    return () => {
+      container.removeEventListener("scroll", handlePositionUpdate);
+      window.removeEventListener("resize", handlePositionUpdate);
+    };
   }, [containerRef, updatePosition]);
 
   return (
@@ -88,14 +96,16 @@ export const SelectionPopup = ({
             transformOrigin: "top center",
           }}
         >
-          <Button
-            size="xs"
-            color="warning"
-            isLoading={isSaving}
-            onPress={onHighlightSave}
-          >
-            Highlight
-          </Button>
+          {onHighlightSave && (
+            <Button
+              size="xs"
+              color="warning"
+              isLoading={isSaving}
+              onPress={onHighlightSave}
+            >
+              Highlight
+            </Button>
+          )}
           <Button
             size="xs"
             tooltip="This feature is not yet available"

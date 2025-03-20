@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useRef } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -19,10 +19,11 @@ interface MarkdownViewerProps {
   highlights: Highlight[];
   className?: string;
   children?: string;
+  isEditable?: boolean;
 }
 
 const MarkdownViewer: React.FC<MarkdownViewerProps> = memo(
-  ({ highlights, className, children }: MarkdownViewerProps) => {
+  ({ highlights, className, children, isEditable }: MarkdownViewerProps) => {
     const contentRef = useRef<HTMLDivElement>(null);
 
     const {
@@ -67,14 +68,22 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = memo(
       clearSelectedHighlight();
     }, [clearSelection, clearSelectedHighlight]);
 
+    useEffect(() => {
+      window.addEventListener("mouseup", handleSelection);
+      window.addEventListener("touchend", handleSelection);
+
+      return () => {
+        window.removeEventListener("mouseup", handleSelection);
+        window.removeEventListener("touchend", handleSelection);
+      };
+    }, [handleSelection]);
+
     return (
       <div className="relative flex gap-4">
         <div
           ref={contentRef}
           onMouseDown={(event) => event.button === 0 && clearSelections()}
           onTouchStart={clearSelections}
-          onMouseUp={handleSelection}
-          onTouchEnd={handleSelection}
           className={cn(
             "prose prose-slate max-w-none overflow-y-auto h-full [&_*]:text-default-foreground hover:prose-a:!text-primary dark:prose-invert relative",
             className,
@@ -93,7 +102,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = memo(
           <SelectionPopup
             selection={currentSelection}
             containerRef={contentRef}
-            onHighlightSave={saveHighlight}
+            onHighlightSave={isEditable ? saveHighlight : undefined}
             isSaving={isSavingHighlight}
           />
         )}

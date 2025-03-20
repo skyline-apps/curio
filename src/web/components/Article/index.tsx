@@ -46,7 +46,11 @@ const Article: React.FC<ArticleProps> = ({
           onProgressChange={progressChangeHandler}
         />
       )}
-      <MarkdownViewer highlights={highlights} className={cn("py-4", className)}>
+      <MarkdownViewer
+        highlights={highlights}
+        className={cn("py-4", className)}
+        isEditable={isEditable(loadedItem?.item)}
+      >
         {content}
       </MarkdownViewer>
     </>
