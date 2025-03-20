@@ -41,6 +41,7 @@ const MOCK_PROFILE_ITEMS = [
     title: "Existing title",
     savedAt: new Date("2025-01-10T12:52:56-08:00"),
     versionName: "mock-old-version",
+    stateUpdatedAt: new Date("2025-01-10T12:52:56-08:00"),
   },
   {
     id: "1234e567-e89b-12d3-a456-426614174098",
@@ -49,6 +50,7 @@ const MOCK_PROFILE_ITEMS = [
     title: "Existing title 2",
     savedAt: new Date("2025-01-10T12:52:56-08:00"),
     versionName: "mock-old-version",
+    stateUpdatedAt: new Date("2025-01-10T12:52:57-08:00"),
   },
 ];
 

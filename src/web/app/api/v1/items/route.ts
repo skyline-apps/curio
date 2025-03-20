@@ -3,7 +3,12 @@ import { fetchOwnItemResults } from "@/db/queries";
 import { items, ItemState, profileItems, TextDirection } from "@/db/schema";
 import { searchDocuments } from "@/lib/search";
 import { SearchError } from "@/lib/search/types";
-import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
+import {
+  APIRequest,
+  APIResponse,
+  APIResponseJSON,
+  RequestError,
+} from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
 import { createLogger } from "@/utils/logger";
 import { cleanUrl, generateSlug } from "@/utils/url";
@@ -277,15 +282,28 @@ export async function POST(
 
       const itemIds = insertedItems.map((item) => item.id);
 
+      const stateUpdatedAtSet = new Set<string>();
       const profileItemsToInsert = newItems.map((item) => {
         const cleanedUrl = cleanUrl(item.url);
         const itemId = urlToItemId.get(cleanedUrl);
         if (!itemId) {
-          throw new Error(
+          throw new RequestError(
             `Failed to find itemId for URL ${item.url}. This should never happen.`,
           );
         }
         const itemIndex = itemIds.indexOf(itemId);
+
+        // Calculate stateUpdatedAt value
+        let stateUpdatedAt = item.metadata?.stateUpdatedAt
+          ? new Date(item.metadata?.stateUpdatedAt)
+          : new Date(new Date().getTime() + itemIndex);
+
+        // Check for duplicate stateUpdatedAt values
+        const stateUpdatedAtStr = stateUpdatedAt.toISOString();
+        if (stateUpdatedAtSet.has(stateUpdatedAtStr)) {
+          stateUpdatedAt = new Date(stateUpdatedAt.getTime() + 1);
+        }
+        stateUpdatedAtSet.add(stateUpdatedAtStr);
 
         return {
           title: item.metadata?.title || cleanedUrl,
@@ -301,9 +319,7 @@ export async function POST(
           updatedAt: new Date(),
           profileId: profileResult.profile.id,
           state: ItemState.ACTIVE,
-          stateUpdatedAt: item.metadata?.stateUpdatedAt
-            ? new Date(item.metadata?.stateUpdatedAt)
-            : new Date(new Date().getTime() + itemIndex),
+          stateUpdatedAt,
           itemId,
         };
       });
@@ -376,6 +392,9 @@ export async function POST(
       return APIResponseJSON(response);
     });
   } catch (error) {
+    if (error instanceof RequestError) {
+      return APIResponseJSON({ error: error.message }, { status: 400 });
+    }
     log.error("Error creating items:", error);
     return APIResponseJSON({ error: "Error creating items." }, { status: 500 });
   }

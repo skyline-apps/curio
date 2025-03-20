@@ -98,7 +98,7 @@ describe("/api/v1/items/favorite", () => {
           author: "Kim",
           state: ItemState.ARCHIVED,
           isFavorite: true,
-          stateUpdatedAt: ORIGINAL_ARCHIVED_TIME,
+          stateUpdatedAt: new Date(ORIGINAL_ARCHIVED_TIME.getTime() + 1000),
           savedAt: new Date("2025-01-01T00:00:00.000Z"),
           lastReadAt: null,
         },

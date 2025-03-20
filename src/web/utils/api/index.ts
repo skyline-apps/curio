@@ -21,3 +21,10 @@ export async function handleAPIResponse<T>(response: Response): Promise<T> {
   const result = await response.json();
   return result;
 }
+
+export class RequestError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "RequestError";
+  }
+}

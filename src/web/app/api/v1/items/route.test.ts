@@ -1345,6 +1345,7 @@ describe("/api/v1/items", () => {
         updatedItems[1].stateUpdatedAt.toISOString(),
       );
     });
+
     it("should return 200 and use provided stateUpdatedAt", async () => {
       await testDb.db.insert(items).values(MOCK_ITEMS.slice(0, 2));
       const request: APIRequest = makeAuthenticatedMockRequest({
@@ -1354,13 +1355,13 @@ describe("/api/v1/items", () => {
             {
               url: "https://example.com",
               metadata: {
-                stateUpdatedAt: new Date("2024-01-01"),
+                stateUpdatedAt: new Date("2024-01-01 12:00:00 -8:00"),
               },
             },
             {
               url: "https://example2.com",
               metadata: {
-                stateUpdatedAt: new Date("2024-01-01"),
+                stateUpdatedAt: new Date("2024-01-01 12:00:00 -8:00"),
               },
             },
           ],
@@ -1374,16 +1375,16 @@ describe("/api/v1/items", () => {
         .select()
         .from(profileItems)
         .where(and(eq(profileItems.profileId, DEFAULT_TEST_PROFILE_ID)))
-        .orderBy(profileItems.itemId);
+        .orderBy(profileItems.stateUpdatedAt);
 
       expect(updatedItems).toHaveLength(2);
       expect(updatedItems[0].state).toBe(ItemState.ACTIVE);
       expect(updatedItems[0].stateUpdatedAt.toISOString()).toEqual(
-        "2024-01-01T00:00:00.000Z",
+        "2024-01-01T20:00:00.000Z",
       );
       expect(updatedItems[1].state).toBe(ItemState.ACTIVE);
       expect(updatedItems[1].stateUpdatedAt.toISOString()).toEqual(
-        "2024-01-01T00:00:00.000Z",
+        "2024-01-01T20:00:00.001Z",
       );
     });
 

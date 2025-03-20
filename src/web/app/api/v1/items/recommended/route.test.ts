@@ -415,6 +415,7 @@ describe("GET /api/v1/items/recommended", () => {
       slug: `example-com-${i}`,
     }));
 
+    const date = new Date();
     const mockProfileItems = [
       ...mockItems.map((item, i) => ({
         id: v4(),
@@ -428,6 +429,7 @@ describe("GET /api/v1/items/recommended", () => {
         isFavorite: i % 2 === 0,
         lastReadAt: i % 2 === 1 ? new Date() : null,
         savedAt: i % 4 === 0 ? thisWeek : lastWeek,
+        stateUpdatedAt: new Date(date.getTime() + i),
       })),
       ...mockItems.slice(0, 5).map((item, i) => ({
         id: v4(),
@@ -439,6 +441,7 @@ describe("GET /api/v1/items/recommended", () => {
         favicon: `https://example.com/favicon${i}.ico`,
         profileId: mockProfiles[0].id,
         savedAt: i % 2 === 0 ? thisWeek : lastWeek,
+        stateUpdatedAt: new Date(date.getTime() + i + 1000),
       })),
       ...mockItems.slice(0, 5).map((item, i) => ({
         id: v4(),
@@ -450,6 +453,7 @@ describe("GET /api/v1/items/recommended", () => {
         favicon: `https://example.com/favicon${i}.ico`,
         profileId: mockProfiles[1].id,
         savedAt: new Date(Date.now() - i * 24 * 60 * 60 * 1000),
+        stateUpdatedAt: new Date(date.getTime() + i + 2000),
       })),
       ...mockItems.slice(0, 2).map((item, i) => ({
         id: v4(),
@@ -462,6 +466,7 @@ describe("GET /api/v1/items/recommended", () => {
         profileId: DEFAULT_TEST_PROFILE_ID_2,
         savedAt: new Date(Date.now() - i * 24 * 60 * 60 * 1000),
         lastReadAt: new Date(),
+        stateUpdatedAt: new Date(date.getTime() + i + 3000),
       })),
     ];
 
