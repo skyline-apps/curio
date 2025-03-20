@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 
 import Button from "@/components/ui/Button";
@@ -24,6 +25,7 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({}: EmailSignInProps) => {
       },
     });
     setIsSigningIn(false);
+    setErrorMessage(null);
     if (error) {
       setErrorMessage(error.message);
     } else {
@@ -36,18 +38,24 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({}: EmailSignInProps) => {
       id="email-signin-button"
       className="flex flex-col gap-2 items-center w-full"
     >
-      <form className="flex gap-2 w-full">
+      <form
+        className="flex gap-2 w-full"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSignInWithEmail();
+        }}
+      >
         <Input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           contrast
+          className="grow"
         />
         <Button
           isDisabled={!email}
           isLoading={isSigningIn}
-          onPress={handleSignInWithEmail}
           color="primary"
           type="submit"
           size="sm"
