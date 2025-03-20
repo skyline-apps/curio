@@ -8,7 +8,7 @@ import Icon from "@/components/ui/Icon";
 interface SelectionPopupProps {
   selection: Selection | null;
   onHighlightSave: () => Promise<void>;
-  isSaving: boolean;
+  isSaving?: boolean;
   containerRef: React.RefObject<HTMLElement>;
 }
 

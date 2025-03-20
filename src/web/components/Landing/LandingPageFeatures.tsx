@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import { type Highlight } from "@/app/api/v1/items/highlights/validation";
 import { calculateHighlight } from "@/components/Article/useHighlightSelection";
@@ -87,16 +87,27 @@ const LandingPageFeatures: React.FC = () => {
     if (!highlight) {
       return;
     }
-    setDraftHighlight({ ...highlight, id: crypto.randomUUID() });
-    selection.removeAllRanges();
+    setDraftHighlight({
+      ...highlight,
+      id: crypto.randomUUID(),
+    });
   };
 
-  const nonOverlappingHighlights = removeHighlightsOverlap(sampleHighlights);
+  const allHighlights: Highlight[] = useMemo(
+    () =>
+      draftHighlight ? [...sampleHighlights, draftHighlight] : sampleHighlights,
+    [draftHighlight],
+  );
+
+  const nonOverlappingHighlights = useMemo(
+    () => removeHighlightsOverlap(allHighlights),
+    [allHighlights],
+  );
 
   const markdownComponents: Components = Object.fromEntries(
     ALL_COMPONENTS.map((c) => [
       c,
-      wrapMarkdownComponent(c, nonOverlappingHighlights, draftHighlight),
+      wrapMarkdownComponent(c, nonOverlappingHighlights, null),
     ]),
   );
 
@@ -136,7 +147,7 @@ const LandingPageFeatures: React.FC = () => {
           onTouchEnd={handleSelection}
         >
           <Markdown
-            className="text-xs select-text"
+            className="text-xs select-text overflow-hidden leading-6"
             components={markdownComponents}
           >
             {sampleArticle}
