@@ -1,24 +1,30 @@
-import React from "react";
+import React, { useContext } from "react";
 
-import { ReadItemResponse } from "@/app/api/v1/items/read/validation";
+import { useAppPage } from "@/providers/AppPageProvider";
+import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 
+import { useArticleUpdate } from "./actions";
 import { useScrollProgress } from "./useScrollProgress";
 
-interface ScrollProgressTrackerProps {
-  initialProgress: number;
-  containerRef: React.RefObject<HTMLElement>;
-  onProgressChange?: (progress: number) => Promise<ReadItemResponse>;
-}
+interface ScrollProgressTrackerProps {}
 
-const ScrollProgressTracker: React.FC<ScrollProgressTrackerProps> = ({
-  initialProgress,
-  containerRef,
-  onProgressChange,
-}) => {
+const ScrollProgressTracker: React.FC<ScrollProgressTrackerProps> = ({}) => {
+  const { loadedItem, isEditable } = useContext(CurrentItemContext);
+  const { updateReadingProgress } = useArticleUpdate();
+  const { containerRef } = useAppPage();
+
+  const readingProgress = isEditable(loadedItem?.item)
+    ? loadedItem?.item.metadata.readingProgress || 0
+    : 0;
+
+  const progressChangeHandler = isEditable(loadedItem?.item)
+    ? updateReadingProgress
+    : undefined;
+
   useScrollProgress({
-    initialProgress,
+    initialProgress: readingProgress,
     containerRef,
-    onProgressChange,
+    onProgressChange: progressChangeHandler,
   });
 
   return null;
