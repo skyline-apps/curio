@@ -1,8 +1,19 @@
 import { Spinner, SpinnerProps } from "@heroui/react";
 
-interface CurioSpinnerProps extends Omit<SpinnerProps, "size"> {
+import { cn } from "@/utils/cn";
+
+interface CurioSpinnerProps extends Omit<SpinnerProps, "size" | "color"> {
   centered?: boolean;
   size?: "xs" | "sm" | "md" | "lg";
+  color?:
+    | "default"
+    | "primary"
+    | "secondary"
+    | "success"
+    | "warning"
+    | "danger"
+    | "light"
+    | "dark";
 }
 
 const CurioSpinner: React.FC<CurioSpinnerProps> = ({
@@ -13,18 +24,25 @@ const CurioSpinner: React.FC<CurioSpinnerProps> = ({
   classNames,
   ...props
 }: CurioSpinnerProps) => {
+  const isDark = color === "dark";
+  const isLight = color === "light";
   const spinnerProps: SpinnerProps = {
-    color,
+    color: isLight || isDark ? "default" : color,
     className,
-    classNames:
-      size === "xs"
-        ? {
-            wrapper: "w-4 h-4",
-            circle1: "border-2",
-            circle2: "border-2",
-            ...classNames,
-          }
-        : classNames,
+    classNames: {
+      wrapper: cn(size === "xs" && "w-4 h-4"),
+      circle1: cn(
+        isDark && "border-b-default",
+        isLight && "border-b-default-100",
+        size === "xs" && "border-2",
+      ),
+      circle2: cn(
+        isDark && "border-b-default",
+        isLight && "border-b-default-100",
+        size === "xs" && "border-2",
+      ),
+      ...classNames,
+    },
     size: size === "xs" ? undefined : size,
   };
 

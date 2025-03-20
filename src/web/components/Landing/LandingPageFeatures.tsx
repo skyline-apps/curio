@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 
-import { type NewHighlight } from "@/app/api/v1/items/highlights/validation";
+import { type Highlight } from "@/app/api/v1/items/highlights/validation";
 import { calculateHighlight } from "@/components/Article/useHighlightSelection";
 import {
   ALL_COMPONENTS,
@@ -57,9 +57,7 @@ const Feature: React.FC<FeatureProps> = ({
 
 const LandingPageFeatures: React.FC = () => {
   const [labels, setLabels] = useState<Label[]>(sampleLabels);
-  const [draftHighlight, setDraftHighlight] = useState<NewHighlight | null>(
-    null,
-  );
+  const [draftHighlight, setDraftHighlight] = useState<Highlight | null>(null);
 
   const handleAddLabel = (label: Omit<Label, "id">): void => {
     setLabels([
@@ -89,14 +87,11 @@ const LandingPageFeatures: React.FC = () => {
     if (!highlight) {
       return;
     }
-    setDraftHighlight(highlight);
+    setDraftHighlight({ ...highlight, id: crypto.randomUUID() });
     selection.removeAllRanges();
   };
 
-  const nonOverlappingHighlights = removeHighlightsOverlap(
-    sampleHighlights,
-    draftHighlight,
-  );
+  const nonOverlappingHighlights = removeHighlightsOverlap(sampleHighlights);
 
   const markdownComponents: Components = Object.fromEntries(
     ALL_COMPONENTS.map((c) => [

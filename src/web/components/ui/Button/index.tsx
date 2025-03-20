@@ -32,7 +32,7 @@ export const FormButton: React.FC<FormButtonProps> = ({
   );
 };
 
-interface CurioButtonProps extends Omit<ButtonProps, "size"> {
+interface CurioButtonProps extends Omit<ButtonProps, "size" | "spinner"> {
   href?: string;
   tooltip?: string;
   size?: "xs" | "sm" | "md" | "lg";
@@ -52,6 +52,7 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
     const buttonProps: ButtonProps = {
       ...props,
       className: cn(
+        "relative",
         {
           "text-xs px-1 py-1 min-w-6 h-6": size === "xs",
           [props.isIconOnly ? "w-6" : ""]: size === "xs",
@@ -59,17 +60,34 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
             props.variant === "faded",
           "opacity-70 border-none shadow data-[hover=true]:!bg-transparent data-[hover=true]:opacity-100":
             props.variant === "ghost",
+          "text-default-900": props.color === "secondary",
         },
         className,
       ),
       size: size === "xs" ? undefined : size,
-      spinner:
-        size === "xs" && props.isLoading ? (
-          <Spinner size="xs" />
-        ) : (
-          props.spinner
-        ),
+      isLoading: false,
     };
+    const spinner = props.isLoading ? (
+      <Spinner
+        color={
+          props.color === "warning" || props.color === "secondary"
+            ? "dark"
+            : "light"
+        }
+        size={size === "xs" ? "xs" : "sm"}
+      />
+    ) : undefined;
+
+    if (props.isLoading) {
+      buttonProps.children = (
+        <>
+          <div className="opacity-0">{props.children}</div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            {spinner}
+          </div>
+        </>
+      );
+    }
 
     if (href) {
       const handlePress = (): void => {
