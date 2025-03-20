@@ -229,7 +229,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
       }
       setItemLoadedSlug(slug);
     },
-    [itemLoadedSlug, refetch],
+    [itemLoadedSlug], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const firstItem =

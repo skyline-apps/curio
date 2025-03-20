@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 
 import Article from "@/components/Article";
 import {
@@ -21,10 +21,11 @@ const ItemPage: React.FC = () => {
   const { slug } = useParams();
   const { settings } = useSettings();
   const { displayFont, displayFontSize } = settings || {};
+  const metadata = loadedItem?.item.metadata;
 
   const fontClass = getDisplayFontClass(
     displayFont || DisplayFont.SANS,
-    loadedItem?.item.metadata.textLanguage || "",
+    metadata?.textLanguage || "",
   );
 
   const headerSizeClass =
@@ -40,13 +41,50 @@ const ItemPage: React.FC = () => {
     }
   }, [fetchContent, slug]);
 
-  const { metadata } = loadedItem?.item || {};
-
   useEffect(() => {
     if (metadata?.title) {
       document.title = `Curio - ${metadata.title}`;
     }
   }, [metadata?.title]);
+
+  const articleContent = useMemo(() => {
+    if (!loadedItem?.content || !metadata?.title) return null;
+
+    return (
+      <div
+        className={cn(
+          "w-full lg:w-4xl max-w-4xl self-start pl-6 pt-4 mx-auto",
+          fontClass,
+        )}
+      >
+        <h1
+          className={cn("font-medium mb-2", headerSizeClass)}
+          dir={metadata?.textDirection}
+        >
+          {metadata?.title}
+        </h1>
+        <Article content={loadedItem?.content} className={cn(proseSizeClass)} />
+        <hr className="border-secondary my-4" />
+        <p
+          className={cn(
+            "text-sm text-secondary italic py-4",
+            metadata?.textDirection === TextDirection.RTL && "text-right",
+          )}
+        >
+          {metadata?.savedAt &&
+            `Saved on ${new Date(metadata.savedAt).toLocaleString()}`}
+        </p>
+      </div>
+    );
+  }, [
+    loadedItem?.content,
+    metadata?.title,
+    metadata?.textDirection,
+    metadata?.savedAt,
+    headerSizeClass,
+    proseSizeClass,
+    fontClass,
+  ]);
 
   return (
     <>
@@ -64,41 +102,15 @@ const ItemPage: React.FC = () => {
       )}
       <div className="flex-1 w-full h-full flex flex-col">
         {!loading && loadedItem ? (
-          <div
-            className={cn(
-              "w-full lg:w-4xl max-w-4xl self-start pl-6 pt-4 mx-auto",
-              fontClass,
-            )}
-          >
-            <h1
-              className={cn("font-medium mb-2", headerSizeClass)}
-              dir={metadata?.textDirection}
-            >
-              {metadata?.title}
-            </h1>
-            {loadingError ? (
-              <p className="text-sm text-danger">{loadingError}</p>
-            ) : loadedItem.content ? (
-              <Article
-                content={loadedItem.content}
-                className={cn(proseSizeClass)}
-              />
-            ) : (
-              <p className="text-sm text-secondary italic py-4">
-                Content unavailable.
-              </p>
-            )}
-            <hr className="border-secondary my-4" />
-            <p
-              className={cn(
-                "text-sm text-secondary italic py-4",
-                metadata?.textDirection === TextDirection.RTL && "text-right",
-              )}
-            >
-              {metadata?.savedAt &&
-                `Saved on ${new Date(metadata.savedAt).toLocaleString()}`}
+          loadingError ? (
+            <p className="text-sm text-danger">{loadingError}</p>
+          ) : loadedItem.content ? (
+            articleContent
+          ) : (
+            <p className="text-sm text-secondary italic py-4">
+              Content unavailable.
             </p>
-          </div>
+          )
         ) : (
           loadingError && <p className="text-sm text-danger">{loadingError}</p>
         )}

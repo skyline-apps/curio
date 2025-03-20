@@ -96,8 +96,8 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = memo(
         >
           <ReactMarkdown
             className="select-text"
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeRaw]}
+            remarkPlugins={useMemo(() => [remarkGfm], [])}
+            rehypePlugins={useMemo(() => [rehypeRaw], [])}
             components={components}
           >
             {children || ""}

@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
-import { ReadItemResponse } from "@/app/api/v1/items/read/validation";
+import { createLogger } from "@/utils/logger";
+
+const log = createLogger("useScrollProgress");
 
 interface UseScrollProgressProps {
   initialProgress: number;
   containerRef: React.RefObject<HTMLElement>;
-  onProgressChange?: (progress: number) => Promise<ReadItemResponse>;
+  onProgressChange?: (progress: number) => Promise<void>;
 }
 
 export function useScrollProgress({
@@ -15,6 +17,8 @@ export function useScrollProgress({
   onProgressChange,
 }: UseScrollProgressProps): { progress: number } {
   const [progress, setProgress] = useState<number>(initialProgress);
+  const progressRef = useRef(progress);
+  progressRef.current = progress;
 
   const debouncedScrollHandler = useDebouncedCallback(
     (element: HTMLElement) => {
@@ -22,31 +26,37 @@ export function useScrollProgress({
       const currentProgress = Math.round(
         (element.scrollTop / totalHeight) * 100,
       );
-      if (currentProgress !== progress) {
+      if (currentProgress !== progressRef.current) {
         setProgress(currentProgress);
         onProgressChange?.(currentProgress);
       }
     },
     300,
+    // Disable leading/trailing callbacks to minimize updates
+    { leading: false, trailing: true, maxWait: 1000 },
   );
 
+  // Memoize the scroll handler to prevent recreation
+  const handleScroll = useCallback((): void => {
+    if (!containerRef.current) return;
+    debouncedScrollHandler(containerRef.current);
+  }, [debouncedScrollHandler, containerRef]);
+
   useEffect(() => {
-    const handleScroll = (): void => {
-      if (!containerRef.current) return;
-      debouncedScrollHandler(containerRef.current);
-    };
     const element = containerRef.current;
     element?.addEventListener("scroll", handleScroll);
     return () => {
       element?.removeEventListener("scroll", handleScroll);
       debouncedScrollHandler.cancel();
     };
-  }, [onProgressChange, debouncedScrollHandler, containerRef]);
+  }, [handleScroll, debouncedScrollHandler, containerRef]);
 
   useEffect(() => {
     if (!containerRef.current) return;
     if (initialProgress === 0) {
-      onProgressChange?.(0);
+      onProgressChange?.(0).catch((error) => {
+        log.error("Failed to update reading progress:", error);
+      });
       return;
     }
     const element = containerRef.current;

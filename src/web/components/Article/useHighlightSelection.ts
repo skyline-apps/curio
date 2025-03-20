@@ -123,12 +123,12 @@ export function useHighlightSelection({}: UseHighlightSelectionProps): UseHighli
       updateAppLayout({ rightSidebarOpen: true });
       setSelectedHighlight(highlight);
     },
-    [updateAppLayout, setSelectedHighlight],
+    [updateAppLayout], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const clearSelectedHighlight = useCallback(() => {
     setSelectedHighlight(null);
-  }, [setSelectedHighlight]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const saveHighlight = useCallback(async () => {
     if (!currentSelection) {

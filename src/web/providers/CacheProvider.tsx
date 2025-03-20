@@ -66,22 +66,15 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
             if (!oldData) return oldData;
 
             const labels = item.labels ? item.labels : oldData.item.labels;
-
-            return {
-              ...oldData,
-              item: {
-                ...oldData.item,
-                ...item,
-                metadata: { ...oldData.item.metadata, ...item.metadata },
-                highlights:
-                  "highlights" in item
-                    ? item.highlights
-                    : "highlights" in oldData.item
-                      ? oldData.item.highlights
-                      : [],
-                labels,
-              },
+            oldData.item.labels = labels;
+            if ("highlights" in item && "highlights" in oldData.item) {
+              oldData.item.highlights = item.highlights;
+            }
+            oldData.item.metadata = {
+              ...oldData.item.metadata,
+              ...item.metadata,
             };
+            return oldData;
           },
         );
       });
