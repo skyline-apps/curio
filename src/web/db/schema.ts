@@ -195,6 +195,7 @@ export const profileItems = pgTable(
     stateUpdatedAt: timestamp("state_updated_at", {
       withTimezone: true,
     })
+      .unique()
       .notNull()
       .defaultNow(),
     lastReadAt: timestamp("last_read_at", { withTimezone: true }),
@@ -226,6 +227,13 @@ export const profileItems = pgTable(
     uniqueProfileItem: uniqueIndex("unique_profile_item").on(
       table.profileId,
       table.itemId,
+    ),
+    isFavoriteIndex: index("profile_items_is_favorite_idx").on(
+      table.isFavorite,
+    ),
+    stateIndex: index("profile_items_state_idx").on(table.state),
+    stateUpdatedAtIndex: index("profile_items_state_updated_at_idx").on(
+      table.stateUpdatedAt,
     ),
   }),
 ).enableRLS();
@@ -272,6 +280,7 @@ export const profileItemHighlights = pgTable(
       .notNull()
       .defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
+      .unique()
       .notNull()
       .defaultNow(),
   },

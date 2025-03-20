@@ -200,7 +200,6 @@ export async function GET(
 
     const results = await fetchOwnItemResults()
       .where(whereClause)
-      // TODO: Fix pagination bug if multiple items have the same stateUpdatedAt
       .orderBy(desc(profileItems.stateUpdatedAt), desc(items.id))
       .limit(limit);
 

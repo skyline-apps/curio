@@ -64,10 +64,11 @@ export async function POST(
       });
     }
 
+    const baseDate = new Date();
     const itemsWithMetadata = await Promise.all(
-      itemsToSave.map(async (item) => {
+      itemsToSave.map(async (item, index) => {
         const metadata = await getItemMetadata(item.slug);
-        const newDate = new Date();
+        const newDate = new Date(baseDate.getTime() + index);
         return {
           itemId: item.id,
           profileId: profileResult.profile.id,

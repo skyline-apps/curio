@@ -232,6 +232,20 @@
       "when": 1742333874247,
       "tag": "0032_add auto text direction",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1742434074618,
+      "tag": "0033_add-indexes-profile-items",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1742438048563,
+      "tag": "0034_add-unique-highlight-time",
+      "breakpoints": true
     }
   ]
 }
