@@ -19,7 +19,7 @@ const RightSidebar: React.FC = () => {
     selectedItems,
     currentItem,
     isCurrentlyPreviewing,
-    draftHighlight,
+    selectedHighlight,
     isEditable,
     fetching,
   } = useContext(CurrentItemContext);
@@ -51,7 +51,7 @@ const RightSidebar: React.FC = () => {
             )}
           >
             {rightSidebarOpen &&
-              (draftHighlight && isEditable(currentItem) ? (
+              (selectedHighlight && isEditable(currentItem) ? (
                 <HighlightMetadata />
               ) : currentItem ? (
                 <ItemMetadata

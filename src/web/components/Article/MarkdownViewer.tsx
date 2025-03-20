@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useRef } from "react";
+import React, { memo, useCallback, useMemo, useRef } from "react";
 import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm";
 import { type Highlight } from "@/app/api/v1/items/highlights/validation";
 import { cn } from "@/utils/cn";
 
+import { SelectionPopup } from "./SelectionPopup";
 import { useHighlightSelection } from "./useHighlightSelection";
 import {
   ALL_COMPONENTS,
@@ -25,17 +26,21 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = memo(
     const contentRef = useRef<HTMLDivElement>(null);
 
     const {
+      currentSelection,
       handleSelection,
-      draftHighlight,
-      selectDraftHighlight,
+      saveHighlight,
+      isSavingHighlight,
+      selectedHighlight,
+      updateSelectedHighlight,
+      clearSelectedHighlight,
       clearSelection,
     } = useHighlightSelection({
       contentRef,
     });
 
     const nonOverlappingHighlights = useMemo(
-      () => removeHighlightsOverlap(highlights, draftHighlight),
-      [highlights, draftHighlight],
+      () => removeHighlightsOverlap(highlights),
+      [highlights],
     );
 
     const components: Components = useMemo(
@@ -46,27 +51,32 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = memo(
             wrapMarkdownComponent(
               c,
               nonOverlappingHighlights,
-              draftHighlight,
-              selectDraftHighlight,
+              selectedHighlight,
+              updateSelectedHighlight,
             ),
           ]),
         ),
-      [nonOverlappingHighlights, draftHighlight, selectDraftHighlight],
+      [nonOverlappingHighlights, selectedHighlight, updateSelectedHighlight],
     );
 
     const remarkPlugins = useMemo(() => [remarkGfm], []);
     const rehypePlugins = useMemo(() => [rehypeRaw], []);
 
+    const clearSelections = useCallback(() => {
+      clearSelection();
+      clearSelectedHighlight();
+    }, [clearSelection, clearSelectedHighlight]);
+
     return (
       <div className="relative flex gap-4">
         <div
           ref={contentRef}
-          onMouseDown={(event) => event.button === 0 && clearSelection()}
-          onTouchStart={clearSelection}
+          onMouseDown={(event) => event.button === 0 && clearSelections()}
+          onTouchStart={clearSelections}
           onMouseUp={handleSelection}
           onTouchEnd={handleSelection}
           className={cn(
-            "prose prose-slate max-w-none overflow-y-auto h-full [&_*]:text-default-foreground hover:prose-a:!text-primary dark:prose-invert",
+            "prose prose-slate max-w-none overflow-y-auto h-full [&_*]:text-default-foreground hover:prose-a:!text-primary dark:prose-invert relative",
             className,
           )}
         >
@@ -79,6 +89,14 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = memo(
             {children || ""}
           </ReactMarkdown>
         </div>
+        {currentSelection && (
+          <SelectionPopup
+            selection={currentSelection}
+            containerRef={contentRef}
+            onHighlightSave={saveHighlight}
+            isSaving={isSavingHighlight}
+          />
+        )}
       </div>
     );
   },

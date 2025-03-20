@@ -1,24 +1,27 @@
-import { type RefObject, useCallback, useContext } from "react";
+import { useCallback, useContext, useState } from "react";
 
 import {
   type Highlight,
   type NewHighlight,
 } from "@/app/api/v1/items/highlights/validation";
+import { useHighlightUpdate } from "@/components/RightSidebar/highlightActions";
 import { useAppLayout } from "@/providers/AppLayoutProvider";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import { createLogger } from "@/utils/logger";
 
 const log = createLogger("useHighlightSelection");
 
-interface UseHighlightSelectionProps {
-  contentRef: RefObject<HTMLElement>;
-}
+interface UseHighlightSelectionProps {}
 
 interface UseHighlightSelectionResult {
-  handleSelection: () => Promise<void>;
-  draftHighlight: Highlight | NewHighlight | null;
-  selectDraftHighlight: (highlight: Highlight) => void;
+  currentSelection: Selection | null;
+  handleSelection: () => void;
   clearSelection: () => void;
+  saveHighlight: () => Promise<void>;
+  isSavingHighlight: boolean;
+  selectedHighlight: Highlight | null;
+  updateSelectedHighlight: (highlight: Highlight) => void;
+  clearSelectedHighlight: () => void;
 }
 
 export function findPreviousOffset(node: Node): number {
@@ -90,46 +93,65 @@ export function calculateHighlight(selection: Selection): NewHighlight | null {
   return highlight;
 }
 
-export function useHighlightSelection({
-  contentRef,
-}: UseHighlightSelectionProps): UseHighlightSelectionResult {
+export function useHighlightSelection({}: UseHighlightSelectionProps): UseHighlightSelectionResult {
   const { updateAppLayout } = useAppLayout();
-  const { draftHighlight, setDraftHighlight } = useContext(CurrentItemContext);
+  const { selectedHighlight, setSelectedHighlight } =
+    useContext(CurrentItemContext);
+  const [currentSelection, setCurrentSelection] = useState<Selection | null>(
+    null,
+  );
+  const { createHighlight, isUpdating } = useHighlightUpdate();
 
-  const selectDraftHighlight = useCallback(
+  const handleSelection = (): void => {
+    const selection = window.getSelection();
+    if (selection && !selection.isCollapsed) {
+      setCurrentSelection(selection);
+    } else {
+      setCurrentSelection(null);
+    }
+  };
+
+  const clearSelection = (): void => {
+    setCurrentSelection(null);
+    window.getSelection()?.removeAllRanges();
+  };
+
+  const updateSelectedHighlight = useCallback(
     (highlight: Highlight) => {
       updateAppLayout({ rightSidebarOpen: true });
-      setDraftHighlight(highlight);
+      setSelectedHighlight(highlight);
     },
-    [updateAppLayout, setDraftHighlight],
+    [updateAppLayout, setSelectedHighlight],
   );
 
-  const clearSelection = useCallback(() => {
-    setDraftHighlight(null);
-  }, [setDraftHighlight]);
+  const clearSelectedHighlight = useCallback(() => {
+    setSelectedHighlight(null);
+  }, [setSelectedHighlight]);
 
-  const handleSelection = useCallback(async () => {
-    const selection = window.getSelection();
-    if (!selection || !contentRef.current || selection.rangeCount === 0) {
-      return;
-    }
-
+  const saveHighlight = useCallback(async () => {
+    if (!currentSelection) return;
     try {
-      const highlight = calculateHighlight(selection);
+      const highlight = calculateHighlight(currentSelection);
       if (!highlight) {
         return;
       }
 
-      setDraftHighlight(highlight);
+      await createHighlight(highlight);
+      updateAppLayout({ rightSidebarOpen: true });
+      clearSelection();
     } catch (error) {
       log.error("Error handling selection:", error);
     }
-  }, [contentRef, setDraftHighlight]);
+  }, [currentSelection, createHighlight, updateAppLayout]);
 
   return {
+    currentSelection,
     handleSelection,
-    draftHighlight,
-    selectDraftHighlight,
     clearSelection,
+    selectedHighlight,
+    updateSelectedHighlight,
+    clearSelectedHighlight,
+    saveHighlight,
+    isSavingHighlight: isUpdating,
   };
 }

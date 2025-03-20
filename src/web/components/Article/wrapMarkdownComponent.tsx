@@ -4,10 +4,7 @@ import React, {
   useEffect,
 } from "react";
 
-import {
-  type Highlight,
-  type NewHighlight,
-} from "@/app/api/v1/items/highlights/validation";
+import { type Highlight } from "@/app/api/v1/items/highlights/validation";
 import Button from "@/components/ui/Button";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { BrowserMessageContext } from "@/providers/BrowserMessageProvider";
@@ -94,7 +91,7 @@ const LinkInfo: React.FC<LinkInfoProps> = ({
   return (
     <Tooltip
       content={
-        <span className="flex items-center justify-center w-60 p-1 overflow-x-hidden select-none">
+        <span className="flex items-center gap-1 justify-between max-w-60 p-1 overflow-x-hidden select-none">
           <a
             href={href}
             target="_blank"
@@ -106,6 +103,7 @@ const LinkInfo: React.FC<LinkInfoProps> = ({
             <Button
               className="shrink-0"
               size="xs"
+              color="primary"
               onPress={() => href && saveItemContent(href)}
             >
               Save to Curio
@@ -119,34 +117,40 @@ const LinkInfo: React.FC<LinkInfoProps> = ({
   );
 };
 
-export function removeHighlightsOverlap(
-  existingHighlights: Highlight[],
-  currentHighlight: NewHighlight | null,
-): Highlight[] {
-  if (!currentHighlight) return existingHighlights;
+export function removeHighlightsOverlap(highlights: Highlight[]): Highlight[] {
+  if (highlights.length <= 1) return highlights;
+
+  // Sort highlights by start offset for efficient processing
+  const sortedHighlights = [...highlights].sort(
+    (a, b) => a.startOffset - b.startOffset,
+  );
   const resultHighlights: Highlight[] = [];
-  existingHighlights.forEach((h) => {
-    if (
-      h.startOffset >= currentHighlight.startOffset &&
-      h.endOffset <= currentHighlight.endOffset
-    ) {
-      // Completely contained, don't render
-    } else if (
-      h.endOffset > currentHighlight.startOffset &&
-      h.endOffset < currentHighlight.endOffset
-    ) {
-      // Overlaps before current highlight, truncate the end
-      resultHighlights.push({ ...h, endOffset: currentHighlight.startOffset });
-    } else if (
-      h.startOffset > currentHighlight.startOffset &&
-      h.startOffset < currentHighlight.endOffset
-    ) {
-      // Overlaps after current highlight, truncate the start
-      resultHighlights.push({ ...h, startOffset: currentHighlight.endOffset });
+
+  let current = sortedHighlights[0];
+
+  // Process each highlight in order
+  for (let i = 1; i < sortedHighlights.length; i++) {
+    const next = sortedHighlights[i];
+
+    if (current.endOffset <= next.startOffset) {
+      // No overlap - add current and move to next
+      resultHighlights.push(current);
+      current = next;
+    } else if (current.endOffset >= next.endOffset) {
+      // Next is completely contained within current - skip next
+      continue;
     } else {
-      resultHighlights.push({ ...h });
+      // Partial overlap - truncate current highlight and add both
+      resultHighlights.push({
+        ...current,
+        endOffset: next.startOffset,
+      });
+      current = next;
     }
-  });
+  }
+
+  // Add the last processed highlight
+  resultHighlights.push(current);
 
   return resultHighlights;
 }
@@ -180,12 +184,10 @@ if (typeof window !== "undefined") {
 export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
   tag: T,
   highlights: Highlight[],
-  draftHighlight: NewHighlight | Highlight | null,
+  selectedHighlight: Highlight | null,
   selectHighlight?: (highlight: Highlight) => void,
 ): React.FC<MarkdownProps<T>> => {
-  const allHighlights = draftHighlight
-    ? [...highlights, draftHighlight]
-    : highlights;
+  const allHighlights: Highlight[] = highlights;
 
   const MarkdownComponent = ({
     node,
@@ -298,7 +300,7 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
     const processTextNode = (
       text: string,
       currentOffset: number,
-      textHighlights: (NewHighlight | Highlight)[],
+      textHighlights: Highlight[],
     ): { processed: React.ReactNode[]; nextOffset: number } => {
       const processed: React.ReactNode[] = [];
       let pos = currentOffset;
@@ -327,7 +329,7 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
         if (highlightedText) {
           processed.push(
             <HighlightSpan
-              isSelected={highlight.id === draftHighlight?.id}
+              isSelected={highlight.id === selectedHighlight?.id}
               key={`${highlight.startOffset}-${highlightEnd}`}
               highlight={highlight}
               startOffset={Math.max(currentOffset, highlight.startOffset)}
@@ -396,7 +398,7 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
     if (containingHighlight && !React.isValidElement(children)) {
       return createBaseElement(
         <HighlightSpan
-          isSelected={containingHighlight.id === draftHighlight?.id}
+          isSelected={containingHighlight.id === selectedHighlight?.id}
           highlight={containingHighlight}
           startOffset={startOffset}
           endOffset={endOffset}

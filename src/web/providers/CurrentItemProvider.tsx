@@ -10,10 +10,7 @@ import React, {
   useState,
 } from "react";
 
-import {
-  type Highlight,
-  type NewHighlight,
-} from "@/app/api/v1/items/highlights/validation";
+import { type Highlight } from "@/app/api/v1/items/highlights/validation";
 import { GetItemContentResponse } from "@/app/api/v1/public/items/content/validation";
 import { ItemState } from "@/db/schema";
 import { useAppLayout } from "@/providers/AppLayoutProvider";
@@ -54,8 +51,8 @@ export type CurrentItemContextType = {
   loadingError: string | null;
   lastSelectionIndex: number | null;
   setLastSelectionIndex: (index: number | null) => void;
-  draftHighlight: Highlight | NewHighlight | null;
-  setDraftHighlight: (highlight: Highlight | NewHighlight | null) => void;
+  selectedHighlight: Highlight | null;
+  setSelectedHighlight: (highlight: Highlight | null) => void;
   isEditable: (item: Item | PublicItem | null | undefined) => item is Item;
 };
 
@@ -78,8 +75,8 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
   loadingError: null,
   lastSelectionIndex: null,
   setLastSelectionIndex: () => {},
-  draftHighlight: null,
-  setDraftHighlight: () => {},
+  selectedHighlight: null,
+  setSelectedHighlight: () => {},
   isEditable: (item: Item | PublicItem | null | undefined): item is Item => {
     return item ? typeof item.profileItemId === "string" : false;
   },
@@ -99,9 +96,9 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     Item | PublicItem | null
   >(null);
   const [inSelectionMode, setInSelectionMode] = useState<boolean>(false);
-  const [draftHighlight, setDraftHighlight] = useState<
-    Highlight | NewHighlight | null
-  >(null);
+  const [selectedHighlight, setSelectedHighlight] = useState<Highlight | null>(
+    null,
+  );
 
   const { updateAppLayout } = useAppLayout();
   // Note that this ItemsContext may not be available if CurrentItemProvider is being used for an
@@ -113,7 +110,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     setItemLoadedSlug(null);
     setCurrentPreviewItem(null);
     setInSelectionMode(false);
-    setDraftHighlight(null);
+    setSelectedHighlight(null);
     updateAppLayout({ rightSidebarOpen: false });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -290,8 +287,8 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         loadingError: error ? error.message || "Error loading items." : null,
         lastSelectionIndex,
         setLastSelectionIndex,
-        draftHighlight,
-        setDraftHighlight,
+        selectedHighlight,
+        setSelectedHighlight,
         isEditable,
       }}
     >

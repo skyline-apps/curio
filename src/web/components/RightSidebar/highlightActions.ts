@@ -19,8 +19,11 @@ export const isHighlightWithId = (
   highlight: Highlight | NewHighlight | null,
 ): highlight is Highlight => !!highlight && "id" in highlight;
 
-interface UseRightSidebarUpdate {
-  createOrUpdateHighlight: (
+interface UseHighlightUpdate {
+  createHighlight: (
+    highlight: NewHighlight,
+  ) => Promise<CreateOrUpdateHighlightResponse>;
+  updateHighlightNote: (
     note: string,
   ) => Promise<CreateOrUpdateHighlightResponse>;
   deleteHighlight: () => Promise<DeleteHighlightResponse>;
@@ -28,8 +31,8 @@ interface UseRightSidebarUpdate {
   isDeleting: boolean;
 }
 
-export const useRightSidebarUpdate = (): UseRightSidebarUpdate => {
-  const { draftHighlight, loadedItem, setDraftHighlight } =
+export const useHighlightUpdate = (): UseHighlightUpdate => {
+  const { selectedHighlight, loadedItem, setSelectedHighlight } =
     useContext(CurrentItemContext);
   const { optimisticUpdateItems } = useCache();
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
@@ -51,8 +54,12 @@ export const useRightSidebarUpdate = (): UseRightSidebarUpdate => {
       }).then(handleAPIResponse<CreateOrUpdateHighlightResponse>);
     },
     onSuccess: (data) => {
-      if (loadedItem?.item && "highlights" in loadedItem.item) {
-        setDraftHighlight(null);
+      if (
+        loadedItem?.item &&
+        "highlights" in loadedItem.item &&
+        data.highlights.length
+      ) {
+        setSelectedHighlight(data.highlights[0]);
         optimisticUpdateItems([
           {
             slug: loadedItem.item.slug,
@@ -92,7 +99,7 @@ export const useRightSidebarUpdate = (): UseRightSidebarUpdate => {
     },
     onSuccess: (data) => {
       if (loadedItem?.item && "highlights" in loadedItem.item) {
-        setDraftHighlight(null);
+        setSelectedHighlight(null);
         optimisticUpdateItems([
           {
             slug: loadedItem.item.slug,
@@ -111,35 +118,49 @@ export const useRightSidebarUpdate = (): UseRightSidebarUpdate => {
 
   const deleteHighlightMutation = useMutation(deleteHighlightMutationOptions);
 
-  const createOrUpdateHighlight = async (
+  const createHighlight = async (
+    highlight: NewHighlight,
+  ): Promise<CreateOrUpdateHighlightResponse> => {
+    if (!loadedItem?.item) {
+      log.error("Failed to create highlight, item not loaded");
+      throw new Error("Item not loaded");
+    }
+    return await createOrUpdateHighlightMutation.mutateAsync({
+      slug: loadedItem.item.slug,
+      highlight,
+    });
+  };
+
+  const updateHighlightNote = async (
     note: string,
   ): Promise<CreateOrUpdateHighlightResponse> => {
-    if (!loadedItem?.item || !draftHighlight) {
+    if (!loadedItem?.item || !selectedHighlight) {
       log.error("Failed to create highlight, highlight not loaded");
       throw new Error("Highlight not loaded");
     }
     return await createOrUpdateHighlightMutation.mutateAsync({
       slug: loadedItem.item.slug,
       highlight: {
-        ...draftHighlight,
+        ...selectedHighlight,
         note,
       },
     });
   };
 
   const deleteHighlight = async (): Promise<DeleteHighlightResponse> => {
-    if (!loadedItem?.item || !isHighlightWithId(draftHighlight)) {
+    if (!loadedItem?.item || !isHighlightWithId(selectedHighlight)) {
       log.error("Failed to delete highlight, highlight not loaded");
       throw new Error("Highlight not loaded");
     }
     return await deleteHighlightMutation.mutateAsync({
       slug: loadedItem.item.slug,
-      highlightId: draftHighlight.id,
+      highlightId: selectedHighlight.id,
     });
   };
 
   return {
-    createOrUpdateHighlight,
+    createHighlight,
+    updateHighlightNote,
     deleteHighlight,
     isUpdating,
     isDeleting,
