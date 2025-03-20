@@ -22,6 +22,18 @@ interface MarkdownViewerProps {
   isEditable?: boolean;
 }
 
+const useSelectionListeners = (handleSelection: () => void): void => {
+  useEffect(() => {
+    window.addEventListener("mouseup", handleSelection);
+    window.addEventListener("touchend", handleSelection);
+
+    return () => {
+      window.removeEventListener("mouseup", handleSelection);
+      window.removeEventListener("touchend", handleSelection);
+    };
+  }, [handleSelection]);
+};
+
 const MarkdownViewer: React.FC<MarkdownViewerProps> = memo(
   ({ highlights, className, children, isEditable }: MarkdownViewerProps) => {
     const contentRef = useRef<HTMLDivElement>(null);
@@ -60,29 +72,22 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = memo(
       [nonOverlappingHighlights, selectedHighlight, updateSelectedHighlight],
     );
 
-    const remarkPlugins = useMemo(() => [remarkGfm], []);
-    const rehypePlugins = useMemo(() => [rehypeRaw], []);
-
     const clearSelections = useCallback(() => {
       clearSelection();
       clearSelectedHighlight();
     }, [clearSelection, clearSelectedHighlight]);
 
-    useEffect(() => {
-      window.addEventListener("mouseup", handleSelection);
-      window.addEventListener("touchend", handleSelection);
-
-      return () => {
-        window.removeEventListener("mouseup", handleSelection);
-        window.removeEventListener("touchend", handleSelection);
-      };
-    }, [handleSelection]);
+    useSelectionListeners(handleSelection);
 
     return (
       <div className="relative flex gap-4">
         <div
           ref={contentRef}
-          onMouseDown={(event) => event.button === 0 && clearSelections()}
+          onMouseDown={useCallback(
+            (event: React.MouseEvent) =>
+              event.button === 0 && clearSelections(),
+            [clearSelections],
+          )}
           onTouchStart={clearSelections}
           className={cn(
             "prose prose-slate max-w-none overflow-y-auto h-full [&_*]:text-default-foreground hover:prose-a:!text-primary dark:prose-invert relative",
@@ -91,8 +96,8 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = memo(
         >
           <ReactMarkdown
             className="select-text"
-            remarkPlugins={remarkPlugins}
-            rehypePlugins={rehypePlugins}
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw]}
             components={components}
           >
             {children || ""}

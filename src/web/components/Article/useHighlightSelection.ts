@@ -7,6 +7,7 @@ import {
 import { useHighlightUpdate } from "@/components/RightSidebar/highlightActions";
 import { useAppLayout } from "@/providers/AppLayoutProvider";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
+import { useToast } from "@/providers/ToastProvider";
 import { createLogger } from "@/utils/logger";
 
 const log = createLogger("useHighlightSelection");
@@ -94,6 +95,7 @@ export function calculateHighlight(selection: Selection): NewHighlight | null {
 }
 
 export function useHighlightSelection({}: UseHighlightSelectionProps): UseHighlightSelectionResult {
+  const { showToast } = useToast();
   const { updateAppLayout } = useAppLayout();
   const { selectedHighlight, setSelectedHighlight } =
     useContext(CurrentItemContext);
@@ -102,19 +104,19 @@ export function useHighlightSelection({}: UseHighlightSelectionProps): UseHighli
   );
   const { createHighlight, isUpdating } = useHighlightUpdate();
 
-  const handleSelection = (): void => {
+  const handleSelection = useCallback((): void => {
     const selection = window.getSelection();
     if (selection && !selection.isCollapsed) {
       setCurrentSelection(selection);
     } else {
       setCurrentSelection(null);
     }
-  };
+  }, []);
 
-  const clearSelection = (): void => {
+  const clearSelection = useCallback((): void => {
     setCurrentSelection(null);
     window.getSelection()?.removeAllRanges();
-  };
+  }, []);
 
   const updateSelectedHighlight = useCallback(
     (highlight: Highlight) => {
@@ -129,10 +131,13 @@ export function useHighlightSelection({}: UseHighlightSelectionProps): UseHighli
   }, [setSelectedHighlight]);
 
   const saveHighlight = useCallback(async () => {
-    if (!currentSelection) return;
+    if (!currentSelection) {
+      return;
+    }
     try {
       const highlight = calculateHighlight(currentSelection);
       if (!highlight) {
+        showToast("Invalid highlight");
         return;
       }
 
@@ -141,8 +146,15 @@ export function useHighlightSelection({}: UseHighlightSelectionProps): UseHighli
       clearSelection();
     } catch (error) {
       log.error("Error handling selection:", error);
+      showToast("Error saving highlight");
     }
-  }, [currentSelection, createHighlight, updateAppLayout]);
+  }, [
+    currentSelection,
+    createHighlight,
+    updateAppLayout,
+    clearSelection,
+    showToast,
+  ]);
 
   return {
     currentSelection,
