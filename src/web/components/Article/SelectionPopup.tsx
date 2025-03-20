@@ -108,7 +108,7 @@ export const SelectionPopup = ({
           )}
           <Button
             size="xs"
-            tooltip="This feature is not yet available"
+            tooltip="Sorry, you don't have access to this feature."
             disabled
             onPress={() => {}}
           >
