@@ -59,6 +59,7 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({}: EmailSignInProps) => {
           color="primary"
           type="submit"
           size="sm"
+          className="shrink-0"
         >
           Sign in
         </Button>
