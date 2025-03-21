@@ -11,7 +11,7 @@ import {
 import { extractMainContentAsMarkdown, extractMetadata } from "@/lib/extract";
 import { MOCK_METADATA } from "@/lib/extract/__mocks__/index";
 import { ExtractError, MetadataError } from "@/lib/extract/types";
-import { indexDocuments } from "@/lib/search";
+import { indexItemDocuments } from "@/lib/search";
 import {
   getItemContent,
   getItemMetadata,
@@ -62,8 +62,8 @@ const MOCK_HIGHLIGHTS = [
 describe("/api/v1/items/content", () => {
   describe("POST /api/v1/items/content", () => {
     const checkDocumentIndexed = (): void => {
-      expect(indexDocuments).toHaveBeenCalledTimes(1);
-      expect(indexDocuments).toHaveBeenCalledWith([
+      expect(indexItemDocuments).toHaveBeenCalledTimes(1);
+      expect(indexItemDocuments).toHaveBeenCalledWith([
         {
           title: MOCK_METADATA.title,
           description: MOCK_METADATA.description,
@@ -271,8 +271,8 @@ describe("/api/v1/items/content", () => {
       expect(profileItem[1].savedAt).toEqual(
         new Date("2025-01-10T12:55:56-08:00"),
       );
-      expect(indexDocuments).toHaveBeenCalledTimes(1);
-      expect(indexDocuments).toHaveBeenCalledWith([
+      expect(indexItemDocuments).toHaveBeenCalledTimes(1);
+      expect(indexItemDocuments).toHaveBeenCalledWith([
         {
           title: MOCK_METADATA.title,
           description: MOCK_METADATA.description,
@@ -341,7 +341,7 @@ describe("/api/v1/items/content", () => {
         (profileItem[0].savedAt as Date).getTime() >
           ORIGINAL_CREATION_DATE.getTime(),
       ).toBe(true);
-      expect(indexDocuments).toHaveBeenCalledTimes(0);
+      expect(indexItemDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 200 and overwrite previous reading state when longer content exists", async () => {
@@ -410,7 +410,7 @@ describe("/api/v1/items/content", () => {
           eq(profileItemHighlights.profileItemId, updatedProfileItem[0].id),
         );
       expect(updatedHighlights.length).toEqual(0);
-      expect(indexDocuments).toHaveBeenCalledTimes(0);
+      expect(indexItemDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 200 and just force update metadata", async () => {
@@ -479,7 +479,7 @@ describe("/api/v1/items/content", () => {
           eq(profileItemHighlights.profileItemId, updatedProfileItem[0].id),
         );
       expect(updatedHighlights.length).toEqual(0);
-      expect(indexDocuments).toHaveBeenCalledTimes(0);
+      expect(indexItemDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 200 and skip metadata update when configured", async () => {
@@ -519,8 +519,8 @@ describe("/api/v1/items/content", () => {
         .from(profileItemHighlights)
         .where(eq(profileItemHighlights.profileItemId, profileItem[0].id));
       expect(updatedHighlights.length).toEqual(0);
-      expect(indexDocuments).toHaveBeenCalledTimes(1);
-      expect(indexDocuments).toHaveBeenCalledWith([
+      expect(indexItemDocuments).toHaveBeenCalledTimes(1);
+      expect(indexItemDocuments).toHaveBeenCalledWith([
         {
           title: MOCK_PROFILE_ITEMS[0].title,
           description: MOCK_PROFILE_ITEMS[0].description,

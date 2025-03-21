@@ -9,7 +9,7 @@ import {
   parseIncomingEmail,
 } from "@/lib/email/__mocks__/index";
 import { EmailError } from "@/lib/email/types";
-import { indexDocuments } from "@/lib/search";
+import { indexItemDocuments } from "@/lib/search";
 import { MOCK_VERSION, uploadItemContent } from "@/lib/storage/__mocks__/index";
 import { UploadStatus } from "@/lib/storage/types";
 import { APIRequest } from "@/utils/api";
@@ -70,8 +70,8 @@ const MOCK_HIGHLIGHTS = [
 describe("/api/v1/items/email", () => {
   describe("POST /api/v1/items/email", () => {
     const checkDocumentIndexed = (): void => {
-      expect(indexDocuments).toHaveBeenCalledTimes(1);
-      expect(indexDocuments).toHaveBeenCalledWith([
+      expect(indexItemDocuments).toHaveBeenCalledTimes(1);
+      expect(indexItemDocuments).toHaveBeenCalledWith([
         {
           title: MOCK_EMAIL.subject,
           description: MOCK_EMAIL.textContent,
@@ -262,7 +262,7 @@ describe("/api/v1/items/email", () => {
         expect(item).toHaveLength(1);
         expect(item[0].title).toBe("test title");
         expect(item[0].versionName).toBe(null);
-        expect(indexDocuments).not.toHaveBeenCalled();
+        expect(indexItemDocuments).not.toHaveBeenCalled();
       });
 
       it("should return 200 when receiving shorter email content", async () => {
@@ -297,7 +297,7 @@ describe("/api/v1/items/email", () => {
         expect(item[0].versionName).toBe(null);
         const highlights = await testDb.db.select().from(profileItemHighlights);
         expect(highlights).toHaveLength(0);
-        expect(indexDocuments).not.toHaveBeenCalled();
+        expect(indexItemDocuments).not.toHaveBeenCalled();
       });
 
       it("should return 200 when receiving longer email content", async () => {

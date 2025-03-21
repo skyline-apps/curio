@@ -34,7 +34,20 @@ export interface ItemDocumentResult extends ItemDocument {
   };
 }
 
-export interface SearchResults {
+export interface ItemSearchResults {
   hits: ItemDocumentResult[];
   estimatedTotalHits: number;
+}
+
+export interface HighlightDocument {
+  id: string;
+  profileId: string;
+  profileItemId: string;
+  slug: string;
+  url: string;
+  title: string;
+  description?: string;
+  author?: string;
+  highlightText: string;
+  note: string;
 }

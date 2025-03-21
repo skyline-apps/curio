@@ -10,7 +10,7 @@ import {
   profileLabels,
   TextDirection,
 } from "@/db/schema";
-import { searchDocuments } from "@/lib/search";
+import { searchItemDocuments } from "@/lib/search";
 import { SearchError } from "@/lib/search/types";
 import { APIRequest } from "@/utils/api";
 import {
@@ -243,7 +243,7 @@ describe("/api/v1/items", () => {
     });
 
     it("should support offset-based pagination when searching", async () => {
-      vi.mocked(searchDocuments).mockResolvedValueOnce({
+      vi.mocked(searchItemDocuments).mockResolvedValueOnce({
         hits: [
           {
             slug: MOCK_ITEMS[1].slug,
@@ -284,7 +284,7 @@ describe("/api/v1/items", () => {
       expect(firstData.items[0].excerpt).toBe("blah2");
       expect(firstData.items[1].id).toBe(TEST_ITEM_ID_1);
       expect(firstData.items[1].excerpt).toBe("blah");
-      vi.mocked(searchDocuments).mockResolvedValueOnce({
+      vi.mocked(searchItemDocuments).mockResolvedValueOnce({
         hits: [
           {
             slug: MOCK_ITEMS[2].slug,
@@ -395,7 +395,7 @@ describe("/api/v1/items", () => {
       expect(data.items).toHaveLength(1);
       expect(data.items[0].id).toBe(TEST_ITEM_ID_DELETED);
       expect(data.total).toBe(1);
-      expect(searchDocuments).not.toHaveBeenCalled();
+      expect(searchItemDocuments).not.toHaveBeenCalled();
     });
 
     it("should return 200 when applying multiple filters", async () => {
@@ -421,11 +421,11 @@ describe("/api/v1/items", () => {
       expect(data.items).toHaveLength(1);
       expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
       expect(data.total).toBe(1);
-      expect(searchDocuments).not.toHaveBeenCalled();
+      expect(searchItemDocuments).not.toHaveBeenCalled();
     });
 
     it("should return 200 with empty results if search has no results", async () => {
-      vi.mocked(searchDocuments).mockResolvedValueOnce({
+      vi.mocked(searchItemDocuments).mockResolvedValueOnce({
         hits: [],
         estimatedTotalHits: 0,
       });
@@ -446,11 +446,11 @@ describe("/api/v1/items", () => {
       const data = await response.json();
       expect(data.items).toHaveLength(0);
       expect(data.total).toBe(0);
-      expect(searchDocuments).toHaveBeenCalledTimes(1);
+      expect(searchItemDocuments).toHaveBeenCalledTimes(1);
     });
 
     it("should return 200 when fuzzy searching items", async () => {
-      vi.mocked(searchDocuments).mockResolvedValueOnce({
+      vi.mocked(searchItemDocuments).mockResolvedValueOnce({
         hits: [
           {
             slug: MOCK_ITEMS[1].slug,
@@ -479,8 +479,8 @@ describe("/api/v1/items", () => {
       expect(data.items).toHaveLength(1);
       expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
       expect(data.total).toBe(1);
-      expect(searchDocuments).toHaveBeenCalledTimes(1);
-      expect(searchDocuments).toHaveBeenCalledWith("hellO", {
+      expect(searchItemDocuments).toHaveBeenCalledTimes(1);
+      expect(searchItemDocuments).toHaveBeenCalledWith("hellO", {
         attributesToCrop: ["content"],
         attributesToHighlight: ["content"],
         limit: 20,
@@ -489,7 +489,7 @@ describe("/api/v1/items", () => {
     });
 
     it("should return 200 when falling back to naive database search for title / description", async () => {
-      vi.mocked(searchDocuments).mockRejectedValueOnce(
+      vi.mocked(searchItemDocuments).mockRejectedValueOnce(
         new SearchError("Search failed"),
       );
       await testDb.db.insert(items).values(MOCK_ITEMS);
@@ -511,8 +511,8 @@ describe("/api/v1/items", () => {
       expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
       expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
       expect(data.total).toBe(2);
-      expect(searchDocuments).toHaveBeenCalledTimes(1);
-      expect(searchDocuments).toHaveBeenCalledWith("item 2", {
+      expect(searchItemDocuments).toHaveBeenCalledTimes(1);
+      expect(searchItemDocuments).toHaveBeenCalledWith("item 2", {
         attributesToCrop: ["content"],
         attributesToHighlight: ["content"],
         limit: 20,
@@ -521,7 +521,7 @@ describe("/api/v1/items", () => {
     });
 
     it("should return 200 when falling back to naive database search for url", async () => {
-      vi.mocked(searchDocuments).mockRejectedValueOnce(
+      vi.mocked(searchItemDocuments).mockRejectedValueOnce(
         new SearchError("Search failed"),
       );
       await testDb.db.insert(items).values(MOCK_ITEMS);
@@ -542,8 +542,8 @@ describe("/api/v1/items", () => {
       expect(data.items).toHaveLength(1);
       expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
       expect(data.total).toBe(1);
-      expect(searchDocuments).toHaveBeenCalledTimes(1);
-      expect(searchDocuments).toHaveBeenCalledWith("https://example.com", {
+      expect(searchItemDocuments).toHaveBeenCalledTimes(1);
+      expect(searchItemDocuments).toHaveBeenCalledWith("https://example.com", {
         attributesToCrop: ["content"],
         attributesToHighlight: ["content"],
         limit: 20,
@@ -552,7 +552,7 @@ describe("/api/v1/items", () => {
     });
 
     it("should return 200 when combining filters and search", async () => {
-      vi.mocked(searchDocuments).mockResolvedValueOnce({
+      vi.mocked(searchItemDocuments).mockResolvedValueOnce({
         hits: [
           {
             slug: MOCK_ITEMS[2].slug,
@@ -597,8 +597,8 @@ describe("/api/v1/items", () => {
       expect(data.items[0].id).toBe(TEST_ITEM_ID_3);
       expect(data.items[1].id).toBe(TEST_ITEM_ID_1);
       expect(data.total).toBe(3);
-      expect(searchDocuments).toHaveBeenCalledTimes(1);
-      expect(searchDocuments).toHaveBeenCalledWith("item", {
+      expect(searchItemDocuments).toHaveBeenCalledTimes(1);
+      expect(searchItemDocuments).toHaveBeenCalledWith("item", {
         attributesToCrop: ["content"],
         attributesToHighlight: ["content"],
         limit: 20,
@@ -607,7 +607,7 @@ describe("/api/v1/items", () => {
     });
 
     it("should return 200 with empty results and incremented offset", async () => {
-      vi.mocked(searchDocuments).mockResolvedValueOnce({
+      vi.mocked(searchItemDocuments).mockResolvedValueOnce({
         hits: [
           {
             slug: MOCK_ITEMS[3].slug,
@@ -636,7 +636,7 @@ describe("/api/v1/items", () => {
       expect(data.items).toHaveLength(0);
       expect(data.nextOffset).toBe(1);
       expect(data.total).toBe(2);
-      vi.mocked(searchDocuments).mockResolvedValueOnce({
+      vi.mocked(searchItemDocuments).mockResolvedValueOnce({
         hits: [
           {
             slug: MOCK_ITEMS[2].slug,
@@ -668,7 +668,7 @@ describe("/api/v1/items", () => {
     });
 
     it("should return 200 and return only results belonging to the user", async () => {
-      vi.mocked(searchDocuments).mockResolvedValueOnce({
+      vi.mocked(searchItemDocuments).mockResolvedValueOnce({
         hits: [
           {
             slug: MOCK_ITEMS[2].slug,
@@ -697,8 +697,8 @@ describe("/api/v1/items", () => {
       expect(data.items).toHaveLength(1);
       expect(data.items[0].id).toBe(TEST_ITEM_ID_3);
       expect(data.total).toBe(1);
-      expect(searchDocuments).toHaveBeenCalledTimes(1);
-      expect(searchDocuments).toHaveBeenCalledWith("itemsearch", {
+      expect(searchItemDocuments).toHaveBeenCalledTimes(1);
+      expect(searchItemDocuments).toHaveBeenCalledWith("itemsearch", {
         attributesToCrop: ["content"],
         attributesToHighlight: ["content"],
         limit: 20,

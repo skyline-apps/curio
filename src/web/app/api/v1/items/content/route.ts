@@ -6,7 +6,7 @@ import {
   ExtractError,
   MetadataError,
 } from "@/lib/extract/types";
-import { indexDocuments } from "@/lib/search";
+import { indexItemDocuments } from "@/lib/search";
 import { storage } from "@/lib/storage";
 import { StorageError, UploadStatus } from "@/lib/storage/types";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
@@ -139,7 +139,7 @@ export async function POST(
         );
 
         // Index profile item with new main content
-        await indexDocuments([
+        await indexItemDocuments([
           {
             slug: slug,
             url: item[0].url,

@@ -1,7 +1,7 @@
 import { and, db, desc, eq, ilike, not, or, type SQL, sql } from "@/db";
 import { fetchOwnItemResults } from "@/db/queries";
 import { items, ItemState, profileItems, TextDirection } from "@/db/schema";
-import { searchDocuments } from "@/lib/search";
+import { searchItemDocuments } from "@/lib/search";
 import { SearchError } from "@/lib/search/types";
 import {
   APIRequest,
@@ -48,7 +48,7 @@ async function getRelevantProfileItemIds(
     };
   }
   try {
-    const { hits, estimatedTotalHits } = await searchDocuments(search, {
+    const { hits, estimatedTotalHits } = await searchItemDocuments(search, {
       offset,
       limit,
       attributesToCrop: ["content"],

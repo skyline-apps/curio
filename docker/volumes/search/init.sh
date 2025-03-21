@@ -36,7 +36,7 @@ until curl -s "${SEARCH_EXTERNAL_ENDPOINT_URL}/health" > /dev/null; do
     sleep 1
 done
 
-# Create index
+# Create index for items
 until curl -s -X POST "${SEARCH_EXTERNAL_ENDPOINT_URL}/indexes" \
     -H "Authorization: Bearer ${SEARCH_MASTER_API_KEY}" \
     -H "Content-Type: application/json" \
@@ -55,6 +55,26 @@ until curl -s -X PUT "${SEARCH_EXTERNAL_ENDPOINT_URL}/indexes/items/settings/fil
 done
 
 echo "Initialized search with index for items"
+
+# Create index for highlights
+until curl -s -X POST "${SEARCH_EXTERNAL_ENDPOINT_URL}/indexes" \
+    -H "Authorization: Bearer ${SEARCH_MASTER_API_KEY}" \
+    -H "Content-Type: application/json" \
+    -d '{ "uid": "highlights", "primaryKey": "id"}' > /dev/null; do
+    echo "Retrying to create index..."
+    sleep 1
+done
+
+# Add filterable attributes
+until curl -s -X PUT "${SEARCH_EXTERNAL_ENDPOINT_URL}/indexes/highlights/settings/filterable-attributes" \
+    -H "Authorization: Bearer ${SEARCH_MASTER_API_KEY}" \
+    -H "Content-Type: application/json" \
+    -d '["profileId", "profileItemId"]' > /dev/null; do
+    echo "Retrying to add filterable attributes..."
+    sleep 1
+done
+
+echo "Initialized search with index for highlights"
 
 # Create API key
 until curl -s -X POST "${SEARCH_EXTERNAL_ENDPOINT_URL}/keys" \

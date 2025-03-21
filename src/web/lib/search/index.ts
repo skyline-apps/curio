@@ -7,9 +7,9 @@ import { createLogger } from "@/utils/logger";
 
 import {
   ItemDocument,
+  ItemSearchResults,
   SearchError,
   SearchOptions,
-  SearchResults,
 } from "./types";
 
 const log = createLogger("lib/search");
@@ -156,7 +156,7 @@ export class Search {
       });
   }
 
-  async indexDocuments(documents: ItemDocument[]): Promise<void> {
+  async indexItemDocuments(documents: ItemDocument[]): Promise<void> {
     const axiosInstance = await this.createAxiosInstance();
 
     await withRetry(async () => {
@@ -170,10 +170,10 @@ export class Search {
     });
   }
 
-  async searchDocuments(
+  async searchItemDocuments(
     query: string,
     options: SearchOptions = {},
-  ): Promise<SearchResults> {
+  ): Promise<ItemSearchResults> {
     const axiosInstance = await this.createAxiosInstance();
 
     const searchOptions = {
@@ -207,9 +207,9 @@ export class Search {
 export const search = new Search();
 
 // Export bound methods to preserve 'this' context
-export const indexDocuments = (documents: ItemDocument[]): Promise<void> =>
-  search.indexDocuments(documents);
-export const searchDocuments = (
+export const indexItemDocuments = (documents: ItemDocument[]): Promise<void> =>
+  search.indexItemDocuments(documents);
+export const searchItemDocuments = (
   query: string,
   options?: SearchOptions,
-): Promise<SearchResults> => search.searchDocuments(query, options);
+): Promise<ItemSearchResults> => search.searchItemDocuments(query, options);
