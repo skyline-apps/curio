@@ -18,12 +18,13 @@ const CurioTextarea = ({
   classNames,
   ...props
 }: CurioTextareaProps): React.ReactElement => {
-  const [editable, setEditable] = useState<boolean>(false);
+  const [editable, setEditable] = useState<boolean>(props.value === "");
   const [loading, setLoading] = useState<boolean>(false);
   const textAreaProps = { ...props };
   textAreaProps.isClearable = false;
   textAreaProps.onClear = undefined;
   let extraElements = null;
+
   if (props.onSave) {
     textAreaProps.disabled = !editable;
     if (!editable) {

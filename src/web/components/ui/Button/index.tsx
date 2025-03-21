@@ -58,7 +58,7 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
           [props.isIconOnly ? "w-6" : ""]: size === "xs",
           "bg-background-400 dark:bg-background hover:bg-background-300 dark:hover:bg-background-400 border-none shadow":
             props.variant === "faded",
-          "opacity-70 border-none shadow data-[hover=true]:!bg-transparent data-[hover=true]:opacity-100":
+          "opacity-70 border-none shadow data-[hover=true]:!bg-transparent data-[hover=true]:opacity-100 shadow-none":
             props.variant === "ghost",
           "text-default-900": props.color === "secondary",
         },
