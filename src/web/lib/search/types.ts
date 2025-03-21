@@ -1,3 +1,5 @@
+import { TextDirection } from "@/db/schema";
+
 export class SearchError extends Error {
   constructor(
     message: string,
@@ -46,7 +48,7 @@ export interface HighlightDocument {
   slug: string;
   url: string;
   title: string;
-  description?: string;
+  textDirection: TextDirection;
   author?: string;
   highlightText: string;
   note: string;

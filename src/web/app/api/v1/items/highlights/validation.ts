@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { TextDirection } from "@/db/schema";
+
 export const HighlightSchema = z.object({
   id: z.string().uuid(),
   startOffset: z
@@ -65,10 +67,9 @@ export const GetHighlightsResponseSchema = z.object({
           title: z
             .string()
             .describe("The title of the item containing the highlight."),
-          description: z
-            .string()
-            .optional()
-            .describe("The description of the item containing the highlight."),
+          textDirection: z
+            .nativeEnum(TextDirection)
+            .describe("The text direction of the item."),
           author: z
             .string()
             .optional()

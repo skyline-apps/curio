@@ -244,7 +244,7 @@ export class Search {
           "slug",
           "url",
           "title",
-          "description",
+          "textDirection",
           "author",
           "highlightText",
           "note",

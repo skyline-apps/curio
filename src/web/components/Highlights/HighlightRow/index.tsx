@@ -3,10 +3,12 @@ import Link from "next/link";
 import React, { useContext } from "react";
 
 import Markdown from "@/components/Markdown";
+import { TextDirection } from "@/db/schema";
 import {
   type HighlightItem,
   HighlightsContext,
 } from "@/providers/HighlightsProvider";
+import { cn } from "@/utils/cn";
 
 interface HighlightRowProps {
   highlight: HighlightItem;
@@ -16,6 +18,7 @@ const HighlightRow: React.FC<HighlightRowProps> = ({ highlight }) => {
   const { selectedHighlight, selectHighlight } = useContext(HighlightsContext);
 
   const isSelected = selectedHighlight?.id === highlight.id;
+  const dir = highlight.item.metadata.textDirection;
 
   return (
     <div
@@ -24,8 +27,14 @@ const HighlightRow: React.FC<HighlightRowProps> = ({ highlight }) => {
       data-selected={isSelected ? true : undefined}
       data-focus={isSelected ? true : undefined}
       data-active={isSelected ? true : undefined}
+      dir={dir}
     >
-      <div className="text-sm mb-2 border-l border-warning-300 pl-2">
+      <div
+        className={cn(
+          "text-sm mb-2 border-warning-300",
+          dir === TextDirection.RTL ? "border-r pr-2" : "border-l pl-2",
+        )}
+      >
         {highlight.textExcerpt ? (
           <Markdown
             className="[&_*]:text-sm [&_*]:my-0 text-wrap truncate"

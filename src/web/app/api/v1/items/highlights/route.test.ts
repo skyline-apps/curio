@@ -2,7 +2,12 @@ import { vi } from "vitest";
 
 import { eq } from "@/db";
 import { DbErrorCode } from "@/db/errors";
-import { items, profileItemHighlights, profileItems } from "@/db/schema";
+import {
+  items,
+  profileItemHighlights,
+  profileItems,
+  TextDirection,
+} from "@/db/schema";
 import {
   deleteHighlightDocuments,
   indexHighlightDocuments,
@@ -65,7 +70,7 @@ const MOCK_SEARCH_RESULTS: HighlightDocumentResult[] = [
     url: MOCK_ITEMS[1].url,
     slug: MOCK_ITEMS[1].slug,
     title: MOCK_PROFILE_ITEMS[1].title,
-    description: MOCK_PROFILE_ITEMS[1].description,
+    textDirection: TextDirection.LTR,
     author: MOCK_PROFILE_ITEMS[1].author,
   },
   {
@@ -76,7 +81,7 @@ const MOCK_SEARCH_RESULTS: HighlightDocumentResult[] = [
     url: MOCK_ITEMS[0].url,
     slug: MOCK_ITEMS[0].slug,
     title: MOCK_PROFILE_ITEMS[0].title,
-    description: MOCK_PROFILE_ITEMS[0].description,
+    textDirection: TextDirection.LTR,
     author: MOCK_PROFILE_ITEMS[0].author,
   },
 ];
@@ -282,7 +287,7 @@ describe("/api/v1/items/highlights", () => {
           profileId: DEFAULT_TEST_PROFILE_ID,
           profileItemId: MOCK_PROFILE_ITEMS[0].id,
           title: MOCK_PROFILE_ITEMS[0].title,
-          description: MOCK_PROFILE_ITEMS[0].description,
+          textDirection: TextDirection.LTR,
           author: MOCK_PROFILE_ITEMS[0].author,
           highlightText: "New highlight",
           note: "New note",
@@ -343,7 +348,7 @@ describe("/api/v1/items/highlights", () => {
           profileId: DEFAULT_TEST_PROFILE_ID,
           profileItemId: MOCK_PROFILE_ITEMS[0].id,
           title: MOCK_PROFILE_ITEMS[0].title,
-          description: MOCK_PROFILE_ITEMS[0].description,
+          textDirection: TextDirection.LTR,
           author: MOCK_PROFILE_ITEMS[0].author,
           highlightText: "Updated highlight",
           note: "Updated note",

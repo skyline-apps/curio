@@ -63,6 +63,7 @@ const RightSidebar: React.FC = () => {
                 <HighlightMetadata
                   highlight={selectedHighlight}
                   itemSlug={currentItem.slug}
+                  textDirection={currentItem.metadata.textDirection}
                   onUpdate={setSelectedHighlight}
                 />
               ) : currentItem ? (
@@ -86,6 +87,9 @@ const RightSidebar: React.FC = () => {
                 <HighlightMetadata
                   highlight={selectedHighlightPreview}
                   itemSlug={selectedHighlightPreview.item.slug}
+                  textDirection={
+                    selectedHighlightPreview.item.metadata.textDirection
+                  }
                   onUpdate={(highlight) =>
                     setSelectedHighlightPreview(highlight?.id || null)
                   }

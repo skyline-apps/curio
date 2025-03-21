@@ -71,7 +71,7 @@ export async function GET(
           url: hit.url,
           metadata: {
             title: hit.title,
-            description: hit.description,
+            textDirection: hit.textDirection,
             author: hit.author,
           },
         },
@@ -115,7 +115,7 @@ export async function POST(
       .select({
         id: profileItems.id,
         title: profileItems.title,
-        description: profileItems.description,
+        textDirection: profileItems.textDirection,
         author: profileItems.author,
         url: items.url,
       })
@@ -170,7 +170,7 @@ export async function POST(
           slug: slug,
           url: profileItem[0].url,
           title: profileItem[0].title,
-          description: profileItem[0].description ?? undefined,
+          textDirection: profileItem[0].textDirection,
           author: profileItem[0].author ?? undefined,
           highlightText: h.text || "",
           note: h.note || "",
