@@ -5,14 +5,22 @@
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "index:backfill": "tsx backfillIndex.ts",
     "import:omnivore": "tsx importOmnivore.ts",
     "update": "tsx updateItemContent.ts"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "@types/yargs": "^17.0.33",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.38.3",
     "node-fetch": "^3.3.2",
+    "postgres": "^3.4.5",
     "tsx": "^4.19.2",
-    "unzipper": "^0.12.3"
-  }
+    "unzipper": "^0.12.3",
+    "yargs": "^17.7.2"
+  },
+  "keywords": []
 }

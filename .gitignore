@@ -49,6 +49,7 @@ terraform.tfstate
 terraform.tfstate*.backup
 terraform.tfvars
 
-# generated
+# data and generated files
+src/script/data
 src/script/generated
 lambda.zip

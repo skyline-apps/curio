@@ -50,4 +50,19 @@ export interface HighlightDocument {
   author?: string;
   highlightText: string;
   note: string;
+  startOffset: number;
+  endOffset: number;
+  updatedAt: Date;
+}
+
+export interface HighlightDocumentResult extends HighlightDocument {
+  _formatted: {
+    highlightText?: string;
+    note?: string;
+  };
+}
+
+export interface HighlightSearchResults {
+  hits: HighlightDocumentResult[];
+  estimatedTotalHits: number;
 }
