@@ -67,9 +67,11 @@ export const GetHighlightsResponseSchema = z.object({
             .describe("The title of the item containing the highlight."),
           description: z
             .string()
+            .optional()
             .describe("The description of the item containing the highlight."),
           author: z
             .string()
+            .optional()
             .describe("The author of the item containing the highlight."),
         }),
       }),
