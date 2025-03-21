@@ -39,18 +39,17 @@ const HighlightMetadata: React.FC<HighlightMetadataProps> = ({
   }, [highlight.note]);
 
   return (
-    <div className="flex flex-col gap-2 p-4 h-full">
+    <div className="flex flex-col gap-2 p-4 h-full" dir={textDirection}>
       {"item" in highlight && (
-        <div dir={textDirection}>
+        <>
           <ItemTitle title={highlight.item.metadata.title} slug={itemSlug} />
           <ItemUrl
             url={highlight.item.url}
             title={highlight.item.metadata.title}
           />
-        </div>
+        </>
       )}
       <div
-        dir={textDirection}
         className={cn(
           "border-warning-300",
           textDirection === TextDirection.RTL
@@ -63,10 +62,7 @@ const HighlightMetadata: React.FC<HighlightMetadataProps> = ({
         </Markdown>
       </div>
 
-      <div
-        className="flex flex-row justify-end gap-2 shrink-0"
-        dir={textDirection}
-      >
+      <div className="flex flex-row justify-end gap-2 shrink-0">
         <Button
           isIconOnly
           tooltip="Copy highlight text"

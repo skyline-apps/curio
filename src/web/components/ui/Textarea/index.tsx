@@ -35,7 +35,6 @@ const CurioTextarea = ({
             isIconOnly
             tooltip="Edit"
             disableRipple
-            className="absolute top-0 right-0"
             variant="ghost"
             onPress={() => setEditable(true)}
           >
@@ -52,7 +51,7 @@ const CurioTextarea = ({
             tooltip="Clear"
             disableRipple
             className={cn(
-              "absolute top-0 right-7",
+              "relative -end-2",
               props.onClear ? "visible" : "hidden",
             )}
             variant="ghost"
@@ -65,7 +64,6 @@ const CurioTextarea = ({
             isIconOnly
             tooltip="Save"
             disableRipple
-            className="absolute top-0 right-0"
             variant="ghost"
             onPress={async () => {
               setLoading(true);
@@ -89,7 +87,7 @@ const CurioTextarea = ({
         inputWrapper: cn(INPUT_CLASSES, "border border-background-600"),
         ...classNames,
       }}
-      endContent={extraElements}
+      endContent={<div className="absolute top-0 end-0">{extraElements}</div>}
       {...textAreaProps}
     />
   );
