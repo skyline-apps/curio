@@ -61,7 +61,7 @@ const RecommendedSection: React.FC<RecommendedSectionProps> = ({
       <h2 className="text-lg text-secondary mb-2">
         {SECTION_HEADERS[sectionType]}
       </h2>
-      <div className="flex flex-row gap-2 overflow-x-auto">
+      <div className="flex flex-row gap-2 overflow-x-auto overflow-y-hidden">
         {!items.length ? (
           <div className="flex items-center text-secondary-700 text-sm gap-2">
             {getEmptyMessage(sectionType)}
