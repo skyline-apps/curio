@@ -229,7 +229,7 @@ export class Search {
 
     const searchOptions = {
       ...options,
-      filter: [...(options.filter || []), `profileId:${profileId}`],
+      filter: [...(options.filter || []), `profileId="${profileId}"`],
     };
 
     return withRetry(async () => {

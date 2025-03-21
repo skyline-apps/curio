@@ -60,7 +60,7 @@ async function getRelevantProfileItemIds(
       success: true,
       searchResults: items.map((item) => ({
         slug: item.slug,
-        excerpt: item._formatted.content || "",
+        excerpt: item._formatted?.content || "",
       })),
       nextOffset,
       total: estimatedTotalHits,

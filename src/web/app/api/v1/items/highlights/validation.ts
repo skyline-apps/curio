@@ -26,19 +26,18 @@ export type Highlight = z.infer<typeof HighlightSchema>;
 export type NewHighlight = z.infer<typeof NewHighlightSchema>;
 
 export const GetHighlightsRequestSchema = z.object({
-  cursor: z
-    .string()
+  offset: z.coerce
+    .number()
+    .min(0)
     .optional()
-    .describe("The updatedAt timestamp to start from."),
-  limit: z.number().int().min(1).max(100).default(20),
-  filter: z
-    .object({
-      search: z
-        .string()
-        .optional()
-        .describe("Term to search across highlight text"),
-    })
-    .optional(),
+    .describe("The search result offset to start from.")
+    .default(0),
+  limit: z.coerce.number().min(1).max(1000).optional().default(20),
+  search: z
+    .string()
+    .max(100)
+    .optional()
+    .describe("Search query to apply across highlight text and notes."),
 });
 
 export type GetHighlightsRequest = z.infer<typeof GetHighlightsRequestSchema>;
@@ -46,6 +45,14 @@ export type GetHighlightsRequest = z.infer<typeof GetHighlightsRequestSchema>;
 export const GetHighlightsResponseSchema = z.object({
   highlights: z.array(
     HighlightSchema.extend({
+      textExcerpt: z
+        .string()
+        .optional()
+        .describe("The formatted highlight text excerpt."),
+      noteExcerpt: z
+        .string()
+        .optional()
+        .describe("The formatted note text excerpt."),
       item: z.object({
         slug: z
           .string()
@@ -58,15 +65,18 @@ export const GetHighlightsResponseSchema = z.object({
           title: z
             .string()
             .describe("The title of the item containing the highlight."),
+          description: z
+            .string()
+            .describe("The description of the item containing the highlight."),
+          author: z
+            .string()
+            .describe("The author of the item containing the highlight."),
         }),
       }),
     }),
   ),
+  nextOffset: z.number().optional(),
   total: z.number().int().min(0),
-  cursor: z
-    .string()
-    .optional()
-    .describe("The updatedAt timestamp to start from."),
 });
 
 export type GetHighlightsResponse = z.infer<typeof GetHighlightsResponseSchema>;

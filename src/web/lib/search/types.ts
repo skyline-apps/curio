@@ -29,8 +29,8 @@ export interface ItemDocument {
 }
 
 export interface ItemDocumentResult extends ItemDocument {
-  _formatted: {
-    content?: string;
+  _formatted?: {
+    content: string;
   };
 }
 
@@ -56,9 +56,9 @@ export interface HighlightDocument {
 }
 
 export interface HighlightDocumentResult extends HighlightDocument {
-  _formatted: {
-    highlightText?: string;
-    note?: string;
+  _formatted?: {
+    highlightText: string;
+    note: string;
   };
 }
 

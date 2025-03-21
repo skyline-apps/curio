@@ -3,6 +3,7 @@ import { items, profileItemHighlights, profileItems } from "@/db/schema";
 import {
   deleteHighlightDocuments,
   indexHighlightDocuments,
+  searchHighlightDocuments,
 } from "@/lib/search";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
@@ -15,9 +16,76 @@ import {
   DeleteHighlightRequestSchema,
   DeleteHighlightResponse,
   DeleteHighlightResponseSchema,
+  GetHighlightsRequestSchema,
+  GetHighlightsResponse,
+  GetHighlightsResponseSchema,
 } from "./validation";
 
 const log = createLogger("api/v1/items/highlights");
+
+export async function GET(
+  request: APIRequest,
+): Promise<APIResponse<GetHighlightsResponse>> {
+  const userId = request.headers.get("x-user-id");
+  try {
+    const profileResult = await checkUserProfile(userId);
+    if (profileResult.error) {
+      return profileResult.error;
+    }
+
+    const url = new URL(request.url);
+    const data = await parseAPIRequest(
+      GetHighlightsRequestSchema,
+      Object.fromEntries(url.searchParams),
+    );
+    if ("error" in data) {
+      return data.error;
+    }
+
+    const { offset, limit, search } = data;
+
+    const { hits, estimatedTotalHits } = await searchHighlightDocuments(
+      search || "",
+      profileResult.profile.id,
+      {
+        offset,
+        limit,
+        ...(search ? {} : { sort: ["updatedAt:desc"] }),
+      },
+    );
+
+    const hasNextPage = estimatedTotalHits > offset + limit;
+
+    const response = GetHighlightsResponseSchema.parse({
+      highlights: hits.map((hit) => ({
+        id: hit.id,
+        text: hit.highlightText,
+        note: hit.note,
+        startOffset: hit.startOffset,
+        endOffset: hit.endOffset,
+        updatedAt: hit.updatedAt,
+        textExcerpt: hit._formatted?.highlightText,
+        noteExcerpt: hit._formatted?.note,
+        item: {
+          slug: hit.slug,
+          url: hit.url,
+          metadata: {
+            title: hit.title,
+            description: hit.description,
+            author: hit.author,
+          },
+        },
+      })),
+      nextOffset: hasNextPage ? offset + limit : undefined,
+      total: estimatedTotalHits,
+    });
+
+    return APIResponseJSON(response);
+  } catch (error) {
+    log.error("Error getting highlights", error);
+    return APIResponseJSON({ error: "Internal server error" }, { status: 500 });
+  }
+}
 
 export async function POST(
   request: APIRequest,

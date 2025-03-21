@@ -65,7 +65,14 @@ until curl -s -X POST "${SEARCH_EXTERNAL_ENDPOINT_URL}/indexes" \
     sleep 1
 done
 
-# Add filterable attributes
+# Add sortable and filterable attributes
+until curl -s -X PUT "${SEARCH_EXTERNAL_ENDPOINT_URL}/indexes/highlights/settings/sortable-attributes" \
+    -H "Authorization: Bearer ${SEARCH_MASTER_API_KEY}" \
+    -H "Content-Type: application/json" \
+    -d '["updatedAt"]' > /dev/null; do
+    echo "Retrying to add sortable attributes..."
+    sleep 1
+done
 until curl -s -X PUT "${SEARCH_EXTERNAL_ENDPOINT_URL}/indexes/highlights/settings/filterable-attributes" \
     -H "Authorization: Bearer ${SEARCH_MASTER_API_KEY}" \
     -H "Content-Type: application/json" \

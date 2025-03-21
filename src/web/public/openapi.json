@@ -882,7 +882,8 @@
                                     "type": "string",
                                     "enum": [
                                       "ltr",
-                                      "rtl"
+                                      "rtl",
+                                      "auto"
                                     ],
                                     "description": "The text direction of the item."
                                   },
@@ -1027,7 +1028,8 @@
                                     "type": "string",
                                     "enum": [
                                       "ltr",
-                                      "rtl"
+                                      "rtl",
+                                      "auto"
                                     ],
                                     "description": "The text direction of the item."
                                   },
@@ -1493,7 +1495,8 @@
                                       "type": "string",
                                       "enum": [
                                         "ltr",
-                                        "rtl"
+                                        "rtl",
+                                        "auto"
                                       ],
                                       "description": "The text direction of the item."
                                     },
@@ -1737,7 +1740,8 @@
                                       "type": "string",
                                       "enum": [
                                         "ltr",
-                                        "rtl"
+                                        "rtl",
+                                        "auto"
                                       ],
                                       "description": "The text direction of the item."
                                     },
@@ -2008,7 +2012,8 @@
                                 "type": "string",
                                 "enum": [
                                   "ltr",
-                                  "rtl"
+                                  "rtl",
+                                  "auto"
                                 ],
                                 "description": "The text direction of the item."
                               },
@@ -2285,7 +2290,8 @@
                               "type": "string",
                               "enum": [
                                 "ltr",
-                                "rtl"
+                                "rtl",
+                                "auto"
                               ],
                               "description": "The text direction of the item."
                             },
@@ -2468,7 +2474,8 @@
                                 "type": "string",
                                 "enum": [
                                   "ltr",
-                                  "rtl"
+                                  "rtl",
+                                  "auto"
                                 ],
                                 "description": "The text direction of the item."
                               },
@@ -2969,7 +2976,8 @@
                                           "type": "string",
                                           "enum": [
                                             "ltr",
-                                            "rtl"
+                                            "rtl",
+                                            "auto"
                                           ],
                                           "description": "The text direction of the item."
                                         },
@@ -3181,7 +3189,8 @@
                                           "type": "string",
                                           "enum": [
                                             "ltr",
-                                            "rtl"
+                                            "rtl",
+                                            "auto"
                                           ],
                                           "description": "The text direction of the item."
                                         },
@@ -3630,6 +3639,204 @@
       }
     },
     "/api/v1/items/highlights": {
+      "get": {
+        "description": "GET /api/v1/items/highlights",
+        "tags": [
+          "V1"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "number",
+              "nullable": true,
+              "minimum": 0,
+              "default": 0,
+              "description": "The search result offset to start from."
+            },
+            "required": false,
+            "description": "The search result offset to start from.",
+            "name": "offset",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 20
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "search": {
+                  "type": "string",
+                  "description": "Term to search across highlight text"
+                }
+              }
+            },
+            "required": false,
+            "name": "filter",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "highlights": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "startOffset": {
+                            "type": "number",
+                            "minimum": 0,
+                            "description": "Index of start position within its node"
+                          },
+                          "endOffset": {
+                            "type": "number",
+                            "minimum": 0,
+                            "description": "Index of end position within its node"
+                          },
+                          "text": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "The text of the highlight"
+                          },
+                          "note": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "User note about the highlight"
+                          },
+                          "textExcerpt": {
+                            "type": "string",
+                            "description": "The formatted highlight text excerpt."
+                          },
+                          "noteExcerpt": {
+                            "type": "string",
+                            "description": "The formatted note text excerpt."
+                          },
+                          "item": {
+                            "type": "object",
+                            "properties": {
+                              "slug": {
+                                "type": "string",
+                                "description": "The slug of the item containing the highlight."
+                              },
+                              "url": {
+                                "type": "string",
+                                "format": "uri",
+                                "description": "The URL of the item containing the highlight."
+                              },
+                              "metadata": {
+                                "type": "object",
+                                "properties": {
+                                  "title": {
+                                    "type": "string",
+                                    "description": "The title of the item containing the highlight."
+                                  },
+                                  "description": {
+                                    "type": "string",
+                                    "description": "The description of the item containing the highlight."
+                                  },
+                                  "author": {
+                                    "type": "string",
+                                    "description": "The author of the item containing the highlight."
+                                  }
+                                },
+                                "required": [
+                                  "title",
+                                  "description",
+                                  "author"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "slug",
+                              "url",
+                              "metadata"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "startOffset",
+                          "endOffset",
+                          "text",
+                          "note",
+                          "item"
+                        ]
+                      }
+                    },
+                    "nextOffset": {
+                      "type": "number"
+                    },
+                    "total": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "highlights",
+                    "total"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "description": "POST /api/v1/items/highlights",
         "tags": [
