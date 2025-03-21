@@ -3,8 +3,15 @@ import { vi } from "vitest";
 import { eq } from "@/db";
 import { DbErrorCode } from "@/db/errors";
 import { items, profileItemHighlights, profileItems } from "@/db/schema";
+import {
+  deleteHighlightDocuments,
+  indexHighlightDocuments,
+} from "@/lib/search/__mocks__/index";
 import { APIRequest } from "@/utils/api";
-import { makeAuthenticatedMockRequest } from "@/utils/test/api";
+import {
+  DEFAULT_TEST_PROFILE_ID,
+  makeAuthenticatedMockRequest,
+} from "@/utils/test/api";
 import { MOCK_ITEMS, MOCK_PROFILE_ITEMS } from "@/utils/test/data";
 import { testDb } from "@/utils/test/provider";
 
@@ -85,6 +92,22 @@ describe("/api/v1/items/highlights", () => {
         text: "New highlight",
         note: "New note",
       });
+
+      expect(indexHighlightDocuments).toHaveBeenCalledTimes(1);
+      expect(indexHighlightDocuments).toHaveBeenCalledWith([
+        expect.objectContaining({
+          id: savedHighlight[0].id,
+          url: MOCK_ITEMS[0].url,
+          slug: "example-com",
+          profileId: DEFAULT_TEST_PROFILE_ID,
+          profileItemId: MOCK_PROFILE_ITEMS[0].id,
+          title: MOCK_PROFILE_ITEMS[0].title,
+          description: MOCK_PROFILE_ITEMS[0].description,
+          author: MOCK_PROFILE_ITEMS[0].author,
+          highlightText: "New highlight",
+          note: "New note",
+        }),
+      ]);
     });
 
     it("should update existing highlights", async () => {
@@ -131,6 +154,21 @@ describe("/api/v1/items/highlights", () => {
       expect(savedHighlight[0].updatedAt.getTime()).toBeGreaterThan(
         savedHighlight[0].createdAt.getTime(),
       );
+      expect(indexHighlightDocuments).toHaveBeenCalledTimes(1);
+      expect(indexHighlightDocuments).toHaveBeenCalledWith([
+        expect.objectContaining({
+          id: savedHighlight[0].id,
+          url: MOCK_ITEMS[0].url,
+          slug: "example-com",
+          profileId: DEFAULT_TEST_PROFILE_ID,
+          profileItemId: MOCK_PROFILE_ITEMS[0].id,
+          title: MOCK_PROFILE_ITEMS[0].title,
+          description: MOCK_PROFILE_ITEMS[0].description,
+          author: MOCK_PROFILE_ITEMS[0].author,
+          highlightText: "Updated highlight",
+          note: "Updated note",
+        }),
+      ]);
     });
 
     it("should not update highlights from other profiles", async () => {
@@ -165,6 +203,7 @@ describe("/api/v1/items/highlights", () => {
         text: "Another highlight",
         note: null,
       });
+      expect(indexHighlightDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 400 if no slug is provided", async () => {
@@ -255,6 +294,11 @@ describe("/api/v1/items/highlights", () => {
         .from(profileItemHighlights)
         .where(eq(profileItemHighlights.id, TEST_HIGHLIGHT_ID_1));
       expect(savedHighlight).toHaveLength(0);
+
+      expect(deleteHighlightDocuments).toHaveBeenCalledTimes(1);
+      expect(deleteHighlightDocuments).toHaveBeenCalledWith([
+        TEST_HIGHLIGHT_ID_1,
+      ]);
     });
 
     it("should not delete highlights from other profiles", async () => {
@@ -277,6 +321,7 @@ describe("/api/v1/items/highlights", () => {
         .from(profileItemHighlights)
         .where(eq(profileItemHighlights.id, TEST_HIGHLIGHT_ID_2));
       expect(savedHighlight).toHaveLength(1);
+      expect(deleteHighlightDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 400 if no highlight IDs are provided", async () => {
@@ -309,6 +354,7 @@ describe("/api/v1/items/highlights", () => {
         .from(profileItemHighlights)
         .where(eq(profileItemHighlights.id, TEST_HIGHLIGHT_ID_1));
       expect(savedHighlight).toHaveLength(1);
+      expect(deleteHighlightDocuments).toHaveBeenCalledTimes(0);
     });
 
     it("should return 500 if profile item query fails", async () => {

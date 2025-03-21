@@ -481,8 +481,6 @@ describe("/api/v1/items", () => {
       expect(data.total).toBe(1);
       expect(searchItemDocuments).toHaveBeenCalledTimes(1);
       expect(searchItemDocuments).toHaveBeenCalledWith("hellO", {
-        attributesToCrop: ["content"],
-        attributesToHighlight: ["content"],
         limit: 20,
         offset: 0,
       });
@@ -513,8 +511,6 @@ describe("/api/v1/items", () => {
       expect(data.total).toBe(2);
       expect(searchItemDocuments).toHaveBeenCalledTimes(1);
       expect(searchItemDocuments).toHaveBeenCalledWith("item 2", {
-        attributesToCrop: ["content"],
-        attributesToHighlight: ["content"],
         limit: 20,
         offset: 0,
       });
@@ -544,8 +540,6 @@ describe("/api/v1/items", () => {
       expect(data.total).toBe(1);
       expect(searchItemDocuments).toHaveBeenCalledTimes(1);
       expect(searchItemDocuments).toHaveBeenCalledWith("https://example.com", {
-        attributesToCrop: ["content"],
-        attributesToHighlight: ["content"],
         limit: 20,
         offset: 0,
       });
@@ -599,8 +593,6 @@ describe("/api/v1/items", () => {
       expect(data.total).toBe(3);
       expect(searchItemDocuments).toHaveBeenCalledTimes(1);
       expect(searchItemDocuments).toHaveBeenCalledWith("item", {
-        attributesToCrop: ["content"],
-        attributesToHighlight: ["content"],
         limit: 20,
         offset: 0,
       });
@@ -699,8 +691,6 @@ describe("/api/v1/items", () => {
       expect(data.total).toBe(1);
       expect(searchItemDocuments).toHaveBeenCalledTimes(1);
       expect(searchItemDocuments).toHaveBeenCalledWith("itemsearch", {
-        attributesToCrop: ["content"],
-        attributesToHighlight: ["content"],
         limit: 20,
         offset: 0,
       });

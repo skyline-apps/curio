@@ -1,5 +1,9 @@
 import { and, db, eq, inArray, sql } from "@/db";
 import { items, profileItemHighlights, profileItems } from "@/db/schema";
+import {
+  deleteHighlightDocuments,
+  indexHighlightDocuments,
+} from "@/lib/search";
 import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
 import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
 import { createLogger } from "@/utils/logger";
@@ -42,6 +46,10 @@ export async function POST(
     const profileItem = await db
       .select({
         id: profileItems.id,
+        title: profileItems.title,
+        description: profileItems.description,
+        author: profileItems.author,
+        url: items.url,
       })
       .from(profileItems)
       .innerJoin(items, eq(profileItems.itemId, items.id))
@@ -84,6 +92,26 @@ export async function POST(
         },
       })
       .returning();
+
+    if (savedHighlights.length) {
+      await indexHighlightDocuments(
+        savedHighlights.map((h) => ({
+          id: h.id,
+          profileId: profileResult.profile.id,
+          profileItemId: h.profileItemId,
+          slug: slug,
+          url: profileItem[0].url,
+          title: profileItem[0].title,
+          description: profileItem[0].description ?? undefined,
+          author: profileItem[0].author ?? undefined,
+          highlightText: h.text || "",
+          note: h.note || "",
+          startOffset: h.startOffset,
+          endOffset: h.endOffset,
+          updatedAt: h.updatedAt,
+        })),
+      );
+    }
 
     const response = CreateOrUpdateHighlightResponseSchema.parse({
       highlights: savedHighlights.map((h) => ({
@@ -154,6 +182,10 @@ export async function DELETE(
         ),
       )
       .returning();
+
+    if (deletedHighlights.length) {
+      await deleteHighlightDocuments(deletedHighlights.map((h) => h.id));
+    }
 
     const response = DeleteHighlightResponseSchema.parse({
       deleted: deletedHighlights.map((h) => ({ id: h.id })),

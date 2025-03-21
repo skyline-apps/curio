@@ -6,6 +6,8 @@ import { appConfig } from "@/db/schema";
 import { createLogger } from "@/utils/logger";
 
 import {
+  HighlightDocument,
+  HighlightSearchResults,
   ItemDocument,
   ItemSearchResults,
   SearchError,
@@ -184,6 +186,8 @@ export class Search {
     return withRetry(async () => {
       const response = await axiosInstance.post("/indexes/items/search", {
         q: query,
+        attributesToCrop: ["content"],
+        attributesToHighlight: ["content"],
         attributesToRetrieve: ["slug"],
         highlightPreTag: "**",
         highlightPostTag: "**",
@@ -201,6 +205,81 @@ export class Search {
       };
     });
   }
+
+  async indexHighlightDocuments(documents: HighlightDocument[]): Promise<void> {
+    const axiosInstance = await this.createAxiosInstance();
+
+    await withRetry(async () => {
+      const response = await axiosInstance.put(
+        "/indexes/highlights/documents",
+        documents,
+      );
+      if (response.status !== 202) {
+        throw new SearchError(`Unexpected status code: ${response.status}`);
+      }
+    });
+  }
+
+  async searchHighlightDocuments(
+    query: string,
+    profileId: string,
+    options: SearchOptions = {},
+  ): Promise<HighlightSearchResults> {
+    const axiosInstance = await this.createAxiosInstance();
+
+    const searchOptions = {
+      ...options,
+      filter: [...(options.filter || []), `profileId:${profileId}`],
+    };
+
+    return withRetry(async () => {
+      const response = await axiosInstance.post("/indexes/highlights/search", {
+        q: query,
+        attributesToCrop: ["highlightText", "note"],
+        attributesToHighlight: ["highlightText", "note"],
+        attributesToRetrieve: [
+          "id",
+          "profileId",
+          "profileItemId",
+          "slug",
+          "url",
+          "title",
+          "description",
+          "author",
+          "highlightText",
+          "note",
+          "startOffset",
+          "endOffset",
+          "updatedAt",
+        ],
+        highlightPreTag: "**",
+        highlightPostTag: "**",
+        cropLength: 40,
+        ...searchOptions,
+      });
+
+      if (!response.data || !Array.isArray(response.data.hits)) {
+        throw new SearchError("Invalid search response format");
+      }
+
+      return {
+        hits: response.data.hits,
+        estimatedTotalHits: response.data.estimatedTotalHits,
+      };
+    });
+  }
+
+  async deleteHighlightDocuments(highlightIds: string[]): Promise<void> {
+    const axiosInstance = await this.createAxiosInstance();
+
+    const response = await axiosInstance.post("/indexes/highlights/delete", {
+      filter: `id IN [${highlightIds.join(", ")}]`,
+    });
+
+    if (!response.data || !Array.isArray(response.data)) {
+      throw new SearchError("Invalid delete response format");
+    }
+  }
 }
 
 // Export singleton instance
@@ -213,3 +292,15 @@ export const searchItemDocuments = (
   query: string,
   options?: SearchOptions,
 ): Promise<ItemSearchResults> => search.searchItemDocuments(query, options);
+export const indexHighlightDocuments = (
+  documents: HighlightDocument[],
+): Promise<void> => search.indexHighlightDocuments(documents);
+export const searchHighlightDocuments = (
+  query: string,
+  profileId: string,
+  options?: SearchOptions,
+): Promise<HighlightSearchResults> =>
+  search.searchHighlightDocuments(query, profileId, options);
+export const deleteHighlightDocuments = (
+  highlightIds: string[],
+): Promise<void> => search.deleteHighlightDocuments(highlightIds);

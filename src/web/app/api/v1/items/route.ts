@@ -51,8 +51,6 @@ async function getRelevantProfileItemIds(
     const { hits, estimatedTotalHits } = await searchItemDocuments(search, {
       offset,
       limit,
-      attributesToCrop: ["content"],
-      attributesToHighlight: ["content"],
     });
 
     const hasNextPage = estimatedTotalHits > offset + limit;
