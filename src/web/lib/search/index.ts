@@ -272,11 +272,14 @@ export class Search {
   async deleteHighlightDocuments(highlightIds: string[]): Promise<void> {
     const axiosInstance = await this.createAxiosInstance();
 
-    const response = await axiosInstance.post("/indexes/highlights/delete", {
-      filter: `id IN [${highlightIds.join(", ")}]`,
-    });
+    const response = await axiosInstance.post(
+      "/indexes/highlights/documents/delete",
+      {
+        filter: `id IN [${highlightIds.join(", ")}]`,
+      },
+    );
 
-    if (!response.data || !Array.isArray(response.data)) {
+    if (!response.data) {
       throw new SearchError("Invalid delete response format");
     }
   }
