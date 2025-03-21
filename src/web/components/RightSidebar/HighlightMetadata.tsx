@@ -51,15 +51,13 @@ const HighlightMetadata: React.FC<HighlightMetadataProps> = ({
       )}
       <div
         className={cn(
-          "border-warning-300",
+          "border-warning-300 overflow-y-auto",
           textDirection === TextDirection.RTL
             ? "border-r pr-2"
             : "border-l pl-2",
         )}
       >
-        <Markdown className="[&_*]:text-sm overflow-y-auto">
-          {highlight.text}
-        </Markdown>
+        <Markdown className="[&_*]:text-sm">{highlight.text}</Markdown>
       </div>
 
       <div className="flex flex-row justify-end gap-2 shrink-0">
@@ -85,7 +83,9 @@ const HighlightMetadata: React.FC<HighlightMetadataProps> = ({
         </Button>
       </div>
       <Textarea
-        className="max-w-xs shrink-0"
+        classNames={{
+          base: "max-w-xs shrink-0",
+        }}
         value={draftNote}
         onValueChange={(note) => setDraftNote(note)}
         label="Note"
