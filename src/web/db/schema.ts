@@ -280,7 +280,6 @@ export const profileItemHighlights = pgTable(
       .notNull()
       .defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
-      .unique()
       .notNull()
       .defaultNow(),
   },
