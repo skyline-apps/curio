@@ -1,48 +1,62 @@
-import { useContext, useState } from "react";
+import { useEffect, useState } from "react";
 import { HiOutlineClipboard, HiOutlineTrash } from "react-icons/hi2";
 
+import { Highlight } from "@/app/api/v1/items/highlights/validation";
 import Markdown from "@/components/Markdown";
+import { ItemTitle, ItemUrl } from "@/components/RightSidebar/ItemMetadata";
 import Button from "@/components/ui/Button";
 import Textarea from "@/components/ui/Textarea";
-import { CurrentItemContext } from "@/providers/CurrentItemProvider";
+import { type HighlightItem } from "@/providers/HighlightsProvider";
 
 import { useHighlightUpdate } from "./highlightActions";
 
-const HighlightMetadata: React.FC = (): React.ReactElement => {
-  const { selectedHighlight } = useContext(CurrentItemContext);
-  const { isDeleting, updateHighlightNote, deleteHighlight } =
-    useHighlightUpdate();
-  const [draftNote, setDraftNote] = useState<string>(
-    selectedHighlight?.note || "",
-  );
+interface HighlightMetadataProps {
+  highlight: Highlight | HighlightItem;
+  itemSlug: string;
+  onUpdate?: (highlight: Highlight | null) => void;
+}
 
-  const components = {
-    p: ({
-      children,
-      ...props
-    }: React.PropsWithChildren<React.HTMLAttributes<HTMLParagraphElement>>) => (
-      <p className="text-sm line-clamp-4 ellipsis leading-6 my-1" {...props}>
-        <span className="bg-warning dark:text-default-950">{children}</span>
-      </p>
-    ),
-  };
+const HighlightMetadata: React.FC<HighlightMetadataProps> = ({
+  highlight,
+  itemSlug,
+  onUpdate,
+}: HighlightMetadataProps): React.ReactElement => {
+  const { isDeleting, updateHighlightNote, deleteHighlight } =
+    useHighlightUpdate({
+      currentHighlight: highlight,
+      itemSlug,
+      onUpdate,
+    });
+
+  const [draftNote, setDraftNote] = useState<string>("");
+
+  useEffect(() => {
+    setDraftNote(highlight.note || "");
+  }, [highlight.note]);
 
   return (
     <div className="flex flex-col gap-2 p-4 h-full">
-      <Markdown className="h-24 overflow-y-hidden" components={components}>
-        {selectedHighlight?.text}
+      {"item" in highlight && (
+        <>
+          <ItemTitle title={highlight.item.metadata.title} slug={itemSlug} />
+          <ItemUrl
+            url={highlight.item.url}
+            title={highlight.item.metadata.title}
+          />
+        </>
+      )}
+      <Markdown className="[&_*]:text-sm border-l border-warning-300 pl-2 overflow-y-auto">
+        {highlight.text}
       </Markdown>
 
-      <div className="flex flex-row justify-end gap-2">
+      <div className="flex flex-row justify-end gap-2 shrink-0">
         <>
           <Button
             isIconOnly
             tooltip="Copy highlight text"
             size="sm"
             variant="faded"
-            onPress={() =>
-              navigator.clipboard.writeText(selectedHighlight?.text || "")
-            }
+            onPress={() => navigator.clipboard.writeText(highlight.text || "")}
           >
             <HiOutlineClipboard />
           </Button>
@@ -60,7 +74,7 @@ const HighlightMetadata: React.FC = (): React.ReactElement => {
         </>
       </div>
       <Textarea
-        className="max-w-xs"
+        className="max-w-xs shrink-0"
         value={draftNote}
         onValueChange={(note) => setDraftNote(note)}
         label="Note"

@@ -8,6 +8,7 @@ import LeftSidebar from "@/components/LeftSidebar";
 import RightSidebar from "@/components/RightSidebar";
 import { Progress } from "@/components/ui/Progress";
 import Spinner from "@/components/ui/Spinner";
+import { HighlightsContext } from "@/providers/HighlightsProvider";
 import { ItemsContext } from "@/providers/ItemsProvider";
 import { useSettings } from "@/providers/SettingsProvider";
 
@@ -16,13 +17,14 @@ interface MainLayoutProps {
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-  const { isFetching } = useContext(ItemsContext);
+  const { isFetching: isFetchingItems } = useContext(ItemsContext);
+  const { isFetching: isFetchingHighlights } = useContext(HighlightsContext);
   const { settings } = useSettings();
   const pathname = usePathname();
 
   return settings ? (
     <div className="flex flex-row h-dvh w-full">
-      {isFetching && (
+      {(isFetchingItems || isFetchingHighlights) && (
         <Progress
           aria-label="Loading..."
           size="sm"

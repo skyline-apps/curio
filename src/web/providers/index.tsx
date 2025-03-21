@@ -11,6 +11,7 @@ import { BrowserMessageProvider } from "./BrowserMessageProvider";
 import { CacheProvider } from "./CacheProvider";
 import { ClientProviders } from "./ClientProviders";
 import { CurrentItemProvider } from "./CurrentItemProvider";
+import { HighlightsProvider } from "./HighlightsProvider";
 import { ItemsProvider } from "./ItemsProvider";
 import { SettingsProvider } from "./SettingsProvider";
 import { ToastProvider } from "./ToastProvider";
@@ -22,9 +23,11 @@ const AuthenticatedProviders: React.FC<PropsWithChildren> = ({
   return (
     <ItemsProvider>
       <CurrentItemProvider>
-        <CacheProvider>
-          <BrowserMessageProvider>{children}</BrowserMessageProvider>
-        </CacheProvider>
+        <HighlightsProvider>
+          <CacheProvider>
+            <BrowserMessageProvider>{children}</BrowserMessageProvider>
+          </CacheProvider>
+        </HighlightsProvider>
       </CurrentItemProvider>
     </ItemsProvider>
   );

@@ -11,12 +11,9 @@ import { ItemSource } from "@/db/schema";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
 import type { Item } from "@/providers/ItemsProvider";
 import { ItemsContext } from "@/providers/ItemsProvider";
-import { cn } from "@/utils/cn";
 import { FALLBACK_HOSTNAME } from "@/utils/url";
 
 interface ItemRowProps {
-  height?: number;
-  startPos?: number;
   item: Item;
   index: number;
   onClick?: (ev: React.MouseEvent) => void;
@@ -24,8 +21,6 @@ interface ItemRowProps {
 }
 
 const ItemRow: React.FC<ItemRowProps> = ({
-  height,
-  startPos,
   item,
   index,
   onClick,
@@ -46,16 +41,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
     <div
       key={item.id}
       dir={item.metadata.textDirection}
-      className={cn(
-        "w-full group flex flex-row bg-background-400 pl-4 pr-1 py-1 h-16 rounded-sm overflow-hidden hover:bg-background-300 data-[selected=true]:bg-background-300 data-[focus=true]:outline-focus data-[focus=true]:outline",
-        startPos !== undefined && "absolute top-0 left-0",
-      )}
-      style={{
-        ...(height && { height: `${height}px` }),
-        ...(startPos !== undefined && {
-          transform: `translateY(${startPos}px)`,
-        }),
-      }}
+      className="w-full group flex flex-row bg-background-400 pl-4 pr-1 py-1 h-16 rounded-sm overflow-hidden hover:bg-background-300 data-[selected=true]:bg-background-300 data-[focus=true]:outline-focus data-[focus=true]:outline"
       onClick={onClick}
       onTouchStart={(e: React.TouchEvent) => {
         if (timer.current) clearTimeout(timer.current);
@@ -91,6 +77,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
               )}
             </div>
             <Link
+              prefetch={false}
               href={`/item/${item.slug}`}
               className="text-sm shrink-0 text-foreground hover:underline truncate"
             >

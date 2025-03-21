@@ -1,6 +1,7 @@
 import React from "react";
 import {
   HiOutlineArchiveBox,
+  HiOutlineBookOpen,
   HiOutlineHome,
   HiOutlineInbox,
 } from "react-icons/hi2";
@@ -16,6 +17,7 @@ export enum SidebarKey {
   HOME = "/home",
   INBOX = "/inbox",
   ARCHIVE = "/archive",
+  NOTES = "/notes",
 }
 
 interface NavigationMenuProps {
@@ -32,6 +34,7 @@ const navigationItems = [
     label: "Archive",
     icon: <HiOutlineArchiveBox />,
   },
+  { key: SidebarKey.NOTES, label: "Notes", icon: <HiOutlineBookOpen /> },
 ];
 
 const NavigationMenu: React.FC<NavigationMenuProps> = ({

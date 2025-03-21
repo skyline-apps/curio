@@ -97,12 +97,16 @@ export function calculateHighlight(selection: Selection): NewHighlight | null {
 export function useHighlightSelection({}: UseHighlightSelectionProps): UseHighlightSelectionResult {
   const { showToast } = useToast();
   const { updateAppLayout } = useAppLayout();
-  const { selectedHighlight, setSelectedHighlight } =
+  const { currentItem, selectedHighlight, setSelectedHighlight } =
     useContext(CurrentItemContext);
   const [currentSelection, setCurrentSelection] = useState<Selection | null>(
     null,
   );
-  const { createHighlight, isUpdating } = useHighlightUpdate();
+  const { createHighlight, isUpdating } = useHighlightUpdate({
+    currentHighlight: selectedHighlight,
+    itemSlug: currentItem?.slug || "",
+    onUpdate: setSelectedHighlight,
+  });
 
   const handleSelection = useCallback((): void => {
     const selection = window.getSelection();

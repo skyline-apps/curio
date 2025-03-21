@@ -8,6 +8,7 @@ import Icon from "@/components/ui/Icon";
 import Spinner from "@/components/ui/Spinner";
 import { useAppLayout } from "@/providers/AppLayoutProvider";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
+import { HighlightsContext } from "@/providers/HighlightsProvider";
 import { ItemsContext } from "@/providers/ItemsProvider";
 import { cn } from "@/utils/cn";
 
@@ -15,14 +16,21 @@ import HighlightMetadata from "./HighlightMetadata";
 import ItemMetadata from "./ItemMetadata";
 
 const RightSidebar: React.FC = () => {
+  // Context from the current selected item if viewing from the items pages
   const {
     selectedItems,
     currentItem,
     isCurrentlyPreviewing,
     selectedHighlight,
+    setSelectedHighlight,
     isEditable,
     fetching,
   } = useContext(CurrentItemContext);
+  // Context from the highlight if viewing from the notes page
+  const {
+    selectedHighlight: selectedHighlightPreview,
+    selectHighlight: setSelectedHighlightPreview,
+  } = useContext(HighlightsContext);
   const {
     appLayout: { rightSidebarOpen },
     updateAppLayout,
@@ -52,7 +60,11 @@ const RightSidebar: React.FC = () => {
           >
             {rightSidebarOpen &&
               (selectedHighlight && isEditable(currentItem) ? (
-                <HighlightMetadata />
+                <HighlightMetadata
+                  highlight={selectedHighlight}
+                  itemSlug={currentItem.slug}
+                  onUpdate={setSelectedHighlight}
+                />
               ) : currentItem ? (
                 <ItemMetadata
                   item={currentItem}
@@ -70,6 +82,14 @@ const RightSidebar: React.FC = () => {
                 </>
               ) : fetching ? (
                 <Spinner centered />
+              ) : selectedHighlightPreview ? (
+                <HighlightMetadata
+                  highlight={selectedHighlightPreview}
+                  itemSlug={selectedHighlightPreview.item.slug}
+                  onUpdate={(highlight) =>
+                    setSelectedHighlightPreview(highlight?.id || null)
+                  }
+                />
               ) : null)}
           </div>
         </div>

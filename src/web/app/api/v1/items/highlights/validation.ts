@@ -29,8 +29,8 @@ export const GetHighlightsRequestSchema = z.object({
   offset: z.coerce
     .number()
     .min(0)
-    .optional()
     .describe("The search result offset to start from.")
+    .optional()
     .default(0),
   limit: z.coerce.number().min(1).max(1000).optional().default(20),
   search: z

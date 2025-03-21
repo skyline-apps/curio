@@ -31,10 +31,24 @@ interface UseHighlightUpdate {
   isDeleting: boolean;
 }
 
-export const useHighlightUpdate = (): UseHighlightUpdate => {
-  const { selectedHighlight, loadedItem, setSelectedHighlight } =
-    useContext(CurrentItemContext);
-  const { optimisticUpdateItems } = useCache();
+interface UseHighlightUpdateProps {
+  currentHighlight: Highlight | null;
+  itemSlug: string;
+  onUpdate?: (highlight: Highlight | null) => void;
+}
+
+export const useHighlightUpdate = ({
+  currentHighlight,
+  itemSlug,
+  onUpdate,
+}: UseHighlightUpdateProps): UseHighlightUpdate => {
+  const { loadedItem } = useContext(CurrentItemContext);
+  const {
+    invalidateCache,
+    optimisticUpdateHighlights,
+    optimisticRemoveHighlights,
+    optimisticUpdateItems,
+  } = useCache();
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
@@ -54,23 +68,26 @@ export const useHighlightUpdate = (): UseHighlightUpdate => {
       }).then(handleAPIResponse<CreateOrUpdateHighlightResponse>);
     },
     onSuccess: (data) => {
+      optimisticUpdateHighlights(data.highlights);
       if (
         loadedItem?.item &&
         "highlights" in loadedItem.item &&
-        data.highlights.length
+        data.highlights.length === 1
       ) {
-        setSelectedHighlight(data.highlights[0]);
+        onUpdate?.(data.highlights[0]);
         optimisticUpdateItems([
           {
-            slug: loadedItem.item.slug,
+            slug: itemSlug,
             highlights: [
-              ...(loadedItem.item.highlights?.filter(
-                (h) => !data.highlights.some((dh) => dh.id === h.id),
+              ...(loadedItem.item?.highlights?.filter(
+                (h: Highlight) => !data.highlights.some((dh) => dh.id === h.id),
               ) || []),
               ...data.highlights,
             ],
           },
         ]);
+      } else {
+        invalidateCache(itemSlug);
       }
     },
     onSettled: () => {
@@ -98,17 +115,20 @@ export const useHighlightUpdate = (): UseHighlightUpdate => {
       }).then(handleAPIResponse<DeleteHighlightResponse>);
     },
     onSuccess: (data) => {
+      optimisticRemoveHighlights(data.deleted.map((d) => d.id));
       if (loadedItem?.item && "highlights" in loadedItem.item) {
-        setSelectedHighlight(null);
+        onUpdate?.(null);
         optimisticUpdateItems([
           {
-            slug: loadedItem.item.slug,
+            slug: itemSlug,
             highlights:
-              loadedItem.item.highlights?.filter(
-                (h) => !data.deleted.some((d) => d.id === h.id),
+              loadedItem.item?.highlights?.filter(
+                (h: Highlight) => !data.deleted.some((d) => d.id === h.id),
               ) || [],
           },
         ]);
+      } else {
+        invalidateCache(itemSlug);
       }
     },
     onSettled: () => {
@@ -121,12 +141,12 @@ export const useHighlightUpdate = (): UseHighlightUpdate => {
   const createHighlight = async (
     highlight: NewHighlight,
   ): Promise<CreateOrUpdateHighlightResponse> => {
-    if (!loadedItem?.item) {
+    if (!itemSlug) {
       log.error("Failed to create highlight, item not loaded");
       throw new Error("Item not loaded");
     }
     return await createOrUpdateHighlightMutation.mutateAsync({
-      slug: loadedItem.item.slug,
+      slug: itemSlug,
       highlight,
     });
   };
@@ -134,27 +154,31 @@ export const useHighlightUpdate = (): UseHighlightUpdate => {
   const updateHighlightNote = async (
     note: string,
   ): Promise<CreateOrUpdateHighlightResponse> => {
-    if (!loadedItem?.item || !selectedHighlight) {
+    if (!itemSlug || !currentHighlight) {
       log.error("Failed to create highlight, highlight not loaded");
       throw new Error("Highlight not loaded");
     }
     return await createOrUpdateHighlightMutation.mutateAsync({
-      slug: loadedItem.item.slug,
+      slug: itemSlug,
       highlight: {
-        ...selectedHighlight,
+        ...currentHighlight,
         note,
       },
     });
   };
 
   const deleteHighlight = async (): Promise<DeleteHighlightResponse> => {
-    if (!loadedItem?.item || !isHighlightWithId(selectedHighlight)) {
+    if (
+      !itemSlug ||
+      !currentHighlight ||
+      !isHighlightWithId(currentHighlight)
+    ) {
       log.error("Failed to delete highlight, highlight not loaded");
       throw new Error("Highlight not loaded");
     }
     return await deleteHighlightMutation.mutateAsync({
-      slug: loadedItem.item.slug,
-      highlightId: selectedHighlight.id,
+      slug: itemSlug,
+      highlightId: currentHighlight.id,
     });
   };
 

@@ -16,7 +16,7 @@ const Markdown: React.FC<MarkdownProps> = ({
   return (
     <ReactMarkdown
       className={cn(
-        "prose prose-slate max-w-none overflow-y-auto h-full [&_*]:text-default-foreground hover:prose-a:!text-primary dark:prose-invert",
+        "prose prose-slate max-w-none overflow-y-auto [&_*]:text-default-foreground hover:prose-a:!text-primary dark:prose-invert",
         className,
       )}
       components={components}

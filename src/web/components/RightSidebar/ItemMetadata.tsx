@@ -19,6 +19,68 @@ interface ItemMetadataProps {
   readonly?: boolean;
 }
 
+interface ItemTitleProps {
+  title: string;
+  slug: string;
+}
+
+export const ItemTitle: React.FC<ItemTitleProps> = ({
+  title,
+  slug,
+}: ItemTitleProps) => {
+  return (
+    <div className="flex items-start justify-between">
+      <Link className="hover:underline" href={`/item/${slug}`}>
+        <h2>{title}</h2>
+      </Link>
+    </div>
+  );
+};
+
+interface ItemDescriptionProps {
+  description?: string | null;
+}
+
+export const ItemDescription: React.FC<ItemDescriptionProps> = ({
+  description,
+}: ItemDescriptionProps) => {
+  return description ? (
+    <p className="text-sm text-secondary-300 dark:text-secondary-600">
+      {description}
+    </p>
+  ) : null;
+};
+
+interface ItemUrlProps {
+  title: string;
+  textDirection?: TextDirection;
+  url: string;
+}
+
+export const ItemUrl: React.FC<ItemUrlProps> = ({
+  title,
+  textDirection,
+  url,
+}: ItemUrlProps) => {
+  return url === title ? (
+    <Link className="hover:underline" href={url} target="_blank">
+      <p className="text-sm text-primary">Original page</p>
+    </Link>
+  ) : !url.startsWith(`https://${FALLBACK_HOSTNAME}`) ? (
+    <Link className="hover:underline" href={url} target="_blank">
+      <p
+        dir="ltr"
+        className={cn(
+          "text-sm text-primary overflow-hidden truncate",
+          textDirection === TextDirection.RTL && "text-right",
+        )}
+      >
+        {url}
+      </p>
+    </Link>
+  ) : null;
+};
+
 const ItemMetadata: React.FC<ItemMetadataProps> = ({
   item,
   readonly,
@@ -64,28 +126,12 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
         thumbnail={metadata.thumbnail ? metadata.thumbnail : undefined}
       />
       <div className="px-4 py-2 overflow-x-hidden">
-        <div className="flex items-start justify-between">
-          <Link className="hover:underline" href={`/item/${item.slug}`}>
-            <h2>{metadata.title}</h2>
-          </Link>
-        </div>
-        {item.url === metadata.title ? (
-          <Link className="hover:underline" href={item.url} target="_blank">
-            <p className="text-sm text-primary">Original page</p>
-          </Link>
-        ) : !item.url.startsWith(`https://${FALLBACK_HOSTNAME}`) ? (
-          <Link className="hover:underline" href={item.url} target="_blank">
-            <p
-              dir="ltr"
-              className={cn(
-                "text-sm text-primary overflow-hidden truncate",
-                metadata.textDirection === TextDirection.RTL && "text-right",
-              )}
-            >
-              {item.url}
-            </p>
-          </Link>
-        ) : null}
+        <ItemTitle title={metadata.title} slug={item.slug} />
+        <ItemUrl
+          title={metadata.title}
+          textDirection={metadata.textDirection}
+          url={item.url}
+        />
         <div className="flex flex-col gap-2 py-2">
           <div className="flex flex-row gap-2 items-start">
             {metadata.author && (
@@ -108,11 +154,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
             <OtherItemActions item={item} />
           ) : null}
         </div>
-        {metadata.description && (
-          <p className="text-sm text-secondary max-h-20 overflow-hidden">
-            {metadata.description}
-          </p>
-        )}
+        <ItemDescription description={metadata.description} />
         <div className="flex flex-col gap-2 py-2">
           {readonly ? (
             <Labels labels={item.labels || []} mode="view" />

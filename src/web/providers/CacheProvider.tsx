@@ -10,6 +10,11 @@ import {
   ITEM_CONTENT_QUERY_KEY,
   type ItemWithContent,
 } from "./CurrentItemProvider";
+import {
+  type HighlightItem,
+  HIGHLIGHTS_QUERY_KEY,
+  type HighlightsPage,
+} from "./HighlightsProvider";
 import { type Item, ITEMS_QUERY_KEY, type ItemsPage } from "./ItemsProvider";
 
 type ItemUpdate = { slug: string } & {
@@ -18,10 +23,16 @@ type ItemUpdate = { slug: string } & {
   highlights?: Highlight[];
 };
 
+type HighlightUpdate = { id: string } & {
+  note: string | null;
+};
+
 export type CacheContextType = {
   invalidateCache: (slug?: string) => void;
   optimisticUpdateItems: (items: ItemUpdate[]) => void;
   optimisticRemoveItems: (itemSlugs: string[]) => void;
+  optimisticUpdateHighlights: (highlights: HighlightUpdate[]) => void;
+  optimisticRemoveHighlights: (highlightIds: string[]) => void;
 };
 
 interface CacheProviderProps extends React.PropsWithChildren {}
@@ -30,6 +41,8 @@ export const CacheContext = createContext<CacheContextType>({
   invalidateCache: () => {},
   optimisticUpdateItems: () => {},
   optimisticRemoveItems: () => {},
+  optimisticUpdateHighlights: () => {},
+  optimisticRemoveHighlights: () => {},
 });
 
 export const CacheProvider: React.FC<CacheProviderProps> = ({
@@ -138,10 +151,63 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
     [queryClient],
   );
 
+  const optimisticUpdateHighlights = useCallback(
+    (highlights: HighlightUpdate[]) => {
+      queryClient.setQueriesData<InfiniteData<HighlightsPage>>(
+        { queryKey: [HIGHLIGHTS_QUERY_KEY] },
+        (oldData) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              highlights: page.highlights.map((highlight: HighlightItem) =>
+                highlights.find((h) => h.id === highlight.id)
+                  ? {
+                      ...highlight,
+                      ...highlights.find((h) => h.id === highlight.id),
+                      noteExcerpt: undefined,
+                    }
+                  : highlight,
+              ),
+            })),
+          };
+        },
+      );
+    },
+    [queryClient],
+  );
+
+  const optimisticRemoveHighlights = useCallback(
+    (highlightIds: string[]) => {
+      queryClient.setQueriesData<InfiniteData<HighlightsPage>>(
+        { queryKey: [HIGHLIGHTS_QUERY_KEY] },
+        (oldData) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              highlights: page.highlights.filter(
+                (highlight: HighlightItem) =>
+                  !highlightIds.includes(highlight.id),
+              ),
+            })),
+          };
+        },
+      );
+    },
+    [queryClient],
+  );
+
   const contextValue: CacheContextType = {
     invalidateCache,
     optimisticUpdateItems,
     optimisticRemoveItems,
+    optimisticUpdateHighlights,
+    optimisticRemoveHighlights,
   };
 
   return (
