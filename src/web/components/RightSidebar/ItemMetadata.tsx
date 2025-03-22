@@ -22,15 +22,20 @@ interface ItemMetadataProps {
 interface ItemTitleProps {
   title: string;
   slug: string;
+  anchor?: string;
 }
 
 export const ItemTitle: React.FC<ItemTitleProps> = ({
   title,
   slug,
+  anchor,
 }: ItemTitleProps) => {
   return (
     <div className="flex items-start justify-between">
-      <Link className="hover:underline" href={`/item/${slug}`}>
+      <Link
+        className="hover:underline"
+        href={`/item/${slug}${anchor ? `#${anchor}` : ""}`}
+      >
         <h2>{title}</h2>
       </Link>
     </div>

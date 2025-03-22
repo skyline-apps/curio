@@ -53,6 +53,18 @@ export function useScrollProgress({
 
   useEffect(() => {
     if (!containerRef.current) return;
+
+    // Handle anchor scrolling first
+    if (typeof window !== "undefined" && window.location.hash) {
+      const id = window.location.hash.slice(1);
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView();
+        return;
+      }
+    }
+
+    // If no anchor or anchor element not found, handle initial scroll position
     if (initialProgress === 0) {
       onProgressChange?.(0).catch((error) => {
         log.error("Failed to update reading progress:", error);

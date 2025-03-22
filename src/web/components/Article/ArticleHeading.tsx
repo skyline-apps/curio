@@ -4,12 +4,12 @@ import { createPortal } from "react-dom";
 import { useAppPage } from "@/providers/AppPageProvider";
 
 interface ArticleHeadingProps extends React.PropsWithChildren {
-  heading: React.RefObject<HTMLElement>;
+  anchor: string;
 }
 
 const ArticleHeading: React.FC<ArticleHeadingProps> = ({
   children,
-  heading,
+  anchor,
 }: ArticleHeadingProps): React.ReactElement => {
   const { articleFixedInfoRef } = useAppPage();
 
@@ -17,18 +17,12 @@ const ArticleHeading: React.FC<ArticleHeadingProps> = ({
     return <></>;
   }
 
-  const handleClick = (): void => {
-    if (heading.current) {
-      heading.current.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   return createPortal(
     <a
       className="truncate"
-      onClick={handleClick}
       role="button"
       style={{ cursor: "pointer" }}
+      href={`#${anchor}`}
     >
       {children}
     </a>,

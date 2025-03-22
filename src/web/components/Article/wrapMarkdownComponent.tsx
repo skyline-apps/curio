@@ -1,3 +1,4 @@
+import slugify from "limax";
 import React, {
   type ComponentPropsWithoutRef,
   useContext,
@@ -273,18 +274,25 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
         isUrl = false;
       }
 
+      const anchor = isHeading ? slugify(childrenText) : "";
+
       const element = React.createElement(
         tag,
         {
           "data-start-offset": startOffset,
           "data-end-offset": endOffset,
           ref: selfRef,
-          ...(isUrl ? { target: "_blank" } : {}),
           ...rest,
+          // Open links in new tab
+          ...(isUrl ? { target: "_blank" } : {}),
+          // Add anchors to headings
+          ...(isHeading ? { id: anchor } : {}),
+          // Ignore existing anchor links
+          ...(href?.startsWith("#") ? { href: undefined } : { href }),
         },
         <>
           {isHeading ? (
-            <ArticleHeading heading={selfRef}>{childrenText}</ArticleHeading>
+            <ArticleHeading anchor={anchor}>{childrenText}</ArticleHeading>
           ) : null}
           {elementChildren}
         </>,
@@ -329,6 +337,12 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
         if (highlightedText) {
           processed.push(
             <HighlightSpan
+              id={
+                // Only set highlight id if this is the first span for the highlight
+                pos <= highlight.startOffset && highlight.startOffset < textEnd
+                  ? highlight.id
+                  : ""
+              }
               isSelected={highlight.id === selectedHighlight?.id}
               key={`${highlight.startOffset}-${highlightEnd}`}
               highlight={highlight}
@@ -398,6 +412,11 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
     if (containingHighlight && !React.isValidElement(children)) {
       return createBaseElement(
         <HighlightSpan
+          id={
+            containingHighlight.startOffset === startOffset
+              ? containingHighlight.id
+              : ""
+          }
           isSelected={containingHighlight.id === selectedHighlight?.id}
           highlight={containingHighlight}
           startOffset={startOffset}

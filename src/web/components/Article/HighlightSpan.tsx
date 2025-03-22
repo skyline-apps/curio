@@ -11,6 +11,7 @@ const isHighlightWithId = (
 ): highlight is Highlight => "id" in highlight;
 
 interface HighlightSpanProps {
+  id: string;
   highlight: Highlight | NewHighlight;
   children: React.ReactNode;
   startOffset: number;
@@ -20,6 +21,7 @@ interface HighlightSpanProps {
 }
 
 export const HighlightSpan: React.FC<HighlightSpanProps> = ({
+  id,
   highlight,
   children,
   startOffset,
@@ -32,6 +34,7 @@ export const HighlightSpan: React.FC<HighlightSpanProps> = ({
   return (
     <>
       <span
+        id={id}
         ref={spanRef}
         className={cn(
           "cursor-pointer",

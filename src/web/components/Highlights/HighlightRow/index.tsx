@@ -67,7 +67,7 @@ const HighlightRow: React.FC<HighlightRowProps> = ({ highlight }) => {
       <div className="self-end text-xs text-secondary italic">
         <Link
           prefetch={false}
-          href={`/item/${highlight.item.slug}`}
+          href={`/item/${highlight.item.slug}#${highlight.id}`}
           className="underline"
         >
           {highlight.item.metadata.title}

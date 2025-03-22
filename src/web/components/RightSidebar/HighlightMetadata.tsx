@@ -42,7 +42,11 @@ const HighlightMetadata: React.FC<HighlightMetadataProps> = ({
     <div className="flex flex-col gap-2 p-4 h-full" dir={textDirection}>
       {"item" in highlight && (
         <>
-          <ItemTitle title={highlight.item.metadata.title} slug={itemSlug} />
+          <ItemTitle
+            title={highlight.item.metadata.title}
+            slug={itemSlug}
+            anchor={highlight.id}
+          />
           <ItemUrl
             url={highlight.item.url}
             title={highlight.item.metadata.title}
