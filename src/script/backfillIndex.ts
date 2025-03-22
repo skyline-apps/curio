@@ -21,8 +21,8 @@ const requiredEnvVars = [
   'POSTGRES_URL',
   'SEARCH_EXTERNAL_ENDPOINT_URL',
   'SEARCH_APPLICATION_API_KEY',
-  'API_EXTERNAL_URL',
-  'SERVICE_ROLE_KEY',
+  'NEXT_PUBLIC_SUPABASE_URL',
+  'SUPABASE_SERVICE_ROLE_KEY',
 ];
 
 for (const envVar of requiredEnvVars) {

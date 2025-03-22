@@ -11,8 +11,8 @@ export class ScriptStorage {
 
   constructor() {
     const supabase = createSupabaseClient(
-      process.env.API_EXTERNAL_URL!,
-      process.env.SERVICE_ROLE_KEY!,
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
     this.storage = supabase.storage;
   }
