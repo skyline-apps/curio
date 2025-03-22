@@ -20,7 +20,7 @@ const KeyboardShortcuts = (): React.ReactElement => {
     >
       <ModalContent>
         <ModalHeader>Keyboard shortcuts</ModalHeader>
-        <ModalBody>
+        <ModalBody className="overflow-auto">
           {Object.entries(keyboardShortcuts).map(([category, names]) => (
             <div key={category} className="text-sm">
               <h2 className="font-medium text-secondary">{category}</h2>
