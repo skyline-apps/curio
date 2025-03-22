@@ -36,6 +36,7 @@ export const ItemNavigationShortcuts = (): null => {
   };
 
   const navigateDown = (): boolean => {
+    if (!items.length) return false;
     if (lastSelectionIndex === items.length - 1) return false;
     const newIndex = lastSelectionIndex === null ? 0 : lastSelectionIndex + 1;
     if (!inSelectionMode && selectedItems.size <= 1) {
@@ -46,6 +47,7 @@ export const ItemNavigationShortcuts = (): null => {
   };
 
   const navigateUp = (): boolean => {
+    if (!items.length) return false;
     if (lastSelectionIndex === 0) return false;
     const newIndex = lastSelectionIndex === null ? 0 : lastSelectionIndex - 1;
     if (!inSelectionMode && selectedItems.size <= 1) {
@@ -131,7 +133,7 @@ export const ItemNavigationShortcuts = (): null => {
   useKeyboardShortcut({
     key: "ArrowDown",
     name: "Next item",
-    category: ShortcutType.ITEMS,
+    category: ShortcutType.NAVIGATION,
     handler: navigateDown,
     priority: 100,
   });
@@ -139,7 +141,7 @@ export const ItemNavigationShortcuts = (): null => {
   useKeyboardShortcut({
     key: "j",
     name: "Next item",
-    category: ShortcutType.ITEMS,
+    category: ShortcutType.NAVIGATION,
     handler: navigateDown,
     priority: 100,
   });
@@ -147,7 +149,7 @@ export const ItemNavigationShortcuts = (): null => {
   useKeyboardShortcut({
     key: "ArrowUp",
     name: "Previous item",
-    category: ShortcutType.ITEMS,
+    category: ShortcutType.NAVIGATION,
     handler: navigateUp,
     priority: 100,
   });
@@ -155,7 +157,7 @@ export const ItemNavigationShortcuts = (): null => {
   useKeyboardShortcut({
     key: "k",
     name: "Previous item",
-    category: ShortcutType.ITEMS,
+    category: ShortcutType.NAVIGATION,
     handler: navigateUp,
     priority: 100,
   });
@@ -163,7 +165,7 @@ export const ItemNavigationShortcuts = (): null => {
   useKeyboardShortcut({
     key: "x",
     name: "Select item",
-    category: ShortcutType.ITEMS,
+    category: ShortcutType.NAVIGATION,
     handler: selectCurrentItem,
     priority: 100,
   });
@@ -171,7 +173,7 @@ export const ItemNavigationShortcuts = (): null => {
   useKeyboardShortcut({
     key: "Enter",
     name: "Select item",
-    category: ShortcutType.ITEMS,
+    category: ShortcutType.NAVIGATION,
     handler: selectCurrentItem,
     priority: 100,
   });
@@ -179,7 +181,7 @@ export const ItemNavigationShortcuts = (): null => {
   useKeyboardShortcut({
     key: "Escape",
     name: "Clear selection",
-    category: ShortcutType.ITEMS,
+    category: ShortcutType.NAVIGATION,
     handler: (): boolean => {
       clearSelectedItems();
       return true;

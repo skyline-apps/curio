@@ -60,7 +60,10 @@ const ItemRow: React.FC<ItemRowProps> = ({
           ? true
           : undefined
       }
-      data-focus={lastSelectionIndex === index && currentItem?.id !== item.id}
+      data-focus={
+        (lastSelectionIndex === index && currentItem?.id !== item.id) ||
+        (selectedItems.size === 1 && selectedItems.has(item.slug))
+      }
       data-active={currentItem?.id === item.id}
     >
       <div className="flex flex-row gap-2 justify-between items-start w-full">

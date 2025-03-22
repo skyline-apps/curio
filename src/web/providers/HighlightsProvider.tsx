@@ -30,6 +30,7 @@ export interface HighlightsPage {
 
 export type HighlightsContextType = {
   selectedHighlight: HighlightItem | null;
+  selectedHighlightIndex: number | null;
   selectHighlight: (highlightId: string | null) => void;
   highlights: HighlightItem[];
   totalHighlights: number;
@@ -50,6 +51,7 @@ interface HighlightsProviderProps extends React.PropsWithChildren {}
 
 export const HighlightsContext = createContext<HighlightsContextType>({
   selectedHighlight: null,
+  selectedHighlightIndex: null,
   selectHighlight: () => {},
   highlights: [],
   totalHighlights: 0,
@@ -177,6 +179,14 @@ export const HighlightsProvider: React.FC<HighlightsProviderProps> = ({
     );
   }, [highlights, selectedHighlightId]);
 
+  const selectedHighlightIndex = useMemo(() => {
+    return selectedHighlightId
+      ? highlights
+          .map((h) => h.id)
+          .findIndex((id) => id === selectedHighlightId)
+      : null;
+  }, [highlights, selectedHighlightId]);
+
   return (
     <HighlightsContext.Provider
       value={{
@@ -189,6 +199,7 @@ export const HighlightsProvider: React.FC<HighlightsProviderProps> = ({
         hasNextPage: hasNextPage ?? false,
         fetchHighlights,
         selectedHighlight,
+        selectedHighlightIndex,
         selectHighlight,
         searchQuery,
         setSearchQuery,

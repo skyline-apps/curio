@@ -14,7 +14,6 @@ export type KeyboardShortcutHandler = (
 ) => boolean | void | Promise<boolean> | Promise<void>;
 
 export enum ShortcutType {
-  ITEMS = "Items",
   DEFAULT = "Default",
   ACTIONS = "Actions",
   NAVIGATION = "Navigation",

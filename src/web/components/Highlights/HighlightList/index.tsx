@@ -1,6 +1,7 @@
 "use client";
 import React, { useCallback, useContext } from "react";
 
+import { HighlightNavigationShortcuts } from "@/components/Highlights/HighlightList/HighlightNavigationShortcuts";
 import HighlightRow from "@/components/Highlights/HighlightRow";
 import HighlightSearch from "@/components/Highlights/HighlightSearch";
 import InfiniteList from "@/components/InfiniteList";
@@ -29,6 +30,7 @@ const HighlightList: React.FC<
 
   return (
     <>
+      <HighlightNavigationShortcuts />
       <div className="flex h-8 w-full items-center gap-2 mb-2">
         <HighlightSearch highlightCount={totalHighlights} />
       </div>
