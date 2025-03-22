@@ -31,9 +31,11 @@ if (!document.querySelector('#curio-toast-styles')) {
     background: #E7C9C5;
   }
   .curio-toast a {
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 4px 8px;
-    height: 32px;
+    height: 28px;
     cursor: pointer;
     border-radius: 2px;
     text-decoration: none;
@@ -58,6 +60,7 @@ function showToast(message, actionText = "", actionLink = "", isError = false) {
 
   // Create new toast
   const toast = document.createElement('div');
+  toast.dir = "ltr";
   toast.className = `curio-toast${isError ? ' error' : ''}`;
   toast.textContent = message;
   if (actionText && actionLink) {

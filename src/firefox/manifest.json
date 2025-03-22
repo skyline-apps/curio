@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Curio Saver",
-    "version": "1.1",
+    "version": "1.2",
     "description": "Add a webpage to Curio",
     "browser_specific_settings": {
         "gecko": {
