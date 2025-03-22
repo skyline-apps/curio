@@ -1,8 +1,14 @@
 import { vi } from "vitest";
 
-import { and, eq, not } from "@/db";
+import { and, eq, not, or } from "@/db";
 import { DbErrorCode } from "@/db/errors";
-import { items, ItemState, profileItems } from "@/db/schema";
+import {
+  items,
+  ItemState,
+  profileItemHighlights,
+  profileItems,
+} from "@/db/schema";
+import { deleteHighlightDocuments } from "@/lib/search/__mocks__";
 import { APIRequest } from "@/utils/api";
 import {
   DEFAULT_TEST_PROFILE_ID,
@@ -10,10 +16,10 @@ import {
   makeUnauthenticatedMockRequest,
 } from "@/utils/test/api";
 import {
+  MOCK_HIGHLIGHTS,
   MOCK_ITEMS,
   MOCK_PROFILE_ITEMS,
   NONEXISTENT_USER_ID,
-  TEST_ITEM_ID_1,
   TEST_ITEM_ID_DELETED,
 } from "@/utils/test/data";
 import { testDb } from "@/utils/test/provider";
@@ -112,17 +118,7 @@ describe("/api/v1/items/state", () => {
 
     it("should return 200 if item is already archived", async () => {
       await testDb.db.insert(items).values(MOCK_ITEMS[0]);
-      await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID_1,
-        title: "Old title",
-        author: "Kim",
-        state: ItemState.ARCHIVED,
-        isFavorite: false,
-        stateUpdatedAt: ORIGINAL_ARCHIVED_TIME,
-        savedAt: new Date("2025-01-01T00:00:00.000Z"),
-        lastReadAt: null,
-      });
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS[0]);
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         body: {
@@ -153,17 +149,7 @@ describe("/api/v1/items/state", () => {
 
     it("should return 200 converting item back to active", async () => {
       await testDb.db.insert(items).values(MOCK_ITEMS[0]);
-      await testDb.db.insert(profileItems).values({
-        profileId: DEFAULT_TEST_PROFILE_ID,
-        itemId: TEST_ITEM_ID_1,
-        title: "Old title",
-        author: "Kim",
-        state: ItemState.ARCHIVED,
-        isFavorite: false,
-        stateUpdatedAt: ORIGINAL_ARCHIVED_TIME,
-        savedAt: new Date("2025-01-01T00:00:00.000Z"),
-        lastReadAt: null,
-      });
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS[0]);
       const request: APIRequest = makeAuthenticatedMockRequest({
         method: "POST",
         body: {
@@ -190,6 +176,53 @@ describe("/api/v1/items/state", () => {
         (updatedItems[0].stateUpdatedAt as Date).getTime() >
           ORIGINAL_ARCHIVED_TIME.getTime(),
       ).toBe(true);
+    });
+
+    it("should return 200 deleting with highlights", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+      await testDb.db.insert(profileItemHighlights).values(MOCK_HIGHLIGHTS);
+      const request: APIRequest = makeAuthenticatedMockRequest({
+        method: "POST",
+        body: {
+          slugs: "example-com,example2-com",
+          state: ItemState.DELETED,
+        },
+      });
+
+      const response = await POST(request);
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data).toEqual({
+        updated: [{ slug: "example2-com" }, { slug: "example-com" }],
+      });
+
+      const updatedItems = await testDb.db
+        .select()
+        .from(profileItems)
+        .where(
+          or(
+            eq(profileItems.id, MOCK_PROFILE_ITEMS[0].id),
+            eq(profileItems.id, MOCK_PROFILE_ITEMS[1].id),
+          ),
+        );
+
+      expect(updatedItems).toHaveLength(2);
+      expect(updatedItems[0].state).toBe(ItemState.DELETED);
+      expect(updatedItems[1].state).toBe(ItemState.DELETED);
+
+      const highlights = await testDb.db
+        .select()
+        .from(profileItemHighlights)
+        .orderBy(profileItemHighlights.id);
+      expect(highlights).toHaveLength(1);
+      expect(highlights[0].id).toBe(MOCK_HIGHLIGHTS[2].id);
+
+      expect(deleteHighlightDocuments).toHaveBeenCalledExactlyOnceWith([
+        MOCK_HIGHLIGHTS[0].id,
+        MOCK_HIGHLIGHTS[1].id,
+      ]);
     });
 
     it("should return 200 if request body includes invalid slugs", async () => {
@@ -305,9 +338,18 @@ describe("/api/v1/items/state", () => {
         },
       });
 
-      vi.spyOn(testDb.db, "update").mockImplementationOnce(() => {
-        throw { code: DbErrorCode.ConnectionFailure };
-      });
+      type PgTx = Parameters<Parameters<typeof testDb.db.transaction>[0]>[0];
+
+      vi.spyOn(testDb.db, "transaction").mockImplementationOnce(
+        async (callback) => {
+          return callback({
+            ...testDb.db,
+            insert: () => {
+              throw { code: DbErrorCode.UniqueViolation };
+            },
+          } as unknown as PgTx);
+        },
+      );
 
       const response = await POST(request);
       expect(response.status).toBe(500);

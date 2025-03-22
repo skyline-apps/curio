@@ -19,47 +19,14 @@ import {
   DEFAULT_TEST_PROFILE_ID,
   makeAuthenticatedMockRequest,
 } from "@/utils/test/api";
-import { MOCK_ITEMS, MOCK_PROFILE_ITEMS } from "@/utils/test/data";
+import {
+  MOCK_HIGHLIGHTS,
+  MOCK_ITEMS,
+  MOCK_PROFILE_ITEMS,
+} from "@/utils/test/data";
 import { testDb } from "@/utils/test/provider";
 
 import { DELETE, GET, POST } from "./route";
-
-const TEST_HIGHLIGHT_ID_1 = "123e4567-e89b-12d3-a456-426614174111";
-const TEST_HIGHLIGHT_ID_2 = "123e4567-e89b-12d3-a456-426614174222";
-const TEST_HIGHLIGHT_ID_3 = "123e4567-e89b-12d3-a456-426614174333";
-
-const MOCK_HIGHLIGHTS = [
-  {
-    id: TEST_HIGHLIGHT_ID_1,
-    profileItemId: MOCK_PROFILE_ITEMS[0].id,
-    startOffset: 0,
-    endOffset: 10,
-    text: "Test highlight",
-    note: "Test note",
-    createdAt: new Date("2025-01-10T12:52:56-08:00"),
-    updatedAt: new Date("2025-01-10T12:52:56-08:00"),
-  },
-  {
-    id: TEST_HIGHLIGHT_ID_2,
-    profileItemId: MOCK_PROFILE_ITEMS[1].id,
-    startOffset: 5,
-    endOffset: 15,
-    text: "Another highlight",
-    note: null,
-    createdAt: new Date("2025-01-10T12:53:56-08:00"),
-    updatedAt: new Date("2025-01-10T12:53:56-08:00"),
-  },
-  {
-    id: TEST_HIGHLIGHT_ID_3,
-    profileItemId: MOCK_PROFILE_ITEMS[4].id,
-    startOffset: 5,
-    endOffset: 15,
-    text: "Another highlight not mine",
-    note: null,
-    createdAt: new Date("2025-01-10T12:54:56-08:00"),
-    updatedAt: new Date("2025-01-10T12:54:56-08:00"),
-  },
-];
 
 const MOCK_SEARCH_RESULTS: HighlightDocumentResult[] = [
   {
@@ -118,8 +85,8 @@ describe("/api/v1/items/highlights", () => {
           sort: ["updatedAt:desc"],
         },
       );
-      expect(data.highlights[0].id).toBe(TEST_HIGHLIGHT_ID_2);
-      expect(data.highlights[1].id).toBe(TEST_HIGHLIGHT_ID_1);
+      expect(data.highlights[0].id).toBe(MOCK_HIGHLIGHTS[1].id);
+      expect(data.highlights[1].id).toBe(MOCK_HIGHLIGHTS[0].id);
       expect(data.highlights[0].textExcerpt).toBe(undefined);
       expect(data.highlights[0].noteExcerpt).toBe(undefined);
       expect(data.highlights[1].textExcerpt).toBe(undefined);
@@ -174,7 +141,7 @@ describe("/api/v1/items/highlights", () => {
 
       const data = await response.json();
       expect(data.highlights).toHaveLength(1);
-      expect(data.highlights[0].id).toBe(TEST_HIGHLIGHT_ID_2);
+      expect(data.highlights[0].id).toBe(MOCK_HIGHLIGHTS[1].id);
       expect(data.nextOffset).toBe(1);
       expect(data.total).toBe(2);
       expect(searchHighlightDocuments).toHaveBeenCalledExactlyOnceWith(
@@ -206,7 +173,7 @@ describe("/api/v1/items/highlights", () => {
 
       const data2 = await response2.json();
       expect(data2.highlights).toHaveLength(1);
-      expect(data2.highlights[0].id).toBe(TEST_HIGHLIGHT_ID_1);
+      expect(data2.highlights[0].id).toBe(MOCK_HIGHLIGHTS[0].id);
       expect(data2.nextOffset).toBeUndefined();
       expect(data2.total).toBe(2);
       expect(searchHighlightDocuments).toHaveBeenCalledTimes(2);
@@ -302,7 +269,7 @@ describe("/api/v1/items/highlights", () => {
           slug: "example-com",
           highlights: [
             {
-              id: TEST_HIGHLIGHT_ID_1,
+              id: MOCK_HIGHLIGHTS[0].id,
               startOffset: 15,
               endOffset: 25,
               text: "Updated highlight",
@@ -318,7 +285,7 @@ describe("/api/v1/items/highlights", () => {
       const data = await response.json();
       expect(data.highlights).toHaveLength(1);
       expect(data.highlights[0]).toMatchObject({
-        id: TEST_HIGHLIGHT_ID_1,
+        id: MOCK_HIGHLIGHTS[0].id,
         startOffset: 15,
         endOffset: 25,
         text: "Updated highlight",
@@ -328,7 +295,7 @@ describe("/api/v1/items/highlights", () => {
       const savedHighlight = await testDb.db
         .select()
         .from(profileItemHighlights)
-        .where(eq(profileItemHighlights.id, TEST_HIGHLIGHT_ID_1));
+        .where(eq(profileItemHighlights.id, MOCK_HIGHLIGHTS[0].id));
       expect(savedHighlight).toHaveLength(1);
       expect(savedHighlight[0]).toMatchObject({
         startOffset: 15,
@@ -363,7 +330,7 @@ describe("/api/v1/items/highlights", () => {
           slug: "example3-com",
           highlights: [
             {
-              id: TEST_HIGHLIGHT_ID_2,
+              id: MOCK_HIGHLIGHTS[1].id,
               startOffset: 25,
               endOffset: 35,
               text: "Should not update",
@@ -381,7 +348,7 @@ describe("/api/v1/items/highlights", () => {
       const savedHighlight = await testDb.db
         .select()
         .from(profileItemHighlights)
-        .where(eq(profileItemHighlights.id, TEST_HIGHLIGHT_ID_2));
+        .where(eq(profileItemHighlights.id, MOCK_HIGHLIGHTS[1].id));
       expect(savedHighlight[0]).toMatchObject({
         startOffset: 5,
         endOffset: 15,
@@ -463,7 +430,7 @@ describe("/api/v1/items/highlights", () => {
         method: "DELETE",
         body: {
           slug: "example-com",
-          highlightIds: [TEST_HIGHLIGHT_ID_1],
+          highlightIds: [MOCK_HIGHLIGHTS[0].id],
         },
       });
 
@@ -472,17 +439,17 @@ describe("/api/v1/items/highlights", () => {
 
       const data = await response.json();
       expect(data.deleted).toHaveLength(1);
-      expect(data.deleted[0].id).toBe(TEST_HIGHLIGHT_ID_1);
+      expect(data.deleted[0].id).toBe(MOCK_HIGHLIGHTS[0].id);
 
       const savedHighlight = await testDb.db
         .select()
         .from(profileItemHighlights)
-        .where(eq(profileItemHighlights.id, TEST_HIGHLIGHT_ID_1));
+        .where(eq(profileItemHighlights.id, MOCK_HIGHLIGHTS[0].id));
       expect(savedHighlight).toHaveLength(0);
 
       expect(deleteHighlightDocuments).toHaveBeenCalledTimes(1);
       expect(deleteHighlightDocuments).toHaveBeenCalledWith([
-        TEST_HIGHLIGHT_ID_1,
+        MOCK_HIGHLIGHTS[0].id,
       ]);
     });
 
@@ -491,7 +458,7 @@ describe("/api/v1/items/highlights", () => {
         method: "DELETE",
         body: {
           slug: "example3-com",
-          highlightIds: [TEST_HIGHLIGHT_ID_2],
+          highlightIds: [MOCK_HIGHLIGHTS[1].id],
         },
       });
 
@@ -504,7 +471,7 @@ describe("/api/v1/items/highlights", () => {
       const savedHighlight = await testDb.db
         .select()
         .from(profileItemHighlights)
-        .where(eq(profileItemHighlights.id, TEST_HIGHLIGHT_ID_2));
+        .where(eq(profileItemHighlights.id, MOCK_HIGHLIGHTS[1].id));
       expect(savedHighlight).toHaveLength(1);
       expect(deleteHighlightDocuments).toHaveBeenCalledTimes(0);
     });
@@ -527,7 +494,7 @@ describe("/api/v1/items/highlights", () => {
         method: "DELETE",
         body: {
           slug: "nonexistent-slug",
-          highlightIds: [TEST_HIGHLIGHT_ID_1],
+          highlightIds: [MOCK_HIGHLIGHTS[0].id],
         },
       });
 
@@ -537,7 +504,7 @@ describe("/api/v1/items/highlights", () => {
       const savedHighlight = await testDb.db
         .select()
         .from(profileItemHighlights)
-        .where(eq(profileItemHighlights.id, TEST_HIGHLIGHT_ID_1));
+        .where(eq(profileItemHighlights.id, MOCK_HIGHLIGHTS[0].id));
       expect(savedHighlight).toHaveLength(1);
       expect(deleteHighlightDocuments).toHaveBeenCalledTimes(0);
     });
@@ -551,7 +518,7 @@ describe("/api/v1/items/highlights", () => {
         method: "DELETE",
         body: {
           slug: "example-com",
-          highlightIds: [TEST_HIGHLIGHT_ID_1],
+          highlightIds: [MOCK_HIGHLIGHTS[0].id],
         },
       });
 
@@ -570,7 +537,7 @@ describe("/api/v1/items/highlights", () => {
         method: "DELETE",
         body: {
           slug: "example-com",
-          highlightIds: [TEST_HIGHLIGHT_ID_1],
+          highlightIds: [MOCK_HIGHLIGHTS[0].id],
         },
       });
 

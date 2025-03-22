@@ -175,3 +175,36 @@ export const MOCK_PROFILE_ITEM_LABELS = [
     labelId: TEST_LABEL_ID_1,
   },
 ];
+
+export const MOCK_HIGHLIGHTS = [
+  {
+    id: "123e4567-e89b-12d3-a456-426614174111",
+    profileItemId: MOCK_PROFILE_ITEMS[0].id,
+    startOffset: 0,
+    endOffset: 10,
+    text: "Test highlight",
+    note: "Test note",
+    createdAt: new Date("2025-01-10T12:52:56-08:00"),
+    updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+  },
+  {
+    id: "123e4567-e89b-12d3-a456-426614174222",
+    profileItemId: MOCK_PROFILE_ITEMS[1].id,
+    startOffset: 5,
+    endOffset: 15,
+    text: "Another highlight",
+    note: null,
+    createdAt: new Date("2025-01-10T12:53:56-08:00"),
+    updatedAt: new Date("2025-01-10T12:53:56-08:00"),
+  },
+  {
+    id: "123e4567-e89b-12d3-a456-426614174333",
+    profileItemId: MOCK_PROFILE_ITEMS[4].id,
+    startOffset: 5,
+    endOffset: 15,
+    text: "Another highlight not mine",
+    note: null,
+    createdAt: new Date("2025-01-10T12:54:56-08:00"),
+    updatedAt: new Date("2025-01-10T12:54:56-08:00"),
+  },
+];
