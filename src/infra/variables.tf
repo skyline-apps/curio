@@ -82,3 +82,8 @@ variable "vercel_protection_bypass" {
   sensitive   = true
   default     = ""
 }
+
+variable "project_forwarding_email_address" {
+  description = "Email address to forward sender domain emails to"
+  type        = string
+}

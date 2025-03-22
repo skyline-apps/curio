@@ -18,6 +18,52 @@ resource "aws_ses_email_identity" "auth" {
   email = "auth@${var.ses_email_identity_sender}"
 }
 
+# Using the main receipt rule set from email_receiver.tf
+
+resource "aws_ses_receipt_rule" "forward" {
+  name          = "forward-sender-emails"
+  rule_set_name = aws_ses_receipt_rule_set.main.rule_set_name
+  enabled       = true
+  scan_enabled  = true
+  recipients    = [var.ses_email_identity_sender]
+
+  # Forward action
+  sns_action {
+    topic_arn = aws_sns_topic.email_forwarder.arn
+    position  = 2
+  }
+}
+
+# SNS topic for email forwarding
+resource "aws_sns_topic" "email_forwarder" {
+  name = "${var.project_prefix}-${var.environment}-email-forwarder"
+}
+
+resource "aws_sns_topic_policy" "email_forwarder" {
+  arn = aws_sns_topic.email_forwarder.arn
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowSESPublish"
+        Effect = "Allow"
+        Principal = {
+          Service = "ses.amazonaws.com"
+        }
+        Action   = "SNS:Publish"
+        Resource = aws_sns_topic.email_forwarder.arn
+      }
+    ]
+  })
+}
+
+# SNS topic subscription for email forwarding
+resource "aws_sns_topic_subscription" "email_forwarder" {
+  topic_arn = aws_sns_topic.email_forwarder.arn
+  protocol  = "email"
+  endpoint  = var.project_forwarding_email_address
+}
+
 # IAM policy to allow sending emails
 data "aws_iam_policy_document" "ses_sender" {
   statement {

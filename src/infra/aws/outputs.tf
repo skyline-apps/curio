@@ -52,6 +52,25 @@ output "ses_receiver_dkim_records" {
   ]
 }
 
+# Receiver MAIL FROM Domain Records
+output "ses_receiver_mail_from_mx_record" {
+  description = "MX record for custom MAIL FROM domain"
+  value = {
+    name  = aws_ses_domain_mail_from.main.mail_from_domain
+    type  = "MX"
+    value = "10 feedback-smtp.${data.aws_region.current.name}.amazonses.com"
+  }
+}
+
+output "ses_receiver_mail_from_txt_record" {
+  description = "TXT record for custom MAIL FROM domain SPF"
+  value = {
+    name  = aws_ses_domain_mail_from.main.mail_from_domain
+    type  = "TXT"
+    value = "v=spf1 include:amazonses.com ~all"
+  }
+}
+
 # Sender Domain Verification Record
 output "ses_sender_verification_record" {
   description = "TXT record that needs to be added to sender domain DNS settings to verify SES domain ownership"

@@ -13,6 +13,8 @@ module "aws" {
   email_healthcheck_error_endpoint = var.email_healthcheck_error_endpoint
   email_healthcheck_warn_endpoint  = var.email_healthcheck_warn_endpoint
   email_healthcheck_token          = var.email_healthcheck_token
+
+  project_forwarding_email_address = var.project_forwarding_email_address
 }
 
 # GCP Module

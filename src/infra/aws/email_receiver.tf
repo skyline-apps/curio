@@ -7,6 +7,12 @@ resource "aws_ses_domain_dkim" "main" {
   domain = aws_ses_domain_identity.main.domain
 }
 
+resource "aws_ses_domain_mail_from" "main" {
+  domain                 = aws_ses_domain_identity.main.domain
+  mail_from_domain       = "amazonses.${aws_ses_domain_identity.main.domain}"
+  behavior_on_mx_failure = "RejectMessage"
+}
+
 # Enable receiving on the domain
 resource "aws_ses_receipt_filter" "main" {
   name   = "${var.project_prefix}-${var.environment}-filter"
@@ -27,6 +33,7 @@ resource "aws_ses_receipt_rule" "store_and_notify" {
   rule_set_name = aws_ses_receipt_rule_set.main.rule_set_name
   enabled       = true
   scan_enabled  = true
+  recipients    = ["${var.ses_email_identity_receiver}"]
 
   # First store in S3
   s3_action {
@@ -34,5 +41,4 @@ resource "aws_ses_receipt_rule" "store_and_notify" {
     object_key_prefix = "incoming/" # Add prefix for better organization
     position          = 1
   }
-
 }

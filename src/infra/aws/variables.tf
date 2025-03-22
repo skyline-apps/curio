@@ -19,6 +19,11 @@ variable "ses_email_identity_receiver" {
   type        = string
 }
 
+variable "project_forwarding_email_address" {
+  description = "Email address to forward sender domain emails to"
+  type        = string
+}
+
 variable "ses_email_identity_sender" {
   description = "Email domain to verify for SES (sender)"
   type        = string
