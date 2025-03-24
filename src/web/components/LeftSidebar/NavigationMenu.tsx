@@ -16,8 +16,8 @@ export enum SidebarKey {
   NONE = "",
   HOME = "/home",
   INBOX = "/inbox",
-  ARCHIVE = "/archive",
   NOTES = "/notes",
+  ARCHIVE = "/archive",
 }
 
 interface NavigationMenuProps {
@@ -29,12 +29,12 @@ interface NavigationMenuProps {
 const navigationItems = [
   { key: SidebarKey.HOME, label: "Home", icon: <HiOutlineHome /> },
   { key: SidebarKey.INBOX, label: "Inbox", icon: <HiOutlineInbox /> },
+  { key: SidebarKey.NOTES, label: "Notes", icon: <HiOutlineBookOpen /> },
   {
     key: SidebarKey.ARCHIVE,
     label: "Archive",
     icon: <HiOutlineArchiveBox />,
   },
-  { key: SidebarKey.NOTES, label: "Notes", icon: <HiOutlineBookOpen /> },
 ];
 
 const NavigationMenu: React.FC<NavigationMenuProps> = ({

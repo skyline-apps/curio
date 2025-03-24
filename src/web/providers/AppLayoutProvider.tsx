@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import React, {
   createContext,
   useCallback,
@@ -36,6 +37,7 @@ export const AppLayoutProvider: React.FC<AppLayoutProviderProps> = ({
   children,
 }: AppLayoutProviderProps): React.ReactNode => {
   const [appLayout, setAppLayout] = useState<AppLayoutSettings>(DEFAULT_LAYOUT);
+  const router = useRouter();
 
   useEffect(() => {
     setAppLayout(loadLayoutSettings());
@@ -57,11 +59,71 @@ export const AppLayoutProvider: React.FC<AppLayoutProviderProps> = ({
     });
   }, [appLayout, updateAppLayout]);
 
+  const navigateHome = useCallback(() => {
+    router.push("/home");
+  }, [router]);
+
+  const navigateInbox = useCallback(() => {
+    router.push("/inbox");
+  }, [router]);
+
+  const navigateNotes = useCallback(() => {
+    router.push("/notes");
+  }, [router]);
+
+  const navigateArchive = useCallback(() => {
+    router.push("/archive");
+  }, [router]);
+
   useKeyboardShortcut({
     key: "|",
     name: "Toggle sidebars",
     category: ShortcutType.DEFAULT,
     handler: toggleSidebars,
+    priority: 100,
+    conditions: {
+      shiftKey: true,
+    },
+  });
+
+  useKeyboardShortcut({
+    key: "H",
+    name: "Navigate to home",
+    category: ShortcutType.DEFAULT,
+    handler: navigateHome,
+    priority: 100,
+    conditions: {
+      shiftKey: true,
+    },
+  });
+
+  useKeyboardShortcut({
+    key: "I",
+    name: "Navigate to inbox",
+    category: ShortcutType.DEFAULT,
+    handler: navigateInbox,
+    priority: 100,
+    conditions: {
+      shiftKey: true,
+    },
+  });
+
+  useKeyboardShortcut({
+    key: "N",
+    name: "Navigate to notes",
+    category: ShortcutType.DEFAULT,
+    handler: navigateNotes,
+    priority: 100,
+    conditions: {
+      shiftKey: true,
+    },
+  });
+
+  useKeyboardShortcut({
+    key: "A",
+    name: "Navigate to archive",
+    category: ShortcutType.DEFAULT,
+    handler: navigateArchive,
     priority: 100,
     conditions: {
       shiftKey: true,
