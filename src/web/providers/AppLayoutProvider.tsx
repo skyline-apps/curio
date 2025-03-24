@@ -8,6 +8,10 @@ import React, {
 } from "react";
 
 import {
+  ShortcutType,
+  useKeyboardShortcut,
+} from "@/providers/KeyboardShortcutProvider";
+import {
   type AppLayoutSettings,
   DEFAULT_LAYOUT,
   loadLayoutSettings,
@@ -44,6 +48,25 @@ export const AppLayoutProvider: React.FC<AppLayoutProviderProps> = ({
     },
     [appLayout],
   );
+
+  const toggleSidebars = useCallback(() => {
+    const current = appLayout.leftSidebarOpen;
+    updateAppLayout({
+      leftSidebarOpen: !current,
+      rightSidebarOpen: !current,
+    });
+  }, [appLayout, updateAppLayout]);
+
+  useKeyboardShortcut({
+    key: "|",
+    name: "Toggle sidebars",
+    category: ShortcutType.DEFAULT,
+    handler: toggleSidebars,
+    priority: 100,
+    conditions: {
+      shiftKey: true,
+    },
+  });
 
   return (
     <AppLayoutContext.Provider

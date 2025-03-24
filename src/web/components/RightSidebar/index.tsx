@@ -94,7 +94,11 @@ const RightSidebar: React.FC = () => {
                     setSelectedHighlightPreview(highlight?.id || null)
                   }
                 />
-              ) : null)}
+              ) : (
+                <p className="text-secondary text-center pt-24">
+                  Select an item to preview it here.
+                </p>
+              ))}
           </div>
         </div>
         <Button
