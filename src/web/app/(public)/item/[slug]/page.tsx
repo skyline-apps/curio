@@ -9,6 +9,7 @@ import {
   displayHeaderSizeClass,
   getDisplayFontClass,
 } from "@/components/Article/displaySettings";
+import KeyboardShortcuts from "@/components/KeyboardShortcuts";
 import { Progress } from "@/components/ui/Progress";
 import { DisplayFont, DisplayFontSize, TextDirection } from "@/db/schema";
 import { CurrentItemContext } from "@/providers/CurrentItemProvider";
@@ -88,6 +89,7 @@ const ItemPage: React.FC = () => {
 
   return (
     <>
+      <KeyboardShortcuts />
       {loading && (
         <Progress
           aria-label="Loading..."
