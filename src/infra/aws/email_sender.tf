@@ -30,7 +30,7 @@ resource "aws_ses_receipt_rule" "forward" {
   # Forward action
   sns_action {
     topic_arn = aws_sns_topic.email_forwarder.arn
-    position  = 2
+    position  = 1
   }
 }
 
