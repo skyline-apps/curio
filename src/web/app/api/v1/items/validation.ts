@@ -43,7 +43,7 @@ export const PublicItemMetadataSchema = z.object({
   title: z.string().max(255).describe("The title of the item."),
   description: z
     .string()
-    .max(2048)
+    .max(4096)
     .nullable()
     .optional()
     .describe("The description of the item."),
@@ -245,14 +245,14 @@ const ItemMetadataUpdateSchema = ItemMetadataSchema.merge(
     thumbnail: z
       .string()
       .url()
-      .max(2048)
+      .max(4096)
       .nullable()
       .optional()
       .describe("The thumbnail URL of the item."),
     favicon: z
       .string()
       .url()
-      .max(2048)
+      .max(4096)
       .nullable()
       .optional()
       .describe("The favicon URL of the item."),
