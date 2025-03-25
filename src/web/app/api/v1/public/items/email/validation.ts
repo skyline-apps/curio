@@ -1,6 +1,5 @@
-import { z } from "zod";
-
 import { UploadStatus } from "@web/lib/storage/types";
+import { z } from "zod";
 
 export const UploadEmailRequestSchema = z.object({
   emailBody: z.string().describe("The email body content, base64-encoded"),

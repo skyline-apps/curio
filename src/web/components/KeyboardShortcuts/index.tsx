@@ -1,5 +1,3 @@
-import React, { useContext } from "react";
-
 import Kbd, { type KbdKey } from "@web/components/ui/Kbd";
 import Modal, {
   ModalBody,
@@ -7,6 +5,7 @@ import Modal, {
   ModalHeader,
 } from "@web/components/ui/Modal";
 import { KeyboardShortcutContext } from "@web/providers/KeyboardShortcutProvider";
+import React, { useContext } from "react";
 
 const KeyboardShortcuts = (): React.ReactElement => {
   const { keyboardShortcuts, showKeyboardShortcuts, setShowKeyboardShortcuts } =

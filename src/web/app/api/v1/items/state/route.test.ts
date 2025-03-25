@@ -1,5 +1,3 @@
-import { vi } from "vitest";
-
 import { and, eq, not, or } from "@web/db";
 import { DbErrorCode } from "@web/db/errors";
 import {
@@ -23,6 +21,7 @@ import {
   TEST_ITEM_ID_DELETED,
 } from "@web/utils/test/data";
 import { testDb } from "@web/utils/test/provider";
+import { vi } from "vitest";
 
 import { POST } from "./route";
 

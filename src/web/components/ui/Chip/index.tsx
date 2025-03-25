@@ -1,12 +1,11 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
-import React, { useEffect, useRef, useState } from "react";
-import { HiOutlineXMark } from "react-icons/hi2";
-
 import Button from "@web/components/ui/Button";
 import { INPUT_CLASSES } from "@web/components/ui/Input";
 import Spinner from "@web/components/ui/Spinner";
 import { cn } from "@web/utils/cn";
 import { blue, gray, green, red, yellow } from "@web/utils/colors";
+import React, { useEffect, useRef, useState } from "react";
+import { HiOutlineXMark } from "react-icons/hi2";
 
 export const COLOR_PALETTE = [
   red[400],
@@ -159,7 +158,7 @@ export const Chip = React.forwardRef<HTMLDivElement, ChipProps>(
                     className={cn(
                       "w-6 h-6 rounded",
                       editColor === paletteColor &&
-                      "border-2 border-foreground",
+                        "border-2 border-foreground",
                     )}
                     style={{
                       backgroundColor: paletteColor,
@@ -188,9 +187,9 @@ export const Chip = React.forwardRef<HTMLDivElement, ChipProps>(
         onClick={
           editable
             ? () => {
-              setIsEditing(true);
-              inputRef.current?.focus();
-            }
+                setIsEditing(true);
+                inputRef.current?.focus();
+              }
             : undefined
         }
       >

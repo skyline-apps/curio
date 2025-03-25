@@ -1,5 +1,3 @@
-import { describe, expect, it, vi } from "vitest";
-
 import { db, eq } from "@web/db";
 import { profiles } from "@web/db/schema";
 import {
@@ -7,6 +5,7 @@ import {
   makeAuthenticatedMockRequest,
   makeUnauthenticatedMockRequest,
 } from "@web/utils/test/api";
+import { describe, expect, it, vi } from "vitest";
 
 import { POST } from "./route";
 

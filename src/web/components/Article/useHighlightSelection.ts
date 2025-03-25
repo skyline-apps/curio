@@ -1,5 +1,3 @@
-import { useCallback, useContext, useState } from "react";
-
 import {
   type Highlight,
   type NewHighlight,
@@ -9,6 +7,7 @@ import { useAppLayout } from "@web/providers/AppLayoutProvider";
 import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
 import { useToast } from "@web/providers/ToastProvider";
 import { createLogger } from "@web/utils/logger";
+import { useCallback, useContext, useState } from "react";
 
 const log = createLogger("useHighlightSelection");
 

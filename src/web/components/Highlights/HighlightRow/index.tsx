@@ -1,7 +1,4 @@
 "use client";
-import Link from "next/link";
-import React, { useContext } from "react";
-
 import Markdown from "@web/components/Markdown";
 import { TextDirection } from "@web/db/schema";
 import {
@@ -9,6 +6,8 @@ import {
   HighlightsContext,
 } from "@web/providers/HighlightsProvider";
 import { cn } from "@web/utils/cn";
+import Link from "next/link";
+import React, { useContext } from "react";
 
 interface HighlightRowProps {
   highlight: HighlightItem;

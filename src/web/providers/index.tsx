@@ -1,10 +1,9 @@
 // eslint-disable-next-line no-restricted-imports
 import { HeroUIProvider } from "@heroui/react";
-import React, { PropsWithChildren } from "react";
-
 import { db, eq } from "@web/db";
 import { profiles } from "@web/db/schema";
 import { createClient } from "@web/utils/supabase/server";
+import React, { PropsWithChildren } from "react";
 
 import { AppLayoutProvider } from "./AppLayoutProvider";
 import { BrowserMessageProvider } from "./BrowserMessageProvider";

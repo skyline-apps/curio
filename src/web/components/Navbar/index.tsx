@@ -1,8 +1,5 @@
 "use client";
 import { Navbar, NavbarBrand, NavbarContent } from "@heroui/navbar";
-import React, { useContext } from "react";
-import { HiOutlineUser } from "react-icons/hi2";
-
 import { CurioBrand } from "@web/components/CurioBrand";
 import Button from "@web/components/ui/Button";
 import {
@@ -14,6 +11,8 @@ import {
 import Icon from "@web/components/ui/Icon";
 import { useLogout } from "@web/hooks/useLogout";
 import { UserContext } from "@web/providers/UserProvider";
+import React, { useContext } from "react";
+import { HiOutlineUser } from "react-icons/hi2";
 
 const CurioNavbar: React.FC = () => {
   const { user } = useContext(UserContext);

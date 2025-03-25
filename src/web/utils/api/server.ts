@@ -1,7 +1,6 @@
-import { ZodType } from "zod";
-
 import { and, db, eq } from "@web/db";
 import { profiles } from "@web/db/schema";
+import { ZodType } from "zod";
 
 import { APIResponse, APIResponseJSON } from "./index";
 

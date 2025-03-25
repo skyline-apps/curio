@@ -1,7 +1,5 @@
 "use client";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import React, { createContext, useCallback, useMemo, useState } from "react";
-
 import {
   type GetItemsRequest,
   type GetItemsResponse,
@@ -10,6 +8,7 @@ import {
 } from "@web/app/api/v1/items/validation";
 import { handleAPIResponse } from "@web/utils/api";
 import { createLogger } from "@web/utils/logger";
+import React, { createContext, useCallback, useMemo, useState } from "react";
 
 const log = createLogger("items-provider");
 
@@ -41,7 +40,7 @@ export type ItemsContextType = {
   currentFilters: GetItemsRequest["filters"];
 };
 
-interface ItemsProviderProps extends React.PropsWithChildren { }
+interface ItemsProviderProps extends React.PropsWithChildren {}
 
 export const ItemsContext = createContext<ItemsContextType>({
   items: [],
@@ -53,7 +52,7 @@ export const ItemsContext = createContext<ItemsContextType>({
   hasNextPage: true,
   fetchItems: () => Promise.resolve(),
   searchQuery: "",
-  setSearchQuery: () => { },
+  setSearchQuery: () => {},
   currentFilters: {},
 });
 

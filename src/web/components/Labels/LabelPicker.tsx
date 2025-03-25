@@ -1,12 +1,14 @@
 "use client";
 
-import React, { Key, useMemo, useRef, useState } from "react";
-import { HiOutlinePlus } from "react-icons/hi2";
-
-import { Autocomplete, AutocompleteItem } from "@web/components/ui/Autocomplete";
+import {
+  Autocomplete,
+  AutocompleteItem,
+} from "@web/components/ui/Autocomplete";
 import Button from "@web/components/ui/Button";
 import { Chip } from "@web/components/ui/Chip";
 import Icon from "@web/components/ui/Icon";
+import React, { Key, useMemo, useRef, useState } from "react";
+import { HiOutlinePlus } from "react-icons/hi2";
 
 import { Label } from ".";
 

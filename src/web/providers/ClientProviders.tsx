@@ -1,11 +1,10 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import AnalyticsPageView from "@web/app/AnalyticsPageView";
 import posthog from "posthog-js";
 import { PostHogProvider as PHProvider } from "posthog-js/react";
 import React, { PropsWithChildren, useEffect, useState } from "react";
-
-import AnalyticsPageView from "@web/app/AnalyticsPageView";
 
 import { KeyboardShortcutProvider } from "./KeyboardShortcutProvider";
 

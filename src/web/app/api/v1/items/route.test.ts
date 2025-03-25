@@ -1,5 +1,3 @@
-import { vi } from "vitest";
-
 import { and, desc, eq } from "@web/db";
 import { DbErrorCode } from "@web/db/errors";
 import {
@@ -35,6 +33,7 @@ import {
   TEST_LABEL_ID_2,
 } from "@web/utils/test/data";
 import { testDb } from "@web/utils/test/provider";
+import { vi } from "vitest";
 
 import { GET, POST } from "./route";
 

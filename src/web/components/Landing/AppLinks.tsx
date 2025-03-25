@@ -1,3 +1,5 @@
+import Icon from "@web/components/ui/Icon";
+import config from "@web/lib/config.json";
 import Link from "next/link";
 import {
   FaAndroid,
@@ -6,9 +8,6 @@ import {
   FaDesktop,
   FaFirefoxBrowser,
 } from "react-icons/fa6";
-
-import Icon from "@web/components/ui/Icon";
-import config from "@web/lib/config.json";
 
 interface AppLinkProps {
   href?: string;

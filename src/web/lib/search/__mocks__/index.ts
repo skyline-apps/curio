@@ -1,5 +1,3 @@
-import { vi } from "vitest";
-
 import {
   HighlightDocument,
   HighlightSearchResults,
@@ -7,6 +5,7 @@ import {
   ItemSearchResults,
   SearchOptions,
 } from "@web/lib/search/types";
+import { vi } from "vitest";
 
 export class Search {
   async indexItemDocuments(_documents: ItemDocument[]): Promise<void> {}

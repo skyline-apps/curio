@@ -1,6 +1,3 @@
-import { useEffect, useState } from "react";
-import { HiOutlineClipboard, HiOutlineTrash } from "react-icons/hi2";
-
 import { Highlight } from "@web/app/api/v1/items/highlights/validation";
 import Markdown from "@web/components/Markdown";
 import { ItemTitle, ItemUrl } from "@web/components/RightSidebar/ItemMetadata";
@@ -9,6 +6,8 @@ import Textarea from "@web/components/ui/Textarea";
 import { TextDirection } from "@web/db/schema";
 import { type HighlightItem } from "@web/providers/HighlightsProvider";
 import { cn } from "@web/utils/cn";
+import { useEffect, useState } from "react";
+import { HiOutlineClipboard, HiOutlineTrash } from "react-icons/hi2";
 
 import { useHighlightUpdate } from "./highlightActions";
 

@@ -1,5 +1,3 @@
-import { vi } from "vitest";
-
 import { eq } from "@web/db";
 import { DbErrorCode } from "@web/db/errors";
 import {
@@ -15,6 +13,7 @@ import {
   makeAuthenticatedMockRequest,
 } from "@web/utils/test/api";
 import { testDb } from "@web/utils/test/provider";
+import { vi } from "vitest";
 
 import { GET, POST } from "./route";
 

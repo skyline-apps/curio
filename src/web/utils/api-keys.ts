@@ -1,8 +1,7 @@
-import { randomBytes } from "crypto";
-
 import { and, db, desc, eq } from "@web/db";
 import { apiKeys, profiles, SelectApiKey } from "@web/db/schema";
 import { SupabaseClient } from "@web/utils/supabase/server";
+import { randomBytes } from "crypto";
 
 const API_KEY_PREFIX = "ck_";
 const API_KEY_BYTES = 32;

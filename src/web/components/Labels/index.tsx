@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { HiOutlinePlus, HiOutlineTag } from "react-icons/hi2";
-
 import Button from "@web/components/ui/Button";
 import { Chip, COLOR_PALETTE } from "@web/components/ui/Chip";
 import Icon from "@web/components/ui/Icon";
 import Spinner from "@web/components/ui/Spinner";
 import { Tooltip } from "@web/components/ui/Tooltip";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { HiOutlinePlus, HiOutlineTag } from "react-icons/hi2";
 
 import LabelPicker from "./LabelPicker";
 

@@ -1,12 +1,4 @@
 "use client";
-import { usePathname, useRouter } from "next/navigation";
-import React, { useContext, useEffect, useState } from "react";
-import {
-  HiChevronDoubleLeft,
-  HiChevronDoubleRight,
-  HiPlus,
-} from "react-icons/hi2";
-
 import NewItemModal from "@web/components/NewItemModal";
 import Button from "@web/components/ui/Button";
 import Icon from "@web/components/ui/Icon";
@@ -18,6 +10,13 @@ import {
 } from "@web/providers/BrowserMessageProvider";
 import { UserContext } from "@web/providers/UserProvider";
 import { cn } from "@web/utils/cn";
+import { usePathname, useRouter } from "next/navigation";
+import React, { useContext, useEffect, useState } from "react";
+import {
+  HiChevronDoubleLeft,
+  HiChevronDoubleRight,
+  HiPlus,
+} from "react-icons/hi2";
 
 import NavigationMenu, { SidebarKey } from "./NavigationMenu";
 import SidebarHeader from "./SidebarHeader";

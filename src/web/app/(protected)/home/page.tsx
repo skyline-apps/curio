@@ -1,8 +1,7 @@
 "use client";
-import React, { useContext, useEffect } from "react";
-
 import Recommendations from "@web/components/Recommendations";
 import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
+import React, { useContext, useEffect } from "react";
 
 const HomePage: React.FC = () => {
   const { clearSelectedItems } = useContext(CurrentItemContext);

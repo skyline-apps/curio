@@ -1,10 +1,3 @@
-import React from "react";
-import {
-  HiArrowRightOnRectangle,
-  HiOutlineCog6Tooth,
-  HiOutlineUser,
-} from "react-icons/hi2";
-
 import {
   Dropdown,
   DropdownItem,
@@ -14,6 +7,12 @@ import {
 import Icon from "@web/components/ui/Icon";
 import { User } from "@web/components/ui/User";
 import { cn } from "@web/utils/cn";
+import React from "react";
+import {
+  HiArrowRightOnRectangle,
+  HiOutlineCog6Tooth,
+  HiOutlineUser,
+} from "react-icons/hi2";
 
 import SidebarButton from "./SidebarButton";
 

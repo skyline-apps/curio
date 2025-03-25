@@ -1,12 +1,11 @@
-import Link from "next/link";
-import React, { useContext } from "react";
-import { LuMail } from "react-icons/lu";
-
 import { RecommendationSection } from "@web/app/api/v1/items/recommended/validation";
 import ItemCard from "@web/components/Items/ItemCard";
 import Icon from "@web/components/ui/Icon";
 import { PersonalRecommendationType, RecommendationType } from "@web/db/schema";
 import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
+import Link from "next/link";
+import React, { useContext } from "react";
+import { LuMail } from "react-icons/lu";
 
 interface RecommendedSectionProps {
   section: RecommendationSection;

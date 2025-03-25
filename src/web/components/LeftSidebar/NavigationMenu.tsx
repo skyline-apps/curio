@@ -1,3 +1,6 @@
+import Icon from "@web/components/ui/Icon";
+import { Tab, Tabs } from "@web/components/ui/Tabs";
+import { cn } from "@web/utils/cn";
 import React from "react";
 import {
   HiOutlineArchiveBox,
@@ -5,10 +8,6 @@ import {
   HiOutlineHome,
   HiOutlineInbox,
 } from "react-icons/hi2";
-
-import Icon from "@web/components/ui/Icon";
-import { Tab, Tabs } from "@web/components/ui/Tabs";
-import { cn } from "@web/utils/cn";
 
 import SidebarButton from "./SidebarButton";
 

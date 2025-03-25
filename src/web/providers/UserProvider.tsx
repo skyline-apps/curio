@@ -1,9 +1,8 @@
 "use client";
-import React, { createContext, useState } from "react";
-
 import { type UpdateEmailResponse } from "@web/app/api/v1/user/email/validation";
 import { type UpdateUsernameResponse } from "@web/app/api/v1/user/username/validation";
 import { handleAPIResponse } from "@web/utils/api";
+import React, { createContext, useState } from "react";
 
 export type User = {
   id: string | null;
@@ -31,7 +30,7 @@ export const UserContext = createContext<UserContextType>({
     email: null,
     newsletterEmail: null,
   },
-  clearUser: () => { },
+  clearUser: () => {},
   changeUsername: (_username: string) => Promise.resolve(),
   updateNewsletterEmail: () => Promise.resolve(),
 });

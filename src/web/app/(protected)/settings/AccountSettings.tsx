@@ -1,20 +1,23 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
-import { HiOutlineClipboard } from "react-icons/hi2";
-
 import Button from "@web/components/ui/Button";
 import Card from "@web/components/ui/Card";
 import { FormSection } from "@web/components/ui/Form";
 import Icon from "@web/components/ui/Icon";
 import Input from "@web/components/ui/Input";
-import { Dialog, showAlert, showConfirm } from "@web/components/ui/Modal/Dialog";
+import {
+  Dialog,
+  showAlert,
+  showConfirm,
+} from "@web/components/ui/Modal/Dialog";
 import Snippet from "@web/components/ui/Snippet";
 import Spinner from "@web/components/ui/Spinner";
 import { SelectApiKey } from "@web/db/schema";
 import { useToast } from "@web/providers/ToastProvider";
 import { UserContext } from "@web/providers/UserProvider";
 import { createLogger } from "@web/utils/logger";
+import React, { useContext, useEffect, useState } from "react";
+import { HiOutlineClipboard } from "react-icons/hi2";
 
 import { createApiKey, listApiKeys, revokeApiKey } from "./actions";
 

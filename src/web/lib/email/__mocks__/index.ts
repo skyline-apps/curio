@@ -1,6 +1,5 @@
-import { vi } from "vitest";
-
 import { generateSlug } from "@web/utils/url";
+import { vi } from "vitest";
 
 export const MOCK_EMAIL_URL =
   "https://substack.com/test-newsletter/weekly-roundup";

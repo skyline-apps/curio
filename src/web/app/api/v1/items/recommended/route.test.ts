@@ -1,6 +1,3 @@
-import { v4 } from "uuid";
-import { beforeEach, describe, expect, it } from "vitest";
-
 import { ItemResult, PublicItemResult } from "@web/app/api/v1/items/validation";
 import { and, db, eq, sql } from "@web/db";
 import {
@@ -25,6 +22,8 @@ import {
   NONEXISTENT_USER_ID,
 } from "@web/utils/test/data";
 import { testDb } from "@web/utils/test/provider";
+import { v4 } from "uuid";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { GET } from "./route";
 import {

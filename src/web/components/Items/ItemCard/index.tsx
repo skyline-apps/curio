@@ -1,11 +1,10 @@
-import Link from "next/link";
-
 import Thumbnail from "@web/components/Image/Thumbnail";
 import Card from "@web/components/ui/Card";
 import { TextDirection } from "@web/db/schema";
 import { type Item, type PublicItem } from "@web/providers/ItemsProvider";
 import { cn } from "@web/utils/cn";
 import { FALLBACK_HOSTNAME } from "@web/utils/url";
+import Link from "next/link";
 
 interface ItemCardProps {
   item: PublicItem | Item;
@@ -63,7 +62,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
               className={cn(
                 "text-sm text-primary overflow-hidden truncate",
                 item.metadata.textDirection === TextDirection.RTL &&
-                "text-right",
+                  "text-right",
               )}
             >
               {item.url}

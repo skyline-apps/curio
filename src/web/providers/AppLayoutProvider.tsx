@@ -1,13 +1,4 @@
 "use client";
-import { useRouter } from "next/navigation";
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
-
 import {
   ShortcutType,
   useKeyboardShortcut,
@@ -18,6 +9,14 @@ import {
   loadLayoutSettings,
   updateLayoutSettings,
 } from "@web/utils/displayStorage";
+import { useRouter } from "next/navigation";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 export type AppLayoutContextType = {
   appLayout: AppLayoutSettings;
@@ -30,7 +29,7 @@ interface AppLayoutProviderProps {
 
 export const AppLayoutContext = createContext<AppLayoutContextType>({
   appLayout: DEFAULT_LAYOUT,
-  updateAppLayout: () => { },
+  updateAppLayout: () => {},
 });
 
 export const AppLayoutProvider: React.FC<AppLayoutProviderProps> = ({

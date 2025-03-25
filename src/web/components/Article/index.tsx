@@ -1,7 +1,6 @@
-import React, { useContext, useMemo } from "react";
-
 import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
 import { cn } from "@web/utils/cn";
+import React, { useContext, useMemo } from "react";
 
 import { ItemActionShortcuts } from "./ItemActionShortcuts";
 import MarkdownViewer from "./MarkdownViewer";

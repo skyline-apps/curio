@@ -1,7 +1,6 @@
+import { cn } from "@web/utils/cn";
 import React from "react";
 import ReactMarkdown, { Options } from "react-markdown";
-
-import { cn } from "@web/utils/cn";
 
 interface MarkdownProps extends Options {
   className?: string;

@@ -1,10 +1,9 @@
-import fs from "fs";
-import path from "path";
-import { vi } from "vitest";
-
 import { TextDirection } from "@web/db/schema";
 import { Extract } from "@web/lib/extract";
 import { ExtractError, MetadataError } from "@web/lib/extract/types";
+import fs from "fs";
+import path from "path";
+import { vi } from "vitest";
 
 vi.unmock("@web/lib/extract");
 

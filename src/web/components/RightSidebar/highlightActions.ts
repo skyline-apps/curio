@@ -1,7 +1,5 @@
 "use client";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
-import { useContext, useState } from "react";
-
 import {
   CreateOrUpdateHighlightResponse,
   DeleteHighlightResponse,
@@ -12,6 +10,7 @@ import { useCache } from "@web/providers/CacheProvider";
 import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
 import { handleAPIResponse } from "@web/utils/api";
 import { createLogger } from "@web/utils/logger";
+import { useContext, useState } from "react";
 
 const log = createLogger("right-sidebar-actions");
 

@@ -1,9 +1,8 @@
+import { useAppLayout } from "@web/providers/AppLayoutProvider";
+import { cn } from "@web/utils/cn";
 import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import React, { createContext, useContext, useRef } from "react";
-
-import { useAppLayout } from "@web/providers/AppLayoutProvider";
-import { cn } from "@web/utils/cn";
 
 interface AppPageContextValue {
   containerRef: React.RefObject<HTMLDivElement>;

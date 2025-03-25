@@ -1,4 +1,5 @@
 import { Textarea, type TextAreaProps } from "@heroui/react";
+import Button from "@web/components/ui/Button";
 import { INPUT_CLASSES } from "components/ui/Input";
 import { useState } from "react";
 import {
@@ -7,8 +8,6 @@ import {
   HiOutlineXCircle,
 } from "react-icons/hi2";
 import { cn } from "utils/cn";
-
-import Button from "@web/components/ui/Button";
 
 interface CurioTextareaProps extends TextAreaProps {
   onSave?: () => Promise<void>;

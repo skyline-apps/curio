@@ -1,9 +1,8 @@
 /* eslint-disable no-restricted-imports */
 import { createServerClient } from "@supabase/ssr";
 import { PostgrestError } from "@supabase/supabase-js";
-import { type NextRequest, NextResponse } from "next/server";
-
 import { createLogger } from "@web/utils/logger";
+import { type NextRequest, NextResponse } from "next/server";
 
 const log = createLogger("supabase.middleware");
 

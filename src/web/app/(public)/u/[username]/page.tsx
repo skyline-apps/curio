@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-
 import Profile from "@web/components/Profile";
+import { useEffect } from "react";
 
 const UserPage = ({
   params,

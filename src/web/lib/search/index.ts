@@ -1,9 +1,8 @@
 // TODO: Use the Meilisearch JS SDK?
-import axios, { AxiosError, AxiosInstance } from "axios";
-
 import { db, sql } from "@web/db";
 import { appConfig } from "@web/db/schema";
 import { createLogger } from "@web/utils/logger";
+import axios, { AxiosError, AxiosInstance } from "axios";
 
 import {
   HighlightDocument,

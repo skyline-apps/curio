@@ -1,7 +1,3 @@
-import Link from "next/link";
-import { useContext, useRef } from "react";
-import { HiCheck, HiOutlineEnvelope } from "react-icons/hi2";
-
 import Favicon from "@web/components/Image/Favicon";
 import ItemActions from "@web/components/Items/ItemActions";
 import Labels from "@web/components/Labels";
@@ -12,6 +8,9 @@ import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
 import type { Item } from "@web/providers/ItemsProvider";
 import { ItemsContext } from "@web/providers/ItemsProvider";
 import { FALLBACK_HOSTNAME } from "@web/utils/url";
+import Link from "next/link";
+import { useContext, useRef } from "react";
+import { HiCheck, HiOutlineEnvelope } from "react-icons/hi2";
 
 interface ItemRowProps {
   item: Item;

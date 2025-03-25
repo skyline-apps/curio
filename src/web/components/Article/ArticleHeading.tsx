@@ -1,7 +1,6 @@
+import { useAppPage } from "@web/providers/AppPageProvider";
 import React from "react";
 import { createPortal } from "react-dom";
-
-import { useAppPage } from "@web/providers/AppPageProvider";
 
 interface ArticleHeadingProps extends React.PropsWithChildren {
   anchor: string;

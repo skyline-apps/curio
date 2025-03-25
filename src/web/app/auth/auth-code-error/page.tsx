@@ -1,9 +1,8 @@
 "use client";
 
+import URLMessage from "@web/components/ui/URLMessage";
 import Link from "next/link";
 import React, { Suspense } from "react";
-
-import URLMessage from "@web/components/ui/URLMessage";
 
 const AuthCodeError: React.FC = () => {
   return (

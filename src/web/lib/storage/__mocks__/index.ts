@@ -1,9 +1,8 @@
-import { vi } from "vitest";
-
 import { MOCK_METADATA } from "@web/lib/extract/__mocks__/index";
 import { ExtractedMetadata } from "@web/lib/extract/types";
 import { UploadStatus } from "@web/lib/storage/types";
 import { type VersionMetadata } from "@web/lib/storage/types";
+import { vi } from "vitest";
 
 export const MOCK_VERSION = "2024-10-20T12:00:00.000Z";
 

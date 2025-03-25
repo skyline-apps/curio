@@ -1,6 +1,4 @@
 "use client";
-import React, { useMemo, useState } from "react";
-
 import { type Highlight } from "@web/app/api/v1/items/highlights/validation";
 import { calculateHighlight } from "@web/components/Article/useHighlightSelection";
 import {
@@ -12,6 +10,7 @@ import ItemRow from "@web/components/Items/ItemRow";
 import Labels, { type Label } from "@web/components/Labels";
 import Markdown, { type Components } from "@web/components/Markdown";
 import { cn } from "@web/utils/cn";
+import React, { useMemo, useState } from "react";
 
 import {
   sampleArticle,

@@ -4,8 +4,6 @@ import {
   type RenderOptions,
   type RenderResult,
 } from "@testing-library/react";
-import React from "react";
-
 import { BrowserMessageProvider } from "@web/providers/BrowserMessageProvider";
 import { CacheProvider } from "@web/providers/CacheProvider";
 import { CurrentItemProvider } from "@web/providers/CurrentItemProvider";
@@ -13,6 +11,7 @@ import { ItemsProvider } from "@web/providers/ItemsProvider";
 import { SettingsProvider } from "@web/providers/SettingsProvider";
 import { ToastProvider } from "@web/providers/ToastProvider";
 import { UserProvider } from "@web/providers/UserProvider";
+import React from "react";
 
 import { DEFAULT_TEST_USER_ID, DEFAULT_TEST_USERNAME } from "./api";
 

@@ -1,11 +1,10 @@
+import { type Highlight } from "@web/app/api/v1/items/highlights/validation";
+import { cn } from "@web/utils/cn";
 import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
-
-import { type Highlight } from "@web/app/api/v1/items/highlights/validation";
-import { cn } from "@web/utils/cn";
 
 import { SelectionPopup } from "./SelectionPopup";
 import { useHighlightSelection } from "./useHighlightSelection";

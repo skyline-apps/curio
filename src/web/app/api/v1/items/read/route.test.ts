@@ -1,5 +1,3 @@
-import { vi } from "vitest";
-
 import { eq } from "@web/db";
 import { items, profileItems } from "@web/db/schema";
 import { getItemContent, getItemMetadata } from "@web/lib/storage";
@@ -13,6 +11,7 @@ import {
   NONEXISTENT_USER_ID,
 } from "@web/utils/test/data";
 import { testDb } from "@web/utils/test/provider";
+import { vi } from "vitest";
 
 import { POST } from "./route";
 

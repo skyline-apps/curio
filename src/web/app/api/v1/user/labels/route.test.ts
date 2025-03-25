@@ -1,5 +1,3 @@
-import { vi } from "vitest";
-
 import { desc, eq } from "@web/db";
 import { profileLabels } from "@web/db/schema";
 import { APIRequest } from "@web/utils/api";
@@ -9,6 +7,7 @@ import {
   makeAuthenticatedMockRequest,
 } from "@web/utils/test/api";
 import { testDb } from "@web/utils/test/provider";
+import { vi } from "vitest";
 
 import { DELETE, GET, POST } from "./route";
 

@@ -1,7 +1,6 @@
-import React from "react";
-
 import Footer from "@web/components/Landing/Footer";
 import Navbar from "@web/components/Navbar";
+import React from "react";
 
 const Privacy: React.FC = () => {
   return (

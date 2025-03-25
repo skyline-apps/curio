@@ -1,7 +1,6 @@
-import React from "react";
-
 import { CurioBrand, CurioHomeLogo } from "@web/components/CurioBrand";
 import { cn } from "@web/utils/cn";
+import React from "react";
 
 interface SidebarHeaderProps {
   sidebarOpen: boolean;

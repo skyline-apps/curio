@@ -1,9 +1,8 @@
+import Button from "@web/components/ui/Button";
+import Icon from "@web/components/ui/Icon";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import { HiMiniSparkles } from "react-icons/hi2";
-
-import Button from "@web/components/ui/Button";
-import Icon from "@web/components/ui/Icon";
 
 interface SelectionPopupProps {
   selection: Selection | null;
@@ -110,7 +109,7 @@ export const SelectionPopup = ({
             size="xs"
             tooltip="Sorry, you don't have access to this feature."
             disabled
-            onPress={() => { }}
+            onPress={() => {}}
           >
             <Icon icon={<HiMiniSparkles />} />
             Explain

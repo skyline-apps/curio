@@ -1,5 +1,8 @@
 "use client";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import ItemCard from "@web/components/Items/ItemCard";
+import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
+import { type Item, type PublicItem } from "@web/providers/ItemsProvider";
 import React, {
   useCallback,
   useContext,
@@ -8,10 +11,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-
-import ItemCard from "@web/components/Items/ItemCard";
-import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
-import { type Item, type PublicItem } from "@web/providers/ItemsProvider";
 
 interface ItemGridProps {
   items: (PublicItem | Item)[];

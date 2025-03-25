@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
-
 import { createLogger } from "@web/utils/logger";
+import React from "react";
 
 const log = createLogger("global-error");
 

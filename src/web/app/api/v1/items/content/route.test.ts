@@ -1,5 +1,3 @@
-import { vi } from "vitest";
-
 import { desc, eq } from "@web/db";
 import {
   items,
@@ -8,7 +6,10 @@ import {
   profileItems,
   TextDirection,
 } from "@web/db/schema";
-import { extractMainContentAsMarkdown, extractMetadata } from "@web/lib/extract";
+import {
+  extractMainContentAsMarkdown,
+  extractMetadata,
+} from "@web/lib/extract";
 import { MOCK_METADATA } from "@web/lib/extract/__mocks__/index";
 import { ExtractError, MetadataError } from "@web/lib/extract/types";
 import { indexItemDocuments } from "@web/lib/search";
@@ -29,6 +30,7 @@ import {
   TEST_ITEM_URL_1,
 } from "@web/utils/test/data";
 import { testDb } from "@web/utils/test/provider";
+import { vi } from "vitest";
 
 import { POST } from "./route";
 

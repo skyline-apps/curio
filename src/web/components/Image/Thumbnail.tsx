@@ -1,7 +1,6 @@
+import Icon from "@web/components/ui/Icon";
 import React, { useState } from "react";
 import { HiOutlinePhoto } from "react-icons/hi2";
-
-import Icon from "@web/components/ui/Icon";
 
 interface ThumbnailProps {
   thumbnail?: string;

@@ -10,7 +10,10 @@ import {
 } from "@web/lib/email/__mocks__/index";
 import { EmailError } from "@web/lib/email/types";
 import { indexItemDocuments } from "@web/lib/search";
-import { MOCK_VERSION, uploadItemContent } from "@web/lib/storage/__mocks__/index";
+import {
+  MOCK_VERSION,
+  uploadItemContent,
+} from "@web/lib/storage/__mocks__/index";
 import { UploadStatus } from "@web/lib/storage/types";
 import { APIRequest } from "@web/utils/api";
 import {

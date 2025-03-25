@@ -1,7 +1,6 @@
+import { createLogger } from "@web/utils/logger";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-
-import { createLogger } from "@web/utils/logger";
 
 const log = createLogger("useScrollProgress");
 

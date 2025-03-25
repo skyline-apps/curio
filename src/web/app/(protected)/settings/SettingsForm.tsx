@@ -1,7 +1,6 @@
+import { Accordion, AccordionItem } from "@web/components/ui/Accordion";
 import Link from "next/link";
 import React from "react";
-
-import { Accordion, AccordionItem } from "@web/components/ui/Accordion";
 
 import AccountSettings from "./AccountSettings";
 import LabelSettings from "./LabelSettings";

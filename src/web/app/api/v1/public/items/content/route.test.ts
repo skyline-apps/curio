@@ -1,5 +1,3 @@
-import { vi } from "vitest";
-
 import { eq } from "@web/db";
 import {
   items,
@@ -21,6 +19,7 @@ import {
   makeUnauthenticatedMockRequest,
 } from "@web/utils/test/api";
 import { testDb } from "@web/utils/test/provider";
+import { vi } from "vitest";
 
 import { GET } from "./route";
 

@@ -1,8 +1,4 @@
 "use client";
-import { useItemUpdate } from "components/Items/ItemActions/actions";
-import { useRouter } from "next/navigation";
-import { useContext } from "react";
-
 import { ItemState } from "@web/db/schema";
 import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
 import { ItemsContext } from "@web/providers/ItemsProvider";
@@ -10,6 +6,9 @@ import {
   ShortcutType,
   useKeyboardShortcut,
 } from "@web/providers/KeyboardShortcutProvider";
+import { useItemUpdate } from "components/Items/ItemActions/actions";
+import { useRouter } from "next/navigation";
+import { useContext } from "react";
 
 export const ItemNavigationShortcuts = (): null => {
   const { items } = useContext(ItemsContext);
@@ -92,10 +91,10 @@ export const ItemNavigationShortcuts = (): null => {
     const itemsToUpdate =
       selectedItems.size > 0
         ? items.filter(
-          (item) =>
-            selectedItems.has(item.slug) &&
-            item.metadata.state !== ItemState.ARCHIVED,
-        )
+            (item) =>
+              selectedItems.has(item.slug) &&
+              item.metadata.state !== ItemState.ARCHIVED,
+          )
         : lastSelectionIndex !== null
           ? [items[lastSelectionIndex]]
           : [];
@@ -113,10 +112,10 @@ export const ItemNavigationShortcuts = (): null => {
     const itemsToUpdate =
       selectedItems.size > 0
         ? items.filter(
-          (item) =>
-            selectedItems.has(item.slug) &&
-            item.metadata.state !== ItemState.DELETED,
-        )
+            (item) =>
+              selectedItems.has(item.slug) &&
+              item.metadata.state !== ItemState.DELETED,
+          )
         : lastSelectionIndex !== null
           ? [items[lastSelectionIndex]]
           : [];

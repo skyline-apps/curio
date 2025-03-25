@@ -1,8 +1,7 @@
-import { useState } from "react";
-import { FaGoogle } from "react-icons/fa6";
-
 import Button from "@web/components/ui/Button";
 import { createClient } from "@web/utils/supabase/client";
+import { useState } from "react";
+import { FaGoogle } from "react-icons/fa6";
 
 interface GoogleOAuthButtonProps {
   nextUrl?: string;

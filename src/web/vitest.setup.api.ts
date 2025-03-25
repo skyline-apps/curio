@@ -1,5 +1,3 @@
-import { beforeAll, beforeEach, vi } from "vitest";
-
 import { ColorScheme, profiles } from "@web/db/schema";
 import {
   DEFAULT_TEST_PROFILE_ID,
@@ -10,6 +8,7 @@ import {
   DEFAULT_TEST_USERNAME_2,
 } from "@web/utils/test/api";
 import { testDb } from "@web/utils/test/provider";
+import { beforeAll, beforeEach, vi } from "vitest";
 
 vi.stubEnv("CURIO_EMAIL_DOMAIN", "testmail.curi.ooo");
 

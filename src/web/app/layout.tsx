@@ -1,10 +1,9 @@
 import "./globals.css";
 
-import type { Metadata } from "next";
-import React from "react";
-
 import { monoFonts, sansFonts, serifFonts } from "@web/app/styles/fonts";
 import Providers from "@web/providers";
+import type { Metadata } from "next";
+import React from "react";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://curi.ooo"),

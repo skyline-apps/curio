@@ -5,11 +5,10 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
+import { UserContext } from "@web/providers/UserProvider";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { vi } from "vitest";
-
-import { UserContext } from "@web/providers/UserProvider";
 
 import Navbar from ".";
 

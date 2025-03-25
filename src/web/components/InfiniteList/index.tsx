@@ -1,10 +1,9 @@
 "use client";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import React, { useEffect } from "react";
-import { LuBird, LuLeaf, LuPartyPopper } from "react-icons/lu";
-
 import PullToRefresh from "@web/components/PullToRefresh";
 import Icon from "@web/components/ui/Icon";
+import React, { useEffect } from "react";
+import { LuBird, LuLeaf, LuPartyPopper } from "react-icons/lu";
 
 interface InfiniteListProps<T> {
   listData: T[];

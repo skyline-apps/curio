@@ -1,7 +1,6 @@
-import { vi } from "vitest";
-
 import { AuthError } from "@web/utils/supabase/__mocks__/server";
 import { createClient } from "@web/utils/supabase/server";
+import { vi } from "vitest";
 
 // eslint-disable-next-line no-restricted-imports
 import { GET } from "./route";

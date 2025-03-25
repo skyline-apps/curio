@@ -1,5 +1,3 @@
-import { vi } from "vitest";
-
 import { eq } from "@web/db";
 import { DbErrorCode } from "@web/db/errors";
 import {
@@ -25,6 +23,7 @@ import {
   MOCK_PROFILE_ITEMS,
 } from "@web/utils/test/data";
 import { testDb } from "@web/utils/test/provider";
+import { vi } from "vitest";
 
 import { DELETE, GET, POST } from "./route";
 

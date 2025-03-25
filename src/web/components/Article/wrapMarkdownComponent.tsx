@@ -1,15 +1,14 @@
+import { type Highlight } from "@web/app/api/v1/items/highlights/validation";
+import Button from "@web/components/ui/Button";
+import { Tooltip } from "@web/components/ui/Tooltip";
+import { BrowserMessageContext } from "@web/providers/BrowserMessageProvider";
+import { UserContext } from "@web/providers/UserProvider";
 import slugify from "limax";
 import React, {
   type ComponentPropsWithoutRef,
   useContext,
   useEffect,
 } from "react";
-
-import { type Highlight } from "@web/app/api/v1/items/highlights/validation";
-import Button from "@web/components/ui/Button";
-import { Tooltip } from "@web/components/ui/Tooltip";
-import { BrowserMessageContext } from "@web/providers/BrowserMessageProvider";
-import { UserContext } from "@web/providers/UserProvider";
 
 import ArticleHeading from "./ArticleHeading";
 import { HighlightSpan } from "./HighlightSpan";

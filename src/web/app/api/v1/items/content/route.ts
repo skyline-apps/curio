@@ -1,6 +1,9 @@
 import { and, db, eq } from "@web/db";
 import { items, profileItems } from "@web/db/schema";
-import { extractMainContentAsMarkdown, extractMetadata } from "@web/lib/extract";
+import {
+  extractMainContentAsMarkdown,
+  extractMetadata,
+} from "@web/lib/extract";
 import {
   ExtractedMetadata,
   ExtractError,

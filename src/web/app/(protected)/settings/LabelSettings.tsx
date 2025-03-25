@@ -1,11 +1,10 @@
 "use client";
 
-import React from "react";
-
 import Labels from "@web/components/Labels";
 import { FormSection } from "@web/components/ui/Form";
 import { useSettings } from "@web/providers/SettingsProvider";
 import { createLogger } from "@web/utils/logger";
+import React from "react";
 
 const log = createLogger("LabelSettings");
 

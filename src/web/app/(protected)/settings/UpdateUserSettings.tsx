@@ -1,8 +1,5 @@
 "use client";
 
-import React, { useState } from "react";
-import { z } from "zod";
-
 import { SettingsSchema } from "@web/app/api/v1/user/settings/validation";
 import { type SettingsResponse } from "@web/app/api/v1/user/settings/validation";
 import { FormSection } from "@web/components/ui/Form";
@@ -13,6 +10,8 @@ import { useSettings } from "@web/providers/SettingsProvider";
 import { useToast } from "@web/providers/ToastProvider";
 import { createLogger } from "@web/utils/logger";
 import { camelCaseToSentenceCase } from "@web/utils/string";
+import React, { useState } from "react";
+import { z } from "zod";
 
 const log = createLogger("UpdateUserSettings");
 

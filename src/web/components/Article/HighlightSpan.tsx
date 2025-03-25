@@ -1,10 +1,9 @@
-import React, { useRef } from "react";
-
 import {
   type Highlight,
   type NewHighlight,
 } from "@web/app/api/v1/items/highlights/validation";
 import { cn } from "@web/utils/cn";
+import React, { useRef } from "react";
 
 const isHighlightWithId = (
   highlight: Highlight | NewHighlight,

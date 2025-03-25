@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-
 import { GetRecommendationsResponse } from "@web/app/api/v1/items/recommended/validation";
 import { createLogger } from "@web/utils/logger";
 

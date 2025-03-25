@@ -1,9 +1,8 @@
-import React from "react";
-
 import { CurioName } from "@web/components/CurioBrand";
 import Button from "@web/components/ui/Button";
 import LandingPageDark from "@web/public/assets/landing_page_dark.svg";
 import LandingPageLight from "@web/public/assets/landing_page_light.svg";
+import React from "react";
 
 import AppLinks from "./AppLinks";
 import LandingPageFeatures from "./LandingPageFeatures";

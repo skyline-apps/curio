@@ -1,7 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-
 import ItemGrid from "@web/components/Items/ItemGrid";
 import Spinner from "@web/components/ui/Spinner";
+import React, { useEffect, useRef, useState } from "react";
 
 import { useProfile } from "./useProfile";
 

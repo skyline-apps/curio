@@ -1,17 +1,16 @@
 "use client";
-import React, { useCallback, useContext } from "react";
-
 import { HighlightNavigationShortcuts } from "@web/components/Highlights/HighlightList/HighlightNavigationShortcuts";
 import HighlightRow from "@web/components/Highlights/HighlightRow";
 import HighlightSearch from "@web/components/Highlights/HighlightSearch";
 import InfiniteList from "@web/components/InfiniteList";
 import { HighlightsContext } from "@web/providers/HighlightsProvider";
+import React, { useCallback, useContext } from "react";
 
-interface HighlightListProps { }
+interface HighlightListProps {}
 
 const HighlightList: React.FC<
   HighlightListProps
-> = ({ }: HighlightListProps) => {
+> = ({}: HighlightListProps) => {
   const {
     highlights,
     hasNextPage,
@@ -45,8 +44,8 @@ const HighlightList: React.FC<
         lastSelectionIndex={
           selectedHighlight
             ? highlights.findIndex(
-              (highlight) => highlight.id === selectedHighlight.id,
-            )
+                (highlight) => highlight.id === selectedHighlight.id,
+              )
             : null
         }
         renderItem={(item, _virtualRow) => <HighlightRow highlight={item} />}

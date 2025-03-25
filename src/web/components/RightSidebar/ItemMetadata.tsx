@@ -1,6 +1,3 @@
-import Link from "next/link";
-import { useCallback, useContext } from "react";
-
 import Thumbnail from "@web/components/Image/Thumbnail";
 import ItemActions from "@web/components/Items/ItemActions";
 import { useItemUpdate } from "@web/components/Items/ItemActions/actions";
@@ -13,6 +10,8 @@ import { useSettings } from "@web/providers/SettingsProvider";
 import { UserContext } from "@web/providers/UserProvider";
 import { cn } from "@web/utils/cn";
 import { FALLBACK_HOSTNAME } from "@web/utils/url";
+import Link from "next/link";
+import { useCallback, useContext } from "react";
 
 interface ItemMetadataProps {
   item?: Item | PublicItem;

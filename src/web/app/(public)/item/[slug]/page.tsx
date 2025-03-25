@@ -1,8 +1,5 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import React, { useContext, useEffect, useMemo } from "react";
-
 import Article from "@web/components/Article";
 import {
   displayFontSizeClass,
@@ -15,6 +12,8 @@ import { DisplayFont, DisplayFontSize, TextDirection } from "@web/db/schema";
 import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
 import { useSettings } from "@web/providers/SettingsProvider";
 import { cn } from "@web/utils/cn";
+import { useParams } from "next/navigation";
+import React, { useContext, useEffect, useMemo } from "react";
 
 const ItemPage: React.FC = () => {
   const { fetchContent, loading, loadingError, loadedItem } =

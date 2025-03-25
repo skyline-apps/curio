@@ -1,9 +1,8 @@
 "use client";
 
+import { cn } from "@web/utils/cn";
 import React from "react";
 import { IconContext } from "react-icons";
-
-import { cn } from "@web/utils/cn";
 
 interface IconProps {
   className?: string;

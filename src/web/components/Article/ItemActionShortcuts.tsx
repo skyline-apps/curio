@@ -1,7 +1,4 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useContext } from "react";
-
 import { useItemUpdate } from "@web/components/Items/ItemActions/actions";
 import { ItemState } from "@web/db/schema";
 import { useAppPage } from "@web/providers/AppPageProvider";
@@ -11,6 +8,8 @@ import {
   ShortcutType,
   useKeyboardShortcut,
 } from "@web/providers/KeyboardShortcutProvider";
+import { useRouter } from "next/navigation";
+import { useContext } from "react";
 
 export const ItemActionShortcuts = (): null => {
   const { items } = useContext(ItemsContext);

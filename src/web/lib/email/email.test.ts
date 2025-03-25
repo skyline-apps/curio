@@ -1,8 +1,7 @@
+import { TextDirection } from "@web/db/schema";
 import fs from "fs";
 import path from "path";
 import { vi } from "vitest";
-
-import { TextDirection } from "@web/db/schema";
 
 import {
   extractMetadataFromEmail,

@@ -1,4 +1,5 @@
 import { Readability } from "@mozilla/readability";
+import { TextDirection } from "@web/db/schema";
 import { JSDOM } from "jsdom";
 import {
   Article,
@@ -9,8 +10,6 @@ import {
   Thing,
 } from "schema-dts";
 import TurndownService, { Node as TurndownNode } from "turndown";
-
-import { TextDirection } from "@web/db/schema";
 
 import { ExtractedMetadata, ExtractError, MetadataError } from "./types";
 

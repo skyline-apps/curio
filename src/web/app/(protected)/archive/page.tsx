@@ -1,9 +1,8 @@
 "use client";
-import React, { useContext, useEffect } from "react";
-
 import ItemList from "@web/components/Items/ItemList";
 import { ItemState } from "@web/db/schema";
 import { ItemsContext } from "@web/providers/ItemsProvider";
+import React, { useContext, useEffect } from "react";
 
 const ArchivePage: React.FC = () => {
   const { fetchItems } = useContext(ItemsContext);

@@ -1,7 +1,6 @@
-import { z } from "zod";
-
 import { LabelSchema } from "@web/app/api/v1/user/labels/validation";
 import { ItemSource, ItemState, TextDirection } from "@web/db/schema";
+import { z } from "zod";
 
 const UrlSchema = z.string().url().describe("Unique URL of the item.");
 const SlugSchema = z

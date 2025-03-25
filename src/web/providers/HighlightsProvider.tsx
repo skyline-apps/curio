@@ -1,7 +1,5 @@
 "use client";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import React, { createContext, useCallback, useMemo, useState } from "react";
-
 import {
   type GetHighlightsRequest,
   type GetHighlightsResponse,
@@ -9,6 +7,7 @@ import {
 import { useAppLayout } from "@web/providers/AppLayoutProvider";
 import { handleAPIResponse } from "@web/utils/api";
 import { createLogger } from "@web/utils/logger";
+import React, { createContext, useCallback, useMemo, useState } from "react";
 
 const log = createLogger("highlights-provider");
 
@@ -47,12 +46,12 @@ export type HighlightsContextType = {
   setSearchQuery: (search: string) => void;
 };
 
-interface HighlightsProviderProps extends React.PropsWithChildren { }
+interface HighlightsProviderProps extends React.PropsWithChildren {}
 
 export const HighlightsContext = createContext<HighlightsContextType>({
   selectedHighlight: null,
   selectedHighlightIndex: null,
-  selectHighlight: () => { },
+  selectHighlight: () => {},
   highlights: [],
   totalHighlights: 0,
   isLoading: false,
@@ -62,7 +61,7 @@ export const HighlightsContext = createContext<HighlightsContextType>({
   hasNextPage: true,
   fetchHighlights: () => Promise.resolve(),
   searchQuery: "",
-  setSearchQuery: () => { },
+  setSearchQuery: () => {},
 });
 
 export const HighlightsProvider: React.FC<HighlightsProviderProps> = ({
@@ -182,8 +181,8 @@ export const HighlightsProvider: React.FC<HighlightsProviderProps> = ({
   const selectedHighlightIndex = useMemo(() => {
     return selectedHighlightId
       ? highlights
-        .map((h) => h.id)
-        .findIndex((id) => id === selectedHighlightId)
+          .map((h) => h.id)
+          .findIndex((id) => id === selectedHighlightId)
       : null;
   }, [highlights, selectedHighlightId]);
 

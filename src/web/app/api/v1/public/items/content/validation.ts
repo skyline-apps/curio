@@ -1,9 +1,8 @@
-import { z } from "zod";
-
 import {
   ItemResultSchema,
   PublicItemResultSchema,
 } from "@web/app/api/v1/items/validation";
+import { z } from "zod";
 
 export const HighlightSchema = z.object({
   id: z.string(),

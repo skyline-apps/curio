@@ -1,3 +1,9 @@
+import Button from "@web/components/ui/Button";
+import { ItemState } from "@web/db/schema";
+import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
+import { ItemsContext } from "@web/providers/ItemsProvider";
+import { useToast } from "@web/providers/ToastProvider";
+import { createLogger } from "@web/utils/logger";
 import { useCallback, useContext, useState } from "react";
 import {
   HiArchiveBox,
@@ -5,13 +11,6 @@ import {
   HiOutlineTrash,
   HiTrash,
 } from "react-icons/hi2";
-
-import Button from "@web/components/ui/Button";
-import { ItemState } from "@web/db/schema";
-import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
-import { ItemsContext } from "@web/providers/ItemsProvider";
-import { useToast } from "@web/providers/ToastProvider";
-import { createLogger } from "@web/utils/logger";
 
 import { useItemUpdate } from "./actions";
 

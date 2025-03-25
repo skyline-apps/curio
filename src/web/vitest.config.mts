@@ -8,7 +8,7 @@ const baseConfig = {
     globals: true,
     clearMocks: true,
     alias: {
-      "@": resolve(__dirname),
+      "@web": resolve(__dirname),
     },
   },
 };

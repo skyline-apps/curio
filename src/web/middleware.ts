@@ -1,7 +1,5 @@
-// eslint-disable-next-line no-restricted-imports
-import { type NextRequest, type NextResponse } from "next/server";
-
 import { updateSession } from "@web/utils/supabase/middleware";
+import { type NextRequest, type NextResponse } from "next/server"; // eslint-disable-line no-restricted-imports
 
 export const middleware = async (
   request: NextRequest,

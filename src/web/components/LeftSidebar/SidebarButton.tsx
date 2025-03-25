@@ -1,7 +1,6 @@
-import React from "react";
-
 import Button from "@web/components/ui/Button";
 import Icon from "@web/components/ui/Icon";
+import React from "react";
 
 interface SidebarButtonProps {
   icon: React.ReactNode;

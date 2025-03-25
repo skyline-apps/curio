@@ -1,8 +1,7 @@
-import React, { useCallback, useContext, useState } from "react";
-import { useDebouncedCallback } from "use-debounce";
-
 import Input from "@web/components/ui/Input";
 import { ItemsContext } from "@web/providers/ItemsProvider";
+import React, { useCallback, useContext, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
 
 import ItemSearchFilters from "./ItemSearchFilters";
 

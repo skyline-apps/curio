@@ -1,6 +1,5 @@
-import { z } from "zod";
-
 import { TextDirection } from "@web/db/schema";
+import { z } from "zod";
 
 export const HighlightSchema = z.object({
   id: z.string().uuid(),

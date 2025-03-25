@@ -1,5 +1,4 @@
 import { Switch, SwitchProps } from "@heroui/react";
-
 import { cn } from "@web/utils/cn";
 
 interface CurioSwitchProps extends Omit<SwitchProps, "size"> {

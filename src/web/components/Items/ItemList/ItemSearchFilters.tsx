@@ -1,6 +1,3 @@
-import { useCallback, useContext, useState } from "react";
-import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
-
 import Labels, { Label } from "@web/components/Labels";
 import Button from "@web/components/ui/Button";
 import { Checkbox } from "@web/components/ui/Checkbox";
@@ -14,6 +11,8 @@ import {
 import { Switch } from "@web/components/ui/Switch";
 import { ItemsContext } from "@web/providers/ItemsProvider";
 import { useSettings } from "@web/providers/SettingsProvider";
+import { useCallback, useContext, useState } from "react";
+import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
 
 const ItemSearchFilters: React.FC = (): React.ReactElement => {
   const [isFavorite, setIsFavorite] = useState<boolean>(false);

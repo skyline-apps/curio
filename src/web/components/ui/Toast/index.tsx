@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { HiXMark } from "react-icons/hi2";
-
 import Button from "@web/components/ui/Button";
 import Card from "@web/components/ui/Card";
 import Icon from "@web/components/ui/Icon";
 import { cn } from "@web/utils/cn";
+import React, { useEffect, useState } from "react";
+import { HiXMark } from "react-icons/hi2";
 
 const ANIMATION_DURATION = 300;
 const DEFAULT_TOAST_DURATION = 3000;

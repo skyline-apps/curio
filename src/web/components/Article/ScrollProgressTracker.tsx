@@ -1,13 +1,12 @@
-import React, { useContext } from "react";
-
 import { useAppPage } from "@web/providers/AppPageProvider";
 import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
 import { Item } from "@web/providers/ItemsProvider";
+import React, { useContext } from "react";
 
 import { useArticleUpdate } from "./actions";
 import { useScrollProgress } from "./useScrollProgress";
 
-interface ScrollProgressTrackerProps { }
+interface ScrollProgressTrackerProps {}
 
 const ScrollProgressTracker: React.FC<ScrollProgressTrackerProps> = React.memo(
   () => {

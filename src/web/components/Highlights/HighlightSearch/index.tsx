@@ -1,8 +1,7 @@
-import React, { useCallback, useContext, useState } from "react";
-import { useDebouncedCallback } from "use-debounce";
-
 import Input from "@web/components/ui/Input";
 import { HighlightsContext } from "@web/providers/HighlightsProvider";
+import React, { useCallback, useContext, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
 
 interface HighlightSearchProps {
   highlightCount: number;

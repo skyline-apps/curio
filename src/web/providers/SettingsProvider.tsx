@@ -1,8 +1,5 @@
 "use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import posthog from "posthog-js";
-import React, { createContext, useContext, useEffect } from "react";
-
 import type {
   CreateOrUpdateLabelsResponse,
   DeleteLabelsResponse,
@@ -22,6 +19,8 @@ import {
   setLightTheme,
   setSystemTheme,
 } from "@web/utils/displayStorage";
+import posthog from "posthog-js";
+import React, { createContext, useContext, useEffect } from "react";
 
 export type SettingsContextType = {
   settings?: SettingsResponse;
@@ -44,10 +43,10 @@ interface SettingsProviderProps {
 }
 
 export const SettingsContext = createContext<SettingsContextType>({
-  updateSettings: async () => { },
+  updateSettings: async () => {},
   createLabel: async () => true,
   updateLabel: async () => true,
-  deleteLabel: async () => { },
+  deleteLabel: async () => {},
 });
 
 const fetchSettings = async (): Promise<SettingsResponse> => {

@@ -1,5 +1,3 @@
-import { vi } from "vitest";
-
 import { eq } from "@web/db";
 import { DbErrorCode } from "@web/db/errors";
 import { items, ItemState, profileItems } from "@web/db/schema";
@@ -17,6 +15,7 @@ import {
   TEST_ITEM_ID_2,
 } from "@web/utils/test/data";
 import { testDb } from "@web/utils/test/provider";
+import { vi } from "vitest";
 
 import { POST } from "./route";
 

@@ -1,7 +1,4 @@
 "use client";
-import { usePathname } from "next/navigation";
-import React, { useContext } from "react";
-
 import AppPage from "@web/app/AppPage";
 import KeyboardShortcuts from "@web/components/KeyboardShortcuts";
 import LeftSidebar from "@web/components/LeftSidebar";
@@ -11,6 +8,8 @@ import Spinner from "@web/components/ui/Spinner";
 import { HighlightsContext } from "@web/providers/HighlightsProvider";
 import { ItemsContext } from "@web/providers/ItemsProvider";
 import { useSettings } from "@web/providers/SettingsProvider";
+import { usePathname } from "next/navigation";
+import React, { useContext } from "react";
 
 interface MainLayoutProps {
   children: React.ReactNode;
