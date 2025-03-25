@@ -18,6 +18,7 @@ build
 # misc
 .vscode
 .cursorrules
+.windsurfrules
 .DS_Store
 *.pem
 
