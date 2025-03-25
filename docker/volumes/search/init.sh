@@ -49,7 +49,7 @@ done
 until curl -s -X PUT "${SEARCH_EXTERNAL_ENDPOINT_URL}/indexes/items/settings/filterable-attributes" \
     -H "Authorization: Bearer ${SEARCH_MASTER_API_KEY}" \
     -H "Content-Type: application/json" \
-    -d '["author"]' > /dev/null; do
+    -d '["author", "slug"]' > /dev/null; do
     echo "Retrying to add filterable attributes..."
     sleep 1
 done
