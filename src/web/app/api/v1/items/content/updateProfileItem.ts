@@ -1,11 +1,11 @@
-import { eq, sql, type TransactionDB } from "@/db";
+import { eq, sql, type TransactionDB } from "@web/db";
 import {
   ItemSource,
   ItemState,
   profileItemHighlights,
   profileItems,
-} from "@/db/schema";
-import { ExtractedMetadata } from "@/lib/extract/types";
+} from "@web/db/schema";
+import { ExtractedMetadata } from "@web/lib/extract/types";
 
 export interface ExportOptions {
   source?: ItemSource;

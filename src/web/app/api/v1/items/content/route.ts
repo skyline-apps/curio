@@ -1,18 +1,18 @@
-import { and, db, eq } from "@/db";
-import { items, profileItems } from "@/db/schema";
-import { extractMainContentAsMarkdown, extractMetadata } from "@/lib/extract";
+import { and, db, eq } from "@web/db";
+import { items, profileItems } from "@web/db/schema";
+import { extractMainContentAsMarkdown, extractMetadata } from "@web/lib/extract";
 import {
   ExtractedMetadata,
   ExtractError,
   MetadataError,
-} from "@/lib/extract/types";
-import { indexItemDocuments } from "@/lib/search";
-import { storage } from "@/lib/storage";
-import { StorageError, UploadStatus } from "@/lib/storage/types";
-import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
-import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
-import { createLogger } from "@/utils/logger";
-import { cleanUrl, generateSlug } from "@/utils/url";
+} from "@web/lib/extract/types";
+import { indexItemDocuments } from "@web/lib/search";
+import { storage } from "@web/lib/storage";
+import { StorageError, UploadStatus } from "@web/lib/storage/types";
+import { APIRequest, APIResponse, APIResponseJSON } from "@web/utils/api";
+import { checkUserProfile, parseAPIRequest } from "@web/utils/api/server";
+import { createLogger } from "@web/utils/logger";
+import { cleanUrl, generateSlug } from "@web/utils/url";
 
 import { updateProfileItem } from "./updateProfileItem";
 import {

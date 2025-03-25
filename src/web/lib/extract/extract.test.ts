@@ -2,11 +2,11 @@ import fs from "fs";
 import path from "path";
 import { vi } from "vitest";
 
-import { TextDirection } from "@/db/schema";
-import { Extract } from "@/lib/extract";
-import { ExtractError, MetadataError } from "@/lib/extract/types";
+import { TextDirection } from "@web/db/schema";
+import { Extract } from "@web/lib/extract";
+import { ExtractError, MetadataError } from "@web/lib/extract/types";
 
-vi.unmock("@/lib/extract");
+vi.unmock("@web/lib/extract");
 
 describe("Extract", () => {
   let extract: Extract;

@@ -1,9 +1,9 @@
-import { and, db, eq, inArray, sql } from "@/db";
-import { checkDbError, DbError, DbErrorCode } from "@/db/errors";
-import { profileLabels } from "@/db/schema";
-import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
-import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
-import { createLogger } from "@/utils/logger";
+import { and, db, eq, inArray, sql } from "@web/db";
+import { checkDbError, DbError, DbErrorCode } from "@web/db/errors";
+import { profileLabels } from "@web/db/schema";
+import { APIRequest, APIResponse, APIResponseJSON } from "@web/utils/api";
+import { checkUserProfile, parseAPIRequest } from "@web/utils/api/server";
+import { createLogger } from "@web/utils/logger";
 
 import {
   CreateOrUpdateLabelsRequestSchema,

@@ -2,10 +2,10 @@
 
 import React from "react";
 
-import Labels from "@/components/Labels";
-import { FormSection } from "@/components/ui/Form";
-import { useSettings } from "@/providers/SettingsProvider";
-import { createLogger } from "@/utils/logger";
+import Labels from "@web/components/Labels";
+import { FormSection } from "@web/components/ui/Form";
+import { useSettings } from "@web/providers/SettingsProvider";
+import { createLogger } from "@web/utils/logger";
 
 const log = createLogger("LabelSettings");
 

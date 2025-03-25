@@ -5,20 +5,20 @@ import { vi } from "vitest";
 import LandingPage from "./LandingPage";
 
 // Mock CurioBrand components
-vi.mock("@/components/CurioBrand", () => ({
+vi.mock("@web/components/CurioBrand", () => ({
   __esModule: true,
   CurioLogo: () => <div data-testid="curio-logo">CurioLogo</div>,
   CurioName: () => <div data-testid="curio-name">CurioName</div>,
 }));
 
 // Mock LandingPageFeatures component
-vi.mock("@/components/Landing/LandingPageFeatures", () => ({
+vi.mock("@web/components/Landing/LandingPageFeatures", () => ({
   __esModule: true,
   default: () => <div data-testid="landing-page-features">Features</div>,
 }));
 
 // Mock SVG imports
-vi.mock("@/public/assets/landing_page_light.svg", () => ({
+vi.mock("@web/public/assets/landing_page_light.svg", () => ({
   __esModule: true,
   default: ({ className }: { className: string }) => (
     <div data-testid="landing-page-light" className={className}>
@@ -27,7 +27,7 @@ vi.mock("@/public/assets/landing_page_light.svg", () => ({
   ),
 }));
 
-vi.mock("@/public/assets/landing_page_dark.svg", () => ({
+vi.mock("@web/public/assets/landing_page_dark.svg", () => ({
   __esModule: true,
   default: ({ className }: { className: string }) => (
     <div data-testid="landing-page-dark" className={className}>

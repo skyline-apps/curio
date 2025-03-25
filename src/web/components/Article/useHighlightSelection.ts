@@ -3,12 +3,12 @@ import { useCallback, useContext, useState } from "react";
 import {
   type Highlight,
   type NewHighlight,
-} from "@/app/api/v1/items/highlights/validation";
-import { useHighlightUpdate } from "@/components/RightSidebar/highlightActions";
-import { useAppLayout } from "@/providers/AppLayoutProvider";
-import { CurrentItemContext } from "@/providers/CurrentItemProvider";
-import { useToast } from "@/providers/ToastProvider";
-import { createLogger } from "@/utils/logger";
+} from "@web/app/api/v1/items/highlights/validation";
+import { useHighlightUpdate } from "@web/components/RightSidebar/highlightActions";
+import { useAppLayout } from "@web/providers/AppLayoutProvider";
+import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
+import { useToast } from "@web/providers/ToastProvider";
+import { createLogger } from "@web/utils/logger";
 
 const log = createLogger("useHighlightSelection");
 

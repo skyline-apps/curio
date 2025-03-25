@@ -11,13 +11,13 @@ import React, {
 import {
   ShortcutType,
   useKeyboardShortcut,
-} from "@/providers/KeyboardShortcutProvider";
+} from "@web/providers/KeyboardShortcutProvider";
 import {
   type AppLayoutSettings,
   DEFAULT_LAYOUT,
   loadLayoutSettings,
   updateLayoutSettings,
-} from "@/utils/displayStorage";
+} from "@web/utils/displayStorage";
 
 export type AppLayoutContextType = {
   appLayout: AppLayoutSettings;
@@ -30,7 +30,7 @@ interface AppLayoutProviderProps {
 
 export const AppLayoutContext = createContext<AppLayoutContextType>({
   appLayout: DEFAULT_LAYOUT,
-  updateAppLayout: () => {},
+  updateAppLayout: () => { },
 });
 
 export const AppLayoutProvider: React.FC<AppLayoutProviderProps> = ({

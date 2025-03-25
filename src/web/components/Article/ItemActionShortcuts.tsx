@@ -2,15 +2,15 @@
 import { useRouter } from "next/navigation";
 import { useContext } from "react";
 
-import { useItemUpdate } from "@/components/Items/ItemActions/actions";
-import { ItemState } from "@/db/schema";
-import { useAppPage } from "@/providers/AppPageProvider";
-import { CurrentItemContext } from "@/providers/CurrentItemProvider";
-import { ItemsContext } from "@/providers/ItemsProvider";
+import { useItemUpdate } from "@web/components/Items/ItemActions/actions";
+import { ItemState } from "@web/db/schema";
+import { useAppPage } from "@web/providers/AppPageProvider";
+import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
+import { ItemsContext } from "@web/providers/ItemsProvider";
 import {
   ShortcutType,
   useKeyboardShortcut,
-} from "@/providers/KeyboardShortcutProvider";
+} from "@web/providers/KeyboardShortcutProvider";
 
 export const ItemActionShortcuts = (): null => {
   const { items } = useContext(ItemsContext);

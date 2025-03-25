@@ -1,7 +1,7 @@
 "use client";
 import React, { useContext, useEffect } from "react";
 
-import { UserContext } from "@/providers/UserProvider";
+import { UserContext } from "@web/providers/UserProvider";
 
 import SettingsForm from "./SettingsForm";
 

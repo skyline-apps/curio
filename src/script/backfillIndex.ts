@@ -7,13 +7,13 @@ console.log('Loading .env from:', process.env.DOTENV_CONFIG_PATH);
 
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import { items, profileItems, profileItemHighlights } from '@/db/schema';
+import { items, profileItems, profileItemHighlights } from '@web/db/schema';
 import { sql, eq, inArray } from 'drizzle-orm';
-import { ItemDocument, HighlightDocument } from '@/lib/search/types';
+import { ItemDocument, HighlightDocument } from '@web/lib/search/types';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { readFileSync } from 'fs';
-import { ExtractedMetadata } from '@/lib/extract/types';
+import { ExtractedMetadata } from '@web/lib/extract/types';
 import { ScriptStorage } from './storage';
 
 // Verify required environment variables

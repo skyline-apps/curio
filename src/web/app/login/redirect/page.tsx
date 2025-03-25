@@ -2,9 +2,9 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useContext } from "react";
 
-import Button from "@/components/ui/Button";
-import Spinner from "@/components/ui/Spinner";
-import { UserContext } from "@/providers/UserProvider";
+import Button from "@web/components/ui/Button";
+import Spinner from "@web/components/ui/Spinner";
+import { UserContext } from "@web/providers/UserProvider";
 
 const RedirectPage: React.FC = () => {
   const { user } = useContext(UserContext);

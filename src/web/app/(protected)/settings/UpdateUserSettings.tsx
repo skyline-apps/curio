@@ -3,16 +3,16 @@
 import React, { useState } from "react";
 import { z } from "zod";
 
-import { SettingsSchema } from "@/app/api/v1/user/settings/validation";
-import { type SettingsResponse } from "@/app/api/v1/user/settings/validation";
-import { FormSection } from "@/components/ui/Form";
-import { Radio, RadioGroup } from "@/components/ui/Radio";
-import Spinner from "@/components/ui/Spinner";
-import { Switch } from "@/components/ui/Switch";
-import { useSettings } from "@/providers/SettingsProvider";
-import { useToast } from "@/providers/ToastProvider";
-import { createLogger } from "@/utils/logger";
-import { camelCaseToSentenceCase } from "@/utils/string";
+import { SettingsSchema } from "@web/app/api/v1/user/settings/validation";
+import { type SettingsResponse } from "@web/app/api/v1/user/settings/validation";
+import { FormSection } from "@web/components/ui/Form";
+import { Radio, RadioGroup } from "@web/components/ui/Radio";
+import Spinner from "@web/components/ui/Spinner";
+import { Switch } from "@web/components/ui/Switch";
+import { useSettings } from "@web/providers/SettingsProvider";
+import { useToast } from "@web/providers/ToastProvider";
+import { createLogger } from "@web/utils/logger";
+import { camelCaseToSentenceCase } from "@web/utils/string";
 
 const log = createLogger("UpdateUserSettings");
 

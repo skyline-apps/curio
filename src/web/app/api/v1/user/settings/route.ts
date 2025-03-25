@@ -1,8 +1,8 @@
-import { db, eq, type PgColumn, type SelectedFields } from "@/db";
-import { profiles } from "@/db/schema";
-import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
-import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
-import { createLogger } from "@/utils/logger";
+import { db, eq, type PgColumn, type SelectedFields } from "@web/db";
+import { profiles } from "@web/db/schema";
+import { APIRequest, APIResponse, APIResponseJSON } from "@web/utils/api";
+import { checkUserProfile, parseAPIRequest } from "@web/utils/api/server";
+import { createLogger } from "@web/utils/logger";
 
 import {
   type SettingsResponse,

@@ -2,9 +2,9 @@
 import { HeroUIProvider } from "@heroui/react";
 import React, { PropsWithChildren } from "react";
 
-import { db, eq } from "@/db";
-import { profiles } from "@/db/schema";
-import { createClient } from "@/utils/supabase/server";
+import { db, eq } from "@web/db";
+import { profiles } from "@web/db/schema";
+import { createClient } from "@web/utils/supabase/server";
 
 import { AppLayoutProvider } from "./AppLayoutProvider";
 import { BrowserMessageProvider } from "./BrowserMessageProvider";

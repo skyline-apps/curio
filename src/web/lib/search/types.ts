@@ -1,4 +1,4 @@
-import { TextDirection } from "@/db/schema";
+import { TextDirection } from "@web/db/schema";
 
 export class SearchError extends Error {
   constructor(

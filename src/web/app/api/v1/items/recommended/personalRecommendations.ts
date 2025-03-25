@@ -1,4 +1,4 @@
-import { and, db, desc, eq, exists, isNull, not, or, sql } from "@/db";
+import { and, db, desc, eq, exists, isNull, not, or, sql } from "@web/db";
 import {
   items,
   ItemSource,
@@ -6,8 +6,8 @@ import {
   PersonalRecommendationType,
   profileItemRecommendations,
   profileItems,
-} from "@/db/schema";
-import { createLogger } from "@/utils/logger";
+} from "@web/db/schema";
+import { createLogger } from "@web/utils/logger";
 
 export type PersonalRecommendation = {
   id: string;

@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { HiOutlineClipboard, HiOutlineTrash } from "react-icons/hi2";
 
-import { Highlight } from "@/app/api/v1/items/highlights/validation";
-import Markdown from "@/components/Markdown";
-import { ItemTitle, ItemUrl } from "@/components/RightSidebar/ItemMetadata";
-import Button from "@/components/ui/Button";
-import Textarea from "@/components/ui/Textarea";
-import { TextDirection } from "@/db/schema";
-import { type HighlightItem } from "@/providers/HighlightsProvider";
-import { cn } from "@/utils/cn";
+import { Highlight } from "@web/app/api/v1/items/highlights/validation";
+import Markdown from "@web/components/Markdown";
+import { ItemTitle, ItemUrl } from "@web/components/RightSidebar/ItemMetadata";
+import Button from "@web/components/ui/Button";
+import Textarea from "@web/components/ui/Textarea";
+import { TextDirection } from "@web/db/schema";
+import { type HighlightItem } from "@web/providers/HighlightsProvider";
+import { cn } from "@web/utils/cn";
 
 import { useHighlightUpdate } from "./highlightActions";
 

@@ -1,16 +1,16 @@
 import type { PressEvent } from "@react-types/shared";
 import { useCallback, useContext, useEffect, useState } from "react";
 
-import Button from "@/components/ui/Button";
-import Form from "@/components/ui/Form";
-import Input from "@/components/ui/Input";
+import Button from "@web/components/ui/Button";
+import Form from "@web/components/ui/Form";
+import Input from "@web/components/ui/Input";
 import Modal, {
   ModalBody,
   ModalContent,
   ModalHeader,
-} from "@/components/ui/Modal";
-import { BrowserMessageContext } from "@/providers/BrowserMessageProvider";
-import { createLogger } from "@/utils/logger";
+} from "@web/components/ui/Modal";
+import { BrowserMessageContext } from "@web/providers/BrowserMessageProvider";
+import { createLogger } from "@web/utils/logger";
 
 interface NewItemModalProps {
   isOpen: boolean;

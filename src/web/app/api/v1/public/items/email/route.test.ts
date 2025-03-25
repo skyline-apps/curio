@@ -1,31 +1,31 @@
-import { desc, eq } from "@/db";
-import { DbErrorCode } from "@/db/errors";
-import { items, profileItemHighlights, profileItems } from "@/db/schema";
+import { desc, eq } from "@web/db";
+import { DbErrorCode } from "@web/db/errors";
+import { items, profileItemHighlights, profileItems } from "@web/db/schema";
 import {
   MOCK_EMAIL,
   MOCK_EMAIL_DATE,
   MOCK_EMAIL_SLUG,
   MOCK_EMAIL_URL,
   parseIncomingEmail,
-} from "@/lib/email/__mocks__/index";
-import { EmailError } from "@/lib/email/types";
-import { indexItemDocuments } from "@/lib/search";
-import { MOCK_VERSION, uploadItemContent } from "@/lib/storage/__mocks__/index";
-import { UploadStatus } from "@/lib/storage/types";
-import { APIRequest } from "@/utils/api";
+} from "@web/lib/email/__mocks__/index";
+import { EmailError } from "@web/lib/email/types";
+import { indexItemDocuments } from "@web/lib/search";
+import { MOCK_VERSION, uploadItemContent } from "@web/lib/storage/__mocks__/index";
+import { UploadStatus } from "@web/lib/storage/types";
+import { APIRequest } from "@web/utils/api";
 import {
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_PROFILE_ID_2,
   makeUnauthenticatedMockRequest,
-} from "@/utils/test/api";
-import { testDb } from "@/utils/test/provider";
+} from "@web/utils/test/api";
+import { testDb } from "@web/utils/test/provider";
 
 import { POST } from "./route";
 
 const MOCK_SECRET = "mocksecret";
 process.env.CURIO_APP_SECRET = MOCK_SECRET;
 
-vi.unmock("@/lib/extract");
+vi.unmock("@web/lib/extract");
 
 const MOCK_EXISTING_ITEM = {
   id: "123e4567-e89b-12d3-a456-426614174010",

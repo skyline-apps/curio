@@ -7,9 +7,9 @@ import {
   type GetItemsResponse,
   type ItemResult,
   type PublicItemResult,
-} from "@/app/api/v1/items/validation";
-import { handleAPIResponse } from "@/utils/api";
-import { createLogger } from "@/utils/logger";
+} from "@web/app/api/v1/items/validation";
+import { handleAPIResponse } from "@web/utils/api";
+import { createLogger } from "@web/utils/logger";
 
 const log = createLogger("items-provider");
 
@@ -41,7 +41,7 @@ export type ItemsContextType = {
   currentFilters: GetItemsRequest["filters"];
 };
 
-interface ItemsProviderProps extends React.PropsWithChildren {}
+interface ItemsProviderProps extends React.PropsWithChildren { }
 
 export const ItemsContext = createContext<ItemsContextType>({
   items: [],
@@ -53,7 +53,7 @@ export const ItemsContext = createContext<ItemsContextType>({
   hasNextPage: true,
   fetchItems: () => Promise.resolve(),
   searchQuery: "",
-  setSearchQuery: () => {},
+  setSearchQuery: () => { },
   currentFilters: {},
 });
 

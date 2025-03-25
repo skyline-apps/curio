@@ -2,11 +2,11 @@
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { useContext } from "react";
 
-import { ReadItemResponse } from "@/app/api/v1/items/read/validation";
-import { useCache } from "@/providers/CacheProvider";
-import { CurrentItemContext } from "@/providers/CurrentItemProvider";
-import { handleAPIResponse } from "@/utils/api";
-import { createLogger } from "@/utils/logger";
+import { ReadItemResponse } from "@web/app/api/v1/items/read/validation";
+import { useCache } from "@web/providers/CacheProvider";
+import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
+import { handleAPIResponse } from "@web/utils/api";
+import { createLogger } from "@web/utils/logger";
 
 const log = createLogger("article-actions");
 

@@ -2,9 +2,9 @@
 import { InfiniteData, useQueryClient } from "@tanstack/react-query";
 import React, { createContext, useCallback, useContext } from "react";
 
-import { type Highlight } from "@/app/api/v1/items/highlights/validation";
-import { PROFILE_QUERY_KEY } from "@/components/Profile/useProfile";
-import { UserContext } from "@/providers/UserProvider";
+import { type Highlight } from "@web/app/api/v1/items/highlights/validation";
+import { PROFILE_QUERY_KEY } from "@web/components/Profile/useProfile";
+import { UserContext } from "@web/providers/UserProvider";
 
 import {
   ITEM_CONTENT_QUERY_KEY,
@@ -35,14 +35,14 @@ export type CacheContextType = {
   optimisticRemoveHighlights: (highlightIds: string[]) => void;
 };
 
-interface CacheProviderProps extends React.PropsWithChildren {}
+interface CacheProviderProps extends React.PropsWithChildren { }
 
 export const CacheContext = createContext<CacheContextType>({
-  invalidateCache: () => {},
-  optimisticUpdateItems: () => {},
-  optimisticRemoveItems: () => {},
-  optimisticUpdateHighlights: () => {},
-  optimisticRemoveHighlights: () => {},
+  invalidateCache: () => { },
+  optimisticUpdateItems: () => { },
+  optimisticRemoveItems: () => { },
+  optimisticUpdateHighlights: () => { },
+  optimisticRemoveHighlights: () => { },
 });
 
 export const CacheProvider: React.FC<CacheProviderProps> = ({
@@ -108,16 +108,16 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
               items: page.items.map((item: Item) =>
                 updatedItemsSlugs.get(item.slug)
                   ? {
-                      ...item,
-                      ...updatedItemsSlugs.get(item.slug),
-                      metadata: {
-                        ...item.metadata,
-                        ...updatedItemsSlugs.get(item.slug)?.metadata,
-                      },
-                      labels: item.labels
-                        ? item.labels
-                        : updatedItemsSlugs.get(item.slug)?.labels,
-                    }
+                    ...item,
+                    ...updatedItemsSlugs.get(item.slug),
+                    metadata: {
+                      ...item.metadata,
+                      ...updatedItemsSlugs.get(item.slug)?.metadata,
+                    },
+                    labels: item.labels
+                      ? item.labels
+                      : updatedItemsSlugs.get(item.slug)?.labels,
+                  }
                   : item,
               ),
             })),
@@ -165,10 +165,10 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
               highlights: page.highlights.map((highlight: HighlightItem) =>
                 highlights.find((h) => h.id === highlight.id)
                   ? {
-                      ...highlight,
-                      ...highlights.find((h) => h.id === highlight.id),
-                      noteExcerpt: undefined,
-                    }
+                    ...highlight,
+                    ...highlights.find((h) => h.id === highlight.id),
+                    noteExcerpt: undefined,
+                  }
                   : highlight,
               ),
             })),

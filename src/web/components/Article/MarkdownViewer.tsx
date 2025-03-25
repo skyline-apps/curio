@@ -4,8 +4,8 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 
-import { type Highlight } from "@/app/api/v1/items/highlights/validation";
-import { cn } from "@/utils/cn";
+import { type Highlight } from "@web/app/api/v1/items/highlights/validation";
+import { cn } from "@web/utils/cn";
 
 import { SelectionPopup } from "./SelectionPopup";
 import { useHighlightSelection } from "./useHighlightSelection";

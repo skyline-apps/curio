@@ -1,9 +1,9 @@
 "use server";
 
-import { SelectApiKey } from "@/db/schema";
-import * as apiKeyUtils from "@/utils/api-keys";
-import { createLogger } from "@/utils/logger";
-import { createClient } from "@/utils/supabase/server";
+import { SelectApiKey } from "@web/db/schema";
+import * as apiKeyUtils from "@web/utils/api-keys";
+import { createLogger } from "@web/utils/logger";
+import { createClient } from "@web/utils/supabase/server";
 
 const log = createLogger("settings.actions");
 

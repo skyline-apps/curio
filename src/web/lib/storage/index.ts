@@ -1,12 +1,12 @@
 import { createHash } from "crypto";
 
-import { TextDirection } from "@/db/schema";
-import config from "@/lib/config.json";
-import { ExtractedMetadata } from "@/lib/extract/types";
-import { StorageError, UploadStatus } from "@/lib/storage/types";
-import { createLogger } from "@/utils/logger";
-import { createClient } from "@/utils/supabase/server";
-import type { StorageClient } from "@/utils/supabase/types";
+import { TextDirection } from "@web/db/schema";
+import config from "@web/lib/config.json";
+import { ExtractedMetadata } from "@web/lib/extract/types";
+import { StorageError, UploadStatus } from "@web/lib/storage/types";
+import { createLogger } from "@web/utils/logger";
+import { createClient } from "@web/utils/supabase/server";
+import type { StorageClient } from "@web/utils/supabase/types";
 
 import { type VersionMetadata } from "./types";
 

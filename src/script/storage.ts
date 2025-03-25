@@ -1,7 +1,7 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import { StorageError, VersionMetadata } from '@/lib/storage/types';
-import config from '@/lib/config.json';
-import { createLogger } from '@/utils/logger';
+import { StorageError, VersionMetadata } from '@web/lib/storage/types';
+import config from '@web/lib/config.json';
+import { createLogger } from '@web/utils/logger';
 
 const log = createLogger("script/storage");
 const ITEMS_BUCKET = config.storageItemsBucket;

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import Spinner from "@/components/ui/Spinner";
+import Spinner from "@web/components/ui/Spinner";
 
 import RecommendedSection from "./RecommendedSection";
 import { useRecommendations } from "./useRecommendations";

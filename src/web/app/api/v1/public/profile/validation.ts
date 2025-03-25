@@ -3,7 +3,7 @@ import { z } from "zod";
 import {
   ItemResultSchema,
   PublicItemResultSchema,
-} from "@/app/api/v1/items/validation";
+} from "@web/app/api/v1/items/validation";
 
 export const GetProfileRequestSchema = z
   .object({

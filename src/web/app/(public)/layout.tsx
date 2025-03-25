@@ -1,11 +1,11 @@
 "use client";
 import React, { useContext } from "react";
 
-import AppPage from "@/app/AppPage";
-import LeftSidebar from "@/components/LeftSidebar";
-import Navbar from "@/components/Navbar";
-import RightSidebar from "@/components/RightSidebar";
-import { UserContext } from "@/providers/UserProvider";
+import AppPage from "@web/app/AppPage";
+import LeftSidebar from "@web/components/LeftSidebar";
+import Navbar from "@web/components/Navbar";
+import RightSidebar from "@web/components/RightSidebar";
+import { UserContext } from "@web/providers/UserProvider";
 
 interface PublicLayoutProps {
   children: React.ReactNode;

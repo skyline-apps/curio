@@ -8,7 +8,7 @@ import {
 } from "react-icons/hi2";
 import { cn } from "utils/cn";
 
-import Button from "@/components/ui/Button";
+import Button from "@web/components/ui/Button";
 
 interface CurioTextareaProps extends TextAreaProps {
   onSave?: () => Promise<void>;

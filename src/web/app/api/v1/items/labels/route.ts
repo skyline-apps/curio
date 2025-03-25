@@ -1,8 +1,8 @@
-import { and, db, eq, inArray, sql } from "@/db";
-import { items, profileItemLabels, profileItems } from "@/db/schema";
-import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
-import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
-import { createLogger } from "@/utils/logger";
+import { and, db, eq, inArray, sql } from "@web/db";
+import { items, profileItemLabels, profileItems } from "@web/db/schema";
+import { APIRequest, APIResponse, APIResponseJSON } from "@web/utils/api";
+import { checkUserProfile, parseAPIRequest } from "@web/utils/api/server";
+import { createLogger } from "@web/utils/logger";
 
 import {
   BulkDeleteLabelsRequestSchema,

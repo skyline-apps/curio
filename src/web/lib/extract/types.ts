@@ -1,4 +1,4 @@
-import { TextDirection } from "@/db/schema";
+import { TextDirection } from "@web/db/schema";
 
 export class ExtractError extends Error {
   constructor(message: string) {

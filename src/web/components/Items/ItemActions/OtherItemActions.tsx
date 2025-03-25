@@ -1,8 +1,8 @@
 import { HiOutlineBookmark } from "react-icons/hi2";
 
-import Button from "@/components/ui/Button";
-import { PublicItem } from "@/providers/ItemsProvider";
-import { cn } from "@/utils/cn";
+import Button from "@web/components/ui/Button";
+import { PublicItem } from "@web/providers/ItemsProvider";
+import { cn } from "@web/utils/cn";
 
 import { useItemUpdate } from "./actions";
 

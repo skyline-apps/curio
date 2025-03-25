@@ -1,17 +1,17 @@
-import { and, db, desc, eq, ilike, not, or, type SQL, sql } from "@/db";
-import { fetchOwnItemResults } from "@/db/queries";
-import { items, ItemState, profileItems, TextDirection } from "@/db/schema";
-import { searchItemDocuments } from "@/lib/search";
-import { SearchError } from "@/lib/search/types";
+import { and, db, desc, eq, ilike, not, or, type SQL, sql } from "@web/db";
+import { fetchOwnItemResults } from "@web/db/queries";
+import { items, ItemState, profileItems, TextDirection } from "@web/db/schema";
+import { searchItemDocuments } from "@web/lib/search";
+import { SearchError } from "@web/lib/search/types";
 import {
   APIRequest,
   APIResponse,
   APIResponseJSON,
   RequestError,
-} from "@/utils/api";
-import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
-import { createLogger } from "@/utils/logger";
-import { cleanUrl, generateSlug } from "@/utils/url";
+} from "@web/utils/api";
+import { checkUserProfile, parseAPIRequest } from "@web/utils/api/server";
+import { createLogger } from "@web/utils/logger";
+import { cleanUrl, generateSlug } from "@web/utils/url";
 
 import {
   CreateOrUpdateItemsRequestSchema,

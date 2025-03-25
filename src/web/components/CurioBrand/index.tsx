@@ -1,13 +1,13 @@
 import Link from "next/link";
 import React, { useContext } from "react";
 
-import { UserContext } from "@/providers/UserProvider";
-import CurioDark from "@/public/logo/curio_dark.svg";
-import CurioLight from "@/public/logo/curio_light.svg";
-import CurioLogoSquare from "@/public/logo/curio_logo.svg";
-import CurioNameDark from "@/public/logo/curio_name_dark.svg";
-import CurioNameLight from "@/public/logo/curio_name_light.svg";
-import { cn } from "@/utils/cn";
+import { UserContext } from "@web/providers/UserProvider";
+import CurioDark from "@web/public/logo/curio_dark.svg";
+import CurioLight from "@web/public/logo/curio_light.svg";
+import CurioLogoSquare from "@web/public/logo/curio_logo.svg";
+import CurioNameDark from "@web/public/logo/curio_name_dark.svg";
+import CurioNameLight from "@web/public/logo/curio_name_light.svg";
+import { cn } from "@web/utils/cn";
 
 interface CurioProps {
   className?: string;

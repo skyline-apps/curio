@@ -10,11 +10,11 @@ import React, {
   useState,
 } from "react";
 
-import Button from "@/components/ui/Button";
-import config from "@/lib/config.json";
-import { UploadStatus } from "@/lib/storage/types";
-import { useToast } from "@/providers/ToastProvider";
-import { createLogger } from "@/utils/logger";
+import Button from "@web/components/ui/Button";
+import config from "@web/lib/config.json";
+import { UploadStatus } from "@web/lib/storage/types";
+import { useToast } from "@web/providers/ToastProvider";
+import { createLogger } from "@web/utils/logger";
 
 import { useCache } from "./CacheProvider";
 import { CurrentItemContext } from "./CurrentItemProvider";
@@ -54,13 +54,13 @@ interface BrowserMessageContextType {
 }
 
 export const BrowserMessageContext = createContext<BrowserMessageContextType>({
-  addMessageListener: () => {},
-  removeMessageListener: () => {},
-  checkExtensionInstalled: () => {},
+  addMessageListener: () => { },
+  removeMessageListener: () => { },
+  checkExtensionInstalled: () => { },
   saveItemContent: () => Promise.resolve(),
   savingItem: null,
   savingError: null,
-  clearSavingError: () => {},
+  clearSavingError: () => { },
 });
 
 interface BrowserMessageProviderProps {

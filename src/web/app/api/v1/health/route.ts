@@ -1,4 +1,4 @@
-import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
+import { APIRequest, APIResponse, APIResponseJSON } from "@web/utils/api";
 
 import { HealthResponse, HealthResponseSchema } from "./validation";
 

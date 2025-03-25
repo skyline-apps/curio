@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, vi } from "vitest";
 
-import { ColorScheme, profiles } from "@/db/schema";
+import { ColorScheme, profiles } from "@web/db/schema";
 import {
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_PROFILE_ID_2,
@@ -8,18 +8,18 @@ import {
   DEFAULT_TEST_USER_ID_2,
   DEFAULT_TEST_USERNAME,
   DEFAULT_TEST_USERNAME_2,
-} from "@/utils/test/api";
-import { testDb } from "@/utils/test/provider";
+} from "@web/utils/test/api";
+import { testDb } from "@web/utils/test/provider";
 
 vi.stubEnv("CURIO_EMAIL_DOMAIN", "testmail.curi.ooo");
 
 // Set up global mocks
-vi.mock("@/lib/search");
-vi.mock("@/lib/extract");
-vi.mock("@/lib/email");
-vi.mock("@/lib/storage");
-vi.mock("@/utils/logger");
-vi.mock("@/utils/supabase/server");
+vi.mock("@web/lib/search");
+vi.mock("@web/lib/extract");
+vi.mock("@web/lib/email");
+vi.mock("@web/lib/storage");
+vi.mock("@web/utils/logger");
+vi.mock("@web/utils/supabase/server");
 
 // Mock the request context
 const requestStore = new Map();

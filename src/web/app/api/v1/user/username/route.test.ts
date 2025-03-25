@@ -1,17 +1,17 @@
 import { vi } from "vitest";
 
-import { eq } from "@/db";
-import { DbErrorCode } from "@/db/errors";
-import { profiles } from "@/db/schema";
-import { APIRequest } from "@/utils/api";
+import { eq } from "@web/db";
+import { DbErrorCode } from "@web/db/errors";
+import { profiles } from "@web/db/schema";
+import { APIRequest } from "@web/utils/api";
 import {
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_USER_ID,
   DEFAULT_TEST_USERNAME_2,
   makeAuthenticatedMockRequest,
   makeMockRequest,
-} from "@/utils/test/api";
-import { testDb } from "@/utils/test/provider";
+} from "@web/utils/test/api";
+import { testDb } from "@web/utils/test/provider";
 
 import { POST } from "./route";
 

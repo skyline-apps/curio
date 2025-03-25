@@ -3,19 +3,19 @@ import {
   ItemResultSchema,
   PublicItemResult,
   PublicItemResultSchema,
-} from "@/app/api/v1/items/validation";
-import { db, eq, sql } from "@/db";
-import { fetchOwnItemResults } from "@/db/queries";
+} from "@web/app/api/v1/items/validation";
+import { db, eq, sql } from "@web/db";
+import { fetchOwnItemResults } from "@web/db/queries";
 import {
   items,
   PersonalRecommendationType,
   profileItems,
   RecommendationType,
-} from "@/db/schema";
-import { getItemMetadata } from "@/lib/storage";
-import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
-import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
-import { createLogger } from "@/utils/logger";
+} from "@web/db/schema";
+import { getItemMetadata } from "@web/lib/storage";
+import { APIRequest, APIResponse, APIResponseJSON } from "@web/utils/api";
+import { checkUserProfile, parseAPIRequest } from "@web/utils/api/server";
+import { createLogger } from "@web/utils/logger";
 
 import {
   GlobalRecommendation,

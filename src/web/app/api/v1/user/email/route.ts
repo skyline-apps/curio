@@ -1,11 +1,11 @@
-import { db, eq } from "@/db";
-import { checkDbError, DbError, DbErrorCode } from "@/db/errors";
-import { profiles } from "@/db/schema";
-import { CURIO_EMAIL_DOMAIN } from "@/lib/email";
-import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
-import { checkUserProfile } from "@/utils/api/server";
-import { createLogger } from "@/utils/logger";
-import { generateRandomAlphabetString } from "@/utils/random";
+import { db, eq } from "@web/db";
+import { checkDbError, DbError, DbErrorCode } from "@web/db/errors";
+import { profiles } from "@web/db/schema";
+import { CURIO_EMAIL_DOMAIN } from "@web/lib/email";
+import { APIRequest, APIResponse, APIResponseJSON } from "@web/utils/api";
+import { checkUserProfile } from "@web/utils/api/server";
+import { createLogger } from "@web/utils/logger";
+import { generateRandomAlphabetString } from "@web/utils/random";
 
 import { UpdateEmailResponse, UpdateEmailResponseSchema } from "./validation";
 

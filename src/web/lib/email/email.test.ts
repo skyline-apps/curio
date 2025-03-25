@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { vi } from "vitest";
 
-import { TextDirection } from "@/db/schema";
+import { TextDirection } from "@web/db/schema";
 
 import {
   extractMetadataFromEmail,
@@ -33,9 +33,9 @@ function makeTestEmail(
   };
 }
 
-vi.unmock("@/lib/email");
+vi.unmock("@web/lib/email");
 
-describe("@/lib/email", () => {
+describe("@web/lib/email", () => {
   const fixturesPath = path.join(process.cwd(), "test/fixtures");
 
   describe("parseIncomingEmail", () => {

@@ -2,15 +2,15 @@
 import { usePathname } from "next/navigation";
 import React, { useContext } from "react";
 
-import AppPage from "@/app/AppPage";
-import KeyboardShortcuts from "@/components/KeyboardShortcuts";
-import LeftSidebar from "@/components/LeftSidebar";
-import RightSidebar from "@/components/RightSidebar";
-import { Progress } from "@/components/ui/Progress";
-import Spinner from "@/components/ui/Spinner";
-import { HighlightsContext } from "@/providers/HighlightsProvider";
-import { ItemsContext } from "@/providers/ItemsProvider";
-import { useSettings } from "@/providers/SettingsProvider";
+import AppPage from "@web/app/AppPage";
+import KeyboardShortcuts from "@web/components/KeyboardShortcuts";
+import LeftSidebar from "@web/components/LeftSidebar";
+import RightSidebar from "@web/components/RightSidebar";
+import { Progress } from "@web/components/ui/Progress";
+import Spinner from "@web/components/ui/Spinner";
+import { HighlightsContext } from "@web/providers/HighlightsProvider";
+import { ItemsContext } from "@web/providers/ItemsProvider";
+import { useSettings } from "@web/providers/SettingsProvider";
 
 interface MainLayoutProps {
   children: React.ReactNode;

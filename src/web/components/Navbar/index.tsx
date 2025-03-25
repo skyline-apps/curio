@@ -3,17 +3,17 @@ import { Navbar, NavbarBrand, NavbarContent } from "@heroui/navbar";
 import React, { useContext } from "react";
 import { HiOutlineUser } from "react-icons/hi2";
 
-import { CurioBrand } from "@/components/CurioBrand";
-import Button from "@/components/ui/Button";
+import { CurioBrand } from "@web/components/CurioBrand";
+import Button from "@web/components/ui/Button";
 import {
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-} from "@/components/ui/Dropdown";
-import Icon from "@/components/ui/Icon";
-import { useLogout } from "@/hooks/useLogout";
-import { UserContext } from "@/providers/UserProvider";
+} from "@web/components/ui/Dropdown";
+import Icon from "@web/components/ui/Icon";
+import { useLogout } from "@web/hooks/useLogout";
+import { UserContext } from "@web/providers/UserProvider";
 
 const CurioNavbar: React.FC = () => {
   const { user } = useContext(UserContext);

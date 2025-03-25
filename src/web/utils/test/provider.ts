@@ -7,8 +7,8 @@ import { createTestDb } from "./db";
 export let testDb: TestDatabase;
 
 // Override the database instance for tests
-vi.mock("@/db/index", async () => {
-  const actual = await vi.importActual("@/db/index");
+vi.mock("@web/db/index", async () => {
+  const actual = await vi.importActual("@web/db/index");
   return {
     ...actual,
     get db() {

@@ -9,13 +9,13 @@ import {
   HiTrash,
 } from "react-icons/hi2";
 
-import Button from "@/components/ui/Button";
-import { ItemState } from "@/db/schema";
-import { BrowserMessageContext } from "@/providers/BrowserMessageProvider";
-import { Item, ItemsContext } from "@/providers/ItemsProvider";
-import { useToast } from "@/providers/ToastProvider";
-import { cn } from "@/utils/cn";
-import { createLogger } from "@/utils/logger";
+import Button from "@web/components/ui/Button";
+import { ItemState } from "@web/db/schema";
+import { BrowserMessageContext } from "@web/providers/BrowserMessageProvider";
+import { Item, ItemsContext } from "@web/providers/ItemsProvider";
+import { useToast } from "@web/providers/ToastProvider";
+import { cn } from "@web/utils/cn";
+import { createLogger } from "@web/utils/logger";
 
 import { useItemUpdate } from "./actions";
 

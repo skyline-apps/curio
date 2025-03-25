@@ -1,4 +1,4 @@
-import type { APIRequest } from "@/utils/api";
+import type { APIRequest } from "@web/utils/api";
 
 export const DEFAULT_TEST_USER_ID = "123e4567-e89b-12d3-a456-426614174002";
 export const DEFAULT_TEST_USER_ID_2 = "123e4567-e89b-12d3-a456-426614174004";

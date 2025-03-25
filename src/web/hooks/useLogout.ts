@@ -2,10 +2,10 @@ import { useRouter } from "next/navigation";
 import posthog from "posthog-js";
 import { useContext } from "react";
 
-import { UserContext } from "@/providers/UserProvider";
-import { clearTheme, initializeTheme } from "@/utils/displayStorage";
-import { createLogger } from "@/utils/logger";
-import { createClient } from "@/utils/supabase/client";
+import { UserContext } from "@web/providers/UserProvider";
+import { clearTheme, initializeTheme } from "@web/utils/displayStorage";
+import { createLogger } from "@web/utils/logger";
+import { createClient } from "@web/utils/supabase/client";
 
 const log = createLogger("useLogout");
 

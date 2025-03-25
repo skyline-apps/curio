@@ -1,30 +1,30 @@
 import { vi } from "vitest";
 
-import { eq } from "@/db";
-import { DbErrorCode } from "@/db/errors";
+import { eq } from "@web/db";
+import { DbErrorCode } from "@web/db/errors";
 import {
   items,
   profileItemHighlights,
   profileItems,
   TextDirection,
-} from "@/db/schema";
+} from "@web/db/schema";
 import {
   deleteHighlightDocuments,
   indexHighlightDocuments,
   searchHighlightDocuments,
-} from "@/lib/search/__mocks__/index";
-import { HighlightDocumentResult, SearchError } from "@/lib/search/types";
-import { APIRequest } from "@/utils/api";
+} from "@web/lib/search/__mocks__/index";
+import { HighlightDocumentResult, SearchError } from "@web/lib/search/types";
+import { APIRequest } from "@web/utils/api";
 import {
   DEFAULT_TEST_PROFILE_ID,
   makeAuthenticatedMockRequest,
-} from "@/utils/test/api";
+} from "@web/utils/test/api";
 import {
   MOCK_HIGHLIGHTS,
   MOCK_ITEMS,
   MOCK_PROFILE_ITEMS,
-} from "@/utils/test/data";
-import { testDb } from "@/utils/test/provider";
+} from "@web/utils/test/data";
+import { testDb } from "@web/utils/test/provider";
 
 import { DELETE, GET, POST } from "./route";
 

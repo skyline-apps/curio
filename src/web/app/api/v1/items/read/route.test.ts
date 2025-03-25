@@ -1,18 +1,18 @@
 import { vi } from "vitest";
 
-import { eq } from "@/db";
-import { items, profileItems } from "@/db/schema";
-import { getItemContent, getItemMetadata } from "@/lib/storage";
-import { MOCK_VERSION } from "@/lib/storage/__mocks__/index";
-import { StorageError } from "@/lib/storage/types";
-import { APIRequest } from "@/utils/api";
-import { makeAuthenticatedMockRequest } from "@/utils/test/api";
+import { eq } from "@web/db";
+import { items, profileItems } from "@web/db/schema";
+import { getItemContent, getItemMetadata } from "@web/lib/storage";
+import { MOCK_VERSION } from "@web/lib/storage/__mocks__/index";
+import { StorageError } from "@web/lib/storage/types";
+import { APIRequest } from "@web/utils/api";
+import { makeAuthenticatedMockRequest } from "@web/utils/test/api";
 import {
   MOCK_ITEMS,
   MOCK_PROFILE_ITEMS,
   NONEXISTENT_USER_ID,
-} from "@/utils/test/data";
-import { testDb } from "@/utils/test/provider";
+} from "@web/utils/test/data";
+import { testDb } from "@web/utils/test/provider";
 
 import { POST } from "./route";
 

@@ -1,5 +1,5 @@
-import { COLOR_PALETTE } from "@/components/ui/Chip";
-import { ItemState, TextDirection } from "@/db/schema";
+import { COLOR_PALETTE } from "@web/components/ui/Chip";
+import { ItemState, TextDirection } from "@web/db/schema";
 
 const ITEM_METADATA = {
   thumbnail: null,

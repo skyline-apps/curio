@@ -8,8 +8,8 @@ import {
 import React from "react";
 import { vi } from "vitest";
 
-import type { SettingsResponse } from "@/app/api/v1/user/settings/validation";
-import { ColorScheme } from "@/db/schema";
+import type { SettingsResponse } from "@web/app/api/v1/user/settings/validation";
+import { ColorScheme } from "@web/db/schema";
 
 import { ClientProviders } from "./ClientProviders";
 import { SettingsContext, SettingsProvider } from "./SettingsProvider";

@@ -3,8 +3,8 @@ import { z } from "zod";
 import {
   ItemResultSchema,
   PublicItemResultSchema,
-} from "@/app/api/v1/items/validation";
-import { PersonalRecommendationType, RecommendationType } from "@/db/schema";
+} from "@web/app/api/v1/items/validation";
+import { PersonalRecommendationType, RecommendationType } from "@web/db/schema";
 
 export const RecommendationSectionSchema = z.object({
   sectionType: z

@@ -1,19 +1,19 @@
 import { useCallback, useContext, useState } from "react";
 import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
 
-import Labels, { Label } from "@/components/Labels";
-import Button from "@/components/ui/Button";
-import { Checkbox } from "@/components/ui/Checkbox";
-import { Divider } from "@/components/ui/Divider";
-import Form from "@/components/ui/Form";
+import Labels, { Label } from "@web/components/Labels";
+import Button from "@web/components/ui/Button";
+import { Checkbox } from "@web/components/ui/Checkbox";
+import { Divider } from "@web/components/ui/Divider";
+import Form from "@web/components/ui/Form";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/Popover";
-import { Switch } from "@/components/ui/Switch";
-import { ItemsContext } from "@/providers/ItemsProvider";
-import { useSettings } from "@/providers/SettingsProvider";
+} from "@web/components/ui/Popover";
+import { Switch } from "@web/components/ui/Switch";
+import { ItemsContext } from "@web/providers/ItemsProvider";
+import { useSettings } from "@web/providers/SettingsProvider";
 
 const ItemSearchFilters: React.FC = (): React.ReactElement => {
   const [isFavorite, setIsFavorite] = useState<boolean>(false);

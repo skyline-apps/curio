@@ -1,8 +1,8 @@
 "use client";
 import React from "react";
 
-import Footer from "@/components/Landing/Footer";
-import Navbar from "@/components/Navbar";
+import Footer from "@web/components/Landing/Footer";
+import Navbar from "@web/components/Navbar";
 
 interface PublicLayoutProps {
   children: React.ReactNode;

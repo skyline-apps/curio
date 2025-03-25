@@ -3,16 +3,16 @@
 import { useRouter } from "next/navigation";
 import React, { useContext } from "react";
 
-import EmailSignIn from "@/components/Auth/EmailSignIn";
-import GoogleSignIn from "@/components/Auth/GoogleSignIn";
-import Spinner from "@/components/ui/Spinner";
-import { UserContext } from "@/providers/UserProvider";
-import YarnDark from "@/public/assets/yarn_dark.svg";
-import YarnLight from "@/public/assets/yarn_light.svg";
+import EmailSignIn from "@web/components/Auth/EmailSignIn";
+import GoogleSignIn from "@web/components/Auth/GoogleSignIn";
+import Spinner from "@web/components/ui/Spinner";
+import { UserContext } from "@web/providers/UserProvider";
+import YarnDark from "@web/public/assets/yarn_dark.svg";
+import YarnLight from "@web/public/assets/yarn_light.svg";
 
-interface LoginPageProps {}
+interface LoginPageProps { }
 
-const LoginPage: React.FC<LoginPageProps> = ({}: LoginPageProps) => {
+const LoginPage: React.FC<LoginPageProps> = ({ }: LoginPageProps) => {
   const { user } = useContext(UserContext);
   const router = useRouter();
   if (user && user.id) {

@@ -2,7 +2,7 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { render, screen } from "@/utils/test/component";
+import { render, screen } from "@web/utils/test/component";
 
 import LandingPageFeatures from "./LandingPageFeatures";
 import { sampleItems, sampleLabels } from "./sampleData";

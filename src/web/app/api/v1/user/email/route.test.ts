@@ -1,18 +1,18 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { db, eq } from "@/db";
-import { profiles } from "@/db/schema";
+import { db, eq } from "@web/db";
+import { profiles } from "@web/db/schema";
 import {
   DEFAULT_TEST_PROFILE_ID,
   makeAuthenticatedMockRequest,
   makeUnauthenticatedMockRequest,
-} from "@/utils/test/api";
+} from "@web/utils/test/api";
 
 import { POST } from "./route";
 
 // Mock the email module before any other imports
-vi.mock("@/lib/email", async () => {
-  const actual = await vi.importActual("@/lib/email");
+vi.mock("@web/lib/email", async () => {
+  const actual = await vi.importActual("@web/lib/email");
   return {
     ...actual,
     CURIO_EMAIL_DOMAIN: "testmail.curi.ooo",

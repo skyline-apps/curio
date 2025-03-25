@@ -2,11 +2,11 @@
 import { useRouter } from "next/navigation";
 import { useContext } from "react";
 
-import { HighlightsContext } from "@/providers/HighlightsProvider";
+import { HighlightsContext } from "@web/providers/HighlightsProvider";
 import {
   ShortcutType,
   useKeyboardShortcut,
-} from "@/providers/KeyboardShortcutProvider";
+} from "@web/providers/KeyboardShortcutProvider";
 
 export const HighlightNavigationShortcuts = (): null => {
   const {

@@ -1,15 +1,15 @@
-import { eq } from "@/db";
+import { eq } from "@web/db";
 import {
   items,
   profileItemLabels,
   profileItems,
   profileLabels,
-} from "@/db/schema";
-import { APIRequest } from "@/utils/api";
+} from "@web/db/schema";
+import { APIRequest } from "@web/utils/api";
 import {
   DEFAULT_TEST_USER_ID_2,
   makeAuthenticatedMockRequest,
-} from "@/utils/test/api";
+} from "@web/utils/test/api";
 import {
   MOCK_ITEMS,
   MOCK_LABELS,
@@ -17,8 +17,8 @@ import {
   TEST_LABEL_ID_1,
   TEST_LABEL_ID_2,
   TEST_LABEL_ID_3,
-} from "@/utils/test/data";
-import { testDb } from "@/utils/test/provider";
+} from "@web/utils/test/data";
+import { testDb } from "@web/utils/test/provider";
 
 import { DELETE, POST } from "./route";
 

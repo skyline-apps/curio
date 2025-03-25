@@ -3,8 +3,8 @@ import React, { useRef } from "react";
 import {
   type Highlight,
   type NewHighlight,
-} from "@/app/api/v1/items/highlights/validation";
-import { cn } from "@/utils/cn";
+} from "@web/app/api/v1/items/highlights/validation";
+import { cn } from "@web/utils/cn";
 
 const isHighlightWithId = (
   highlight: Highlight | NewHighlight,

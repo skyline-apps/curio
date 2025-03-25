@@ -7,8 +7,8 @@ import {
   FaFirefoxBrowser,
 } from "react-icons/fa6";
 
-import Icon from "@/components/ui/Icon";
-import config from "@/lib/config.json";
+import Icon from "@web/components/ui/Icon";
+import config from "@web/lib/config.json";
 
 interface AppLinkProps {
   href?: string;

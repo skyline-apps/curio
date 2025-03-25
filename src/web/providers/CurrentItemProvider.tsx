@@ -10,13 +10,13 @@ import React, {
   useState,
 } from "react";
 
-import { type Highlight } from "@/app/api/v1/items/highlights/validation";
-import { GetItemContentResponse } from "@/app/api/v1/public/items/content/validation";
-import { ItemState } from "@/db/schema";
-import { useAppLayout } from "@/providers/AppLayoutProvider";
-import { Item, ItemsContext, PublicItem } from "@/providers/ItemsProvider";
-import { handleAPIResponse } from "@/utils/api";
-import { createLogger } from "@/utils/logger";
+import { type Highlight } from "@web/app/api/v1/items/highlights/validation";
+import { GetItemContentResponse } from "@web/app/api/v1/public/items/content/validation";
+import { ItemState } from "@web/db/schema";
+import { useAppLayout } from "@web/providers/AppLayoutProvider";
+import { Item, ItemsContext, PublicItem } from "@web/providers/ItemsProvider";
+import { handleAPIResponse } from "@web/utils/api";
+import { createLogger } from "@web/utils/logger";
 
 const log = createLogger("current-item-provider");
 
@@ -66,17 +66,17 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
   isCurrentlyPreviewing: false,
   inSelectionMode: false,
   selectedItems: new Set<string>(),
-  selectItems: () => {},
-  previewItem: () => {},
-  clearSelectedItems: () => {},
+  selectItems: () => { },
+  previewItem: () => { },
+  clearSelectedItems: () => { },
   fetchContent: () => Promise.resolve(),
   loading: true,
   fetching: false,
   loadingError: null,
   lastSelectionIndex: null,
-  setLastSelectionIndex: () => {},
+  setLastSelectionIndex: () => { },
   selectedHighlight: null,
-  setSelectedHighlight: () => {},
+  setSelectedHighlight: () => { },
   isEditable: (item: Item | PublicItem | null | undefined): item is Item => {
     return item ? typeof item.profileItemId === "string" : false;
   },
@@ -240,8 +240,8 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   ): item is Item {
     return item
       ? typeof item.profileItemId === "string" &&
-          "state" in item.metadata &&
-          item.metadata.state !== ItemState.DELETED
+      "state" in item.metadata &&
+      item.metadata.state !== ItemState.DELETED
       : false;
   }
 

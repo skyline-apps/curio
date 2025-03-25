@@ -2,10 +2,10 @@ import { franc } from "franc";
 import { iso6393To1 } from "iso-639-3";
 import { type ParsedMail, simpleParser } from "mailparser";
 
-import { TextDirection } from "@/db/schema";
-import { ExtractedMetadata } from "@/lib/extract/types";
-import { createLogger } from "@/utils/logger";
-import { cleanUrl, FALLBACK_HOSTNAME, getRootDomain } from "@/utils/url";
+import { TextDirection } from "@web/db/schema";
+import { ExtractedMetadata } from "@web/lib/extract/types";
+import { createLogger } from "@web/utils/logger";
+import { cleanUrl, FALLBACK_HOSTNAME, getRootDomain } from "@web/utils/url";
 
 import { type Email, EmailError, type EmailHeaders } from "./types";
 

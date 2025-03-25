@@ -1,21 +1,21 @@
-import { updateProfileItem } from "@/app/api/v1/items/content/updateProfileItem";
-import { db, eq } from "@/db";
-import { items, ItemSource, profiles } from "@/db/schema";
+import { updateProfileItem } from "@web/app/api/v1/items/content/updateProfileItem";
+import { db, eq } from "@web/db";
+import { items, ItemSource, profiles } from "@web/db/schema";
 import {
   extractMetadataFromEmail,
   extractUrlFromEmail,
   parseIncomingEmail,
-} from "@/lib/email";
-import { EmailError } from "@/lib/email/types";
-import { extractMainContentAsMarkdown } from "@/lib/extract";
-import { ExtractedMetadata } from "@/lib/extract/types";
-import { indexItemDocuments } from "@/lib/search";
-import { storage } from "@/lib/storage";
-import { StorageError, UploadStatus } from "@/lib/storage/types";
-import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
-import { parseAPIRequest } from "@/utils/api/server";
-import { createLogger } from "@/utils/logger";
-import { generateSlug } from "@/utils/url";
+} from "@web/lib/email";
+import { EmailError } from "@web/lib/email/types";
+import { extractMainContentAsMarkdown } from "@web/lib/extract";
+import { ExtractedMetadata } from "@web/lib/extract/types";
+import { indexItemDocuments } from "@web/lib/search";
+import { storage } from "@web/lib/storage";
+import { StorageError, UploadStatus } from "@web/lib/storage/types";
+import { APIRequest, APIResponse, APIResponseJSON } from "@web/utils/api";
+import { parseAPIRequest } from "@web/utils/api/server";
+import { createLogger } from "@web/utils/logger";
+import { generateSlug } from "@web/utils/url";
 
 import {
   UploadEmailRequestSchema,

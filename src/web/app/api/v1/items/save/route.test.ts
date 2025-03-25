@@ -1,14 +1,14 @@
-import { eq } from "@/db";
-import { DbErrorCode } from "@/db/errors";
-import { items, ItemState, profileItems } from "@/db/schema";
-import { getItemMetadata } from "@/lib/storage/__mocks__/index";
-import { APIRequest } from "@/utils/api";
+import { eq } from "@web/db";
+import { DbErrorCode } from "@web/db/errors";
+import { items, ItemState, profileItems } from "@web/db/schema";
+import { getItemMetadata } from "@web/lib/storage/__mocks__/index";
+import { APIRequest } from "@web/utils/api";
 import {
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_PROFILE_ID_2,
   DEFAULT_TEST_USER_ID_2,
   makeAuthenticatedMockRequest,
-} from "@/utils/test/api";
+} from "@web/utils/test/api";
 import {
   MOCK_ITEMS,
   MOCK_PROFILE_ITEMS,
@@ -17,8 +17,8 @@ import {
   TEST_ITEM_ID_2,
   TEST_ITEM_ID_3,
   TEST_ITEM_ID_DELETED,
-} from "@/utils/test/data";
-import { testDb } from "@/utils/test/provider";
+} from "@web/utils/test/data";
+import { testDb } from "@web/utils/test/provider";
 
 import { POST } from "./route";
 

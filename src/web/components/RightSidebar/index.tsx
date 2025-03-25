@@ -2,15 +2,15 @@
 import React, { useContext } from "react";
 import { HiChevronDoubleLeft, HiChevronDoubleRight } from "react-icons/hi2";
 
-import BulkActions from "@/components/Items/ItemActions/BulkActions";
-import Button from "@/components/ui/Button";
-import Icon from "@/components/ui/Icon";
-import Spinner from "@/components/ui/Spinner";
-import { useAppLayout } from "@/providers/AppLayoutProvider";
-import { CurrentItemContext } from "@/providers/CurrentItemProvider";
-import { HighlightsContext } from "@/providers/HighlightsProvider";
-import { ItemsContext } from "@/providers/ItemsProvider";
-import { cn } from "@/utils/cn";
+import BulkActions from "@web/components/Items/ItemActions/BulkActions";
+import Button from "@web/components/ui/Button";
+import Icon from "@web/components/ui/Icon";
+import Spinner from "@web/components/ui/Spinner";
+import { useAppLayout } from "@web/providers/AppLayoutProvider";
+import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
+import { HighlightsContext } from "@web/providers/HighlightsProvider";
+import { ItemsContext } from "@web/providers/ItemsProvider";
+import { cn } from "@web/utils/cn";
 
 import HighlightMetadata from "./HighlightMetadata";
 import ItemMetadata from "./ItemMetadata";

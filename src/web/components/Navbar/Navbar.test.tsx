@@ -9,12 +9,12 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { vi } from "vitest";
 
-import { UserContext } from "@/providers/UserProvider";
+import { UserContext } from "@web/providers/UserProvider";
 
 import Navbar from ".";
 
 // Mock CurioBrand component
-vi.mock("@/components/CurioBrand", () => ({
+vi.mock("@web/components/CurioBrand", () => ({
   __esModule: true,
   CurioBrand: () => <div data-testid="curio-brand">CurioBrand</div>,
 }));

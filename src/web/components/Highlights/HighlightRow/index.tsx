@@ -2,13 +2,13 @@
 import Link from "next/link";
 import React, { useContext } from "react";
 
-import Markdown from "@/components/Markdown";
-import { TextDirection } from "@/db/schema";
+import Markdown from "@web/components/Markdown";
+import { TextDirection } from "@web/db/schema";
 import {
   type HighlightItem,
   HighlightsContext,
-} from "@/providers/HighlightsProvider";
-import { cn } from "@/utils/cn";
+} from "@web/providers/HighlightsProvider";
+import { cn } from "@web/utils/cn";
 
 interface HighlightRowProps {
   highlight: HighlightItem;

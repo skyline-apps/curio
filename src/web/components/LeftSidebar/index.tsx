@@ -7,17 +7,17 @@ import {
   HiPlus,
 } from "react-icons/hi2";
 
-import NewItemModal from "@/components/NewItemModal";
-import Button from "@/components/ui/Button";
-import Icon from "@/components/ui/Icon";
-import { useLogout } from "@/hooks/useLogout";
-import { useAppLayout } from "@/providers/AppLayoutProvider";
+import NewItemModal from "@web/components/NewItemModal";
+import Button from "@web/components/ui/Button";
+import Icon from "@web/components/ui/Icon";
+import { useLogout } from "@web/hooks/useLogout";
+import { useAppLayout } from "@web/providers/AppLayoutProvider";
 import {
   BrowserMessageContext,
   EventType,
-} from "@/providers/BrowserMessageProvider";
-import { UserContext } from "@/providers/UserProvider";
-import { cn } from "@/utils/cn";
+} from "@web/providers/BrowserMessageProvider";
+import { UserContext } from "@web/providers/UserProvider";
+import { cn } from "@web/utils/cn";
 
 import NavigationMenu, { SidebarKey } from "./NavigationMenu";
 import SidebarHeader from "./SidebarHeader";

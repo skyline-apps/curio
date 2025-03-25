@@ -9,9 +9,9 @@ import React, {
   useState,
 } from "react";
 
-import ItemCard from "@/components/Items/ItemCard";
-import { CurrentItemContext } from "@/providers/CurrentItemProvider";
-import { type Item, type PublicItem } from "@/providers/ItemsProvider";
+import ItemCard from "@web/components/Items/ItemCard";
+import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
+import { type Item, type PublicItem } from "@web/providers/ItemsProvider";
 
 interface ItemGridProps {
   items: (PublicItem | Item)[];

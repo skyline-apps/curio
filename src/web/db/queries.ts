@@ -1,10 +1,10 @@
-import { db, eq, type SQL, sql } from "@/db";
+import { db, eq, type SQL, sql } from "@web/db";
 import {
   items,
   profileItemLabels,
   profileItems,
   profileLabels,
-} from "@/db/schema";
+} from "@web/db/schema";
 
 export const LABELS_CLAUSE = sql<
   Array<{ id: string; name: string; color: string }>

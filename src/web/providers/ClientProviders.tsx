@@ -5,7 +5,7 @@ import posthog from "posthog-js";
 import { PostHogProvider as PHProvider } from "posthog-js/react";
 import React, { PropsWithChildren, useEffect, useState } from "react";
 
-import AnalyticsPageView from "@/app/AnalyticsPageView";
+import AnalyticsPageView from "@web/app/AnalyticsPageView";
 
 import { KeyboardShortcutProvider } from "./KeyboardShortcutProvider";
 

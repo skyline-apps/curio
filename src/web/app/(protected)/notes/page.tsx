@@ -1,8 +1,8 @@
 "use client";
 import React, { useContext, useEffect } from "react";
 
-import HighlightList from "@/components/Highlights/HighlightList";
-import { HighlightsContext } from "@/providers/HighlightsProvider";
+import HighlightList from "@web/components/Highlights/HighlightList";
+import { HighlightsContext } from "@web/providers/HighlightsProvider";
 
 const NotesPage: React.FC = () => {
   const { fetchHighlights } = useContext(HighlightsContext);

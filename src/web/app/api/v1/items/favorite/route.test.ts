@@ -1,22 +1,22 @@
 import { vi } from "vitest";
 
-import { eq } from "@/db";
-import { DbErrorCode } from "@/db/errors";
-import { items, ItemState, profileItems } from "@/db/schema";
-import { APIRequest } from "@/utils/api";
+import { eq } from "@web/db";
+import { DbErrorCode } from "@web/db/errors";
+import { items, ItemState, profileItems } from "@web/db/schema";
+import { APIRequest } from "@web/utils/api";
 import {
   DEFAULT_TEST_PROFILE_ID,
   makeAuthenticatedMockRequest,
   makeUnauthenticatedMockRequest,
-} from "@/utils/test/api";
+} from "@web/utils/test/api";
 import {
   MOCK_ITEMS,
   MOCK_PROFILE_ITEMS,
   NONEXISTENT_USER_ID,
   TEST_ITEM_ID_1,
   TEST_ITEM_ID_2,
-} from "@/utils/test/data";
-import { testDb } from "@/utils/test/provider";
+} from "@web/utils/test/data";
+import { testDb } from "@web/utils/test/provider";
 
 import { POST } from "./route";
 

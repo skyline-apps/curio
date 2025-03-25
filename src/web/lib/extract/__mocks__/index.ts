@@ -1,7 +1,7 @@
 import { vi } from "vitest";
 
-import { TextDirection } from "@/db/schema";
-import { ExtractedMetadata } from "@/lib/extract/types";
+import { TextDirection } from "@web/db/schema";
+import { ExtractedMetadata } from "@web/lib/extract/types";
 
 export const MOCK_METADATA: ExtractedMetadata = {
   author: "kim",

@@ -2,11 +2,11 @@ import Link from "next/link";
 import React, { useContext } from "react";
 import { LuMail } from "react-icons/lu";
 
-import { RecommendationSection } from "@/app/api/v1/items/recommended/validation";
-import ItemCard from "@/components/Items/ItemCard";
-import Icon from "@/components/ui/Icon";
-import { PersonalRecommendationType, RecommendationType } from "@/db/schema";
-import { CurrentItemContext } from "@/providers/CurrentItemProvider";
+import { RecommendationSection } from "@web/app/api/v1/items/recommended/validation";
+import ItemCard from "@web/components/Items/ItemCard";
+import Icon from "@web/components/ui/Icon";
+import { PersonalRecommendationType, RecommendationType } from "@web/db/schema";
+import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
 
 interface RecommendedSectionProps {
   section: RecommendationSection;

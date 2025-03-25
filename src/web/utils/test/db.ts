@@ -5,7 +5,7 @@ import { migrate } from "drizzle-orm/pglite/migrator";
 import { join } from "path";
 import { v4 as uuidv4 } from "uuid";
 
-import * as schema from "@/db/schema";
+import * as schema from "@web/db/schema";
 
 type DrizzleDb = ReturnType<typeof drizzle<typeof schema>>;
 

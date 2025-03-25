@@ -1,8 +1,8 @@
 import { v4 } from "uuid";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { ItemResult, PublicItemResult } from "@/app/api/v1/items/validation";
-import { and, db, eq, sql } from "@/db";
+import { ItemResult, PublicItemResult } from "@web/app/api/v1/items/validation";
+import { and, db, eq, sql } from "@web/db";
 import {
   itemRecommendations,
   items,
@@ -12,19 +12,19 @@ import {
   profileItems,
   profiles,
   RecommendationType,
-} from "@/db/schema";
+} from "@web/db/schema";
 import {
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_PROFILE_ID_2,
   DEFAULT_TEST_USER_ID_2,
   makeAuthenticatedMockRequest,
-} from "@/utils/test/api";
+} from "@web/utils/test/api";
 import {
   MOCK_ITEMS,
   MOCK_PROFILE_ITEMS,
   NONEXISTENT_USER_ID,
-} from "@/utils/test/data";
-import { testDb } from "@/utils/test/provider";
+} from "@web/utils/test/data";
+import { testDb } from "@web/utils/test/provider";
 
 import { GET } from "./route";
 import {

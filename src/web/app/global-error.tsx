@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { createLogger } from "@/utils/logger";
+import { createLogger } from "@web/utils/logger";
 
 const log = createLogger("global-error");
 

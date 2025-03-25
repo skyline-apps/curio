@@ -1,7 +1,7 @@
 import { vi } from "vitest";
 
-import { eq } from "@/db";
-import { DbErrorCode } from "@/db/errors";
+import { eq } from "@web/db";
+import { DbErrorCode } from "@web/db/errors";
 import {
   items,
   ItemState,
@@ -10,8 +10,8 @@ import {
   profileLabels,
   profiles,
   TextDirection,
-} from "@/db/schema";
-import { APIRequest } from "@/utils/api";
+} from "@web/db/schema";
+import { APIRequest } from "@web/utils/api";
 import {
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_PROFILE_ID_2,
@@ -19,8 +19,8 @@ import {
   DEFAULT_TEST_USERNAME_2,
   makeAuthenticatedMockRequest,
   makeUnauthenticatedMockRequest,
-} from "@/utils/test/api";
-import { testDb } from "@/utils/test/provider";
+} from "@web/utils/test/api";
+import { testDb } from "@web/utils/test/provider";
 
 import { GET } from "./route";
 

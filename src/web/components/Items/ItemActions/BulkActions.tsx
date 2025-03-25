@@ -6,12 +6,12 @@ import {
   HiTrash,
 } from "react-icons/hi2";
 
-import Button from "@/components/ui/Button";
-import { ItemState } from "@/db/schema";
-import { CurrentItemContext } from "@/providers/CurrentItemProvider";
-import { ItemsContext } from "@/providers/ItemsProvider";
-import { useToast } from "@/providers/ToastProvider";
-import { createLogger } from "@/utils/logger";
+import Button from "@web/components/ui/Button";
+import { ItemState } from "@web/db/schema";
+import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
+import { ItemsContext } from "@web/providers/ItemsProvider";
+import { useToast } from "@web/providers/ToastProvider";
+import { createLogger } from "@web/utils/logger";
 
 import { useItemUpdate } from "./actions";
 

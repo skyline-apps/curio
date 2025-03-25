@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { ItemResultSchema } from "@/app/api/v1/items/validation";
-import { UploadStatus } from "@/lib/storage/types";
+import { ItemResultSchema } from "@web/app/api/v1/items/validation";
+import { UploadStatus } from "@web/lib/storage/types";
 
 export const HighlightSchema = z.object({
   id: z.string(),

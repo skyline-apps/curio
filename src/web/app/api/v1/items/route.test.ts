@@ -1,7 +1,7 @@
 import { vi } from "vitest";
 
-import { and, desc, eq } from "@/db";
-import { DbErrorCode } from "@/db/errors";
+import { and, desc, eq } from "@web/db";
+import { DbErrorCode } from "@web/db/errors";
 import {
   items,
   ItemState,
@@ -9,16 +9,16 @@ import {
   profileItems,
   profileLabels,
   TextDirection,
-} from "@/db/schema";
-import { searchItemDocuments } from "@/lib/search";
-import { SearchError } from "@/lib/search/types";
-import { APIRequest } from "@/utils/api";
+} from "@web/db/schema";
+import { searchItemDocuments } from "@web/lib/search";
+import { SearchError } from "@web/lib/search/types";
+import { APIRequest } from "@web/utils/api";
 import {
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_USER_ID_2,
   makeAuthenticatedMockRequest,
   makeUnauthenticatedMockRequest,
-} from "@/utils/test/api";
+} from "@web/utils/test/api";
 import {
   MOCK_ITEMS,
   MOCK_LABELS,
@@ -33,8 +33,8 @@ import {
   TEST_ITEM_URL_2,
   TEST_LABEL_ID_1,
   TEST_LABEL_ID_2,
-} from "@/utils/test/data";
-import { testDb } from "@/utils/test/provider";
+} from "@web/utils/test/data";
+import { testDb } from "@web/utils/test/provider";
 
 import { GET, POST } from "./route";
 

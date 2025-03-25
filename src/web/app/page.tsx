@@ -1,8 +1,8 @@
 import React from "react";
 
-import Footer from "@/components/Landing/Footer";
-import LandingPage from "@/components/Landing/LandingPage";
-import Navbar from "@/components/Navbar";
+import Footer from "@web/components/Landing/Footer";
+import LandingPage from "@web/components/Landing/LandingPage";
+import Navbar from "@web/components/Navbar";
 
 const MainPage: React.FC = () => {
   return (

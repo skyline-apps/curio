@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import Profile from "@/components/Profile";
+import Profile from "@web/components/Profile";
 
 const UserPage = ({
   params,

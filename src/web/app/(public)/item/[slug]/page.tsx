@@ -3,18 +3,18 @@
 import { useParams } from "next/navigation";
 import React, { useContext, useEffect, useMemo } from "react";
 
-import Article from "@/components/Article";
+import Article from "@web/components/Article";
 import {
   displayFontSizeClass,
   displayHeaderSizeClass,
   getDisplayFontClass,
-} from "@/components/Article/displaySettings";
-import KeyboardShortcuts from "@/components/KeyboardShortcuts";
-import { Progress } from "@/components/ui/Progress";
-import { DisplayFont, DisplayFontSize, TextDirection } from "@/db/schema";
-import { CurrentItemContext } from "@/providers/CurrentItemProvider";
-import { useSettings } from "@/providers/SettingsProvider";
-import { cn } from "@/utils/cn";
+} from "@web/components/Article/displaySettings";
+import KeyboardShortcuts from "@web/components/KeyboardShortcuts";
+import { Progress } from "@web/components/ui/Progress";
+import { DisplayFont, DisplayFontSize, TextDirection } from "@web/db/schema";
+import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
+import { useSettings } from "@web/providers/SettingsProvider";
+import { cn } from "@web/utils/cn";
 
 const ItemPage: React.FC = () => {
   const { fetchContent, loading, loadingError, loadedItem } =

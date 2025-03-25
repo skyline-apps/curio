@@ -3,8 +3,8 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import React, { useEffect } from "react";
 import { LuBird, LuLeaf, LuPartyPopper } from "react-icons/lu";
 
-import PullToRefresh from "@/components/PullToRefresh";
-import Icon from "@/components/ui/Icon";
+import PullToRefresh from "@web/components/PullToRefresh";
+import Icon from "@web/components/ui/Icon";
 
 interface InfiniteListProps<T> {
   listData: T[];

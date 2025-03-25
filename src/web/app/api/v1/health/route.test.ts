@@ -1,8 +1,8 @@
-import { APIRequest } from "@/utils/api";
+import { APIRequest } from "@web/utils/api";
 import {
   makeAuthenticatedMockRequest,
   makeUnauthenticatedMockRequest,
-} from "@/utils/test/api";
+} from "@web/utils/test/api";
 
 import { GET } from "./route";
 

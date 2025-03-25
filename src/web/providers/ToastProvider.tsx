@@ -3,7 +3,7 @@
 import { AnimatePresence } from "framer-motion";
 import React, { createContext, useCallback, useContext, useState } from "react";
 
-import Toast, { type ToastType } from "@/components/ui/Toast";
+import Toast, { type ToastType } from "@web/components/ui/Toast";
 
 export interface ToastOptions {
   duration?: number;
@@ -23,8 +23,8 @@ interface ToastProviderProps {
 }
 
 export const ToastContext = createContext<ToastContextType>({
-  showToast: () => {},
-  hideToast: () => {},
+  showToast: () => { },
+  hideToast: () => { },
 });
 
 export const useToast = (): ToastContextType => useContext(ToastContext);

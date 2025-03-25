@@ -2,18 +2,18 @@
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { useContext } from "react";
 
-import { UpdateFavoriteResponse } from "@/app/api/v1/items/favorite/validation";
-import { UpdateLabelsResponse } from "@/app/api/v1/items/labels/validation";
-import { SaveResponse } from "@/app/api/v1/items/save/validation";
-import { UpdateStateResponse } from "@/app/api/v1/items/state/validation";
-import { showConfirm } from "@/components/ui/Modal/Dialog";
-import { ItemState } from "@/db/schema";
-import { BrowserMessageContext } from "@/providers/BrowserMessageProvider";
-import { useCache } from "@/providers/CacheProvider";
-import { CurrentItemContext } from "@/providers/CurrentItemProvider";
-import { type Item } from "@/providers/ItemsProvider";
-import { handleAPIResponse } from "@/utils/api";
-import { createLogger } from "@/utils/logger";
+import { UpdateFavoriteResponse } from "@web/app/api/v1/items/favorite/validation";
+import { UpdateLabelsResponse } from "@web/app/api/v1/items/labels/validation";
+import { SaveResponse } from "@web/app/api/v1/items/save/validation";
+import { UpdateStateResponse } from "@web/app/api/v1/items/state/validation";
+import { showConfirm } from "@web/components/ui/Modal/Dialog";
+import { ItemState } from "@web/db/schema";
+import { BrowserMessageContext } from "@web/providers/BrowserMessageProvider";
+import { useCache } from "@web/providers/CacheProvider";
+import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
+import { type Item } from "@web/providers/ItemsProvider";
+import { handleAPIResponse } from "@web/utils/api";
+import { createLogger } from "@web/utils/logger";
 
 const log = createLogger("item-actions");
 

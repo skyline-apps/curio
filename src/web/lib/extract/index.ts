@@ -10,7 +10,7 @@ import {
 } from "schema-dts";
 import TurndownService, { Node as TurndownNode } from "turndown";
 
-import { TextDirection } from "@/db/schema";
+import { TextDirection } from "@web/db/schema";
 
 import { ExtractedMetadata, ExtractError, MetadataError } from "./types";
 

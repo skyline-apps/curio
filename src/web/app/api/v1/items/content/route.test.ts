@@ -1,34 +1,34 @@
 import { vi } from "vitest";
 
-import { desc, eq } from "@/db";
+import { desc, eq } from "@web/db";
 import {
   items,
   ItemState,
   profileItemHighlights,
   profileItems,
   TextDirection,
-} from "@/db/schema";
-import { extractMainContentAsMarkdown, extractMetadata } from "@/lib/extract";
-import { MOCK_METADATA } from "@/lib/extract/__mocks__/index";
-import { ExtractError, MetadataError } from "@/lib/extract/types";
-import { indexItemDocuments } from "@/lib/search";
+} from "@web/db/schema";
+import { extractMainContentAsMarkdown, extractMetadata } from "@web/lib/extract";
+import { MOCK_METADATA } from "@web/lib/extract/__mocks__/index";
+import { ExtractError, MetadataError } from "@web/lib/extract/types";
+import { indexItemDocuments } from "@web/lib/search";
 import {
   getItemContent,
   getItemMetadata,
   uploadItemContent,
-} from "@/lib/storage";
-import { MOCK_VERSION } from "@/lib/storage/__mocks__/index";
-import { UploadStatus } from "@/lib/storage/types";
-import { APIRequest } from "@/utils/api";
-import { makeAuthenticatedMockRequest } from "@/utils/test/api";
+} from "@web/lib/storage";
+import { MOCK_VERSION } from "@web/lib/storage/__mocks__/index";
+import { UploadStatus } from "@web/lib/storage/types";
+import { APIRequest } from "@web/utils/api";
+import { makeAuthenticatedMockRequest } from "@web/utils/test/api";
 import {
   MOCK_ITEMS,
   MOCK_PROFILE_ITEMS,
   NONEXISTENT_USER_ID,
   TEST_ITEM_ID_1,
   TEST_ITEM_URL_1,
-} from "@/utils/test/data";
-import { testDb } from "@/utils/test/provider";
+} from "@web/utils/test/data";
+import { testDb } from "@web/utils/test/provider";
 
 import { POST } from "./route";
 

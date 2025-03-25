@@ -1,13 +1,13 @@
-import { and, db, eq, inArray, sql } from "@/db";
-import { items, profileItemHighlights, profileItems } from "@/db/schema";
+import { and, db, eq, inArray, sql } from "@web/db";
+import { items, profileItemHighlights, profileItems } from "@web/db/schema";
 import {
   deleteHighlightDocuments,
   indexHighlightDocuments,
   searchHighlightDocuments,
-} from "@/lib/search";
-import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
-import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
-import { createLogger } from "@/utils/logger";
+} from "@web/lib/search";
+import { APIRequest, APIResponse, APIResponseJSON } from "@web/utils/api";
+import { checkUserProfile, parseAPIRequest } from "@web/utils/api/server";
+import { createLogger } from "@web/utils/logger";
 
 import {
   CreateOrUpdateHighlightRequestSchema,

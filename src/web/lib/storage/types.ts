@@ -1,4 +1,4 @@
-import { ExtractedMetadata } from "@/lib/extract/types";
+import { ExtractedMetadata } from "@web/lib/extract/types";
 
 export class StorageError extends Error {
   constructor(message: string) {

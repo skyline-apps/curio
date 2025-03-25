@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 
-import { eq } from "@/db";
+import { eq } from "@web/db";
 import {
   items,
   ItemState,
@@ -9,18 +9,18 @@ import {
   profileItems,
   profileLabels,
   TextDirection,
-} from "@/db/schema";
-import { getItemContent } from "@/lib/storage";
-import { MOCK_VERSION } from "@/lib/storage/__mocks__/index";
-import { StorageError } from "@/lib/storage/types";
-import { APIRequest } from "@/utils/api";
+} from "@web/db/schema";
+import { getItemContent } from "@web/lib/storage";
+import { MOCK_VERSION } from "@web/lib/storage/__mocks__/index";
+import { StorageError } from "@web/lib/storage/types";
+import { APIRequest } from "@web/utils/api";
 import {
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_USER_ID_2,
   makeAuthenticatedMockRequest,
   makeUnauthenticatedMockRequest,
-} from "@/utils/test/api";
-import { testDb } from "@/utils/test/provider";
+} from "@web/utils/test/api";
+import { testDb } from "@web/utils/test/provider";
 
 import { GET } from "./route";
 

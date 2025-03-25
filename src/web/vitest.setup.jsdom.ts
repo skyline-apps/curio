@@ -11,10 +11,10 @@ vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
 vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "test-key");
 
 // Set up global mocks
-vi.mock("@/lib/search");
-vi.mock("@/lib/extract");
-vi.mock("@/lib/storage");
-vi.mock("@/utils/logger");
+vi.mock("@web/lib/search");
+vi.mock("@web/lib/extract");
+vi.mock("@web/lib/storage");
+vi.mock("@web/utils/logger");
 
 // Mock Next.js navigation
 const mockRouter = {

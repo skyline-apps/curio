@@ -3,10 +3,10 @@
 import React, { Key, useMemo, useRef, useState } from "react";
 import { HiOutlinePlus } from "react-icons/hi2";
 
-import { Autocomplete, AutocompleteItem } from "@/components/ui/Autocomplete";
-import Button from "@/components/ui/Button";
-import { Chip } from "@/components/ui/Chip";
-import Icon from "@/components/ui/Icon";
+import { Autocomplete, AutocompleteItem } from "@web/components/ui/Autocomplete";
+import Button from "@web/components/ui/Button";
+import { Chip } from "@web/components/ui/Chip";
+import Icon from "@web/components/ui/Icon";
 
 import { Label } from ".";
 

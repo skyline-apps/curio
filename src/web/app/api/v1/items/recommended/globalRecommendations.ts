@@ -1,11 +1,11 @@
-import { and, db, desc, eq, gt, inArray, isNull, not, sql } from "@/db";
+import { and, db, desc, eq, gt, inArray, isNull, not, sql } from "@web/db";
 import {
   itemRecommendations,
   ItemState,
   profileItems,
   RecommendationType,
-} from "@/db/schema";
-import { createLogger } from "@/utils/logger";
+} from "@web/db/schema";
+import { createLogger } from "@web/utils/logger";
 
 export type GlobalRecommendation = {
   id: string;

@@ -82,15 +82,15 @@
         "paths": [
           {
             "name": "next/server",
-            "message": "Please use `@/utils/api` instead of `next/server`"
+            "message": "Please use `@web/utils/api` instead of `next/server`"
           },
           {
             "name": "@heroui/react",
-            "message": "Please use components from the `@/components/` library"
+            "message": "Please use components from the `@web/components/` library"
           },
           {
             "name": "tailwind-merge",
-            "message": "Please use `cn` from `@/utils/cn`"
+            "message": "Please use `cn` from `@web/utils/cn`"
           }
         ],
         "patterns": [
@@ -98,14 +98,14 @@
             "group": [
               "@supabase/*"
             ],
-            "message": "Please use `@/utils/supabase` instead of `@supabase/*`"
+            "message": "Please use `@web/utils/supabase` instead of `@supabase/*`"
           },
           {
             "group": [
               "drizzle-orm",
               "postgres"
             ],
-            "message": "Please use `@/db` for database utilities"
+            "message": "Please use `@web/db` for database utilities"
           }
         ]
       }

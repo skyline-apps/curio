@@ -1,11 +1,11 @@
 // eslint-disable-next-line no-restricted-imports
 import { NextResponse } from "next/server";
 
-import { db, eq } from "@/db";
-import { profiles, SelectProfile } from "@/db/schema";
-import { createLogger } from "@/utils/logger";
-import { createClient, SupabaseClient } from "@/utils/supabase/server";
-import { createUsernameSlug } from "@/utils/username";
+import { db, eq } from "@web/db";
+import { profiles, SelectProfile } from "@web/db/schema";
+import { createLogger } from "@web/utils/logger";
+import { createClient, SupabaseClient } from "@web/utils/supabase/server";
+import { createUsernameSlug } from "@web/utils/username";
 
 const log = createLogger("auth/callback");
 

@@ -1,10 +1,10 @@
-import { db, eq } from "@/db";
-import { checkDbError, DbError, DbErrorCode } from "@/db/errors";
-import { profiles } from "@/db/schema";
-import { APIRequest, APIResponse, APIResponseJSON } from "@/utils/api";
-import { checkUserProfile, parseAPIRequest } from "@/utils/api/server";
-import { createLogger } from "@/utils/logger";
-import { usernameError } from "@/utils/username";
+import { db, eq } from "@web/db";
+import { checkDbError, DbError, DbErrorCode } from "@web/db/errors";
+import { profiles } from "@web/db/schema";
+import { APIRequest, APIResponse, APIResponseJSON } from "@web/utils/api";
+import { checkUserProfile, parseAPIRequest } from "@web/utils/api/server";
+import { createLogger } from "@web/utils/logger";
+import { usernameError } from "@web/utils/username";
 
 import {
   UpdateUsernameRequestSchema,

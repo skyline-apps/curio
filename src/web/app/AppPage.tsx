@@ -1,10 +1,10 @@
 "use client";
 import React, { useContext } from "react";
 
-import { Dialog } from "@/components/ui/Modal/Dialog";
-import Spinner from "@/components/ui/Spinner";
-import { AppPageProvider } from "@/providers/AppPageProvider";
-import { UserContext } from "@/providers/UserProvider";
+import { Dialog } from "@web/components/ui/Modal/Dialog";
+import Spinner from "@web/components/ui/Spinner";
+import { AppPageProvider } from "@web/providers/AppPageProvider";
+import { UserContext } from "@web/providers/UserProvider";
 
 interface AppPageProps {
   children: React.ReactNode;

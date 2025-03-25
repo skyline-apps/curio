@@ -6,7 +6,7 @@ import {
   ItemDocument,
   ItemSearchResults,
   SearchOptions,
-} from "@/lib/search/types";
+} from "@web/lib/search/types";
 
 export class Search {
   async indexItemDocuments(_documents: ItemDocument[]): Promise<void> {}

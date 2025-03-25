@@ -5,11 +5,11 @@ import React, {
   useEffect,
 } from "react";
 
-import { type Highlight } from "@/app/api/v1/items/highlights/validation";
-import Button from "@/components/ui/Button";
-import { Tooltip } from "@/components/ui/Tooltip";
-import { BrowserMessageContext } from "@/providers/BrowserMessageProvider";
-import { UserContext } from "@/providers/UserProvider";
+import { type Highlight } from "@web/app/api/v1/items/highlights/validation";
+import Button from "@web/components/ui/Button";
+import { Tooltip } from "@web/components/ui/Tooltip";
+import { BrowserMessageContext } from "@web/providers/BrowserMessageProvider";
+import { UserContext } from "@web/providers/UserProvider";
 
 import ArticleHeading from "./ArticleHeading";
 import { HighlightSpan } from "./HighlightSpan";

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ItemState } from "@/db/schema";
+import { ItemState } from "@web/db/schema";
 
 export const UpdateStateRequestSchema = z.object({
   slugs: z

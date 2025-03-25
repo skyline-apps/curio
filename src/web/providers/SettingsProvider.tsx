@@ -7,21 +7,21 @@ import type {
   CreateOrUpdateLabelsResponse,
   DeleteLabelsResponse,
   GetLabelsResponse,
-} from "@/app/api/v1/user/labels/validation";
+} from "@web/app/api/v1/user/labels/validation";
 import type {
   SettingsResponse,
   UpdatedSettingsResponse,
-} from "@/app/api/v1/user/settings/validation";
-import { showConfirm } from "@/components/ui/Modal/Dialog";
-import { useToast } from "@/providers/ToastProvider";
-import { UserContext } from "@/providers/UserProvider";
-import { handleAPIResponse } from "@/utils/api";
+} from "@web/app/api/v1/user/settings/validation";
+import { showConfirm } from "@web/components/ui/Modal/Dialog";
+import { useToast } from "@web/providers/ToastProvider";
+import { UserContext } from "@web/providers/UserProvider";
+import { handleAPIResponse } from "@web/utils/api";
 import {
   initializeTheme,
   setDarkTheme,
   setLightTheme,
   setSystemTheme,
-} from "@/utils/displayStorage";
+} from "@web/utils/displayStorage";
 
 export type SettingsContextType = {
   settings?: SettingsResponse;
@@ -44,10 +44,10 @@ interface SettingsProviderProps {
 }
 
 export const SettingsContext = createContext<SettingsContextType>({
-  updateSettings: async () => {},
+  updateSettings: async () => { },
   createLabel: async () => true,
   updateLabel: async () => true,
-  deleteLabel: async () => {},
+  deleteLabel: async () => { },
 });
 
 const fetchSettings = async (): Promise<SettingsResponse> => {

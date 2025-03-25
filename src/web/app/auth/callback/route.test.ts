@@ -1,7 +1,7 @@
 import { vi } from "vitest";
 
-import { AuthError } from "@/utils/supabase/__mocks__/server";
-import { createClient } from "@/utils/supabase/server";
+import { AuthError } from "@web/utils/supabase/__mocks__/server";
+import { createClient } from "@web/utils/supabase/server";
 
 // eslint-disable-next-line no-restricted-imports
 import { GET } from "./route";

@@ -3,7 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 import { PostgrestError } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
 
-import { createLogger } from "@/utils/logger";
+import { createLogger } from "@web/utils/logger";
 
 const log = createLogger("supabase.middleware");
 

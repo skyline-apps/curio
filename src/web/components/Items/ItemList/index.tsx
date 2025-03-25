@@ -1,17 +1,17 @@
 "use client";
 import React, { useContext } from "react";
 
-import InfiniteList from "@/components/InfiniteList";
-import { ItemNavigationShortcuts } from "@/components/Items/ItemList/ItemNavigationShortcuts";
-import ItemsActions from "@/components/Items/ItemList/ItemsActions";
-import ItemSearch from "@/components/Items/ItemList/ItemSearch";
-import ItemRow from "@/components/Items/ItemRow";
-import { CurrentItemContext } from "@/providers/CurrentItemProvider";
-import { ItemsContext } from "@/providers/ItemsProvider";
+import InfiniteList from "@web/components/InfiniteList";
+import { ItemNavigationShortcuts } from "@web/components/Items/ItemList/ItemNavigationShortcuts";
+import ItemsActions from "@web/components/Items/ItemList/ItemsActions";
+import ItemSearch from "@web/components/Items/ItemList/ItemSearch";
+import ItemRow from "@web/components/Items/ItemRow";
+import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
+import { ItemsContext } from "@web/providers/ItemsProvider";
 
-interface ItemListProps {}
+interface ItemListProps { }
 
-const ItemList: React.FC<ItemListProps> = ({}: ItemListProps) => {
+const ItemList: React.FC<ItemListProps> = ({ }: ItemListProps) => {
   const { lastSelectionIndex, selectItems, clearSelectedItems } =
     useContext(CurrentItemContext);
 

@@ -2,7 +2,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { vi } from "vitest";
 
-import { DEFAULT_TEST_USER_ID } from "@/utils/test/api";
+import { DEFAULT_TEST_USER_ID } from "@web/utils/test/api";
 
 // eslint-disable-next-line no-restricted-imports
 export { AuthError } from "@supabase/supabase-js";

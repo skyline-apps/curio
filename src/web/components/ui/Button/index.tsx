@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import React, { forwardRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 
-import Spinner from "@/components/ui/Spinner";
-import { Tooltip } from "@/components/ui/Tooltip";
-import { cn } from "@/utils/cn";
+import Spinner from "@web/components/ui/Spinner";
+import { Tooltip } from "@web/components/ui/Tooltip";
+import { cn } from "@web/utils/cn";
 
 interface FormButtonProps extends ButtonProps {
   pendingText?: string;

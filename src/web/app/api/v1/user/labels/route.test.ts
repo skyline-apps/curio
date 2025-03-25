@@ -1,14 +1,14 @@
 import { vi } from "vitest";
 
-import { desc, eq } from "@/db";
-import { profileLabels } from "@/db/schema";
-import { APIRequest } from "@/utils/api";
+import { desc, eq } from "@web/db";
+import { profileLabels } from "@web/db/schema";
+import { APIRequest } from "@web/utils/api";
 import {
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_PROFILE_ID_2,
   makeAuthenticatedMockRequest,
-} from "@/utils/test/api";
-import { testDb } from "@/utils/test/provider";
+} from "@web/utils/test/api";
+import { testDb } from "@web/utils/test/provider";
 
 import { DELETE, GET, POST } from "./route";
 

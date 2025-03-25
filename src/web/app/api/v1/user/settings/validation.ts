@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ColorScheme, DisplayFont, DisplayFontSize } from "@/db/schema";
+import { ColorScheme, DisplayFont, DisplayFontSize } from "@web/db/schema";
 
 export const SettingsSchema = z.object({
   colorScheme: z.nativeEnum(ColorScheme).describe("Color scheme to display."),

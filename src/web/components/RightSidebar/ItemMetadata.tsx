@@ -1,18 +1,18 @@
 import Link from "next/link";
 import { useCallback, useContext } from "react";
 
-import Thumbnail from "@/components/Image/Thumbnail";
-import ItemActions from "@/components/Items/ItemActions";
-import { useItemUpdate } from "@/components/Items/ItemActions/actions";
-import OtherItemActions from "@/components/Items/ItemActions/OtherItemActions";
-import Labels, { Label } from "@/components/Labels";
-import { TextDirection } from "@/db/schema";
-import { CurrentItemContext } from "@/providers/CurrentItemProvider";
-import type { Item, PublicItem } from "@/providers/ItemsProvider";
-import { useSettings } from "@/providers/SettingsProvider";
-import { UserContext } from "@/providers/UserProvider";
-import { cn } from "@/utils/cn";
-import { FALLBACK_HOSTNAME } from "@/utils/url";
+import Thumbnail from "@web/components/Image/Thumbnail";
+import ItemActions from "@web/components/Items/ItemActions";
+import { useItemUpdate } from "@web/components/Items/ItemActions/actions";
+import OtherItemActions from "@web/components/Items/ItemActions/OtherItemActions";
+import Labels, { Label } from "@web/components/Labels";
+import { TextDirection } from "@web/db/schema";
+import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
+import type { Item, PublicItem } from "@web/providers/ItemsProvider";
+import { useSettings } from "@web/providers/SettingsProvider";
+import { UserContext } from "@web/providers/UserProvider";
+import { cn } from "@web/utils/cn";
+import { FALLBACK_HOSTNAME } from "@web/utils/url";
 
 interface ItemMetadataProps {
   item?: Item | PublicItem;
