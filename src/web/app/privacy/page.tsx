@@ -9,9 +9,7 @@ const Privacy: React.FC = () => {
       <div className="w-full p-4 md:p-8">
         <div className="flex flex-col justify-center items-start max-w-2xl mx-auto">
           <h1 className="text-lg font-medium text-center">Privacy policy</h1>
-          <p className="text-secondary text-sm">
-            Last updated: February 20, 2025
-          </p>
+          <p className="text-secondary text-sm">Last updated: March 24, 2025</p>
           <div className="text-sm my-4">
             <h2 className="font-medium my-2">Information we collect</h2>
             <p>

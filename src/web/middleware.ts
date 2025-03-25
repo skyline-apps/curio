@@ -18,8 +18,9 @@ export const config = {
      * - /api/v1/health
      And the ones that are exactly
      * - /privacy
+     * - /terms
      * - /login
      */
-    "/((?!_next/static|_next/image|favicon.ico|auth|api/v1/health|privacy$|login$|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|auth|api/v1/health|privacy$|terms$|login$|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

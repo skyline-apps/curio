@@ -6,6 +6,7 @@ import Spinner from "@web/components/ui/Spinner";
 import { UserContext } from "@web/providers/UserProvider";
 import YarnDark from "@web/public/assets/yarn_dark.svg";
 import YarnLight from "@web/public/assets/yarn_light.svg";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useContext } from "react";
 
@@ -30,6 +31,17 @@ const LoginPage: React.FC<LoginPageProps> = ({}: LoginPageProps) => {
         <GoogleSignIn nextUrl="/home" />
         <p className="text-secondary text-xs">or</p>
         <EmailSignIn />
+        <p className="text-secondary text-xs text-center mt-2">
+          By signing up, you agree to our{" "}
+          <Link className="hover:underline" href="/terms" target="_blank">
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link className="hover:underline" href="/privacy" target="_blank">
+            Privacy Policy
+          </Link>
+          .
+        </p>
       </div>
     </div>
   );
