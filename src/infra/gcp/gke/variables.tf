@@ -134,7 +134,7 @@ variable "regional" {
 variable "deletion_protection" {
   description = "Whether to allow Terraform to destroy the cluster. Unless set to 'false', 'terraform destroy' will fail."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "node_locations" {
