@@ -49,7 +49,7 @@ export const ItemDescription: React.FC<ItemDescriptionProps> = ({
   description,
 }: ItemDescriptionProps) => {
   return description ? (
-    <p className="text-sm text-secondary-300 dark:text-secondary-600">
+    <p className="text-sm text-secondary-300 dark:text-secondary-600 line-clamp-6">
       {description}
     </p>
   ) : null;
