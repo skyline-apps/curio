@@ -96,14 +96,18 @@ export const ItemActionShortcuts = (): null => {
       });
   };
 
-  const deleteCurrentItem = async (): Promise<boolean> => {
+  const deleteCurrentItem = async (
+    returnToInbox: boolean,
+  ): Promise<boolean> => {
     if (!loadedItem?.item) {
       return false;
     }
     const nextItemSlug = getNextItemSlug();
     return await updateItemsState([loadedItem.item.slug], ItemState.DELETED)
       .then(() => {
-        if (nextItemSlug) {
+        if (returnToInbox) {
+          router.push("/inbox");
+        } else if (nextItemSlug) {
           router.push(`/item/${nextItemSlug}`);
         }
         return true;
@@ -180,7 +184,7 @@ export const ItemActionShortcuts = (): null => {
 
   useKeyboardShortcut({
     key: "E",
-    name: "Archive then return to Inbox",
+    name: "Archive then return to inbox",
     category: ShortcutType.ACTIONS,
     handler: () => archiveCurrentItem(true),
     priority: 100,
@@ -190,10 +194,18 @@ export const ItemActionShortcuts = (): null => {
   });
 
   useKeyboardShortcut({
-    key: "#",
+    key: "d",
     name: "Delete then open next item",
     category: ShortcutType.ACTIONS,
-    handler: deleteCurrentItem,
+    handler: () => deleteCurrentItem(false),
+    priority: 100,
+  });
+
+  useKeyboardShortcut({
+    key: "D",
+    name: "Delete then return to inbox",
+    category: ShortcutType.ACTIONS,
+    handler: () => deleteCurrentItem(true),
     priority: 100,
     conditions: {
       shiftKey: true,
