@@ -221,9 +221,6 @@ export const ItemNavigationShortcuts = (): null => {
     category: ShortcutType.ACTIONS,
     handler: deleteCurrentItem,
     priority: 100,
-    conditions: {
-      shiftKey: true,
-    },
   });
 
   return null;
