@@ -73,8 +73,7 @@ const MOCK_HIGHLIGHTS = [
 describe("/api/v1/items/email", () => {
   describe("POST /api/v1/items/email", () => {
     const checkDocumentIndexed = (): void => {
-      expect(indexItemDocuments).toHaveBeenCalledTimes(1);
-      expect(indexItemDocuments).toHaveBeenCalledWith([
+      expect(indexItemDocuments).toHaveBeenCalledExactlyOnceWith([
         {
           title: MOCK_EMAIL.subject,
           description: MOCK_EMAIL.textContent,
@@ -126,7 +125,7 @@ describe("/api/v1/items/email", () => {
       expect(newItem[0].description).toBe(MOCK_EMAIL.textContent);
       expect(newItem[0].publishedAt).toEqual(MOCK_EMAIL_DATE);
       expect(newItem[0].savedAt).not.toBe(null);
-      expect(newItem[0].versionName).toBe(null);
+      expect(newItem[0].versionName).toBe(MOCK_VERSION);
 
       checkDocumentIndexed();
     });
@@ -263,8 +262,8 @@ describe("/api/v1/items/email", () => {
           .from(profileItems)
           .where(eq(profileItems.profileId, DEFAULT_TEST_PROFILE_ID));
         expect(item).toHaveLength(1);
-        expect(item[0].title).toBe("test title");
-        expect(item[0].versionName).toBe(null);
+        expect(item[0].title).toBe(MOCK_EMAIL.subject);
+        expect(item[0].versionName).toBe(MOCK_VERSION);
         expect(indexItemDocuments).not.toHaveBeenCalled();
       });
 
@@ -296,8 +295,8 @@ describe("/api/v1/items/email", () => {
           .from(profileItems)
           .where(eq(profileItems.profileId, DEFAULT_TEST_PROFILE_ID));
         expect(item).toHaveLength(1);
-        expect(item[0].title).toBe("test title");
-        expect(item[0].versionName).toBe(null);
+        expect(item[0].title).toBe(MOCK_EMAIL.subject);
+        expect(item[0].versionName).toBe(MOCK_VERSION);
         const highlights = await testDb.db.select().from(profileItemHighlights);
         expect(highlights).toHaveLength(0);
         expect(indexItemDocuments).not.toHaveBeenCalled();
@@ -327,7 +326,7 @@ describe("/api/v1/items/email", () => {
           .orderBy(desc(profileItems.id));
         expect(item).toHaveLength(2);
         expect(item[0].title).toBe(MOCK_EMAIL.subject);
-        expect(item[0].versionName).toBe(null);
+        expect(item[0].versionName).toBe(MOCK_VERSION);
         expect(item[1].title).toBe("Existing title 2");
         expect(item[1].versionName).toBe("mock-old-version");
         const highlights = await testDb.db.select().from(profileItemHighlights);

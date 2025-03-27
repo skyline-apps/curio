@@ -7,8 +7,9 @@ import {
 } from "@web/db/schema";
 import { ExtractedMetadata } from "@web/lib/extract/types";
 
-export interface ExportOptions {
+export interface UpdateOptions {
   source?: ItemSource;
+  versionName?: string;
 }
 
 export async function updateProfileItem(
@@ -18,7 +19,7 @@ export async function updateProfileItem(
   itemId: string,
   metadata: ExtractedMetadata,
   savedAt: Date,
-  options: ExportOptions = {},
+  options: UpdateOptions = {},
 ): Promise<string> {
   const { source } = options;
   const newTitle = metadata.title || itemUrl;
@@ -34,7 +35,7 @@ export async function updateProfileItem(
     publishedAt: metadata.publishedAt ? new Date(metadata.publishedAt) : null,
     textDirection: metadata.textDirection,
     readingProgress: 0,
-    versionName: null,
+    versionName: options.versionName || null,
     state: ItemState.ACTIVE,
     ...(source ? { source } : {}),
   };

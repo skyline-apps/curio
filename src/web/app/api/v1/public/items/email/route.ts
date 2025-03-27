@@ -8,7 +8,6 @@ import {
 } from "@web/lib/email";
 import { EmailError } from "@web/lib/email/types";
 import { extractMainContentAsMarkdown } from "@web/lib/extract";
-import { ExtractedMetadata } from "@web/lib/extract/types";
 import { indexItemDocuments } from "@web/lib/search";
 import { storage } from "@web/lib/storage";
 import { StorageError, UploadStatus } from "@web/lib/storage/types";
@@ -109,23 +108,23 @@ export async function POST(
               ? "Content already exists"
               : "Content updated",
       });
+      await tx
+        .update(items)
+        .set({ updatedAt: newDate })
+        .where(eq(items.id, item[0].id));
+
+      await updateProfileItem(
+        tx,
+        itemUrl,
+        profileResult[0].id,
+        itemId,
+        metadata,
+        newDate,
+        { source: ItemSource.EMAIL, versionName },
+      );
+
+      // Index profile item with new main content
       if (status === UploadStatus.UPDATED_MAIN) {
-        await tx
-          .update(items)
-          .set({ updatedAt: newDate })
-          .where(eq(items.id, item[0].id));
-
-        await updateProfileItem(
-          tx,
-          itemUrl,
-          profileResult[0].id,
-          itemId,
-          metadata,
-          newDate,
-          { source: ItemSource.EMAIL },
-        );
-
-        // Index profile item with new main content
         await indexItemDocuments([
           {
             slug: itemSlug,
@@ -137,36 +136,8 @@ export async function POST(
             contentVersionName: versionName,
           },
         ]);
-        return APIResponseJSON(response);
-      } else if (
-        status === UploadStatus.STORED_VERSION ||
-        status === UploadStatus.SKIPPED
-      ) {
-        const defaultMetadata = await storage.getItemMetadata(itemSlug);
-        const newMetadata = { ...metadata };
-        Object.entries(defaultMetadata).forEach(([key, value]) => {
-          if (value !== null && value !== undefined) {
-            newMetadata[key as keyof ExtractedMetadata] = value;
-          }
-        });
-        // Update item metadata and clear reading state
-        await updateProfileItem(
-          tx,
-          itemUrl,
-          profileResult[0].id,
-          itemId,
-          newMetadata,
-          newDate,
-          { source: ItemSource.EMAIL },
-        );
-        return APIResponseJSON(response);
-      } else {
-        log.error("Upload error", { status: status });
-        return APIResponseJSON(
-          { error: "Error uploading item content." },
-          { status: 500 },
-        );
       }
+      return APIResponseJSON(response);
     });
   } catch (error) {
     if (error instanceof EmailError) {
