@@ -24,7 +24,7 @@ const KeyboardShortcuts = (): React.ReactElement => {
             {Object.entries(keyboardShortcuts).map(([category, names]) => (
               <div key={category} className="text-sm">
                 <h2 className="font-medium text-secondary">{category}</h2>
-                <div className="grid grid-cols-[100px_auto] items-center gap-2">
+                <div className="grid grid-cols-[140px_auto] items-center gap-2">
                   {Object.entries(names).map(([name, shortcutList]) => (
                     <React.Fragment key={name}>
                       <div className="flex gap-2">
