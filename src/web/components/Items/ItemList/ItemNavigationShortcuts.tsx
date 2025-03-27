@@ -216,7 +216,7 @@ export const ItemNavigationShortcuts = (): null => {
   });
 
   useKeyboardShortcut({
-    key: "#",
+    key: "d",
     name: "Delete item",
     category: ShortcutType.ACTIONS,
     handler: deleteCurrentItem,
