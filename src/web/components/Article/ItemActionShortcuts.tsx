@@ -75,14 +75,18 @@ export const ItemActionShortcuts = (): null => {
     return true;
   };
 
-  const archiveCurrentItem = async (): Promise<boolean> => {
+  const archiveCurrentItem = async (
+    returnToInbox: boolean,
+  ): Promise<boolean> => {
     if (!loadedItem?.item) {
       return false;
     }
     const nextItemSlug = getNextItemSlug();
     return await updateItemsState([loadedItem.item.slug], ItemState.ARCHIVED)
       .then(() => {
-        if (nextItemSlug) {
+        if (returnToInbox) {
+          router.push("/inbox");
+        } else if (nextItemSlug) {
           router.push(`/item/${nextItemSlug}`);
         }
         return true;
@@ -170,8 +174,19 @@ export const ItemActionShortcuts = (): null => {
     key: "e",
     name: "Archive then open next item",
     category: ShortcutType.ACTIONS,
-    handler: archiveCurrentItem,
+    handler: () => archiveCurrentItem(false),
     priority: 100,
+  });
+
+  useKeyboardShortcut({
+    key: "E",
+    name: "Archive then return to Inbox",
+    category: ShortcutType.ACTIONS,
+    handler: () => archiveCurrentItem(true),
+    priority: 100,
+    conditions: {
+      shiftKey: true,
+    },
   });
 
   useKeyboardShortcut({
