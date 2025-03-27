@@ -40,19 +40,13 @@ const FiltersSchema = z
 export type Filters = z.infer<typeof FiltersSchema>;
 
 export const PublicItemMetadataSchema = z.object({
-  title: z.string().max(255).describe("The title of the item."),
+  title: z.string().describe("The title of the item."),
   description: z
     .string()
-    .max(4096)
     .nullable()
     .optional()
     .describe("The description of the item."),
-  author: z
-    .string()
-    .max(255)
-    .nullable()
-    .optional()
-    .describe("The author of the item."),
+  author: z.string().nullable().optional().describe("The author of the item."),
   publishedAt: dateType
     .nullable()
     .optional()
@@ -209,11 +203,7 @@ export const GetItemsRequestSchema = z
       .describe("The search result offset to start from.")
       .default(0),
     filters: FiltersSchema.optional().describe("The filters to apply."),
-    search: z
-      .string()
-      .max(100)
-      .optional()
-      .describe("The search query to apply."),
+    search: z.string().optional().describe("The search query to apply."),
   })
   .refine(
     (val) => [val.slugs, val.urls, val.search].filter(Boolean).length <= 1,
@@ -245,14 +235,12 @@ const ItemMetadataUpdateSchema = ItemMetadataSchema.merge(
     thumbnail: z
       .string()
       .url()
-      .max(4096)
       .nullable()
       .optional()
       .describe("The thumbnail URL of the item."),
     favicon: z
       .string()
       .url()
-      .max(4096)
       .nullable()
       .optional()
       .describe("The favicon URL of the item."),
