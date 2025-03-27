@@ -2,6 +2,8 @@ import { cn } from "@web/utils/cn";
 import React from "react";
 import ReactMarkdown, { Options } from "react-markdown";
 
+import MarkdownErrorBoundary from "./error-boundary";
+
 interface MarkdownProps extends Options {
   className?: string;
 }
@@ -26,4 +28,12 @@ const Markdown: React.FC<MarkdownProps> = ({
 };
 
 export type { Components } from "react-markdown";
-export default Markdown;
+const MarkdownWithErrorBoundary = (
+  props: MarkdownProps,
+): React.ReactElement => (
+  <MarkdownErrorBoundary>
+    <Markdown {...props} />
+  </MarkdownErrorBoundary>
+);
+
+export default MarkdownWithErrorBoundary;

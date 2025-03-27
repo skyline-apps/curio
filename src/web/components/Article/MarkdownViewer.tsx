@@ -1,4 +1,5 @@
 import { type Highlight } from "@web/app/api/v1/items/highlights/validation";
+import MarkdownErrorBoundary from "@web/components/Markdown/error-boundary";
 import { cn } from "@web/utils/cn";
 import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import type { Components } from "react-markdown";
@@ -117,4 +118,12 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = memo(
 
 MarkdownViewer.displayName = "MarkdownViewer";
 
-export default MarkdownViewer;
+const MarkdownViewerWithErrorBoundary = (
+  props: MarkdownViewerProps,
+): React.ReactElement => (
+  <MarkdownErrorBoundary>
+    <MarkdownViewer {...props} />
+  </MarkdownErrorBoundary>
+);
+
+export default MarkdownViewerWithErrorBoundary;
