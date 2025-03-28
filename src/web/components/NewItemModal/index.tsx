@@ -49,6 +49,7 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
   const openAndSave = async (
     event: React.FormEvent<HTMLFormElement> | PressEvent,
   ): Promise<void> => {
+    setError(null);
     if ("preventDefault" in event) event.preventDefault();
     try {
       new URL(urlInput);
@@ -80,7 +81,7 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
           <ModalBody>
             <p className="text-sm text-secondary">
               Add a new item to your library. This will open the page in a new
-              tab and automatically save its content.
+              tab and automatically save its content to Curio.
             </p>
             <Form onSubmit={openAndSave}>
               <Input

@@ -69,6 +69,13 @@ interface BrowserMessageProviderProps {
 const INSTALLED_TIMEOUT_MS = 1000;
 const SAVE_TIMEOUT_MS = 10000;
 
+const UNSUPPORTED_BROWSER_ERROR = (
+  <>
+    It looks like you&rsquo;re using an unsupported browser. Please try Chrome
+    or Firefox.
+  </>
+);
+
 export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
   children,
 }: BrowserMessageProviderProps) => {
@@ -84,42 +91,38 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
     null,
   );
 
-  const getExtensionError = useCallback((): JSX.Element => {
+  const getExtensionName = useCallback((): string => {
+    if (browser === "chrome") {
+      return "Chrome extension";
+    } else if (browser === "firefox") {
+      return "Firefox add-on";
+    }
+    return "browser extension";
+  }, [browser]);
+
+  const getExtensionLink = useCallback((): JSX.Element | null => {
     if (browser === "chrome") {
       return (
-        <span>
-          Please ensure the{" "}
-          <Link
-            className="underline"
-            target="_blank"
-            href={config.chromeExtensionLink}
-          >
-            Chrome extension
-          </Link>{" "}
-          is installed and enabled.
-        </span>
+        <Link
+          className="underline"
+          target="_blank"
+          href={config.chromeExtensionLink}
+        >
+          Chrome extension
+        </Link>
       );
     } else if (browser === "firefox") {
       return (
-        <span>
-          Please ensure the{" "}
-          <Link
-            className="underline"
-            target="_blank"
-            href={config.firefoxExtensionLink}
-          >
-            Firefox extension
-          </Link>{" "}
-          is installed and enabled.
-        </span>
+        <Link
+          className="underline"
+          target="_blank"
+          href={config.firefoxExtensionLink}
+        >
+          Firefox add-on
+        </Link>
       );
     }
-    return (
-      <span>
-        It looks like you&rsquo;re using an unsupported browser. Please try
-        Chrome or Firefox.
-      </span>
-    );
+    return null;
   }, [browser]);
 
   const clearSavingError = useCallback(() => {
@@ -131,7 +134,22 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
       if (success) {
         setSavingError(null);
       } else {
-        setSavingError(<span>Unable to connect. {getExtensionError()}</span>);
+        setSavingError(
+          <>
+            <p>
+              Curio requires a {getExtensionName()} to save pages from your
+              browser.
+            </p>
+            {getExtensionLink() ? (
+              <p>
+                Please install and enable the {getExtensionLink()}, then refresh
+                this page.
+              </p>
+            ) : (
+              <p>{UNSUPPORTED_BROWSER_ERROR}</p>
+            )}
+          </>,
+        );
       }
     };
     installationCallback.current = callback;
@@ -146,7 +164,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
     } catch {
       callback(false);
     }
-  }, [getExtensionError]);
+  }, [getExtensionName, getExtensionLink]);
 
   const saveItemContent = useCallback(
     async (url: string): Promise<void> => {
@@ -156,7 +174,19 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
 
         const timeoutId = setTimeout(() => {
           setSavingItem(null);
-          const error = <>Operation timed out. {getExtensionError()}</>;
+          const error = (
+            <>
+              {getExtensionLink() ? (
+                <>
+                  If your browser hasn&rsquo;t opened the link in a new tab,
+                  please ensure the {getExtensionLink()} is installed and
+                  enabled, then refresh this page.
+                </>
+              ) : (
+                UNSUPPORTED_BROWSER_ERROR
+              )}
+            </>
+          );
           showToast(error, {
             dismissable: true,
             disappearing: true,
@@ -189,7 +219,15 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
         log.error("Error sending save request:", error);
         const errorElement = (
           <>
-            Failed to communicate with browser extension. {getExtensionError()}
+            <p>Failed to communicate with {getExtensionName()}.</p>
+            {getExtensionLink() ? (
+              <p>
+                Please ensure the {getExtensionLink()} is installed and enabled,
+                then refresh this page.
+              </p>
+            ) : (
+              UNSUPPORTED_BROWSER_ERROR
+            )}
           </>
         );
         showToast(errorElement, {
@@ -200,7 +238,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
         setSavingError(errorElement);
       }
     },
-    [showToast, getExtensionError],
+    [showToast, getExtensionName, getExtensionLink],
   );
 
   const handleMessage = useCallback(
@@ -222,9 +260,10 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
         if (!event.data.data || event.data.data.status === UploadStatus.ERROR) {
           log.error("Error updating content", event.data);
           const errorElement = (
-            <span>
-              Error saving content. Contact us if this error persists.
-            </span>
+            <p>
+              Error saving content. Refresh the page and try again, and contact
+              us if this problem persists.
+            </p>
           );
           showToast(errorElement, {
             dismissable: true,
@@ -255,7 +294,10 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
         setSavingItem(null);
         log.error("Error saving content", event.data);
         const errorElement = (
-          <span>Error saving content. Contact us if this error persists.</span>
+          <p>
+            Error saving content. Refresh the page and try again, and contact us
+            if this problem persists.
+          </p>
         );
         showToast(errorElement, {
           dismissable: true,
