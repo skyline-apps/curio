@@ -1,0 +1,1 @@
+ALTER TABLE "profile_items" RENAME COLUMN "archived_at" TO "state_updated_at";

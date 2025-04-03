@@ -12,6 +12,9 @@ node_modules
 .next/
 out/
 
+# wrangler
+.wrangler
+
 # production
 build
 

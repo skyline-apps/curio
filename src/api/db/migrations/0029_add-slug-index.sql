@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "slug_index" ON "items" USING btree ("slug");
