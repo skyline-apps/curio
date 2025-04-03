@@ -1,11 +1,12 @@
 import { and, desc, eq, getDb, ilike, not, or, type SQL, sql } from "@api/db";
-import { checkUserProfile } from "@api/db/auth";
-import { fetchOwnItemResults } from "@api/db/queries";
+import { checkUserProfile } from "@api/db/dal/profile";
+import {
+  fetchOwnItemResults,
+  getRelevantProfileItemIds,
+} from "@api/db/dal/profileItems";
 import { items, ItemState, profileItems, TextDirection } from "@api/db/schema";
-import { searchItemDocuments } from "@api/lib/search";
-import { SearchError } from "@api/lib/search/types";
 import { apiDoc, APIResponse, parseError } from "@api/utils/api";
-import { EnvBindings, EnvContext } from "@api/utils/env";
+import { EnvBindings } from "@api/utils/env";
 import log from "@api/utils/logger";
 import { cleanUrl, generateSlug } from "@api/utils/url";
 import { Hono } from "hono";
@@ -24,62 +25,6 @@ import {
   ItemResultSchema,
   ItemResultWithoutLabelsSchema,
 } from "./validation";
-
-async function getRelevantProfileItemIds(
-  c: EnvContext,
-  limit: number,
-  offset: number,
-  search?: string,
-): Promise<
-  | { success: false; searchResults: null; nextOffset: null; total: null }
-  | {
-      success: true;
-      searchResults: { slug: string; excerpt: string }[];
-      nextOffset: number | undefined;
-      total: number;
-    }
-> {
-  if (!search) {
-    return {
-      success: false,
-      searchResults: null,
-      nextOffset: null,
-      total: null,
-    };
-  }
-  try {
-    const { hits, estimatedTotalHits } = await searchItemDocuments(c, search, {
-      offset,
-      limit,
-    });
-
-    const hasNextPage = estimatedTotalHits > offset + limit;
-    const items = hits;
-    const nextOffset = hasNextPage ? offset + limit : undefined;
-    return {
-      success: true,
-      searchResults: items.map((item) => ({
-        slug: item.slug,
-        excerpt: item._formatted?.content || "",
-      })),
-      nextOffset,
-      total: estimatedTotalHits,
-    };
-  } catch (error) {
-    if (error instanceof SearchError) {
-      log(
-        `Failed to search items for ${search}, falling back to normal search: ${error.message}`,
-      );
-      return {
-        success: false,
-        searchResults: null,
-        nextOffset: null,
-        total: null,
-      };
-    }
-    throw error;
-  }
-}
 
 export const itemsRouter = new Hono<EnvBindings>()
   .get(
