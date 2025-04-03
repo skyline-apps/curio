@@ -14,42 +14,42 @@ jobs:
         with:
           node-version: "22.9.0"
 
-      - name: [API] Build custom lint rules
+      - name: API - Build custom lint rules
         working-directory: ./src/api/eslint-local-rules
         run: npm install && npm run build
 
-      - name: [API] Install dependencies
+      - name: API - Install dependencies
         working-directory: ./src/api
         run: npm install
 
-      - name: [API] Run lint
+      - name: API - Run lint
         working-directory: ./src/api
         run: npm run lint
 
-      - name: [API] Run build
+      - name: API - Run build
         working-directory: ./src/api
         run: npm run build
 
-      - name: [API] Run tests
+      - name: API - Run tests
         working-directory: ./src/api
         run: npm run test
 
-      - name: [WEB] Build custom lint rules
+      - name: WEB - Build custom lint rules
         working-directory: ./src/web/eslint-local-rules
         run: npm install && npm run build
 
-      - name: [WEB] Install dependencies
+      - name: WEB - Install dependencies
         working-directory: ./src/web
         run: npm install
 
-      - name: [WEB] Run lint
+      - name: WEB - Run lint
         working-directory: ./src/web
         run: npm run lint
 
-      - name: [WEB] Run build
+      - name: WEB - Run build
         working-directory: ./src/web
         run: npm run build
 
-      - name: [WEB] Run tests
+      - name: WEB - Run tests
         working-directory: ./src/web
         run: npm run test
