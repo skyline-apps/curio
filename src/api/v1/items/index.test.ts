@@ -10,6 +10,7 @@ import {
 } from "@api/db/schema";
 import { searchItemDocuments } from "@api/lib/search";
 import { SearchError } from "@api/lib/search/types";
+import { ErrorResponse } from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
 import {
   createMockAuthMiddleware,
@@ -664,7 +665,7 @@ describe("/api/v1/items", () => {
           urls: "https://example2.com?query=val,https://example3.com/",
         });
         expect(response.status).toBe(400);
-        const data = await response.json();
+        const data: ErrorResponse = await response.json();
         expect(data.error).toContain("Invalid request parameters");
       });
 
@@ -673,7 +674,7 @@ describe("/api/v1/items", () => {
           limit: "0",
         });
         expect(response.status).toBe(400);
-        const data = await response.json();
+        const data: ErrorResponse = await response.json();
         expect(data.error).toContain("Invalid request parameters");
       });
     });
@@ -704,7 +705,7 @@ describe("/api/v1/items", () => {
         });
         expect(response.status).toBe(200);
 
-        const data = await response.json();
+        const data: GetItemsResponse = await response.json();
         expect(data.items).toHaveLength(1);
         expect(data.items[0].id).toBe(TEST_ITEM_ID_3);
         expect(data.total).toBe(1);
@@ -1100,7 +1101,7 @@ describe("/api/v1/items", () => {
         ],
       });
       expect(response.status).toBe(400);
-      const data = await response.json();
+      const data: ErrorResponse = await response.json();
       expect(data.error).toContain("Invalid request parameters");
     });
 
@@ -1114,7 +1115,7 @@ describe("/api/v1/items", () => {
         ],
       });
       expect(response.status).toBe(400);
-      const data = await response.json();
+      const data: ErrorResponse = await response.json();
       expect(data.error).toContain("Invalid request parameters");
     });
 
@@ -1130,7 +1131,7 @@ describe("/api/v1/items", () => {
         ],
       });
       expect(response.status).toBe(400);
-      const data = await response.json();
+      const data: ErrorResponse = await response.json();
       expect(data.error).toContain("Invalid request parameters");
     });
 
@@ -1146,7 +1147,7 @@ describe("/api/v1/items", () => {
         ],
       });
       expect(response.status).toBe(400);
-      const data = await response.json();
+      const data: ErrorResponse = await response.json();
       expect(data.error).toContain("Invalid request parameters");
     });
 

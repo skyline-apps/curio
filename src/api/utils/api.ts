@@ -6,9 +6,11 @@ import { ZodError, ZodType } from "zod";
 
 export type APIRequest = Request;
 
-interface APIResponseJsonError extends TypedResponse {
+export interface ErrorResponse {
   error?: string;
 }
+
+type APIResponseJsonError = TypedResponse & ErrorResponse;
 
 export type APIResponse<T = unknown> =
   | APIResponseJsonError
