@@ -1,12 +1,6 @@
 name: Build
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+on: [push, pull_request]
 
 jobs:
   build:
@@ -20,22 +14,42 @@ jobs:
         with:
           node-version: "22.9.0"
 
-      - name: Build custom lint rules
+      - name: [API] Build custom lint rules
+        working-directory: ./src/api/eslint-local-rules
+        run: npm install && npm run build
+
+      - name: [API] Install dependencies
+        working-directory: ./src/api
+        run: npm install
+
+      - name: [API] Run lint
+        working-directory: ./src/api
+        run: npm run lint
+
+      - name: [API] Run build
+        working-directory: ./src/api
+        run: npm run build
+
+      - name: [API] Run tests
+        working-directory: ./src/api
+        run: npm run test
+
+      - name: [WEB] Build custom lint rules
         working-directory: ./src/web/eslint-local-rules
         run: npm install && npm run build
 
-      - name: Install dependencies
+      - name: [WEB] Install dependencies
         working-directory: ./src/web
         run: npm install
 
-      - name: Run lint
+      - name: [WEB] Run lint
         working-directory: ./src/web
         run: npm run lint
 
-      - name: Run build
+      - name: [WEB] Run build
         working-directory: ./src/web
         run: npm run build
 
-      - name: Run tests
+      - name: [WEB] Run tests
         working-directory: ./src/web
         run: npm run test
