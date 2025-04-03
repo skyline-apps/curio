@@ -1,3 +1,5 @@
+import "zod-openapi/extend";
+
 import { ItemSource, ItemState, TextDirection } from "@api/db/schema";
 import { LabelSchema } from "@api/v1/user/labels/validation";
 import { z } from "zod";
