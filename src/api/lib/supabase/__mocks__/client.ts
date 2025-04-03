@@ -1,4 +1,3 @@
-import { DEFAULT_TEST_USER_ID } from "@api/utils/test/api";
 import type { SupabaseClient } from "@supabase/supabase-js"; // eslint-disable-line no-restricted-imports
 import { vi } from "vitest";
 
@@ -10,7 +9,7 @@ export const supabaseMock = {
   auth: {
     getUser: vi.fn().mockResolvedValue({
       data: {
-        user: { id: DEFAULT_TEST_USER_ID, email: "user@example.com" },
+        user: null,
       },
       error: null,
     }),
@@ -19,7 +18,7 @@ export const supabaseMock = {
     getSession: vi.fn().mockResolvedValue({
       data: {
         session: {
-          user: { id: DEFAULT_TEST_USER_ID, email: "user@example.com" },
+          user: null,
         },
       },
       error: null,

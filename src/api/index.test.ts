@@ -1,5 +1,5 @@
 import { supabaseMock } from "@api/lib/supabase/__mocks__/client";
-import { getRequest } from "@api/utils/test/api";
+import { DEFAULT_TEST_USER_ID, getRequest } from "@api/utils/test/api";
 import { describe, expect, it, Mock } from "vitest";
 
 import app from "./index";
@@ -33,17 +33,17 @@ describe("/api", () => {
 
   describe("Protected routes", () => {
     it("should return 401 when unauthenticated", async () => {
-      (supabaseMock.auth.getUser as unknown as Mock).mockResolvedValue({
-        data: {
-          user: null,
-        },
-        error: null,
-      });
       const response = await getRequest(app, "/v1/items");
       expect(response.status).toBe(401);
     });
 
     it("should return 200 when authenticated", async () => {
+      (supabaseMock.auth.getUser as unknown as Mock).mockResolvedValue({
+        data: {
+          user: { id: DEFAULT_TEST_USER_ID, email: "user@example.com" },
+        },
+        error: null,
+      });
       const response = await getRequest(app, "/v1/items");
       expect(response.status).toBe(200);
     });

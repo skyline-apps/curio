@@ -1,4 +1,5 @@
 import { TextDirection } from "@api/db/schema";
+import { MOCK_ENV } from "@api/utils/test/env";
 import fs from "fs";
 import path from "path";
 import { describe, expect, it, vi } from "vitest";
@@ -43,7 +44,10 @@ describe("@api/lib/email", () => {
         path.join(fixturesPath, "email-single.txt"),
         "utf-8",
       );
-      const parsedEmail = await parseIncomingEmail(email);
+      const parsedEmail = await parseIncomingEmail(
+        MOCK_ENV.CURIO_EMAIL_DOMAIN,
+        email,
+      );
       expect(parsedEmail).toBeDefined();
       expect(parsedEmail!.recipient).toBe("test@testmail.curi.ooo");
       expect(parsedEmail!.subject).toBe("Test email");
@@ -74,7 +78,10 @@ describe("@api/lib/email", () => {
         path.join(fixturesPath, "email-multiple.txt"),
         "utf-8",
       );
-      const parsedEmail = await parseIncomingEmail(email);
+      const parsedEmail = await parseIncomingEmail(
+        MOCK_ENV.CURIO_EMAIL_DOMAIN,
+        email,
+      );
       expect(parsedEmail).toBeDefined();
       expect(parsedEmail!.recipient).toBe("test@testmail.curi.ooo");
       expect(parsedEmail!.subject).toBe("Test multiple recipients");
@@ -91,7 +98,10 @@ describe("@api/lib/email", () => {
         path.join(fixturesPath, "email-headers.txt"),
         "utf-8",
       );
-      const parsedEmail = await parseIncomingEmail(email);
+      const parsedEmail = await parseIncomingEmail(
+        MOCK_ENV.CURIO_EMAIL_DOMAIN,
+        email,
+      );
       // @ts-expect-error https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/69199
       expect(parsedEmail!.headers.get("list")?.post.url).toEqual(
         "https://www.sender.com/p/another-test-newsletter",
@@ -103,7 +113,10 @@ describe("@api/lib/email", () => {
         path.join(fixturesPath, "email-forwarded.txt"),
         "utf-8",
       );
-      const parsedEmail = await parseIncomingEmail(email);
+      const parsedEmail = await parseIncomingEmail(
+        MOCK_ENV.CURIO_EMAIL_DOMAIN,
+        email,
+      );
       expect(parsedEmail).toBeDefined();
       expect(parsedEmail!.recipient).toBe("test@testmail.curi.ooo");
       expect(parsedEmail!.subject).toBe("My newsletter forwarded");

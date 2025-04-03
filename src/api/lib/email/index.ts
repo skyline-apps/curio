@@ -8,8 +8,6 @@ import { type ParsedMail, simpleParser } from "mailparser";
 
 import { type Email, EmailError, type EmailHeaders } from "./types";
 
-export const CURIO_EMAIL_DOMAIN = process.env.CURIO_EMAIL_DOMAIN || "";
-
 function domainsMatch(domain1: string, domain2: string): boolean {
   return getRootDomain(domain1) === getRootDomain(domain2);
 }
@@ -46,9 +44,10 @@ function generateFallbackUrl(senderAddress: string, subject: string): string {
 }
 
 export async function parseIncomingEmail(
+  curioEmailDomain: string,
   mimeEmail: string,
 ): Promise<Email | null> {
-  if (!CURIO_EMAIL_DOMAIN) {
+  if (!curioEmailDomain) {
     throw new EmailError("CURIO_EMAIL_DOMAIN is not set");
   }
 
@@ -60,20 +59,16 @@ export async function parseIncomingEmail(
       const recipient = Array.isArray(parsed.to)
         ? parsed.to
             .find((r) =>
-              r.value.some((addr) =>
-                addr.address?.includes(CURIO_EMAIL_DOMAIN),
-              ),
+              r.value.some((addr) => addr.address?.includes(curioEmailDomain)),
             )
-            ?.value.find((addr) => addr.address?.includes(CURIO_EMAIL_DOMAIN))
+            ?.value.find((addr) => addr.address?.includes(curioEmailDomain))
             ?.address
         : parsed.to?.value.find((addr) =>
-            addr.address?.includes(CURIO_EMAIL_DOMAIN),
+            addr.address?.includes(curioEmailDomain),
           )?.address;
 
       if (!recipient) {
-        throw new EmailError(
-          `Invalid recipient, expected ${CURIO_EMAIL_DOMAIN}`,
-        );
+        throw new EmailError(`Invalid recipient, expected ${curioEmailDomain}`);
       }
 
       // Extract original sender from forwarded email if present
