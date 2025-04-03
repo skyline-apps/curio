@@ -15,6 +15,7 @@ vi.mock("@api/lib/search");
 vi.mock("@api/lib/extract");
 vi.mock("@api/lib/email");
 vi.mock("@api/lib/storage");
+vi.mock("@api/lib/supabase/client");
 vi.mock("@api/utils/logger");
 vi.mock("@api/utils/supabase/server");
 

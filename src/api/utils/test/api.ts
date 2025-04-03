@@ -1,4 +1,5 @@
 import { EnvBindings } from "@api/utils/env";
+import { MOCK_ENV } from "@api/utils/test/env";
 import { Hono, MiddlewareHandler } from "hono";
 
 export const DEFAULT_TEST_USER_ID = "123e4567-e89b-12d3-a456-426614174002";
@@ -27,6 +28,7 @@ export const getRequest = async (
     {
       method: "GET",
     },
+    MOCK_ENV,
   );
 };
 
@@ -35,11 +37,15 @@ export const postRequest = async (
   endpoint: string,
   body?: Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
 ): Promise<Response> => {
-  return await app.request(`${endpoint}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  return await app.request(
+    `${endpoint}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
     },
-    body: JSON.stringify(body),
-  });
+    MOCK_ENV,
+  );
 };

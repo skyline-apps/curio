@@ -1,5 +1,5 @@
 import { authMiddleware } from "@api/middleware/auth";
-import { Env, EnvContext } from "@api/utils/env";
+import { EnvBindings, EnvContext } from "@api/utils/env";
 import log from "@api/utils/logger";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -9,7 +9,7 @@ import { openAPISpecs } from "hono-openapi";
 
 import { v1Router } from "./v1";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<EnvBindings>();
 
 const PUBLIC_ROUTES = ["/auth/callback", "/health", "/openapi", "/v1/public"];
 
