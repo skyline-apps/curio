@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiMiddlewareRule = void 0;
-// src/api/eslint-local-rules/api-middleware.ts
 const utils_1 = require("@typescript-eslint/utils");
 exports.apiMiddlewareRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
     meta: {
@@ -25,8 +24,6 @@ exports.apiMiddlewareRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
                         (object.type === "CallExpression" &&
                             object.callee.type === "MemberExpression" &&
                             ["get", "post", "put", "delete", "patch"].includes(object.callee.property.name));
-                    console.log("-------------", isHonoRoute);
-                    console.log(object);
                     if (isHonoRoute) {
                         const args = node.arguments;
                         const middlewares = args.slice(1);
