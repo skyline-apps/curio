@@ -11,6 +11,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
 import { FlatCompat } from "@eslint/eslintrc";
+import eslintLocalRules from "@local/eslint-local-rules";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,6 +32,7 @@ export default defineConfig([globalIgnores(["**/*.config.js"]), {
         promise,
         "simple-import-sort": simpleImportSort,
         "unused-imports": unusedImports,
+        "@local/eslint-local-rules": eslintLocalRules,
     },
 
     languageOptions: {
@@ -44,6 +46,7 @@ export default defineConfig([globalIgnores(["**/*.config.js"]), {
     },
 
     rules: {
+        "@local/eslint-local-rules/api-middleware": "error",
         "@typescript-eslint/explicit-function-return-type": ["error", {
             allowExpressions: true,
         }],

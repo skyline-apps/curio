@@ -29,6 +29,7 @@
     "zod-openapi": "^4.2.3"
   },
   "devDependencies": {
+    "@local/eslint-local-rules": "file:eslint-local-rules",
     "@cloudflare/workers-types": "^4.20250214.0",
     "@electric-sql/pglite": "^0.2.15",
     "@eslint/eslintrc": "^3.3.1",
