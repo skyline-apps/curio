@@ -1,20 +1,17 @@
 /* eslint-disable no-restricted-imports */
 import * as schema from "@api/db/schema";
 import { type EnvContext } from "@api/utils/env";
-import { drizzle } from "drizzle-orm/node-postgres";
-import { type NodePgDatabase } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
+import { type PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 
-let pool: Pool | null = null;
-export type TransactionDB = NodePgDatabase<typeof schema>;
+export type TransactionDB = PostgresJsDatabase<typeof schema>;
 
 export function getDb(c: EnvContext): TransactionDB {
-  if (!pool) {
-    pool = new Pool({
-      connectionString: c.env.POSTGRES_URL,
-    });
-  }
-  return drizzle(pool, { schema });
+  const client = postgres(c.env.POSTGRES_URL, {
+    /* options like max: 1 */
+  });
+  return drizzle(client, { schema });
 }
 
 export type { InferSelectModel, SQL } from "drizzle-orm";
