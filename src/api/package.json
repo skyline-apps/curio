@@ -8,7 +8,8 @@
     "db:generate": "npx drizzle-kit generate --name",
     "db:migrate": "npx drizzle-kit migrate",
     "lint": "eslint '**/*.ts'",
-    "test": "vitest"
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@hono/node-server": "^1.8.2",

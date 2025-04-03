@@ -26,9 +26,9 @@ jobs:
         working-directory: ./src/api
         run: npm run lint
 
-      - name: API - Run build
+      - name: API - Run typecheck
         working-directory: ./src/api
-        run: npm run build
+        run: npm run typecheck
 
       - name: API - Run tests
         working-directory: ./src/api
