@@ -11,7 +11,7 @@ import { v1Router } from "./v1";
 
 const app = new Hono<EnvBindings>();
 
-const PUBLIC_ROUTES = ["/auth/callback", "/health", "/openapi", "/v1/public"];
+const PUBLIC_ROUTES = ["/auth/callback", "/health", "/openapi"];
 
 // Middleware
 app.use("*", logger(log));
@@ -42,6 +42,11 @@ app.use("*", async (c: EnvContext, next) => {
   // Skip auth for specific paths
   if (PUBLIC_ROUTES.includes(path)) {
     return next();
+  }
+
+  if (path.startsWith("/v1/public")) {
+    c.set("authOptional", true);
+    return authMiddleware(c, next);
   }
 
   return authMiddleware(c, next);

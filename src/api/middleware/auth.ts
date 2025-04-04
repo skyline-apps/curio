@@ -68,7 +68,7 @@ export const authMiddleware = createMiddleware(
     } = await supabase.auth.getUser();
 
     // If API route but no API key and no user, return 401
-    if (error || !user) {
+    if ((error || !user) && !c.get("authOptional")) {
       return c.json({ error: "Unauthorized" }, 401);
     }
 

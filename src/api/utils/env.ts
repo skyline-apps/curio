@@ -26,6 +26,7 @@ export type EnvBindings = {
   Bindings: Env;
   Variables: {
     userId: string;
+    authOptional?: boolean;
   };
 };
 
