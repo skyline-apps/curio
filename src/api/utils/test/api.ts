@@ -63,7 +63,7 @@ export const postRequest = async (
         "Content-Type": "application/json",
         ...(headers ? headers : {}),
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(body ?? {}),
     },
     MOCK_ENV,
   );
@@ -83,7 +83,7 @@ export const deleteRequest = async (
         "Content-Type": "application/json",
         ...(headers ? headers : {}),
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(body ?? {}),
     },
     MOCK_ENV,
   );

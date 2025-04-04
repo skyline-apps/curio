@@ -16,6 +16,7 @@
     "@mozilla/readability": "^0.6.0",
     "@supabase/ssr": "^0.5.1",
     "axios": "^1.7.9",
+    "crypto-random-string": "^5.0.0",
     "drizzle-orm": "^0.38.4",
     "franc": "^6.2.0",
     "hono": "^4.7.5",
