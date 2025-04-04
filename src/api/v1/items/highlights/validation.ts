@@ -1,3 +1,5 @@
+import "zod-openapi/extend";
+
 import { TextDirection } from "@api/db/schema";
 import { z } from "zod";
 

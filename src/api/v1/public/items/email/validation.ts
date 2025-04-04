@@ -1,3 +1,5 @@
+import "zod-openapi/extend";
+
 import { UploadStatus } from "@api/lib/storage/types";
 import { z } from "zod";
 

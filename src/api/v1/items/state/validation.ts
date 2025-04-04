@@ -1,3 +1,5 @@
+import "zod-openapi/extend";
+
 import { ItemState } from "@api/db/schema";
 import { z } from "zod";
 

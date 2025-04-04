@@ -1,3 +1,5 @@
+import "zod-openapi/extend";
+
 import {
   ItemResultSchema,
   PublicItemResultSchema,

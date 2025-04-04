@@ -1,3 +1,5 @@
+import "zod-openapi/extend";
+
 import { PersonalRecommendationType, RecommendationType } from "@api/db/schema";
 import {
   ItemResultSchema,
