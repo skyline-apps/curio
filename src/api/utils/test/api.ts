@@ -35,11 +35,15 @@ export const getRequest = async (
   app: Hono<EnvBindings>,
   endpoint: string,
   params?: Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
+  headers?: Record<string, string>,
 ): Promise<Response> => {
   return await app.request(
     `${endpoint}${params ? `?${new URLSearchParams(params).toString()}` : ""}`,
     {
       method: "GET",
+      headers: {
+        ...(headers ? headers : {}),
+      },
     },
     MOCK_ENV,
   );
@@ -49,6 +53,7 @@ export const postRequest = async (
   app: Hono<EnvBindings>,
   endpoint: string,
   body?: Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
+  headers?: Record<string, string>,
 ): Promise<Response> => {
   return await app.request(
     `${endpoint}`,
@@ -56,6 +61,7 @@ export const postRequest = async (
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...(headers ? headers : {}),
       },
       body: JSON.stringify(body),
     },
@@ -67,6 +73,7 @@ export const deleteRequest = async (
   app: Hono<EnvBindings>,
   endpoint: string,
   body?: Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
+  headers?: Record<string, string>,
 ): Promise<Response> => {
   return await app.request(
     `${endpoint}`,
@@ -74,6 +81,7 @@ export const deleteRequest = async (
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
+        ...(headers ? headers : {}),
       },
       body: JSON.stringify(body),
     },
