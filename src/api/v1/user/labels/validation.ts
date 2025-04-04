@@ -17,6 +17,10 @@ export const LabelSchema = z.object({
 
 export type Label = z.infer<typeof LabelSchema>;
 
+export const GetLabelsRequestSchema = z.object({});
+
+export type GetLabelsRequest = z.infer<typeof GetLabelsRequestSchema>;
+
 export const GetLabelsResponseSchema = z.object({
   labels: z.array(LabelSchema),
 });
