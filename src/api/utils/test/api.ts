@@ -9,6 +9,18 @@ export const DEFAULT_TEST_PROFILE_ID_2 = "123e4567-e89b-12d3-a456-426614174001";
 export const DEFAULT_TEST_USERNAME = "defaultuser";
 export const DEFAULT_TEST_USERNAME_2 = "defaultuser2";
 
+export const setUpMockApp = (
+  app: Hono<EnvBindings>,
+  route: string,
+  router: Hono<EnvBindings>,
+  userId: string = DEFAULT_TEST_USER_ID,
+): Hono<EnvBindings> => {
+  app = new Hono<EnvBindings>();
+  app.use(createMockAuthMiddleware(userId));
+  app.route(route, router);
+  return app;
+};
+
 export const createMockAuthMiddleware = (
   userId: string,
 ): MiddlewareHandler<EnvBindings> => {
