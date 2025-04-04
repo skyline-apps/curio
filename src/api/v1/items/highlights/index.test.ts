@@ -15,12 +15,11 @@ import { HighlightDocumentResult, SearchError } from "@api/lib/search/types";
 import { ErrorResponse } from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
 import {
-  createMockAuthMiddleware,
   DEFAULT_TEST_PROFILE_ID,
-  DEFAULT_TEST_USER_ID,
   deleteRequest,
   getRequest,
   postRequest,
+  setUpMockApp,
 } from "@api/utils/test/api";
 import {
   MOCK_HIGHLIGHTS,
@@ -66,9 +65,7 @@ const MOCK_SEARCH_RESULTS: HighlightDocumentResult[] = [
 describe("/api/v1/items/highlights", () => {
   let app: Hono<EnvBindings>;
   beforeAll(async () => {
-    app = new Hono<EnvBindings>();
-    app.use(createMockAuthMiddleware(DEFAULT_TEST_USER_ID));
-    app.route("/v1/items/highlights", itemsHighlightRouter);
+    app = setUpMockApp("/v1/items/highlights", itemsHighlightRouter);
   });
 
   beforeEach(async () => {

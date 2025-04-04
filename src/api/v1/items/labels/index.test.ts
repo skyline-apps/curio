@@ -7,11 +7,10 @@ import {
 } from "@api/db/schema";
 import { EnvBindings } from "@api/utils/env";
 import {
-  createMockAuthMiddleware,
-  DEFAULT_TEST_USER_ID,
   DEFAULT_TEST_USER_ID_2,
   deleteRequest,
   postRequest,
+  setUpMockApp,
 } from "@api/utils/test/api";
 import {
   MOCK_ITEMS,
@@ -40,131 +39,123 @@ describe("/api/v1/items/labels", () => {
   });
 
   describe("POST /api/v1/items/labels", () => {
-    describe("Main user", () => {
-      beforeAll(async () => {
-        app = new Hono<EnvBindings>();
-        app.use(createMockAuthMiddleware(DEFAULT_TEST_USER_ID));
-        app.route("/v1/items/labels", itemsLabelsRouter);
-      });
-
-      it("should return 200 adding labels via regular auth", async () => {
-        const response = await postRequest(app, "v1/items/labels", {
-          slugs: "example-com,example2-com",
-          labelIds: [TEST_LABEL_ID_1, TEST_LABEL_ID_2],
-        });
-
-        expect(response.status).toBe(200);
-
-        const data = await response.json();
-        expect(data).toEqual({
-          updated: [{ slug: "example2-com" }, { slug: "example-com" }],
-        });
-
-        const newLabels = await testDb.db
-          .select({
-            profileItemId: profileItemLabels.profileItemId,
-            labelId: profileItemLabels.labelId,
-          })
-          .from(profileItemLabels)
-          .innerJoin(
-            profileItems,
-            eq(profileItems.id, profileItemLabels.profileItemId),
-          );
-
-        expect(newLabels.length).toEqual(4);
-        expect(newLabels).toEqual(
-          expect.arrayContaining([
-            {
-              profileItemId: TEST_PROFILE_ITEM_ID_1,
-              labelId: TEST_LABEL_ID_1,
-            },
-            {
-              profileItemId: TEST_PROFILE_ITEM_ID_1,
-              labelId: TEST_LABEL_ID_2,
-            },
-            {
-              profileItemId: TEST_PROFILE_ITEM_ID_2,
-              labelId: TEST_LABEL_ID_1,
-            },
-            {
-              profileItemId: TEST_PROFILE_ITEM_ID_2,
-              labelId: TEST_LABEL_ID_2,
-            },
-          ]),
-        );
-      });
-
-      it("should return 404 if invalid slugs are provided", async () => {
-        const response = await postRequest(app, "v1/items/labels", {
-          slugs: "invalid-slug",
-          labelIds: [TEST_LABEL_ID_1],
-        });
-
-        expect(response.status).toBe(404);
-        const data = await response.json();
-        expect(data).toEqual({ error: "No valid labels provided." });
-      });
-
-      it("should return 400 if no slugs are provided", async () => {
-        const response = await postRequest(app, "v1/items/labels", {
-          slugs: "",
-          labelIds: [TEST_LABEL_ID_1],
-        });
-
-        expect(response.status).toBe(400);
-        const data = await response.json();
-        expect(data).toEqual({ error: "No slugs provided." });
-      });
+    beforeAll(async () => {
+      app = setUpMockApp("/v1/items/labels", itemsLabelsRouter);
     });
-    describe("Secondary user", () => {
-      beforeAll(async () => {
-        app = new Hono<EnvBindings>();
-        app.use(createMockAuthMiddleware(DEFAULT_TEST_USER_ID_2));
-        app.route("/v1/items/labels", itemsLabelsRouter);
+
+    it("should return 200 adding labels via regular auth", async () => {
+      const response = await postRequest(app, "v1/items/labels", {
+        slugs: "example-com,example2-com",
+        labelIds: [TEST_LABEL_ID_1, TEST_LABEL_ID_2],
       });
 
-      it("should return 200 but not add label if item is not owned by profile", async () => {
-        const response = await postRequest(app, "v1/items/labels", {
-          slugs: "example2-com,example3-com",
-          labelIds: [TEST_LABEL_ID_2],
-        });
+      expect(response.status).toBe(200);
 
-        expect(response.status).toBe(200);
+      const data = await response.json();
+      expect(data).toEqual({
+        updated: [{ slug: "example2-com" }, { slug: "example-com" }],
+      });
 
-        const data = await response.json();
-        expect(data).toEqual({
-          updated: [{ slug: "example3-com" }],
-        });
-
-        const newLabels = await testDb.db
-          .select({
-            profileItemId: profileItemLabels.profileItemId,
-            labelId: profileItemLabels.labelId,
-          })
-          .from(profileItemLabels)
-          .innerJoin(
-            profileItems,
-            eq(profileItems.id, profileItemLabels.profileItemId),
-          );
-
-        expect(newLabels.length).toEqual(1);
-        expect(newLabels).toEqual(
-          expect.arrayContaining([
-            {
-              profileItemId: TEST_OTHER_PROFILE_ITEM_ID,
-              labelId: TEST_LABEL_ID_2,
-            },
-          ]),
+      const newLabels = await testDb.db
+        .select({
+          profileItemId: profileItemLabels.profileItemId,
+          labelId: profileItemLabels.labelId,
+        })
+        .from(profileItemLabels)
+        .innerJoin(
+          profileItems,
+          eq(profileItems.id, profileItemLabels.profileItemId),
         );
+
+      expect(newLabels.length).toEqual(4);
+      expect(newLabels).toEqual(
+        expect.arrayContaining([
+          {
+            profileItemId: TEST_PROFILE_ITEM_ID_1,
+            labelId: TEST_LABEL_ID_1,
+          },
+          {
+            profileItemId: TEST_PROFILE_ITEM_ID_1,
+            labelId: TEST_LABEL_ID_2,
+          },
+          {
+            profileItemId: TEST_PROFILE_ITEM_ID_2,
+            labelId: TEST_LABEL_ID_1,
+          },
+          {
+            profileItemId: TEST_PROFILE_ITEM_ID_2,
+            labelId: TEST_LABEL_ID_2,
+          },
+        ]),
+      );
+    });
+
+    it("should return 404 if invalid slugs are provided", async () => {
+      const response = await postRequest(app, "v1/items/labels", {
+        slugs: "invalid-slug",
+        labelIds: [TEST_LABEL_ID_1],
       });
+
+      expect(response.status).toBe(404);
+      const data = await response.json();
+      expect(data).toEqual({ error: "No valid labels provided." });
+    });
+
+    it("should return 400 if no slugs are provided", async () => {
+      const response = await postRequest(app, "v1/items/labels", {
+        slugs: "",
+        labelIds: [TEST_LABEL_ID_1],
+      });
+
+      expect(response.status).toBe(400);
+      const data = await response.json();
+      expect(data).toEqual({ error: "No slugs provided." });
+    });
+
+    it("should return 200 but not add label if item is not owned by profile", async () => {
+      app = setUpMockApp(
+        "/v1/items/labels",
+        itemsLabelsRouter,
+        DEFAULT_TEST_USER_ID_2,
+      );
+      const response = await postRequest(app, "v1/items/labels", {
+        slugs: "example2-com,example3-com",
+        labelIds: [TEST_LABEL_ID_2],
+      });
+
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data).toEqual({
+        updated: [{ slug: "example3-com" }],
+      });
+
+      const newLabels = await testDb.db
+        .select({
+          profileItemId: profileItemLabels.profileItemId,
+          labelId: profileItemLabels.labelId,
+        })
+        .from(profileItemLabels)
+        .innerJoin(
+          profileItems,
+          eq(profileItems.id, profileItemLabels.profileItemId),
+        );
+
+      expect(newLabels.length).toEqual(1);
+      expect(newLabels).toEqual(
+        expect.arrayContaining([
+          {
+            profileItemId: TEST_OTHER_PROFILE_ITEM_ID,
+            labelId: TEST_LABEL_ID_2,
+          },
+        ]),
+      );
     });
   });
 
   describe("DELETE /api/v1/items/labels", () => {
     beforeAll(async () => {
-      app = new Hono<EnvBindings>();
-      app.use(createMockAuthMiddleware(DEFAULT_TEST_USER_ID));
-      app.route("/v1/items/labels", itemsLabelsRouter);
+      app = setUpMockApp("/v1/items/labels", itemsLabelsRouter);
     });
     beforeEach(async () => {
       await testDb.db.insert(profileItemLabels).values([

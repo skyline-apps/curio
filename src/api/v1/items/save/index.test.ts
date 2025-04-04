@@ -35,7 +35,7 @@ describe("/api/v1/items/save", () => {
 
     describe("main user", () => {
       beforeAll(() => {
-        app = setUpMockApp(app, "/v1/items/save", itemsSaveRouter);
+        app = setUpMockApp("/v1/items/save", itemsSaveRouter);
       });
       it("should return 200 when item is already saved", async () => {
         const originalItem = await testDb.db
@@ -166,7 +166,6 @@ describe("/api/v1/items/save", () => {
     describe("secondary user", () => {
       beforeAll(() => {
         app = setUpMockApp(
-          app,
           "/v1/items/save",
           itemsSaveRouter,
           DEFAULT_TEST_USER_ID_2,

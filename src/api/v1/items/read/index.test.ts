@@ -5,11 +5,7 @@ import { MOCK_VERSION } from "@api/lib/storage/__mocks__/index";
 import { StorageError } from "@api/lib/storage/types";
 import { ErrorResponse } from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
-import {
-  createMockAuthMiddleware,
-  DEFAULT_TEST_USER_ID,
-  postRequest,
-} from "@api/utils/test/api";
+import { postRequest, setUpMockApp } from "@api/utils/test/api";
 import { MOCK_ITEMS, MOCK_PROFILE_ITEMS } from "@api/utils/test/data";
 import { testDb } from "@api/utils/test/provider";
 import { Hono } from "hono";
@@ -28,9 +24,7 @@ const MOCK_SLUG = "example2-com";
 describe("/api/v1/items/read", () => {
   let app: Hono<EnvBindings>;
   beforeAll(async () => {
-    app = new Hono<EnvBindings>();
-    app.use(createMockAuthMiddleware(DEFAULT_TEST_USER_ID));
-    app.route("/v1/items/read", itemsReadRouter);
+    app = setUpMockApp("/v1/items/read", itemsReadRouter);
   });
   describe("POST /api/v1/items/read", () => {
     it("should return 200 when reading version name via regular auth", async () => {

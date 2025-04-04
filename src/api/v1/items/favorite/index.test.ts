@@ -3,10 +3,9 @@ import { DbErrorCode } from "@api/db/errors";
 import { items, ItemState, profileItems } from "@api/db/schema";
 import { EnvBindings } from "@api/utils/env";
 import {
-  createMockAuthMiddleware,
   DEFAULT_TEST_PROFILE_ID,
-  DEFAULT_TEST_USER_ID,
   postRequest,
+  setUpMockApp,
 } from "@api/utils/test/api";
 import {
   MOCK_ITEMS,
@@ -26,9 +25,7 @@ describe("/api/v1/items/favorite", () => {
   let app: Hono<EnvBindings>;
   describe("POST /api/v1/items/favorite", () => {
     beforeAll(async () => {
-      app = new Hono<EnvBindings>();
-      app.use(createMockAuthMiddleware(DEFAULT_TEST_USER_ID));
-      app.route("/v1/items/favorite", itemsFavoriteRouter);
+      app = setUpMockApp("/v1/items/favorite", itemsFavoriteRouter);
     });
     it("should return 200 favoriting items via regular auth", async () => {
       await testDb.db.insert(items).values(MOCK_ITEMS);

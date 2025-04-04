@@ -13,12 +13,11 @@ import { SearchError } from "@api/lib/search/types";
 import { ErrorResponse } from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
 import {
-  createMockAuthMiddleware,
   DEFAULT_TEST_PROFILE_ID,
-  DEFAULT_TEST_USER_ID,
   DEFAULT_TEST_USER_ID_2,
   getRequest,
   postRequest,
+  setUpMockApp,
 } from "@api/utils/test/api";
 import {
   MOCK_ITEMS,
@@ -45,688 +44,675 @@ describe("/api/v1/items", () => {
   let app: Hono<EnvBindings>;
 
   describe("GET /api/v1/items", () => {
-    describe("Main user", () => {
-      beforeAll(async () => {
-        app = new Hono<EnvBindings>();
-        app.use(createMockAuthMiddleware(DEFAULT_TEST_USER_ID));
-        app.route("/v1/items", itemsRouter);
-      });
-
-      it("should return 200 with the user's items via regular auth", async () => {
-        await testDb.db.insert(items).values(MOCK_ITEMS[0]);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS[0]);
-
-        const response = await getRequest(app, "v1/items");
-        expect(response.status).toBe(200);
-
-        const data: GetItemsResponse = await response.json();
-
-        expect(data.items).toHaveLength(1);
-        expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
-        expect(data.total).toBe(1);
-        expect(data.items[0].metadata).toEqual({
-          author: "Test Author",
-          description: "First example item",
-          publishedAt: "2025-01-10T20:52:56.000Z",
-          thumbnail: "https://example.com/thumb1.jpg",
-          favicon: "https://example.com/favicon1.ico",
-          textDirection: TextDirection.LTR,
-          textLanguage: "en",
-          title: "Example 1",
-          savedAt: "2025-01-10T20:52:56.000Z",
-          stateUpdatedAt: "2024-04-30T20:52:59.000Z",
-          isFavorite: false,
-          lastReadAt: null,
-          readingProgress: 0,
-          state: ItemState.ARCHIVED,
-          source: null,
-          versionName: null,
-        });
-        expect(data.items[0].labels).toEqual([]);
-      });
-
-      it("should return items with their associated labels", async () => {
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-        await testDb.db.insert(profileLabels).values(MOCK_LABELS);
-        await testDb.db
-          .insert(profileItemLabels)
-          .values(MOCK_PROFILE_ITEM_LABELS);
-
-        const response = await getRequest(app, "v1/items");
-        expect(response.status).toBe(200);
-
-        const data: GetItemsResponse = await response.json();
-        expect(data.items).toHaveLength(3);
-        expect(data.items[0].labels).toEqual([
-          {
-            id: TEST_LABEL_ID_1,
-            name: "Test Label 1",
-            color: "#ff0000",
-          },
-          {
-            id: TEST_LABEL_ID_2,
-            name: "Test Label 2",
-            color: "#00ff00",
-          },
-        ]);
-        expect(data.items[1].labels).toEqual([
-          {
-            id: TEST_LABEL_ID_1,
-            name: "Test Label 1",
-            color: "#ff0000",
-          },
-        ]);
-        expect(data.items[2].labels).toEqual([]);
-      });
-
-      it("should return 200 with active items sorted by stateUpdatedAt desc", async () => {
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values([
-          {
-            profileId: DEFAULT_TEST_PROFILE_ID,
-            itemId: TEST_ITEM_ID_1,
-            title: "Item 1",
-            state: ItemState.ACTIVE,
-            stateUpdatedAt: new Date("2025-01-12T12:52:56-08:00"),
-            savedAt: new Date("2025-01-30T12:52:56-08:00"),
-          },
-          {
-            profileId: DEFAULT_TEST_PROFILE_ID,
-            itemId: TEST_ITEM_ID_2,
-            title: "Item 2",
-            state: ItemState.ACTIVE,
-            stateUpdatedAt: new Date("2025-01-22T12:52:56-08:00"),
-            savedAt: new Date("2025-01-20T12:52:56-08:00"),
-          },
-          {
-            profileId: DEFAULT_TEST_PROFILE_ID,
-            itemId: TEST_ITEM_ID_3,
-            title: "Item 3",
-            state: ItemState.ACTIVE,
-            stateUpdatedAt: new Date("2025-01-17T12:52:56-08:00"),
-            savedAt: new Date("2025-01-10T12:52:56-08:00"),
-          },
-        ]);
-
-        const response = await getRequest(app, "v1/items", {
-          limit: "2",
-          filters: JSON.stringify({ state: ItemState.ACTIVE }),
-        });
-
-        expect(response.status).toBe(200);
-        const data: GetItemsResponse = await response.json();
-        expect(data.items).toHaveLength(2);
-        expect(data.nextCursor).toBe("2025-01-17T20:52:56.000Z");
-        expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
-        expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
-      });
-
-      it("should support cursor-based pagination", async () => {
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-
-        const firstResponse = await getRequest(app, "v1/items", { limit: "2" });
-        expect(firstResponse.status).toBe(200);
-
-        const firstData: GetItemsResponse = await firstResponse.json();
-        expect(firstData.items).toHaveLength(2);
-        expect(firstData.total).toBe(3);
-        expect(firstData.nextCursor).toBe(
-          MOCK_PROFILE_ITEMS[1].stateUpdatedAt.toISOString(),
-        );
-        expect(firstData.items[0].id).toBe(TEST_ITEM_ID_1); // Most recent first
-        expect(firstData.items[1].id).toBe(TEST_ITEM_ID_2);
-
-        const secondResponse = await getRequest(app, "v1/items", {
-          limit: "2",
-          cursor: firstData.nextCursor || "",
-        });
-        expect(secondResponse.status).toBe(200);
-
-        const secondData: GetItemsResponse = await secondResponse.json();
-        expect(secondData.items).toHaveLength(1);
-        expect(secondData.total).toBe(3);
-        expect(secondData.nextCursor).toBeUndefined(); // No more pages
-        expect(secondData.items[0].id).toBe(TEST_ITEM_ID_3); // Last item
-      });
-
-      it("should support offset-based pagination when searching", async () => {
-        vi.mocked(searchItemDocuments).mockResolvedValueOnce({
-          hits: [
-            {
-              slug: MOCK_ITEMS[1].slug,
-              url: MOCK_ITEMS[1].url,
-              title: MOCK_PROFILE_ITEMS[1].title,
-              _formatted: { content: "blah2" },
-            },
-            {
-              slug: MOCK_ITEMS[0].slug,
-              url: MOCK_ITEMS[0].url,
-              title: MOCK_PROFILE_ITEMS[0].title,
-              _formatted: { content: "blah" },
-            },
-          ],
-          estimatedTotalHits: 3,
-        });
-
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-
-        const firstResponse = await getRequest(app, "v1/items", {
-          limit: "2",
-          search: "universal",
-        });
-        expect(firstResponse.status).toBe(200);
-
-        const firstData: GetItemsResponse = await firstResponse.json();
-        expect(firstData.items).toHaveLength(2);
-        expect(firstData.total).toBe(3);
-        expect(firstData.nextOffset).toBe(2);
-        expect(firstData.items[0].id).toBe(TEST_ITEM_ID_2);
-        expect(firstData.items[0].excerpt).toBe("blah2");
-        expect(firstData.items[1].id).toBe(TEST_ITEM_ID_1);
-        expect(firstData.items[1].excerpt).toBe("blah");
-        vi.mocked(searchItemDocuments).mockResolvedValueOnce({
-          hits: [
-            {
-              slug: MOCK_ITEMS[2].slug,
-              url: MOCK_ITEMS[2].url,
-              title: MOCK_PROFILE_ITEMS[2].title,
-              _formatted: { content: "blah3" },
-            },
-          ],
-          estimatedTotalHits: 3,
-        });
-
-        const secondResponse = await getRequest(app, "v1/items", {
-          limit: "2",
-          offset: "2",
-          search: "universal",
-        });
-        expect(secondResponse.status).toBe(200);
-
-        const secondData: GetItemsResponse = await secondResponse.json();
-        expect(secondData.items).toHaveLength(1);
-        expect(secondData.total).toBe(3);
-        expect(secondData.nextOffset).toBeUndefined();
-        expect(secondData.items[0].id).toBe(TEST_ITEM_ID_3);
-        expect(secondData.items[0].excerpt).toBe("blah3");
-      });
-
-      it("should return 200 when fetching specific slugs", async () => {
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-
-        const response = await getRequest(app, "v1/items", {
-          slugs: "example-com,example2-com",
-        });
-        expect(response.status).toBe(200);
-
-        const data: GetItemsResponse = await response.json();
-        expect(data.items).toHaveLength(2);
-        expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
-        expect(data.items[1].id).toBe(TEST_ITEM_ID_2);
-        expect(data.total).toBe(2);
-      });
-
-      it("should return 200 when fetching specific urls", async () => {
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-
-        const response = await getRequest(app, "v1/items", {
-          urls: "https://example2.com?query=val,https://example3.com/",
-        });
-        expect(response.status).toBe(200);
-
-        const data: GetItemsResponse = await response.json();
-        expect(data.items).toHaveLength(2);
-        expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
-        expect(data.items[0].metadata.versionName).toBe(null);
-        expect(data.items[0].metadata.lastReadAt).toBe(null);
-        expect(data.items[0].metadata.isFavorite).toBe(true);
-        expect(data.items[0].metadata.readingProgress).toBe(0);
-        expect(data.items[0].metadata.state).toBe(ItemState.ACTIVE);
-        expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
-        expect(data.items[1].metadata.versionName).toBe("2024-01-01");
-        expect(data.items[1].metadata.lastReadAt).toBe(
-          "2025-01-15T20:00:00.000Z",
-        );
-        expect(data.items[1].metadata.isFavorite).toBe(false);
-        expect(data.items[1].metadata.readingProgress).toBe(10);
-        expect(data.items[1].metadata.state).toBe(ItemState.ARCHIVED);
-        expect(data.total).toBe(2);
-      });
-
-      it("should return 200 when applying a filter", async () => {
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-
-        const response = await getRequest(app, "v1/items", {
-          filters: JSON.stringify({
-            state: ItemState.DELETED,
-          }),
-        });
-        expect(response.status).toBe(200);
-
-        const data: GetItemsResponse = await response.json();
-        expect(data.items).toHaveLength(1);
-        expect(data.items[0].id).toBe(TEST_ITEM_ID_DELETED);
-        expect(data.total).toBe(1);
-        expect(searchItemDocuments).not.toHaveBeenCalled();
-      });
-
-      it("should return 200 when applying multiple filters", async () => {
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-
-        const response = await getRequest(app, "v1/items", {
-          filters: JSON.stringify({
-            state: ItemState.ACTIVE,
-            isFavorite: true,
-          }),
-        });
-        expect(response.status).toBe(200);
-
-        const data: GetItemsResponse = await response.json();
-        expect(data.items).toHaveLength(1);
-        expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
-        expect(data.total).toBe(1);
-        expect(searchItemDocuments).not.toHaveBeenCalled();
-      });
-
-      it("should return 200 with empty results if search has no results", async () => {
-        vi.mocked(searchItemDocuments).mockResolvedValueOnce({
-          hits: [],
-          estimatedTotalHits: 0,
-        });
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-
-        const response = await getRequest(app, "v1/items", {
-          search: "NO MATCHES",
-        });
-        expect(response.status).toBe(200);
-
-        const data: GetItemsResponse = await response.json();
-        expect(data.items).toHaveLength(0);
-        expect(data.total).toBe(0);
-        expect(searchItemDocuments).toHaveBeenCalledTimes(1);
-      });
-
-      it("should return 200 when fuzzy searching items", async () => {
-        vi.mocked(searchItemDocuments).mockResolvedValueOnce({
-          hits: [
-            {
-              slug: MOCK_ITEMS[1].slug,
-              url: MOCK_ITEMS[1].url,
-              title: MOCK_PROFILE_ITEMS[1].title,
-              _formatted: { content: "blah blah" },
-            },
-          ],
-          estimatedTotalHits: 1,
-        });
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-
-        const response = await getRequest(app, "v1/items", {
-          search: "hellO",
-        });
-        expect(response.status).toBe(200);
-
-        const data: GetItemsResponse = await response.json();
-        expect(data.items).toHaveLength(1);
-        expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
-        expect(data.total).toBe(1);
-        expect(searchItemDocuments).toHaveBeenCalledTimes(1);
-        expect(searchItemDocuments).toHaveBeenCalledWith(
-          expect.any(Object),
-          "hellO",
-          {
-            limit: 20,
-            offset: 0,
-          },
-        );
-      });
-
-      it("should return 200 when falling back to naive database search for title / description", async () => {
-        vi.mocked(searchItemDocuments).mockRejectedValueOnce(
-          new SearchError("Search failed"),
-        );
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-
-        const response = await getRequest(app, "v1/items", {
-          search: "item 2",
-        });
-        expect(response.status).toBe(200);
-
-        const data: GetItemsResponse = await response.json();
-        expect(data.items).toHaveLength(2);
-        expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
-        expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
-        expect(data.total).toBe(2);
-        expect(searchItemDocuments).toHaveBeenCalledTimes(1);
-        expect(searchItemDocuments).toHaveBeenCalledWith(
-          expect.any(Object),
-          "item 2",
-          {
-            limit: 20,
-            offset: 0,
-          },
-        );
-      });
-
-      it("should return 200 when falling back to naive database search for url", async () => {
-        vi.mocked(searchItemDocuments).mockRejectedValueOnce(
-          new SearchError("Search failed"),
-        );
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-
-        const response = await getRequest(app, "v1/items", {
-          search: "https://example.com",
-        });
-        expect(response.status).toBe(200);
-
-        const data: GetItemsResponse = await response.json();
-        expect(data.items).toHaveLength(1);
-        expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
-        expect(data.total).toBe(1);
-        expect(searchItemDocuments).toHaveBeenCalledTimes(1);
-        expect(searchItemDocuments).toHaveBeenCalledWith(
-          expect.any(Object),
-          "https://example.com",
-          {
-            limit: 20,
-            offset: 0,
-          },
-        );
-      });
-
-      it("should return 200 when combining filters and search", async () => {
-        vi.mocked(searchItemDocuments).mockResolvedValueOnce({
-          hits: [
-            {
-              slug: MOCK_ITEMS[2].slug,
-              url: MOCK_ITEMS[2].url,
-              title: MOCK_PROFILE_ITEMS[2].title,
-              _formatted: { content: "blah blah blah" },
-            },
-            {
-              slug: MOCK_ITEMS[0].slug,
-              url: MOCK_ITEMS[0].url,
-              title: MOCK_PROFILE_ITEMS[0].title,
-              _formatted: { content: "blah blah blah" },
-            },
-            {
-              slug: MOCK_ITEMS[1].slug,
-              url: MOCK_ITEMS[1].url,
-              title: MOCK_PROFILE_ITEMS[1].title,
-              _formatted: { content: "blah blah blah" },
-            },
-          ],
-          estimatedTotalHits: 3,
-        });
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-        const response = await getRequest(app, "v1/items", {
-          filters: JSON.stringify({
-            state: ItemState.ARCHIVED,
-            isFavorite: false,
-          }),
-          search: "item",
-        });
-        expect(response.status).toBe(200);
-
-        const data: GetItemsResponse = await response.json();
-        expect(data.items).toHaveLength(2);
-        expect(data.items[0].id).toBe(TEST_ITEM_ID_3);
-        expect(data.items[1].id).toBe(TEST_ITEM_ID_1);
-        expect(data.total).toBe(3);
-        expect(searchItemDocuments).toHaveBeenCalledTimes(1);
-        expect(searchItemDocuments).toHaveBeenCalledWith(
-          expect.any(Object),
-          "item",
-          {
-            limit: 20,
-            offset: 0,
-          },
-        );
-      });
-
-      it("should return 200 with empty results and incremented offset", async () => {
-        vi.mocked(searchItemDocuments).mockResolvedValueOnce({
-          hits: [
-            {
-              slug: MOCK_ITEMS[3].slug,
-              url: MOCK_ITEMS[3].url,
-              title: MOCK_PROFILE_ITEMS[3].title,
-              _formatted: { content: "blah blah blah" },
-            },
-          ],
-          estimatedTotalHits: 2,
-        });
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-        const response = await getRequest(app, "v1/items", {
-          search: "item",
-          limit: "1",
-        });
-        expect(response.status).toBe(200);
-
-        const data: GetItemsResponse = await response.json();
-        expect(data.items).toHaveLength(0);
-        expect(data.nextOffset).toBe(1);
-        expect(data.total).toBe(2);
-        vi.mocked(searchItemDocuments).mockResolvedValueOnce({
-          hits: [
-            {
-              slug: MOCK_ITEMS[2].slug,
-              url: MOCK_ITEMS[2].url,
-              title: MOCK_PROFILE_ITEMS[2].title,
-              _formatted: { content: "blah blah blah" },
-            },
-          ],
-          estimatedTotalHits: 2,
-        });
-
-        const response2 = await getRequest(app, "v1/items", {
-          search: "item",
-          limit: "1",
-          offset: "1",
-        });
-        expect(response2.status).toBe(200);
-
-        const data2: GetItemsResponse = await response2.json();
-        expect(data2.items).toHaveLength(1);
-        expect(data2.nextOffset).toBe(undefined);
-        expect(data2.total).toBe(2);
-        expect(data2.items[0].id).toBe(TEST_ITEM_ID_3);
-      });
-
-      it("should return 200 when filtering by inactive state ordering by stateUpdatedAt", async () => {
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-
-        const response = await getRequest(app, "v1/items", {
-          filters: JSON.stringify({
-            state: ItemState.ARCHIVED,
-          }),
-        });
-        expect(response.status).toBe(200);
-
-        const data: GetItemsResponse = await response.json();
-        expect(data.items).toHaveLength(2);
-        expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
-        expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
-        expect(data.total).toBe(2);
-      });
-
-      it("should return 200 with no label filters if list is empty", async () => {
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-        await testDb.db.insert(profileLabels).values(MOCK_LABELS);
-        await testDb.db
-          .insert(profileItemLabels)
-          .values(MOCK_PROFILE_ITEM_LABELS);
-
-        const response = await getRequest(app, "v1/items", {
-          filters: JSON.stringify({
-            labels: {
-              ids: [],
-            },
-          }),
-        });
-
-        expect(response.status).toBe(200);
-
-        const data: GetItemsResponse = await response.json();
-        expect(data.items).toHaveLength(3);
-      });
-
-      it("should return 200 with label filters specified with AND", async () => {
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-        await testDb.db.insert(profileLabels).values(MOCK_LABELS);
-        await testDb.db
-          .insert(profileItemLabels)
-          .values(MOCK_PROFILE_ITEM_LABELS);
-
-        const response = await getRequest(app, "v1/items", {
-          filters: JSON.stringify({
-            labels: {
-              operator: "and",
-              ids: [TEST_LABEL_ID_1, TEST_LABEL_ID_2],
-            },
-          }),
-        });
-
-        expect(response.status).toBe(200);
-
-        const data: GetItemsResponse = await response.json();
-        expect(data.items).toHaveLength(1);
-        expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
-        expect(data.total).toBe(1);
-      });
-
-      it("should return 200 with label filters specified with OR", async () => {
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-        await testDb.db.insert(profileLabels).values(MOCK_LABELS);
-        await testDb.db
-          .insert(profileItemLabels)
-          .values(MOCK_PROFILE_ITEM_LABELS);
-
-        const response = await getRequest(app, "v1/items", {
-          filters: JSON.stringify({
-            labels: {
-              operator: "or",
-              ids: [TEST_LABEL_ID_1, TEST_LABEL_ID_2],
-            },
-          }),
-        });
-
-        expect(response.status).toBe(200);
-
-        const data: GetItemsResponse = await response.json();
-        expect(data.items).toHaveLength(2);
-        expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
-        expect(data.items[1].id).toBe(TEST_ITEM_ID_2);
-        expect(data.total).toBe(2);
-      });
-
-      it("should return 200 on invalid thumbnail url", async () => {
-        await testDb.db.insert(items).values(MOCK_ITEMS[0]);
-        await testDb.db.insert(profileItems).values({
-          profileId: DEFAULT_TEST_PROFILE_ID,
-          itemId: TEST_ITEM_ID_1,
-          title: "Example",
-          description: "An example item",
-          author: "Test Author",
-          thumbnail: "bad",
-        });
-
-        const response = await getRequest(app, "v1/items");
-        expect(response.status).toBe(200);
-
-        const data: GetItemsResponse = await response.json();
-        expect(data.items).toHaveLength(1);
-        expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
-        expect(data.items[0].metadata.thumbnail).toBe(null);
-      });
-
-      it("should return 400 when both slugs and urls are provided", async () => {
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-
-        const response = await getRequest(app, "v1/items", {
-          slugs: "example-com,example2-com",
-          urls: "https://example2.com?query=val,https://example3.com/",
-        });
-        expect(response.status).toBe(400);
-        const data: ErrorResponse = await response.json();
-        expect(data.error).toContain("Invalid request parameters");
-      });
-
-      it("should return 400 with default limit if limit is invalid", async () => {
-        const response = await getRequest(app, "v1/items", {
-          limit: "0",
-        });
-        expect(response.status).toBe(400);
-        const data: ErrorResponse = await response.json();
-        expect(data.error).toContain("Invalid request parameters");
-      });
+    beforeAll(async () => {
+      app = setUpMockApp("/v1/items", itemsRouter);
     });
 
-    describe("Secondary user", () => {
-      beforeAll(async () => {
-        app = new Hono<EnvBindings>();
-        app.use(createMockAuthMiddleware(DEFAULT_TEST_USER_ID_2));
-        app.route("/v1/items", itemsRouter);
+    it("should return 200 with the user's items via regular auth", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS[0]);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS[0]);
+
+      const response = await getRequest(app, "v1/items");
+      expect(response.status).toBe(200);
+
+      const data: GetItemsResponse = await response.json();
+
+      expect(data.items).toHaveLength(1);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
+      expect(data.total).toBe(1);
+      expect(data.items[0].metadata).toEqual({
+        author: "Test Author",
+        description: "First example item",
+        publishedAt: "2025-01-10T20:52:56.000Z",
+        thumbnail: "https://example.com/thumb1.jpg",
+        favicon: "https://example.com/favicon1.ico",
+        textDirection: TextDirection.LTR,
+        textLanguage: "en",
+        title: "Example 1",
+        savedAt: "2025-01-10T20:52:56.000Z",
+        stateUpdatedAt: "2024-04-30T20:52:59.000Z",
+        isFavorite: false,
+        lastReadAt: null,
+        readingProgress: 0,
+        state: ItemState.ARCHIVED,
+        source: null,
+        versionName: null,
+      });
+      expect(data.items[0].labels).toEqual([]);
+    });
+
+    it("should return items with their associated labels", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+      await testDb.db.insert(profileLabels).values(MOCK_LABELS);
+      await testDb.db
+        .insert(profileItemLabels)
+        .values(MOCK_PROFILE_ITEM_LABELS);
+
+      const response = await getRequest(app, "v1/items");
+      expect(response.status).toBe(200);
+
+      const data: GetItemsResponse = await response.json();
+      expect(data.items).toHaveLength(3);
+      expect(data.items[0].labels).toEqual([
+        {
+          id: TEST_LABEL_ID_1,
+          name: "Test Label 1",
+          color: "#ff0000",
+        },
+        {
+          id: TEST_LABEL_ID_2,
+          name: "Test Label 2",
+          color: "#00ff00",
+        },
+      ]);
+      expect(data.items[1].labels).toEqual([
+        {
+          id: TEST_LABEL_ID_1,
+          name: "Test Label 1",
+          color: "#ff0000",
+        },
+      ]);
+      expect(data.items[2].labels).toEqual([]);
+    });
+
+    it("should return 200 with active items sorted by stateUpdatedAt desc", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values([
+        {
+          profileId: DEFAULT_TEST_PROFILE_ID,
+          itemId: TEST_ITEM_ID_1,
+          title: "Item 1",
+          state: ItemState.ACTIVE,
+          stateUpdatedAt: new Date("2025-01-12T12:52:56-08:00"),
+          savedAt: new Date("2025-01-30T12:52:56-08:00"),
+        },
+        {
+          profileId: DEFAULT_TEST_PROFILE_ID,
+          itemId: TEST_ITEM_ID_2,
+          title: "Item 2",
+          state: ItemState.ACTIVE,
+          stateUpdatedAt: new Date("2025-01-22T12:52:56-08:00"),
+          savedAt: new Date("2025-01-20T12:52:56-08:00"),
+        },
+        {
+          profileId: DEFAULT_TEST_PROFILE_ID,
+          itemId: TEST_ITEM_ID_3,
+          title: "Item 3",
+          state: ItemState.ACTIVE,
+          stateUpdatedAt: new Date("2025-01-17T12:52:56-08:00"),
+          savedAt: new Date("2025-01-10T12:52:56-08:00"),
+        },
+      ]);
+
+      const response = await getRequest(app, "v1/items", {
+        limit: "2",
+        filters: JSON.stringify({ state: ItemState.ACTIVE }),
       });
 
-      it("should return 200 and return only results belonging to the user", async () => {
-        vi.mocked(searchItemDocuments).mockResolvedValueOnce({
-          hits: [
-            {
-              slug: MOCK_ITEMS[2].slug,
-              url: MOCK_ITEMS[2].url,
-              title: MOCK_PROFILE_ITEMS[2].title,
-              _formatted: { content: "blah blah blah" },
-            },
-          ],
-          estimatedTotalHits: 1,
-        });
-        await testDb.db.insert(items).values(MOCK_ITEMS);
-        await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
-        const response = await getRequest(app, "/v1/items", {
-          search: "itemsearch",
-        });
-        expect(response.status).toBe(200);
+      expect(response.status).toBe(200);
+      const data: GetItemsResponse = await response.json();
+      expect(data.items).toHaveLength(2);
+      expect(data.nextCursor).toBe("2025-01-17T20:52:56.000Z");
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
+      expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
+    });
 
-        const data: GetItemsResponse = await response.json();
-        expect(data.items).toHaveLength(1);
-        expect(data.items[0].id).toBe(TEST_ITEM_ID_3);
-        expect(data.total).toBe(1);
-        expect(searchItemDocuments).toHaveBeenCalledTimes(1);
-        expect(searchItemDocuments).toHaveBeenCalledWith(
-          expect.any(Object),
-          "itemsearch",
+    it("should support cursor-based pagination", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+      const firstResponse = await getRequest(app, "v1/items", { limit: "2" });
+      expect(firstResponse.status).toBe(200);
+
+      const firstData: GetItemsResponse = await firstResponse.json();
+      expect(firstData.items).toHaveLength(2);
+      expect(firstData.total).toBe(3);
+      expect(firstData.nextCursor).toBe(
+        MOCK_PROFILE_ITEMS[1].stateUpdatedAt.toISOString(),
+      );
+      expect(firstData.items[0].id).toBe(TEST_ITEM_ID_1); // Most recent first
+      expect(firstData.items[1].id).toBe(TEST_ITEM_ID_2);
+
+      const secondResponse = await getRequest(app, "v1/items", {
+        limit: "2",
+        cursor: firstData.nextCursor || "",
+      });
+      expect(secondResponse.status).toBe(200);
+
+      const secondData: GetItemsResponse = await secondResponse.json();
+      expect(secondData.items).toHaveLength(1);
+      expect(secondData.total).toBe(3);
+      expect(secondData.nextCursor).toBeUndefined(); // No more pages
+      expect(secondData.items[0].id).toBe(TEST_ITEM_ID_3); // Last item
+    });
+
+    it("should support offset-based pagination when searching", async () => {
+      vi.mocked(searchItemDocuments).mockResolvedValueOnce({
+        hits: [
           {
-            limit: 20,
-            offset: 0,
+            slug: MOCK_ITEMS[1].slug,
+            url: MOCK_ITEMS[1].url,
+            title: MOCK_PROFILE_ITEMS[1].title,
+            _formatted: { content: "blah2" },
           },
-        );
+          {
+            slug: MOCK_ITEMS[0].slug,
+            url: MOCK_ITEMS[0].url,
+            title: MOCK_PROFILE_ITEMS[0].title,
+            _formatted: { content: "blah" },
+          },
+        ],
+        estimatedTotalHits: 3,
       });
+
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+      const firstResponse = await getRequest(app, "v1/items", {
+        limit: "2",
+        search: "universal",
+      });
+      expect(firstResponse.status).toBe(200);
+
+      const firstData: GetItemsResponse = await firstResponse.json();
+      expect(firstData.items).toHaveLength(2);
+      expect(firstData.total).toBe(3);
+      expect(firstData.nextOffset).toBe(2);
+      expect(firstData.items[0].id).toBe(TEST_ITEM_ID_2);
+      expect(firstData.items[0].excerpt).toBe("blah2");
+      expect(firstData.items[1].id).toBe(TEST_ITEM_ID_1);
+      expect(firstData.items[1].excerpt).toBe("blah");
+      vi.mocked(searchItemDocuments).mockResolvedValueOnce({
+        hits: [
+          {
+            slug: MOCK_ITEMS[2].slug,
+            url: MOCK_ITEMS[2].url,
+            title: MOCK_PROFILE_ITEMS[2].title,
+            _formatted: { content: "blah3" },
+          },
+        ],
+        estimatedTotalHits: 3,
+      });
+
+      const secondResponse = await getRequest(app, "v1/items", {
+        limit: "2",
+        offset: "2",
+        search: "universal",
+      });
+      expect(secondResponse.status).toBe(200);
+
+      const secondData: GetItemsResponse = await secondResponse.json();
+      expect(secondData.items).toHaveLength(1);
+      expect(secondData.total).toBe(3);
+      expect(secondData.nextOffset).toBeUndefined();
+      expect(secondData.items[0].id).toBe(TEST_ITEM_ID_3);
+      expect(secondData.items[0].excerpt).toBe("blah3");
+    });
+
+    it("should return 200 when fetching specific slugs", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+      const response = await getRequest(app, "v1/items", {
+        slugs: "example-com,example2-com",
+      });
+      expect(response.status).toBe(200);
+
+      const data: GetItemsResponse = await response.json();
+      expect(data.items).toHaveLength(2);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
+      expect(data.items[1].id).toBe(TEST_ITEM_ID_2);
+      expect(data.total).toBe(2);
+    });
+
+    it("should return 200 when fetching specific urls", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+      const response = await getRequest(app, "v1/items", {
+        urls: "https://example2.com?query=val,https://example3.com/",
+      });
+      expect(response.status).toBe(200);
+
+      const data: GetItemsResponse = await response.json();
+      expect(data.items).toHaveLength(2);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
+      expect(data.items[0].metadata.versionName).toBe(null);
+      expect(data.items[0].metadata.lastReadAt).toBe(null);
+      expect(data.items[0].metadata.isFavorite).toBe(true);
+      expect(data.items[0].metadata.readingProgress).toBe(0);
+      expect(data.items[0].metadata.state).toBe(ItemState.ACTIVE);
+      expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
+      expect(data.items[1].metadata.versionName).toBe("2024-01-01");
+      expect(data.items[1].metadata.lastReadAt).toBe(
+        "2025-01-15T20:00:00.000Z",
+      );
+      expect(data.items[1].metadata.isFavorite).toBe(false);
+      expect(data.items[1].metadata.readingProgress).toBe(10);
+      expect(data.items[1].metadata.state).toBe(ItemState.ARCHIVED);
+      expect(data.total).toBe(2);
+    });
+
+    it("should return 200 when applying a filter", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+      const response = await getRequest(app, "v1/items", {
+        filters: JSON.stringify({
+          state: ItemState.DELETED,
+        }),
+      });
+      expect(response.status).toBe(200);
+
+      const data: GetItemsResponse = await response.json();
+      expect(data.items).toHaveLength(1);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_DELETED);
+      expect(data.total).toBe(1);
+      expect(searchItemDocuments).not.toHaveBeenCalled();
+    });
+
+    it("should return 200 when applying multiple filters", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+      const response = await getRequest(app, "v1/items", {
+        filters: JSON.stringify({
+          state: ItemState.ACTIVE,
+          isFavorite: true,
+        }),
+      });
+      expect(response.status).toBe(200);
+
+      const data: GetItemsResponse = await response.json();
+      expect(data.items).toHaveLength(1);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
+      expect(data.total).toBe(1);
+      expect(searchItemDocuments).not.toHaveBeenCalled();
+    });
+
+    it("should return 200 with empty results if search has no results", async () => {
+      vi.mocked(searchItemDocuments).mockResolvedValueOnce({
+        hits: [],
+        estimatedTotalHits: 0,
+      });
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+      const response = await getRequest(app, "v1/items", {
+        search: "NO MATCHES",
+      });
+      expect(response.status).toBe(200);
+
+      const data: GetItemsResponse = await response.json();
+      expect(data.items).toHaveLength(0);
+      expect(data.total).toBe(0);
+      expect(searchItemDocuments).toHaveBeenCalledTimes(1);
+    });
+
+    it("should return 200 when fuzzy searching items", async () => {
+      vi.mocked(searchItemDocuments).mockResolvedValueOnce({
+        hits: [
+          {
+            slug: MOCK_ITEMS[1].slug,
+            url: MOCK_ITEMS[1].url,
+            title: MOCK_PROFILE_ITEMS[1].title,
+            _formatted: { content: "blah blah" },
+          },
+        ],
+        estimatedTotalHits: 1,
+      });
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+      const response = await getRequest(app, "v1/items", {
+        search: "hellO",
+      });
+      expect(response.status).toBe(200);
+
+      const data: GetItemsResponse = await response.json();
+      expect(data.items).toHaveLength(1);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
+      expect(data.total).toBe(1);
+      expect(searchItemDocuments).toHaveBeenCalledTimes(1);
+      expect(searchItemDocuments).toHaveBeenCalledWith(
+        expect.any(Object),
+        "hellO",
+        {
+          limit: 20,
+          offset: 0,
+        },
+      );
+    });
+
+    it("should return 200 when falling back to naive database search for title / description", async () => {
+      vi.mocked(searchItemDocuments).mockRejectedValueOnce(
+        new SearchError("Search failed"),
+      );
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+      const response = await getRequest(app, "v1/items", {
+        search: "item 2",
+      });
+      expect(response.status).toBe(200);
+
+      const data: GetItemsResponse = await response.json();
+      expect(data.items).toHaveLength(2);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_2);
+      expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
+      expect(data.total).toBe(2);
+      expect(searchItemDocuments).toHaveBeenCalledTimes(1);
+      expect(searchItemDocuments).toHaveBeenCalledWith(
+        expect.any(Object),
+        "item 2",
+        {
+          limit: 20,
+          offset: 0,
+        },
+      );
+    });
+
+    it("should return 200 when falling back to naive database search for url", async () => {
+      vi.mocked(searchItemDocuments).mockRejectedValueOnce(
+        new SearchError("Search failed"),
+      );
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+      const response = await getRequest(app, "v1/items", {
+        search: "https://example.com",
+      });
+      expect(response.status).toBe(200);
+
+      const data: GetItemsResponse = await response.json();
+      expect(data.items).toHaveLength(1);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
+      expect(data.total).toBe(1);
+      expect(searchItemDocuments).toHaveBeenCalledTimes(1);
+      expect(searchItemDocuments).toHaveBeenCalledWith(
+        expect.any(Object),
+        "https://example.com",
+        {
+          limit: 20,
+          offset: 0,
+        },
+      );
+    });
+
+    it("should return 200 when combining filters and search", async () => {
+      vi.mocked(searchItemDocuments).mockResolvedValueOnce({
+        hits: [
+          {
+            slug: MOCK_ITEMS[2].slug,
+            url: MOCK_ITEMS[2].url,
+            title: MOCK_PROFILE_ITEMS[2].title,
+            _formatted: { content: "blah blah blah" },
+          },
+          {
+            slug: MOCK_ITEMS[0].slug,
+            url: MOCK_ITEMS[0].url,
+            title: MOCK_PROFILE_ITEMS[0].title,
+            _formatted: { content: "blah blah blah" },
+          },
+          {
+            slug: MOCK_ITEMS[1].slug,
+            url: MOCK_ITEMS[1].url,
+            title: MOCK_PROFILE_ITEMS[1].title,
+            _formatted: { content: "blah blah blah" },
+          },
+        ],
+        estimatedTotalHits: 3,
+      });
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+      const response = await getRequest(app, "v1/items", {
+        filters: JSON.stringify({
+          state: ItemState.ARCHIVED,
+          isFavorite: false,
+        }),
+        search: "item",
+      });
+      expect(response.status).toBe(200);
+
+      const data: GetItemsResponse = await response.json();
+      expect(data.items).toHaveLength(2);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_3);
+      expect(data.items[1].id).toBe(TEST_ITEM_ID_1);
+      expect(data.total).toBe(3);
+      expect(searchItemDocuments).toHaveBeenCalledTimes(1);
+      expect(searchItemDocuments).toHaveBeenCalledWith(
+        expect.any(Object),
+        "item",
+        {
+          limit: 20,
+          offset: 0,
+        },
+      );
+    });
+
+    it("should return 200 with empty results and incremented offset", async () => {
+      vi.mocked(searchItemDocuments).mockResolvedValueOnce({
+        hits: [
+          {
+            slug: MOCK_ITEMS[3].slug,
+            url: MOCK_ITEMS[3].url,
+            title: MOCK_PROFILE_ITEMS[3].title,
+            _formatted: { content: "blah blah blah" },
+          },
+        ],
+        estimatedTotalHits: 2,
+      });
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+      const response = await getRequest(app, "v1/items", {
+        search: "item",
+        limit: "1",
+      });
+      expect(response.status).toBe(200);
+
+      const data: GetItemsResponse = await response.json();
+      expect(data.items).toHaveLength(0);
+      expect(data.nextOffset).toBe(1);
+      expect(data.total).toBe(2);
+      vi.mocked(searchItemDocuments).mockResolvedValueOnce({
+        hits: [
+          {
+            slug: MOCK_ITEMS[2].slug,
+            url: MOCK_ITEMS[2].url,
+            title: MOCK_PROFILE_ITEMS[2].title,
+            _formatted: { content: "blah blah blah" },
+          },
+        ],
+        estimatedTotalHits: 2,
+      });
+
+      const response2 = await getRequest(app, "v1/items", {
+        search: "item",
+        limit: "1",
+        offset: "1",
+      });
+      expect(response2.status).toBe(200);
+
+      const data2: GetItemsResponse = await response2.json();
+      expect(data2.items).toHaveLength(1);
+      expect(data2.nextOffset).toBe(undefined);
+      expect(data2.total).toBe(2);
+      expect(data2.items[0].id).toBe(TEST_ITEM_ID_3);
+    });
+
+    it("should return 200 when filtering by inactive state ordering by stateUpdatedAt", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+      const response = await getRequest(app, "v1/items", {
+        filters: JSON.stringify({
+          state: ItemState.ARCHIVED,
+        }),
+      });
+      expect(response.status).toBe(200);
+
+      const data: GetItemsResponse = await response.json();
+      expect(data.items).toHaveLength(2);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
+      expect(data.items[1].id).toBe(TEST_ITEM_ID_3);
+      expect(data.total).toBe(2);
+    });
+
+    it("should return 200 with no label filters if list is empty", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+      await testDb.db.insert(profileLabels).values(MOCK_LABELS);
+      await testDb.db
+        .insert(profileItemLabels)
+        .values(MOCK_PROFILE_ITEM_LABELS);
+
+      const response = await getRequest(app, "v1/items", {
+        filters: JSON.stringify({
+          labels: {
+            ids: [],
+          },
+        }),
+      });
+
+      expect(response.status).toBe(200);
+
+      const data: GetItemsResponse = await response.json();
+      expect(data.items).toHaveLength(3);
+    });
+
+    it("should return 200 with label filters specified with AND", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+      await testDb.db.insert(profileLabels).values(MOCK_LABELS);
+      await testDb.db
+        .insert(profileItemLabels)
+        .values(MOCK_PROFILE_ITEM_LABELS);
+
+      const response = await getRequest(app, "v1/items", {
+        filters: JSON.stringify({
+          labels: {
+            operator: "and",
+            ids: [TEST_LABEL_ID_1, TEST_LABEL_ID_2],
+          },
+        }),
+      });
+
+      expect(response.status).toBe(200);
+
+      const data: GetItemsResponse = await response.json();
+      expect(data.items).toHaveLength(1);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
+      expect(data.total).toBe(1);
+    });
+
+    it("should return 200 with label filters specified with OR", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+      await testDb.db.insert(profileLabels).values(MOCK_LABELS);
+      await testDb.db
+        .insert(profileItemLabels)
+        .values(MOCK_PROFILE_ITEM_LABELS);
+
+      const response = await getRequest(app, "v1/items", {
+        filters: JSON.stringify({
+          labels: {
+            operator: "or",
+            ids: [TEST_LABEL_ID_1, TEST_LABEL_ID_2],
+          },
+        }),
+      });
+
+      expect(response.status).toBe(200);
+
+      const data: GetItemsResponse = await response.json();
+      expect(data.items).toHaveLength(2);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
+      expect(data.items[1].id).toBe(TEST_ITEM_ID_2);
+      expect(data.total).toBe(2);
+    });
+
+    it("should return 200 on invalid thumbnail url", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS[0]);
+      await testDb.db.insert(profileItems).values({
+        profileId: DEFAULT_TEST_PROFILE_ID,
+        itemId: TEST_ITEM_ID_1,
+        title: "Example",
+        description: "An example item",
+        author: "Test Author",
+        thumbnail: "bad",
+      });
+
+      const response = await getRequest(app, "v1/items");
+      expect(response.status).toBe(200);
+
+      const data: GetItemsResponse = await response.json();
+      expect(data.items).toHaveLength(1);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_1);
+      expect(data.items[0].metadata.thumbnail).toBe(null);
+    });
+
+    it("should return 400 when both slugs and urls are provided", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+
+      const response = await getRequest(app, "v1/items", {
+        slugs: "example-com,example2-com",
+        urls: "https://example2.com?query=val,https://example3.com/",
+      });
+      expect(response.status).toBe(400);
+      const data: ErrorResponse = await response.json();
+      expect(data.error).toContain("Invalid request parameters");
+    });
+
+    it("should return 400 with default limit if limit is invalid", async () => {
+      const response = await getRequest(app, "v1/items", {
+        limit: "0",
+      });
+      expect(response.status).toBe(400);
+      const data: ErrorResponse = await response.json();
+      expect(data.error).toContain("Invalid request parameters");
+    });
+
+    it("should return 200 and return only results belonging to the user", async () => {
+      app = setUpMockApp("/v1/items", itemsRouter, DEFAULT_TEST_USER_ID_2);
+      vi.mocked(searchItemDocuments).mockResolvedValueOnce({
+        hits: [
+          {
+            slug: MOCK_ITEMS[2].slug,
+            url: MOCK_ITEMS[2].url,
+            title: MOCK_PROFILE_ITEMS[2].title,
+            _formatted: { content: "blah blah blah" },
+          },
+        ],
+        estimatedTotalHits: 1,
+      });
+      await testDb.db.insert(items).values(MOCK_ITEMS);
+      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);
+      const response = await getRequest(app, "/v1/items", {
+        search: "itemsearch",
+      });
+      expect(response.status).toBe(200);
+
+      const data: GetItemsResponse = await response.json();
+      expect(data.items).toHaveLength(1);
+      expect(data.items[0].id).toBe(TEST_ITEM_ID_3);
+      expect(data.total).toBe(1);
+      expect(searchItemDocuments).toHaveBeenCalledTimes(1);
+      expect(searchItemDocuments).toHaveBeenCalledWith(
+        expect.any(Object),
+        "itemsearch",
+        {
+          limit: 20,
+          offset: 0,
+        },
+      );
     });
   });
 
   describe("POST /api/v1/items", () => {
     beforeAll(() => {
-      app = new Hono<EnvBindings>();
-      app.use(createMockAuthMiddleware(DEFAULT_TEST_USER_ID));
-      app.route("/v1/items", itemsRouter);
+      app = setUpMockApp("/v1/items", itemsRouter);
     });
 
     it("should return 200 creating untitled item via regular auth", async () => {

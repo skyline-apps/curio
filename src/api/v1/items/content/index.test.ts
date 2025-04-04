@@ -22,11 +22,7 @@ import { MOCK_VERSION } from "@api/lib/storage/__mocks__/index";
 import { UploadStatus } from "@api/lib/storage/types";
 import { ErrorResponse } from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
-import {
-  createMockAuthMiddleware,
-  DEFAULT_TEST_USER_ID,
-  postRequest,
-} from "@api/utils/test/api";
+import { postRequest, setUpMockApp } from "@api/utils/test/api";
 import {
   MOCK_ITEMS,
   MOCK_PROFILE_ITEMS,
@@ -70,9 +66,7 @@ describe("/api/v1/items/content", () => {
   let app: Hono<EnvBindings>;
   describe("POST /api/v1/items/content", () => {
     beforeAll(async () => {
-      app = new Hono<EnvBindings>();
-      app.use(createMockAuthMiddleware(DEFAULT_TEST_USER_ID));
-      app.route("/v1/items/content", itemsContentRouter);
+      app = setUpMockApp("/v1/items/content", itemsContentRouter);
     });
 
     const checkDocumentIndexed = (): void => {
