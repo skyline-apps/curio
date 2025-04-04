@@ -15,6 +15,9 @@ export const HighlightSchema = z.object({
 export const ItemResultWithHighlightsSchema = ItemResultSchema.extend({
   highlights: z.array(HighlightSchema),
 });
+export type ItemResultWithHighlights = z.infer<
+  typeof ItemResultWithHighlightsSchema
+>;
 
 export const GetItemContentRequestSchema = z.object({
   slug: z.string().describe("The unique slug of the item to retrieve."),

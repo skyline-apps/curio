@@ -22,15 +22,12 @@ export const GetItemContentRequestSchema = z.object({
   slug: z.string().describe("The unique slug of the item to retrieve."),
 });
 
-export const GetItemContentResponseSchema = z.union([
-  z.object({
-    content: z.string().optional(),
-    item: z.union([ItemResultWithHighlightsSchema, PublicItemResultSchema]),
-  }),
-  z.object({
-    error: z.string(),
-  }),
-]);
+export type GetItemContentRequest = z.infer<typeof GetItemContentRequestSchema>;
+
+export const GetItemContentResponseSchema = z.object({
+  content: z.string().optional(),
+  item: z.union([ItemResultWithHighlightsSchema, PublicItemResultSchema]),
+});
 
 export type GetItemContentResponse = z.infer<
   typeof GetItemContentResponseSchema

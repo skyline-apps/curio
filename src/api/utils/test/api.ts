@@ -21,10 +21,12 @@ const createMockAuthMiddleware = (
 export const setUpMockApp = (
   route: string,
   router: Hono<EnvBindings>,
-  userId: string = DEFAULT_TEST_USER_ID,
+  userId: string | null = DEFAULT_TEST_USER_ID,
 ): Hono<EnvBindings> => {
   const app = new Hono<EnvBindings>();
-  app.use(createMockAuthMiddleware(userId));
+  if (userId) {
+    app.use(createMockAuthMiddleware(userId));
+  }
   app.route(route, router);
   return app;
 };
