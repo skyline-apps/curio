@@ -2,6 +2,7 @@ import { MOCK_METADATA } from "@api/lib/extract/__mocks__/index";
 import { ExtractedMetadata } from "@api/lib/extract/types";
 import { UploadStatus } from "@api/lib/storage/types";
 import { type VersionMetadata } from "@api/lib/storage/types";
+import { EnvContext } from "@api/utils/env";
 import { vi } from "vitest";
 
 export const MOCK_VERSION = "2024-10-20T12:00:00.000Z";
@@ -28,6 +29,7 @@ export const getItemMetadata = vi.fn().mockResolvedValue({
 // Export class with mock functions
 export class Storage {
   async uploadItemContent(
+    c: EnvContext,
     slug: string,
     content: string,
     metadata: ExtractedMetadata,
@@ -35,18 +37,19 @@ export class Storage {
     versionName: string;
     status: Exclude<UploadStatus, UploadStatus.ERROR>;
   }> {
-    return uploadItemContent(slug, content, metadata);
+    return uploadItemContent(c, slug, content, metadata);
   }
 
   async getItemContent(
+    c: EnvContext,
     slug: string,
     version: string | null,
   ): Promise<{ version: string | null; versionName: string; content: string }> {
-    return getItemContent(slug, version);
+    return getItemContent(c, slug, version);
   }
 
-  async getItemMetadata(slug: string): Promise<VersionMetadata> {
-    return getItemMetadata(slug);
+  async getItemMetadata(c: EnvContext, slug: string): Promise<VersionMetadata> {
+    return getItemMetadata(c, slug);
   }
 }
 

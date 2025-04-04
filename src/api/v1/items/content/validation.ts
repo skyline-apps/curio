@@ -1,3 +1,5 @@
+import "zod-openapi/extend";
+
 import { UploadStatus } from "@api/lib/storage/types";
 import { ItemResultSchema } from "@api/v1/items/validation";
 import { z } from "zod";
@@ -35,12 +37,16 @@ export type GetItemContentResponse = z.infer<
 export const UpdateItemContentRequestSchema = z.object({
   htmlContent: z
     .string()
+    .min(1)
     .describe(
       "The HTML content for the item. Will replace the existing content only if it's longer.",
     ),
-  url: z.string().describe("The URL of the item to update."),
+  url: z.string().min(1).describe("The URL of the item to update."),
   skipMetadataExtraction: z.boolean().optional().default(false),
 });
+export type UpdateItemContentRequest = z.infer<
+  typeof UpdateItemContentRequestSchema
+>;
 
 export const UpdateItemContentResponseSchema = z.discriminatedUnion("status", [
   z.object({
