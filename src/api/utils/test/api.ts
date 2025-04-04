@@ -49,3 +49,21 @@ export const postRequest = async (
     MOCK_ENV,
   );
 };
+
+export const deleteRequest = async (
+  app: Hono<EnvBindings>,
+  endpoint: string,
+  body?: Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
+): Promise<Response> => {
+  return await app.request(
+    `${endpoint}`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    },
+    MOCK_ENV,
+  );
+};
