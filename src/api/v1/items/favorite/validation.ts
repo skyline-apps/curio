@@ -1,3 +1,5 @@
+import "zod-openapi/extend";
+
 import { z } from "zod";
 
 export const UpdateFavoriteRequestSchema = z.object({
