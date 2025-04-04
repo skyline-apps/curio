@@ -447,10 +447,6 @@ describe("/v1/profile", () => {
       });
 
       it("should return 200 when viewing public profile", async () => {
-        await testDb.db
-          .update(profiles)
-          .set({ public: true })
-          .where(eq(profiles.id, DEFAULT_TEST_PROFILE_ID));
         const response = await getRequest(app, "v1/public/profile", {
           username: DEFAULT_TEST_USERNAME,
         });

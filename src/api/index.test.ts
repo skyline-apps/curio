@@ -1,5 +1,9 @@
 import { supabaseMock } from "@api/lib/supabase/__mocks__/client";
-import { DEFAULT_TEST_USER_ID, getRequest } from "@api/utils/test/api";
+import {
+  DEFAULT_TEST_USER_ID,
+  DEFAULT_TEST_USERNAME,
+  getRequest,
+} from "@api/utils/test/api";
 import { describe, expect, it, Mock } from "vitest";
 
 import app from "./index";
@@ -45,6 +49,28 @@ describe("/api", () => {
         error: null,
       });
       const response = await getRequest(app, "/v1/items");
+      expect(response.status).toBe(200);
+    });
+  });
+
+  describe("Public routes", () => {
+    it("should return 200 when unauthenticated", async () => {
+      const response = await getRequest(app, "/v1/public/profile", {
+        username: DEFAULT_TEST_USERNAME,
+      });
+      expect(response.status).toBe(200);
+    });
+
+    it("should return 200 when authenticated", async () => {
+      (supabaseMock.auth.getUser as unknown as Mock).mockResolvedValue({
+        data: {
+          user: { id: DEFAULT_TEST_USER_ID, email: "user@example.com" },
+        },
+        error: null,
+      });
+      const response = await getRequest(app, "/v1/public/profile", {
+        username: DEFAULT_TEST_USERNAME,
+      });
       expect(response.status).toBe(200);
     });
   });

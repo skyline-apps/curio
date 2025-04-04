@@ -44,6 +44,7 @@ beforeAll(async () => {
     createdAt: new Date("2025-01-10T12:52:56-08:00"),
     updatedAt: new Date("2025-01-10T12:52:56-08:00"),
     newsletterEmail: "test@testmail.curi.ooo",
+    public: true,
   });
 
   await testDb.db.insert(profiles).values({
