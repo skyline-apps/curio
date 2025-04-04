@@ -21,9 +21,9 @@ import { itemsFavoriteRouter } from "./index";
 
 const ORIGINAL_ARCHIVED_TIME = new Date("2025-01-10T12:52:56-08:00");
 
-describe("/api/v1/items/favorite", () => {
+describe("/v1/items/favorite", () => {
   let app: Hono<EnvBindings>;
-  describe("POST /api/v1/items/favorite", () => {
+  describe("POST /v1/items/favorite", () => {
     beforeAll(async () => {
       app = setUpMockApp("/v1/items/favorite", itemsFavoriteRouter);
     });

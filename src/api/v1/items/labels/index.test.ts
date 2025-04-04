@@ -30,7 +30,7 @@ const TEST_PROFILE_ITEM_ID_1 = MOCK_PROFILE_ITEMS[0].id;
 const TEST_PROFILE_ITEM_ID_2 = MOCK_PROFILE_ITEMS[1].id;
 const TEST_OTHER_PROFILE_ITEM_ID = MOCK_PROFILE_ITEMS[4].id;
 
-describe("/api/v1/items/labels", () => {
+describe("/v1/items/labels", () => {
   let app: Hono<EnvBindings>;
   beforeEach(async () => {
     await testDb.db.insert(items).values(MOCK_ITEMS);
@@ -38,7 +38,7 @@ describe("/api/v1/items/labels", () => {
     await testDb.db.insert(profileLabels).values(MOCK_LABELS);
   });
 
-  describe("POST /api/v1/items/labels", () => {
+  describe("POST /v1/items/labels", () => {
     beforeAll(async () => {
       app = setUpMockApp("/v1/items/labels", itemsLabelsRouter);
     });
@@ -153,7 +153,7 @@ describe("/api/v1/items/labels", () => {
     });
   });
 
-  describe("DELETE /api/v1/items/labels", () => {
+  describe("DELETE /v1/items/labels", () => {
     beforeAll(async () => {
       app = setUpMockApp("/v1/items/labels", itemsLabelsRouter);
     });

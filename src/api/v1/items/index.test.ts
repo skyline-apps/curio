@@ -40,10 +40,10 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
 import { itemsRouter } from "./index";
 import { GetItemsResponse } from "./validation";
 
-describe("/api/v1/items", () => {
+describe("/v1/items", () => {
   let app: Hono<EnvBindings>;
 
-  describe("GET /api/v1/items", () => {
+  describe("GET /v1/items", () => {
     beforeAll(async () => {
       app = setUpMockApp("/v1/items", itemsRouter);
     });
@@ -710,7 +710,7 @@ describe("/api/v1/items", () => {
     });
   });
 
-  describe("POST /api/v1/items", () => {
+  describe("POST /v1/items", () => {
     beforeAll(() => {
       app = setUpMockApp("/v1/items", itemsRouter);
     });

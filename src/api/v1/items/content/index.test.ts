@@ -62,9 +62,9 @@ const MOCK_HIGHLIGHTS = [
   },
 ];
 
-describe("/api/v1/items/content", () => {
+describe("/v1/items/content", () => {
   let app: Hono<EnvBindings>;
-  describe("POST /api/v1/items/content", () => {
+  describe("POST /v1/items/content", () => {
     beforeAll(async () => {
       app = setUpMockApp("/v1/items/content", itemsContentRouter);
     });

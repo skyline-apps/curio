@@ -25,9 +25,9 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { itemsSaveRouter } from "./index";
 import { SaveResponse } from "./validation";
 
-describe("/api/v1/items/save", () => {
+describe("/v1/items/save", () => {
   let app: Hono<EnvBindings>;
-  describe("POST /api/v1/items/save", () => {
+  describe("POST /v1/items/save", () => {
     beforeEach(async () => {
       await testDb.db.insert(items).values(MOCK_ITEMS);
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS);

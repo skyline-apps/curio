@@ -30,7 +30,7 @@ import {
   RecommendationSection,
 } from "./validation";
 
-describe("GET /api/v1/items/recommended", () => {
+describe("GET /v1/items/recommended", () => {
   let app: Hono<EnvBindings>;
 
   describe("using default test data", () => {

@@ -62,7 +62,7 @@ const MOCK_SEARCH_RESULTS: HighlightDocumentResult[] = [
   },
 ];
 
-describe("/api/v1/items/highlights", () => {
+describe("/v1/items/highlights", () => {
   let app: Hono<EnvBindings>;
   beforeAll(async () => {
     app = setUpMockApp("/v1/items/highlights", itemsHighlightRouter);
@@ -74,7 +74,7 @@ describe("/api/v1/items/highlights", () => {
     await testDb.db.insert(profileItemHighlights).values(MOCK_HIGHLIGHTS);
   });
 
-  describe("GET /api/v1/items/highlights", () => {
+  describe("GET /v1/items/highlights", () => {
     it("should return all highlights in order of updatedAt by default", async () => {
       searchHighlightDocuments.mockResolvedValueOnce({
         hits: MOCK_SEARCH_RESULTS,
@@ -193,7 +193,7 @@ describe("/api/v1/items/highlights", () => {
     });
   });
 
-  describe("POST /api/v1/items/highlights", () => {
+  describe("POST /v1/items/highlights", () => {
     it("should create new highlights", async () => {
       const response = await postRequest(app, "v1/items/highlights", {
         slug: "example-com",
@@ -389,7 +389,7 @@ describe("/api/v1/items/highlights", () => {
     });
   });
 
-  describe("DELETE /api/v1/items/highlights", () => {
+  describe("DELETE /v1/items/highlights", () => {
     it("should delete highlights", async () => {
       const response = await deleteRequest(app, "v1/items/highlights", {
         slug: "example-com",

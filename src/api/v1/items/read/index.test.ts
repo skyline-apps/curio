@@ -21,12 +21,12 @@ const MOCK_PROFILE_ITEM_WITH_VERSION = {
 };
 const MOCK_SLUG = "example2-com";
 
-describe("/api/v1/items/read", () => {
+describe("/v1/items/read", () => {
   let app: Hono<EnvBindings>;
   beforeAll(async () => {
     app = setUpMockApp("/v1/items/read", itemsReadRouter);
   });
-  describe("POST /api/v1/items/read", () => {
+  describe("POST /v1/items/read", () => {
     it("should return 200 when reading version name via regular auth", async () => {
       await testDb.db.insert(items).values(MOCK_ITEM);
       await testDb.db
