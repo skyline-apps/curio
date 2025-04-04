@@ -3,7 +3,7 @@ import "zod-openapi/extend";
 import { z } from "zod";
 
 export const ReadItemRequestSchema = z.object({
-  slug: z.string(),
+  slug: z.string().min(1),
   readingProgress: z.number().min(0).max(100),
 });
 
