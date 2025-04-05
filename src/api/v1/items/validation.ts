@@ -1,6 +1,7 @@
 import "zod-openapi/extend";
 
 import { ItemSource, ItemState, TextDirection } from "@api/db/schema";
+import { dateType } from "@api/utils/types";
 import { LabelSchema } from "@api/v1/user/labels/validation";
 import { z } from "zod";
 
@@ -8,15 +9,6 @@ const UrlSchema = z.string().url().describe("Unique URL of the item.");
 const SlugSchema = z
   .string()
   .describe("Unique slug for the item used to identify it in its URL.");
-const dateType = z
-  .union([z.string(), z.date()])
-  .transform((val) => {
-    if (val instanceof Date) {
-      return val.toISOString();
-    }
-    return val;
-  })
-  .pipe(z.string());
 
 const FiltersSchema = z
   .string()
