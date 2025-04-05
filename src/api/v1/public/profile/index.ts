@@ -1,5 +1,4 @@
-import { and, desc, eq, getDb, sql } from "@api/db";
-import { checkUserProfile } from "@api/db/dal/profile";
+import { and, desc, eq, sql } from "@api/db";
 import { fetchOwnItemResults } from "@api/db/dal/profileItems";
 import { profileItems, profiles } from "@api/db/schema";
 import { apiDoc, APIResponse, parseError } from "@api/utils/api";
@@ -31,13 +30,10 @@ export const publicProfileRouter = new Hono<EnvBindings>().get(
     parseError<GetProfileRequest, GetProfileResponse>,
   ),
   async (c): Promise<APIResponse<GetProfileResponse>> => {
-    const userId = c.get("userId");
+    const userProfileId = c.get("profileId");
     const { username, limit, cursor } = c.req.valid("query");
     try {
-      const profileResult = await checkUserProfile(c, userId);
-      const userProfile = profileResult.profile;
-
-      const db = getDb(c);
+      const db = c.get("db");
       const profile = await db.query.profiles.findFirst({
         where: and(
           eq(profiles.username, username),
@@ -49,11 +45,11 @@ export const publicProfileRouter = new Hono<EnvBindings>().get(
         return c.json({ error: "Profile not found" }, 404);
       }
 
-      const isOwner = userProfile && profile.id === userProfile.id;
+      const isOwner = userProfileId && profile.id === userProfileId;
 
       // Check if user has access to view the profile
       const canView =
-        profile.public || (userProfile && profile.id === userProfile.id);
+        profile.public || (userProfileId && profile.id === userProfileId);
 
       if (!canView) {
         return c.json({ error: "Profile not found" }, 404);

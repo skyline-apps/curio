@@ -1,16 +1,18 @@
 import { eq } from "@api/db";
+import { DbErrorCode } from "@api/db/errors";
 import { apiKeys, profiles } from "@api/db/schema";
 import { supabaseMock } from "@api/lib/supabase/__mocks__/client";
 import {
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_USER_ID,
+  DEFAULT_TEST_USER_ID_2,
   DEFAULT_TEST_USERNAME,
   getRequest,
 } from "@api/utils/test/api";
 import { testDb } from "@api/utils/test/provider";
 import fs from "fs";
 import path from "path";
-import { afterEach, beforeEach, describe, expect, it, Mock } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, Mock, vi } from "vitest";
 
 import app from "./index";
 
@@ -126,6 +128,21 @@ describe("/api", () => {
       expect(response.status).toBe(401);
     });
 
+    it("should return 500 when authenticated but DB connection fails", async () => {
+      vi.spyOn(testDb.db, "select").mockImplementationOnce(() => {
+        throw { code: DbErrorCode.ConnectionFailure };
+      });
+      (supabaseMock.auth.getUser as unknown as Mock).mockResolvedValue({
+        data: {
+          user: { id: DEFAULT_TEST_USER_ID, email: "user@example.com" },
+        },
+        error: null,
+      });
+
+      const response = await getRequest(app, "/v1/items");
+      expect(response.status).toBe(500);
+    });
+
     describe("API keys", () => {
       let key: string;
       beforeEach(async () => {
@@ -210,6 +227,19 @@ describe("/api", () => {
       (supabaseMock.auth.getUser as unknown as Mock).mockResolvedValue({
         data: {
           user: { id: DEFAULT_TEST_USER_ID, email: "user@example.com" },
+        },
+        error: null,
+      });
+      const response = await getRequest(app, "/v1/public/profile", {
+        username: DEFAULT_TEST_USERNAME,
+      });
+      expect(response.status).toBe(200);
+    });
+
+    it("should return 200 when authenticated even if profile is private", async () => {
+      (supabaseMock.auth.getUser as unknown as Mock).mockResolvedValue({
+        data: {
+          user: { id: DEFAULT_TEST_USER_ID_2, email: "user2@example.com" },
         },
         error: null,
       });

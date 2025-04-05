@@ -1,5 +1,4 @@
-import { and, eq, getDb, inArray, sql } from "@api/db";
-import { checkUserProfile } from "@api/db/dal/profile";
+import { and, eq, inArray, sql } from "@api/db";
 import { items, profileItemLabels, profileItems } from "@api/db/schema";
 import { apiDoc, APIResponse, parseError } from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
@@ -31,18 +30,13 @@ export const itemsLabelsRouter = new Hono<EnvBindings>()
       parseError<UpdateLabelsRequest, UpdateLabelsResponse>,
     ),
     async (c): Promise<APIResponse<UpdateLabelsResponse>> => {
-      const userId = c.get("userId");
+      const profileId = c.get("profileId")!;
       try {
-        const profileResult = await checkUserProfile(c, userId);
-        if (profileResult.error) {
-          return profileResult.error;
-        }
-
         const { slugs, labelIds } = c.req.valid("json");
         if (!slugs || slugs.length === 0) {
           return c.json({ error: "No slugs provided." }, 400);
         }
-        const db = getDb(c);
+        const db = c.get("db");
 
         const insertValues = await db
           .select({
@@ -57,7 +51,7 @@ export const itemsLabelsRouter = new Hono<EnvBindings>()
           .innerJoin(items, eq(profileItems.itemId, items.id))
           .where(
             and(
-              eq(profileItems.profileId, profileResult.profile.id),
+              eq(profileItems.profileId, profileId),
               inArray(items.slug, slugs),
             ),
           );
@@ -98,20 +92,15 @@ export const itemsLabelsRouter = new Hono<EnvBindings>()
       parseError<BulkDeleteLabelsRequest, BulkDeleteLabelsResponse>,
     ),
     async (c): Promise<APIResponse<BulkDeleteLabelsResponse>> => {
-      const userId = c.get("userId");
+      const profileId = c.get("profileId")!;
 
       try {
-        const profileResult = await checkUserProfile(c, userId);
-        if (profileResult.error) {
-          return profileResult.error;
-        }
-
         const { slugs, labelIds } = c.req.valid("json");
         if (!slugs || slugs.length === 0) {
           return c.json({ error: "No slugs provided." }, 400);
         }
 
-        const db = getDb(c);
+        const db = c.get("db");
         const labelsToDelete = await db
           .select({
             profileItemLabelId: profileItemLabels.id,
@@ -126,7 +115,7 @@ export const itemsLabelsRouter = new Hono<EnvBindings>()
           .innerJoin(items, eq(profileItems.itemId, items.id))
           .where(
             and(
-              eq(profileItems.profileId, profileResult.profile.id),
+              eq(profileItems.profileId, profileId),
               inArray(profileItemLabels.labelId, labelIds),
               inArray(items.slug, slugs),
             ),

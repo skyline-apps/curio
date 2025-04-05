@@ -1,5 +1,4 @@
-import { and, eq, getDb, sql } from "@api/db";
-import { checkUserProfile } from "@api/db/dal/profile";
+import { and, eq, sql } from "@api/db";
 import { items, profileItems } from "@api/db/schema";
 import { storage } from "@api/lib/storage";
 import { apiDoc, APIResponse, parseError } from "@api/utils/api";
@@ -25,15 +24,10 @@ export const itemsReadRouter = new Hono<EnvBindings>().post(
     parseError<ReadItemRequest, ReadItemResponse>,
   ),
   async (c): Promise<APIResponse<ReadItemResponse>> => {
-    const userId = c.get("userId");
+    const profileId = c.get("profileId")!;
     try {
-      const profileResult = await checkUserProfile(c, userId);
-      if (profileResult.error) {
-        return profileResult.error;
-      }
-
       const { slug, readingProgress } = c.req.valid("json");
-      const db = getDb(c);
+      const db = c.get("db");
 
       const itemData = await db
         .select({
@@ -45,7 +39,7 @@ export const itemsReadRouter = new Hono<EnvBindings>().post(
         .innerJoin(items, eq(profileItems.itemId, items.id))
         .where(
           and(
-            eq(profileItems.profileId, profileResult.profile.id),
+            eq(profileItems.profileId, profileId),
             sql`${items.slug} = ${slug}`,
           ),
         );
@@ -73,7 +67,7 @@ export const itemsReadRouter = new Hono<EnvBindings>().post(
         .where(
           and(
             eq(profileItems.itemId, items.id),
-            eq(profileItems.profileId, profileResult.profile.id),
+            eq(profileItems.profileId, profileId),
             sql`${items.slug} = ${slug}`,
           ),
         )

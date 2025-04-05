@@ -1,5 +1,4 @@
-import { eq, getDb } from "@api/db";
-import { checkUserProfile } from "@api/db/dal/profile";
+import { eq } from "@api/db";
 import { apiKeys } from "@api/db/schema";
 import { apiDoc, APIResponse, parseError } from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
@@ -32,22 +31,17 @@ export const userApiKeysRouter = new Hono<EnvBindings>()
       parseError<GetApiKeysRequest, GetApiKeysResponse>,
     ),
     async (c): Promise<APIResponse<GetApiKeysResponse>> => {
-      const userId = c.get("userId");
+      const profileId = c.get("profileId")!;
 
       try {
-        const profileResult = await checkUserProfile(c, userId);
-        if (profileResult.error) {
-          return profileResult.error;
-        }
-
-        const db = getDb(c);
+        const db = c.get("db");
         const keys = await db.query.apiKeys.findMany({
-          where: eq(apiKeys.profileId, profileResult.profile.id),
+          where: eq(apiKeys.profileId, profileId),
         });
 
         return c.json(GetApiKeysResponseSchema.parse({ keys }));
       } catch (error) {
-        log(`Error listing API keys for user ${userId}:`, error);
+        log(`Error listing API keys for user ${profileId}:`, error);
         return c.json({ error: "Failed to list API keys" }, 500);
       }
     },
@@ -63,25 +57,20 @@ export const userApiKeysRouter = new Hono<EnvBindings>()
       parseError<CreateApiKeyRequest, CreateApiKeyResponse>,
     ),
     async (c): Promise<APIResponse<CreateApiKeyResponse>> => {
-      const userId = c.get("userId");
+      const profileId = c.get("profileId")!;
 
       try {
         const { name } = c.req.valid("json");
-        const profileResult = await checkUserProfile(c, userId);
-        if (profileResult.error) {
-          return profileResult.error;
-        }
-
         if (!name || name.length > 30) {
           return c.json({ error: "Invalid name" }, 400);
         }
 
-        const db = getDb(c);
+        const db = c.get("db");
         const key = generateApiKey();
         const [apiKey] = await db
           .insert(apiKeys)
           .values({
-            profileId: profileResult.profile.id,
+            profileId,
             key,
             name,
           })
@@ -89,7 +78,7 @@ export const userApiKeysRouter = new Hono<EnvBindings>()
 
         return c.json(CreateApiKeyResponseSchema.parse(apiKey));
       } catch (error) {
-        log(`Error creating API key for user ${userId}:`, error);
+        log(`Error creating API key for user ${profileId}:`, error);
         return c.json({ error: "Failed to create API key" }, 500);
       }
     },

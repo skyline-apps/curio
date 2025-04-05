@@ -1,5 +1,4 @@
-import { eq, getDb } from "@api/db";
-import { checkUserProfile } from "@api/db/dal/profile";
+import { eq } from "@api/db";
 import { checkDbError, DbError, DbErrorCode } from "@api/db/errors";
 import { profiles } from "@api/db/schema";
 import { apiDoc, APIResponse, parseError } from "@api/utils/api";
@@ -28,14 +27,8 @@ export const userUsernameRouter = new Hono<EnvBindings>().post(
     parseError<UpdateUsernameRequest, UpdateUsernameResponse>,
   ),
   async (c): Promise<APIResponse<UpdateUsernameResponse>> => {
-    const userId = c.get("userId");
-
+    const profileId = c.get("profileId")!;
     try {
-      const profileResult = await checkUserProfile(c, userId);
-      if (profileResult.error) {
-        return profileResult.error;
-      }
-
       const { username: newUsername } = c.req.valid("json");
 
       // Check that the new username is valid
@@ -48,17 +41,17 @@ export const userUsernameRouter = new Hono<EnvBindings>().post(
           400,
         );
       }
-      const db = getDb(c);
+      const db = c.get("db");
 
       // Update the username in the database
       const updates = await db
         .update(profiles)
         .set({ username: newUsername })
-        .where(userId ? eq(profiles.userId, userId) : undefined)
+        .where(eq(profiles.id, profileId))
         .returning({ updatedUsername: profiles.username });
 
       if (!updates.length) {
-        log(`Failed to update username for user ${userId}.`);
+        log(`Failed to update username for user ${profileId}.`);
         return c.json({ error: "Failed to update username." }, 500);
       }
       // Return the updated username
@@ -69,7 +62,7 @@ export const userUsernameRouter = new Hono<EnvBindings>().post(
       if (checkDbError(error as DbError) === DbErrorCode.UniqueViolation) {
         return c.json({ error: "Username already in use." }, 400);
       }
-      log(`Error updating username for user ${userId}:`, error);
+      log(`Error updating username for user ${profileId}:`, error);
       return c.json({ error: "Unknown error updating username." }, 500);
     }
   },

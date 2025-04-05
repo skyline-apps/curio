@@ -1,5 +1,4 @@
-import { eq, getDb, sql, TransactionDB } from "@api/db";
-import { checkUserProfile } from "@api/db/dal/profile";
+import { eq, sql, TransactionDB } from "@api/db";
 import { fetchOwnItemResults } from "@api/db/dal/profileItems";
 import {
   items,
@@ -52,31 +51,20 @@ export const itemsRecommendedRouter = new Hono<EnvBindings>().get(
     parseError<GetRecommendationsRequest, GetRecommendationsResponse>,
   ),
   async (c): Promise<APIResponse<GetRecommendationsResponse>> => {
-    const userId = c.get("userId");
+    const profileId = c.get("profileId")!;
     try {
-      const profileResult = await checkUserProfile(c, userId);
-      if ("error" in profileResult) {
-        return profileResult.error as APIResponse<GetRecommendationsResponse>;
-      }
-
       const allRecommendations: (
         | PersonalRecommendation
         | GlobalRecommendation
       )[] = [];
-      const db = getDb(c);
+      const db = c.get("db");
 
       // Fetch stored recommendations from the database
       allRecommendations.push(
-        ...(await maybeUpdateAndGetGlobalRecommendations(
-          db,
-          profileResult.profile.id,
-        )),
+        ...(await maybeUpdateAndGetGlobalRecommendations(db, profileId)),
       );
       allRecommendations.push(
-        ...(await maybeUpdateAndGetPersonalRecommendations(
-          db,
-          profileResult.profile.id,
-        )),
+        ...(await maybeUpdateAndGetPersonalRecommendations(db, profileId)),
       );
 
       if (allRecommendations.length === 0) {

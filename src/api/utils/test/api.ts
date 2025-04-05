@@ -1,5 +1,7 @@
+import { type TransactionDB } from "@api/db";
 import { EnvBindings } from "@api/utils/env";
 import { MOCK_ENV } from "@api/utils/test/env";
+import { testDb } from "@api/utils/test/provider";
 import { Hono, MiddlewareHandler } from "hono";
 
 export const DEFAULT_TEST_USER_ID = "123e4567-e89b-12d3-a456-426614174002";
@@ -9,11 +11,20 @@ export const DEFAULT_TEST_PROFILE_ID_2 = "123e4567-e89b-12d3-a456-426614174001";
 export const DEFAULT_TEST_USERNAME = "defaultuser";
 export const DEFAULT_TEST_USERNAME_2 = "defaultuser2";
 
+const profileIdMap: Record<string, string> = {
+  [DEFAULT_TEST_USER_ID]: DEFAULT_TEST_PROFILE_ID,
+  [DEFAULT_TEST_USER_ID_2]: DEFAULT_TEST_PROFILE_ID_2,
+};
+
 const createMockAuthMiddleware = (
   userId: string,
 ): MiddlewareHandler<EnvBindings> => {
   return async (c, next) => {
-    c.set("userId", userId);
+    if (userId) {
+      const profileId = profileIdMap[userId];
+      c.set("userId", userId);
+      c.set("profileId", profileId);
+    }
     await next();
   };
 };
@@ -27,6 +38,10 @@ export const setUpMockApp = (
   if (userId) {
     app.use(createMockAuthMiddleware(userId));
   }
+  app.use("*", (c, next) => {
+    c.set("db", testDb.db as unknown as TransactionDB);
+    return next();
+  });
   app.route(route, router);
   return app;
 };

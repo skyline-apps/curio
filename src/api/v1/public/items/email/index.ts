@@ -1,4 +1,4 @@
-import { eq, getDb } from "@api/db";
+import { eq } from "@api/db";
 import { updateProfileItem } from "@api/db/dal/profileItems";
 import { items, ItemSource, profiles } from "@api/db/schema";
 import {
@@ -55,7 +55,7 @@ export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
       if (!email) {
         return c.json({ error: "Failed to parse email" }, 400);
       }
-      const db = getDb(c);
+      const db = c.get("db");
 
       const profileResult = await db
         .select()

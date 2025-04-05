@@ -1,5 +1,4 @@
-import { and, eq, getDb, inArray, sql } from "@api/db";
-import { checkUserProfile } from "@api/db/dal/profile";
+import { and, eq, inArray, sql } from "@api/db";
 import { checkDbError, DbError, DbErrorCode } from "@api/db/errors";
 import { profileLabels } from "@api/db/schema";
 import { apiDoc, APIResponse, parseError } from "@api/utils/api";
@@ -36,13 +35,9 @@ export const userLabelsRouter = new Hono<EnvBindings>()
       parseError<GetLabelsRequest, GetLabelsResponse>,
     ),
     async (c): Promise<APIResponse<GetLabelsResponse>> => {
-      const userId = c.get("userId");
+      const profileId = c.get("profileId")!;
       try {
-        const profileResult = await checkUserProfile(c, userId);
-        if ("error" in profileResult) {
-          return profileResult.error as APIResponse<GetLabelsResponse>;
-        }
-        const db = getDb(c);
+        const db = c.get("db");
         const labels = await db
           .select({
             id: profileLabels.id,
@@ -50,14 +45,14 @@ export const userLabelsRouter = new Hono<EnvBindings>()
             color: profileLabels.color,
           })
           .from(profileLabels)
-          .where(eq(profileLabels.profileId, profileResult.profile.id))
+          .where(eq(profileLabels.profileId, profileId))
           .orderBy(profileLabels.createdAt);
         const response: GetLabelsResponse = GetLabelsResponseSchema.parse({
           labels,
         });
         return c.json(response);
       } catch (error) {
-        log(`Error fetching labels for user ${userId}`, error);
+        log(`Error fetching labels for user ${profileId}`, error);
         return c.json({ error: "Error fetching labels." }, 500);
       }
     },
@@ -77,18 +72,14 @@ export const userLabelsRouter = new Hono<EnvBindings>()
       parseError<CreateOrUpdateLabelsRequest, CreateOrUpdateLabelsResponse>,
     ),
     async (c): Promise<APIResponse<CreateOrUpdateLabelsResponse>> => {
-      const userId = c.get("userId");
+      const profileId = c.get("profileId")!;
       try {
-        const profileResult = await checkUserProfile(c, userId);
-        if ("error" in profileResult) {
-          return profileResult.error as APIResponse<CreateOrUpdateLabelsResponse>;
-        }
         const { labels } = c.req.valid("json");
-        const db = getDb(c);
+        const db = c.get("db");
         const now = new Date();
         const newLabels = labels.map((label) => ({
           id: "id" in label ? label.id : undefined,
-          profileId: profileResult.profile.id,
+          profileId,
           name: label.name ?? "",
           color: label.color ?? "",
           createdAt: now,
@@ -104,7 +95,7 @@ export const userLabelsRouter = new Hono<EnvBindings>()
               color: sql`CASE WHEN EXCLUDED.color = '' THEN profile_labels.color ELSE EXCLUDED.color END`,
               updatedAt: sql`now()`,
             },
-            where: eq(profileLabels.profileId, profileResult.profile.id),
+            where: eq(profileLabels.profileId, profileId),
           })
           .returning({
             id: profileLabels.id,
@@ -120,7 +111,7 @@ export const userLabelsRouter = new Hono<EnvBindings>()
         if (checkDbError(error as DbError) === DbErrorCode.UniqueViolation) {
           return c.json({ error: "Label name already in use." }, 400);
         }
-        log(`Error updating labels for user ${userId}`, error);
+        log(`Error updating labels for user ${profileId}`, error);
         return c.json({ error: "Error updating labels." }, 500);
       }
     },
@@ -136,20 +127,16 @@ export const userLabelsRouter = new Hono<EnvBindings>()
       parseError<DeleteLabelsRequest, DeleteLabelsResponse>,
     ),
     async (c): Promise<APIResponse<DeleteLabelsResponse>> => {
-      const userId = c.get("userId");
+      const profileId = c.get("profileId")!;
       try {
-        const profileResult = await checkUserProfile(c, userId);
-        if ("error" in profileResult) {
-          return profileResult.error as APIResponse<DeleteLabelsResponse>;
-        }
         const { ids } = c.req.valid("json");
-        const db = getDb(c);
+        const db = c.get("db");
         const deleted = await db
           .delete(profileLabels)
           .where(
             and(
               inArray(profileLabels.id, ids),
-              eq(profileLabels.profileId, profileResult.profile.id),
+              eq(profileLabels.profileId, profileId),
             ),
           )
           .returning({ deleted: profileLabels.id });
@@ -161,7 +148,7 @@ export const userLabelsRouter = new Hono<EnvBindings>()
         });
         return c.json(response);
       } catch (error) {
-        log(`Error deleting labels for user ${userId}`, error);
+        log(`Error deleting labels for user ${profileId}`, error);
         return c.json({ error: "Error deleting labels." }, 500);
       }
     },

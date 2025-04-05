@@ -1,5 +1,4 @@
-import { and, eq, getDb, sql, TransactionDB } from "@api/db";
-import { checkUserProfile } from "@api/db/dal/profile";
+import { and, eq, sql, TransactionDB } from "@api/db";
 import { fetchOwnItemResults } from "@api/db/dal/profileItems";
 import { items, profileItemHighlights, profileItems } from "@api/db/schema";
 import { getItemContent, getItemMetadata } from "@api/lib/storage";
@@ -100,16 +99,14 @@ export const publicItemsContentRouter = new Hono<EnvBindings>().get(
     parseError<GetItemContentRequest, GetItemContentResponse>,
   ),
   async (c): Promise<APIResponse<GetItemContentResponse>> => {
-    const userId = c.get("userId");
+    const profileId = c.get("profileId");
 
     const { slug } = c.req.valid("query");
 
     try {
-      const profileResult = await checkUserProfile(c, userId);
-      const isAuthenticated = !("error" in profileResult);
-      const db = getDb(c);
+      const db = c.get("db");
 
-      if (!isAuthenticated) {
+      if (!profileId) {
         return getDefaultContent(c, db, slug);
       }
 
@@ -139,12 +136,7 @@ export const publicItemsContentRouter = new Hono<EnvBindings>().get(
           WHERE h.profile_item_id = ${profileItems.id}
         )`,
       })
-        .where(
-          and(
-            eq(items.slug, slug),
-            eq(profileItems.profileId, profileResult.profile.id),
-          ),
-        )
+        .where(and(eq(items.slug, slug), eq(profileItems.profileId, profileId)))
         .limit(1);
 
       if (!item.length) {
@@ -173,7 +165,7 @@ export const publicItemsContentRouter = new Hono<EnvBindings>().get(
             .where(
               and(
                 eq(profileItems.itemId, itemResponse.id),
-                eq(profileItems.profileId, profileResult.profile.id),
+                eq(profileItems.profileId, profileId),
               ),
             )
             .returning({

@@ -1,5 +1,4 @@
-import { eq, getDb } from "@api/db";
-import { checkUserProfile } from "@api/db/dal/profile";
+import { eq } from "@api/db";
 import { checkDbError, DbError, DbErrorCode } from "@api/db/errors";
 import { profiles } from "@api/db/schema";
 import { apiDoc, APIResponse, parseError } from "@api/utils/api";
@@ -28,13 +27,9 @@ export const userEmailRouter = new Hono<EnvBindings>().post(
     parseError<UpdateEmailRequest, UpdateEmailResponse>,
   ),
   async (c): Promise<APIResponse<UpdateEmailResponse>> => {
-    const userId = c.get("userId");
+    const profileId = c.get("profileId")!;
 
     try {
-      const profileResult = await checkUserProfile(c, userId);
-      if ("error" in profileResult) {
-        return profileResult.error as APIResponse<UpdateEmailResponse>;
-      }
       const curioEmailDomain = c.env.CURIO_EMAIL_DOMAIN;
 
       const randomString = generateRandomAlphabetString();
@@ -45,16 +40,16 @@ export const userEmailRouter = new Hono<EnvBindings>().post(
         ) as APIResponse<UpdateEmailResponse>;
       }
       const newsletterEmail = `${randomString}@${curioEmailDomain}`;
-      const db = getDb(c);
+      const db = c.get("db");
 
       const updates = await db
         .update(profiles)
         .set({ newsletterEmail })
-        .where(userId ? eq(profiles.userId, userId) : undefined)
+        .where(eq(profiles.id, profileId))
         .returning({ updatedNewsletterEmail: profiles.newsletterEmail });
 
       if (!updates.length) {
-        log(`Failed to update newsletter email for user ${userId}.`);
+        log(`Failed to update newsletter email for user ${profileId}.`);
         return c.json({ error: "Failed to update newsletter email." }, 500);
       }
 
@@ -64,10 +59,10 @@ export const userEmailRouter = new Hono<EnvBindings>().post(
       return c.json(response);
     } catch (error) {
       if (checkDbError(error as DbError) === DbErrorCode.UniqueViolation) {
-        log(`Failed to set unique email for ${userId}.`, error);
+        log(`Failed to set unique email for ${profileId}.`, error);
         return c.json({ error: "Email already in use." }, 400);
       }
-      log(`Error updating newsletter email for user ${userId}:`, error);
+      log(`Error updating newsletter email for user ${profileId}:`, error);
       return c.json({ error: "Unknown error updating newsletter email." }, 500);
     }
   },

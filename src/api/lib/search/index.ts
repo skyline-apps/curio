@@ -1,5 +1,6 @@
+/* eslint-disable @local/eslint-local-rules/api-middleware */
 // TODO: Use the Meilisearch JS SDK?
-import { getDb, sql } from "@api/db";
+import { sql } from "@api/db";
 import { appConfig } from "@api/db/schema";
 import { EnvContext } from "@api/utils/env";
 import log from "@api/utils/logger";
@@ -141,7 +142,8 @@ export class Search {
   async populateSearchConfig(c: EnvContext): Promise<void> {
     // The database connects directly to the search endpoint on a shared Docker network in development mode.
     const { apiKey, endpoint } = this.getSearchConfig(c, false);
-    await getDb(c)
+    await c
+      .get("db")
       .insert(appConfig)
       .values([
         {

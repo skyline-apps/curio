@@ -1,5 +1,4 @@
-import { and, eq, getDb } from "@api/db";
-import { checkUserProfile } from "@api/db/dal/profile";
+import { and, eq } from "@api/db";
 import { apiKeys } from "@api/db/schema";
 import { apiDoc, APIResponse, parseError } from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
@@ -26,25 +25,16 @@ export const userApiKeysRevokeRouter = new Hono<EnvBindings>().post(
     parseError<RevokeApiKeyRequest, RevokeApiKeyResponse>,
   ),
   async (c): Promise<APIResponse<RevokeApiKeyResponse>> => {
-    const userId = c.get("userId");
-    const { keyId } = await c.req.json<{ keyId: string }>();
+    const profileId = c.get("profileId")!;
+    const { keyId } = c.req.valid("json");
 
     try {
-      const profileResult = await checkUserProfile(c, userId);
-      if ("error" in profileResult) {
-        return profileResult.error as APIResponse<RevokeApiKeyResponse>;
-      }
-      const db = getDb(c);
+      const db = c.get("db");
 
       const result = await db
         .update(apiKeys)
         .set({ isActive: false })
-        .where(
-          and(
-            eq(apiKeys.id, keyId),
-            eq(apiKeys.profileId, profileResult.profile.id),
-          ),
-        )
+        .where(and(eq(apiKeys.id, keyId), eq(apiKeys.profileId, profileId)))
         .returning({ keyId: apiKeys.id, isActive: apiKeys.isActive });
 
       if (result.length > 0) {
@@ -54,7 +44,7 @@ export const userApiKeysRevokeRouter = new Hono<EnvBindings>().post(
 
       return c.json({ error: "API key not found" }, 404);
     } catch (error) {
-      log(`Error revoking API key ${keyId} for user ${userId}:`, error);
+      log(`Error revoking API key ${keyId} for user ${profileId}:`, error);
       return c.json({ error: "Failed to revoke API key" }, 500);
     }
   },

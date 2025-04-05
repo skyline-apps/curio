@@ -27,7 +27,8 @@ export type EnvBindings = {
   Bindings: Env;
   Variables: {
     db: TransactionDB;
-    userId: string;
+    userId?: string;
+    profileId?: string;
     authOptional?: boolean;
   };
 };

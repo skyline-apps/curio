@@ -1,5 +1,4 @@
-import { and, eq, getDb, inArray, sql } from "@api/db";
-import { checkUserProfile } from "@api/db/dal/profile";
+import { and, eq, inArray, sql } from "@api/db";
 import { items, profileItemHighlights, profileItems } from "@api/db/schema";
 import {
   deleteHighlightDocuments,
@@ -40,19 +39,14 @@ export const itemsHighlightRouter = new Hono<EnvBindings>()
       parseError<GetHighlightsRequest, GetHighlightsResponse>,
     ),
     async (c): Promise<APIResponse<GetHighlightsResponse>> => {
-      const userId = c.get("userId");
+      const profileId = c.get("profileId")!;
       try {
-        const profileResult = await checkUserProfile(c, userId);
-        if (profileResult.error) {
-          return profileResult.error;
-        }
-
         const { offset, limit, search } = c.req.valid("query");
 
         const { hits, estimatedTotalHits } = await searchHighlightDocuments(
           c,
           search || "",
-          profileResult.profile.id,
+          profileId,
           {
             offset,
             limit,
@@ -111,19 +105,14 @@ export const itemsHighlightRouter = new Hono<EnvBindings>()
       >,
     ),
     async (c): Promise<APIResponse<CreateOrUpdateHighlightResponse>> => {
-      const userId = c.get("userId");
+      const profileId = c.get("profileId")!;
       try {
-        const profileResult = await checkUserProfile(c, userId);
-        if (profileResult.error) {
-          return profileResult.error;
-        }
-
         const { slug, highlights } = c.req.valid("json");
         if (!slug) {
           return c.json({ error: "No slug provided." }, 400);
         }
 
-        const db = getDb(c);
+        const db = c.get("db");
         const profileItem = await db
           .select({
             id: profileItems.id,
@@ -135,10 +124,7 @@ export const itemsHighlightRouter = new Hono<EnvBindings>()
           .from(profileItems)
           .innerJoin(items, eq(profileItems.itemId, items.id))
           .where(
-            and(
-              eq(profileItems.profileId, profileResult.profile.id),
-              eq(items.slug, slug),
-            ),
+            and(eq(profileItems.profileId, profileId), eq(items.slug, slug)),
           )
           .limit(1);
 
@@ -176,7 +162,7 @@ export const itemsHighlightRouter = new Hono<EnvBindings>()
             c,
             savedHighlights.map((h) => ({
               id: h.id,
-              profileId: profileResult.profile.id,
+              profileId,
               profileItemId: h.profileItemId,
               slug: slug,
               url: profileItem[0].url,
@@ -225,16 +211,11 @@ export const itemsHighlightRouter = new Hono<EnvBindings>()
       parseError<DeleteHighlightRequest, DeleteHighlightResponse>,
     ),
     async (c): Promise<APIResponse<DeleteHighlightResponse>> => {
-      const userId = c.get("userId");
+      const profileId = c.get("profileId")!;
       try {
-        const profileResult = await checkUserProfile(c, userId);
-        if (profileResult.error) {
-          return profileResult.error;
-        }
-
         const { slug, highlightIds } = c.req.valid("json");
 
-        const db = getDb(c);
+        const db = c.get("db");
         const profileItem = await db
           .select({
             id: profileItems.id,
@@ -242,10 +223,7 @@ export const itemsHighlightRouter = new Hono<EnvBindings>()
           .from(profileItems)
           .innerJoin(items, eq(profileItems.itemId, items.id))
           .where(
-            and(
-              eq(profileItems.profileId, profileResult.profile.id),
-              eq(items.slug, slug),
-            ),
+            and(eq(profileItems.profileId, profileId), eq(items.slug, slug)),
           )
           .limit(1);
 

@@ -1,5 +1,4 @@
-import { eq, getDb, type PgColumn, type SelectedFields } from "@api/db";
-import { checkUserProfile } from "@api/db/dal/profile";
+import { and, eq, type PgColumn, type SelectedFields } from "@api/db";
 import { profiles } from "@api/db/schema";
 import { apiDoc, APIResponse, parseError } from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
@@ -35,11 +34,27 @@ export const userSettingsRouter = new Hono<EnvBindings>()
     async (c): Promise<APIResponse<GetSettingsResponse>> => {
       const userId = c.get("userId");
       try {
-        const profileResult = await checkUserProfile(c, userId);
-        if (profileResult.error) {
-          return profileResult.error;
+        const db = c.get("db");
+        const profileResult = await db
+          .select({
+            id: profiles.id,
+            userId: profiles.userId,
+            username: profiles.username,
+            colorScheme: profiles.colorScheme,
+            displayFont: profiles.displayFont,
+            displayFontSize: profiles.displayFontSize,
+            analyticsTracking: profiles.analyticsTracking,
+            public: profiles.public,
+          })
+          .from(profiles)
+          .where(
+            and(eq(profiles.userId, userId!), eq(profiles.isEnabled, true)),
+          )
+          .limit(1);
+        if (!profileResult || profileResult.length === 0) {
+          return c.json({ error: "Unauthorized" }, 401);
         }
-        const settings = GetSettingsResponseSchema.parse(profileResult.profile);
+        const settings = GetSettingsResponseSchema.parse(profileResult[0]);
         return c.json(settings);
       } catch (error) {
         log(
@@ -63,11 +78,6 @@ export const userSettingsRouter = new Hono<EnvBindings>()
     async (c): Promise<APIResponse<UpdateSettingsResponse>> => {
       const userId = c.get("userId");
       try {
-        const profileResult = await checkUserProfile(c, userId);
-        if (profileResult.error) {
-          return profileResult.error;
-        }
-
         const settings = c.req.valid("json");
         const settingsKeys = Object.keys(settings);
 
@@ -82,12 +92,11 @@ export const userSettingsRouter = new Hono<EnvBindings>()
           }
           return acc;
         }, {});
-        const db = getDb(c);
-
+        const db = c.get("db");
         const updates = await db
           .update(profiles)
           .set({ ...settings })
-          .where(eq(profiles.userId, profileResult.profile.userId))
+          .where(eq(profiles.userId, userId!))
           .returning(returnFields);
 
         if (!updates.length) {

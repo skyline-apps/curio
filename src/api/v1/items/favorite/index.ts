@@ -1,5 +1,4 @@
-import { and, eq, getDb, sql } from "@api/db";
-import { checkUserProfile } from "@api/db/dal/profile";
+import { and, eq, sql } from "@api/db";
 import { items, profileItems } from "@api/db/schema";
 import { apiDoc, APIResponse, parseError } from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
@@ -26,14 +25,9 @@ export const itemsFavoriteRouter = new Hono<EnvBindings>().post(
     parseError<UpdateFavoriteRequest, UpdateFavoriteResponse>,
   ),
   async (c): Promise<APIResponse<UpdateFavoriteResponse>> => {
-    const userId = c.get("userId");
+    const profileId = c.get("profileId")!;
     try {
-      const profileResult = await checkUserProfile(c, userId);
-      if (profileResult.error) {
-        return profileResult.error;
-      }
-
-      const db = getDb(c);
+      const db = c.get("db");
       const { slugs, favorite } = c.req.valid("json");
       if (!slugs || slugs.length === 0) {
         return c.json({ error: "No slugs provided." }, 400);
@@ -48,7 +42,7 @@ export const itemsFavoriteRouter = new Hono<EnvBindings>().post(
         .where(
           and(
             eq(profileItems.itemId, items.id),
-            eq(profileItems.profileId, profileResult.profile.id),
+            eq(profileItems.profileId, profileId),
             sql`${items.slug} = ANY(ARRAY[${sql.join(slugs, sql`, `)}]::text[])`,
           ),
         )

@@ -1,5 +1,4 @@
-import { and, desc, eq, getDb, ilike, not, or, type SQL, sql } from "@api/db";
-import { checkUserProfile } from "@api/db/dal/profile";
+import { and, desc, eq, ilike, not, or, type SQL, sql } from "@api/db";
 import {
   fetchOwnItemResults,
   getRelevantProfileItemIds,
@@ -36,13 +35,9 @@ export const itemsRouter = new Hono<EnvBindings>()
       parseError<GetItemsRequest, GetItemsResponse>,
     ),
     async (c): Promise<APIResponse<GetItemsResponse>> => {
-      const userId = c.get("userId");
+      const profileId = c.get("profileId")!;
       try {
-        const db = getDb(c);
-        const profileResult = await checkUserProfile(c, userId);
-        if (profileResult.error) {
-          return profileResult.error;
-        }
+        const db = c.get("db");
         const { limit, slugs, urls, cursor, filters, search, offset } =
           c.req.valid("query");
         const cleanedUrls = urls?.map((url) => cleanUrl(url)) ?? [];
@@ -50,7 +45,7 @@ export const itemsRouter = new Hono<EnvBindings>()
 
         let whereClause: SQL<unknown> | undefined = eq(
           profileItems.profileId,
-          profileResult.profile.id,
+          profileId,
         );
         if (filters) {
           whereClause = and(
@@ -195,13 +190,9 @@ export const itemsRouter = new Hono<EnvBindings>()
       parseError<CreateOrUpdateItemsRequest, CreateOrUpdateItemsResponse>,
     ),
     async (c) => {
-      const userId = c.get("userId");
+      const profileId = c.get("profileId")!;
       try {
-        const db = getDb(c);
-        const profileResult = await checkUserProfile(c, userId);
-        if (profileResult.error) {
-          return profileResult.error;
-        }
+        const db = c.get("db");
         const { items: newItems } = c.req.valid("json");
 
         const now = new Date();
@@ -269,7 +260,7 @@ export const itemsRouter = new Hono<EnvBindings>()
                 ? new Date(item.metadata.publishedAt)
                 : sql`NULL`,
               updatedAt: new Date(),
-              profileId: profileResult.profile.id,
+              profileId,
               state: ItemState.ACTIVE,
               stateUpdatedAt,
               itemId,

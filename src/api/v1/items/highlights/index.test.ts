@@ -366,8 +366,8 @@ describe("/v1/items/highlights", () => {
       expect(data.error).toBe("Failed to create/update highlights");
     });
 
-    it("should return 500 if profile item query fails", async () => {
-      vi.spyOn(testDb.db, "select").mockImplementationOnce(() => {
+    it("should return 500 if insert query fails", async () => {
+      vi.spyOn(testDb.db, "insert").mockImplementationOnce(() => {
         throw { code: DbErrorCode.ConnectionFailure };
       });
 

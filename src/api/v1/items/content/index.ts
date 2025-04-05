@@ -1,5 +1,4 @@
-import { and, eq, getDb } from "@api/db";
-import { checkUserProfile } from "@api/db/dal/profile";
+import { and, eq } from "@api/db";
 import { updateProfileItem } from "@api/db/dal/profileItems";
 import { items, profileItems } from "@api/db/schema";
 import {
@@ -44,20 +43,15 @@ export const itemsContentRouter = new Hono<EnvBindings>().post(
     parseError<UpdateItemContentRequest, UpdateItemContentResponse>,
   ),
   async (c): Promise<APIResponse<UpdateItemContentResponse>> => {
-    const userId = c.get("userId");
-    const profileResult = await checkUserProfile(c, userId);
-    if ("error" in profileResult) {
-      return profileResult.error as APIResponse<UpdateItemContentResponse>;
-    }
-
     const { url, htmlContent, skipMetadataExtraction } = c.req.valid("json");
+    const profileId = c.get("profileId")!;
 
     try {
       const cleanedUrl = cleanUrl(url);
       let slug: string = generateSlug(cleanedUrl);
       let metadata: ExtractedMetadata;
       const newDate = new Date();
-      const db = getDb(c);
+      const db = c.get("db");
 
       return await db.transaction(async (tx) => {
         const item = await tx
@@ -91,7 +85,7 @@ export const itemsContentRouter = new Hono<EnvBindings>().post(
             .where(
               and(
                 eq(profileItems.itemId, item[0].id),
-                eq(profileItems.profileId, profileResult.profile.id),
+                eq(profileItems.profileId, profileId),
               ),
             )
             .limit(1);
@@ -139,7 +133,7 @@ export const itemsContentRouter = new Hono<EnvBindings>().post(
           await updateProfileItem(
             tx,
             item[0].url,
-            profileResult.profile.id,
+            profileId,
             item[0].id,
             metadata,
             newDate,
@@ -173,7 +167,7 @@ export const itemsContentRouter = new Hono<EnvBindings>().post(
           await updateProfileItem(
             tx,
             item[0].url,
-            profileResult.profile.id,
+            profileId,
             item[0].id,
             newMetadata,
             newDate,

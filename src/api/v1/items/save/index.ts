@@ -1,5 +1,4 @@
-import { and, eq, getDb, inArray, isNull, not, or, sql } from "@api/db";
-import { checkUserProfile } from "@api/db/dal/profile";
+import { and, eq, inArray, isNull, not, or, sql } from "@api/db";
 import { items, ItemState, profileItems } from "@api/db/schema";
 import { getItemMetadata } from "@api/lib/storage";
 import { apiDoc, APIResponse, parseError } from "@api/utils/api";
@@ -21,19 +20,14 @@ export const itemsSaveRouter = new Hono<EnvBindings>().post(
   describeRoute(apiDoc("post", SaveRequestSchema, SaveResponseSchema)),
   zValidator("json", SaveRequestSchema, parseError<SaveRequest, SaveResponse>),
   async (c): Promise<APIResponse<SaveResponse>> => {
-    const userId = c.get("userId");
+    const profileId = c.get("profileId")!;
     try {
-      const profileResult = await checkUserProfile(c, userId);
-      if (profileResult.error) {
-        return profileResult.error;
-      }
-
       const { slugs } = c.req.valid("json");
       if (!slugs || slugs.length === 0) {
         return c.json({ error: "No slugs provided." }, 400);
       }
 
-      const db = getDb(c);
+      const db = c.get("db");
       const itemsToSave = await db
         .select({
           id: items.id,
@@ -45,7 +39,7 @@ export const itemsSaveRouter = new Hono<EnvBindings>().post(
           profileItems,
           and(
             eq(profileItems.itemId, items.id),
-            eq(profileItems.profileId, profileResult.profile.id),
+            eq(profileItems.profileId, profileId),
           ),
         )
         .where(
@@ -69,7 +63,7 @@ export const itemsSaveRouter = new Hono<EnvBindings>().post(
           const newDate = new Date(baseDate.getTime() + index);
           return {
             itemId: item.id,
-            profileId: profileResult.profile.id,
+            profileId,
             title: metadata.title || item.url,
             description: metadata.description,
             thumbnail: metadata.thumbnail,

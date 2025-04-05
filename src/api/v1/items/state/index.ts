@@ -1,5 +1,4 @@
-import { and, eq, getDb, sql } from "@api/db";
-import { checkUserProfile } from "@api/db/dal/profile";
+import { and, eq, sql } from "@api/db";
 import {
   items,
   ItemState,
@@ -32,20 +31,15 @@ export const itemsStateRouter = new Hono<EnvBindings>().post(
     parseError<UpdateStateRequest, UpdateStateResponse>,
   ),
   async (c): Promise<APIResponse<UpdateStateResponse>> => {
-    const userId = c.get("userId");
+    const profileId = c.get("profileId")!;
     try {
-      const profileResult = await checkUserProfile(c, userId);
-      if (profileResult.error) {
-        return profileResult.error;
-      }
-
       const { slugs, state } = c.req.valid("json");
       if (!slugs || slugs.length === 0) {
         return c.json({ error: "No slugs provided." }, 400);
       }
 
       const now = new Date();
-      const db = getDb(c);
+      const db = c.get("db");
 
       return await db.transaction(async (tx) => {
         const updatedItems = await tx
@@ -58,7 +52,7 @@ export const itemsStateRouter = new Hono<EnvBindings>().post(
           .where(
             and(
               eq(profileItems.itemId, items.id),
-              eq(profileItems.profileId, profileResult.profile.id),
+              eq(profileItems.profileId, profileId),
               sql`${items.slug} = ANY(ARRAY[${sql.join(slugs, sql`, `)}]::text[])`,
             ),
           )
