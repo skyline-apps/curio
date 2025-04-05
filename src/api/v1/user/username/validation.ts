@@ -6,6 +6,8 @@ export const UpdateUsernameRequestSchema = z.object({
   username: z.string(),
 });
 
+export type UpdateUsernameRequest = z.infer<typeof UpdateUsernameRequestSchema>;
+
 export const UpdateUsernameResponseSchema = z.object({
   updatedUsername: z.string().optional(),
 });
