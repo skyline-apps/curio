@@ -1,4 +1,6 @@
-import { createClient, type PostgrestError } from "@api/lib/supabase/client";
+import { and, eq } from "@api/db";
+import { apiKeys, profiles } from "@api/db/schema";
+import { createClient } from "@api/lib/supabase/client";
 import { EnvContext } from "@api/utils/env";
 import { getCookie, setCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
@@ -13,35 +15,32 @@ export const authMiddleware = createMiddleware(
     // Check if API key is provided for API routes
     const apiKey = c.req.header("x-api-key");
 
+    const db = c.get("db");
     // Handle API routes with API key
     if (apiKey) {
-      const adminClient = createClient(c, true);
       try {
-        const {
-          data: keyData,
-          error: keyError,
-        }:
-          | { data: { profiles: { user_id: string } } | null; error: null }
-          | { data: null; error: PostgrestError } = await adminClient
-          .from("api_keys")
-          .select("profiles(user_id)")
-          .eq("key", apiKey)
-          .eq("is_active", true)
-          .eq("profiles.is_enabled", true)
-          .single();
+        const profile = await db
+          .select({ userId: profiles.userId })
+          .from(profiles)
+          .innerJoin(apiKeys, eq(apiKeys.profileId, profiles.id))
+          .where(
+            and(
+              eq(apiKeys.key, apiKey),
+              eq(apiKeys.isActive, true),
+              eq(profiles.isEnabled, true),
+            ),
+          );
 
-        if (keyError || !keyData || !keyData.profiles) {
+        if (!profile[0]?.userId) {
           return c.json({ error: "Invalid API key" }, 401);
         }
 
         // Update last used timestamp
-        await adminClient
-          .from("api_keys")
-          .update({ last_used_at: new Date() })
-          .eq("key", apiKey);
-
-        const userId = keyData.profiles.user_id;
-        c.set("userId", userId);
+        await db
+          .update(apiKeys)
+          .set({ lastUsedAt: new Date() })
+          .where(eq(apiKeys.key, apiKey));
+        c.set("userId", profile[0]?.userId);
         await next();
         return;
       } catch (_error) {
@@ -66,9 +65,25 @@ export const authMiddleware = createMiddleware(
       data: { user },
       error,
     } = await supabase.auth.getUser();
+    if (error) {
+      return c.json({ error: "Error authenticating" }, 401);
+    }
 
     // If API route but no API key and no user, return 401
-    if ((error || !user) && !c.get("authOptional")) {
+    if (!user) {
+      if (c.get("authOptional")) {
+        await next();
+        return;
+      }
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const [{ isEnabled }] = await db
+      .select({ isEnabled: profiles.isEnabled })
+      .from(profiles)
+      .where(eq(profiles.userId, user.id));
+
+    if (!isEnabled) {
       return c.json({ error: "Unauthorized" }, 401);
     }
 

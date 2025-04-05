@@ -1,3 +1,5 @@
+/* eslint-disable @local/eslint-local-rules/api-middleware */
+import { getDb } from "@api/db";
 import { authMiddleware } from "@api/middleware/auth";
 import { EnvBindings, EnvContext } from "@api/utils/env";
 import log from "@api/utils/logger";
@@ -43,6 +45,8 @@ app.use("*", async (c: EnvContext, next) => {
   if (PUBLIC_ROUTES.includes(path)) {
     return next();
   }
+
+  c.set("db", getDb(c));
 
   if (path.startsWith("/v1/public")) {
     c.set("authOptional", true);

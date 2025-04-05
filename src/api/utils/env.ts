@@ -1,3 +1,4 @@
+import { TransactionDB } from "@api/db";
 import { type Context } from "hono";
 
 export interface Env {
@@ -25,6 +26,7 @@ export interface Env {
 export type EnvBindings = {
   Bindings: Env;
   Variables: {
+    db: TransactionDB;
     userId: string;
     authOptional?: boolean;
   };

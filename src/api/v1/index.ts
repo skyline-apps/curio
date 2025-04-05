@@ -10,6 +10,7 @@ import { itemsRecommendedRouter } from "./items/recommended";
 import { itemsSaveRouter } from "./items/save";
 import { itemsStateRouter } from "./items/state";
 import { publicRouter } from "./public";
+import { userRouter } from "./user";
 
 const v1Router = new Hono();
 
@@ -24,5 +25,6 @@ v1Router.route("/items/save", itemsSaveRouter);
 v1Router.route("/items/state", itemsStateRouter);
 
 v1Router.route("/public", publicRouter);
+v1Router.route("/user", userRouter);
 
 export { v1Router };
