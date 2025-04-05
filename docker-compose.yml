@@ -47,6 +47,30 @@ services:
             - /app/node_modules
         - action: rebuild
           path: ./src/api/package.json
+  app:
+    build:
+      context: ./
+      dockerfile: ./docker/curio-app/Dockerfile
+    container_name: curio-app
+    network_mode: host
+    working_dir: /app
+    command: >
+      npm run dev
+    environment:
+      CURIO_API_URL: ${CURIO_API_URL}
+      POSTHOG_KEY: ${POSTHOG_KEY}
+      POSTHOG_HOST: ${POSTHOG_HOST}
+    mem_limit: "6G"
+    cpus: 4
+    develop:
+      watch:
+        - action: sync
+          path: ./src/app
+          target: /app
+          ignore:
+            - /app/node_modules
+        - action: rebuild
+          path: ./src/app/package.json
   web:
     build:
       context: ./
