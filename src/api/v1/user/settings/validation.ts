@@ -23,14 +23,15 @@ export const SettingsSchema = z.object({
 
 export const UpdateableSettingsSchema = SettingsSchema.strict().partial();
 
-export const SettingsResponseSchema = SettingsSchema;
-export type SettingsResponse = z.infer<typeof SettingsResponseSchema>;
+export const GetSettingsRequestSchema = z.object({});
+export type GetSettingsRequest = z.infer<typeof GetSettingsRequestSchema>;
 
-export const UpdatedSettingsRequestSchema = UpdateableSettingsSchema;
-export type UpdatedSettingsRequest = z.infer<
-  typeof UpdatedSettingsRequestSchema
->;
-export const UpdatedSettingsResponseSchema = UpdateableSettingsSchema;
-export type UpdatedSettingsResponse = z.infer<
-  typeof UpdatedSettingsResponseSchema
+export const GetSettingsResponseSchema = SettingsSchema;
+export type GetSettingsResponse = z.infer<typeof GetSettingsResponseSchema>;
+
+export const UpdateSettingsRequestSchema = UpdateableSettingsSchema;
+export type UpdateSettingsRequest = z.infer<typeof UpdateSettingsRequestSchema>;
+export const UpdateSettingsResponseSchema = UpdateableSettingsSchema;
+export type UpdateSettingsResponse = z.infer<
+  typeof UpdateSettingsResponseSchema
 >;
