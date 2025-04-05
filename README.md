@@ -16,6 +16,11 @@ To start the local development environment:
 2. Start file syncing with `docker compose watch`.
 3. Navigate to `http://localhost:3000` to view the application.
 
+### Database migrations
+Create a new database migration by first editing `src/api/db/schema.ts`. Then from the `src/api` folder, run `npm run db:generate <MIGRATION_NAME>` and check in the generated files.
+
+Run the migration against your local development database by running `docker exec -it curio-api bash` and then `npm run db:migrate`.
+
 ### Browser extensions
 The Chrome extension is at `src/chrome`, and the Firefox extension is at `src/firefox`.
 To develop locally using the extensions, first make sure that the API hostname values are correctly set in all the files of the extension.
