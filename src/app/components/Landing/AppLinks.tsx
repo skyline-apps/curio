@@ -39,7 +39,7 @@ const AppLinks: React.FC = () => {
     <div className="flex gap-8">
       <AppLink
         key="web"
-        href={process.env.NEXT_PUBLIC_CURIO_URL || "/"}
+        href={import.meta.env.VITE_CURIO_URL || "/"}
         icon={<FaDesktop size={ICON_SIZE} />}
       />
       {config.chromeExtensionLink && (

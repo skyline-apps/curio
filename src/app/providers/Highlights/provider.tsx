@@ -6,21 +6,15 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import React, { useCallback, useMemo, useState } from "react";
 
 import {
-  HighlightItem,
   HIGHLIGHTS_QUERY_KEY,
   HighlightsContext,
   HighlightSearchOptions,
+  HighlightsPage,
 } from ".";
 
 const log = createLogger("highlights-provider");
 
 const HIGHLIGHTS_BATCH_SIZE = 20;
-
-export interface HighlightsPage {
-  highlights: HighlightItem[];
-  nextOffset?: number;
-  total: number;
-}
 
 type HighlightsProviderProps = React.PropsWithChildren;
 

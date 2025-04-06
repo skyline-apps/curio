@@ -8,8 +8,8 @@ import { KeyboardShortcutProvider } from "./KeyboardShortcuts/provider";
 
 export const ClientProviders: React.FC<PropsWithChildren> = ({ children }) => {
   useEffect(() => {
-    posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    posthog.init(import.meta.env.VITE_POSTHOG_KEY!, {
+      api_host: import.meta.env.VITE_POSTHOG_HOST,
       person_profiles: "always",
     });
   }, []);

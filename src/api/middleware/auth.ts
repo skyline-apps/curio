@@ -4,8 +4,14 @@ import { apiKeys, profiles } from "@api/db/schema";
 import { createClient } from "@api/lib/supabase/client";
 import { EnvContext } from "@api/utils/env";
 import log from "@api/utils/logger";
-import { getCookie, setCookie } from "hono/cookie";
+import { createUsernameSlug } from "@api/utils/username";
+import { User } from "@supabase/supabase-js"; // eslint-disable-line no-restricted-imports
 import { createMiddleware } from "hono/factory";
+
+type UserWithEmail = User & { email: string };
+function isUserWithEmail(user: User): user is UserWithEmail {
+  return typeof user.email === "string";
+}
 
 export const authMiddleware = createMiddleware(
   async (
@@ -48,74 +54,73 @@ export const authMiddleware = createMiddleware(
         return;
       }
 
-      // Get JWT tokens from cookies
-      const accessToken = getCookie(c, "sb-access-token");
-      const refreshToken = getCookie(c, "sb-refresh-token");
+      const authHeader = c.req.header("Authorization");
+      let user: UserWithEmail | null = null;
+      let tokenError: string | null = null;
 
-      // Set auth cookies if they exist
-      if (accessToken && refreshToken) {
-        supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        const token = authHeader.substring(7);
+        const { data, error } = await supabase.auth.getUser(token);
+        if (error) {
+          log(`Bearer token validation failed: ${error.message}`);
+          tokenError = error.message;
+        } else if (!data?.user) {
+          log("Bearer token valid, but no user returned.");
+          tokenError = "No user associated with token";
+        } else if (!isUserWithEmail(data.user)) {
+          log("Bearer token valid, but user has no email.");
+          tokenError = "User has no email";
+        } else {
+          user = data.user;
+        }
+      } else {
+        log("No Bearer token found in Authorization header.");
       }
 
-      // Get current user
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
-      if (error) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
+      if (user) {
+        const profileResult = await db
+          .select({ id: profiles.id, isEnabled: profiles.isEnabled })
+          .from(profiles)
+          .where(eq(profiles.userId, user.id))
+          .limit(1);
 
-      // If API route but no API key and no user, return 401
-      if (!user) {
+        let profile = profileResult[0];
+
+        if (!profile) {
+          const newProfile = await db
+            .insert(profiles)
+            .values({
+              userId: user.id,
+              username: createUsernameSlug(user.email),
+            })
+            .returning({ id: profiles.id, isEnabled: profiles.isEnabled });
+          if (!newProfile || newProfile.length === 0) {
+            throw new Error("Error creating profile for new user");
+          }
+
+          profile = newProfile[0];
+        }
+
+        if (!profile.isEnabled) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        c.set("userId", user.id);
+        c.set("profileId", profile.id);
+
+        await next();
+      } else {
         if (c.get("authOptional")) {
+          c.set("userId", undefined);
+          c.set("profileId", undefined);
           await next();
-          return;
-        }
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      const [{ id: profileId, isEnabled }] = await db
-        .select({ id: profiles.id, isEnabled: profiles.isEnabled })
-        .from(profiles)
-        .where(eq(profiles.userId, user.id));
-
-      if (!isEnabled) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      // Set user ID header if user is authenticated
-      c.set("userId", user.id);
-      c.set("profileId", profileId);
-
-      // Session refresh handling
-      if (accessToken && refreshToken) {
-        const { data: sessionData, error: sessionError } =
-          await supabase.auth.refreshSession({
-            refresh_token: refreshToken,
-          });
-
-        if (!sessionError && sessionData.session) {
-          // Set refreshed cookies
-          setCookie(c, "sb-access-token", sessionData.session.access_token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "Lax",
-            path: "/",
-          });
-          setCookie(c, "sb-refresh-token", sessionData.session.refresh_token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "Lax",
-            path: "/",
-          });
+        } else {
+          const message = tokenError
+            ? `Authentication error: ${tokenError}`
+            : "Authentication required.";
+          return c.json({ error: "Unauthorized", message }, 401);
         }
       }
-
-      await next();
     } catch (error) {
       if (checkDbError(error as DbError) === DbErrorCode.ConnectionFailure) {
         return c.json({ error: "Error connecting to database" }, 500);

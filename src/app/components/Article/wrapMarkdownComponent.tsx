@@ -1,7 +1,7 @@
 import Button from "@app/components/ui/Button";
 import { Tooltip } from "@app/components/ui/Tooltip";
 import { BrowserMessageContext } from "@app/providers/BrowserMessage";
-import { UserContext } from "@app/providers/User";
+import { useUser } from "@app/providers/User";
 import { Highlight } from "@shared/v1/items/highlights";
 import slugify from "limax";
 import React, {
@@ -85,7 +85,7 @@ const LinkInfo: React.FC<LinkInfoProps> = ({
   children,
   href,
 }: LinkInfoProps) => {
-  const { user } = useContext(UserContext);
+  const { user } = useUser();
   const { saveItemContent } = useContext(BrowserMessageContext);
 
   return (

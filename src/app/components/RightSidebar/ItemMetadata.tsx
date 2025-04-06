@@ -6,7 +6,7 @@ import Labels, { Label } from "@app/components/Labels";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import type { Item, PublicItem } from "@app/providers/Items";
 import { useSettings } from "@app/providers/Settings";
-import { UserContext } from "@app/providers/User";
+import { useUser } from "@app/providers/User";
 import { cn } from "@app/utils/cn";
 import { TextDirection } from "@shared/db";
 import { FALLBACK_HOSTNAME } from "@shared/types";
@@ -89,7 +89,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
   item,
   readonly,
 }: ItemMetadataProps) => {
-  const { user } = useContext(UserContext);
+  const { user } = useUser();
   const { isEditable } = useContext(CurrentItemContext);
   const { labels } = useSettings();
   const { addItemsLabel, removeItemsLabel } = useItemUpdate();

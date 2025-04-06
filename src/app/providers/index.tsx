@@ -1,9 +1,6 @@
-// eslint-disable-next-line no-restricted-imports
-import { HeroUIProvider } from "@heroui/react";
-import { db, eq } from "@web/db";
-import { profiles } from "@web/db/schema";
-import { createClient } from "@web/utils/supabase/server";
-import React, { PropsWithChildren } from "react";
+import { supabase } from "@app/utils/supabase";
+import { HeroUIProvider } from "@heroui/react"; // eslint-disable-line no-restricted-imports
+import React, { PropsWithChildren, useEffect, useState } from "react";
 
 import { AppLayoutProvider } from "./AppLayout/provider";
 import { BrowserMessageProvider } from "./BrowserMessage/provider";
@@ -33,35 +30,41 @@ const AuthenticatedProviders: React.FC<PropsWithChildren> = ({
   );
 };
 
-const Providers: React.FC<PropsWithChildren> = async ({
+const Providers: React.FC<PropsWithChildren> = ({
   children,
 }: PropsWithChildren) => {
-  let currentUser: User = {
+  const [currentUser, setCurrentUser] = useState<User>({
     id: null,
     username: null,
     email: null,
     newsletterEmail: null,
-  };
+  });
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  useEffect(() => {
+    const fetchProfile = async (): Promise<void> => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-  if (user) {
-    const profile = await db.query.profiles.findFirst({
-      where: eq(profiles.userId, user.id),
-    });
+      if (user) {
+        const profile = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", user.id)
+          .single();
 
-    if (profile) {
-      currentUser = {
-        id: profile.userId,
-        username: profile.username,
-        email: user.email || null,
-        newsletterEmail: profile.newsletterEmail,
-      };
-    }
-  }
+        if (profile) {
+          setCurrentUser({
+            id: profile.userId,
+            username: profile.username,
+            email: user.email || null,
+            newsletterEmail: profile.newsletterEmail,
+          });
+        }
+      }
+    };
+    fetchProfile();
+  }, []);
 
   return (
     <ClientProviders>
@@ -69,7 +72,7 @@ const Providers: React.FC<PropsWithChildren> = async ({
         <ToastProvider>
           <UserProvider user={currentUser}>
             <AppLayoutProvider>
-              {user ? (
+              {currentUser && currentUser.id ? (
                 <SettingsProvider>
                   <AuthenticatedProviders>{children}</AuthenticatedProviders>
                 </SettingsProvider>

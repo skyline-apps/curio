@@ -1,11 +1,11 @@
 import Button from "@app/components/ui/Button";
 import { useCache } from "@app/providers/Cache";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
+import { ItemsContext } from "@app/providers/Items";
+import { useToast } from "@app/providers/Toast";
 import config from "@app/utils/config.json";
 import { createLogger } from "@app/utils/logger";
 import { UploadStatus } from "@shared/types";
-import { ItemsContext } from "providers/Items";
-import { useToast } from "providers/Toast";
 import React, {
   useCallback,
   useContext,
@@ -173,11 +173,8 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
         const currentTimeoutId = timeoutId;
 
         const allowedOrigins = new Set<string>();
-        if (process.env.NEXT_PUBLIC_CURIO_URL) {
-          allowedOrigins.add(process.env.NEXT_PUBLIC_CURIO_URL);
-        }
-        if (process.env.VERCEL_URL) {
-          allowedOrigins.add(process.env.VERCEL_URL);
+        if (import.meta.env.VITE_CURIO_URL) {
+          allowedOrigins.add(import.meta.env.VITE_CURIO_URL);
         }
 
         for (const origin of allowedOrigins) {

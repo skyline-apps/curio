@@ -1,11 +1,11 @@
-import { UserContext } from "@app/providers/User";
-import CurioDark from "@app/public/logo/curio_dark.svg";
-import CurioLight from "@app/public/logo/curio_light.svg";
-import CurioLogoSquare from "@app/public/logo/curio_logo.svg";
-import CurioNameDark from "@app/public/logo/curio_name_dark.svg";
-import CurioNameLight from "@app/public/logo/curio_name_light.svg";
+import CurioDark from "@app/assets/curio_dark.svg";
+import CurioLight from "@app/assets/curio_light.svg";
+import CurioLogoSquare from "@app/assets/curio_logo.svg";
+import CurioNameDark from "@app/assets/curio_name_dark.svg";
+import CurioNameLight from "@app/assets/curio_name_light.svg";
+import { useUser } from "@app/providers/User";
 import { cn } from "@app/utils/cn";
-import React, { useContext } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 
 interface CurioProps {
@@ -13,7 +13,7 @@ interface CurioProps {
 }
 
 export const CurioBrand: React.FC<CurioProps> = ({ className }) => {
-  const { user } = useContext(UserContext);
+  const { user } = useUser();
 
   const homeLink = user.id ? "/home" : "/";
   return (
@@ -27,7 +27,7 @@ export const CurioBrand: React.FC<CurioProps> = ({ className }) => {
 };
 
 export const CurioHomeLogo: React.FC<CurioProps> = ({ className }) => {
-  const { user } = useContext(UserContext);
+  const { user } = useUser();
 
   const homeLink = user.id ? "/home" : "/";
   return (

@@ -1,12 +1,11 @@
 import Button from "@app/components/ui/Button";
 import Input from "@app/components/ui/Input";
-import { createClient } from "@web/utils/supabase/client";
+import { supabase } from "@app/utils/supabase";
 import { useState } from "react";
 
 type EmailSignInProps = Record<never, never>;
 
 const EmailSignIn: React.FC<EmailSignInProps> = ({}: EmailSignInProps) => {
-  const supabase = createClient();
   const [email, setEmail] = useState<string>("");
   const [isSigningIn, setIsSigningIn] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

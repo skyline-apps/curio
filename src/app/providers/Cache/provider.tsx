@@ -7,11 +7,15 @@ import {
   type HighlightItem,
   HIGHLIGHTS_QUERY_KEY,
   type HighlightsPage,
-} from "@app/providers/Highlights/provider";
+} from "@app/providers/Highlights";
+import {
+  type Item,
+  ITEMS_QUERY_KEY,
+  type ItemsPage,
+} from "@app/providers/Items";
+import { useUser } from "@app/providers/User";
 import { InfiniteData, useQueryClient } from "@tanstack/react-query";
-import { type Item, ITEMS_QUERY_KEY, type ItemsPage } from "providers/Items";
-import { UserContext } from "providers/User";
-import React, { useCallback, useContext } from "react";
+import React, { useCallback } from "react";
 
 import {
   CacheContext,
@@ -26,7 +30,7 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
   children,
 }: CacheProviderProps): React.ReactNode => {
   const queryClient = useQueryClient();
-  const { user } = useContext(UserContext);
+  const { user } = useUser();
 
   const invalidateCache = useCallback(
     (slug?: string) => {

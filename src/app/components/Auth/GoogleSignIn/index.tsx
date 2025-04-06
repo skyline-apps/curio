@@ -1,5 +1,5 @@
 import Button from "@app/components/ui/Button";
-import { createClient } from "@web/utils/supabase/client";
+import { supabase } from "@app/utils/supabase";
 import { useState } from "react";
 import { FaGoogle } from "react-icons/fa6";
 
@@ -10,7 +10,6 @@ interface GoogleOAuthButtonProps {
 const GoogleOAuthButton: React.FC<GoogleOAuthButtonProps> = ({
   nextUrl,
 }: GoogleOAuthButtonProps) => {
-  const supabase = createClient();
   const [isSigningIn, setIsSigningIn] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 

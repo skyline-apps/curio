@@ -1,9 +1,16 @@
 import { handleAPIResponse } from "@app/utils/api";
+import { clearTheme, initializeTheme } from "@app/utils/displayStorage";
+import { createLogger } from "@app/utils/logger";
+import { supabase } from "@app/utils/supabase";
 import { type UpdateEmailResponse } from "@shared/v1/user/email";
 import { type UpdateUsernameResponse } from "@shared/v1/user/username";
+import posthog from "posthog-js";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { User, UserContext } from ".";
+
+const log = createLogger("User");
 
 interface UserProviderProps {
   children: React.ReactNode;
@@ -14,6 +21,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
   children,
   user,
 }: UserProviderProps): React.ReactNode => {
+  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<User>(user);
 
   const clearUser = (): void => {
@@ -60,6 +68,19 @@ export const UserProvider: React.FC<UserProviderProps> = ({
       });
   };
 
+  const handleLogout = async (): Promise<void> => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      log.error("Error with logout:", error);
+      return;
+    }
+    clearUser();
+    clearTheme();
+    initializeTheme();
+    posthog.reset();
+    navigate("/");
+  };
+
   return (
     <UserContext.Provider
       value={{
@@ -67,6 +88,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
         clearUser,
         changeUsername,
         updateNewsletterEmail,
+        handleLogout,
       }}
     >
       {children}

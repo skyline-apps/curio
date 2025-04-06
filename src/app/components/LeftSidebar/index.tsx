@@ -6,22 +6,22 @@ import {
   BrowserMessageContext,
   EventType,
 } from "@app/providers/BrowserMessage";
-import { UserContext } from "@app/providers/User";
+import { useUser } from "@app/providers/User";
 import { cn } from "@app/utils/cn";
-import { useLocation, useNavigate } from "react-router-dom";
 import React, { useContext, useEffect, useState } from "react";
 import {
   HiChevronDoubleLeft,
   HiChevronDoubleRight,
   HiPlus,
 } from "react-icons/hi2";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import NavigationMenu, { SidebarKey } from "./NavigationMenu";
 import SidebarHeader from "./SidebarHeader";
 import UserMenu from "./UserMenu";
 
 const LeftSidebar: React.FC = () => {
-  const { user } = useContext(UserContext);
+  const { user, handleLogout } = useUser();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [selectedKey, setSelectedKey] = useState<string>(SidebarKey.NONE);
@@ -101,7 +101,7 @@ const LeftSidebar: React.FC = () => {
             user={user}
             sidebarOpen={sidebarOpen}
             selectedKey={selectedKey}
-            onLogout={() => void /* TODO: Implement logout */}
+            onLogout={handleLogout}
             onNavigate={handleNavigation}
           />
           <Button

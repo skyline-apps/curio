@@ -1,5 +1,5 @@
+import { type Item } from "@app/providers/Items";
 import { type Highlight } from "@shared/v1/items/highlights";
-import { type Item } from "providers/Items";
 import { createContext, useContext } from "react";
 
 export type ItemUpdate = { slug: string } & {

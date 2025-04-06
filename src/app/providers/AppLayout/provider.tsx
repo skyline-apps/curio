@@ -1,13 +1,13 @@
 import {
+  ShortcutType,
+  useKeyboardShortcuts,
+} from "@app/providers/KeyboardShortcuts";
+import {
   type AppLayoutSettings,
   DEFAULT_LAYOUT,
   loadLayoutSettings,
   updateLayoutSettings,
 } from "@app/utils/displayStorage";
-import {
-  ShortcutType,
-  useKeyboardShortcuts,
-} from "providers/KeyboardShortcuts";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 

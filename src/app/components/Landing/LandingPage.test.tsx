@@ -17,7 +17,7 @@ vi.mock("@app/components/Landing/LandingPageFeatures", () => ({
 }));
 
 // Mock SVG imports
-vi.mock("@app/public/assets/landing_page_light.svg", () => ({
+vi.mock("@app/assets/landing_page_light.svg", () => ({
   __esModule: true,
   default: ({ className }: { className: string }) => (
     <div data-testid="landing-page-light" className={className}>
@@ -26,7 +26,7 @@ vi.mock("@app/public/assets/landing_page_light.svg", () => ({
   ),
 }));
 
-vi.mock("@app/public/assets/landing_page_dark.svg", () => ({
+vi.mock("@app/assets/landing_page_dark.svg", () => ({
   __esModule: true,
   default: ({ className }: { className: string }) => (
     <div data-testid="landing-page-dark" className={className}>

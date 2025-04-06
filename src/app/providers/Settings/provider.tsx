@@ -1,4 +1,6 @@
 import { showConfirm } from "@app/components/ui/Modal/Dialog";
+import { useToast } from "@app/providers/Toast";
+import { useUser } from "@app/providers/User";
 import { handleAPIResponse } from "@app/utils/api";
 import {
   initializeTheme,
@@ -18,9 +20,7 @@ import type {
 } from "@shared/v1/user/settings";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import posthog from "posthog-js";
-import { useToast } from "providers/Toast";
-import { UserContext } from "providers/User";
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 
 import { SettingsContext } from ".";
 
@@ -51,7 +51,7 @@ enum LabelAction {
 export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   children,
 }: SettingsProviderProps): React.ReactNode => {
-  const { user } = useContext(UserContext);
+  const { user } = useUser();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
