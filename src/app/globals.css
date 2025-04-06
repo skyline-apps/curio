@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+}
+
+::selection {
+  @apply bg-warning text-warning-foreground;
+}
+
+::-moz-selection {
+  @apply bg-warning text-warning-foreground;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(128, 128, 128, 0.5) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background-color: transparent;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(128, 128, 128, 0.5);
+  border-radius: 0;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(128, 128, 128, 0.7);
+}
+
+@layer base {
+  :root {
+    --font-sans-default: var(--noto-sans);
+    --font-sans-arabic: var(--noto-sans-arabic);
+    --font-serif-default: var(--noto-serif);
+    --font-serif-arabic: var(--noto-naskh-arabic);
+    --font-mono-default: var(--noto-mono);
+    --font-mono-arabic: var(--noto-mono-arabic);
+  }
+}
+
+@layer utilities {
+  .font-sans-arabic {
+    font-family: var(--font-sans-arabic);
+  }
+
+  .font-serif-arabic {
+    font-family: var(--font-serif-arabic);
+  }
+
+  .font-mono-arabic {
+    font-family: var(--font-mono-arabic);
+  }
+}
+
+@layer base {
+  @font-face {
+    font-family: var(--noto-naskh-arabic);
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+  }
+
+  @font-face {
+    font-family: var(--noto-sans-arabic);
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+  }
+
+  @font-face {
+    font-family: var(--noto-mono-arabic);
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+  }
+}
