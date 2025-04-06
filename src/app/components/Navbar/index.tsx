@@ -9,13 +9,11 @@ import {
 import Icon from "@app/components/ui/Icon";
 import { UserContext } from "@app/providers/User";
 import { Navbar, NavbarBrand, NavbarContent } from "@heroui/navbar";
-import { useLogout } from "@web/hooks/useLogout";
 import React, { useContext } from "react";
 import { HiOutlineUser } from "react-icons/hi2";
 
 const CurioNavbar: React.FC = () => {
   const { user } = useContext(UserContext);
-  const handleLogout = useLogout();
 
   return (
     <Navbar classNames={{ wrapper: "px-4" }} isBordered maxWidth="full">
@@ -33,7 +31,7 @@ const CurioNavbar: React.FC = () => {
             <DropdownMenu>
               <DropdownItem
                 key="logout"
-                onPress={handleLogout}
+                onPress={() => void /* TODO: Implement logout */}
                 description={user.username}
               >
                 Log Out

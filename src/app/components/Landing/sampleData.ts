@@ -1,4 +1,4 @@
-import { COLOR_PALETTE } from "@web/components/ui/Chip";
+import { COLOR_PALETTE } from "@app/components/ui/Chip";
 import { ItemState, TextDirection } from "@web/db/schema";
 
 const ITEM_METADATA = {

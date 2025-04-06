@@ -8,7 +8,6 @@ import {
 } from "@app/providers/BrowserMessage";
 import { UserContext } from "@app/providers/User";
 import { cn } from "@app/utils/cn";
-import { useLogout } from "@web/hooks/useLogout";
 import { useLocation, useNavigate } from "react-router-dom";
 import React, { useContext, useEffect, useState } from "react";
 import {
@@ -31,8 +30,6 @@ const LeftSidebar: React.FC = () => {
   const { addMessageListener, removeMessageListener } = useContext(
     BrowserMessageContext,
   );
-
-  const handleLogout = useLogout();
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent): void => {
@@ -104,7 +101,7 @@ const LeftSidebar: React.FC = () => {
             user={user}
             sidebarOpen={sidebarOpen}
             selectedKey={selectedKey}
-            onLogout={handleLogout}
+            onLogout={() => void /* TODO: Implement logout */}
             onNavigate={handleNavigation}
           />
           <Button

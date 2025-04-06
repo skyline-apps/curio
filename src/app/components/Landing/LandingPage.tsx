@@ -1,7 +1,7 @@
 import { CurioName } from "@app/components/CurioBrand";
 import Button from "@app/components/ui/Button";
-import LandingPageDark from "@web/public/assets/landing_page_dark.svg";
-import LandingPageLight from "@web/public/assets/landing_page_light.svg";
+import LandingPageDark from "@app/public/assets/landing_page_dark.svg";
+import LandingPageLight from "@app/public/assets/landing_page_light.svg";
 import React from "react";
 
 import AppLinks from "./AppLinks";

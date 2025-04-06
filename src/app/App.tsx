@@ -1,12 +1,13 @@
 import RootLayout from "@app/layouts/RootLayout";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Outlet } from "react-router-dom";
+import MainPage from "@app/pages"
 
 export const App = (): React.ReactNode => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<RootLayout />}>
-          <Route path="/" element={<div>Home Page</div>} />
+        <Route element={<RootLayout><Outlet /></RootLayout>}>
+          <Route path="/" element={<MainPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -6,10 +6,10 @@ import {
   type Highlight,
   type NewHighlight,
 } from "@web/app/api/v1/items/highlights/validation";
-import { useCache } from "@web/providers/CacheProvider";
-import { CurrentItemContext } from "@web/providers/CurrentItemProvider";
-import { handleAPIResponse } from "@web/utils/api";
-import { createLogger } from "@web/utils/logger";
+import { useCache } from "@app/providers/Cache";
+import { CurrentItemContext } from "@app/providers/CurrentItem";
+import { handleAPIResponse } from "@app/utils/api";
+import { createLogger } from "@app/utils/logger";
 import { useContext, useState } from "react";
 
 const log = createLogger("right-sidebar-actions");
