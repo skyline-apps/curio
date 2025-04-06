@@ -6,9 +6,9 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import { useNavigate } from "react-router-dom";
 import React from "react";
-import { describe, beforeEach, it, expect, vi } from "vitest";
+import { useNavigate } from "react-router-dom";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import Navbar from ".";
 
@@ -41,7 +41,12 @@ describe("Navbar", () => {
   }: React.PropsWithChildren): React.ReactElement => (
     <UserContext.Provider
       value={{
-        user: { id: "user1", username: "testuser", email: "user@email.com", newsletterEmail: null },
+        user: {
+          id: "user1",
+          username: "testuser",
+          email: "user@email.com",
+          newsletterEmail: null,
+        },
         clearUser: mockClearUser,
         changeUsername: mockChangeUsername,
         updateNewsletterEmail: vi.fn(),

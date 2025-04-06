@@ -7,9 +7,9 @@ import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { type Item, ItemsContext } from "@app/providers/Items";
 import { ItemSource } from "@web/db/schema";
 import { FALLBACK_HOSTNAME } from "@web/utils/url";
-import { Link } from "react-router-dom";
 import { useContext, useRef } from "react";
 import { HiCheck, HiOutlineEnvelope } from "react-icons/hi2";
+import { Link } from "react-router-dom";
 
 interface ItemRowProps {
   item: Item;

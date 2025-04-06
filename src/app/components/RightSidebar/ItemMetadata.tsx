@@ -10,8 +10,8 @@ import { UserContext } from "@app/providers/User";
 import { cn } from "@app/utils/cn";
 import { TextDirection } from "@web/db/schema";
 import { FALLBACK_HOSTNAME } from "@web/utils/url";
-import { Link } from "react-router-dom";
 import { useCallback, useContext } from "react";
+import { Link } from "react-router-dom";
 
 interface ItemMetadataProps {
   item?: Item | PublicItem;

@@ -3,7 +3,7 @@ import { cn } from "utils/cn";
 
 export { type KbdKey } from "@heroui/react";
 
-interface CurioKbdProps extends KbdProps {}
+type CurioKbdProps = KbdProps;
 
 const CurioKbd = ({
   className,

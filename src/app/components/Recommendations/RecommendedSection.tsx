@@ -3,9 +3,9 @@ import Icon from "@app/components/ui/Icon";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { RecommendationSection } from "@web/app/api/v1/items/recommended/validation";
 import { PersonalRecommendationType, RecommendationType } from "@web/db/schema";
-import { Link } from "react-router-dom";
 import React, { useContext } from "react";
 import { LuMail } from "react-icons/lu";
+import { Link } from "react-router-dom";
 
 interface RecommendedSectionProps {
   section: RecommendationSection;

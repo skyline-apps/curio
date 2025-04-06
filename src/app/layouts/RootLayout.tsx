@@ -25,9 +25,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({
   ];
   return (
     <Providers>
-      <main className="w-full h-full min-h-dvh flex flex-col">
-        {children}
-      </main>
+      <main className="w-full h-full min-h-dvh flex flex-col">{children}</main>
     </Providers>
   );
 };

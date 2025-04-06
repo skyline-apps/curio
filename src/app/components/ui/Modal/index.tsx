@@ -7,7 +7,7 @@ import {
   ModalProps,
 } from "@heroui/modal";
 
-interface CurioModalProps extends ModalProps {}
+type CurioModalProps = ModalProps;
 
 const CurioModal: React.FC<CurioModalProps> = ({
   children,

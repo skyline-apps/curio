@@ -1,18 +1,18 @@
-import { Spinner, SpinnerProps } from "@heroui/react";
 import { cn } from "@app/utils/cn";
+import { Spinner, SpinnerProps } from "@heroui/react";
 
 interface CurioSpinnerProps extends Omit<SpinnerProps, "size" | "color"> {
   centered?: boolean;
   size?: "xs" | "sm" | "md" | "lg";
   color?:
-  | "default"
-  | "primary"
-  | "secondary"
-  | "success"
-  | "warning"
-  | "danger"
-  | "light"
-  | "dark";
+    | "default"
+    | "primary"
+    | "secondary"
+    | "success"
+    | "warning"
+    | "danger"
+    | "light"
+    | "dark";
 }
 
 const CurioSpinner: React.FC<CurioSpinnerProps> = ({

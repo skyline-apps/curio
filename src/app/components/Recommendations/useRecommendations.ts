@@ -1,6 +1,6 @@
+import { createLogger } from "@app/utils/logger";
 import { useQuery } from "@tanstack/react-query";
 import { GetRecommendationsResponse } from "@web/app/api/v1/items/recommended/validation";
-import { createLogger } from "@web/utils/logger";
 
 const log = createLogger("Recommendations");
 
@@ -10,7 +10,7 @@ export interface RecommendationPage {
   recommendations: GetRecommendationsResponse["recommendations"];
 }
 
-interface UseRecommendationsOptions {}
+type UseRecommendationsOptions = Record<never, never>;
 
 export interface UseRecommendationsReturn {
   recommendations: GetRecommendationsResponse["recommendations"];

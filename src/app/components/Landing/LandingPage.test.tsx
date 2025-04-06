@@ -1,5 +1,5 @@
 import { act, render, screen } from "@testing-library/react";
-import { vi, expect, describe, it, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import LandingPage from "./LandingPage";
 

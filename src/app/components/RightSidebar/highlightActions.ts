@@ -1,4 +1,7 @@
-"use client";
+import { useCache } from "@app/providers/Cache";
+import { CurrentItemContext } from "@app/providers/CurrentItem";
+import { handleAPIResponse } from "@app/utils/api";
+import { createLogger } from "@app/utils/logger";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import {
   CreateOrUpdateHighlightResponse,
@@ -6,10 +9,6 @@ import {
   type Highlight,
   type NewHighlight,
 } from "@web/app/api/v1/items/highlights/validation";
-import { useCache } from "@app/providers/Cache";
-import { CurrentItemContext } from "@app/providers/CurrentItem";
-import { handleAPIResponse } from "@app/utils/api";
-import { createLogger } from "@app/utils/logger";
 import { useContext, useState } from "react";
 
 const log = createLogger("right-sidebar-actions");

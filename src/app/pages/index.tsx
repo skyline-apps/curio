@@ -4,13 +4,13 @@ import Navbar from "@app/components/Navbar";
 import React from "react";
 
 const MainPage: React.FC = () => {
-    return (
-        <>
-            <Navbar />
-            <LandingPage />
-            <Footer />
-        </>
-    );
+  return (
+    <>
+      <Navbar />
+      <LandingPage />
+      <Footer />
+    </>
+  );
 };
 
 export default MainPage;

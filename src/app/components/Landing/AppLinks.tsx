@@ -1,6 +1,5 @@
 import Icon from "@app/components/ui/Icon";
 import config from "@app/utils/config.json";
-import { Link } from "react-router-dom";
 import {
   FaAndroid,
   FaApple,
@@ -8,6 +7,7 @@ import {
   FaDesktop,
   FaFirefoxBrowser,
 } from "react-icons/fa6";
+import { Link } from "react-router-dom";
 
 interface AppLinkProps {
   href?: string;

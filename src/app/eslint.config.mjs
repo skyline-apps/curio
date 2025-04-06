@@ -54,14 +54,6 @@ export default defineConfig([
       parser: tsParser,
       sourceType: "module",
     },
-    overrides: [
-      {
-        files: ["components/ui/**/*"],
-        rules: {
-          "no-restricted-imports": "off",
-        },
-      },
-    ],
 
     rules: {
       ...reactHooks.configs.recommended.rules,
@@ -141,6 +133,12 @@ export default defineConfig([
       react: {
         version: "detect",
       },
+    },
+  },
+  {
+    files: ["components/ui/**/*"],
+    rules: {
+      "no-restricted-imports": "off",
     },
   },
 ]);

@@ -1,6 +1,6 @@
 import { Snippet, type SnippetProps } from "@heroui/react";
 
-export interface CurioSnippetProps extends SnippetProps { }
+export type CurioSnippetProps = SnippetProps;
 
 const CurioSnippet = ({
   children,

@@ -1,7 +1,3 @@
-import type {
-  SettingsResponse,
-  UpdatedSettingsResponse,
-} from "@web/app/api/v1/user/settings/validation";
 import { showConfirm } from "@app/components/ui/Modal/Dialog";
 import { handleAPIResponse } from "@app/utils/api";
 import {
@@ -16,6 +12,10 @@ import type {
   DeleteLabelsResponse,
   GetLabelsResponse,
 } from "@web/app/api/v1/user/labels/validation";
+import type {
+  SettingsResponse,
+  UpdatedSettingsResponse,
+} from "@web/app/api/v1/user/settings/validation";
 import posthog from "posthog-js";
 import { useToast } from "providers/Toast";
 import { UserContext } from "providers/User";
