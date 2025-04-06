@@ -34,6 +34,33 @@ jobs:
         working-directory: ./src/api
         run: npm run test
 
+  check-app:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.9.0"
+
+      - name: APP - Install dependencies
+        working-directory: ./src/app
+        run: npm install
+
+      - name: APP - Run lint
+        working-directory: ./src/app
+        run: npm run lint
+
+      - name: APP - Run build
+        working-directory: ./src/app
+        run: npm run build
+
+      - name: APP - Run tests
+        working-directory: ./src/app
+        run: npm run test
+
   check-web:
     runs-on: ubuntu-latest
 
