@@ -75,10 +75,10 @@ export default defineConfig([globalIgnores(["**/*.config.js"]), {
         "no-restricted-imports": ["error", {
             patterns: [{
                 group: ["@supabase/*"],
-                message: "Please use `@web/utils/supabase` instead of `@supabase/*`",
+                message: "Please use `@api/lib/supabase` instead of `@supabase/*`",
             }, {
                 group: ["drizzle-orm", "postgres"],
-                message: "Please use `@web/db` for database utilities",
+                message: "Please use `@api/db` for database utilities",
             }],
         }],
 

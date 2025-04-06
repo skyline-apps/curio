@@ -1,4 +1,4 @@
-import { type Highlight } from "@web/app/api/v1/items/highlights/validation";
+import { type Highlight } from "@shared/v1/items/highlights";
 import { type Item } from "providers/Items";
 import { createContext, useContext } from "react";
 

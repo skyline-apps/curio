@@ -1,6 +1,6 @@
 import { createLogger } from "@app/utils/logger";
+import { GetRecommendationsResponse } from "@shared/v1/items/recommended";
 import { useQuery } from "@tanstack/react-query";
-import { GetRecommendationsResponse } from "@web/app/api/v1/items/recommended/validation";
 
 const log = createLogger("Recommendations");
 

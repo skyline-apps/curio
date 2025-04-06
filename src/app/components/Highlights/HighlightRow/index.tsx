@@ -4,7 +4,7 @@ import {
   HighlightsContext,
 } from "@app/providers/Highlights";
 import { cn } from "@app/utils/cn";
-import { TextDirection } from "@web/db/schema";
+import { TextDirection } from "@shared/db";
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 

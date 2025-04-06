@@ -16,3 +16,5 @@ export enum UploadStatus {
   SKIPPED = "SKIPPED",
   ERROR = "ERROR",
 }
+
+export const FALLBACK_HOSTNAME = "curio-newsletter";

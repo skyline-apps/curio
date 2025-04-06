@@ -2,8 +2,8 @@ import Thumbnail from "@app/components/Image/Thumbnail";
 import Card from "@app/components/ui/Card";
 import { type Item, type PublicItem } from "@app/providers/Items";
 import { cn } from "@app/utils/cn";
-import { TextDirection } from "@web/db/schema";
-import { FALLBACK_HOSTNAME } from "@web/utils/url";
+import { TextDirection } from "@shared/db";
+import { FALLBACK_HOSTNAME } from "@shared/types";
 import { Link } from "react-router-dom";
 
 interface ItemCardProps {

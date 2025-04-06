@@ -3,10 +3,7 @@ import { useAppLayout } from "@app/providers/AppLayout";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { useToast } from "@app/providers/Toast";
 import { createLogger } from "@app/utils/logger";
-import {
-  type Highlight,
-  type NewHighlight,
-} from "@web/app/api/v1/items/highlights/validation";
+import { Highlight, NewHighlight } from "@shared/v1/items/highlights";
 import { useCallback, useContext, useState } from "react";
 
 const log = createLogger("useHighlightSelection");

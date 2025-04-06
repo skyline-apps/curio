@@ -1,12 +1,7 @@
+import { FALLBACK_HOSTNAME } from "@shared/types";
 import { describe, expect, it } from "vitest";
 
-import {
-  cleanUrl,
-  FALLBACK_HOSTNAME,
-  generateSlug,
-  getRootDomain,
-  slugifyString,
-} from "./url";
+import { cleanUrl, generateSlug, getRootDomain, slugifyString } from "./url";
 
 describe("url", () => {
   describe("cleanUrl", () => {

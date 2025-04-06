@@ -4,8 +4,8 @@ import Button from "@app/components/ui/Button";
 import Textarea from "@app/components/ui/Textarea";
 import { type HighlightItem } from "@app/providers/Highlights";
 import { cn } from "@app/utils/cn";
-import { Highlight } from "@web/app/api/v1/items/highlights/validation";
-import { TextDirection } from "@web/db/schema";
+import { TextDirection } from "@shared/db";
+import { Highlight } from "@shared/v1/items/highlights";
 import { useEffect, useState } from "react";
 import { HiOutlineClipboard, HiOutlineTrash } from "react-icons/hi2";
 

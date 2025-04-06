@@ -3,7 +3,7 @@ import { useCache } from "@app/providers/Cache";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import config from "@app/utils/config.json";
 import { createLogger } from "@app/utils/logger";
-import { UploadStatus } from "@web/lib/storage/types";
+import { UploadStatus } from "@shared/types";
 import { ItemsContext } from "providers/Items";
 import { useToast } from "providers/Toast";
 import React, {

@@ -1,8 +1,5 @@
 import { cn } from "@app/utils/cn";
-import {
-  type Highlight,
-  type NewHighlight,
-} from "@web/app/api/v1/items/highlights/validation";
+import { Highlight, NewHighlight } from "@shared/v1/items/highlights";
 import React, { useRef } from "react";
 
 const isHighlightWithId = (

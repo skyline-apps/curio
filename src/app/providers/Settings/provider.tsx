@@ -6,16 +6,17 @@ import {
   setLightTheme,
   setSystemTheme,
 } from "@app/utils/displayStorage";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   CreateOrUpdateLabelsResponse,
   DeleteLabelsResponse,
   GetLabelsResponse,
-} from "@web/app/api/v1/user/labels/validation";
+} from "@shared/v1/user/labels";
 import type {
-  SettingsResponse,
-  UpdatedSettingsResponse,
-} from "@web/app/api/v1/user/settings/validation";
+  GetSettingsResponse,
+  UpdateSettingsRequest,
+  UpdateSettingsResponse,
+} from "@shared/v1/user/settings";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import posthog from "posthog-js";
 import { useToast } from "providers/Toast";
 import { UserContext } from "providers/User";
@@ -27,11 +28,11 @@ interface SettingsProviderProps {
   children: React.ReactNode;
 }
 
-const fetchSettings = async (): Promise<SettingsResponse> => {
+const fetchSettings = async (): Promise<GetSettingsResponse> => {
   const response = await fetch("/api/v1/user/settings", {
     method: "GET",
   });
-  return handleAPIResponse<SettingsResponse>(response);
+  return handleAPIResponse<GetSettingsResponse>(response);
 };
 
 const fetchLabels = async (): Promise<GetLabelsResponse> => {
@@ -68,8 +69,8 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
 
   const updateSettingsMutation = useMutation({
     mutationFn: async (payload: {
-      field: keyof SettingsResponse;
-      value: SettingsResponse[keyof SettingsResponse];
+      field: keyof UpdateSettingsRequest;
+      value: UpdateSettingsRequest[keyof UpdateSettingsRequest];
     }) => {
       const response = await fetch("/api/v1/user/settings", {
         method: "POST",
@@ -78,12 +79,12 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         },
         body: JSON.stringify({ [payload.field]: payload.value }),
       });
-      return handleAPIResponse<UpdatedSettingsResponse>(response);
+      return handleAPIResponse<UpdateSettingsResponse>(response);
     },
     onSuccess: (result) => {
-      queryClient.setQueryData<SettingsResponse>(
+      queryClient.setQueryData<GetSettingsResponse>(
         ["settings"],
-        (oldData: SettingsResponse | undefined) => {
+        (oldData: GetSettingsResponse | undefined) => {
           return oldData ? { ...oldData, ...result } : undefined;
         },
       );
@@ -174,9 +175,9 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   }, [currentSettings?.analyticsTracking, user.id, user.username]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateSettings = async (
-    field: keyof SettingsResponse,
-    value: SettingsResponse[keyof SettingsResponse],
-  ): Promise<UpdatedSettingsResponse | void> => {
+    field: keyof UpdateSettingsRequest,
+    value: UpdateSettingsRequest[keyof UpdateSettingsRequest],
+  ): Promise<UpdateSettingsResponse | void> => {
     if (!currentSettings) {
       return;
     }

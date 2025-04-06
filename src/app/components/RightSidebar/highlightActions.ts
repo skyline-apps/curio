@@ -2,13 +2,13 @@ import { useCache } from "@app/providers/Cache";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { handleAPIResponse } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
-import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import {
   CreateOrUpdateHighlightResponse,
   DeleteHighlightResponse,
   type Highlight,
   type NewHighlight,
-} from "@web/app/api/v1/items/highlights/validation";
+} from "@shared/v1/items/highlights";
+import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { useContext, useState } from "react";
 
 const log = createLogger("right-sidebar-actions");

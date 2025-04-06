@@ -1,6 +1,6 @@
 import { handleAPIResponse } from "@app/utils/api";
-import { type UpdateEmailResponse } from "@web/app/api/v1/user/email/validation";
-import { type UpdateUsernameResponse } from "@web/app/api/v1/user/username/validation";
+import { type UpdateEmailResponse } from "@shared/v1/user/email";
+import { type UpdateUsernameResponse } from "@shared/v1/user/username";
 import React, { useState } from "react";
 
 import { User, UserContext } from ".";

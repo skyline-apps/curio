@@ -1,5 +1,5 @@
-import { type Highlight } from "@web/app/api/v1/items/highlights/validation";
-import { GetItemContentResponse } from "@web/app/api/v1/public/items/content/validation";
+import { type Highlight } from "@shared/v1/items/highlights";
+import { GetItemContentResponse } from "@shared/v1/public/items/content";
 import { Item, PublicItem } from "providers/Items";
 import { createContext } from "react";
 

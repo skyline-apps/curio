@@ -1,10 +1,10 @@
 import { useAppLayout } from "@app/providers/AppLayout";
 import { handleAPIResponse } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
+import { ItemState } from "@shared/db";
+import { type Highlight } from "@shared/v1/items/highlights";
+import { GetItemContentResponse } from "@shared/v1/public/items/content";
 import { useQuery } from "@tanstack/react-query";
-import { type Highlight } from "@web/app/api/v1/items/highlights/validation";
-import { GetItemContentResponse } from "@web/app/api/v1/public/items/content/validation";
-import { ItemState } from "@web/db/schema";
 import { Item, ItemsContext, PublicItem } from "providers/Items";
 import React, {
   useCallback,

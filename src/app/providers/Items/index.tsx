@@ -2,7 +2,7 @@ import {
   type GetItemsRequest,
   type ItemResult,
   type PublicItemResult,
-} from "@web/app/api/v1/items/validation";
+} from "@shared/v1/items";
 import { createContext } from "react";
 
 export const ITEMS_QUERY_KEY = "items";

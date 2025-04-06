@@ -8,8 +8,8 @@ import type { Item, PublicItem } from "@app/providers/Items";
 import { useSettings } from "@app/providers/Settings";
 import { UserContext } from "@app/providers/User";
 import { cn } from "@app/utils/cn";
-import { TextDirection } from "@web/db/schema";
-import { FALLBACK_HOSTNAME } from "@web/utils/url";
+import { TextDirection } from "@shared/db";
+import { FALLBACK_HOSTNAME } from "@shared/types";
 import { useCallback, useContext } from "react";
 import { Link } from "react-router-dom";
 
@@ -106,7 +106,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
     async (labelId: string): Promise<void> => {
       if (readonly || !item || !isEditable(item) || !item.labels) return;
 
-      const labelToRemove = item.labels.find((l) => l.id === labelId);
+      const labelToRemove = item.labels.find((l: Label) => l.id === labelId);
       if (labelToRemove) {
         await removeItemsLabel([item], labelToRemove);
       }

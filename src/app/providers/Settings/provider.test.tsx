@@ -1,6 +1,8 @@
 import "@testing-library/jest-dom";
 
 import { ClientProviders } from "@app/providers/ClientProviders";
+import { ColorScheme, DisplayFont, DisplayFontSize } from "@shared/db";
+import type { GetSettingsResponse } from "@shared/v1/user/settings";
 import {
   act,
   fireEvent,
@@ -8,17 +10,18 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import type { SettingsResponse } from "@web/app/api/v1/user/settings/validation";
-import { ColorScheme } from "@web/db/schema";
 import { describe, expect, it, vi } from "vitest";
 
 import { SettingsContext } from ".";
 import { SettingsProvider } from "./provider";
 
 describe("SettingsContext", () => {
-  const initialSettings: SettingsResponse = {
+  const initialSettings: GetSettingsResponse = {
     colorScheme: ColorScheme.LIGHT,
+    displayFont: DisplayFont.SANS,
+    displayFontSize: DisplayFontSize.MD,
     public: false,
+    analyticsTracking: false,
   };
 
   it("fetches and provides initial settings values", async () => {

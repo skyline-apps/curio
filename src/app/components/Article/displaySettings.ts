@@ -1,4 +1,4 @@
-import { DisplayFont, DisplayFontSize } from "@web/db/schema";
+import { DisplayFont, DisplayFontSize } from "@shared/db";
 import { lookup } from "bcp-47-match";
 
 export const getDisplayFontClass = (

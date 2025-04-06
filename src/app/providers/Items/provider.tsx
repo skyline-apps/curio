@@ -1,10 +1,7 @@
 import { handleAPIResponse } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
+import { type GetItemsRequest } from "@shared/v1/items";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import {
-  type GetItemsRequest,
-  type GetItemsResponse,
-} from "@web/app/api/v1/items/validation";
 import React, { useCallback, useMemo, useState } from "react";
 
 import { ItemsContext, ItemsContextType, ItemsPage } from ".";

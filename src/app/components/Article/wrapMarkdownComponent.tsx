@@ -2,7 +2,7 @@ import Button from "@app/components/ui/Button";
 import { Tooltip } from "@app/components/ui/Tooltip";
 import { BrowserMessageContext } from "@app/providers/BrowserMessage";
 import { UserContext } from "@app/providers/User";
-import { type Highlight } from "@web/app/api/v1/items/highlights/validation";
+import { Highlight } from "@shared/v1/items/highlights";
 import slugify from "limax";
 import React, {
   type ComponentPropsWithoutRef,
@@ -26,7 +26,7 @@ interface MarkdownNode {
   value?: string;
 }
 
-type MarkdownProps<T extends keyof JSX.IntrinsicElements> =
+type MarkdownProps<T extends keyof React.JSX.IntrinsicElements> =
   ComponentPropsWithoutRef<T> & {
     node?: MarkdownNode;
   };
@@ -49,7 +49,7 @@ const VOID_ELEMENTS = new Set([
   "wbr",
 ]);
 
-export const ALL_COMPONENTS: (keyof JSX.IntrinsicElements)[] = [
+export const ALL_COMPONENTS: (keyof React.JSX.IntrinsicElements)[] = [
   "h1",
   "h2",
   "h3",
@@ -181,7 +181,9 @@ if (typeof window !== "undefined") {
   });
 }
 
-export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
+export const wrapMarkdownComponent = <
+  T extends keyof React.JSX.IntrinsicElements,
+>(
   tag: T,
   highlights: Highlight[],
   selectedHighlight: Highlight | null,
@@ -193,7 +195,7 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
     node,
     children,
     ...rest
-  }: MarkdownProps<T>): JSX.Element => {
+  }: MarkdownProps<T>): React.ReactElement => {
     const selfRef = React.useRef<HTMLDivElement>(null);
     const startOffset = node?.position?.start?.offset ?? 0;
     const endOffset = node?.position?.end?.offset ?? 0;

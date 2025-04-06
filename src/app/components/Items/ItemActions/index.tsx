@@ -4,7 +4,7 @@ import { Item, ItemsContext } from "@app/providers/Items";
 import { useToast } from "@app/providers/Toast";
 import { cn } from "@app/utils/cn";
 import { createLogger } from "@app/utils/logger";
-import { ItemState } from "@web/db/schema";
+import { ItemState } from "@shared/db";
 import { useCallback, useContext } from "react";
 import {
   HiArchiveBox,

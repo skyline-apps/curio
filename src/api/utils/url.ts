@@ -1,8 +1,7 @@
+import { FALLBACK_HOSTNAME } from "@shared/types";
 import { createHash } from "crypto";
 import slugify from "limax";
 import punycode from "punycode";
-
-export const FALLBACK_HOSTNAME = "curio-newsletter";
 
 /**
  * Removes query parameters from a URL and returns the cleaned URL

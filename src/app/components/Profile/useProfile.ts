@@ -1,6 +1,6 @@
+import { createLogger } from "@app/utils/logger";
+import { GetProfileResponse } from "@shared/v1/public/profile";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { GetProfileResponse } from "@web/app/api/v1/public/profile/validation";
-import { createLogger } from "@web/utils/logger";
 
 const log = createLogger("Profile");
 

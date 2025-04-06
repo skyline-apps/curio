@@ -1,16 +1,17 @@
+import type { GetLabelsResponse } from "@shared/v1/user/labels";
 import type {
-  SettingsResponse,
-  UpdatedSettingsResponse,
-} from "@app/api/v1/user/settings/validation";
-import type { GetLabelsResponse } from "@web/app/api/v1/user/labels/validation";
+  GetSettingsResponse,
+  UpdateSettingsRequest,
+  UpdateSettingsResponse,
+} from "@shared/v1/user/settings";
 import { createContext, useContext } from "react";
 
 export type SettingsContextType = {
-  settings?: SettingsResponse;
+  settings?: GetSettingsResponse;
   updateSettings: (
-    field: keyof SettingsResponse,
-    value: SettingsResponse[keyof SettingsResponse],
-  ) => Promise<UpdatedSettingsResponse | void>;
+    field: keyof UpdateSettingsRequest,
+    value: UpdateSettingsRequest[keyof UpdateSettingsRequest],
+  ) => Promise<UpdateSettingsResponse | void>;
   labels?: GetLabelsResponse["labels"];
   loadingLabels?: boolean;
   createLabel: (label: { name: string; color?: string }) => Promise<boolean>;

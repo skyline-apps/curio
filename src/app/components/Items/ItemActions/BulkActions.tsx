@@ -3,7 +3,7 @@ import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { ItemsContext } from "@app/providers/Items";
 import { useToast } from "@app/providers/Toast";
 import { createLogger } from "@app/utils/logger";
-import { ItemState } from "@web/db/schema";
+import { ItemState } from "@shared/db";
 import { useCallback, useContext, useState } from "react";
 import {
   HiArchiveBox,

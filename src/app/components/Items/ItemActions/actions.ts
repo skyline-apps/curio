@@ -5,12 +5,12 @@ import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { type Item } from "@app/providers/Items";
 import { handleAPIResponse } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
+import { ItemState } from "@shared/db";
+import { UpdateFavoriteResponse } from "@shared/v1/items/favorite";
+import { UpdateLabelsResponse } from "@shared/v1/items/labels";
+import { SaveResponse } from "@shared/v1/items/save";
+import { UpdateStateResponse } from "@shared/v1/items/state";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
-import { UpdateFavoriteResponse } from "@web/app/api/v1/items/favorite/validation";
-import { UpdateLabelsResponse } from "@web/app/api/v1/items/labels/validation";
-import { SaveResponse } from "@web/app/api/v1/items/save/validation";
-import { UpdateStateResponse } from "@web/app/api/v1/items/state/validation";
-import { ItemState } from "@web/db/schema";
 import { useContext } from "react";
 
 const log = createLogger("item-actions");
@@ -157,7 +157,7 @@ export const useItemUpdate = (): UseItemUpdate => {
       const newItems = items.map((item) => ({
         ...item,
         labels: (item.labels || []).filter(
-          (label) => label.id !== labelToRemove.id,
+          (label: ItemLabel) => label.id !== labelToRemove.id,
         ),
       }));
       optimisticUpdateItems(newItems);

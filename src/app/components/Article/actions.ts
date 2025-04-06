@@ -2,8 +2,8 @@ import { useCache } from "@app/providers/Cache";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { handleAPIResponse } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
+import { ReadItemResponse } from "@shared/v1/items/read";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
-import { ReadItemResponse } from "@web/app/api/v1/items/read/validation";
 import { useContext } from "react";
 
 const log = createLogger("article-actions");
