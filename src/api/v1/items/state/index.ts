@@ -1,24 +1,23 @@
 import { and, eq, sql } from "@api/db";
-import {
-  items,
-  ItemState,
-  profileItemHighlights,
-  profileItems,
-} from "@api/db/schema";
+import { items, profileItemHighlights, profileItems } from "@api/db/schema";
 import { deleteHighlightDocuments } from "@api/lib/search";
-import { apiDoc, APIResponse, parseError } from "@api/utils/api";
+import {
+  apiDoc,
+  APIResponse,
+  describeRoute,
+  parseError,
+  zValidator,
+} from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
 import log from "@api/utils/logger";
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-import { validator as zValidator } from "hono-openapi/zod";
-
+import { ItemState } from "@shared/db";
 import {
   UpdateStateRequest,
   UpdateStateRequestSchema,
   UpdateStateResponse,
   UpdateStateResponseSchema,
-} from "./validation";
+} from "@shared/v1/items/state";
+import { Hono } from "hono";
 
 export const itemsStateRouter = new Hono<EnvBindings>().post(
   "/",

@@ -1,23 +1,23 @@
 import { and, desc, eq, sql } from "@api/db";
 import { fetchOwnItemResults } from "@api/db/dal/profileItems";
 import { profileItems, profiles } from "@api/db/schema";
-import { apiDoc, APIResponse, parseError } from "@api/utils/api";
+import {
+  apiDoc,
+  APIResponse,
+  describeRoute,
+  parseError,
+  zValidator,
+} from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
 import log from "@api/utils/logger";
-import {
-  ItemResultSchema,
-  PublicItemResultSchema,
-} from "@api/v1/items/validation";
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-import { validator as zValidator } from "hono-openapi/zod";
-
+import { ItemResultSchema, PublicItemResultSchema } from "@shared/v1/items";
 import {
   GetProfileRequest,
   GetProfileRequestSchema,
   GetProfileResponse,
   GetProfileResponseSchema,
-} from "./validation";
+} from "@shared/v1/public/profile";
+import { Hono } from "hono";
 
 export const publicProfileRouter = new Hono<EnvBindings>().get(
   "/",

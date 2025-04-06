@@ -1,8 +1,8 @@
 import "zod-openapi/extend";
 
-import { ItemSource, ItemState, TextDirection } from "@api/db/schema";
-import { dateType } from "@api/utils/types";
-import { LabelSchema } from "@api/v1/user/labels/validation";
+import { ItemSource, ItemState, TextDirection } from "@shared/db";
+import { dateType } from "@shared/types/index";
+import { LabelSchema } from "@shared/v1/user/labels";
 import { z } from "zod";
 
 const UrlSchema = z.string().url().describe("Unique URL of the item.");

@@ -1,5 +1,5 @@
-import { TextDirection } from "@api/db/schema";
 import { ExtractedMetadata } from "@api/lib/extract/types";
+import { TextDirection } from "@shared/db";
 import { vi } from "vitest";
 
 export const MOCK_METADATA: ExtractedMetadata = {

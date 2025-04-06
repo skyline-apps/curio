@@ -2,11 +2,9 @@ import { and, desc, eq } from "@api/db";
 import { DbErrorCode } from "@api/db/errors";
 import {
   items,
-  ItemState,
   profileItemLabels,
   profileItems,
   profileLabels,
-  TextDirection,
 } from "@api/db/schema";
 import { searchItemDocuments } from "@api/lib/search";
 import { SearchError } from "@api/lib/search/types";
@@ -34,11 +32,12 @@ import {
   TEST_LABEL_ID_2,
 } from "@api/utils/test/data";
 import { testDb } from "@api/utils/test/provider";
+import { ItemState, TextDirection } from "@shared/db";
+import { GetItemsResponse } from "@shared/v1/items";
 import { Hono } from "hono";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { itemsRouter } from "./index";
-import { GetItemsResponse } from "./validation";
 
 describe("/v1/items", () => {
   let app: Hono<EnvBindings>;

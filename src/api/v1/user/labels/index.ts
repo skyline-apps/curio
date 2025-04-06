@@ -1,13 +1,15 @@
 import { and, eq, inArray, sql } from "@api/db";
 import { checkDbError, DbError, DbErrorCode } from "@api/db/errors";
 import { profileLabels } from "@api/db/schema";
-import { apiDoc, APIResponse, parseError } from "@api/utils/api";
+import {
+  apiDoc,
+  APIResponse,
+  describeRoute,
+  parseError,
+  zValidator,
+} from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
 import log from "@api/utils/logger";
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-import { validator as zValidator } from "hono-openapi/zod";
-
 import {
   CreateOrUpdateLabelsRequest,
   CreateOrUpdateLabelsRequestSchema,
@@ -21,7 +23,8 @@ import {
   GetLabelsRequestSchema,
   GetLabelsResponse,
   GetLabelsResponseSchema,
-} from "./validation";
+} from "@shared/v1/user/labels";
+import { Hono } from "hono";
 
 export const userLabelsRouter = new Hono<EnvBindings>()
   .get(

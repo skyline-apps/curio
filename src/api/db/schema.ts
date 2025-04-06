@@ -1,3 +1,13 @@
+import {
+  ColorScheme,
+  DisplayFont,
+  DisplayFontSize,
+  ItemSource,
+  ItemState,
+  PersonalRecommendationType,
+  RecommendationType,
+  TextDirection,
+} from "@shared/db";
 // eslint-disable-next-line no-restricted-imports
 import {
   boolean,
@@ -21,35 +31,17 @@ const authUsers = authSchema.table("users", {
   email: text("email").notNull().unique(),
 });
 
-export enum ColorScheme {
-  AUTO = "auto",
-  LIGHT = "light",
-  DARK = "dark",
-}
 export const colorSchemeEnum = pgEnum("color_scheme", [
   ColorScheme.AUTO,
   ColorScheme.LIGHT,
   ColorScheme.DARK,
 ]);
 
-export enum DisplayFont {
-  MONO = "monospace",
-  SANS = "sans-serif",
-  SERIF = "serif",
-}
-
 export const displayFontEnum = pgEnum("display_font", [
   DisplayFont.MONO,
   DisplayFont.SANS,
   DisplayFont.SERIF,
 ]);
-
-export enum DisplayFontSize {
-  SM = "sm",
-  MD = "md",
-  LG = "lg",
-  XL = "xl",
-}
 
 export const displayFontSizeEnum = pgEnum("display_font_size", [
   DisplayFontSize.SM,
@@ -141,11 +133,6 @@ export const profileLabels = pgTable(
   }),
 ).enableRLS();
 
-export enum ItemState {
-  ACTIVE = "active",
-  ARCHIVED = "archived",
-  DELETED = "deleted",
-}
 export const itemState = pgEnum("item_state", [
   ItemState.ACTIVE,
   ItemState.ARCHIVED,
@@ -159,15 +146,6 @@ export const ItemStateNumber = {
   [ItemState.DELETED]: 3,
 };
 
-export enum ItemSource {
-  EMAIL = "email",
-}
-
-export enum TextDirection {
-  LTR = "ltr",
-  RTL = "rtl",
-  AUTO = "auto",
-}
 export const textDirection = pgEnum("text_direction", [
   TextDirection.LTR,
   TextDirection.RTL,
@@ -319,10 +297,6 @@ export const appConfig = pgTable("app_config", {
   value: text("value").notNull(),
 }).enableRLS();
 
-export enum RecommendationType {
-  POPULAR = "popular",
-}
-
 export const recommendationType = pgEnum("recommendation_type", [
   RecommendationType.POPULAR,
 ]);
@@ -351,12 +325,6 @@ export const itemRecommendations = pgTable(
     ),
   }),
 ).enableRLS();
-
-export enum PersonalRecommendationType {
-  NEWSLETTER = "newsletter",
-  FAVORITE_AUTHOR = "favorite_author",
-  FAVORITES = "favorites",
-}
 
 export const personalRecommendationType = pgEnum(
   "personal_recommendation_type",

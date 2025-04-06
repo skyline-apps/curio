@@ -1,0 +1,13 @@
+{
+  "name": "curio-shared",
+  "version": "0.0.1",
+  "description": "Shared types for curio packages",
+  "main": "index.ts",
+  "dependencies": {
+    "zod": "^3.24.2",
+    "zod-openapi": "^4.2.3"
+  },
+  "devDependencies": {
+    "@types/mailparser": "^3.4.5"
+  }
+}

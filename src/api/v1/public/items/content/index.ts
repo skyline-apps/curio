@@ -3,20 +3,23 @@ import { fetchOwnItemResults } from "@api/db/dal/profileItems";
 import { items, profileItemHighlights, profileItems } from "@api/db/schema";
 import { getItemContent, getItemMetadata } from "@api/lib/storage";
 import { StorageError } from "@api/lib/storage/types";
-import { apiDoc, APIResponse, parseError } from "@api/utils/api";
+import {
+  apiDoc,
+  APIResponse,
+  describeRoute,
+  parseError,
+  zValidator,
+} from "@api/utils/api";
 import { EnvBindings, EnvContext } from "@api/utils/env";
 import log from "@api/utils/logger";
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-import { validator as zValidator } from "hono-openapi/zod";
-
 import {
   GetItemContentRequest,
   GetItemContentRequestSchema,
   GetItemContentResponse,
   GetItemContentResponseSchema,
   ItemResultWithHighlightsSchema,
-} from "./validation";
+} from "@shared/v1/public/items/content";
+import { Hono } from "hono";
 
 async function getDefaultContent(
   c: EnvContext,

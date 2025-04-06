@@ -1,11 +1,6 @@
 import { eq } from "@api/db";
 import { DbErrorCode } from "@api/db/errors";
-import {
-  items,
-  profileItemHighlights,
-  profileItems,
-  TextDirection,
-} from "@api/db/schema";
+import { items, profileItemHighlights, profileItems } from "@api/db/schema";
 import {
   deleteHighlightDocuments,
   indexHighlightDocuments,
@@ -27,15 +22,16 @@ import {
   MOCK_PROFILE_ITEMS,
 } from "@api/utils/test/data";
 import { testDb } from "@api/utils/test/provider";
-import { Hono } from "hono";
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-
-import { itemsHighlightRouter } from "./index";
+import { TextDirection } from "@shared/db";
 import {
   CreateOrUpdateHighlightResponse,
   DeleteHighlightResponse,
   GetHighlightsResponse,
-} from "./validation";
+} from "@shared/v1/items/highlights";
+import { Hono } from "hono";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { itemsHighlightRouter } from "./index";
 
 const MOCK_SEARCH_RESULTS: HighlightDocumentResult[] = [
   {

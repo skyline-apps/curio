@@ -1,20 +1,23 @@
 import { eq } from "@api/db";
 import { checkDbError, DbError, DbErrorCode } from "@api/db/errors";
 import { profiles } from "@api/db/schema";
-import { apiDoc, APIResponse, parseError } from "@api/utils/api";
+import {
+  apiDoc,
+  APIResponse,
+  describeRoute,
+  parseError,
+  zValidator,
+} from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
 import log from "@api/utils/logger";
 import { generateRandomAlphabetString } from "@api/utils/random";
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-import { validator as zValidator } from "hono-openapi/zod";
-
 import {
   UpdateEmailRequest,
   UpdateEmailRequestSchema,
   UpdateEmailResponse,
   UpdateEmailResponseSchema,
-} from "./validation";
+} from "@shared/v1/user/email";
+import { Hono } from "hono";
 
 export const userEmailRouter = new Hono<EnvBindings>().post(
   "/",

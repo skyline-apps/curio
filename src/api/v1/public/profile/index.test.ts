@@ -2,12 +2,10 @@ import { eq } from "@api/db";
 import { DbErrorCode } from "@api/db/errors";
 import {
   items,
-  ItemState,
   profileItemLabels,
   profileItems,
   profileLabels,
   profiles,
-  TextDirection,
 } from "@api/db/schema";
 import { EnvBindings } from "@api/utils/env";
 import {
@@ -19,11 +17,12 @@ import {
   setUpMockApp,
 } from "@api/utils/test/api";
 import { testDb } from "@api/utils/test/provider";
+import { ItemState, TextDirection } from "@shared/db";
+import { GetProfileResponse } from "@shared/v1/public/profile";
 import { Hono } from "hono";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { publicProfileRouter } from "./index";
-import { GetProfileResponse } from "./validation";
 
 const TEST_ITEM_ID = "123e4567-e89b-12d3-a456-426614174001";
 const TEST_ITEM_URL_1 = "https://example.com/";

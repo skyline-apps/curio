@@ -1,8 +1,6 @@
 import { eq, type SQL, sql, type TransactionDB } from "@api/db";
 import {
   items,
-  ItemSource,
-  ItemState,
   profileItemHighlights,
   profileItemLabels,
   profileItems,
@@ -13,6 +11,7 @@ import { searchItemDocuments } from "@api/lib/search";
 import { SearchError } from "@api/lib/search/types";
 import { EnvContext } from "@api/utils/env";
 import log from "@api/utils/logger";
+import { ItemSource, ItemState } from "@shared/db";
 
 export const LABELS_CLAUSE = sql<
   Array<{ id: string; name: string; color: string }>

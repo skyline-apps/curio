@@ -2,12 +2,9 @@ import { and, eq, sql } from "@api/db";
 import {
   itemRecommendations,
   items,
-  ItemSource,
-  PersonalRecommendationType,
   profileItemRecommendations,
   profileItems,
   profiles,
-  RecommendationType,
 } from "@api/db/schema";
 import { EnvBindings } from "@api/utils/env";
 import {
@@ -19,16 +16,21 @@ import {
 } from "@api/utils/test/api";
 import { MOCK_ITEMS, MOCK_PROFILE_ITEMS } from "@api/utils/test/data";
 import { testDb } from "@api/utils/test/provider";
-import { ItemResult, PublicItemResult } from "@api/v1/items/validation";
+import {
+  ItemSource,
+  PersonalRecommendationType,
+  RecommendationType,
+} from "@shared/db";
+import { ItemResult, PublicItemResult } from "@shared/v1/items";
+import {
+  GetRecommendationsResponse,
+  RecommendationSection,
+} from "@shared/v1/items/recommended";
 import { Hono } from "hono";
 import { v4 } from "uuid";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { itemsRecommendedRouter } from "./index";
-import {
-  GetRecommendationsResponse,
-  RecommendationSection,
-} from "./validation";
 
 describe("GET /v1/items/recommended", () => {
   let app: Hono<EnvBindings>;

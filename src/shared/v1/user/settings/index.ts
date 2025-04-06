@@ -1,6 +1,6 @@
 import "zod-openapi/extend";
 
-import { ColorScheme, DisplayFont, DisplayFontSize } from "@api/db/schema";
+import { ColorScheme, DisplayFont, DisplayFontSize } from "@shared/db";
 import { z } from "zod";
 
 export const SettingsSchema = z.object({

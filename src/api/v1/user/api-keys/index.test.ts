@@ -8,11 +8,14 @@ import {
   setUpMockApp,
 } from "@api/utils/test/api";
 import { testDb } from "@api/utils/test/provider";
+import {
+  CreateApiKeyResponse,
+  GetApiKeysResponse,
+} from "@shared/v1/user/api-keys";
 import { Hono } from "hono";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { userApiKeysRouter } from "./index";
-import { CreateApiKeyResponse, GetApiKeysResponse } from "./validation";
 
 describe("/v1/user/api-keys", () => {
   let app: Hono<EnvBindings>;

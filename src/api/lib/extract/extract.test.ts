@@ -1,6 +1,6 @@
-import { TextDirection } from "@api/db/schema";
 import { Extract } from "@api/lib/extract";
 import { ExtractError, MetadataError } from "@api/lib/extract/types";
+import { TextDirection } from "@shared/db";
 import fs from "fs";
 import path from "path";
 import { beforeEach, describe, expect, it, vi } from "vitest";

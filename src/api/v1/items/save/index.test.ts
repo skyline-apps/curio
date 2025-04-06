@@ -1,6 +1,6 @@
 import { eq } from "@api/db";
 import { DbErrorCode } from "@api/db/errors";
-import { items, ItemState, profileItems } from "@api/db/schema";
+import { items, profileItems } from "@api/db/schema";
 import { getItemMetadata } from "@api/lib/storage/__mocks__/index";
 import { EnvBindings } from "@api/utils/env";
 import {
@@ -19,11 +19,12 @@ import {
   TEST_ITEM_ID_DELETED,
 } from "@api/utils/test/data";
 import { testDb } from "@api/utils/test/provider";
+import { ItemState } from "@shared/db";
+import { SaveResponse } from "@shared/v1/items/save";
 import { Hono } from "hono";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { itemsSaveRouter } from "./index";
-import { SaveResponse } from "./validation";
 
 describe("/v1/items/save", () => {
   let app: Hono<EnvBindings>;

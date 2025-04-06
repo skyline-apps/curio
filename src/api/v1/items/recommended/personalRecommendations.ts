@@ -11,13 +11,11 @@ import {
 } from "@api/db";
 import {
   items,
-  ItemSource,
-  ItemState,
-  PersonalRecommendationType,
   profileItemRecommendations,
   profileItems,
 } from "@api/db/schema";
 import log from "@api/utils/logger";
+import { ItemSource, ItemState, PersonalRecommendationType } from "@shared/db";
 
 export type PersonalRecommendation = {
   id: string;

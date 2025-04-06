@@ -3,7 +3,7 @@ import "zod-openapi/extend";
 import {
   ItemResultSchema,
   PublicItemResultSchema,
-} from "@api/v1/items/validation";
+} from "@shared/v1/items";
 import { z } from "zod";
 
 export const GetProfileRequestSchema = z

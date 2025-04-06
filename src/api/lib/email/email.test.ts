@@ -1,5 +1,5 @@
-import { TextDirection } from "@api/db/schema";
 import { MOCK_ENV } from "@api/utils/test/env";
+import { TextDirection } from "@shared/db";
 import fs from "fs";
 import path from "path";
 import { describe, expect, it, vi } from "vitest";

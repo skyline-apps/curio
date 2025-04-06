@@ -1,18 +1,21 @@
 import { and, eq } from "@api/db";
 import { apiKeys } from "@api/db/schema";
-import { apiDoc, APIResponse, parseError } from "@api/utils/api";
+import {
+  apiDoc,
+  APIResponse,
+  describeRoute,
+  parseError,
+  zValidator,
+} from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
 import log from "@api/utils/logger";
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-import { validator as zValidator } from "hono-openapi/zod";
-
 import {
   RevokeApiKeyRequest,
   RevokeApiKeyRequestSchema,
   RevokeApiKeyResponse,
   RevokeApiKeyResponseSchema,
-} from "./validation";
+} from "@shared/v1/user/api-keys/revoke";
+import { Hono } from "hono";
 
 export const userApiKeysRevokeRouter = new Hono<EnvBindings>().post(
   "/",

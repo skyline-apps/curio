@@ -29,7 +29,7 @@ services:
       dockerfile: ./docker/curio-api/Dockerfile
     container_name: curio-api
     network_mode: host
-    working_dir: /app
+    working_dir: /api
     command: >
       npm run dev
     depends_on:
@@ -37,14 +37,14 @@ services:
     mem_limit: "6G"
     cpus: 4
     volumes:
-      - ./.env:/app/.dev.vars
+      - ./.env:/api/.dev.vars
     develop:
       watch:
         - action: sync
           path: ./src/api
-          target: /app
+          target: /api
           ignore:
-            - /app/node_modules
+            - /api/node_modules
         - action: rebuild
           path: ./src/api/package.json
   app:

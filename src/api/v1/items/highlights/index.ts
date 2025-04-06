@@ -5,13 +5,15 @@ import {
   indexHighlightDocuments,
   searchHighlightDocuments,
 } from "@api/lib/search";
-import { apiDoc, APIResponse, parseError } from "@api/utils/api";
+import {
+  apiDoc,
+  APIResponse,
+  describeRoute,
+  parseError,
+  zValidator,
+} from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
 import log from "@api/utils/logger";
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-import { validator as zValidator } from "hono-openapi/zod";
-
 import {
   CreateOrUpdateHighlightRequest,
   CreateOrUpdateHighlightRequestSchema,
@@ -25,7 +27,8 @@ import {
   GetHighlightsRequestSchema,
   GetHighlightsResponse,
   GetHighlightsResponseSchema,
-} from "./validation";
+} from "@shared/v1/items/highlights";
+import { Hono } from "hono";
 
 export const itemsHighlightRouter = new Hono<EnvBindings>()
   .get(

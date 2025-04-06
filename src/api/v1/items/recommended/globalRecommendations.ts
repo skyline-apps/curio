@@ -9,13 +9,9 @@ import {
   sql,
   TransactionDB,
 } from "@api/db";
-import {
-  itemRecommendations,
-  ItemState,
-  profileItems,
-  RecommendationType,
-} from "@api/db/schema";
+import { itemRecommendations, profileItems } from "@api/db/schema";
 import log from "@api/utils/logger";
+import { ItemState, RecommendationType } from "@shared/db";
 
 export type GlobalRecommendation = {
   id: string;

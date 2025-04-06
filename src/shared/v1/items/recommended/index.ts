@@ -1,10 +1,10 @@
 import "zod-openapi/extend";
 
-import { PersonalRecommendationType, RecommendationType } from "@api/db/schema";
+import { PersonalRecommendationType, RecommendationType } from "@shared/db";
 import {
   ItemResultSchema,
   PublicItemResultSchema,
-} from "@api/v1/items/validation";
+} from "@shared/v1/items";
 import { z } from "zod";
 
 export const RecommendationSectionSchema = z.object({

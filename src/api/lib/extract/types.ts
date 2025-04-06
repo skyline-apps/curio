@@ -1,4 +1,4 @@
-import { TextDirection } from "@api/db/schema";
+import { TextDirection } from "@shared/db";
 
 export class ExtractError extends Error {
   constructor(message: string) {

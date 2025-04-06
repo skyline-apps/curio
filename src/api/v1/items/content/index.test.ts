@@ -1,11 +1,5 @@
 import { desc, eq } from "@api/db";
-import {
-  items,
-  ItemState,
-  profileItemHighlights,
-  profileItems,
-  TextDirection,
-} from "@api/db/schema";
+import { items, profileItemHighlights, profileItems } from "@api/db/schema";
 import {
   extractMainContentAsMarkdown,
   extractMetadata,
@@ -19,7 +13,6 @@ import {
   uploadItemContent,
 } from "@api/lib/storage";
 import { MOCK_VERSION } from "@api/lib/storage/__mocks__/index";
-import { UploadStatus } from "@api/lib/storage/types";
 import { ErrorResponse } from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
 import { postRequest, setUpMockApp } from "@api/utils/test/api";
@@ -30,6 +23,8 @@ import {
   TEST_ITEM_URL_1,
 } from "@api/utils/test/data";
 import { testDb } from "@api/utils/test/provider";
+import { ItemState, TextDirection } from "@shared/db";
+import { UploadStatus } from "@shared/types";
 import { Hono } from "hono";
 import { beforeAll, describe, expect, it, test, vi } from "vitest";
 

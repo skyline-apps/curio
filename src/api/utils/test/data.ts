@@ -1,8 +1,8 @@
-import { ItemState } from "@api/db/schema";
 import {
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_PROFILE_ID_2,
 } from "@api/utils/test/api";
+import { ItemState } from "@shared/db";
 
 export const TEST_ITEM_ID_1 = "123e4567-e89b-12d3-a456-426614174001";
 export const TEST_ITEM_URL_1 = "https://example.com";

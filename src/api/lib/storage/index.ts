@@ -1,9 +1,10 @@
-import { TextDirection } from "@api/db/schema";
 import { ExtractedMetadata } from "@api/lib/extract/types";
-import { StorageError, UploadStatus } from "@api/lib/storage/types";
+import { StorageError } from "@api/lib/storage/types";
 import { createClient, type StorageClient } from "@api/lib/supabase/client";
 import { EnvContext } from "@api/utils/env";
 import log from "@api/utils/logger";
+import { TextDirection } from "@shared/db";
+import { UploadStatus } from "@shared/types";
 import { createHash } from "crypto";
 
 import { type VersionMetadata } from "./types";

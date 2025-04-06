@@ -12,21 +12,25 @@ import {
 } from "@api/lib/extract/types";
 import { indexItemDocuments } from "@api/lib/search";
 import { storage } from "@api/lib/storage";
-import { StorageError, UploadStatus } from "@api/lib/storage/types";
-import { apiDoc, APIResponse, parseError } from "@api/utils/api";
+import { StorageError } from "@api/lib/storage/types";
+import {
+  apiDoc,
+  APIResponse,
+  describeRoute,
+  parseError,
+  zValidator,
+} from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
 import log from "@api/utils/logger";
 import { cleanUrl, generateSlug } from "@api/utils/url";
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-import { validator as zValidator } from "hono-openapi/zod";
-
+import { UploadStatus } from "@shared/types";
 import {
   UpdateItemContentRequest,
   UpdateItemContentRequestSchema,
   UpdateItemContentResponse,
   UpdateItemContentResponseSchema,
-} from "./validation";
+} from "@shared/v1/items/content";
+import { Hono } from "hono";
 
 export const itemsContentRouter = new Hono<EnvBindings>().post(
   "/",

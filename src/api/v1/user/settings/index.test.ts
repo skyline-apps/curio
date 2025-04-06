@@ -1,11 +1,6 @@
 import { eq } from "@api/db";
 import { DbErrorCode } from "@api/db/errors";
-import {
-  ColorScheme,
-  DisplayFont,
-  DisplayFontSize,
-  profiles,
-} from "@api/db/schema";
+import { profiles } from "@api/db/schema";
 import { EnvBindings } from "@api/utils/env";
 import {
   DEFAULT_TEST_PROFILE_ID,
@@ -15,6 +10,7 @@ import {
   setUpMockApp,
 } from "@api/utils/test/api";
 import { testDb } from "@api/utils/test/provider";
+import { ColorScheme, DisplayFont, DisplayFontSize } from "@shared/db";
 import { Hono } from "hono";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 

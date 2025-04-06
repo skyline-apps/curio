@@ -1,6 +1,6 @@
 import "zod-openapi/extend";
 
-import { TextDirection } from "@api/db/schema";
+import { TextDirection } from "@shared/db";
 import { z } from "zod";
 
 export const HighlightSchema = z.object({

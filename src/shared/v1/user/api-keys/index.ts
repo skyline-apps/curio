@@ -1,6 +1,6 @@
 import "zod-openapi/extend";
 
-import { dateType } from "@api/utils/types";
+import { dateType } from "@shared/types";
 import { z } from "zod";
 
 export const CreateApiKeyRequestSchema = z.object({

@@ -1,6 +1,6 @@
 import { eq } from "@api/db";
 import { updateProfileItem } from "@api/db/dal/profileItems";
-import { items, ItemSource, profiles } from "@api/db/schema";
+import { items, profiles } from "@api/db/schema";
 import {
   extractMetadataFromEmail,
   extractUrlFromEmail,
@@ -10,21 +10,26 @@ import { EmailError } from "@api/lib/email/types";
 import { extractMainContentAsMarkdown } from "@api/lib/extract";
 import { indexItemDocuments } from "@api/lib/search";
 import { storage } from "@api/lib/storage";
-import { StorageError, UploadStatus } from "@api/lib/storage/types";
-import { apiDoc, APIResponse, parseError } from "@api/utils/api";
+import { StorageError } from "@api/lib/storage/types";
+import {
+  apiDoc,
+  APIResponse,
+  describeRoute,
+  parseError,
+  zValidator,
+} from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
 import log from "@api/utils/logger";
 import { generateSlug } from "@api/utils/url";
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-import { validator as zValidator } from "hono-openapi/zod";
-
+import { ItemSource } from "@shared/db";
+import { UploadStatus } from "@shared/types";
 import {
   UploadEmailRequest,
   UploadEmailRequestSchema,
   UploadEmailResponse,
   UploadEmailResponseSchema,
-} from "./validation";
+} from "@shared/v1/public/items/email";
+import { Hono } from "hono";
 
 export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
   "/",

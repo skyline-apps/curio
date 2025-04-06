@@ -14,7 +14,6 @@ import {
   MOCK_VERSION,
   uploadItemContent,
 } from "@api/lib/storage/__mocks__/index";
-import { UploadStatus } from "@api/lib/storage/types";
 import { ErrorResponse } from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
 import {
@@ -25,6 +24,7 @@ import {
 } from "@api/utils/test/api";
 import { MOCK_ENV } from "@api/utils/test/env";
 import { testDb } from "@api/utils/test/provider";
+import { UploadStatus } from "@shared/types";
 import { Hono } from "hono";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 

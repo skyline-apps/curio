@@ -1,24 +1,31 @@
 import { eq, sql, TransactionDB } from "@api/db";
 import { fetchOwnItemResults } from "@api/db/dal/profileItems";
-import {
-  items,
-  PersonalRecommendationType,
-  profileItems,
-  RecommendationType,
-} from "@api/db/schema";
+import { items, profileItems } from "@api/db/schema";
 import { getItemMetadata } from "@api/lib/storage";
-import { apiDoc, APIResponse, parseError } from "@api/utils/api";
+import {
+  apiDoc,
+  APIResponse,
+  describeRoute,
+  parseError,
+  zValidator,
+} from "@api/utils/api";
 import { EnvBindings, EnvContext } from "@api/utils/env";
 import log from "@api/utils/logger";
+import { PersonalRecommendationType, RecommendationType } from "@shared/db";
 import {
   ItemResult,
   ItemResultSchema,
   PublicItemResult,
   PublicItemResultSchema,
-} from "@api/v1/items/validation";
+} from "@shared/v1/items";
+import {
+  GetRecommendationsRequest,
+  GetRecommendationsRequestSchema,
+  GetRecommendationsResponse,
+  GetRecommendationsResponseSchema,
+  RecommendationSection,
+} from "@shared/v1/items/recommended";
 import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-import { validator as zValidator } from "hono-openapi/zod";
 
 import {
   GlobalRecommendation,
@@ -28,13 +35,6 @@ import {
   maybeUpdateAndGetPersonalRecommendations,
   PersonalRecommendation,
 } from "./personalRecommendations";
-import {
-  GetRecommendationsRequest,
-  GetRecommendationsRequestSchema,
-  GetRecommendationsResponse,
-  GetRecommendationsResponseSchema,
-  RecommendationSection,
-} from "./validation";
 
 export const itemsRecommendedRouter = new Hono<EnvBindings>().get(
   "/",

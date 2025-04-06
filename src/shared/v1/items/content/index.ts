@@ -1,7 +1,7 @@
 import "zod-openapi/extend";
 
-import { UploadStatus } from "@api/lib/storage/types";
-import { ItemResultSchema } from "@api/v1/items/validation";
+import { UploadStatus } from "@shared/types/index";
+import { ItemResultSchema } from "@shared/v1/items";
 import { z } from "zod";
 
 export const HighlightSchema = z.object({

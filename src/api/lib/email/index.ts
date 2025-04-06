@@ -1,7 +1,7 @@
-import { TextDirection } from "@api/db/schema";
 import { ExtractedMetadata } from "@api/lib/extract/types";
 import log from "@api/utils/logger";
 import { cleanUrl, FALLBACK_HOSTNAME, getRootDomain } from "@api/utils/url";
+import { TextDirection } from "@shared/db";
 import { franc } from "franc";
 import { iso6393To1 } from "iso-639-3";
 import { type ParsedMail, simpleParser } from "mailparser";

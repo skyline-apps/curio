@@ -1,11 +1,6 @@
 import { and, eq, not, or } from "@api/db";
 import { DbErrorCode } from "@api/db/errors";
-import {
-  items,
-  ItemState,
-  profileItemHighlights,
-  profileItems,
-} from "@api/db/schema";
+import { items, profileItemHighlights, profileItems } from "@api/db/schema";
 import { deleteHighlightDocuments } from "@api/lib/search/__mocks__";
 import { EnvBindings } from "@api/utils/env";
 import {
@@ -20,6 +15,7 @@ import {
   TEST_ITEM_ID_DELETED,
 } from "@api/utils/test/data";
 import { testDb } from "@api/utils/test/provider";
+import { ItemState } from "@shared/db";
 import { Hono } from "hono";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 

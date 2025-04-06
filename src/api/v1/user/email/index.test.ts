@@ -7,11 +7,11 @@ import {
   setUpMockApp,
 } from "@api/utils/test/api";
 import { testDb } from "@api/utils/test/provider";
+import { UpdateEmailResponse } from "@shared/v1/user/email";
 import { Hono } from "hono";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { userEmailRouter } from "./index";
-import { UpdateEmailResponse } from "./validation";
 
 describe("POST /v1/user/email", () => {
   let app: Hono<EnvBindings>;

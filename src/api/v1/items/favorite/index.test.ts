@@ -1,6 +1,6 @@
 import { eq } from "@api/db";
 import { DbErrorCode } from "@api/db/errors";
-import { items, ItemState, profileItems } from "@api/db/schema";
+import { items, profileItems } from "@api/db/schema";
 import { EnvBindings } from "@api/utils/env";
 import {
   DEFAULT_TEST_PROFILE_ID,
@@ -14,6 +14,7 @@ import {
   TEST_ITEM_ID_2,
 } from "@api/utils/test/data";
 import { testDb } from "@api/utils/test/provider";
+import { ItemState } from "@shared/db";
 import { Hono } from "hono";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 

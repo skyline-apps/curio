@@ -1,6 +1,6 @@
 import "zod-openapi/extend";
 
-import { UploadStatus } from "@api/lib/storage/types";
+import { UploadStatus } from "@shared/types/index";
 import { z } from "zod";
 
 export const UploadEmailRequestSchema = z.object({

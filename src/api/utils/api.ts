@@ -4,6 +4,9 @@ import { DescribeRouteOptions } from "hono-openapi";
 import { resolver } from "hono-openapi/zod";
 import { ZodError, ZodType } from "zod";
 
+export { describeRoute } from "hono-openapi";
+export { validator as zValidator } from "hono-openapi/zod";
+
 export type APIRequest = Request;
 
 export interface ErrorResponse {

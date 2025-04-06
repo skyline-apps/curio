@@ -1,19 +1,23 @@
 import { and, eq, inArray, isNull, not, or, sql } from "@api/db";
-import { items, ItemState, profileItems } from "@api/db/schema";
+import { items, profileItems } from "@api/db/schema";
 import { getItemMetadata } from "@api/lib/storage";
-import { apiDoc, APIResponse, parseError } from "@api/utils/api";
+import {
+  apiDoc,
+  APIResponse,
+  describeRoute,
+  parseError,
+  zValidator,
+} from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
 import log from "@api/utils/logger";
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-import { validator as zValidator } from "hono-openapi/zod";
-
+import { ItemState } from "@shared/db";
 import {
   SaveRequest,
   SaveRequestSchema,
   SaveResponse,
   SaveResponseSchema,
-} from "./validation";
+} from "@shared/v1/items/save";
+import { Hono } from "hono";
 
 export const itemsSaveRouter = new Hono<EnvBindings>().post(
   "/",

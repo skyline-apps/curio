@@ -11,15 +11,15 @@ import {
   setUpMockApp,
 } from "@api/utils/test/api";
 import { testDb } from "@api/utils/test/provider";
-import { Hono } from "hono";
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-
-import { userLabelsRouter } from "./index";
 import {
   CreateOrUpdateLabelsResponse,
   DeleteLabelsResponse,
   GetLabelsResponse,
-} from "./validation";
+} from "@shared/v1/user/labels";
+import { Hono } from "hono";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { userLabelsRouter } from "./index";
 
 const MOCK_LABEL_ID_1 = "123e4567-e89b-12d3-a456-426614174999";
 const MOCK_LABEL_ID_2 = "123e4567-e89b-12d3-a456-426614174998";

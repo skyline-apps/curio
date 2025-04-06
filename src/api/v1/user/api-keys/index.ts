@@ -1,13 +1,15 @@
 import { eq } from "@api/db";
 import { apiKeys } from "@api/db/schema";
-import { apiDoc, APIResponse, parseError } from "@api/utils/api";
+import {
+  apiDoc,
+  APIResponse,
+  describeRoute,
+  parseError,
+  zValidator,
+} from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
 import log from "@api/utils/logger";
 import { generateApiKey } from "@api/utils/random";
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-import { validator as zValidator } from "hono-openapi/zod";
-
 import {
   CreateApiKeyRequest,
   CreateApiKeyRequestSchema,
@@ -17,7 +19,8 @@ import {
   GetApiKeysRequestSchema,
   GetApiKeysResponse,
   GetApiKeysResponseSchema,
-} from "./validation";
+} from "@shared/v1/user/api-keys";
+import { Hono } from "hono";
 
 export const userApiKeysRouter = new Hono<EnvBindings>()
   .get(

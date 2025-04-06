@@ -1,12 +1,14 @@
 import { and, eq, inArray, sql } from "@api/db";
 import { items, profileItemLabels, profileItems } from "@api/db/schema";
-import { apiDoc, APIResponse, parseError } from "@api/utils/api";
+import {
+  apiDoc,
+  APIResponse,
+  describeRoute,
+  parseError,
+  zValidator,
+} from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
 import log from "@api/utils/logger";
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-import { validator as zValidator } from "hono-openapi/zod";
-
 import {
   BulkDeleteLabelsRequest,
   BulkDeleteLabelsRequestSchema,
@@ -16,7 +18,8 @@ import {
   UpdateLabelsRequestSchema,
   UpdateLabelsResponse,
   UpdateLabelsResponseSchema,
-} from "./validation";
+} from "@shared/v1/items/labels";
+import { Hono } from "hono";
 
 export const itemsLabelsRouter = new Hono<EnvBindings>()
   .post(

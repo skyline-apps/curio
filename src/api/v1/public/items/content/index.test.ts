@@ -1,12 +1,10 @@
 import { eq } from "@api/db";
 import {
   items,
-  ItemState,
   profileItemHighlights,
   profileItemLabels,
   profileItems,
   profileLabels,
-  TextDirection,
 } from "@api/db/schema";
 import { getItemContent } from "@api/lib/storage";
 import { MOCK_VERSION } from "@api/lib/storage/__mocks__/index";
@@ -19,12 +17,13 @@ import {
   setUpMockApp,
 } from "@api/utils/test/api";
 import { testDb } from "@api/utils/test/provider";
-import { ItemResultWithHighlights } from "@api/v1/items/content/validation";
+import { ItemState, TextDirection } from "@shared/db";
+import { ItemResultWithHighlights } from "@shared/v1/items/content";
+import { GetItemContentResponse } from "@shared/v1/public/items/content";
 import { Hono } from "hono";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { publicItemsContentRouter } from "./index";
-import { GetItemContentResponse } from "./validation";
 
 const TEST_ITEM_ID = "123e4567-e89b-12d3-a456-426614174001";
 const TEST_ITEM_SLUG = "example-com";

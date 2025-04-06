@@ -1,6 +1,6 @@
 import "zod-openapi/extend";
 
-import { ItemState } from "@api/db/schema";
+import { ItemState } from "@shared/db";
 import { z } from "zod";
 
 export const UpdateStateRequestSchema = z.object({

@@ -3,15 +3,18 @@ import {
   fetchOwnItemResults,
   getRelevantProfileItemIds,
 } from "@api/db/dal/profileItems";
-import { items, ItemState, profileItems, TextDirection } from "@api/db/schema";
-import { apiDoc, APIResponse, parseError } from "@api/utils/api";
+import { items, profileItems } from "@api/db/schema";
+import {
+  apiDoc,
+  APIResponse,
+  describeRoute,
+  parseError,
+  zValidator,
+} from "@api/utils/api";
 import { EnvBindings } from "@api/utils/env";
 import log from "@api/utils/logger";
 import { cleanUrl, generateSlug } from "@api/utils/url";
-import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
-import { validator as zValidator } from "hono-openapi/zod";
-
+import { ItemState, TextDirection } from "@shared/db";
 import {
   CreateOrUpdateItemsRequest,
   CreateOrUpdateItemsRequestSchema,
@@ -23,7 +26,8 @@ import {
   GetItemsResponseSchema,
   ItemResultSchema,
   ItemResultWithoutLabelsSchema,
-} from "./validation";
+} from "@shared/v1/items";
+import { Hono } from "hono";
 
 export const itemsRouter = new Hono<EnvBindings>()
   .get(

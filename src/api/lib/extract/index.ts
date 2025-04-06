@@ -1,5 +1,5 @@
-import { TextDirection } from "@api/db/schema";
 import { Readability } from "@mozilla/readability";
+import { TextDirection } from "@shared/db";
 import { JSDOM } from "jsdom";
 import {
   Article,
