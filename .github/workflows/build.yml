@@ -14,6 +14,10 @@ jobs:
         with:
           node-version: "22.9.0"
 
+      - name: API - Build shared
+        working-directory: ./src/shared
+        run: npm install
+
       - name: API - Build custom lint rules
         working-directory: ./src/api/eslint-local-rules
         run: npm install && npm run build
@@ -44,6 +48,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22.9.0"
+
+      - name: APP - Build shared
+        working-directory: ./src/shared
+        run: npm install
 
       - name: APP - Install dependencies
         working-directory: ./src/app
