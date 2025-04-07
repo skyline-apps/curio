@@ -1,4 +1,4 @@
-import { ColorScheme, profiles } from "@api/db/schema";
+import { profiles } from "@api/db/schema";
 import {
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_PROFILE_ID_2,
@@ -8,6 +8,7 @@ import {
   DEFAULT_TEST_USERNAME_2,
 } from "@api/utils/test/api";
 import { testDb } from "@api/utils/test/provider";
+import { ColorScheme } from "@shared/db";
 import { beforeAll, beforeEach, vi } from "vitest";
 
 // Set up global mocks
