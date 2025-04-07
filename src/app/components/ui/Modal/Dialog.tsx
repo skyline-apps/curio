@@ -57,7 +57,7 @@ const useDialog = create<DialogStore>()((set) => ({
     }),
 }));
 
-export const Dialog = (): JSX.Element => {
+export const Dialog = (): React.ReactElement => {
   const dialog = useDialog();
 
   const handleConfirm = (): void => {

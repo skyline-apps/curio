@@ -4,8 +4,6 @@ import {
 } from "@shared/v1/items/highlights";
 import { createContext } from "react";
 
-import { HighlightItem } from ".";
-
 export const HIGHLIGHTS_QUERY_KEY = "highlights";
 
 export type HighlightItem = GetHighlightsResponse["highlights"][0];
