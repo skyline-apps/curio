@@ -1,3 +1,4 @@
+import { monoFonts, sansFonts, serifFonts } from "@app/styles/fonts"; // Adjust the import path if needed
 import { DisplayFont, DisplayFontSize } from "@shared/db";
 import { lookup } from "bcp-47-match";
 
@@ -6,43 +7,22 @@ export const getDisplayFontClass = (
   language: string,
 ): string => {
   const arabic = !!lookup([language], "ar");
-  const other = !!lookup(
-    [language],
-    [
-      "ru",
-      "uk",
-      "be",
-      "bg",
-      "sr",
-      "mk",
-      "me",
-      "kk",
-      "ky",
-      "tg",
-      "mn",
-      "el",
-      "vi",
-    ],
-  );
   switch (font) {
     case DisplayFont.MONO:
-      return arabic
-        ? "font-mono-arabic"
-        : other
-          ? "font-mono-other"
-          : "font-mono";
+      if (arabic) {
+        monoFonts.find((f) => f.variable === "--font-mono-arabic")?.load();
+      }
+      return arabic ? "font-mono-arabic" : "font-mono";
     case DisplayFont.SANS:
-      return arabic
-        ? "font-sans-arabic"
-        : other
-          ? "font-sans-other"
-          : "font-sans";
+      if (arabic) {
+        sansFonts.find((f) => f.variable === "--font-sans-arabic")?.load();
+      }
+      return arabic ? "font-sans-arabic" : "font-sans";
     case DisplayFont.SERIF:
-      return arabic
-        ? "font-serif-arabic"
-        : other
-          ? "font-serif-other"
-          : "font-serif";
+      if (arabic) {
+        serifFonts.find((f) => f.variable === "--font-serif-arabic")?.load();
+      }
+      return arabic ? "font-serif-arabic" : "font-serif";
     default:
       return "font-sans";
   }

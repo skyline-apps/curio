@@ -40,12 +40,12 @@ body {
 
 @layer base {
   :root {
-    --font-sans-default: var(--noto-sans);
-    --font-sans-arabic: var(--noto-sans-arabic);
-    --font-serif-default: var(--noto-serif);
-    --font-serif-arabic: var(--noto-naskh-arabic);
-    --font-mono-default: var(--noto-mono);
-    --font-mono-arabic: var(--noto-mono-arabic);
+    --font-sans-default: "Noto Sans", sans-serif;
+    --font-serif-default: "Noto Serif", serif;
+    --font-mono-default: "Noto Sans Mono", monospace;
+    --font-sans-arabic: "Noto Sans Arabic", sans-serif;
+    --font-serif-arabic: "Noto Naskh Arabic", serif;
+    --font-mono-arabic: "Noto Kufi Arabic", monospace;
   }
 }
 

@@ -25,12 +25,7 @@ const config: Config = {
   ],
   theme: {
     fontFamily: {
-      sans: [
-        "var(--font-sans-arabic)",
-        "var(--font-sans-other)",
-        "var(--font-sans-default)",
-        "sans-serif",
-      ],
+      sans: ["var(--font-sans-default)", "sans-serif"],
       serif: ["var(--font-serif-default)", "serif"],
       mono: ["var(--font-mono-default)", "monospace"],
     },
