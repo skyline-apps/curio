@@ -8,6 +8,7 @@ const baseConfig = {
     clearMocks: true,
     alias: {
       "@api": resolve(__dirname),
+      "@shared": resolve(__dirname, "../shared"),
     },
   },
 };
