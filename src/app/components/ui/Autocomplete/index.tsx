@@ -11,7 +11,7 @@ export type CurioAutocompleteProps<T extends object> = Omit<
   HerouiAutocompleteProps<T>,
   "children"
 > & {
-  children: (item: T) => React.ReactElement;
+  children: (item: T) => React.JSX.Element;
 };
 
 export const Autocomplete = <T extends object>({
