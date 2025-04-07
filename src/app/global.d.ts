@@ -12,3 +12,10 @@ declare module "*.svg?url" {
   const content: any;
   export default content;
 }
+
+declare module "@fontsource/noto-sans";
+declare module "@fontsource/noto-serif";
+declare module "@fontsource/noto-sans-mono";
+declare module "@fontsource/noto-sans-arabic";
+declare module "@fontsource/noto-naskh-arabic";
+declare module "@fontsource/noto-kufi-arabic";
