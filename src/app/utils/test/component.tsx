@@ -6,11 +6,6 @@ import { SettingsProvider } from "@app/providers/Settings/provider";
 import { ToastProvider } from "@app/providers/Toast/provider";
 import { UserProvider } from "@app/providers/User/provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  render,
-  type RenderOptions,
-  type RenderResult,
-} from "@testing-library/react";
 import React from "react";
 
 const DEFAULT_TEST_USER_ID = "123e4567-e89b-12d3-a456-426614174002";
@@ -24,7 +19,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const AllProviders = ({
+export const AllProviders = ({
   children,
 }: {
   children: React.ReactNode;
@@ -56,14 +51,3 @@ const AllProviders = ({
     </div>
   );
 };
-
-const customRender = (
-  ui: React.ReactElement,
-  options?: Omit<RenderOptions, "wrapper">,
-): RenderResult => render(ui, { wrapper: AllProviders, ...options });
-
-// re-export everything
-export * from "@testing-library/react";
-
-// override render method
-export { customRender as render };

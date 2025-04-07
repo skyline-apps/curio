@@ -10,14 +10,7 @@ import {
 } from "react-icons/hi2";
 
 import SidebarButton from "./SidebarButton";
-
-export enum SidebarKey {
-  NONE = "",
-  HOME = "/home",
-  INBOX = "/inbox",
-  NOTES = "/notes",
-  ARCHIVE = "/archive",
-}
+import { SidebarKey } from "./types";
 
 interface NavigationMenuProps {
   sidebarOpen: boolean;

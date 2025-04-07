@@ -12,7 +12,6 @@ export const Table: React.FC<TableProps> = (props) => {
 };
 
 export {
-  getKeyValue,
   TableBody,
   TableCell,
   TableColumn,

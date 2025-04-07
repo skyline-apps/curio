@@ -1,4 +1,4 @@
-import { showConfirm } from "@app/components/ui/Modal/Dialog";
+import { showConfirm } from "@app/components/ui/Modal/actions";
 import { useToast } from "@app/providers/Toast";
 import { useUser } from "@app/providers/User";
 import { handleAPIResponse } from "@app/utils/api";

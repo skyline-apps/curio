@@ -16,8 +16,9 @@ import {
 } from "react-icons/hi2";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import NavigationMenu, { SidebarKey } from "./NavigationMenu";
+import NavigationMenu from "./NavigationMenu";
 import SidebarHeader from "./SidebarHeader";
+import { SidebarKey } from "./types";
 import UserMenu from "./UserMenu";
 
 const LeftSidebar: React.FC = () => {

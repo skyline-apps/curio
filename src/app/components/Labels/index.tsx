@@ -1,5 +1,6 @@
 import Button from "@app/components/ui/Button";
-import { Chip, COLOR_PALETTE } from "@app/components/ui/Chip";
+import { Chip } from "@app/components/ui/Chip";
+import { COLOR_PALETTE } from "@app/components/ui/Chip/colors";
 import Icon from "@app/components/ui/Icon";
 import Spinner from "@app/components/ui/Spinner";
 import { Tooltip } from "@app/components/ui/Tooltip";

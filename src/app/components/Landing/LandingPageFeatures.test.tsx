@@ -1,4 +1,4 @@
-import { render, screen } from "@app/utils/test/component";
+import { render, screen } from "@app/utils/test";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 

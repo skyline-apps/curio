@@ -1,15 +1,9 @@
 import "@testing-library/jest-dom";
 
 import { ClientProviders } from "@app/providers/ClientProviders";
+import { act, fireEvent, render, screen, waitFor } from "@app/utils/test";
 import { ColorScheme, DisplayFont, DisplayFontSize } from "@shared/db";
 import type { GetSettingsResponse } from "@shared/v1/user/settings";
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { SettingsContext } from ".";

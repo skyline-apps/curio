@@ -1,4 +1,4 @@
-import { showConfirm } from "@app/components/ui/Modal/Dialog";
+import { showConfirm } from "@app/components/ui/Modal/actions";
 import { BrowserMessageContext } from "@app/providers/BrowserMessage";
 import { useCache } from "@app/providers/Cache";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
