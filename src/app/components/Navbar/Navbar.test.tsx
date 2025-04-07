@@ -1,8 +1,8 @@
 import { UserContext } from "@app/providers/User";
 import { act, fireEvent, render, screen, waitFor } from "@app/utils/test";
+import { mockNavigate } from "@app/vitest.setup.jsdom";
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import Navbar from ".";
 
@@ -13,8 +13,7 @@ vi.mock("@app/components/CurioBrand", () => ({
 }));
 
 describe("Navbar", () => {
-  const mockNavigate = vi.fn();
-  const mockClearUser = vi.fn();
+  const mockHandleLogout = vi.fn();
   const mockChangeUsername = vi.fn();
   const MockNoUserProvider = ({
     children,
@@ -22,10 +21,10 @@ describe("Navbar", () => {
     <UserContext.Provider
       value={{
         user: { id: null, username: null, email: null, newsletterEmail: null },
-        clearUser: mockClearUser,
+        clearUser: vi.fn(),
         changeUsername: mockChangeUsername,
         updateNewsletterEmail: vi.fn(),
-        handleLogout: vi.fn(),
+        handleLogout: mockHandleLogout,
       }}
     >
       {children}
@@ -42,22 +41,15 @@ describe("Navbar", () => {
           email: "user@email.com",
           newsletterEmail: null,
         },
-        clearUser: mockClearUser,
+        clearUser: vi.fn(),
         changeUsername: mockChangeUsername,
         updateNewsletterEmail: vi.fn(),
-        handleLogout: vi.fn(),
+        handleLogout: mockHandleLogout,
       }}
     >
       {children}
     </UserContext.Provider>
   );
-
-  beforeEach(() => {
-    vi.resetModules();
-    vi.clearAllMocks();
-
-    vi.mocked(useNavigate).mockReturnValue(mockNavigate);
-  });
 
   it("renders login button when user is not logged in", async () => {
     await act(async () => {
@@ -69,7 +61,7 @@ describe("Navbar", () => {
     });
 
     const loginButton = screen.getByTestId("button");
-    expect(loginButton).toHaveTextContent("Log In");
+    expect(loginButton).toHaveTextContent("Log in");
   });
 
   it("renders logout option when user is logged in", async () => {
@@ -86,33 +78,8 @@ describe("Navbar", () => {
       fireEvent.click(userButton);
     });
 
-    const logoutItem = screen.getByText("Log Out");
+    const logoutItem = screen.getByText("Log out");
     expect(logoutItem).toBeInTheDocument();
-  });
-
-  it("calls clearUser and redirects on logout", async () => {
-    await act(async () => {
-      render(
-        <MockUserProvider>
-          <Navbar />
-        </MockUserProvider>,
-      );
-    });
-
-    const userButton = screen.getByTestId("button");
-    await act(async () => {
-      fireEvent.click(userButton);
-    });
-
-    const logoutItem = screen.getByText("Log Out");
-    await act(async () => {
-      fireEvent.click(logoutItem);
-    });
-
-    await waitFor(() => {
-      expect(mockClearUser).toHaveBeenCalled();
-      expect(mockNavigate).toHaveBeenCalledWith("/");
-    });
   });
 
   it("handles login click correctly", async () => {
@@ -149,14 +116,13 @@ describe("Navbar", () => {
       fireEvent.click(userButton);
     });
 
-    const logoutItem = screen.getByText("Log Out");
+    const logoutItem = screen.getByText("Log out");
     await act(async () => {
       fireEvent.click(logoutItem);
     });
 
     await waitFor(() => {
-      expect(mockClearUser).toHaveBeenCalled();
-      expect(mockNavigate).toHaveBeenCalledWith("/");
+      expect(mockHandleLogout).toHaveBeenCalledTimes(1);
     });
   });
 });

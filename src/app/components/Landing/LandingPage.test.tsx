@@ -1,4 +1,5 @@
 import { act, render, screen } from "@app/utils/test";
+import { mockNavigate } from "@app/vitest.setup.jsdom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import LandingPage from "./LandingPage";
@@ -123,8 +124,6 @@ describe("LandingPage", () => {
         button.click();
       });
 
-      const { useNavigate } = await import("react-router-dom");
-      const mockNavigate = useNavigate();
       expect(mockNavigate).toHaveBeenCalledWith("/login");
     });
   });

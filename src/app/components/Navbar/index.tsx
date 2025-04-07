@@ -34,12 +34,12 @@ const CurioNavbar: React.FC = () => {
                 onPress={handleLogout}
                 description={user.username}
               >
-                Log Out
+                Log out
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>
         ) : (
-          <Button href="/login">Log In</Button>
+          <Button href="/login">Log in</Button>
         )}
       </NavbarContent>
     </Navbar>

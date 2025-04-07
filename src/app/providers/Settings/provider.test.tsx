@@ -1,5 +1,3 @@
-import "@testing-library/jest-dom";
-
 import { ClientProviders } from "@app/providers/ClientProviders";
 import { act, fireEvent, render, screen, waitFor } from "@app/utils/test";
 import { ColorScheme, DisplayFont, DisplayFontSize } from "@shared/db";
