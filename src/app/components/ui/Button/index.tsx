@@ -3,31 +3,7 @@ import { Tooltip } from "@app/components/ui/Tooltip";
 import { cn } from "@app/utils/cn";
 import { Button, ButtonProps } from "@heroui/react";
 import React, { forwardRef, useState } from "react";
-import { useFormStatus } from "react-dom";
 import { useNavigate } from "react-router-dom";
-
-interface FormButtonProps extends ButtonProps {
-  pendingText?: string;
-}
-
-export const FormButton: React.FC<FormButtonProps> = ({
-  children,
-  pendingText,
-  ...props
-}: FormButtonProps) => {
-  const { pending } = useFormStatus();
-  const loadingText = pendingText || "Loading...";
-  return (
-    <Button
-      isLoading={pending}
-      type="submit"
-      aria-disabled={pending}
-      {...props}
-    >
-      {pending ? loadingText : children}
-    </Button>
-  );
-};
 
 interface CurioButtonProps extends Omit<ButtonProps, "size" | "spinner"> {
   href?: string;
