@@ -6,6 +6,8 @@ import { Highlight } from "@shared/v1/items/highlights";
 import slugify from "limax";
 import React, {
   type ComponentPropsWithoutRef,
+  type JSX,
+  type PropsWithChildren,
   useContext,
   useEffect,
 } from "react";
@@ -26,10 +28,11 @@ interface MarkdownNode {
   value?: string;
 }
 
-type MarkdownProps<T extends keyof React.JSX.IntrinsicElements> =
-  ComponentPropsWithoutRef<T> & {
-    node?: MarkdownNode;
-  };
+type MarkdownProps<T extends keyof JSX.IntrinsicElements> =
+  ComponentPropsWithoutRef<T> &
+    PropsWithChildren & {
+      node?: MarkdownNode;
+    };
 
 const VOID_ELEMENTS = new Set([
   "img",
@@ -49,7 +52,7 @@ const VOID_ELEMENTS = new Set([
   "wbr",
 ]);
 
-export const ALL_COMPONENTS: (keyof React.JSX.IntrinsicElements)[] = [
+export const ALL_COMPONENTS: (keyof JSX.IntrinsicElements)[] = [
   "h1",
   "h2",
   "h3",
@@ -162,9 +165,11 @@ function childrenToText(children: React.ReactNode): string {
     children !== null &&
     typeof children === "object" &&
     "props" in children &&
-    children.props?.children
+    (children as { props?: { children?: React.ReactNode } }).props?.children
   ) {
-    return childrenToText(children.props.children);
+    return childrenToText(
+      (children as { props: { children: React.ReactNode } }).props.children,
+    );
   } else if (typeof children === "string") {
     return children;
   }
@@ -181,9 +186,7 @@ if (typeof window !== "undefined") {
   });
 }
 
-export const wrapMarkdownComponent = <
-  T extends keyof React.JSX.IntrinsicElements,
->(
+export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
   tag: T,
   highlights: Highlight[],
   selectedHighlight: Highlight | null,
@@ -371,7 +374,7 @@ export const wrapMarkdownComponent = <
       const processed: React.ReactNode[] = [];
       let currentOffset = startOffset;
 
-      React.Children.forEach(children, (child) => {
+      React.Children.forEach(children as React.ReactNode, (child) => {
         if (typeof child === "string") {
           const textHighlights = allHighlights
             .filter(
@@ -390,7 +393,7 @@ export const wrapMarkdownComponent = <
           currentOffset = nextOffset;
         } else if (React.isValidElement(child)) {
           processed.push(child);
-          const childNode = child.props.node as MarkdownNode | undefined;
+          const childNode = (child.props as { node?: MarkdownNode }).node;
           currentOffset = childNode?.position?.end?.offset ?? currentOffset + 1;
         } else if (child != null) {
           processed.push(child);
