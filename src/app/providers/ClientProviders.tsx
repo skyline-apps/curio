@@ -7,12 +7,15 @@ import React, { PropsWithChildren, useEffect, useState } from "react";
 import { KeyboardShortcutProvider } from "./KeyboardShortcuts/provider";
 
 export const ClientProviders: React.FC<PropsWithChildren> = ({ children }) => {
+  const posthogKey = import.meta.env.VITE_POSTHOG_KEY;
+  const posthogHost = import.meta.env.VITE_POSTHOG_HOST;
   useEffect(() => {
-    posthog.init(import.meta.env.VITE_POSTHOG_KEY!, {
-      api_host: import.meta.env.VITE_POSTHOG_HOST,
+    if (!posthogKey || !posthogHost) return;
+    posthog.init(posthogKey, {
+      api_host: posthogHost,
       person_profiles: "always",
     });
-  }, []);
+  }, [posthogKey, posthogHost]);
 
   const [queryClient] = useState(
     () =>
