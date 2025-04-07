@@ -46,6 +46,7 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
     let innerContent: React.ReactNode;
     const navigate = useNavigate();
 
+    const isLoading = props.isLoading || pressed;
     const buttonProps: ButtonProps = {
       ...props,
       className: cn(
@@ -63,8 +64,9 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
       ),
       size: size === "xs" ? undefined : size,
       isLoading: false,
+      disabled: isLoading,
     };
-    const spinner = props.isLoading ? (
+    const spinner = isLoading ? (
       <Spinner
         color={
           props.color === "warning" || props.color === "secondary"
@@ -75,7 +77,7 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
       />
     ) : undefined;
 
-    if (props.isLoading) {
+    if (isLoading) {
       buttonProps.children = (
         <>
           <div className="opacity-0">{props.children}</div>
@@ -90,12 +92,13 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
       const handlePress = (): void => {
         setPressed(true);
         navigate(href);
+        setPressed(false);
       };
       innerContent = (
         <Button
           ref={ref}
           {...buttonProps}
-          isLoading={pressed || buttonProps.isLoading}
+          isLoading={buttonProps.isLoading}
           onPress={handlePress}
           data-testid={props["data-testid"] || "button"}
         />
