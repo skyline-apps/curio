@@ -1,8 +1,11 @@
 import ItemCard from "@app/components/Items/ItemCard";
 import Icon from "@app/components/ui/Icon";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
-import { PersonalRecommendationType, RecommendationType } from "@shared/db";
-import { RecommendationSection } from "@shared/v1/items/recommended";
+import {
+  PersonalRecommendationType,
+  RecommendationType,
+} from "@app/schemas/db";
+import { RecommendationSection } from "@app/schemas/v1/items/recommended";
 import React, { useContext } from "react";
 import { LuMail } from "react-icons/lu";
 import { Link } from "react-router-dom";

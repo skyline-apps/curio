@@ -6,7 +6,7 @@ import {
   ShortcutType,
   useKeyboardShortcuts,
 } from "@app/providers/KeyboardShortcuts";
-import { ItemState } from "@shared/db";
+import { ItemState } from "@app/schemas/db";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 

@@ -1,5 +1,5 @@
+import { GetProfileResponse } from "@app/schemas/v1/public/profile";
 import { createLogger } from "@app/utils/logger";
-import { GetProfileResponse } from "@shared/v1/public/profile";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 const log = createLogger("Profile");

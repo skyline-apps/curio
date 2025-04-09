@@ -1,9 +1,9 @@
+import { type UpdateEmailResponse } from "@app/schemas/v1/user/email";
+import { type UpdateUsernameResponse } from "@app/schemas/v1/user/username";
 import { handleAPIResponse } from "@app/utils/api";
 import { clearTheme, initializeTheme } from "@app/utils/displayStorage";
 import { createLogger } from "@app/utils/logger";
 import { supabase } from "@app/utils/supabase";
-import { type UpdateEmailResponse } from "@shared/v1/user/email";
-import { type UpdateUsernameResponse } from "@shared/v1/user/username";
 import posthog from "posthog-js";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";

@@ -7,9 +7,9 @@ import { CurrentItemContext } from "@app/providers/CurrentItem";
 import type { Item, PublicItem } from "@app/providers/Items";
 import { useSettings } from "@app/providers/Settings";
 import { useUser } from "@app/providers/User";
+import { TextDirection } from "@app/schemas/db";
+import { FALLBACK_HOSTNAME } from "@app/schemas/types";
 import { cn } from "@app/utils/cn";
-import { TextDirection } from "@shared/db";
-import { FALLBACK_HOSTNAME } from "@shared/types";
 import { useCallback, useContext } from "react";
 import { Link } from "react-router-dom";
 

@@ -1,13 +1,13 @@
 import { useCache } from "@app/providers/Cache";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
-import { handleAPIResponse } from "@app/utils/api";
-import { createLogger } from "@app/utils/logger";
 import {
   CreateOrUpdateHighlightResponse,
   DeleteHighlightResponse,
   type Highlight,
   type NewHighlight,
-} from "@shared/v1/items/highlights";
+} from "@app/schemas/v1/items/highlights";
+import { handleAPIResponse } from "@app/utils/api";
+import { createLogger } from "@app/utils/logger";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { useContext, useState } from "react";
 

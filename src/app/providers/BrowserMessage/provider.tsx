@@ -3,9 +3,9 @@ import { useCache } from "@app/providers/Cache";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { ItemsContext } from "@app/providers/Items";
 import { useToast } from "@app/providers/Toast";
+import { UploadStatus } from "@app/schemas/types";
 import config from "@app/utils/config.json";
 import { createLogger } from "@app/utils/logger";
-import { UploadStatus } from "@shared/types";
 import React, {
   useCallback,
   useContext,

@@ -14,12 +14,10 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "baseUrl": ".",
+    "rootDir": ".",
     "paths": {
       "@app/*": [
         "./*"
-      ],
-      "@shared/*": [
-        "../shared/*"
       ]
     },
     /* Bundler mode */

@@ -1,9 +1,9 @@
-import type { GetLabelsResponse } from "@shared/v1/user/labels";
+import type { GetLabelsResponse } from "@app/schemas/v1/user/labels";
 import type {
   GetSettingsResponse,
   UpdateSettingsRequest,
   UpdateSettingsResponse,
-} from "@shared/v1/user/settings";
+} from "@app/schemas/v1/user/settings";
 import { createContext, useContext } from "react";
 
 export type SettingsContextType = {

@@ -1,6 +1,6 @@
 import MarkdownErrorBoundary from "@app/components/Markdown/error-boundary";
+import { Highlight } from "@app/schemas/v1/items/highlights";
 import { cn } from "@app/utils/cn";
-import { Highlight } from "@shared/v1/items/highlights";
 import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";

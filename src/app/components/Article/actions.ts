@@ -1,8 +1,8 @@
 import { useCache } from "@app/providers/Cache";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
+import { ReadItemResponse } from "@app/schemas/v1/items/read";
 import { handleAPIResponse } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
-import { ReadItemResponse } from "@shared/v1/items/read";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { useContext } from "react";
 

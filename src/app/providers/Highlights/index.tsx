@@ -1,7 +1,7 @@
 import {
   type GetHighlightsRequest,
   type GetHighlightsResponse,
-} from "@shared/v1/items/highlights";
+} from "@app/schemas/v1/items/highlights";
 import { createContext } from "react";
 
 export const HIGHLIGHTS_QUERY_KEY = "highlights";

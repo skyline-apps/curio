@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 
 import { FlatCompat } from "@eslint/eslintrc";
 import js from "@eslint/js";
+import eslintLocalRules from "@local/eslint-local-rules";
 import typescriptEslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
 import { defineConfig, globalIgnores } from "eslint/config";
@@ -46,6 +47,7 @@ export default defineConfig([
       "react-refresh": reactRefresh,
       "simple-import-sort": simpleImportSort,
       "unused-imports": unusedImports,
+      "@local/eslint-local-rules": eslintLocalRules,
     },
 
     languageOptions: {
@@ -57,6 +59,7 @@ export default defineConfig([
 
     rules: {
       ...reactHooks.configs.recommended.rules,
+      "@local/eslint-local-rules/api-middleware": "error",
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true },
@@ -110,6 +113,17 @@ export default defineConfig([
             {
               name: "tailwind-merge",
               message: "Please use `cn` from `@app/utils/cn`",
+            },
+          ],
+          patterns: [
+            {
+              group: ["@supabase/*"],
+              message:
+                "Please use `@app/api/lib/supabase` instead of `@supabase/*`",
+            },
+            {
+              group: ["drizzle-orm", "postgres"],
+              message: "Please use `@app/api/db` for database utilities",
             },
           ],
         },

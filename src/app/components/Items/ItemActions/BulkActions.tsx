@@ -2,8 +2,8 @@ import Button from "@app/components/ui/Button";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { ItemsContext } from "@app/providers/Items";
 import { useToast } from "@app/providers/Toast";
+import { ItemState } from "@app/schemas/db";
 import { createLogger } from "@app/utils/logger";
-import { ItemState } from "@shared/db";
 import { useCallback, useContext, useState } from "react";
 import {
   HiArchiveBox,

@@ -9,7 +9,6 @@ const baseConfig = {
     clearMocks: true,
     alias: {
       "@app": resolve(__dirname),
-      "@shared": resolve(__dirname, "../shared"),
     },
   },
 };
@@ -18,6 +17,15 @@ export default defineConfig({
   plugins: [tsconfigPaths(), react()],
   test: {
     workspace: [
+      {
+        ...baseConfig,
+        test: mergeConfig(baseConfig.test, {
+          name: "node",
+          include: ["**/*.test.ts"],
+          environment: "node",
+          setupFiles: ["./vitest.setup.api.ts"],
+        }),
+      },
       {
         ...baseConfig,
         test: mergeConfig(baseConfig.test, {

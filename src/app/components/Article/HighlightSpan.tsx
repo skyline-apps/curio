@@ -1,5 +1,5 @@
+import { Highlight, NewHighlight } from "@app/schemas/v1/items/highlights";
 import { cn } from "@app/utils/cn";
-import { Highlight, NewHighlight } from "@shared/v1/items/highlights";
 import React, { useRef } from "react";
 
 const isHighlightWithId = (

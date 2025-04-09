@@ -3,9 +3,9 @@ import { ItemTitle, ItemUrl } from "@app/components/RightSidebar/ItemMetadata";
 import Button from "@app/components/ui/Button";
 import Textarea from "@app/components/ui/Textarea";
 import { type HighlightItem } from "@app/providers/Highlights";
+import { TextDirection } from "@app/schemas/db";
+import { Highlight } from "@app/schemas/v1/items/highlights";
 import { cn } from "@app/utils/cn";
-import { TextDirection } from "@shared/db";
-import { Highlight } from "@shared/v1/items/highlights";
 import { useEffect, useState } from "react";
 import { HiOutlineClipboard, HiOutlineTrash } from "react-icons/hi2";
 

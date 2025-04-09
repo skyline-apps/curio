@@ -2,9 +2,9 @@ import Button from "@app/components/ui/Button";
 import { BrowserMessageContext } from "@app/providers/BrowserMessage";
 import { Item, ItemsContext } from "@app/providers/Items";
 import { useToast } from "@app/providers/Toast";
+import { ItemState } from "@app/schemas/db";
 import { cn } from "@app/utils/cn";
 import { createLogger } from "@app/utils/logger";
-import { ItemState } from "@shared/db";
 import { useCallback, useContext } from "react";
 import {
   HiArchiveBox,

@@ -2,8 +2,8 @@ import { useHighlightUpdate } from "@app/components/RightSidebar/highlightAction
 import { useAppLayout } from "@app/providers/AppLayout";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { useToast } from "@app/providers/Toast";
+import { Highlight, NewHighlight } from "@app/schemas/v1/items/highlights";
 import { createLogger } from "@app/utils/logger";
-import { Highlight, NewHighlight } from "@shared/v1/items/highlights";
 import { useCallback, useContext, useState } from "react";
 
 const log = createLogger("useHighlightSelection");

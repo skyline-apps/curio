@@ -1,7 +1,7 @@
 import { ClientProviders } from "@app/providers/ClientProviders";
+import { ColorScheme, DisplayFont, DisplayFontSize } from "@app/schemas/db";
+import type { GetSettingsResponse } from "@app/schemas/v1/user/settings";
 import { act, fireEvent, render, screen, waitFor } from "@app/utils/test";
-import { ColorScheme, DisplayFont, DisplayFontSize } from "@shared/db";
-import type { GetSettingsResponse } from "@shared/v1/user/settings";
 import { describe, expect, it, vi } from "vitest";
 
 import { SettingsContext } from ".";

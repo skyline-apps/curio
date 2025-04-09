@@ -2,7 +2,7 @@ import {
   type GetItemsRequest,
   type ItemResult,
   type PublicItemResult,
-} from "@shared/v1/items";
+} from "@app/schemas/v1/items";
 import { createContext } from "react";
 
 export const ITEMS_QUERY_KEY = "items";

@@ -1,4 +1,4 @@
-import { Highlight } from "@shared/v1/items/highlights";
+import { Highlight } from "@app/schemas/v1/items/highlights";
 import slugify from "limax";
 import React, {
   type ComponentPropsWithoutRef,

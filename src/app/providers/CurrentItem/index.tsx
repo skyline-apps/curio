@@ -1,6 +1,6 @@
 import { Item, PublicItem } from "@app/providers/Items";
-import { type Highlight } from "@shared/v1/items/highlights";
-import { GetItemContentResponse } from "@shared/v1/public/items/content";
+import { type Highlight } from "@app/schemas/v1/items/highlights";
+import { GetItemContentResponse } from "@app/schemas/v1/public/items/content";
 import { createContext } from "react";
 
 export type ItemWithContent = Omit<

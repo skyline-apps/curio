@@ -1,7 +1,7 @@
 import { useAppLayout } from "@app/providers/AppLayout";
+import { type GetHighlightsResponse } from "@app/schemas/v1/items/highlights";
 import { handleAPIResponse } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
-import { type GetHighlightsResponse } from "@shared/v1/items/highlights";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import React, { useCallback, useMemo, useState } from "react";
 

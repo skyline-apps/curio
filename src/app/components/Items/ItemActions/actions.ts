@@ -3,13 +3,13 @@ import { BrowserMessageContext } from "@app/providers/BrowserMessage";
 import { useCache } from "@app/providers/Cache";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { type Item } from "@app/providers/Items";
+import { ItemState } from "@app/schemas/db";
+import { UpdateFavoriteResponse } from "@app/schemas/v1/items/favorite";
+import { UpdateLabelsResponse } from "@app/schemas/v1/items/labels";
+import { SaveResponse } from "@app/schemas/v1/items/save";
+import { UpdateStateResponse } from "@app/schemas/v1/items/state";
 import { handleAPIResponse } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
-import { ItemState } from "@shared/db";
-import { UpdateFavoriteResponse } from "@shared/v1/items/favorite";
-import { UpdateLabelsResponse } from "@shared/v1/items/labels";
-import { SaveResponse } from "@shared/v1/items/save";
-import { UpdateStateResponse } from "@shared/v1/items/state";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { useContext } from "react";
 

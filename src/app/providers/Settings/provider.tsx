@@ -1,6 +1,16 @@
 import { showConfirm } from "@app/components/ui/Modal/actions";
 import { useToast } from "@app/providers/Toast";
 import { useUser } from "@app/providers/User";
+import type {
+  CreateOrUpdateLabelsResponse,
+  DeleteLabelsResponse,
+  GetLabelsResponse,
+} from "@app/schemas/v1/user/labels";
+import type {
+  GetSettingsResponse,
+  UpdateSettingsRequest,
+  UpdateSettingsResponse,
+} from "@app/schemas/v1/user/settings";
 import { handleAPIResponse } from "@app/utils/api";
 import {
   initializeTheme,
@@ -8,16 +18,6 @@ import {
   setLightTheme,
   setSystemTheme,
 } from "@app/utils/displayStorage";
-import type {
-  CreateOrUpdateLabelsResponse,
-  DeleteLabelsResponse,
-  GetLabelsResponse,
-} from "@shared/v1/user/labels";
-import type {
-  GetSettingsResponse,
-  UpdateSettingsRequest,
-  UpdateSettingsResponse,
-} from "@shared/v1/user/settings";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import posthog from "posthog-js";
 import React, { useEffect } from "react";

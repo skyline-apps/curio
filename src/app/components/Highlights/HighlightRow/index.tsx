@@ -3,8 +3,8 @@ import {
   type HighlightItem,
   HighlightsContext,
 } from "@app/providers/Highlights";
+import { TextDirection } from "@app/schemas/db";
 import { cn } from "@app/utils/cn";
-import { TextDirection } from "@shared/db";
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 

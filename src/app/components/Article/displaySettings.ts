@@ -1,5 +1,5 @@
+import { DisplayFont, DisplayFontSize } from "@app/schemas/db";
 import { monoFonts, sansFonts, serifFonts } from "@app/styles/fonts"; // Adjust the import path if needed
-import { DisplayFont, DisplayFontSize } from "@shared/db";
 import { lookup } from "bcp-47-match";
 
 export const getDisplayFontClass = (
