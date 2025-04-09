@@ -5,8 +5,8 @@ import { supabaseMock } from "@app/api/lib/supabase/__mocks__/client";
 import {
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_USER_ID,
-  DEFAULT_TEST_USER_ID_2,
   DEFAULT_TEST_USERNAME,
+  DEFAULT_TEST_USERNAME_2,
   getRequest,
 } from "@app/api/utils/test/api";
 import { testDb } from "@app/api/utils/test/provider";
@@ -239,12 +239,12 @@ describe("/api", () => {
     it("should return 200 when authenticated even if profile is private", async () => {
       (supabaseMock.auth.getUser as unknown as Mock).mockResolvedValue({
         data: {
-          user: { id: DEFAULT_TEST_USER_ID_2, email: "user2@example.com" },
+          user: { id: DEFAULT_TEST_USER_ID, email: "user@example.com" },
         },
         error: null,
       });
       const response = await getRequest(app, "/api/v1/public/profile", {
-        username: DEFAULT_TEST_USERNAME,
+        username: DEFAULT_TEST_USERNAME_2,
       });
       expect(response.status).toBe(200);
     });

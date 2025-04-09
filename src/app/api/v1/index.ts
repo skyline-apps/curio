@@ -1,3 +1,6 @@
+import { getDb } from "@app/api/db";
+import { authMiddleware } from "@app/api/middleware/auth";
+import { EnvBindings, EnvContext } from "@app/api/utils/env";
 import { Hono } from "hono";
 
 import { itemsRouter } from "./items";
@@ -12,7 +15,18 @@ import { itemsStateRouter } from "./items/state";
 import { publicRouter } from "./public";
 import { userRouter } from "./user";
 
-const v1Router = new Hono();
+const v1Router = new Hono<EnvBindings>();
+v1Router.use("*", async (c: EnvContext, next) => {
+  c.set("db", getDb(c));
+  const path = new URL(c.req.url).pathname;
+
+  if (path.startsWith("/api/v1/public")) {
+    c.set("authOptional", true);
+    return authMiddleware(c, next);
+  }
+
+  return authMiddleware(c, next);
+});
 
 v1Router.route("/items", itemsRouter);
 v1Router.route("/items/content", itemsContentRouter);

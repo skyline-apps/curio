@@ -1,7 +1,5 @@
 /* eslint-disable @local/eslint-local-rules/api-middleware */
-import { getDb } from "@app/api/db";
-import { authMiddleware } from "@app/api/middleware/auth";
-import { EnvBindings, EnvContext } from "@app/api/utils/env";
+import { EnvBindings } from "@app/api/utils/env";
 import log from "@app/api/utils/logger";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -12,8 +10,6 @@ import { openAPISpecs } from "hono-openapi";
 import { v1Router } from "./v1";
 
 const app = new Hono<EnvBindings>();
-
-const PUBLIC_ROUTES = ["/api/auth/callback", "/api/health", "/api/openapi"];
 
 // Middleware
 app.use("*", logger(log));
@@ -37,23 +33,6 @@ app.use("*", async (c, next) => {
     },
     credentials: true,
   })(c, next);
-});
-app.use("*", async (c: EnvContext, next) => {
-  const path = new URL(c.req.url).pathname;
-
-  // Skip auth for specific paths
-  if (PUBLIC_ROUTES.includes(path)) {
-    return next();
-  }
-
-  c.set("db", getDb(c));
-
-  if (path.startsWith("/api/v1/public")) {
-    c.set("authOptional", true);
-    return authMiddleware(c, next);
-  }
-
-  return authMiddleware(c, next);
 });
 
 // Health check
