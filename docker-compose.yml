@@ -23,30 +23,6 @@ services:
     environment:
       - KUBECONFIG=/root/.kube/config
       - USE_GKE_GCLOUD_AUTH_PLUGIN=True
-  api:
-    build:
-      context: ./
-      dockerfile: ./docker/curio-api/Dockerfile
-    container_name: curio-api
-    network_mode: host
-    working_dir: /api
-    command: >
-      npm run dev
-    depends_on:
-      - db
-    mem_limit: "6G"
-    cpus: 4
-    volumes:
-      - ./.env:/api/.dev.vars
-    develop:
-      watch:
-        - action: sync
-          path: ./src/api
-          target: /api
-          ignore:
-            - /api/node_modules
-        - action: rebuild
-          path: ./src/api/package.json
   app:
     build:
       context: ./
@@ -56,12 +32,8 @@ services:
     working_dir: /app
     command: >
       npm run dev
-    environment:
-      VITE_CURIO_API_URL: ${CURIO_API_URL}
-      VITE_POSTHOG_KEY: ${POSTHOG_KEY}
-      VITE_POSTHOG_HOST: ${POSTHOG_HOST}
-      VITE_SUPABASE_URL: ${SUPABASE_URL}
-      VITE_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+    volumes:
+      - ./.env:/app/.env
     mem_limit: "6G"
     cpus: 4
     develop:
