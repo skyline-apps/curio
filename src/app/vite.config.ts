@@ -6,19 +6,21 @@ import svgr from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [
-    svgr({
-      include: /\.svg(\?v=\d+)?$/,
-    }),
-    react(),
-    cloudflare(),
-    tsconfigPaths(),
-  ],
-  publicDir: "public",
-  resolve: {
-    alias: {
-      "@app": path.resolve(__dirname),
+export default defineConfig(() => {
+  return {
+    plugins: [
+      svgr({
+        include: /\.svg(\?v=\d+)?$/,
+      }),
+      react(),
+      cloudflare(),
+      tsconfigPaths(),
+    ],
+    publicDir: "public",
+    resolve: {
+      alias: {
+        "@app": path.resolve(__dirname),
+      },
     },
-  },
+  };
 });

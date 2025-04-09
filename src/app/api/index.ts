@@ -13,15 +13,15 @@ import { v1Router } from "./v1";
 
 const app = new Hono<EnvBindings>();
 
-const PUBLIC_ROUTES = ["/auth/callback", "/health", "/openapi"];
+const PUBLIC_ROUTES = ["/api/auth/callback", "/api/health", "/api/openapi"];
 
 // Middleware
 app.use("*", logger(log));
 app.use("*", prettyJSON());
 app.use("*", async (c, next) => {
   // Parse CORS origins from environment variable
-  if (!c.env.CURIO_URL) {
-    throw new Error("CURIO_URL environment variable is not set");
+  if (!c.env.VITE_CURIO_URL) {
+    throw new Error("VITE_CURIO_URL environment variable is not set");
   }
 
   // Apply CORS middleware with dynamic origins
@@ -33,7 +33,7 @@ app.use("*", async (c, next) => {
       }
 
       // Check if origin is in the allowed list
-      return c.env.CURIO_URL === origin ? origin : null;
+      return c.env.VITE_CURIO_URL === origin ? origin : null;
     },
     credentials: true,
   })(c, next);
@@ -48,7 +48,7 @@ app.use("*", async (c: EnvContext, next) => {
 
   c.set("db", getDb(c));
 
-  if (path.startsWith("/v1/public")) {
+  if (path.startsWith("/api/v1/public")) {
     c.set("authOptional", true);
     return authMiddleware(c, next);
   }
@@ -57,13 +57,13 @@ app.use("*", async (c: EnvContext, next) => {
 });
 
 // Health check
-app.get("/health", (c) => c.json({ status: "ok" }));
+app.get("/api/health", (c) => c.json({ status: "ok" }));
 
 // API routes
-app.route("/v1", v1Router);
+app.route("/api/v1", v1Router);
 
 app.get(
-  "/openapi",
+  "/api/openapi",
   openAPISpecs(app, {
     documentation: {
       info: {

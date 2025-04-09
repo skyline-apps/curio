@@ -34,6 +34,7 @@ services:
       npm run dev
     volumes:
       - ./.env:/app/.env
+      - ./.env:/app/.dev.vars
     mem_limit: "6G"
     cpus: 4
     develop:

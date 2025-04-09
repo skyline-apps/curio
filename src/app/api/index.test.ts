@@ -17,18 +17,18 @@ import { afterEach, beforeEach, describe, expect, it, Mock, vi } from "vitest";
 import app from "./index";
 
 describe("/api", () => {
-  describe("GET /health", () => {
+  describe("GET /api/health", () => {
     it("should return 200", async () => {
-      const response = await getRequest(app, "/health");
+      const response = await getRequest(app, "/api/health");
       expect(response.status).toBe(200);
       const data = await response.json();
       expect(data).toEqual({ status: "ok" });
     });
   });
 
-  describe("GET /openapi", () => {
+  describe("GET /api/openapi", () => {
     it("should return 200", async () => {
-      const response = await getRequest(app, "/openapi");
+      const response = await getRequest(app, "/api/openapi");
       expect(response.status).toBe(200);
       const data: {
         openapi: string;
@@ -42,7 +42,7 @@ describe("/api", () => {
     });
 
     it("should include all API routes", async () => {
-      const response = await getRequest(app, "/openapi");
+      const response = await getRequest(app, "/api/openapi");
       expect(response.status).toBe(200);
       const data: {
         openapi: string;
@@ -50,7 +50,7 @@ describe("/api", () => {
         paths: Record<string, unknown>;
       } = await response.json();
 
-      expect(data.paths).toHaveProperty("/v1/items");
+      expect(data.paths).toHaveProperty("/api/v1/items");
 
       const routes: string[] = [];
       const crawlDirectory = async (dir: string): Promise<void> => {
@@ -67,7 +67,7 @@ describe("/api", () => {
         );
 
         if (hasIndex && !hasSubdirsWithIndex) {
-          const relativePath = path.relative("./v1", dir);
+          const relativePath = path.relative("./api/v1", dir);
           const routePath = "/" + relativePath.replace(/\\/g, "/");
           routes.push(routePath);
         }
@@ -80,11 +80,11 @@ describe("/api", () => {
         }
       };
 
-      await crawlDirectory("./v1");
+      await crawlDirectory("./api/v1");
 
       // Verify each found route exists in the OpenAPI paths
       routes.forEach((route) => {
-        expect(data.paths).toHaveProperty(`/v1${route}`);
+        expect(data.paths).toHaveProperty(`/api/v1${route}`);
       });
     });
   });
@@ -98,7 +98,7 @@ describe("/api", () => {
     });
 
     it("should return 401 when unauthenticated", async () => {
-      const response = await getRequest(app, "/v1/items");
+      const response = await getRequest(app, "/api/v1/items");
       expect(response.status).toBe(401);
     });
 
@@ -109,7 +109,7 @@ describe("/api", () => {
         },
         error: null,
       });
-      const response = await getRequest(app, "/v1/items");
+      const response = await getRequest(app, "/api/v1/items");
       expect(response.status).toBe(200);
     });
 
@@ -124,7 +124,7 @@ describe("/api", () => {
         },
         error: null,
       });
-      const response = await getRequest(app, "/v1/items");
+      const response = await getRequest(app, "/api/v1/items");
       expect(response.status).toBe(401);
     });
 
@@ -139,7 +139,7 @@ describe("/api", () => {
         error: null,
       });
 
-      const response = await getRequest(app, "/v1/items");
+      const response = await getRequest(app, "/api/v1/items");
       expect(response.status).toBe(500);
     });
 
@@ -170,7 +170,7 @@ describe("/api", () => {
 
         const response = await getRequest(
           app,
-          "/v1/items",
+          "/api/v1/items",
           {},
           {
             "x-api-key": key,
@@ -188,7 +188,7 @@ describe("/api", () => {
       it("should return 401 when invalid API key is used", async () => {
         const response = await getRequest(
           app,
-          "/v1/items",
+          "/api/v1/items",
           {},
           {
             "x-api-key": "invalid-key",
@@ -204,7 +204,7 @@ describe("/api", () => {
           .where(eq(profiles.id, DEFAULT_TEST_PROFILE_ID));
         const response = await getRequest(
           app,
-          "/v1/items",
+          "/api/v1/items",
           {},
           {
             "x-api-key": key,
@@ -217,7 +217,7 @@ describe("/api", () => {
 
   describe("Public routes", () => {
     it("should return 200 when unauthenticated", async () => {
-      const response = await getRequest(app, "/v1/public/profile", {
+      const response = await getRequest(app, "/api/v1/public/profile", {
         username: DEFAULT_TEST_USERNAME,
       });
       expect(response.status).toBe(200);
@@ -230,7 +230,7 @@ describe("/api", () => {
         },
         error: null,
       });
-      const response = await getRequest(app, "/v1/public/profile", {
+      const response = await getRequest(app, "/api/v1/public/profile", {
         username: DEFAULT_TEST_USERNAME,
       });
       expect(response.status).toBe(200);
@@ -243,7 +243,7 @@ describe("/api", () => {
         },
         error: null,
       });
-      const response = await getRequest(app, "/v1/public/profile", {
+      const response = await getRequest(app, "/api/v1/public/profile", {
         username: DEFAULT_TEST_USERNAME,
       });
       expect(response.status).toBe(200);

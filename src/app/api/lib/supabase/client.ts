@@ -9,8 +9,8 @@ export const createClient = (
   c: EnvContext,
   useAdmin: boolean = false,
 ): SupabaseClient => {
-  const supabaseUrl = c.env.SUPABASE_URL;
-  const supabaseAnonKey = c.env.SUPABASE_ANON_KEY;
+  const supabaseUrl = c.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = c.env.VITE_SUPABASE_ANON_KEY;
   const supabaseServiceRoleKey = c.env.SUPABASE_SERVICE_ROLE_KEY;
 
   const cookies: Record<string, string> = {};
