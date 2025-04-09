@@ -2,19 +2,40 @@ import { eq } from "@app/api/db";
 import { DbErrorCode } from "@app/api/db/errors";
 import { apiKeys, profiles } from "@app/api/db/schema";
 import { supabaseMock } from "@app/api/lib/supabase/__mocks__/client";
+import { EnvBindings } from "@app/api/utils/env";
 import {
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_USER_ID,
+  DEFAULT_TEST_USER_ID_2,
   DEFAULT_TEST_USERNAME,
   DEFAULT_TEST_USERNAME_2,
   getRequest,
 } from "@app/api/utils/test/api";
 import { testDb } from "@app/api/utils/test/provider";
 import fs from "fs";
+import { Hono } from "hono";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it, Mock, vi } from "vitest";
 
 import app from "./index";
+
+const makeAuthenticatedRequest = (
+  app: Hono<EnvBindings>,
+  route: string,
+  userId: string,
+  params: Record<string, string> = {},
+): Promise<Response> => {
+  (supabaseMock.auth.getUser as unknown as Mock).mockResolvedValue({
+    data: {
+      user: { id: userId, email: "user@example.com" },
+    },
+    error: null,
+  });
+
+  return getRequest(app, route, params, {
+    Authorization: `Bearer MOCK_TOKEN`,
+  });
+};
 
 describe("/api", () => {
   describe("GET /api/health", () => {
@@ -103,13 +124,11 @@ describe("/api", () => {
     });
 
     it("should return 200 when authenticated", async () => {
-      (supabaseMock.auth.getUser as unknown as Mock).mockResolvedValue({
-        data: {
-          user: { id: DEFAULT_TEST_USER_ID, email: "user@example.com" },
-        },
-        error: null,
-      });
-      const response = await getRequest(app, "/api/v1/items");
+      const response = await makeAuthenticatedRequest(
+        app,
+        "/api/v1/items",
+        DEFAULT_TEST_USER_ID,
+      );
       expect(response.status).toBe(200);
     });
 
@@ -118,13 +137,11 @@ describe("/api", () => {
         .update(profiles)
         .set({ isEnabled: false })
         .where(eq(profiles.id, DEFAULT_TEST_PROFILE_ID));
-      (supabaseMock.auth.getUser as unknown as Mock).mockResolvedValue({
-        data: {
-          user: { id: DEFAULT_TEST_USER_ID, email: "user@example.com" },
-        },
-        error: null,
-      });
-      const response = await getRequest(app, "/api/v1/items");
+      const response = await makeAuthenticatedRequest(
+        app,
+        "/api/v1/items",
+        DEFAULT_TEST_USER_ID,
+      );
       expect(response.status).toBe(401);
     });
 
@@ -132,14 +149,11 @@ describe("/api", () => {
       vi.spyOn(testDb.db, "select").mockImplementationOnce(() => {
         throw { code: DbErrorCode.ConnectionFailure };
       });
-      (supabaseMock.auth.getUser as unknown as Mock).mockResolvedValue({
-        data: {
-          user: { id: DEFAULT_TEST_USER_ID, email: "user@example.com" },
-        },
-        error: null,
-      });
-
-      const response = await getRequest(app, "/api/v1/items");
+      const response = await makeAuthenticatedRequest(
+        app,
+        "/api/v1/items",
+        DEFAULT_TEST_USER_ID,
+      );
       expect(response.status).toBe(500);
     });
 
@@ -224,28 +238,22 @@ describe("/api", () => {
     });
 
     it("should return 200 when authenticated", async () => {
-      (supabaseMock.auth.getUser as unknown as Mock).mockResolvedValue({
-        data: {
-          user: { id: DEFAULT_TEST_USER_ID, email: "user@example.com" },
-        },
-        error: null,
-      });
-      const response = await getRequest(app, "/api/v1/public/profile", {
-        username: DEFAULT_TEST_USERNAME,
-      });
+      const response = await makeAuthenticatedRequest(
+        app,
+        "/api/v1/public/profile",
+        DEFAULT_TEST_USER_ID,
+        { username: DEFAULT_TEST_USERNAME },
+      );
       expect(response.status).toBe(200);
     });
 
     it("should return 200 when authenticated even if profile is private", async () => {
-      (supabaseMock.auth.getUser as unknown as Mock).mockResolvedValue({
-        data: {
-          user: { id: DEFAULT_TEST_USER_ID, email: "user@example.com" },
-        },
-        error: null,
-      });
-      const response = await getRequest(app, "/api/v1/public/profile", {
-        username: DEFAULT_TEST_USERNAME_2,
-      });
+      const response = await makeAuthenticatedRequest(
+        app,
+        "/api/v1/public/profile",
+        DEFAULT_TEST_USER_ID_2,
+        { username: DEFAULT_TEST_USERNAME_2 },
+      );
       expect(response.status).toBe(200);
     });
   });
