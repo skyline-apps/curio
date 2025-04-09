@@ -5,7 +5,7 @@ import { TextDirection } from "@app/schemas/db";
 import { FALLBACK_HOSTNAME } from "@app/schemas/types";
 import { franc } from "franc";
 import { iso6393To1 } from "iso-639-3";
-import { type ParsedMail, simpleParser } from "mailparser";
+import PostalMime, { Email as ParsedEmail } from "postal-mime";
 
 import { type Email, EmailError, type EmailHeaders } from "./types";
 
@@ -17,12 +17,10 @@ function extractUrlFromHeaders(
   headers: EmailHeaders,
   words: string[],
 ): string | null {
-  // https://github.com/nodemailer/mailparser/blob/da665c8dad5662e1d05b93e7e9c68dc7c706b2bd/lib/mail-parser.js#L380-L383
-  const listHeader = headers.get("list");
+  const listHeader = headers.find((header) => header.key === "list-post");
   if (!listHeader) return null;
 
-  // @ts-expect-error https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/69199
-  const headerUrl = listHeader?.post?.url;
+  const headerUrl = listHeader?.value?.replace(/^<([^>]+)>$/g, (_, url) => url);
   if (
     headerUrl &&
     headerUrl.startsWith("http") &&
@@ -52,21 +50,14 @@ export async function parseIncomingEmail(
     throw new EmailError("CURIO_EMAIL_DOMAIN is not set");
   }
 
-  return simpleParser(mimeEmail)
-    .then((parsed: ParsedMail) => {
+  return PostalMime.parse(mimeEmail)
+    .then((parsed: ParsedEmail) => {
       if (!parsed) {
         throw new EmailError("Unknown email contents");
       }
-      const recipient = Array.isArray(parsed.to)
-        ? parsed.to
-            .find((r) =>
-              r.value.some((addr) => addr.address?.includes(curioEmailDomain)),
-            )
-            ?.value.find((addr) => addr.address?.includes(curioEmailDomain))
-            ?.address
-        : parsed.to?.value.find((addr) =>
-            addr.address?.includes(curioEmailDomain),
-          )?.address;
+      const recipient = parsed.to?.find((r) =>
+        r.address?.includes(curioEmailDomain),
+      )?.address;
 
       if (!recipient) {
         throw new EmailError(`Invalid recipient, expected ${curioEmailDomain}`);
@@ -74,15 +65,15 @@ export async function parseIncomingEmail(
 
       // Extract original sender from forwarded email if present
       // Extract and validate the initial sender
-      const initialSender = parsed.from?.value[0];
-      if (!initialSender?.address) {
+      const initialSender = parsed.from;
+      if (!initialSender.name && !initialSender.address) {
         throw new EmailError("Invalid sender");
       }
 
       // Initialize sender with validated fields
       let sender: { name: string; address: string } = {
-        name: initialSender.name || "",
-        address: initialSender.address,
+        name: initialSender.name,
+        address: initialSender.address || "",
       };
       let subject = parsed.subject || "";
       let htmlContent = parsed.html;
@@ -158,7 +149,7 @@ export async function parseIncomingEmail(
         recipient,
         sender: { address: sender.address, name: sender.name },
         subject,
-        htmlContent: htmlContent || parsed.textAsHtml || undefined,
+        htmlContent: htmlContent || undefined,
         textContent: textContent,
         content: textContent || htmlContent || "",
         headers: parsed.headers || new Map(),
@@ -244,13 +235,13 @@ export function extractMetadataFromEmail({
   htmlContent,
   headers,
 }: Email): ExtractedMetadata {
-  const dateHeader = headers.get("date");
-  const publishedAt =
-    dateHeader instanceof Date
-      ? dateHeader
-      : typeof dateHeader === "string"
-        ? new Date(dateHeader)
-        : null;
+  const dateHeader: string | undefined = headers.find(
+    (header) => header.key === "date",
+  )?.value;
+  let publishedAt: Date | null = null;
+  if (dateHeader) {
+    publishedAt = new Date(dateHeader);
+  }
 
   let content: string = textContent || "";
   if (!content && htmlContent) {

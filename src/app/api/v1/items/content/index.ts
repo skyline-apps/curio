@@ -1,15 +1,8 @@
 import { and, eq } from "@app/api/db";
 import { updateProfileItem } from "@app/api/db/dal/profileItems";
 import { items, profileItems } from "@app/api/db/schema";
-import {
-  extractMainContentAsMarkdown,
-  extractMetadata,
-} from "@app/api/lib/extract";
-import {
-  ExtractedMetadata,
-  ExtractError,
-  MetadataError,
-} from "@app/api/lib/extract/types";
+import { extractFromHtml } from "@app/api/lib/extract";
+import { ExtractedMetadata, ExtractError } from "@app/api/lib/extract/types";
 import { indexItemDocuments } from "@app/api/lib/search";
 import { storage } from "@app/api/lib/storage";
 import { StorageError } from "@app/api/lib/storage/types";
@@ -73,6 +66,10 @@ export const itemsContentRouter = new Hono<EnvBindings>().post(
           .returning({ id: items.id, slug: items.slug, url: items.url });
         slug = item[0].slug;
 
+        const { content, metadata: extractedMetadata } = await extractFromHtml(
+          cleanedUrl,
+          htmlContent,
+        );
         if (skipMetadataExtraction) {
           const itemMetadata = await tx
             .select({
@@ -102,13 +99,9 @@ export const itemsContentRouter = new Hono<EnvBindings>().post(
             metadata = itemMetadata[0];
           }
         } else {
-          metadata = await extractMetadata(cleanedUrl, htmlContent);
+          metadata = extractedMetadata;
         }
 
-        const { content } = await extractMainContentAsMarkdown(
-          cleanedUrl,
-          htmlContent,
-        );
         const { versionName, status } = await storage.uploadItemContent(
           c,
           slug,
@@ -187,9 +180,6 @@ export const itemsContentRouter = new Hono<EnvBindings>().post(
         return c.json({ error: error.message }, 500);
       } else if (error instanceof ExtractError) {
         log(`Error extracting content for ${url}:`, error.message);
-        return c.json({ error: error.message }, 500);
-      } else if (error instanceof MetadataError) {
-        log(`Error extracting metadata for ${url}:`, error.message);
         return c.json({ error: error.message }, 500);
       } else if (error instanceof Error) {
         log(

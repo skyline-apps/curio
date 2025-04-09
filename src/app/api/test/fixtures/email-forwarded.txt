@@ -33,7 +33,8 @@ Subject: My newsletter forwarded
 To: <sender@sender.com>
 
 
-Newsletter content: link to original (https://testnewsletter.substack.com/p/my-newsletter-forwarded?ref=newsletter)
+Newsletter content: link to original (https://testnewsletter.substack.com/p=
+/my-newsletter-forwarded?ref=3Dnewsletter)
 
 --0000000000003514dc0630307a26
 Content-Type: text/html; charset=utf-8
@@ -46,7 +47,7 @@ strong> <span dir=3D"auto">&lt;<a href=3D"mailto:testnewsletter@substack.co=
 m">testnewsletter@substack.com</a>&gt;</span><br>Date: Fri, Feb 28, 2025 at=
 5:17=E2=80=AFAM<br>Subject: My newsletter forwarded<br>To:  &lt;<a href=3D"=
 mailto:sender@sender.com">sender@sender.com</a>&gt;<br></div><br><br><p>New=
-sletter content: link to <a href="https://testnewsletter.substack.com/p/my-=
-newsletter-forwarded?ref=newsletter">original</a></p><br></div></div>
+sletter content: link to <a href=3D"https://testnewsletter.substack.com/p/m=
+y-newsletter-forwarded?ref=3Dnewsletter">original</a></p><br></div></div>
 
 --0000000000003514dc0630307a26--

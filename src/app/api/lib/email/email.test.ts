@@ -16,7 +16,7 @@ function makeTestEmail(
   senderName: string,
   subject: string,
   content: string,
-  headers: Record<string, string | Record<string, Record<string, string>>> = {},
+  headers: Record<string, string>[] = [],
   htmlContent?: string,
 ): Email {
   return {
@@ -26,17 +26,14 @@ function makeTestEmail(
     content,
     textContent: content,
     htmlContent,
-    // @ts-expect-error https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/69199
-    headers: new Map(
-      Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v]),
-    ),
+    headers,
   };
 }
 
 vi.unmock("@app/api/lib/email");
 
 describe("@app/api/lib/email", () => {
-  const fixturesPath = path.join(process.cwd(), "test/fixtures");
+  const fixturesPath = path.join(process.cwd(), "api/test/fixtures");
 
   describe("parseIncomingEmail", () => {
     it("should parse raw email with single recipient", async () => {
@@ -56,7 +53,7 @@ describe("@app/api/lib/email", () => {
         name: "Test Sender",
       });
       expect(parsedEmail!.htmlContent).toBe(
-        '<div dir="ltr">This is my email newsletter<div><br></div><div><ol><li style="margin-left:15px">Item 1</li><li style="margin-left:15px">Item 2</li><li style="margin-left:15px">Item 3</li></ol><div><br></div></div><div>Thanks!</div></div>\n',
+        '<div dir="ltr">This is my email newsletter<div><br></div><div><ol><li style="margin-left:15px">Item 1</li><li style="margin-left:15px">Item 2</li><li style="margin-left:15px">Item 3</li></ol><div><br></div></div><div>Thanks!</div></div>\n\n',
       );
       expect(parsedEmail!.textContent).toBe(
         "This is my email newsletter\n" +
@@ -67,10 +64,13 @@ describe("@app/api/lib/email", () => {
           "   3. Item 3\n" +
           "\n" +
           "\n" +
-          "Thanks!\n",
+          "Thanks!\n\n",
       );
       expect(parsedEmail!.textContent).toEqual(parsedEmail!.content);
-      expect(parsedEmail!.headers.get("mime-version")).toBe("1.0");
+      expect(
+        parsedEmail!.headers.find((header) => header.key === "mime-version")
+          ?.value,
+      ).toBe("1.0");
     });
 
     it("should parse raw email with multiple recipients", async () => {
@@ -102,10 +102,10 @@ describe("@app/api/lib/email", () => {
         MOCK_ENV.CURIO_EMAIL_DOMAIN,
         email,
       );
-      // @ts-expect-error https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/69199
-      expect(parsedEmail!.headers.get("list")?.post.url).toEqual(
-        "https://www.sender.com/p/another-test-newsletter",
-      );
+      expect(
+        parsedEmail!.headers.find((header) => header.key === "list-post")
+          ?.value,
+      ).toBe("<https://www.sender.com/p/another-test-newsletter>");
     });
 
     it("should parse forwarded email", async () => {
@@ -125,10 +125,10 @@ describe("@app/api/lib/email", () => {
         name: "Test Newsletter",
       });
       expect(parsedEmail!.htmlContent).toBe(
-        '<div dir="ltr"><br><br><div class="gmail_quote gmail_quote_container"><p>Newsletter content: link to <a href="https://testnewsletter.substack.com/p/my-newsletter-forwarded?ref=newsletter">original</a></p><br></div></div>\n',
+        '<div dir="ltr"><br><br><div class="gmail_quote gmail_quote_container"><p>Newsletter content: link to <a href="https://testnewsletter.substack.com/p/my-newsletter-forwarded?ref=newsletter">original</a></p><br></div></div>\n\n',
       );
       expect(parsedEmail!.textContent).toBe(
-        "\nNewsletter content: link to original (https://testnewsletter.substack.com/p/my-newsletter-forwarded?ref=newsletter)\n",
+        "\nNewsletter content: link to original (https://testnewsletter.substack.com/p/my-newsletter-forwarded?ref=newsletter)\n\n",
       );
     });
   });
@@ -141,7 +141,7 @@ describe("@app/api/lib/email", () => {
           "Sender Name",
           "This is my new post",
           "Some content",
-          { list: { post: { url: "https://blog.example.com/post" } } },
+          [{ key: "list-post", value: "<https://blog.example.com/post>" }],
         ),
       );
       expect(result).toBe("https://blog.example.com/post");
@@ -154,7 +154,7 @@ describe("@app/api/lib/email", () => {
           "Sender Name",
           "Test Subject",
           "Some content",
-          { list: { post: { url: "https://blog.example.com/post" } } },
+          [{ key: "list-post", value: "<https://blog.example.com/post>" }],
         ),
       );
       expect(result).toBe("https://curio-newsletter/example-com/test-subject");
@@ -169,7 +169,7 @@ describe("@app/api/lib/email", () => {
             "Sender Name",
             "Test Post",
             "Some content",
-            { list: { post: { url: "https://writers.medium.com/post" } } },
+            [{ key: "list-post", value: "<https://writers.medium.com/post>" }],
           ),
         ),
       ).toBe("https://writers.medium.com/post");
@@ -182,7 +182,7 @@ describe("@app/api/lib/email", () => {
             "Sender Name",
             "Test Post",
             "Some content",
-            { list: { post: { url: "https://blog.site.co.uk/post" } } },
+            [{ key: "list-post", value: "<https://blog.site.co.uk/post>" }],
           ),
         ),
       ).toBe("https://blog.site.co.uk/post");
@@ -357,9 +357,9 @@ https://substack.com/another-post-weekly?param2=value2
     it("should use receipt date as publishedAt", () => {
       const testDate = new Date("2025-03-12T11:57:13-07:00");
       const result = extractMetadataFromEmail(
-        makeTestEmail("sender@example.com", "Sender", "Subject", "Content", {
-          date: testDate.toISOString(),
-        }),
+        makeTestEmail("sender@example.com", "Sender", "Subject", "Content", [
+          { key: "date", value: testDate.toISOString() },
+        ]),
       );
       expect(result.publishedAt).toEqual(testDate);
     });
@@ -367,9 +367,9 @@ https://substack.com/another-post-weekly?param2=value2
     it("should parse string receipt date", () => {
       const dateStr = "Wed, 12 Mar 2025 11:57:13 -0700";
       const result = extractMetadataFromEmail(
-        makeTestEmail("sender@example.com", "Sender", "Subject", "Content", {
-          date: dateStr,
-        }),
+        makeTestEmail("sender@example.com", "Sender", "Subject", "Content", [
+          { key: "date", value: dateStr },
+        ]),
       );
       expect(result.publishedAt).toEqual(new Date(dateStr));
     });
@@ -389,7 +389,7 @@ https://substack.com/another-post-weekly?param2=value2
         "Sender",
         "Subject",
         "",
-        {},
+        [],
         `<div>
         ${"A ".repeat(30)}${"B ".repeat(30)}
         <div>On Wed, Mar 12, 2025 at 11:57 AM John <john@example.com> wrote:</div>
@@ -413,7 +413,6 @@ https://substack.com/another-post-weekly?param2=value2
           "Sender",
           "Subject",
           "これは日本語のメールです",
-          {},
         ),
       );
       expect(result.textDirection).toBe(TextDirection.LTR);
@@ -427,7 +426,6 @@ https://substack.com/another-post-weekly?param2=value2
           "Sender",
           "Subject",
           "זה כתב עברי Email",
-          {},
         ),
       );
       expect(result.textDirection).toBe(TextDirection.RTL);
@@ -441,7 +439,6 @@ https://substack.com/another-post-weekly?param2=value2
           "Sender",
           "Subject",
           "بريدي الإلكتروني باللغة العربية",
-          {},
         ),
       );
       expect(result.textDirection).toBe(TextDirection.RTL);

@@ -1,8 +1,6 @@
-import { type Headers as MailparserHeaders } from "mailparser";
+import { type Header } from "postal-mime";
 
-export { type HeaderValue } from "mailparser";
-
-export type EmailHeaders = MailparserHeaders;
+export type EmailHeaders = Header[];
 
 export class EmailError extends Error {
   constructor(message: string) {

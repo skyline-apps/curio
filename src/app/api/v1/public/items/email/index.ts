@@ -7,7 +7,8 @@ import {
   parseIncomingEmail,
 } from "@app/api/lib/email";
 import { EmailError } from "@app/api/lib/email/types";
-import { extractMainContentAsMarkdown } from "@app/api/lib/extract";
+import { extractFromHtml } from "@app/api/lib/extract";
+import { ExtractError } from "@app/api/lib/extract/types";
 import { indexItemDocuments } from "@app/api/lib/search";
 import { storage } from "@app/api/lib/storage";
 import { StorageError } from "@app/api/lib/storage/types";
@@ -99,10 +100,24 @@ export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
         const itemId = item[0].id;
         const newDate = new Date();
 
-        const { content } = await extractMainContentAsMarkdown(
-          itemUrl,
-          email.htmlContent || email.content,
-        );
+        let content = email.textContent || "";
+        if (email.htmlContent) {
+          try {
+            let modifiedHtml = email.htmlContent;
+            if (
+              !modifiedHtml.includes("<body>") &&
+              !modifiedHtml.includes("<html>")
+            ) {
+              modifiedHtml = `<html><body>${modifiedHtml}</body></html>`;
+            }
+            const result = await extractFromHtml(itemUrl, modifiedHtml);
+            content = result.content;
+          } catch (error) {
+            if (error instanceof ExtractError) {
+              log("Failed to extract content", { error });
+            }
+          }
+        }
 
         const { versionName, status } = await storage.uploadItemContent(
           c,

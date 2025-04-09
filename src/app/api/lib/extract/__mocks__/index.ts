@@ -14,23 +14,11 @@ export const MOCK_METADATA: ExtractedMetadata = {
 };
 
 export class Extract {
-  async extractMainContentAsMarkdown(
+  async extractFromHtml(
     _url: string,
     _html: string,
-  ): Promise<{ content: string }> {
-    return { content: "" };
-  }
-  async extractMetadata(_url: string): Promise<ExtractedMetadata> {
-    return {
-      author: null,
-      title: null,
-      description: null,
-      thumbnail: null,
-      favicon: null,
-      publishedAt: null,
-      textDirection: TextDirection.LTR,
-      textLanguage: "en",
-    };
+  ): Promise<{ content: string; metadata: ExtractedMetadata }> {
+    return { content: "", metadata: MOCK_METADATA };
   }
 }
 
@@ -38,28 +26,15 @@ export class Extract {
 export const extract = new Extract();
 
 // Create spies for each method
-export const extractMainContentAsMarkdown = vi
-  .spyOn(extract, "extractMainContentAsMarkdown")
+export const extractFromHtml = vi
+  .spyOn(extract, "extractFromHtml")
   .mockImplementation(async () => ({
     content: "",
-  }));
-
-export const extractMetadata = vi
-  .spyOn(extract, "extractMetadata")
-  .mockImplementation(async () => ({
-    author: null,
-    title: null,
-    description: null,
-    thumbnail: null,
-    favicon: null,
-    publishedAt: null,
-    textDirection: TextDirection.LTR,
-    textLanguage: "en",
+    metadata: MOCK_METADATA,
   }));
 
 // Set default mock values
-extractMainContentAsMarkdown.mockResolvedValue({
+extractFromHtml.mockResolvedValue({
   content: "Markdown content",
+  metadata: MOCK_METADATA,
 });
-
-extractMetadata.mockResolvedValue(MOCK_METADATA);

@@ -1,17 +1,9 @@
 import { TextDirection } from "@app/schemas/db";
 import { Readability } from "@mozilla/readability";
-import { JSDOM } from "jsdom";
-import {
-  Article,
-  ImageObject,
-  NewsArticle,
-  Organization,
-  Person,
-  Thing,
-} from "schema-dts";
+import { parseHTML } from "linkedom";
 import TurndownService, { Node as TurndownNode } from "turndown";
 
-import { ExtractedMetadata, ExtractError, MetadataError } from "./types";
+import { ExtractedMetadata, ExtractError } from "./types";
 
 function isElementNode(
   node: TurndownNode | ChildNode | HTMLElement,
@@ -52,8 +44,8 @@ const turndown = new TurndownService({
 
 const recursivelyRemoveBlockElements = (html: string): string => {
   let resultHtml = "";
-  const dom = new JSDOM(html);
-  const node = dom.window.document.body;
+
+  const node = parseHTML(html).document;
   for (const child of node.childNodes) {
     if (child.nodeType === 1 && isElementNode(child)) {
       const tag = child.tagName.toLowerCase();
@@ -72,19 +64,6 @@ const recursivelyRemoveBlockElements = (html: string): string => {
   return resultHtml;
 };
 
-turndown.addRule("header", {
-  filter: HEADER_TAGS,
-  replacement: function (content: string, node: TurndownNode) {
-    if (isElementNode(node)) {
-      const headerLevel = node.tagName.slice(1);
-      const cleanedContent = content.replace(/\s+/g, " ").trim();
-      return `${"#".repeat(Number(headerLevel))} ${cleanedContent}\n\n`;
-    } else {
-      return content;
-    }
-  },
-});
-
 turndown.addRule("link", {
   filter: ["a"],
   replacement: function (content: string, node: TurndownNode) {
@@ -95,6 +74,19 @@ turndown.addRule("link", {
     const cleanedContent = recursivelyRemoveBlockElements(node.innerHTML);
     linkText += turndown.turndown(cleanedContent);
     return `[${linkText}](${href})`;
+  },
+});
+
+turndown.addRule("header", {
+  filter: HEADER_TAGS,
+  replacement: function (content: string, node: TurndownNode) {
+    if (isElementNode(node)) {
+      const headerLevel = node.tagName.slice(1);
+      const cleanedContent = content.replace(/\s+/g, " ").trim();
+      return `${"#".repeat(Number(headerLevel))} ${cleanedContent}\n\n`;
+    } else {
+      return content;
+    }
   },
 });
 
@@ -123,60 +115,6 @@ turndown.addRule("dir", {
   },
 });
 
-type JsonLdGraph = {
-  "@context"?: string;
-  "@graph"?: Thing[];
-  "@type"?: string;
-} & Record<string, unknown>;
-
-type ArticleType = (Article | NewsArticle) & {
-  author?: string | Person | Organization | (string | Person | Organization)[];
-  image?: string | ImageObject | (string | ImageObject)[];
-  publisher?: Organization & {
-    logo?: string;
-  };
-};
-
-function isArticle(thing: Thing): thing is ArticleType {
-  return (
-    typeof thing === "object" &&
-    thing !== null &&
-    "@type" in thing &&
-    (thing["@type"] === "Article" || thing["@type"] === "NewsArticle")
-  );
-}
-
-function isPerson(thing: unknown): thing is Person & { name?: string } {
-  return (
-    typeof thing === "object" &&
-    thing !== null &&
-    "@type" in thing &&
-    thing["@type"] === "Person"
-  );
-}
-
-function isOrganization(
-  thing: unknown,
-): thing is Organization & { name?: string } {
-  return (
-    typeof thing === "object" &&
-    thing !== null &&
-    "@type" in thing &&
-    thing["@type"] === "Organization"
-  );
-}
-
-function isImageObject(
-  thing: unknown,
-): thing is ImageObject & { url?: string } {
-  return (
-    typeof thing === "object" &&
-    thing !== null &&
-    "@type" in thing &&
-    thing["@type"] === "ImageObject"
-  );
-}
-
 export class Extract {
   private getMetaContent(doc: Document, selectors: string[]): string | null {
     for (const selector of selectors) {
@@ -186,130 +124,6 @@ export class Extract {
         return content.trim();
       }
     }
-    return null;
-  }
-
-  private extractDocumentMetadata(doc: Document): {
-    textDirection: TextDirection;
-    textLanguage: string;
-  } {
-    const htmlElement = doc.querySelector("html");
-    const bodyElement = doc.querySelector("body");
-    let textDirection = TextDirection.LTR; // Default to LTR
-    let textLanguage = "";
-
-    if (htmlElement) {
-      if (htmlElement.hasAttribute("dir")) {
-        const dir = htmlElement.getAttribute("dir");
-        if (dir === "rtl") {
-          textDirection = TextDirection.RTL;
-        } else if (dir === "ltr") {
-          textDirection = TextDirection.LTR;
-        } else if (dir === "auto") {
-          textDirection = TextDirection.AUTO;
-        }
-      }
-      if (htmlElement.hasAttribute("lang")) {
-        textLanguage = htmlElement.getAttribute("lang") || "";
-      }
-    }
-
-    if (bodyElement) {
-      if (bodyElement.hasAttribute("dir")) {
-        const dir = bodyElement.getAttribute("dir");
-        if (dir === "rtl") {
-          textDirection = TextDirection.RTL;
-        } else if (dir === "ltr") {
-          textDirection = TextDirection.LTR;
-        } else if (dir === "auto") {
-          textDirection = TextDirection.AUTO;
-        }
-      } else {
-        const bodyStyle = doc.defaultView?.getComputedStyle(bodyElement);
-        const bodyStyleDir = bodyStyle?.getPropertyValue("direction");
-        if (bodyStyleDir === "rtl") {
-          textDirection = TextDirection.RTL;
-        } else if (bodyStyleDir === "ltr") {
-          textDirection = TextDirection.LTR;
-        } else if (bodyStyleDir === "auto") {
-          textDirection = TextDirection.AUTO;
-        }
-      }
-    }
-
-    return { textDirection, textLanguage };
-  }
-
-  private parseJsonLd(jsonString: string): JsonLdGraph | null {
-    try {
-      const parsed = JSON.parse(jsonString);
-      // Handle both single object and array of objects
-      const data = Array.isArray(parsed) ? parsed[0] : parsed;
-      return data as unknown as JsonLdGraph;
-    } catch {
-      return null;
-    }
-  }
-
-  private extractJsonLd(doc: Document): ArticleType | null {
-    const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
-
-    for (const script of scripts) {
-      if (!script.textContent) continue;
-
-      const jsonLd = this.parseJsonLd(script.textContent);
-      if (!jsonLd) continue;
-
-      const items: Thing[] = jsonLd["@graph"] || [jsonLd as unknown as Thing];
-
-      for (const item of items) {
-        if (isArticle(item)) {
-          return item;
-        }
-      }
-    }
-
-    return null;
-  }
-
-  private extractAuthorFromJsonLd(
-    article: Article | NewsArticle,
-  ): string | null {
-    const author = article.author;
-    if (!author) return null;
-
-    if (Array.isArray(author)) {
-      const firstAuthor = author[0];
-      if (typeof firstAuthor === "string") return firstAuthor;
-      if (isPerson(firstAuthor)) return firstAuthor.name?.toString() || null;
-      if (isOrganization(firstAuthor))
-        return firstAuthor.name?.toString() || null;
-      return null;
-    }
-
-    if (typeof author === "string") return author;
-    if (isPerson(author)) return author.name?.toString() || null;
-    if (isOrganization(author)) return author.name?.toString() || null;
-
-    return null;
-  }
-
-  private extractImageFromJsonLd(
-    article: Article | NewsArticle,
-  ): string | null {
-    const image = article.image;
-    if (!image) return null;
-
-    if (Array.isArray(image)) {
-      const firstImage = image[0];
-      if (typeof firstImage === "string") return firstImage;
-      if (isImageObject(firstImage)) return firstImage.url?.toString() || null;
-      return null;
-    }
-
-    if (typeof image === "string") return image;
-    if (isImageObject(image)) return image.url?.toString() || null;
-
     return null;
   }
 
@@ -343,127 +157,69 @@ export class Extract {
     }
   }
 
-  async extractMetadata(url: string, html: string): Promise<ExtractedMetadata> {
-    try {
-      if (!html.trim() || !html.includes("<") || !html.includes(">")) {
-        throw new ExtractError("Invalid HTML content");
-      }
-
-      const dom = new JSDOM(html);
-      const { document } = dom.window;
-
-      if (!document.documentElement || !document.head) {
-        throw new Error("Invalid HTML: missing required elements");
-      }
-
-      const jsonLd = this.extractJsonLd(document);
-
-      const title =
-        this.getMetaContent(document, [
-          'meta[property="og:title"]',
-          'meta[name="twitter:title"]',
-          'meta[name="title"]',
-        ]) ||
-        jsonLd?.headline?.toString() ||
-        document.title ||
-        null;
-
-      const description =
-        this.getMetaContent(document, [
-          'meta[property="og:description"]',
-          'meta[name="twitter:description"]',
-          'meta[name="description"]',
-        ]) ||
-        jsonLd?.description?.toString() ||
-        null;
-
-      const author =
-        this.getMetaContent(document, [
-          'meta[property="article:author"]',
-          'meta[name="author"]',
-        ]) ||
-        (jsonLd && this.extractAuthorFromJsonLd(jsonLd)) ||
-        null;
-
-      const thumbnail =
-        this.getMetaContent(document, [
-          'meta[property="og:image"]',
-          'meta[name="twitter:image"]',
-          'meta[property="og:image:url"]',
-        ]) ||
-        (jsonLd && this.extractImageFromJsonLd(jsonLd)) ||
-        null;
-
-      const publishedAt =
-        this.getMetaContent(document, [
-          'meta[property="article:published_time"]',
-          'meta[name="published_time"]',
-          'meta[property="og:published_time"]',
-        ]) ||
-        jsonLd?.datePublished?.toString() ||
-        null;
-
-      const favicon =
-        this.createAbsoluteUrl(this.extractFavicon(document), url) ||
-        (jsonLd?.publisher && "logo" in jsonLd.publisher
-          ? jsonLd.publisher.logo
-          : null) ||
-        null;
-
-      const { textDirection, textLanguage } = this.extractDocumentMetadata(
-        dom.window.document,
-      );
-
-      return {
-        title,
-        description,
-        author,
-        thumbnail,
-        favicon,
-        publishedAt: publishedAt ? new Date(publishedAt) : null,
-        textDirection,
-        textLanguage,
-      };
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new MetadataError(`Failed to extract metadata: ${error.message}`);
-      } else {
-        throw new MetadataError(`Unknown error while extracting metadata`);
-      }
-    }
-  }
-
-  async extractMainContentAsMarkdown(
+  async extractFromHtml(
     url: string,
     html: string,
-  ): Promise<{ content: string }> {
+  ): Promise<{ content: string; metadata: ExtractedMetadata }> {
     try {
-      const dom = new JSDOM(html, { url });
-      const { textDirection } = this.extractDocumentMetadata(
-        dom.window.document,
-      );
+      const { document } = parseHTML(html, { location: new URL(url) });
 
-      const reader = new Readability(dom.window.document);
+      const reader = new Readability(document, {
+        // @ts-expect-error: https://github.com/mozilla/readability/issues/966
+        linkDensityModifier: 0.1,
+      });
       const article = reader.parse();
       if (!article || !article.content) {
         throw new ExtractError("Failed to extract content");
       }
+      const favicon = this.createAbsoluteUrl(
+        this.extractFavicon(document),
+        url,
+      );
+      const thumbnail = this.getMetaContent(document, [
+        'meta[property="og:image"]',
+        'meta[name="twitter:image"]',
+        'meta[property="og:image:url"]',
+      ]);
+      let textDirection = TextDirection.LTR;
+      if (article.dir === "rtl") {
+        textDirection = TextDirection.RTL;
+      } else if (article.dir === "auto") {
+        textDirection = TextDirection.AUTO;
+      }
+      const metadata = {
+        title: article.title || null,
+        description: article.excerpt || null,
+        author: article.byline || null,
+        publishedAt: article.publishedTime
+          ? new Date(article.publishedTime)
+          : null,
+        textLanguage: article.lang || null,
+        textDirection,
+        thumbnail: thumbnail,
+        favicon: favicon,
+      };
 
       const content = turndown.turndown(article.content);
-      if (textDirection !== TextDirection.LTR) {
+      if (metadata.textDirection !== TextDirection.LTR) {
         return {
-          content: `<div dir="${textDirection}">\n\n${content}\n\n</div>`,
+          content: `<div dir="${article.dir}">\n\n${content}\n\n</div>`,
+          metadata,
         };
       }
-      return { content };
+      return { content, metadata };
     } catch (error) {
-      throw error instanceof Error ? error : new Error(String(error));
+      if (error instanceof Error) {
+        if (error.message.includes("Readability constructor")) {
+          throw new ExtractError("Issue extracting content");
+        }
+        throw error;
+      }
+      throw new Error(String(error));
     }
   }
 }
 
 export const extract = new Extract();
 
-export const extractMainContentAsMarkdown =
-  extract.extractMainContentAsMarkdown.bind(extract);
-export const extractMetadata = extract.extractMetadata.bind(extract);
+export const extractFromHtml = extract.extractFromHtml.bind(extract);

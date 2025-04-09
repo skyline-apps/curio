@@ -7,13 +7,6 @@ export class ExtractError extends Error {
   }
 }
 
-export class MetadataError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "MetadataError";
-  }
-}
-
 export interface ExtractedMetadata {
   author: string | null;
   title: string | null;

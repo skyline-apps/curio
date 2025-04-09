@@ -1,11 +1,8 @@
 import { desc, eq } from "@app/api/db";
 import { items, profileItemHighlights, profileItems } from "@app/api/db/schema";
-import {
-  extractMainContentAsMarkdown,
-  extractMetadata,
-} from "@app/api/lib/extract";
+import { extractFromHtml } from "@app/api/lib/extract";
 import { MOCK_METADATA } from "@app/api/lib/extract/__mocks__/index";
-import { ExtractError, MetadataError } from "@app/api/lib/extract/types";
+import { ExtractError } from "@app/api/lib/extract/types";
 import { indexItemDocuments } from "@app/api/lib/search";
 import {
   getItemContent,
@@ -101,12 +98,7 @@ describe("/v1/items/content", () => {
         status: "UPDATED_MAIN",
       });
 
-      expect(extractMetadata).toHaveBeenCalledWith(
-        TEST_ITEM_URL_1,
-        "<div>Test content</div>",
-      );
-
-      expect(extractMainContentAsMarkdown).toHaveBeenCalledWith(
+      expect(extractFromHtml).toHaveBeenCalledWith(
         TEST_ITEM_URL_1,
         "<div>Test content</div>",
       );
@@ -222,7 +214,7 @@ describe("/v1/items/content", () => {
         "Markdown content",
         MOCK_METADATA,
       );
-      expect(extractMainContentAsMarkdown).toHaveBeenCalledWith(
+      expect(extractFromHtml).toHaveBeenCalledWith(
         TEST_ITEM_URL_1,
         "<div>Test content</div>",
       );
@@ -583,7 +575,7 @@ describe("/v1/items/content", () => {
       await testDb.db.insert(items).values(MOCK_ITEMS[0]);
       await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS[0]);
 
-      vi.mocked(extractMainContentAsMarkdown).mockRejectedValueOnce(
+      vi.mocked(extractFromHtml).mockRejectedValueOnce(
         new ExtractError("Failed to extract content"),
       );
 
@@ -594,31 +586,6 @@ describe("/v1/items/content", () => {
       expect(response.status).toBe(500);
       const data: ErrorResponse = await response.json();
       expect(data.error).toBe("Failed to extract content");
-      const profileItem = await testDb.db
-        .select()
-        .from(profileItems)
-        .where(eq(profileItems.itemId, TEST_ITEM_ID_1))
-        .orderBy(desc(profileItems.savedAt));
-
-      expect(profileItem.length).toBe(1);
-      expect(profileItem[0].savedAt).toEqual(ORIGINAL_CREATION_DATE);
-    });
-
-    it("should return 500 when metadata extraction fails", async () => {
-      await testDb.db.insert(items).values(MOCK_ITEMS[0]);
-      await testDb.db.insert(profileItems).values(MOCK_PROFILE_ITEMS[0]);
-
-      vi.mocked(extractMetadata).mockRejectedValueOnce(
-        new MetadataError("Failed to extract metadata"),
-      );
-
-      const response = await postRequest(app, "v1/items/content", {
-        url: TEST_ITEM_URL_1,
-        htmlContent: "<div>Invalid content</div>",
-      });
-      expect(response.status).toBe(500);
-      const data: ErrorResponse = await response.json();
-      expect(data.error).toBe("Failed to extract metadata");
       const profileItem = await testDb.db
         .select()
         .from(profileItems)
