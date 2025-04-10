@@ -1,6 +1,6 @@
 import "zod-openapi/extend";
 
-import { dateType } from "@app/schemas/types";
+import { dateType, dateTypeOptional } from "@app/schemas/types";
 import { z } from "zod";
 
 export const CreateApiKeyRequestSchema = z.object({
@@ -24,6 +24,8 @@ export const GetApiKeysResponseSchema = z.object({
       id: z.string(),
       name: z.string(),
       createdAt: dateType,
+      lastUsedAt: dateTypeOptional,
+      isActive: z.boolean(),
     }),
   ),
 });

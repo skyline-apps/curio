@@ -10,6 +10,16 @@ export const dateType = z
   })
   .pipe(z.string());
 
+export const dateTypeOptional = z
+  .union([z.string(), z.date(), z.null()])
+  .transform((val) => {
+    if (val instanceof Date) {
+      return val.toISOString();
+    }
+    return val || undefined;
+  })
+  .pipe(z.string().optional());
+
 export enum UploadStatus {
   UPDATED_MAIN = "UPDATED_MAIN",
   STORED_VERSION = "STORED_VERSION",

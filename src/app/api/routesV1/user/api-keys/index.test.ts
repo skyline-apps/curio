@@ -43,6 +43,7 @@ describe("/v1/user/api-keys", () => {
           profileId: DEFAULT_TEST_PROFILE_ID,
           key: "ck_test123",
           name: "Test Key 1",
+          lastUsedAt: new Date("2025-04-09T20:00:00.000Z"),
         },
         {
           profileId: DEFAULT_TEST_PROFILE_ID,
@@ -57,7 +58,11 @@ describe("/v1/user/api-keys", () => {
       const { keys }: GetApiKeysResponse = await response.json();
       expect(keys.length).toBe(2);
       expect(keys[0].name).toBe("Test Key 1");
+      expect(keys[0].lastUsedAt).toBe("2025-04-09T20:00:00.000Z");
+      expect(keys[0].isActive).toBe(true);
       expect(keys[1].name).toBe("Test Key 2");
+      expect(keys[1].lastUsedAt).toBeUndefined();
+      expect(keys[1].isActive).toBe(true);
     });
   });
 
