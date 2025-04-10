@@ -9,11 +9,13 @@ export type User = {
 
 export type UserContextType = {
   user: User;
+  refreshUser: () => Promise<void>;
   clearUser: () => void;
   changeUsername: (username: string) => Promise<void>;
   updateNewsletterEmail: () => Promise<void>;
   handleLogout: () => Promise<void>;
 };
+
 export const UserContext = createContext<UserContextType>({
   user: {
     id: null,
@@ -21,6 +23,7 @@ export const UserContext = createContext<UserContextType>({
     email: null,
     newsletterEmail: null,
   },
+  refreshUser: () => Promise.resolve(),
   clearUser: () => {},
   changeUsername: (_username: string) => Promise.resolve(),
   updateNewsletterEmail: () => Promise.resolve(),

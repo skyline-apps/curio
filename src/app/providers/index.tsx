@@ -1,6 +1,5 @@
-import { supabase } from "@app/utils/supabase";
 import { HeroUIProvider } from "@heroui/react"; // eslint-disable-line no-restricted-imports
-import React, { PropsWithChildren, useEffect, useState } from "react";
+import React, { PropsWithChildren } from "react";
 
 import { AppLayoutProvider } from "./AppLayout/provider";
 import { BrowserMessageProvider } from "./BrowserMessage/provider";
@@ -11,74 +10,40 @@ import { HighlightsProvider } from "./Highlights/provider";
 import { ItemsProvider } from "./Items/provider";
 import { SettingsProvider } from "./Settings/provider";
 import { ToastProvider } from "./Toast/provider";
-import { type User } from "./User";
+import { useUser } from "./User";
 import { UserProvider } from "./User/provider";
 
 const AuthenticatedProviders: React.FC<PropsWithChildren> = ({
   children,
 }: PropsWithChildren) => {
-  return (
-    <ItemsProvider>
-      <CurrentItemProvider>
-        <HighlightsProvider>
-          <CacheProvider>
-            <BrowserMessageProvider>{children}</BrowserMessageProvider>
-          </CacheProvider>
-        </HighlightsProvider>
-      </CurrentItemProvider>
-    </ItemsProvider>
+  const { user } = useUser();
+  return user.id ? (
+    <SettingsProvider>
+      <ItemsProvider>
+        <CurrentItemProvider>
+          <HighlightsProvider>
+            <CacheProvider>
+              <BrowserMessageProvider>{children}</BrowserMessageProvider>
+            </CacheProvider>
+          </HighlightsProvider>
+        </CurrentItemProvider>
+      </ItemsProvider>
+    </SettingsProvider>
+  ) : (
+    <CurrentItemProvider>{children}</CurrentItemProvider>
   );
 };
 
 const Providers: React.FC<PropsWithChildren> = ({
   children,
 }: PropsWithChildren) => {
-  const [currentUser, setCurrentUser] = useState<User>({
-    id: null,
-    username: null,
-    email: null,
-    newsletterEmail: null,
-  });
-
-  useEffect(() => {
-    const fetchProfile = async (): Promise<void> => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (user) {
-        const profile = await supabase
-          .from("profiles")
-          .select("username, newsletter_email")
-          .eq("user_id", user.id)
-          .single();
-
-        if (profile) {
-          setCurrentUser({
-            id: user.id,
-            email: user.email || null,
-            username: profile.data?.username,
-            newsletterEmail: profile.data?.newsletter_email,
-          });
-        }
-      }
-    };
-    fetchProfile();
-  }, []);
-
   return (
     <ClientProviders>
       <HeroUIProvider>
         <ToastProvider>
-          <UserProvider user={currentUser}>
+          <UserProvider>
             <AppLayoutProvider>
-              {currentUser && currentUser.id ? (
-                <SettingsProvider>
-                  <AuthenticatedProviders>{children}</AuthenticatedProviders>
-                </SettingsProvider>
-              ) : (
-                <CurrentItemProvider>{children}</CurrentItemProvider>
-              )}
+              <AuthenticatedProviders>{children}</AuthenticatedProviders>
             </AppLayoutProvider>
           </UserProvider>
         </ToastProvider>

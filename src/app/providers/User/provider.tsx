@@ -5,7 +5,7 @@ import { clearTheme, initializeTheme } from "@app/utils/displayStorage";
 import { createLogger } from "@app/utils/logger";
 import { supabase } from "@app/utils/supabase";
 import posthog from "posthog-js";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { User, UserContext } from ".";
@@ -14,44 +14,77 @@ const log = createLogger("User");
 
 interface UserProviderProps {
   children: React.ReactNode;
-  user: User;
 }
 
 export const UserProvider: React.FC<UserProviderProps> = ({
   children,
-  user,
 }: UserProviderProps): React.ReactNode => {
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState<User>(user);
+  const [currentUser, setCurrentUser] = useState<User>({
+    id: null,
+    username: null,
+    email: null,
+    newsletterEmail: null,
+  });
 
-  const clearUser = (): void => {
+  useEffect(() => {
+    refreshUser();
+  }, []);
+
+  const clearUser = useCallback((): void => {
     setCurrentUser({
       id: null,
       username: null,
       email: null,
       newsletterEmail: null,
     });
-  };
+  }, []);
 
-  const changeUsername = async (username: string): Promise<void> => {
-    return authenticatedFetch("/api/v1/user/username", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId: user.id, username: username }),
-    })
-      .then(handleAPIResponse<UpdateUsernameResponse>)
-      .then((result) => {
-        const { updatedUsername } = result;
-        if (!updatedUsername) {
-          throw Error("Failed to update username");
-        }
-        setCurrentUser({ ...currentUser, username: updatedUsername });
+  const refreshUser = useCallback(async (): Promise<void> => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      const profile = await supabase
+        .from("profiles")
+        .select("username, newsletter_email")
+        .eq("user_id", user.id)
+        .single();
+
+      setCurrentUser({
+        id: user.id,
+        email: user.email || null,
+        username: profile.data?.username,
+        newsletterEmail: profile.data?.newsletter_email,
       });
-  };
+    } else {
+      clearUser();
+    }
+  }, [clearUser]);
 
-  const updateNewsletterEmail = async (): Promise<void> => {
+  const changeUsername = useCallback(
+    async (username: string): Promise<void> => {
+      return authenticatedFetch("/api/v1/user/username", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: currentUser.id, username: username }),
+      })
+        .then(handleAPIResponse<UpdateUsernameResponse>)
+        .then((result) => {
+          const { updatedUsername } = result;
+          if (!updatedUsername) {
+            throw Error("Failed to update username");
+          }
+          setCurrentUser({ ...currentUser, username: updatedUsername });
+        });
+    },
+    [currentUser],
+  );
+
+  const updateNewsletterEmail = useCallback(async (): Promise<void> => {
     return authenticatedFetch("/api/v1/user/email", {
       method: "POST",
     })
@@ -66,9 +99,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({
           newsletterEmail: updatedNewsletterEmail,
         });
       });
-  };
+  }, [currentUser]);
 
-  const handleLogout = async (): Promise<void> => {
+  const handleLogout = useCallback(async (): Promise<void> => {
     const { error } = await supabase.auth.signOut();
     if (error) {
       log.error("Error with logout:", error);
@@ -79,12 +112,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({
     initializeTheme();
     posthog.reset();
     navigate("/");
-  };
+  }, [clearUser, navigate]);
 
   return (
     <UserContext.Provider
       value={{
         user: currentUser,
+        refreshUser,
         clearUser,
         changeUsername,
         updateNewsletterEmail,

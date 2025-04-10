@@ -1,3 +1,4 @@
+import { useUser } from "@app/providers/User";
 import { createLogger } from "@app/utils/logger";
 import { supabase } from "@app/utils/supabase";
 import React, { useEffect } from "react";
@@ -8,6 +9,7 @@ const log = createLogger("auth");
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { refreshUser } = useUser();
 
   useEffect(() => {
     const nextUrl = searchParams.get("next") || "/home";
@@ -18,6 +20,7 @@ const AuthCallback: React.FC = () => {
           if (authListener) {
             authListener.subscription.unsubscribe();
           }
+          refreshUser();
           navigate(nextUrl, { replace: true });
         }
         // Note: You might need to handle other events depending on your flow
@@ -29,6 +32,7 @@ const AuthCallback: React.FC = () => {
       if (authListener) {
         authListener.subscription.unsubscribe();
       }
+      refreshUser();
       navigate(nextUrl, { replace: true });
     }, 5000);
 
@@ -38,7 +42,7 @@ const AuthCallback: React.FC = () => {
         authListener.subscription.unsubscribe();
       }
     };
-  }, [navigate, searchParams]);
+  }, [navigate, searchParams, refreshUser]);
 
   // TODO: Replace with a proper loading screen
   return <div>Loading... Please wait while we sign you in.</div>;
