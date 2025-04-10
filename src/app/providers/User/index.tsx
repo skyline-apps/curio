@@ -9,6 +9,7 @@ export type User = {
 
 export type UserContextType = {
   user: User;
+  isLoading: boolean;
   refreshUser: () => Promise<void>;
   clearUser: () => void;
   changeUsername: (username: string) => Promise<void>;
@@ -23,6 +24,7 @@ export const UserContext = createContext<UserContextType>({
     email: null,
     newsletterEmail: null,
   },
+  isLoading: true,
   refreshUser: () => Promise.resolve(),
   clearUser: () => {},
   changeUsername: (_username: string) => Promise.resolve(),

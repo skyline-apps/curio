@@ -19,6 +19,7 @@ interface UserProviderProps {
 export const UserProvider: React.FC<UserProviderProps> = ({
   children,
 }: UserProviderProps): React.ReactNode => {
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<User>({
     id: null,
@@ -58,6 +59,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
     } else {
       clearUser();
     }
+    setIsLoading(false);
   }, [clearUser]);
 
   useEffect(() => {
@@ -120,6 +122,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
     <UserContext.Provider
       value={{
         user: currentUser,
+        isLoading,
         refreshUser,
         clearUser,
         changeUsername,
