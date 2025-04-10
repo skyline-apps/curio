@@ -14,9 +14,55 @@ import PrivacyPage from "@app/pages/privacy";
 import ProfilePage from "@app/pages/profile";
 import SettingsPage from "@app/pages/settings";
 import TermsPage from "@app/pages/terms";
-import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
+import { useUser } from "@app/providers/User";
+import React, { useEffect, useState } from "react";
+import {
+  BrowserRouter,
+  Outlet,
+  Route,
+  Routes,
+  useNavigate,
+} from "react-router-dom";
+
+import { getSupabaseClient } from "./utils/supabase";
+
+const RequireAuth = ({
+  children,
+}: React.PropsWithChildren): React.ReactNode => {
+  const { user } = useUser();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user?.id) {
+      navigate("/");
+    }
+  }, [user?.id, navigate]);
+
+  return user?.id ? <>{children}</> : null;
+};
+
+const HomeRedirect = (): React.ReactNode => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate("/home", { replace: true });
+  }, [navigate]);
+  return null;
+};
 
 export const App = (): React.ReactNode => {
+  const [user, setUser] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async (): Promise<void> => {
+      const supabase = getSupabaseClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user?.id || null);
+    };
+    fetchUser();
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>
@@ -27,16 +73,21 @@ export const App = (): React.ReactNode => {
             </RootLayout>
           }
         >
-          <Route path="/" element={<MainPage />} />
+          <Route path="/" element={user ? <HomeRedirect /> : <MainPage />} />
+          <Route
+            path="/login"
+            element={user ? <HomeRedirect /> : <LoginPage />}
+          />
           <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/login" element={<LoginPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route
             element={
-              <ProtectedLayout>
-                <Outlet />
-              </ProtectedLayout>
+              <RequireAuth>
+                <ProtectedLayout>
+                  <Outlet />
+                </ProtectedLayout>
+              </RequireAuth>
             }
           >
             <Route path="/home" element={<HomePage />} />

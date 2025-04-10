@@ -38,28 +38,34 @@ export const UserProvider: React.FC<UserProviderProps> = ({
   }, []);
 
   const refreshUser = useCallback(async (): Promise<void> => {
-    const supabase = getSupabaseClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    setIsLoading(true);
+    try {
+      const supabase = getSupabaseClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (user) {
-      const profile = await supabase
-        .from("profiles")
-        .select("username, newsletter_email")
-        .eq("user_id", user.id)
-        .single();
+      if (user) {
+        const profile = await supabase
+          .from("profiles")
+          .select("username, newsletter_email")
+          .eq("user_id", user.id)
+          .single();
 
-      setCurrentUser({
-        id: user.id,
-        email: user.email || null,
-        username: profile.data?.username,
-        newsletterEmail: profile.data?.newsletter_email,
-      });
-    } else {
-      clearUser();
+        setCurrentUser({
+          id: user.id,
+          email: user.email || null,
+          username: profile.data?.username,
+          newsletterEmail: profile.data?.newsletter_email,
+        });
+      } else {
+        clearUser();
+      }
+    } catch (error) {
+      log.error("Error refreshing user:", error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, [clearUser]);
 
   useEffect(() => {
