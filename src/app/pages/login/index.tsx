@@ -21,7 +21,7 @@ const LoginPage: React.FC<LoginPageProps> = ({}: LoginPageProps) => {
   }
 
   return (
-    <div className="flex flex-col w-full h-dvh overflow-hidden">
+    <div className="flex flex-col w-full h-dvh">
       <Navbar />
       <div className="flex-1">
         <div className="flex flex-col gap-4 my-16">
