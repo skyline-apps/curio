@@ -5,8 +5,8 @@ const log = createLogger("api");
 
 export async function handleAPIResponse<T>(response: Response): Promise<T> {
   if (response.status < 200 || response.status >= 300) {
-    const error = await response.json();
-    throw new Error(error.error);
+    const error = await response.text();
+    throw new Error(error);
   }
   const result = await response.json();
   return result;
@@ -32,6 +32,9 @@ export async function authenticatedFetch(
 
   const headers = new Headers(options.headers);
   headers.set("Authorization", `Bearer ${session.access_token}`);
+  if (options.method !== "GET") {
+    headers.set("Content-Type", "application/json");
+  }
 
   return fetch(url, {
     ...options,
