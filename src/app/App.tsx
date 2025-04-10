@@ -9,6 +9,7 @@ import LoginPage from "@app/pages/login";
 import NotFound from "@app/pages/not-found";
 import NotesPage from "@app/pages/notes";
 import PrivacyPage from "@app/pages/privacy";
+import SettingsPage from "@app/pages/settings";
 import TermsPage from "@app/pages/terms";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 
@@ -39,6 +40,7 @@ export const App = (): React.ReactNode => {
             <Route path="/inbox" element={<InboxPage />} />
             <Route path="/notes" element={<NotesPage />} />
             <Route path="/archive" element={<ArchivePage />} />
+            <Route path="/settings" element={<SettingsPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Route>
