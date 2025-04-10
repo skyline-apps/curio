@@ -100,19 +100,16 @@ const ItemPage: React.FC = () => {
         />
       )}
       <div className="flex-1 w-full h-full flex flex-col">
-        {!loading && loadedItem ? (
-          loadingError ? (
-            <p className="text-sm text-danger">{loadingError}</p>
-          ) : loadedItem.content ? (
+        {!loading &&
+          (loadingError ? (
+            <p className="text-sm text-danger p-4">{loadingError}</p>
+          ) : loadedItem?.content ? (
             articleContent
           ) : (
-            <p className="text-sm text-secondary italic py-4">
+            <p className="text-sm text-secondary italic p-4">
               Content unavailable.
             </p>
-          )
-        ) : (
-          loadingError && <p className="text-sm text-danger">{loadingError}</p>
-        )}
+          ))}
       </div>
     </>
   );

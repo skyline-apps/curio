@@ -6,7 +6,7 @@ import {
   profileItems,
   profileLabels,
 } from "@app/api/db/schema";
-import { getItemContent } from "@app/api/lib/storage";
+import { getItemContent, getItemMetadata } from "@app/api/lib/storage";
 import { MOCK_VERSION } from "@app/api/lib/storage/__mocks__/index";
 import { StorageError } from "@app/api/lib/storage/types";
 import { ErrorResponse } from "@app/api/utils/api";
@@ -613,6 +613,26 @@ describe("/v1/public/items/content", () => {
         TEST_ITEM_SLUG,
         null,
       );
+    });
+
+    it("should return 404 when item metadata not found", async () => {
+      vi.mocked(getItemMetadata).mockRejectedValueOnce(
+        new StorageError("Failed to get metadata"),
+      );
+      await testDb.db.insert(items).values(MOCK_ITEM);
+
+      const response = await getRequest(app, "v1/public/items/content", {
+        slug: TEST_ITEM_SLUG,
+      });
+      expect(response.status).toBe(404);
+
+      const data: ErrorResponse = await response.json();
+      expect(data.error).toBe("Item not found.");
+      expect(getItemMetadata).toHaveBeenCalledExactlyOnceWith(
+        expect.any(Object),
+        TEST_ITEM_SLUG,
+      );
+      expect(getItemContent).not.toHaveBeenCalled();
     });
 
     it("should return 404 when item not found for unauthenticated request", async () => {

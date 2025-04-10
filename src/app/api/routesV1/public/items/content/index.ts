@@ -2,7 +2,7 @@ import { and, eq, sql, TransactionDB } from "@app/api/db";
 import { fetchOwnItemResults } from "@app/api/db/dal/profileItems";
 import { items, profileItemHighlights, profileItems } from "@app/api/db/schema";
 import { getItemContent, getItemMetadata } from "@app/api/lib/storage";
-import { StorageError } from "@app/api/lib/storage/types";
+import { StorageError, VersionMetadata } from "@app/api/lib/storage/types";
 import {
   apiDoc,
   APIResponse,
@@ -41,7 +41,21 @@ async function getDefaultContent(
     return c.json({ error: "Item not found." }, 404);
   }
 
-  const metadata = await getItemMetadata(c, slug);
+  let metadata: VersionMetadata;
+
+  try {
+    metadata = await getItemMetadata(c, slug);
+  } catch (error: unknown) {
+    if (error instanceof StorageError) {
+      log("Error fetching default content, returning item info", {
+        error: error.message,
+      });
+      return c.json({ error: "Item not found." }, 404);
+    } else {
+      throw error;
+    }
+  }
+
   try {
     const { content } = await getItemContent(c, slug, null);
 
