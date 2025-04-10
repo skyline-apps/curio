@@ -12,6 +12,7 @@
     "lib": [
       "ESNext",
       "DOM",
+      "DOM.Iterable"
     ],
     "paths": {
       "@app/*": [
@@ -23,7 +24,7 @@
     ]
   },
   "include": [
-    "**/*.ts",
-    "**/*.mts",
+    "api/**/*.ts",
+    "api/**/*.mts",
   ]
 }
