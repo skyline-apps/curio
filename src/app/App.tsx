@@ -4,6 +4,7 @@ import RootLayout from "@app/layouts/RootLayout";
 import MainPage from "@app/pages";
 import ArchivePage from "@app/pages/archive";
 import AuthCallback from "@app/pages/auth/callback";
+import ContentPage from "@app/pages/content";
 import HomePage from "@app/pages/home";
 import InboxPage from "@app/pages/inbox";
 import LoginPage from "@app/pages/login";
@@ -52,6 +53,7 @@ export const App = (): React.ReactNode => {
             }
           >
             <Route path="/u/:username" element={<ProfilePage />} />
+            <Route path="/item/:slug" element={<ContentPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Route>

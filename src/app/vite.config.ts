@@ -36,6 +36,7 @@ export default defineConfig(() => {
           path.resolve(__dirname, "pages"),
           path.resolve(__dirname, "providers"),
           path.resolve(__dirname, "schemas"),
+          path.resolve(__dirname, "styles"),
           path.resolve(__dirname, "utils"),
         ],
       },
