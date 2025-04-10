@@ -29,6 +29,7 @@ vi.mock("@app/providers/User/provider", () => ({
         changeUsername: vi.fn(),
         updateNewsletterEmail: vi.fn(),
         handleLogout: vi.fn(),
+        isLoading: false,
       }}
     >
       {children}

@@ -10,7 +10,8 @@
     "rootDir": ".",
     "outDir": "dist",
     "lib": [
-      "ESNext"
+      "ESNext",
+      "DOM",
     ],
     "paths": {
       "@app/*": [

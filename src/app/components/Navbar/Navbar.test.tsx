@@ -26,6 +26,7 @@ describe("Navbar", () => {
         changeUsername: mockChangeUsername,
         updateNewsletterEmail: vi.fn(),
         handleLogout: mockHandleLogout,
+        isLoading: false,
       }}
     >
       {children}
@@ -47,6 +48,7 @@ describe("Navbar", () => {
         changeUsername: mockChangeUsername,
         updateNewsletterEmail: vi.fn(),
         handleLogout: mockHandleLogout,
+        isLoading: false,
       }}
     >
       {children}

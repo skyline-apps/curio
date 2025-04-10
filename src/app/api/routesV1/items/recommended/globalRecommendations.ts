@@ -86,7 +86,7 @@ async function fetchGlobalRecommendations(db: TransactionDB): Promise<
 }
 
 async function shouldRecomputeGlobalRecommendations(
-  db: TransactionDB,
+  _db: TransactionDB,
   existingRecommendations: Array<{
     itemId: string;
     createdAt: Date;
