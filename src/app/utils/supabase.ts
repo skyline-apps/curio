@@ -15,12 +15,11 @@ export const getSupabaseClient = (): SupabaseClient => {
 
     supabase = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
-        // Recommended: Use localStorage for session persistence in SPAs
+        flowType: "pkce",
         persistSession: true,
-        // Automatically refreshes the token when expired
         autoRefreshToken: true,
         // Detects session changes across browser tabs
-        detectSessionInUrl: true, // Important for OAuth/magic link redirects
+        detectSessionInUrl: true,
       },
     });
   }

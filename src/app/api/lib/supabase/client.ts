@@ -1,44 +1,33 @@
-import { type EnvContext } from "@app/api/utils/env";
+import { EnvContext } from "@app/api/utils/env";
+import { createServerClient, parseCookieHeader } from "@supabase/ssr"; // eslint-disable-line no-restricted-imports
 import type { SupabaseClient } from "@supabase/supabase-js"; // eslint-disable-line no-restricted-imports
-import { createClient as createSupabaseClient } from "@supabase/supabase-js"; // eslint-disable-line no-restricted-imports
+import { setCookie } from "hono/cookie";
 
-export type { PostgrestError, SupabaseClient } from "@supabase/supabase-js"; // eslint-disable-line no-restricted-imports
-export type StorageClient = SupabaseClient["storage"];
+export type { SupabaseClient } from "@supabase/supabase-js"; // eslint-disable-line no-restricted-imports
 
-export const createClient = (
+export const createClient = async (
   c: EnvContext,
   useAdmin: boolean = false,
-): SupabaseClient => {
-  const supabaseUrl = c.env.VITE_SUPABASE_URL;
-  const supabaseAnonKey = c.env.VITE_SUPABASE_ANON_KEY;
-  const supabaseServiceRoleKey = c.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  const cookies: Record<string, string> = {};
-  const cookieHeader = c.req.header("Cookie");
-  if (cookieHeader) {
-    cookieHeader.split(";").forEach((cookie: string) => {
-      const [name, value] = cookie.trim().split("=");
-      cookies[name] = value;
-    });
-  }
-
-  // Create Supabase client
-  const supabase = createSupabaseClient(
-    supabaseUrl,
-    useAdmin ? supabaseServiceRoleKey : supabaseAnonKey,
+): Promise<SupabaseClient> => {
+  return createServerClient(
+    c.env.VITE_SUPABASE_URL!,
+    useAdmin ? c.env.SUPABASE_SERVICE_ROLE_KEY! : c.env.VITE_SUPABASE_ANON_KEY!,
     {
-      auth: {
-        persistSession: false,
-        detectSessionInUrl: false,
-        autoRefreshToken: false,
-      },
-      global: {
-        headers: {
-          Cookie: cookieHeader || "",
+      cookies: {
+        getAll() {
+          return parseCookieHeader(c.req.header("Cookie") ?? "");
         },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            setCookie(c, name, value, options),
+          );
+        },
+      },
+      cookieOptions: {
+        secure: c.env.VITE_CURIO_URL.startsWith("https://"),
+        // sameSite: "lax",
+        // domain: undefined,
       },
     },
   );
-
-  return supabase;
 };

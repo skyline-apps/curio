@@ -1,3 +1,4 @@
+import Spinner from "@app/components/ui/Spinner";
 import { useUser } from "@app/providers/User";
 import { createLogger } from "@app/utils/logger";
 import { getSupabaseClient } from "@app/utils/supabase";
@@ -7,24 +8,49 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 const log = createLogger("auth");
 
 const AuthCallback: React.FC = () => {
+  const { refreshUser } = useUser();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { refreshUser } = useUser();
 
   useEffect(() => {
-    const nextUrl = searchParams.get("next") || "/home";
     const supabase = getSupabaseClient();
+    const nextUrl = searchParams.get("next") || "/home";
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, _session) => {
+      async (event, session) => {
         if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
           if (authListener) {
             authListener.subscription.unsubscribe();
           }
-          refreshUser();
-          navigate(nextUrl, { replace: true });
+          if (!session) {
+            throw new Error("No session found");
+          }
+          try {
+            const response = await fetch("/api/auth/session", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                accessToken: session.access_token,
+                refreshToken: session.refresh_token,
+              }),
+            });
+
+            if (!response.ok) {
+              throw new Error("Failed to set session cookie");
+            }
+
+            refreshUser();
+            navigate(nextUrl, { replace: true });
+          } catch (error) {
+            log.error(
+              "Error setting session cookie:",
+              error instanceof Error ? error.message : error,
+            );
+            navigate("/login?error=session_error", { replace: true });
+          }
         }
-        // Note: You might need to handle other events depending on your flow
       },
     );
 
@@ -45,8 +71,12 @@ const AuthCallback: React.FC = () => {
     };
   }, [navigate, searchParams, refreshUser]);
 
-  // TODO: Replace with a proper loading screen
-  return <div>Loading... Please wait while we sign you in.</div>;
+  return (
+    <div className="flex flex-col items-center gap-4 w-full h-dvh">
+      <Spinner centered />
+      Signing in...
+    </div>
+  );
 };
 
 export default AuthCallback;

@@ -17,7 +17,6 @@ export const EnvSchema = z.object({
   SEARCH_APPLICATION_API_KEY: z.string(),
   SEARCH_ENDPOINT_URL: z.string(),
   SEARCH_EXTERNAL_ENDPOINT_URL: z.string(),
-  NODE_ENV: z.string(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

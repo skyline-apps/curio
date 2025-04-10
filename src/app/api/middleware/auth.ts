@@ -5,13 +5,21 @@ import { createClient } from "@app/api/lib/supabase/client";
 import { EnvContext } from "@app/api/utils/env";
 import log from "@app/api/utils/logger";
 import { createUsernameSlug } from "@app/api/utils/username";
-import { User } from "@supabase/supabase-js"; // eslint-disable-line no-restricted-imports
 import { createMiddleware } from "hono/factory";
 
-type UserWithEmail = User & { email: string };
-function isUserWithEmail(user: User): user is UserWithEmail {
-  return typeof user.email === "string";
-}
+const returnDefault = async (
+  c: EnvContext,
+  next: () => Promise<Response | void>,
+): Promise<Response | void> => {
+  if (c.get("authOptional")) {
+    c.set("userId", undefined);
+    c.set("profileId", undefined);
+    return await next();
+  } else {
+    const message = "Authentication required.";
+    return c.json({ error: "Unauthorized", message }, 401);
+  }
+};
 
 export const authMiddleware = createMiddleware(
   async (
@@ -19,8 +27,6 @@ export const authMiddleware = createMiddleware(
     next: () => Promise<Response | void>,
   ): Promise<Response | void> => {
     try {
-      const supabase = createClient(c);
-
       // Check if API key is provided for API routes
       const apiKey = c.req.header("x-api-key");
 
@@ -54,71 +60,52 @@ export const authMiddleware = createMiddleware(
         return;
       }
 
-      const authHeader = c.req.header("Authorization");
-      let user: UserWithEmail | null = null;
-      let tokenError: string | null = null;
+      // Create client - it automatically reads cookies from the request
+      const supabase = await createClient(c);
 
-      if (authHeader && authHeader.startsWith("Bearer ")) {
-        const token = authHeader.substring(7);
-        const { data, error } = await supabase.auth.getUser(token);
-        if (error) {
-          log(`Bearer token validation failed: ${error.message}`);
-          tokenError = error.message;
-        } else if (!data?.user) {
-          log("Bearer token valid, but no user returned.");
-          tokenError = "No user associated with token";
-        } else if (!isUserWithEmail(data.user)) {
-          log("Bearer token valid, but user has no email.");
-          tokenError = "User has no email";
-        } else {
-          user = data.user;
-        }
+      // Get current user - this verifies the session based on cookies handled by ssr client
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
+      // If getUser fails or returns no user, authentication fails
+      if (error || !user?.email) {
+        return returnDefault(c, next);
       }
 
-      if (user) {
-        const profileResult = await db
-          .select({ id: profiles.id, isEnabled: profiles.isEnabled })
-          .from(profiles)
-          .where(eq(profiles.userId, user.id))
-          .limit(1);
+      // Check/create profile in DB (existing logic)
+      const profileResult = await db
+        .select({ id: profiles.id, isEnabled: profiles.isEnabled })
+        .from(profiles)
+        .where(eq(profiles.userId, user.id))
+        .limit(1);
 
-        let profile = profileResult[0];
+      let profile = profileResult[0];
 
-        if (!profile) {
-          const newProfile = await db
-            .insert(profiles)
-            .values({
-              userId: user.id,
-              username: createUsernameSlug(user.email),
-            })
-            .returning({ id: profiles.id, isEnabled: profiles.isEnabled });
-          if (!newProfile || newProfile.length === 0) {
-            throw new Error("Error creating profile for new user");
-          }
-
-          profile = newProfile[0];
+      if (!profile) {
+        const newProfile = await db
+          .insert(profiles)
+          .values({
+            userId: user.id,
+            username: createUsernameSlug(user.email),
+          })
+          .returning({ id: profiles.id, isEnabled: profiles.isEnabled });
+        if (!newProfile || newProfile.length === 0) {
+          throw new Error("Error creating profile for new user");
         }
 
-        if (!profile.isEnabled) {
-          return c.json({ error: "Unauthorized" }, 401);
-        }
-
-        c.set("userId", user.id);
-        c.set("profileId", profile.id);
-
-        await next();
-      } else {
-        if (c.get("authOptional")) {
-          c.set("userId", undefined);
-          c.set("profileId", undefined);
-          await next();
-        } else {
-          const message = tokenError
-            ? `Authentication error: ${tokenError}`
-            : "Authentication required.";
-          return c.json({ error: "Unauthorized", message }, 401);
-        }
+        profile = newProfile[0];
       }
+
+      if (!profile.isEnabled) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      c.set("userId", user.id);
+      c.set("profileId", profile.id);
+
+      return await next();
     } catch (error) {
       if (checkDbError(error as DbError) === DbErrorCode.ConnectionFailure) {
         return c.json({ error: "Error connecting to database" }, 500);

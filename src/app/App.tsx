@@ -15,7 +15,7 @@ import ProfilePage from "@app/pages/profile";
 import SettingsPage from "@app/pages/settings";
 import TermsPage from "@app/pages/terms";
 import { useUser } from "@app/providers/User";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter,
   Outlet,
@@ -23,8 +23,6 @@ import {
   Routes,
   useNavigate,
 } from "react-router-dom";
-
-import { getSupabaseClient } from "./utils/supabase";
 
 const RequireAuth = ({
   children,
@@ -50,18 +48,7 @@ const HomeRedirect = (): React.ReactNode => {
 };
 
 export const App = (): React.ReactNode => {
-  const [user, setUser] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchUser = async (): Promise<void> => {
-      const supabase = getSupabaseClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user?.id || null);
-    };
-    fetchUser();
-  }, []);
+  const { user } = useUser();
 
   return (
     <BrowserRouter>
@@ -73,10 +60,13 @@ export const App = (): React.ReactNode => {
             </RootLayout>
           }
         >
-          <Route path="/" element={user ? <HomeRedirect /> : <MainPage />} />
+          <Route
+            path="/"
+            element={user?.id ? <HomeRedirect /> : <MainPage />}
+          />
           <Route
             path="/login"
-            element={user ? <HomeRedirect /> : <LoginPage />}
+            element={user?.id ? <HomeRedirect /> : <LoginPage />}
           />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/privacy" element={<PrivacyPage />} />

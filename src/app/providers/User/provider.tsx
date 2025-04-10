@@ -6,7 +6,6 @@ import { createLogger } from "@app/utils/logger";
 import { getSupabaseClient } from "@app/utils/supabase";
 import posthog from "posthog-js";
 import React, { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { User, UserContext } from ".";
 
@@ -20,7 +19,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({
   children,
 }: UserProviderProps): React.ReactNode => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<User>({
     id: null,
     username: null,
@@ -111,18 +109,28 @@ export const UserProvider: React.FC<UserProviderProps> = ({
   }, [currentUser]);
 
   const handleLogout = useCallback(async (): Promise<void> => {
-    const supabase = getSupabaseClient();
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      log.error("Error with logout:", error);
-      return;
+    try {
+      const supabase = getSupabaseClient();
+      const { error: clientSignOutError } = await supabase.auth.signOut();
+      if (clientSignOutError) {
+        log.error("Issue signing out from browser", clientSignOutError);
+      }
+
+      const backendResponse = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+      if (!backendResponse.ok) {
+        log.error("Backend logout failed:", await backendResponse.text());
+      }
+    } catch (error) {
+      log.error("Error during logout process:", error);
+    } finally {
+      clearUser();
+      clearTheme();
+      initializeTheme();
+      posthog.reset();
     }
-    clearUser();
-    clearTheme();
-    initializeTheme();
-    posthog.reset();
-    navigate("/");
-  }, [clearUser, navigate]);
+  }, [clearUser]);
 
   return (
     <UserContext.Provider

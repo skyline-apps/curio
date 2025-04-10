@@ -12,7 +12,6 @@ import { ItemsProvider } from "./Items/provider";
 import { SettingsProvider } from "./Settings/provider";
 import { ToastProvider } from "./Toast/provider";
 import { useUser } from "./User";
-import { UserProvider } from "./User/provider";
 
 const AuthenticatedProviders: React.FC<PropsWithChildren> = ({
   children,
@@ -46,11 +45,9 @@ const Providers: React.FC<PropsWithChildren> = ({
     <ClientProviders>
       <HeroUIProvider>
         <ToastProvider>
-          <UserProvider>
-            <AppLayoutProvider>
-              <AuthenticatedProviders>{children}</AuthenticatedProviders>
-            </AppLayoutProvider>
-          </UserProvider>
+          <AppLayoutProvider>
+            <AuthenticatedProviders>{children}</AuthenticatedProviders>
+          </AppLayoutProvider>
         </ToastProvider>
       </HeroUIProvider>
     </ClientProviders>
