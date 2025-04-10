@@ -1,6 +1,6 @@
 import Button from "@app/components/ui/Button";
 import Input from "@app/components/ui/Input";
-import { supabase } from "@app/utils/supabase";
+import { getSupabaseClient } from "@app/utils/supabase";
 import { useState } from "react";
 
 type EmailSignInProps = Record<never, never>;
@@ -15,6 +15,7 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({}: EmailSignInProps) => {
     setErrorMessage(null);
     setSuccessMessage(null);
     setIsSigningIn(true);
+    const supabase = getSupabaseClient();
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {

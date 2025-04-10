@@ -21,6 +21,7 @@ describe("Navbar", () => {
     <UserContext.Provider
       value={{
         user: { id: null, username: null, email: null, newsletterEmail: null },
+        refreshUser: vi.fn(),
         clearUser: vi.fn(),
         changeUsername: mockChangeUsername,
         updateNewsletterEmail: vi.fn(),
@@ -41,6 +42,7 @@ describe("Navbar", () => {
           email: "user@email.com",
           newsletterEmail: null,
         },
+        refreshUser: vi.fn(),
         clearUser: vi.fn(),
         changeUsername: mockChangeUsername,
         updateNewsletterEmail: vi.fn(),

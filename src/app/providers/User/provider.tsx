@@ -3,7 +3,7 @@ import { type UpdateUsernameResponse } from "@app/schemas/v1/user/username";
 import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import { clearTheme, initializeTheme } from "@app/utils/displayStorage";
 import { createLogger } from "@app/utils/logger";
-import { supabase } from "@app/utils/supabase";
+import { getSupabaseClient } from "@app/utils/supabase";
 import posthog from "posthog-js";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -37,6 +37,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
   }, []);
 
   const refreshUser = useCallback(async (): Promise<void> => {
+    const supabase = getSupabaseClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -102,6 +103,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
   }, [currentUser]);
 
   const handleLogout = useCallback(async (): Promise<void> => {
+    const supabase = getSupabaseClient();
     const { error } = await supabase.auth.signOut();
     if (error) {
       log.error("Error with logout:", error);

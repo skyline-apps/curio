@@ -1,5 +1,5 @@
 import { createLogger } from "@app/utils/logger";
-import { supabase } from "@app/utils/supabase";
+import { getSupabaseClient } from "@app/utils/supabase";
 
 const log = createLogger("api");
 
@@ -16,6 +16,7 @@ export async function authenticatedFetch(
   url: string,
   options: RequestInit = {},
 ): Promise<Response> {
+  const supabase = getSupabaseClient();
   const {
     data: { session },
     error,

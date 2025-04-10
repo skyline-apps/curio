@@ -1,17 +1,40 @@
 import "@testing-library/jest-dom/vitest";
 
+import { UserContext } from "@app/providers/User";
 import * as React from "react";
 import { vi } from "vitest";
 
 // Make React available globally
 global.React = React;
 
-// Mock environment variables
-vi.stubEnv("VITE_SUPABASE_URL", "https://test.supabase.co");
-vi.stubEnv("VITE_SUPABASE_ANON_KEY", "test-key");
-
 // Set up global mocks
 vi.mock("@app/utils/logger");
+
+// Mock user
+const DEFAULT_TEST_USER_ID = "123e4567-e89b-12d3-a456-426614174002";
+const DEFAULT_TEST_USERNAME = "defaultuser";
+
+vi.mock("@app/providers/User/provider", () => ({
+  UserProvider: ({ children }: { children: React.ReactNode }) => (
+    <UserContext.Provider
+      value={{
+        user: {
+          id: DEFAULT_TEST_USER_ID,
+          username: DEFAULT_TEST_USERNAME,
+          email: "test@example.com",
+          newsletterEmail: null,
+        },
+        refreshUser: vi.fn(),
+        clearUser: vi.fn(),
+        changeUsername: vi.fn(),
+        updateNewsletterEmail: vi.fn(),
+        handleLogout: vi.fn(),
+      }}
+    >
+      {children}
+    </UserContext.Provider>
+  ),
+}));
 
 // Mock react-router-dom
 export const mockNavigate = vi.fn();
@@ -31,6 +54,14 @@ vi.mock("react-router-dom", () => ({
       {children}
     </a>
   ),
+}));
+
+// Mock API requests
+export const mockAuthenticatedFetch = vi.fn();
+vi.mock("@app/utils/api", async () => ({
+  handleAPIResponse: (await vi.importActual("@app/utils/api"))
+    .handleAPIResponse,
+  authenticatedFetch: mockAuthenticatedFetch,
 }));
 
 // Mock ResizeObserver

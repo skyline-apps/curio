@@ -1,6 +1,6 @@
 import { useUser } from "@app/providers/User";
 import { createLogger } from "@app/utils/logger";
-import { supabase } from "@app/utils/supabase";
+import { getSupabaseClient } from "@app/utils/supabase";
 import React, { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -13,6 +13,7 @@ const AuthCallback: React.FC = () => {
 
   useEffect(() => {
     const nextUrl = searchParams.get("next") || "/home";
+    const supabase = getSupabaseClient();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, _session) => {

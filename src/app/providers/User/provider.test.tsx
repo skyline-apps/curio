@@ -1,20 +1,53 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { mockAuthenticatedFetch } from "@app/vitest.setup.jsdom";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { User, UserContext } from ".";
+import { UserContext } from ".";
 import { UserProvider } from "./provider";
 
-describe("UserContext", () => {
-  const initialUser: User = {
-    id: "123",
-    username: "testuser",
-    email: "test@example.com",
-    newsletterEmail: null,
-  };
+vi.unmock("@app/providers/User/provider");
 
-  it("provides initial user values", () => {
+describe("UserContext", () => {
+  beforeEach(() => {
+    vi.mock("@app/utils/supabase", () => ({
+      getSupabaseClient: vi.fn().mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              single: vi.fn().mockResolvedValue({
+                data: {
+                  id: "123",
+                  username: "testuser",
+                  email: "test@example.com",
+                  newsletterEmail: null,
+                },
+              }),
+            }),
+          }),
+        }),
+        auth: {
+          getUser: vi.fn().mockResolvedValue({
+            data: {
+              user: {
+                id: "123",
+                email: "test@example.com",
+              },
+            },
+          }),
+        },
+      }),
+    }));
+  });
+
+  it("provides initial user values", async () => {
     render(
-      <UserProvider user={initialUser}>
+      <UserProvider>
         <UserContext.Consumer>
           {({ user }) => (
             <div>
@@ -27,18 +60,20 @@ describe("UserContext", () => {
       </UserProvider>,
     );
 
-    expect(screen.getByTestId("user-id")).toHaveTextContent("123");
-    expect(screen.getByTestId("user-username")).toHaveTextContent("testuser");
-    expect(screen.getByTestId("user-email")).toHaveTextContent(
-      "test@example.com",
-    );
+    await waitFor(() => {
+      expect(screen.getByTestId("user-id")).toHaveTextContent("123");
+      expect(screen.getByTestId("user-username")).toHaveTextContent("testuser");
+      expect(screen.getByTestId("user-email")).toHaveTextContent(
+        "test@example.com",
+      );
+    });
   });
 
-  it("clears user data when clearUser is called", () => {
+  it("clears user data when clearUser is called", async () => {
     let clearUserFunction: () => void;
 
     render(
-      <UserProvider user={initialUser}>
+      <UserProvider>
         <UserContext.Consumer>
           {({ user, clearUser }) => {
             clearUserFunction = clearUser;
@@ -58,25 +93,25 @@ describe("UserContext", () => {
       clearUserFunction();
     });
 
-    expect(screen.getByTestId("user-id")).toHaveTextContent("");
-    expect(screen.getByTestId("user-username")).toHaveTextContent("");
-    expect(screen.getByTestId("user-email")).toHaveTextContent("");
+    await waitFor(() => {
+      expect(screen.getByTestId("user-id")).toHaveTextContent("");
+      expect(screen.getByTestId("user-username")).toHaveTextContent("");
+      expect(screen.getByTestId("user-email")).toHaveTextContent("");
+    });
   });
 
   it("changes username when changeUsername is called", async () => {
-    global.fetch = vi.fn(() =>
-      Promise.resolve(
-        new Response(JSON.stringify({ updatedUsername: "newtestuser" }), {
-          status: 200,
-          headers: new Headers({
-            "Content-Type": "application/json",
-          }),
+    mockAuthenticatedFetch.mockResolvedValueOnce(
+      new Response(JSON.stringify({ updatedUsername: "newtestuser" }), {
+        status: 200,
+        headers: new Headers({
+          "Content-Type": "application/json",
         }),
-      ),
+      }),
     );
 
     render(
-      <UserProvider user={initialUser}>
+      <UserProvider>
         <UserContext.Consumer>
           {({ user, changeUsername }) => (
             <div>
@@ -90,24 +125,29 @@ describe("UserContext", () => {
       </UserProvider>,
     );
 
-    expect(screen.getByTestId("username")).toHaveTextContent("testuser");
-    await act(async () => {
-      await fireEvent.click(screen.getByText("Change username"));
+    await waitFor(() => {
+      expect(screen.getByTestId("username")).toHaveTextContent("testuser");
     });
 
-    expect(global.fetch).toHaveBeenCalledWith(
-      "/api/v1/user/username",
-      expect.objectContaining({
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: initialUser.id,
-          username: "newtestuser",
+    act(() => {
+      fireEvent.click(screen.getByText("Change username"));
+    });
+
+    await waitFor(() => {
+      expect(mockAuthenticatedFetch).toHaveBeenCalledWith(
+        "/api/v1/user/username",
+        expect.objectContaining({
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: "123",
+            username: "newtestuser",
+          }),
         }),
-      }),
-    );
-    expect(screen.getByTestId("username")).toHaveTextContent("newtestuser");
+      );
+      expect(screen.getByTestId("username")).toHaveTextContent("newtestuser");
+    });
   });
 });

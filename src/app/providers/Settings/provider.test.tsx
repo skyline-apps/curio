@@ -2,7 +2,8 @@ import { ClientProviders } from "@app/providers/ClientProviders";
 import { ColorScheme, DisplayFont, DisplayFontSize } from "@app/schemas/db";
 import type { GetSettingsResponse } from "@app/schemas/v1/user/settings";
 import { act, fireEvent, render, screen, waitFor } from "@app/utils/test";
-import { describe, expect, it, vi } from "vitest";
+import { mockAuthenticatedFetch } from "@app/vitest.setup.jsdom";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { SettingsContext } from ".";
 import { SettingsProvider } from "./provider";
@@ -16,18 +17,18 @@ describe("SettingsContext", () => {
     analyticsTracking: false,
   };
 
-  it("fetches and provides initial settings values", async () => {
-    global.fetch = vi.fn(() =>
-      Promise.resolve(
-        new Response(JSON.stringify(initialSettings), {
-          status: 200,
-          headers: new Headers({
-            "Content-Type": "application/json",
-          }),
+  beforeEach(() => {
+    mockAuthenticatedFetch.mockResolvedValue(
+      new Response(JSON.stringify(initialSettings), {
+        status: 200,
+        headers: new Headers({
+          "Content-Type": "application/json",
         }),
-      ),
+      }),
     );
+  });
 
+  it("fetches and provides initial settings values", async () => {
     render(
       <ClientProviders>
         <SettingsProvider>
@@ -56,23 +57,15 @@ describe("SettingsContext", () => {
       expect(screen.getByTestId("color-scheme")).toHaveTextContent("light");
     });
 
-    expect(global.fetch).toHaveBeenCalledWith("/api/v1/user/settings", {
-      method: "GET",
-    });
+    expect(mockAuthenticatedFetch).toHaveBeenCalledWith(
+      "/api/v1/user/settings",
+      {
+        method: "GET",
+      },
+    );
   });
 
   it("updates settings when updateSettings is called", async () => {
-    global.fetch = vi.fn(() =>
-      Promise.resolve(
-        new Response(JSON.stringify(initialSettings), {
-          status: 200,
-          headers: new Headers({
-            "Content-Type": "application/json",
-          }),
-        }),
-      ),
-    );
-
     render(
       <ClientProviders>
         <SettingsProvider>
@@ -101,7 +94,7 @@ describe("SettingsContext", () => {
       expect(screen.getByTestId("color-scheme")).toHaveTextContent("light");
     });
 
-    global.fetch = vi.fn(() =>
+    mockAuthenticatedFetch.mockImplementationOnce(() =>
       Promise.resolve(
         new Response(JSON.stringify({ colorScheme: ColorScheme.DARK }), {
           status: 200,
@@ -116,7 +109,7 @@ describe("SettingsContext", () => {
       fireEvent.click(screen.getByText("Change color scheme"));
     });
 
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(mockAuthenticatedFetch).toHaveBeenCalledWith(
       "/api/v1/user/settings",
       expect.objectContaining({
         method: "POST",

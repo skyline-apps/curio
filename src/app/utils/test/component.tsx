@@ -8,9 +8,6 @@ import { UserProvider } from "@app/providers/User/provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 
-const DEFAULT_TEST_USER_ID = "123e4567-e89b-12d3-a456-426614174002";
-const DEFAULT_TEST_USERNAME = "defaultuser";
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -27,14 +24,7 @@ export const AllProviders = ({
   return (
     <div>
       <QueryClientProvider client={queryClient}>
-        <UserProvider
-          user={{
-            id: DEFAULT_TEST_USER_ID,
-            username: DEFAULT_TEST_USERNAME,
-            email: "test@curi.ooo",
-            newsletterEmail: null,
-          }}
-        >
+        <UserProvider>
           <SettingsProvider>
             <ToastProvider>
               <ItemsProvider>

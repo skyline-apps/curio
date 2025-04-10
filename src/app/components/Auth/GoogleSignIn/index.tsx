@@ -1,5 +1,5 @@
 import Button from "@app/components/ui/Button";
-import { supabase } from "@app/utils/supabase";
+import { getSupabaseClient } from "@app/utils/supabase";
 import { useState } from "react";
 import { FaGoogle } from "react-icons/fa6";
 
@@ -15,6 +15,7 @@ const GoogleOAuthButton: React.FC<GoogleOAuthButtonProps> = ({
 
   const handleSignInWithGoogle = async (): Promise<void> => {
     setIsSigningIn(true);
+    const supabase = getSupabaseClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {

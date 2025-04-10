@@ -117,7 +117,6 @@ async function computeAndStoreGlobalRecommendations(
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
   try {
-    log("Computing new global recommendations");
     const recommendedItems: Record<RecommendationType, { itemId: string }[]> = {
       [RecommendationType.POPULAR]: [],
     };
