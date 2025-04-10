@@ -16,11 +16,9 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col w-full h-dvh overflow-hidden">
       {!isAuthenticated && <Navbar />}
-      <div className="flex flex-row h-full">
+      <div className="flex flex-row flex-1 relative">
         {isAuthenticated && <LeftSidebar />}
-        <div className="flex-1 overflow-y-auto">
-          <AppPage enforceAuth={false}>{children}</AppPage>
-        </div>
+        <AppPage enforceAuth={false}>{children}</AppPage>
         <RightSidebar />
       </div>
     </div>

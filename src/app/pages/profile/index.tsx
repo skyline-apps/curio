@@ -8,11 +8,7 @@ const UserPage = (): React.ReactElement => {
     document.title = `Curio - ${username}`;
   }, [username]);
 
-  return (
-    <div className="flex-1 w-full h-full overflow-y-auto">
-      <Profile username={username!} />
-    </div>
-  );
+  return <Profile username={username!} />;
 };
 
 export default UserPage;
