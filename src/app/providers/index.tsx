@@ -49,16 +49,16 @@ const Providers: React.FC<PropsWithChildren> = ({
       if (user) {
         const profile = await supabase
           .from("profiles")
-          .select("*")
+          .select("username, newsletter_email")
           .eq("user_id", user.id)
           .single();
 
         if (profile) {
           setCurrentUser({
-            id: profile.userId,
-            username: profile.username,
+            id: user.id,
             email: user.email || null,
-            newsletterEmail: profile.newsletterEmail,
+            username: profile.data?.username,
+            newsletterEmail: profile.data?.newsletter_email,
           });
         }
       }
