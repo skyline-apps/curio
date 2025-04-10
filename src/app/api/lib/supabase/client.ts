@@ -3,7 +3,8 @@ import { createServerClient, parseCookieHeader } from "@supabase/ssr"; // eslint
 import type { SupabaseClient } from "@supabase/supabase-js"; // eslint-disable-line no-restricted-imports
 import { setCookie } from "hono/cookie";
 
-export type { SupabaseClient } from "@supabase/supabase-js"; // eslint-disable-line no-restricted-imports
+export type { PostgrestError, SupabaseClient } from "@supabase/supabase-js"; // eslint-disable-line no-restricted-imports
+export type StorageClient = SupabaseClient["storage"];
 
 export const createClient = async (
   c: EnvContext,
