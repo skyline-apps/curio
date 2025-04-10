@@ -88,7 +88,7 @@ describe("/api", () => {
         );
 
         if (hasIndex && !hasSubdirsWithIndex) {
-          const relativePath = path.relative("./api/v1", dir);
+          const relativePath = path.relative("./api/routesV1", dir);
           const routePath = "/" + relativePath.replace(/\\/g, "/");
           routes.push(routePath);
         }
@@ -101,7 +101,7 @@ describe("/api", () => {
         }
       };
 
-      await crawlDirectory("./api/v1");
+      await crawlDirectory("./api/routesV1");
 
       // Verify each found route exists in the OpenAPI paths
       routes.forEach((route) => {

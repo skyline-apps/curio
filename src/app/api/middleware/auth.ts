@@ -73,8 +73,6 @@ export const authMiddleware = createMiddleware(
         } else {
           user = data.user;
         }
-      } else {
-        log("No Bearer token found in Authorization header.");
       }
 
       if (user) {

@@ -26,17 +26,17 @@ v1Router.use("*", async (c: EnvContext, next) => {
   return authMiddleware(c, next);
 });
 
-v1Router.route("/items", itemsRouter);
-v1Router.route("/items/content", itemsContentRouter);
-v1Router.route("/items/favorite", itemsFavoriteRouter);
-v1Router.route("/items/highlights", itemsHighlightRouter);
-v1Router.route("/items/labels", itemsLabelsRouter);
-v1Router.route("/items/read", itemsReadRouter);
-v1Router.route("/items/recommended", itemsRecommendedRouter);
-v1Router.route("/items/save", itemsSaveRouter);
-v1Router.route("/items/state", itemsStateRouter);
+v1Router.route("items", itemsRouter);
+v1Router.route("items/content", itemsContentRouter);
+v1Router.route("items/favorite", itemsFavoriteRouter);
+v1Router.route("items/highlights", itemsHighlightRouter);
+v1Router.route("items/labels", itemsLabelsRouter);
+v1Router.route("items/read", itemsReadRouter);
+v1Router.route("items/recommended", itemsRecommendedRouter);
+v1Router.route("items/save", itemsSaveRouter);
+v1Router.route("items/state", itemsStateRouter);
 
-v1Router.route("/public", publicRouter);
-v1Router.route("/user", userRouter);
+v1Router.route("public", publicRouter);
+v1Router.route("user", userRouter);
 
 export { v1Router };

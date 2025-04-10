@@ -1,5 +1,6 @@
 /* eslint-disable @local/eslint-local-rules/api-middleware */
 import { getDb } from "@app/api/db";
+import { v1Router } from "@app/api/routesV1";
 import { EnvBindings } from "@app/api/utils/env";
 import log from "@app/api/utils/logger";
 import { ExecutionContext, Hono } from "hono";
@@ -7,8 +8,6 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
 import { openAPISpecs } from "hono-openapi";
-
-import { v1Router } from "./v1";
 
 export const api = new Hono<EnvBindings>();
 
