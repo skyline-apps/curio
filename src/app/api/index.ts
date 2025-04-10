@@ -1,7 +1,8 @@
 /* eslint-disable @local/eslint-local-rules/api-middleware */
+import { getDb } from "@app/api/db";
 import { EnvBindings } from "@app/api/utils/env";
 import log from "@app/api/utils/logger";
-import { Hono } from "hono";
+import { ExecutionContext, Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
@@ -9,16 +10,18 @@ import { openAPISpecs } from "hono-openapi";
 
 import { v1Router } from "./v1";
 
-const app = new Hono<EnvBindings>();
+export const api = new Hono<EnvBindings>();
 
 // Middleware
-app.use("*", logger(log));
-app.use("*", prettyJSON());
-app.use("*", async (c, next) => {
+api.use("*", logger(log));
+api.use("*", prettyJSON());
+api.use("*", async (c, next) => {
   // Parse CORS origins from environment variable
   if (!c.env.VITE_CURIO_URL) {
     throw new Error("VITE_CURIO_URL environment variable is not set");
   }
+
+  c.set("db", getDb(c));
 
   // Apply CORS middleware with dynamic origins
   return cors({
@@ -36,14 +39,14 @@ app.use("*", async (c, next) => {
 });
 
 // Health check
-app.get("/api/health", (c) => c.json({ status: "ok" }));
+api.get("/api/health", (c) => c.json({ status: "ok" }));
 
 // API routes
-app.route("/api/v1", v1Router);
+api.route("/api/v1", v1Router);
 
-app.get(
+api.get(
   "/api/openapi",
-  openAPISpecs(app, {
+  openAPISpecs(api, {
     documentation: {
       info: {
         title: "Curio API",
@@ -54,4 +57,19 @@ app.get(
   }),
 );
 
-export default app;
+export default {
+  async fetch(
+    request: Request,
+    env: EnvBindings,
+    ctx: ExecutionContext,
+  ): Promise<Response> {
+    const url = new URL(request.url);
+
+    // Handle /api/* routes with the Hono app
+    if (url.pathname.startsWith("/api")) {
+      return api.fetch(request, env, ctx);
+    }
+
+    return new Response(null, { status: 404 });
+  },
+};

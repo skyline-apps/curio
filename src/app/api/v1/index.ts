@@ -1,4 +1,3 @@
-import { getDb } from "@app/api/db";
 import { authMiddleware } from "@app/api/middleware/auth";
 import { EnvBindings, EnvContext } from "@app/api/utils/env";
 import { Hono } from "hono";
@@ -17,7 +16,6 @@ import { userRouter } from "./user";
 
 const v1Router = new Hono<EnvBindings>();
 v1Router.use("*", async (c: EnvContext, next) => {
-  c.set("db", getDb(c));
   const path = new URL(c.req.url).pathname;
 
   if (path.startsWith("/api/v1/public")) {

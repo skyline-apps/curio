@@ -17,7 +17,7 @@ import { Hono } from "hono";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it, Mock, vi } from "vitest";
 
-import app from "./index";
+import { api } from "./index";
 
 const makeAuthenticatedRequest = (
   app: Hono<EnvBindings>,
@@ -40,7 +40,7 @@ const makeAuthenticatedRequest = (
 describe("/api", () => {
   describe("GET /api/health", () => {
     it("should return 200", async () => {
-      const response = await getRequest(app, "/api/health");
+      const response = await getRequest(api, "/api/health");
       expect(response.status).toBe(200);
       const data = await response.json();
       expect(data).toEqual({ status: "ok" });
@@ -49,7 +49,7 @@ describe("/api", () => {
 
   describe("GET /api/openapi", () => {
     it("should return 200", async () => {
-      const response = await getRequest(app, "/api/openapi");
+      const response = await getRequest(api, "/api/openapi");
       expect(response.status).toBe(200);
       const data: {
         openapi: string;
@@ -63,7 +63,7 @@ describe("/api", () => {
     });
 
     it("should include all API routes", async () => {
-      const response = await getRequest(app, "/api/openapi");
+      const response = await getRequest(api, "/api/openapi");
       expect(response.status).toBe(200);
       const data: {
         openapi: string;
@@ -119,13 +119,13 @@ describe("/api", () => {
     });
 
     it("should return 401 when unauthenticated", async () => {
-      const response = await getRequest(app, "/api/v1/items");
+      const response = await getRequest(api, "/api/v1/items");
       expect(response.status).toBe(401);
     });
 
     it("should return 200 when authenticated", async () => {
       const response = await makeAuthenticatedRequest(
-        app,
+        api,
         "/api/v1/items",
         DEFAULT_TEST_USER_ID,
       );
@@ -138,7 +138,7 @@ describe("/api", () => {
         .set({ isEnabled: false })
         .where(eq(profiles.id, DEFAULT_TEST_PROFILE_ID));
       const response = await makeAuthenticatedRequest(
-        app,
+        api,
         "/api/v1/items",
         DEFAULT_TEST_USER_ID,
       );
@@ -150,7 +150,7 @@ describe("/api", () => {
         throw { code: DbErrorCode.ConnectionFailure };
       });
       const response = await makeAuthenticatedRequest(
-        app,
+        api,
         "/api/v1/items",
         DEFAULT_TEST_USER_ID,
       );
@@ -183,7 +183,7 @@ describe("/api", () => {
         expect(apiKey[0]?.lastUsedAt).toBe(null);
 
         const response = await getRequest(
-          app,
+          api,
           "/api/v1/items",
           {},
           {
@@ -201,7 +201,7 @@ describe("/api", () => {
 
       it("should return 401 when invalid API key is used", async () => {
         const response = await getRequest(
-          app,
+          api,
           "/api/v1/items",
           {},
           {
@@ -217,7 +217,7 @@ describe("/api", () => {
           .set({ isEnabled: false })
           .where(eq(profiles.id, DEFAULT_TEST_PROFILE_ID));
         const response = await getRequest(
-          app,
+          api,
           "/api/v1/items",
           {},
           {
@@ -231,7 +231,7 @@ describe("/api", () => {
 
   describe("Public routes", () => {
     it("should return 200 when unauthenticated", async () => {
-      const response = await getRequest(app, "/api/v1/public/profile", {
+      const response = await getRequest(api, "/api/v1/public/profile", {
         username: DEFAULT_TEST_USERNAME,
       });
       expect(response.status).toBe(200);
@@ -239,7 +239,7 @@ describe("/api", () => {
 
     it("should return 200 when authenticated", async () => {
       const response = await makeAuthenticatedRequest(
-        app,
+        api,
         "/api/v1/public/profile",
         DEFAULT_TEST_USER_ID,
         { username: DEFAULT_TEST_USERNAME },
@@ -249,7 +249,7 @@ describe("/api", () => {
 
     it("should return 200 when authenticated even if profile is private", async () => {
       const response = await makeAuthenticatedRequest(
-        app,
+        api,
         "/api/v1/public/profile",
         DEFAULT_TEST_USER_ID_2,
         { username: DEFAULT_TEST_USERNAME_2 },
