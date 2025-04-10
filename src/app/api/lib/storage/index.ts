@@ -110,7 +110,7 @@ export class Storage {
       defaultMetadata = (data?.metadata as VersionMetadata) || null;
     } catch (error) {
       // Main file doesn't exist yet, or error reading it
-      log("No existing content for ${slug} or error reading it:", error);
+      log(`No existing content for ${slug} or error reading it:`, error);
     }
 
     // This is either the first version or a longer version than current
@@ -126,7 +126,7 @@ export class Storage {
       });
 
     if (versionError) {
-      log("Error uploading version for item ${slug}:", versionError);
+      log(`Error uploading version for item ${slug}:`, versionError);
       throw new StorageError("Failed to upload version");
     }
 
@@ -147,7 +147,7 @@ export class Storage {
       });
 
     if (mainError) {
-      log("Error updating main file for item ${slug}:", mainError);
+      log(`Error updating main file for item ${slug}:`, mainError);
       throw new StorageError("Failed to update main file");
     }
 
@@ -176,11 +176,11 @@ export class Storage {
         return this.getItemContent(c, slug, null);
       } else {
         if (error) {
-          log("Error getting content for ${slug}:", error);
+          log(`Error getting content for ${slug}:`, error);
         } else if (metadataError) {
-          log("Error getting metadata for ${slug}:", metadataError);
+          log(`Error getting metadata for ${slug}:`, metadataError);
         } else if (!metadata.metadata) {
-          log("Error getting metadata for ${slug}:", "metadata is null");
+          log(`Error getting metadata for ${slug}:`, "metadata is null");
         }
         throw new StorageError("Failed to download content");
       }
@@ -200,7 +200,7 @@ export class Storage {
       .info(`${slug}/${DEFAULT_NAME}.md`);
 
     if (error) {
-      log("Error getting metadata for item ${slug}:", error);
+      log(`Error getting metadata for item ${slug}:`, error);
       throw new StorageError("Failed to get metadata");
     }
 
