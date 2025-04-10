@@ -15,7 +15,7 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ sidebarOpen }) => {
       )}
     >
       <div className="transition-opacity duration-300 opacity-100 hidden md:block">
-        {sidebarOpen ? <CurioBrand className="ml-4 mt-4" /> : <CurioHomeLogo />}
+        {sidebarOpen ? <CurioBrand className="ml-4 mt-2" /> : <CurioHomeLogo />}
       </div>
       <div className="block md:hidden mt-2">
         <CurioHomeLogo />
