@@ -3,41 +3,6 @@ name: Build
 on: [push, pull_request]
 
 jobs:
-  check-api:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22.9.0"
-
-      - name: API - Build shared
-        working-directory: ./src/shared
-        run: npm install
-
-      - name: API - Build custom lint rules
-        working-directory: ./src/api/eslint-local-rules
-        run: npm install && npm run build
-
-      - name: API - Install dependencies
-        working-directory: ./src/api
-        run: npm install
-
-      - name: API - Run lint
-        working-directory: ./src/api
-        run: npm run lint
-
-      - name: API - Run typecheck
-        working-directory: ./src/api
-        run: npm run typecheck
-
-      - name: API - Run tests
-        working-directory: ./src/api
-        run: npm run test
-
   check-app:
     runs-on: ubuntu-latest
 
@@ -49,9 +14,9 @@ jobs:
         with:
           node-version: "22.9.0"
 
-      - name: APP - Build shared
-        working-directory: ./src/shared
-        run: npm install
+      - name: APP - Install lint rule
+        working-directory: ./src/app/api/eslint-local-rules
+        run: npm install && npm run build
 
       - name: APP - Install dependencies
         working-directory: ./src/app

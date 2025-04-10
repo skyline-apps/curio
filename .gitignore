@@ -16,6 +16,7 @@ out/
 .wrangler
 
 # production
+dist/
 build
 
 # misc

@@ -27,14 +27,12 @@ const compat = new FlatCompat({
 });
 
 export default defineConfig([
-  globalIgnores(["**/*.config.js"]),
+  globalIgnores(["**/*.config.js", "**/dist/**", "**/node_modules/**"]),
   {
     extends: compat.extends(
       "plugin:@typescript-eslint/recommended",
       "prettier",
     ),
-
-    ignores: ["dist"],
 
     plugins: {
       "@typescript-eslint": typescriptEslint,
