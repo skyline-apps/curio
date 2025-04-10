@@ -18,7 +18,9 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
       {!isAuthenticated && <Navbar />}
       <div className="flex flex-row flex-1 relative overflow-y-auto">
         {isAuthenticated && <LeftSidebar />}
-        <AppPage enforceAuth={false}>{children}</AppPage>
+        <div className="flex-1 overflow-y-auto">
+          <AppPage enforceAuth={false}>{children}</AppPage>
+        </div>
         <RightSidebar />
       </div>
     </div>
