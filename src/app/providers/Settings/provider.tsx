@@ -11,7 +11,7 @@ import type {
   UpdateSettingsRequest,
   UpdateSettingsResponse,
 } from "@app/schemas/v1/user/settings";
-import { handleAPIResponse } from "@app/utils/api";
+import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import {
   initializeTheme,
   setDarkTheme,
@@ -29,14 +29,14 @@ interface SettingsProviderProps {
 }
 
 const fetchSettings = async (): Promise<GetSettingsResponse> => {
-  const response = await fetch("/api/v1/user/settings", {
+  const response = await authenticatedFetch("/api/v1/user/settings", {
     method: "GET",
   });
   return handleAPIResponse<GetSettingsResponse>(response);
 };
 
 const fetchLabels = async (): Promise<GetLabelsResponse> => {
-  const response = await fetch("/api/v1/user/labels", {
+  const response = await authenticatedFetch("/api/v1/user/labels", {
     method: "GET",
   });
   return handleAPIResponse<GetLabelsResponse>(response);
@@ -72,7 +72,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       field: keyof UpdateSettingsRequest;
       value: UpdateSettingsRequest[keyof UpdateSettingsRequest];
     }) => {
-      const response = await fetch("/api/v1/user/settings", {
+      const response = await authenticatedFetch("/api/v1/user/settings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -98,43 +98,52 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     }) => {
       switch (payload.type) {
         case LabelAction.CREATE:
-          const createResponse = await fetch("/api/v1/user/labels", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              labels: [
-                { name: payload.label?.name, color: payload.label?.color },
-              ],
-            }),
-          });
+          const createResponse = await authenticatedFetch(
+            "/api/v1/user/labels",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                labels: [
+                  { name: payload.label?.name, color: payload.label?.color },
+                ],
+              }),
+            },
+          );
           return handleAPIResponse<CreateOrUpdateLabelsResponse>(
             createResponse,
           );
 
         case LabelAction.UPDATE:
-          const updateResponse = await fetch("/api/v1/user/labels", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              labels: [
-                {
-                  id: payload.label?.id,
-                  name: payload.label?.name,
-                  color: payload.label?.color,
-                },
-              ],
-            }),
-          });
+          const updateResponse = await authenticatedFetch(
+            "/api/v1/user/labels",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                labels: [
+                  {
+                    id: payload.label?.id,
+                    name: payload.label?.name,
+                    color: payload.label?.color,
+                  },
+                ],
+              }),
+            },
+          );
           return handleAPIResponse<CreateOrUpdateLabelsResponse>(
             updateResponse,
           );
 
         case LabelAction.DELETE:
-          const deleteResponse = await fetch("/api/v1/user/labels", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ids: [payload.label?.id] }),
-          });
+          const deleteResponse = await authenticatedFetch(
+            "/api/v1/user/labels",
+            {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ids: [payload.label?.id] }),
+            },
+          );
           return handleAPIResponse<DeleteLabelsResponse>(deleteResponse);
       }
     },

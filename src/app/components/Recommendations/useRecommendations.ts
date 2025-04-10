@@ -1,4 +1,5 @@
 import { GetRecommendationsResponse } from "@app/schemas/v1/items/recommended";
+import { authenticatedFetch } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
 import { useQuery } from "@tanstack/react-query";
 
@@ -25,7 +26,7 @@ export function useRecommendations({}: UseRecommendationsOptions = {}): UseRecom
     queryKey: [RECOMMENDATIONS_QUERY_KEY],
     enabled: false,
     queryFn: async () => {
-      const response = await fetch(`/api/v1/items/recommended`);
+      const response = await authenticatedFetch(`/api/v1/items/recommended`);
       if (!response.ok) {
         throw new Error(
           `Failed to fetch recommendations: ${response.statusText}`,

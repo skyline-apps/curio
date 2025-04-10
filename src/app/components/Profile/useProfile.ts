@@ -1,4 +1,5 @@
 import { GetProfileResponse } from "@app/schemas/v1/public/profile";
+import { authenticatedFetch } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
@@ -54,7 +55,7 @@ export function useProfile({
         params.set("cursor", pageParam);
       }
 
-      const response = await fetch(
+      const response = await authenticatedFetch(
         `/api/v1/public/profile?${params.toString()}`,
       );
       if (!response.ok) {

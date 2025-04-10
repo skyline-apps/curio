@@ -6,7 +6,7 @@ import {
   type Highlight,
   type NewHighlight,
 } from "@app/schemas/v1/items/highlights";
-import { handleAPIResponse } from "@app/utils/api";
+import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { useContext, useState } from "react";
@@ -57,7 +57,7 @@ export const useHighlightUpdate = ({
   > = {
     mutationFn: async ({ slug, highlight }) => {
       setIsUpdating(true);
-      return await fetch("/api/v1/items/highlights", {
+      return await authenticatedFetch("/api/v1/items/highlights", {
         method: "POST",
         body: JSON.stringify({
           slug,
@@ -104,7 +104,7 @@ export const useHighlightUpdate = ({
   > = {
     mutationFn: async ({ slug, highlightId }) => {
       setIsDeleting(true);
-      return await fetch("/api/v1/items/highlights", {
+      return await authenticatedFetch("/api/v1/items/highlights", {
         method: "DELETE",
         body: JSON.stringify({
           slug,

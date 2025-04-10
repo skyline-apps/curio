@@ -1,6 +1,6 @@
 import { useAppLayout } from "@app/providers/AppLayout";
 import { type GetHighlightsResponse } from "@app/schemas/v1/items/highlights";
-import { handleAPIResponse } from "@app/utils/api";
+import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import React, { useCallback, useMemo, useState } from "react";
@@ -54,6 +54,7 @@ export const HighlightsProvider: React.FC<HighlightsProviderProps> = ({
     isLoading,
     error,
   } = useInfiniteQuery<HighlightsPage>({
+    enabled: !!currentOptions,
     queryKey: [HIGHLIGHTS_QUERY_KEY, serializedOptions],
     queryFn: async ({ pageParam }): Promise<HighlightsPage> => {
       const params = new URLSearchParams(
@@ -70,7 +71,7 @@ export const HighlightsProvider: React.FC<HighlightsProviderProps> = ({
         ),
       );
 
-      const result = await fetch(
+      const result = await authenticatedFetch(
         `/api/v1/items/highlights?${params.toString()}`,
       ).then(handleAPIResponse<GetHighlightsResponse>);
 

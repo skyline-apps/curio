@@ -2,7 +2,7 @@ import {
   type GetItemsRequest,
   type GetItemsResponse,
 } from "@app/schemas/v1/items";
-import { handleAPIResponse } from "@app/utils/api";
+import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import React, { useCallback, useMemo, useState } from "react";
@@ -62,9 +62,9 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
         ),
       );
 
-      const result = await fetch(`/api/v1/items?${params.toString()}`).then(
-        handleAPIResponse<GetItemsResponse>,
-      );
+      const result = await authenticatedFetch(
+        `/api/v1/items?${params.toString()}`,
+      ).then(handleAPIResponse<GetItemsResponse>);
 
       if (!result.items) {
         log.error("Failed to fetch items", result);

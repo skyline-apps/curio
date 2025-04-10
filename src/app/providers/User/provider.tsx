@@ -1,6 +1,6 @@
 import { type UpdateEmailResponse } from "@app/schemas/v1/user/email";
 import { type UpdateUsernameResponse } from "@app/schemas/v1/user/username";
-import { handleAPIResponse } from "@app/utils/api";
+import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import { clearTheme, initializeTheme } from "@app/utils/displayStorage";
 import { createLogger } from "@app/utils/logger";
 import { supabase } from "@app/utils/supabase";
@@ -34,7 +34,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
   };
 
   const changeUsername = async (username: string): Promise<void> => {
-    return fetch("/api/v1/user/username", {
+    return authenticatedFetch("/api/v1/user/username", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -52,7 +52,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
   };
 
   const updateNewsletterEmail = async (): Promise<void> => {
-    return fetch("/api/v1/user/email", {
+    return authenticatedFetch("/api/v1/user/email", {
       method: "POST",
     })
       .then(handleAPIResponse<UpdateEmailResponse>)

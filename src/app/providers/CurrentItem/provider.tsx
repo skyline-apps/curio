@@ -3,7 +3,7 @@ import { Item, ItemsContext, PublicItem } from "@app/providers/Items";
 import { ItemState } from "@app/schemas/db";
 import { type Highlight } from "@app/schemas/v1/items/highlights";
 import { GetItemContentResponse } from "@app/schemas/v1/public/items/content";
-import { handleAPIResponse } from "@app/utils/api";
+import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
 import { useQuery } from "@tanstack/react-query";
 import React, {
@@ -134,7 +134,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         const searchParams = new URLSearchParams({
           slug: itemLoadedSlug,
         });
-        const result = await fetch(
+        const result = await authenticatedFetch(
           `/api/v1/public/items/content?${searchParams.toString()}`,
           {
             method: "GET",

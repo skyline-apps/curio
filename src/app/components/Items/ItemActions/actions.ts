@@ -8,7 +8,7 @@ import { UpdateFavoriteResponse } from "@app/schemas/v1/items/favorite";
 import { UpdateLabelsResponse } from "@app/schemas/v1/items/labels";
 import { SaveResponse } from "@app/schemas/v1/items/save";
 import { UpdateStateResponse } from "@app/schemas/v1/items/state";
-import { handleAPIResponse } from "@app/utils/api";
+import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { useContext } from "react";
@@ -60,7 +60,7 @@ export const useItemUpdate = (): UseItemUpdate => {
       optimisticUpdateItems(newItems);
       optimisticRemoveItems(itemSlugs);
 
-      return await fetch("/api/v1/items/state", {
+      return await authenticatedFetch("/api/v1/items/state", {
         method: "POST",
         body: JSON.stringify({
           slugs: itemSlugs.join(","),
@@ -93,7 +93,7 @@ export const useItemUpdate = (): UseItemUpdate => {
       }));
       optimisticUpdateItems(newItems);
 
-      return await fetch("/api/v1/items/favorite", {
+      return await authenticatedFetch("/api/v1/items/favorite", {
         method: "POST",
         body: JSON.stringify({
           slugs: itemSlugs.join(","),
@@ -124,7 +124,7 @@ export const useItemUpdate = (): UseItemUpdate => {
       }));
       optimisticUpdateItems(newItems);
 
-      return await fetch("/api/v1/items/labels", {
+      return await authenticatedFetch("/api/v1/items/labels", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -162,7 +162,7 @@ export const useItemUpdate = (): UseItemUpdate => {
       }));
       optimisticUpdateItems(newItems);
 
-      return await fetch("/api/v1/items/labels", {
+      return await authenticatedFetch("/api/v1/items/labels", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -218,7 +218,7 @@ export const useItemUpdate = (): UseItemUpdate => {
     { itemSlugs: string[] }
   > = {
     mutationFn: async ({ itemSlugs }) => {
-      await fetch("/api/v1/items/save", {
+      await authenticatedFetch("/api/v1/items/save", {
         method: "POST",
         body: JSON.stringify({
           slugs: itemSlugs.join(","),
