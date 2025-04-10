@@ -109,7 +109,7 @@ const InfiniteList = <T,>({
         ) : (
           <div
             ref={parentRef}
-            className="h-[calc(100dvh-4rem)] overflow-y-auto"
+            className="h-[calc(100dvh-4rem)] overflow-y-auto overflow-x-hidden"
           >
             {loadingError ? (
               <p className="text-sm text-secondary-800 p-4">{loadingError}</p>

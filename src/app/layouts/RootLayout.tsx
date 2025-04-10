@@ -14,7 +14,11 @@ const RootLayout: React.FC<RootLayoutProps> = ({
 }: RootLayoutProps) => {
   return (
     <Providers>
-      <main className={cn("w-full h-full min-h-dvh flex flex-col font-sans")}>
+      <main
+        className={cn(
+          "w-full h-full min-h-dvh flex flex-col font-sans select-none",
+        )}
+      >
         {children}
       </main>
     </Providers>
