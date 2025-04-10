@@ -1,4 +1,5 @@
 import ProtectedLayout from "@app/layouts/ProtectedLayout";
+import PublicLayout from "@app/layouts/PublicLayout";
 import RootLayout from "@app/layouts/RootLayout";
 import MainPage from "@app/pages";
 import ArchivePage from "@app/pages/archive";
@@ -9,6 +10,7 @@ import LoginPage from "@app/pages/login";
 import NotFound from "@app/pages/not-found";
 import NotesPage from "@app/pages/notes";
 import PrivacyPage from "@app/pages/privacy";
+import ProfilePage from "@app/pages/profile";
 import SettingsPage from "@app/pages/settings";
 import TermsPage from "@app/pages/terms";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
@@ -41,6 +43,15 @@ export const App = (): React.ReactNode => {
             <Route path="/notes" element={<NotesPage />} />
             <Route path="/archive" element={<ArchivePage />} />
             <Route path="/settings" element={<SettingsPage />} />
+          </Route>
+          <Route
+            element={
+              <PublicLayout>
+                <Outlet />
+              </PublicLayout>
+            }
+          >
+            <Route path="/u/:username" element={<ProfilePage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Route>
