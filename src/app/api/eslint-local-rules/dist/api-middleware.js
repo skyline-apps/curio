@@ -1,14 +1,64 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.apiMiddlewareRule = void 0;
+exports.apiValidationRule = exports.responseParseRule = exports.apiMiddlewareRule = void 0;
 const utils_1 = require("@typescript-eslint/utils");
 exports.apiMiddlewareRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
     meta: {
         type: "problem",
         messages: {
             missingDescribeRoute: "API route must use describeRoute middleware",
-            missingZValidator: "API route must use zValidator middleware",
-            missingParseError: "zValidator must include parseError as last argument",
+        },
+        schema: [],
+    },
+    defaultOptions: [],
+    create(context) {
+        function checkRouteMethod(node) {
+            if (node.callee.type !== "MemberExpression")
+                return;
+            const calleeProperty = node.callee.property;
+            if (calleeProperty.type !== "Identifier")
+                return;
+            const methodName = calleeProperty.name;
+            if (!["get", "post", "put", "delete", "patch"].includes(methodName))
+                return;
+            const args = node.arguments;
+            if (args.length < 2)
+                return;
+            let hasDescribeRoute = false;
+            // Check middlewares
+            args.slice(1, -1).forEach((middleware) => {
+                if (middleware.type !== "CallExpression")
+                    return;
+                const callee = middleware.callee;
+                if (callee.type !== "Identifier")
+                    return;
+                if (callee.name === "describeRoute") {
+                    hasDescribeRoute = true;
+                }
+            });
+            if (!hasDescribeRoute) {
+                context.report({
+                    node,
+                    messageId: "missingDescribeRoute",
+                });
+            }
+        }
+        return {
+            CallExpression(node) {
+                checkRouteMethod(node);
+                // Handle chained routes
+                if (node.callee.type === "MemberExpression" &&
+                    node.callee.object.type === "CallExpression") {
+                    checkRouteMethod(node.callee.object);
+                }
+            },
+        };
+    },
+});
+exports.responseParseRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
+    meta: {
+        type: "problem",
+        messages: {
             missingResponseValidation: "API route must validate response with ResponseSchema.parse()",
         },
         schema: [],
@@ -28,35 +78,6 @@ exports.apiMiddlewareRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
             if (args.length < 2)
                 return;
             const handler = args[args.length - 1];
-            let hasDescribeRoute = false;
-            let hasZValidator = false;
-            let hasParseError = false;
-            // Check middlewares
-            args.slice(1, -1).forEach((middleware) => {
-                if (middleware.type !== "CallExpression")
-                    return;
-                const callee = middleware.callee;
-                if (callee.type !== "Identifier")
-                    return;
-                if (callee.name === "describeRoute") {
-                    hasDescribeRoute = true;
-                }
-                if (callee.name === "zValidator") {
-                    hasZValidator = true;
-                    // Check if last argument is parseError (direct or as generic type parameter)
-                    if (middleware.arguments.length > 0) {
-                        const lastArg = middleware.arguments[middleware.arguments.length - 1];
-                        // Handle both direct parseError and parseError<...> cases
-                        if ((lastArg.type === "Identifier" &&
-                            lastArg.name === "parseError") ||
-                            (lastArg.type === "TSInstantiationExpression" &&
-                                lastArg.expression.type === "Identifier" &&
-                                lastArg.expression.name === "parseError")) {
-                            hasParseError = true;
-                        }
-                    }
-                }
-            });
             // Check handler for response validation
             if (handler.type === "ArrowFunctionExpression" ||
                 handler.type === "FunctionExpression") {
@@ -74,12 +95,67 @@ exports.apiMiddlewareRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
                     });
                 }
             }
-            if (!hasDescribeRoute) {
-                context.report({
-                    node,
-                    messageId: "missingDescribeRoute",
-                });
-            }
+        }
+        return {
+            CallExpression(node) {
+                checkRouteMethod(node);
+                // Handle chained routes
+                if (node.callee.type === "MemberExpression" &&
+                    node.callee.object.type === "CallExpression") {
+                    checkRouteMethod(node.callee.object);
+                }
+            },
+        };
+    },
+});
+exports.apiValidationRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
+    meta: {
+        type: "problem",
+        messages: {
+            missingZValidator: "API route must use zValidator middleware",
+            missingParseError: "zValidator must include parseError as last argument",
+        },
+        schema: [],
+    },
+    defaultOptions: [],
+    create(context) {
+        function checkRouteMethod(node) {
+            if (node.callee.type !== "MemberExpression")
+                return;
+            const calleeProperty = node.callee.property;
+            if (calleeProperty.type !== "Identifier")
+                return;
+            const methodName = calleeProperty.name;
+            if (!["get", "post", "put", "delete", "patch"].includes(methodName))
+                return;
+            const args = node.arguments;
+            if (args.length < 2)
+                return;
+            let hasZValidator = false;
+            let hasParseError = false;
+            // Check middlewares
+            args.slice(1, -1).forEach((middleware) => {
+                if (middleware.type !== "CallExpression")
+                    return;
+                const callee = middleware.callee;
+                if (callee.type !== "Identifier")
+                    return;
+                if (callee.name === "zValidator") {
+                    hasZValidator = true;
+                    // Check if last argument is parseError (direct or as generic type parameter)
+                    if (middleware.arguments.length > 0) {
+                        const lastArg = middleware.arguments[middleware.arguments.length - 1];
+                        // Handle both direct parseError and parseError<...> cases
+                        if ((lastArg.type === "Identifier" &&
+                            lastArg.name === "parseError") ||
+                            (lastArg.type === "TSInstantiationExpression" &&
+                                lastArg.expression.type === "Identifier" &&
+                                lastArg.expression.name === "parseError")) {
+                            hasParseError = true;
+                        }
+                    }
+                }
+            });
             if (hasZValidator && !hasParseError) {
                 context.report({
                     node,

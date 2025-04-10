@@ -60,6 +60,8 @@ export default defineConfig([
     rules: {
       ...reactHooks.configs.recommended.rules,
       "@local/eslint-local-rules/api-middleware": "error",
+      "@local/eslint-local-rules/api-validation": "error",
+      "@local/eslint-local-rules/response-parse": "error",
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true },
