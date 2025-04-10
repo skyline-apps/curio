@@ -253,6 +253,13 @@
       "when": 1742524893102,
       "tag": "0035_drop-unique-index-updated-at",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1744249123959,
+      "tag": "0036_add_profile_rls",
+      "breakpoints": true
     }
   ]
 }

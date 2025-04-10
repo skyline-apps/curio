@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite --port 3000",
     "build": "tsc -b && vite build",
-    "db:generate": "npx drizzle-kit generate --name",
-    "db:migrate": "npx drizzle-kit migrate",
+    "db:generate": "tsx --tsconfig ./tsconfig.api.json node_modules/drizzle-kit/bin.cjs generate --name",
+    "db:migrate": "tsx --tsconfig ./tsconfig.api.json node_modules/drizzle-kit/bin.cjs migrate",
     "lint": "eslint .",
     "preview": "npm run build && vite preview",
     "deploy": "npm run build && wrangler deploy",
