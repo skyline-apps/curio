@@ -41,11 +41,6 @@ const AccountSettings: React.FC = () => {
     }
   }, [user?.username]);
 
-  useEffect(() => {
-    setIsRefreshingKeys(true);
-    loadApiKeys();
-  }, []);
-
   const loadApiKeys = useCallback(async (): Promise<void> => {
     listApiKeys()
       .then((response) => setApiKeys(response.keys))
@@ -55,6 +50,11 @@ const AccountSettings: React.FC = () => {
       });
     setIsRefreshingKeys(false);
   }, [listApiKeys]);
+
+  useEffect(() => {
+    setIsRefreshingKeys(true);
+    loadApiKeys();
+  }, [loadApiKeys]);
 
   const handleCreateKey = async (): Promise<void> => {
     if (!keyName) return;

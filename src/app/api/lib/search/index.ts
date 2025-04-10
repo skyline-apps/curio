@@ -1,4 +1,6 @@
 /* eslint-disable @local/eslint-local-rules/api-middleware */
+/* eslint-disable @local/eslint-local-rules/api-validation */
+
 // TODO: Use the Meilisearch JS SDK?
 import { sql } from "@app/api/db";
 import { appConfig } from "@app/api/db/schema";

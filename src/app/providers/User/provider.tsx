@@ -27,10 +27,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({
     newsletterEmail: null,
   });
 
-  useEffect(() => {
-    refreshUser();
-  }, []);
-
   const clearUser = useCallback((): void => {
     setCurrentUser({
       id: null,
@@ -62,6 +58,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({
       clearUser();
     }
   }, [clearUser]);
+
+  useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
 
   const changeUsername = useCallback(
     async (username: string): Promise<void> => {

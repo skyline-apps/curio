@@ -1,4 +1,6 @@
 /* eslint-disable @local/eslint-local-rules/api-middleware */
+/* eslint-disable @local/eslint-local-rules/api-validation */
+/* eslint-disable @local/eslint-local-rules/response-parse */
 import { getDb } from "@app/api/db";
 import { v1Router } from "@app/api/routesV1";
 import { EnvBindings } from "@app/api/utils/env";
