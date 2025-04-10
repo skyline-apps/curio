@@ -19,6 +19,12 @@ export type APIResponse<T = unknown> =
   | APIResponseJsonError
   | (TypedResponse & T);
 
+type ParseError<O> =
+  | Response
+  | void
+  | TypedResponse<O>
+  | Promise<Response | void | TypedResponse<O>>;
+
 export const parseError = <T, O>(
   result: (
     | { success: true; data: T }
@@ -27,11 +33,7 @@ export const parseError = <T, O>(
     target: keyof ValidationTargets;
   },
   c: EnvContext,
-):
-  | Response
-  | void
-  | TypedResponse<O>
-  | Promise<Response | void | TypedResponse<O>> => {
+): ParseError<O> => {
   if (!result.success) {
     const errors = result.error.issues.map((issue) => {
       const path =
@@ -45,18 +47,22 @@ export const parseError = <T, O>(
 
 export const apiDoc = (
   method: "get" | "post" | "put" | "delete",
-  request: ZodType,
+  request: ZodType | null,
   response: ZodType,
 ): DescribeRouteOptions => {
   return {
-    request:
-      method === "get"
-        ? {
-            query: resolver(request),
-          }
-        : {
-            json: resolver(request),
-          },
+    ...(request
+      ? {
+          request:
+            method === "get"
+              ? {
+                  query: resolver(request),
+                }
+              : {
+                  json: resolver(request),
+                },
+        }
+      : {}),
     responses: {
       200: {
         description: "Success",

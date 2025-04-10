@@ -1,34 +1,20 @@
 import { eq } from "@app/api/db";
 import { checkDbError, DbError, DbErrorCode } from "@app/api/db/errors";
 import { profiles } from "@app/api/db/schema";
-import {
-  apiDoc,
-  APIResponse,
-  describeRoute,
-  parseError,
-  zValidator,
-} from "@app/api/utils/api";
+import { apiDoc, APIResponse, describeRoute } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
 import log from "@app/api/utils/logger";
 import { generateRandomAlphabetString } from "@app/api/utils/random";
 import {
-  UpdateEmailRequest,
-  UpdateEmailRequestSchema,
   UpdateEmailResponse,
   UpdateEmailResponseSchema,
 } from "@app/schemas/v1/user/email";
 import { Hono } from "hono";
 
+// eslint-disable-next-line @local/eslint-local-rules/api-validation
 export const userEmailRouter = new Hono<EnvBindings>().post(
   "/",
-  describeRoute(
-    apiDoc("post", UpdateEmailRequestSchema, UpdateEmailResponseSchema),
-  ),
-  zValidator(
-    "json",
-    UpdateEmailRequestSchema,
-    parseError<UpdateEmailRequest, UpdateEmailResponse>,
-  ),
+  describeRoute(apiDoc("post", null, UpdateEmailResponseSchema)),
   async (c): Promise<APIResponse<UpdateEmailResponse>> => {
     const profileId = c.get("profileId")!;
 
