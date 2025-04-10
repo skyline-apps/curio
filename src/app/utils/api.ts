@@ -26,12 +26,16 @@ export async function authenticatedFetch(
     throw new Error("Authentication error");
   }
 
-  if (!session) {
+  const isPublic = url.includes("/api/v1/public");
+
+  if (!session && !isPublic) {
     throw new Error("User not authenticated");
   }
 
   const headers = new Headers(options.headers);
-  headers.set("Authorization", `Bearer ${session.access_token}`);
+  if (session) {
+    headers.set("Authorization", `Bearer ${session.access_token}`);
+  }
   if (options.method !== "GET") {
     headers.set("Content-Type", "application/json");
   }
