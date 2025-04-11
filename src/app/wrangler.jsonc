@@ -12,4 +12,8 @@
   "observability": {
     "enabled": true
   },
+  "env": {
+    "staging": {},
+    "prod": {}
+  }
 }

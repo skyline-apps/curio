@@ -35,6 +35,8 @@ services:
     volumes:
       - ./.env:/app/.env
       - ./.env:/app/.dev.vars
+      - ./.env.staging:/app/.env.staging
+      - ./.env.prod:/app/.env.prod
     mem_limit: "6G"
     cpus: 4
     develop:
