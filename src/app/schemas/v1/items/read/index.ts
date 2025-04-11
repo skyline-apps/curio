@@ -16,3 +16,15 @@ export const ReadItemResponseSchema = z.object({
 });
 
 export type ReadItemResponse = z.infer<typeof ReadItemResponseSchema>;
+
+export const MarkUnreadItemRequestSchema = z.object({
+  slug: z.string().min(1),
+});
+
+export type MarkUnreadItemRequest = z.infer<typeof MarkUnreadItemRequestSchema>;
+
+export const MarkUnreadItemResponseSchema = z.object({ slug: z.string() });
+
+export type MarkUnreadItemResponse = z.infer<
+  typeof MarkUnreadItemResponseSchema
+>;

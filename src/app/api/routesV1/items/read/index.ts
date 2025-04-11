@@ -11,6 +11,10 @@ import {
 import { EnvBindings } from "@app/api/utils/env";
 import log from "@app/api/utils/logger";
 import {
+  MarkUnreadItemRequest,
+  MarkUnreadItemRequestSchema,
+  MarkUnreadItemResponse,
+  MarkUnreadItemResponseSchema,
   ReadItemRequest,
   ReadItemRequestSchema,
   ReadItemResponse,
@@ -18,76 +22,148 @@ import {
 } from "@app/schemas/v1/items/read";
 import { Hono } from "hono";
 
-export const itemsReadRouter = new Hono<EnvBindings>().post(
-  "/",
-  describeRoute(apiDoc("post", ReadItemRequestSchema, ReadItemResponseSchema)),
-  zValidator(
-    "json",
-    ReadItemRequestSchema,
-    parseError<ReadItemRequest, ReadItemResponse>,
-  ),
-  async (c): Promise<APIResponse<ReadItemResponse>> => {
-    const profileId = c.get("profileId")!;
-    try {
-      const { slug, readingProgress } = c.req.valid("json");
-      const db = c.get("db");
+export const itemsReadRouter = new Hono<EnvBindings>()
+  .post(
+    "/",
+    describeRoute(
+      apiDoc("post", ReadItemRequestSchema, ReadItemResponseSchema),
+    ),
+    zValidator(
+      "json",
+      ReadItemRequestSchema,
+      parseError<ReadItemRequest, ReadItemResponse>,
+    ),
+    async (c): Promise<APIResponse<ReadItemResponse>> => {
+      const profileId = c.get("profileId")!;
+      try {
+        const { slug, readingProgress } = c.req.valid("json");
+        const db = c.get("db");
 
-      const itemData = await db
-        .select({
-          id: items.id,
-          slug: items.slug,
-          versionName: profileItems.versionName,
-        })
-        .from(profileItems)
-        .innerJoin(items, eq(profileItems.itemId, items.id))
-        .where(
-          and(
-            eq(profileItems.profileId, profileId),
-            sql`${items.slug} = ${slug}`,
-          ),
+        const itemData = await db
+          .select({
+            id: items.id,
+            slug: items.slug,
+            versionName: profileItems.versionName,
+          })
+          .from(profileItems)
+          .innerJoin(items, eq(profileItems.itemId, items.id))
+          .where(
+            and(
+              eq(profileItems.profileId, profileId),
+              sql`${items.slug} = ${slug}`,
+            ),
+          );
+
+        if (!itemData || itemData.length === 0) {
+          return c.json({ error: "Item not found." }, 404);
+        }
+        const updatedFields: Partial<typeof profileItems.$inferInsert> = {
+          readingProgress,
+          lastReadAt: new Date(),
+        };
+
+        if (itemData[0].versionName === null) {
+          const { timestamp } = await storage.getItemMetadata(
+            c,
+            itemData[0].slug,
+          );
+          updatedFields.versionName = timestamp || null;
+        }
+
+        const updatedItems = await db
+          .update(profileItems)
+          .set(updatedFields)
+          .from(items)
+          .where(
+            and(
+              eq(profileItems.itemId, items.id),
+              eq(profileItems.profileId, profileId),
+              sql`${items.slug} = ${slug}`,
+            ),
+          )
+          .returning({
+            slug: items.slug,
+            readingProgress: profileItems.readingProgress,
+            versionName: profileItems.versionName,
+          });
+
+        const response: ReadItemResponse = ReadItemResponseSchema.parse(
+          updatedItems[0],
         );
 
-      if (!itemData || itemData.length === 0) {
-        return c.json({ error: "Item not found." }, 404);
+        return c.json(response);
+      } catch (error) {
+        log("Error reading item:", error);
+        return c.json({ error: "Error reading item." }, 500);
       }
-      const updatedFields: Partial<typeof profileItems.$inferInsert> = {
-        readingProgress,
-        lastReadAt: new Date(),
-      };
+    },
+  )
+  .delete(
+    "/",
+    describeRoute(
+      apiDoc(
+        "delete",
+        MarkUnreadItemRequestSchema,
+        MarkUnreadItemResponseSchema,
+      ),
+    ),
+    zValidator(
+      "json",
+      MarkUnreadItemRequestSchema,
+      parseError<MarkUnreadItemRequest, MarkUnreadItemResponse>,
+    ),
+    async (c): Promise<APIResponse<MarkUnreadItemResponse>> => {
+      const profileId = c.get("profileId")!;
 
-      if (itemData[0].versionName === null) {
-        const { timestamp } = await storage.getItemMetadata(
-          c,
-          itemData[0].slug,
-        );
-        updatedFields.versionName = timestamp || null;
+      try {
+        const { slug } = c.req.valid("json");
+        const db = c.get("db");
+
+        const itemData = await db
+          .select({
+            id: items.id,
+            slug: items.slug,
+            versionName: profileItems.versionName,
+          })
+          .from(profileItems)
+          .innerJoin(items, eq(profileItems.itemId, items.id))
+          .where(
+            and(
+              eq(profileItems.profileId, profileId),
+              sql`${items.slug} = ${slug}`,
+            ),
+          );
+
+        if (!itemData || itemData.length === 0) {
+          return c.json({ error: "Item not found." }, 404);
+        }
+        const updatedFields: Partial<typeof profileItems.$inferInsert> = {
+          readingProgress: 0,
+          lastReadAt: null,
+        };
+
+        const updatedItems = await db
+          .update(profileItems)
+          .set(updatedFields)
+          .from(items)
+          .where(
+            and(
+              eq(profileItems.itemId, items.id),
+              eq(profileItems.profileId, profileId),
+              sql`${items.slug} = ${slug}`,
+            ),
+          )
+          .returning({
+            slug: items.slug,
+          });
+
+        const response: MarkUnreadItemResponse =
+          MarkUnreadItemResponseSchema.parse(updatedItems[0]);
+
+        return c.json(response);
+      } catch (error) {
+        log("Error reading item:", error);
+        return c.json({ error: "Error reading item." }, 500);
       }
-
-      const updatedItems = await db
-        .update(profileItems)
-        .set(updatedFields)
-        .from(items)
-        .where(
-          and(
-            eq(profileItems.itemId, items.id),
-            eq(profileItems.profileId, profileId),
-            sql`${items.slug} = ${slug}`,
-          ),
-        )
-        .returning({
-          slug: items.slug,
-          readingProgress: profileItems.readingProgress,
-          versionName: profileItems.versionName,
-        });
-
-      const response: ReadItemResponse = ReadItemResponseSchema.parse(
-        updatedItems[0],
-      );
-
-      return c.json(response);
-    } catch (error) {
-      log("Error reading item:", error);
-      return c.json({ error: "Error reading item." }, 500);
-    }
-  },
-);
+    },
+  );

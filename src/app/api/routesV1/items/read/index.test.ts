@@ -5,7 +5,11 @@ import { MOCK_VERSION } from "@app/api/lib/storage/__mocks__/index";
 import { StorageError } from "@app/api/lib/storage/types";
 import { ErrorResponse } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
-import { postRequest, setUpMockApp } from "@app/api/utils/test/api";
+import {
+  deleteRequest,
+  postRequest,
+  setUpMockApp,
+} from "@app/api/utils/test/api";
 import { MOCK_ITEMS, MOCK_PROFILE_ITEMS } from "@app/api/utils/test/data";
 import { testDb } from "@app/api/utils/test/provider";
 import { Hono } from "hono";
@@ -179,6 +183,39 @@ describe("/v1/items/read", () => {
       expect(response.status).toBe(500);
       const data: ErrorResponse = await response.json();
       expect(data.error).toBe("Error reading item.");
+    });
+  });
+
+  describe("DELETE /v1/items/read", () => {
+    it("should return 200 when marking item as unread", async () => {
+      await testDb.db.insert(items).values(MOCK_ITEM);
+      await testDb.db.insert(profileItems).values({
+        ...MOCK_PROFILE_ITEM,
+        readingProgress: 50,
+        lastReadAt: new Date(),
+        versionName: "version",
+      });
+
+      const response = await deleteRequest(app, "v1/items/read", {
+        slug: MOCK_SLUG,
+      });
+      expect(response.status).toBe(200);
+
+      const data = await response.json();
+      expect(data).toEqual({
+        slug: MOCK_SLUG,
+      });
+
+      const updatedItem = await testDb.db
+        .select()
+        .from(profileItems)
+        .where(eq(profileItems.id, MOCK_PROFILE_ITEM.id))
+        .limit(1)
+        .execute();
+
+      expect(updatedItem[0].readingProgress).toBe(0);
+      expect(updatedItem[0].lastReadAt).toBeNull();
+      expect(updatedItem[0].versionName).toBe("version");
     });
   });
 });
