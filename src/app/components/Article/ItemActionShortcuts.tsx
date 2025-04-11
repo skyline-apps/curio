@@ -141,25 +141,19 @@ export const ItemActionShortcuts = (): null => {
   });
 
   useKeyboardShortcuts({
-    key: "J",
+    key: "n",
     name: "Open next item",
     category: ShortcutType.NAVIGATION,
     handler: goToNextItem,
     priority: 100,
-    conditions: {
-      shiftKey: true,
-    },
   });
 
   useKeyboardShortcuts({
-    key: "K",
+    key: "p",
     name: "Open previous item",
     category: ShortcutType.NAVIGATION,
     handler: goToPreviousItem,
     priority: 100,
-    conditions: {
-      shiftKey: true,
-    },
   });
 
   useKeyboardShortcuts({
