@@ -66,7 +66,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: 'src/app'
-          command: deploy --env staging
+          command: deploy
 
   deploy-prod:
     needs: check-app
@@ -102,7 +102,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: 'src/app'
-          command: deploy --env prod
+          command: deploy
 
   check-web:
     runs-on: ubuntu-latest
