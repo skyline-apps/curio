@@ -146,7 +146,7 @@ export function useHighlightSelection({}: UseHighlightSelectionProps): UseHighli
       clearSelection();
     } catch (error) {
       log.error("Error handling selection:", error);
-      showToast("Error saving highlight");
+      showToast("Error saving highlight.");
     }
   }, [
     currentSelection,

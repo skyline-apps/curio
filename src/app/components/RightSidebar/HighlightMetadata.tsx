@@ -3,6 +3,7 @@ import { ItemTitle, ItemUrl } from "@app/components/RightSidebar/ItemMetadata";
 import Button from "@app/components/ui/Button";
 import Textarea from "@app/components/ui/Textarea";
 import { type HighlightItem } from "@app/providers/Highlights";
+import { useToast } from "@app/providers/Toast";
 import { TextDirection } from "@app/schemas/db";
 import { Highlight } from "@app/schemas/v1/items/highlights";
 import { cn } from "@app/utils/cn";
@@ -24,6 +25,7 @@ const HighlightMetadata: React.FC<HighlightMetadataProps> = ({
   textDirection,
   onUpdate,
 }: HighlightMetadataProps): React.ReactElement => {
+  const { showToast } = useToast();
   const { isDeleting, updateHighlightNote, deleteHighlight } =
     useHighlightUpdate({
       currentHighlight: highlight,
@@ -36,6 +38,11 @@ const HighlightMetadata: React.FC<HighlightMetadataProps> = ({
   useEffect(() => {
     setDraftNote(highlight.note || "");
   }, [highlight.note]);
+
+  const copyHighlight = (): void => {
+    navigator.clipboard.writeText(highlight.text || "");
+    showToast("Highlight copied to clipboard.");
+  };
 
   return (
     <div className="flex flex-col gap-2 p-4 h-full" dir={textDirection}>
@@ -69,7 +76,7 @@ const HighlightMetadata: React.FC<HighlightMetadataProps> = ({
           tooltip="Copy highlight text"
           size="sm"
           variant="faded"
-          onPress={() => navigator.clipboard.writeText(highlight.text || "")}
+          onPress={copyHighlight}
         >
           <HiOutlineClipboard />
         </Button>

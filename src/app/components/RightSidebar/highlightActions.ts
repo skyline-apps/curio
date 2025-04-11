@@ -1,5 +1,6 @@
 import { useCache } from "@app/providers/Cache";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
+import { useToast } from "@app/providers/Toast";
 import {
   CreateOrUpdateHighlightResponse,
   DeleteHighlightResponse,
@@ -41,6 +42,7 @@ export const useHighlightUpdate = ({
   onUpdate,
 }: UseHighlightUpdateProps): UseHighlightUpdate => {
   const { loadedItem } = useContext(CurrentItemContext);
+  const { showToast } = useToast();
   const {
     invalidateCache,
     optimisticUpdateHighlights,
@@ -88,6 +90,9 @@ export const useHighlightUpdate = ({
         invalidateCache(itemSlug);
       }
     },
+    onError: () => {
+      showToast("Failed to update highlight.");
+    },
     onSettled: () => {
       setIsUpdating(false);
     },
@@ -128,6 +133,9 @@ export const useHighlightUpdate = ({
       } else {
         invalidateCache(itemSlug);
       }
+    },
+    onError: () => {
+      showToast("Failed to delete highlight.");
     },
     onSettled: () => {
       setIsDeleting(false);
