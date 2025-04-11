@@ -61,11 +61,11 @@ jobs:
         run: npm run build -- --mode staging
         env:
           CLOUDFLARE_ENV: staging
-          VITE_CURIO_URL: ${{ vars.CURIO_URL }}
-          VITE_POSTHOG_HOST: ${{ vars.POSTHOG_HOST }}
-          VITE_POSTHOG_KEY: ${{ vars.POSTHOG_KEY }}
-          VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          VITE_CURIO_URL: ${{ vars.VITE_CURIO_URL }}
+          VITE_POSTHOG_HOST: ${{ vars.VITE_POSTHOG_HOST }}
+          VITE_POSTHOG_KEY: ${{ vars.VITE_POSTHOG_KEY }}
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
           VITE_BUILD_HASH: ${{ github.sha }}
 
       - name: Deploy to Cloudflare (staging)
@@ -109,11 +109,11 @@ jobs:
         run: npm run build -- --mode prod
         env:
           CLOUDFLARE_ENV: prod
-          VITE_CURIO_URL: ${{ vars.CURIO_URL }}
-          VITE_POSTHOG_HOST: ${{ vars.POSTHOG_HOST }}
-          VITE_POSTHOG_KEY: ${{ vars.POSTHOG_KEY }}
-          VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          VITE_CURIO_URL: ${{ vars.VITE_CURIO_URL }}
+          VITE_POSTHOG_HOST: ${{ vars.VITE_POSTHOG_HOST }}
+          VITE_POSTHOG_KEY: ${{ vars.VITE_POSTHOG_KEY }}
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
           VITE_BUILD_HASH: ${{ github.sha }}
 
       - name: Deploy to Cloudflare (production)
