@@ -13,7 +13,15 @@
     "enabled": true
   },
   "env": {
-    "staging": {},
-    "prod": {}
+    "staging": {
+      "vars": {
+        "ENVIRONMENT": "staging"
+      }
+    },
+    "prod": {
+      "vars": {
+        "ENVIRONMENT": "prod"
+      }
+    }
   }
 }
