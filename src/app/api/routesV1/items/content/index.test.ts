@@ -23,6 +23,7 @@ import {
 import { testDb } from "@app/api/utils/test/provider";
 import { ItemState, TextDirection } from "@app/schemas/db";
 import { UploadStatus } from "@app/schemas/types";
+import { UpdateItemContentResponse } from "@app/schemas/v1/items/content";
 import { Hono } from "hono";
 import { beforeAll, describe, expect, it, test, vi } from "vitest";
 
@@ -662,7 +663,8 @@ describe("/v1/items/content", () => {
         url: TEST_ITEM_URL_1,
       });
       expect(response.status).toBe(200);
-      const data = await response.json();
+      const data: UpdateItemContentResponse & { status: UploadStatus.SKIPPED } =
+        await response.json();
       expect(data).toEqual({
         message: "Content already exists",
         slug: expect.any(String),
