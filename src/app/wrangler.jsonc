@@ -6,6 +6,7 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  "keep_vars": true,
   "assets": {
     "not_found_handling": "single-page-application"
   },
