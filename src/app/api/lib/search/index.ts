@@ -49,6 +49,11 @@ async function withRetry<T>(
     } catch (error) {
       lastError = error as Error;
 
+      // Don't retry if it's our own error
+      if (error instanceof SearchError) {
+        throw error;
+      }
+
       // Don't retry if it's a 4xx error (except 429 - too many requests)
       if (error instanceof AxiosError && error.response?.status) {
         const status = error.response.status;
@@ -288,16 +293,18 @@ export class Search {
   ): Promise<void> {
     const axiosInstance = await this.createAxiosInstance(c);
 
-    const response = await axiosInstance.post(
-      "/indexes/highlights/documents/delete",
-      {
-        filter: `id IN [${highlightIds.join(", ")}]`,
-      },
-    );
+    return withRetry(async () => {
+      const response = await axiosInstance.post(
+        "/indexes/highlights/documents/delete",
+        {
+          filter: `id IN [${highlightIds.join(", ")}]`,
+        },
+      );
 
-    if (!response.data) {
-      throw new SearchError("Invalid delete response format");
-    }
+      if (!response.data) {
+        throw new SearchError("Invalid delete response format");
+      }
+    });
   }
 }
 
