@@ -116,6 +116,63 @@ export const ItemActionShortcuts = (): null => {
       });
   };
 
+  const scrollToAnchor = (next: boolean = true): boolean => {
+    const container = containerRef.current;
+    if (!container) {
+      return false;
+    }
+
+    const headers = Array.from(
+      container.querySelectorAll<HTMLHeadingElement>("h1, h2, h3, h4, h5, h6"),
+    );
+
+    if (headers.length === 0) {
+      return false;
+    }
+
+    const currentScrollTop = container.scrollTop;
+    let targetAnchor: HTMLHeadingElement | null = null;
+    let previousAnchor: HTMLHeadingElement | null = null;
+
+    const containerTop = container.getBoundingClientRect().top;
+
+    for (const header of headers) {
+      const headerTopRelativeToViewport = header.getBoundingClientRect().top;
+      const headerTopRelativeToContainer =
+        headerTopRelativeToViewport - containerTop;
+
+      if (next) {
+        if (headerTopRelativeToContainer > 1) {
+          targetAnchor = header;
+          break;
+        }
+      } else {
+        if (headerTopRelativeToContainer < -1) {
+          previousAnchor = header;
+        } else {
+          targetAnchor = previousAnchor;
+          break;
+        }
+      }
+    }
+
+    if (!next && !targetAnchor) {
+      targetAnchor = previousAnchor;
+    }
+
+    if (targetAnchor) {
+      container.scrollTo({
+        top:
+          currentScrollTop +
+          (targetAnchor.getBoundingClientRect().top - containerTop),
+        behavior: "smooth",
+      });
+      return true;
+    }
+
+    return false;
+  };
+
   useKeyboardShortcuts({
     key: "j",
     name: "Scroll down",
@@ -154,6 +211,28 @@ export const ItemActionShortcuts = (): null => {
     category: ShortcutType.NAVIGATION,
     handler: goToPreviousItem,
     priority: 100,
+  });
+
+  useKeyboardShortcuts({
+    key: "J",
+    name: "Scroll to next section",
+    category: ShortcutType.NAVIGATION,
+    handler: () => scrollToAnchor(true),
+    priority: 100,
+    conditions: {
+      shiftKey: true,
+    },
+  });
+
+  useKeyboardShortcuts({
+    key: "K",
+    name: "Scroll to previous section",
+    category: ShortcutType.NAVIGATION,
+    handler: () => scrollToAnchor(false),
+    priority: 100,
+    conditions: {
+      shiftKey: true,
+    },
   });
 
   useKeyboardShortcuts({
