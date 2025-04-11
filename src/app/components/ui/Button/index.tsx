@@ -67,7 +67,11 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
     if (href) {
       const handlePress = (): void => {
         setPressed(true);
-        navigate(href);
+        if (href.startsWith("http")) {
+          window.location.href = href;
+        } else {
+          navigate(href);
+        }
         setPressed(false);
       };
       innerContent = (
