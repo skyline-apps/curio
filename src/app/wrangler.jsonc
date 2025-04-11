@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "api",
+  "name": "curio",
   "main": "api/index.ts",
   "compatibility_date": "2025-04-03",
   "compatibility_flags": [
