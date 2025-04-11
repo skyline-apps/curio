@@ -10,6 +10,7 @@ import { EmailError } from "@app/api/lib/email/types";
 import { extractFromHtml } from "@app/api/lib/extract";
 import { ExtractError } from "@app/api/lib/extract/types";
 import { indexItemDocuments } from "@app/api/lib/search";
+import { SearchError } from "@app/api/lib/search/types";
 import { storage } from "@app/api/lib/storage";
 import { StorageError } from "@app/api/lib/storage/types";
 import {
@@ -168,7 +169,7 @@ export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
       });
     } catch (error) {
       if (error instanceof EmailError) {
-        log("Failed to parse email", { error });
+        log("Failed to parse email", { error: error.message });
         return c.json(
           {
             status: UploadStatus.ERROR,
@@ -177,11 +178,20 @@ export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
           400,
         );
       } else if (error instanceof StorageError) {
-        log("Failed to store content", { error });
+        log("Failed to store content", { error: error.message });
         return c.json(
           {
             status: UploadStatus.ERROR,
             error: "Failed to store content",
+          },
+          500,
+        );
+      } else if (error instanceof SearchError) {
+        log("Failed to index content", { error: error.message });
+        return c.json(
+          {
+            status: UploadStatus.ERROR,
+            error: "Failed to index content",
           },
           500,
         );
@@ -190,7 +200,7 @@ export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
       return c.json(
         {
           status: UploadStatus.ERROR,
-          error: "Internal server error",
+          error: "Unexpected error saving email content",
         },
         500,
       );

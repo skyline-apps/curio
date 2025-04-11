@@ -9,7 +9,8 @@ import {
   parseIncomingEmail,
 } from "@app/api/lib/email/__mocks__/index";
 import { EmailError } from "@app/api/lib/email/types";
-import { indexItemDocuments } from "@app/api/lib/search";
+import { indexItemDocuments } from "@app/api/lib/search/__mocks__/index";
+import { SearchError } from "@app/api/lib/search/types";
 import {
   MOCK_VERSION,
   uploadItemContent,
@@ -207,6 +208,46 @@ describe("/v1/items/email", () => {
       );
 
       expect(response.status).toBe(401);
+    });
+
+    it("should return 500 when indexing fails", async () => {
+      indexItemDocuments.mockRejectedValueOnce(
+        new SearchError("Operation failed after 3 retries."),
+      );
+      const response = await postRequest(
+        app,
+        "v1/public/items/email",
+        {
+          emailBody: "dummy email",
+        },
+        {
+          "x-curio-app-secret": MOCK_SECRET,
+        },
+      );
+
+      expect(response.status).toBe(500);
+
+      expect(uploadItemContent).toHaveBeenCalledExactlyOnceWith(
+        expect.any(Object),
+        MOCK_EMAIL_SLUG,
+        "## Test Email HTML Content\n\nThis is my newsletter",
+        {
+          title: MOCK_EMAIL.subject,
+          author: MOCK_EMAIL.sender.name,
+          description: MOCK_EMAIL.textContent,
+          thumbnail: null,
+          favicon: null,
+          publishedAt: MOCK_EMAIL_DATE,
+        },
+      );
+
+      const data: ErrorResponse = await response.json();
+      expect(data.error).toBe("Failed to index content");
+
+      const item = await testDb.db.select().from(items);
+      expect(item.length).toBe(0);
+      const profileItem = await testDb.db.select().from(profileItems);
+      expect(profileItem.length).toBe(0);
     });
 
     it("should return 500 when database errors", async () => {
