@@ -7,6 +7,10 @@ import { useToast } from "@app/providers/Toast";
 import { ItemState } from "@app/schemas/db";
 import { UpdateFavoriteResponse } from "@app/schemas/v1/items/favorite";
 import { UpdateLabelsResponse } from "@app/schemas/v1/items/labels";
+import {
+  MarkUnreadItemResponse,
+  ReadItemResponse,
+} from "@app/schemas/v1/items/read";
 import { SaveResponse } from "@app/schemas/v1/items/save";
 import { UpdateStateResponse } from "@app/schemas/v1/items/state";
 import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
@@ -35,6 +39,8 @@ interface UseItemUpdate {
     items: Item[],
     labelToRemove: ItemLabel,
   ) => Promise<UpdateLabelsResponse>;
+  markRead: (item: Item) => Promise<ReadItemResponse>;
+  markUnread: (item: Item) => Promise<MarkUnreadItemResponse>;
   refetchItem: (item: Item) => Promise<void>;
   saveExistingItems: (itemSlugs: string[]) => Promise<void>;
   isSavingExisting: boolean;
@@ -193,6 +199,63 @@ export const useItemUpdate = (): UseItemUpdate => {
     },
   };
 
+  const markReadMutationOptions: UseMutationOptions<
+    ReadItemResponse,
+    Error,
+    { item: Item }
+  > = {
+    mutationFn: async ({ item }) => {
+      optimisticUpdateItems([
+        {
+          slug: item.slug,
+          metadata: {
+            readingProgress: 0,
+            lastReadAt: new Date().toISOString(),
+          },
+        },
+      ]);
+      return await authenticatedFetch("/api/v1/items/read", {
+        method: "POST",
+        body: JSON.stringify({ slug: item.slug, readingProgress: 0 }),
+      }).then(handleAPIResponse<ReadItemResponse>);
+    },
+    onSuccess: () => {
+      invalidateCache();
+    },
+    onError: (error) => {
+      invalidateCache();
+      log.error(error.message);
+      showToast("Error marking item as read.");
+    },
+  };
+
+  const markUnreadMutationOptions: UseMutationOptions<
+    MarkUnreadItemResponse,
+    Error,
+    { item: Item }
+  > = {
+    mutationFn: async ({ item }) => {
+      optimisticUpdateItems([
+        {
+          slug: item.slug,
+          metadata: { readingProgress: 0, lastReadAt: null },
+        },
+      ]);
+      return await authenticatedFetch("/api/v1/items/read", {
+        method: "DELETE",
+        body: JSON.stringify({ slug: item.slug }),
+      }).then(handleAPIResponse<MarkUnreadItemResponse>);
+    },
+    onSuccess: () => {
+      invalidateCache();
+    },
+    onError: (error) => {
+      invalidateCache();
+      log.error(error.message);
+      showToast("Error marking item as unread.");
+    },
+  };
+
   const updateItemContentMutationOptions: UseMutationOptions<
     void,
     Error,
@@ -259,6 +322,8 @@ export const useItemUpdate = (): UseItemUpdate => {
   );
   const updateItemsLabelMutation = useMutation(updateItemsLabelMutationOptions);
   const removeItemsLabelMutation = useMutation(removeItemsLabelMutationOptions);
+  const markReadMutation = useMutation(markReadMutationOptions);
+  const markUnreadMutation = useMutation(markUnreadMutationOptions);
   const updateItemContentMutation = useMutation(
     updateItemContentMutationOptions,
   );
@@ -304,6 +369,14 @@ export const useItemUpdate = (): UseItemUpdate => {
     });
   };
 
+  const markRead = async (item: Item): Promise<ReadItemResponse> => {
+    return await markReadMutation.mutateAsync({ item });
+  };
+
+  const markUnread = async (item: Item): Promise<MarkUnreadItemResponse> => {
+    return await markUnreadMutation.mutateAsync({ item });
+  };
+
   const refetchItem = async (item: Item): Promise<void> => {
     return await updateItemContentMutation.mutateAsync({ item });
   };
@@ -317,6 +390,8 @@ export const useItemUpdate = (): UseItemUpdate => {
     updateItemsFavorite,
     addItemsLabel,
     removeItemsLabel,
+    markRead,
+    markUnread,
     refetchItem,
     saveExistingItems,
     isSavingExisting: saveItemsMutation.isPending,

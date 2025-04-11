@@ -1,13 +1,11 @@
 import Button from "@app/components/ui/Button";
-import { BrowserMessageContext } from "@app/providers/BrowserMessage";
 import { Item, ItemsContext } from "@app/providers/Items";
-import { ItemSource, ItemState } from "@app/schemas/db";
+import { ItemState } from "@app/schemas/db";
 import { cn } from "@app/utils/cn";
 import { useCallback, useContext } from "react";
 import {
   HiArchiveBox,
   HiOutlineArchiveBox,
-  HiOutlineArrowPath,
   HiOutlineStar,
   HiOutlineTrash,
   HiStar,
@@ -27,7 +25,6 @@ interface ActionButtonProps<T> {
   activeDisplay?: ActionButtonDisplay;
   isActive?: boolean;
   isLoading?: boolean;
-  isDisabled?: boolean;
 }
 const ActionButton = <T,>({
   action,
@@ -35,7 +32,6 @@ const ActionButton = <T,>({
   activeDisplay,
   isActive,
   isLoading,
-  isDisabled,
 }: ActionButtonProps<T>): React.ReactNode => {
   const { fetchItems } = useContext(ItemsContext);
 
@@ -51,7 +47,6 @@ const ActionButton = <T,>({
       variant="faded"
       size="sm"
       onPress={onPress}
-      isDisabled={isDisabled}
       isLoading={isLoading}
       tooltip={
         isActive ? (activeDisplay || defaultDisplay).text : defaultDisplay.text
@@ -65,17 +60,15 @@ const ActionButton = <T,>({
 interface ItemActionsProps {
   className?: string;
   item?: Item;
-  showAdvanced?: boolean;
+  showExpanded?: boolean;
 }
 
 const ItemActions = ({
   item,
-  showAdvanced,
+  showExpanded,
   className,
 }: ItemActionsProps): React.ReactElement => {
-  const { updateItemsState, updateItemsFavorite, refetchItem } =
-    useItemUpdate();
-  const { savingItem } = useContext(BrowserMessageContext);
+  const { updateItemsState, updateItemsFavorite } = useItemUpdate();
 
   if (!item) {
     return <></>;
@@ -104,17 +97,8 @@ const ItemActions = ({
         activeDisplay={{ text: "Unarchive", icon: <HiArchiveBox /> }}
         isActive={item.metadata.state === ItemState.ARCHIVED}
       />
-      {showAdvanced && (
+      {showExpanded && (
         <>
-          <ActionButton
-            action={async () => refetchItem(item)}
-            defaultDisplay={{
-              text: "Reload content",
-              icon: <HiOutlineArrowPath />,
-            }}
-            isLoading={savingItem === item.url}
-            isDisabled={item.metadata.source === ItemSource.EMAIL}
-          />
           <ActionButton
             action={async () =>
               updateItemsState(

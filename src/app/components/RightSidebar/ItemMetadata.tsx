@@ -1,6 +1,7 @@
 import Thumbnail from "@app/components/Image/Thumbnail";
 import ItemActions from "@app/components/Items/ItemActions";
 import { useItemUpdate } from "@app/components/Items/ItemActions/actions";
+import AdvancedActions from "@app/components/Items/ItemActions/AdvancedActions";
 import OtherItemActions from "@app/components/Items/ItemActions/OtherItemActions";
 import Labels, { Label } from "@app/components/Labels";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
@@ -152,7 +153,10 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
           </div>
           {isEditable(item) ? (
             !readonly ? (
-              <ItemActions item={item} showAdvanced />
+              <div className="flex justify-between">
+                <ItemActions item={item} showExpanded />
+                <AdvancedActions item={item} />
+              </div>
             ) : null
           ) : user.id ? (
             <OtherItemActions item={item} />
