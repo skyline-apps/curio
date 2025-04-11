@@ -11,15 +11,24 @@
     "not_found_handling": "single-page-application"
   },
   "observability": {
-    "enabled": true
+    "enabled": true,
+    "head_sampling_rate": 1,
   },
   "env": {
     "staging": {
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+      },
       "vars": {
         "ENVIRONMENT": "staging"
       }
     },
     "prod": {
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+      },
       "vars": {
         "ENVIRONMENT": "prod"
       }
