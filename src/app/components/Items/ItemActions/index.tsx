@@ -1,7 +1,7 @@
 import Button from "@app/components/ui/Button";
 import { BrowserMessageContext } from "@app/providers/BrowserMessage";
 import { Item, ItemsContext } from "@app/providers/Items";
-import { ItemState } from "@app/schemas/db";
+import { ItemSource, ItemState } from "@app/schemas/db";
 import { cn } from "@app/utils/cn";
 import { useCallback, useContext } from "react";
 import {
@@ -27,6 +27,7 @@ interface ActionButtonProps<T> {
   activeDisplay?: ActionButtonDisplay;
   isActive?: boolean;
   isLoading?: boolean;
+  isDisabled?: boolean;
 }
 const ActionButton = <T,>({
   action,
@@ -34,6 +35,7 @@ const ActionButton = <T,>({
   activeDisplay,
   isActive,
   isLoading,
+  isDisabled,
 }: ActionButtonProps<T>): React.ReactNode => {
   const { fetchItems } = useContext(ItemsContext);
 
@@ -49,6 +51,7 @@ const ActionButton = <T,>({
       variant="faded"
       size="sm"
       onPress={onPress}
+      isDisabled={isDisabled}
       isLoading={isLoading}
       tooltip={
         isActive ? (activeDisplay || defaultDisplay).text : defaultDisplay.text
@@ -110,6 +113,7 @@ const ItemActions = ({
               icon: <HiOutlineArrowPath />,
             }}
             isLoading={savingItem === item.url}
+            isDisabled={item.metadata.source === ItemSource.EMAIL}
           />
           <ActionButton
             action={async () =>
