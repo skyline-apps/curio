@@ -19,7 +19,7 @@ export interface KeyboardShortcut {
   priority?: number;
   preventDefault?: boolean;
   conditions?: {
-    notInInput?: boolean;
+    notInInput?: boolean; // Defaults to true
     shiftKey?: boolean;
     ctrlKey?: boolean; // Also cmd on Macs
   };

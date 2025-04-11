@@ -23,10 +23,11 @@ export const KeyboardShortcutProvider: React.FC<
     shortcuts.current.set(shortcut.id, {
       priority: 0,
       preventDefault: true,
+      ...shortcut,
       conditions: {
+        ...shortcut.conditions,
         notInInput: true,
       },
-      ...shortcut,
     });
   }, []);
 
