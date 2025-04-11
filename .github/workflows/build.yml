@@ -1,26 +1,28 @@
-name: Build
+name: Build and Deploy
 
 on: [push, pull_request]
 
 jobs:
   check-app:
+    name: Check app (lint, test, build)
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22.9.0"
+          node-version: "22.x"
+          cache: 'npm'
+          cache-dependency-path: src/app/package-lock.json
 
       - name: Install lint rule
         working-directory: ./src/app/api/eslint-local-rules
-        run: npm install && npm run build
+        run: npm install
 
       - name: Install dependencies
         working-directory: ./src/app
-        run: npm install
+        run: npm ci
 
       - name: Run lint
         working-directory: ./src/app
@@ -30,17 +32,77 @@ jobs:
         working-directory: ./src/app
         run: npm run test
 
-      - name: Run build (staging)
+  deploy-staging:
+    needs: check-app
+    name: Deploy app (staging)
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: 'npm'
+          cache-dependency-path: src/app/package-lock.json
+
+      - name: Install lint rule
+        working-directory: ./src/app/api/eslint-local-rules
+        run: npm install
+
+      - name: Install dependencies
+        working-directory: ./src/app
+        run: npm ci
+
+      - name: Build for staging
         working-directory: ./src/app
         run: npm run build -- --mode staging
 
-      - name: Deploy (staging)
-        working-directory: ./src/app
+      - name: Deploy to Cloudflare (staging)
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: 'src/app'
           command: deploy --env staging
-          environment: staging
+
+  deploy-prod:
+    needs: check-app
+    name: Deploy app (production)
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/prod' && github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: 'npm'
+          cache-dependency-path: src/app/package-lock.json
+
+      - name: Install lint rule
+        working-directory: ./src/app/api/eslint-local-rules
+        run: npm install
+
+      - name: Install dependencies
+        working-directory: ./src/app
+        run: npm ci
+
+      - name: Build for production
+        working-directory: ./src/app
+        run: npm run build -- --mode prod
+
+      - name: Deploy to Cloudflare (production)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: 'src/app'
+          command: deploy --env prod
 
   check-web:
     runs-on: ubuntu-latest
