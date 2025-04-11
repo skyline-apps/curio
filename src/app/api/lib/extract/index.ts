@@ -1,119 +1,31 @@
 import { TextDirection } from "@app/schemas/db";
 import { Readability } from "@mozilla/readability";
 import { parseHTML } from "linkedom";
-import TurndownService, { Node as TurndownNode } from "turndown";
+import { NodeHtmlMarkdown, TranslatorConfigObject } from "node-html-markdown";
 
 import { ExtractedMetadata, ExtractError } from "./types";
 
-function isElementNode(
-  node: TurndownNode | ChildNode | HTMLElement,
-): node is HTMLElement {
-  return "tagName" in node;
-}
-
-const HEADER_TAGS: (keyof HTMLElementTagNameMap)[] = [
-  "h1",
-  "h2",
-  "h3",
-  "h4",
-  "h5",
-  "h6",
-];
-
-const LIST_CONTAINER_TAGS: (keyof HTMLElementTagNameMap)[] = ["ul", "ol", "dl"];
-const LIST_ITEM_TAGS: (keyof HTMLElementTagNameMap)[] = ["li", "dt", "dd"];
-
-const BLOCK_TAGS: (keyof HTMLElementTagNameMap)[] = [
-  "p",
-  "div",
-  "section",
-  "article",
-  "main",
-  "header",
-  "footer",
-  ...LIST_CONTAINER_TAGS,
-  ...LIST_ITEM_TAGS,
-  ...HEADER_TAGS,
-];
-
-const turndown = new TurndownService({
-  headingStyle: "atx",
-  codeBlockStyle: "fenced",
-  bulletListMarker: "-",
-});
-
-const recursivelyRemoveBlockElements = (html: string): string => {
-  let resultHtml = "";
-
-  const node = parseHTML(html).document;
-  for (const child of node.childNodes) {
-    if (child.nodeType === 1 && isElementNode(child)) {
-      const tag = child.tagName.toLowerCase();
-      if (BLOCK_TAGS.includes(tag as keyof HTMLElementTagNameMap)) {
-        resultHtml += recursivelyRemoveBlockElements(child.innerHTML);
-      } else {
-        const attributes = Array.from(child.attributes)
-          .map((attr) => `${attr.name}="${attr.value}"`)
-          .join(" ");
-        resultHtml += `<${tag} ${attributes}>${recursivelyRemoveBlockElements(child.innerHTML)}</${tag}>`;
-      }
-    } else if (child.nodeType === 3) {
-      resultHtml += child.textContent;
-    }
-  }
-  return resultHtml;
+const customTranslators: TranslatorConfigObject = {
+  "h1,h2,h3,h4,h5,h6": ({ node }) => {
+    const headingLevel = parseInt(node.tagName.substring(1), 10);
+    const prefix = "#".repeat(headingLevel) + " ";
+    return {
+      prefix,
+      recurse: true,
+      postprocess: ({ content }) => {
+        // Remove leading and trailing whitespace, and replace multiple spaces with a single space
+        return content.trim().replace(/\s+/g, " ");
+      },
+    };
+  },
 };
 
-turndown.addRule("link", {
-  filter: ["a"],
-  replacement: function (content: string, node: TurndownNode) {
-    let linkText = "";
-    if (!isElementNode(node)) return content;
-    const href = node.getAttribute("href");
-    if (!href) return content;
-    const cleanedContent = recursivelyRemoveBlockElements(node.innerHTML);
-    linkText += turndown.turndown(cleanedContent);
-    return `[${linkText}](${href})`;
+const htmlToMarkdown = new NodeHtmlMarkdown(
+  {
+    bulletMarker: "-",
   },
-});
-
-turndown.addRule("header", {
-  filter: HEADER_TAGS,
-  replacement: function (content: string, node: TurndownNode) {
-    if (isElementNode(node)) {
-      const headerLevel = node.tagName.slice(1);
-      const cleanedContent = content.replace(/\s+/g, " ").trim();
-      return `${"#".repeat(Number(headerLevel))} ${cleanedContent}\n\n`;
-    } else {
-      return content;
-    }
-  },
-});
-
-turndown.addRule("dir", {
-  filter: function (node, _options) {
-    return node.hasAttribute && node.hasAttribute("dir");
-  },
-  replacement: function (content, node, _options) {
-    if (!isElementNode(node)) return content;
-    const dir = node.getAttribute("dir");
-    const tag = node.tagName.toLowerCase();
-    const otherAttributes = Array.from(node.attributes)
-      .filter((attr) => attr.name !== "dir")
-      .map((attr) => `${attr.name}="${attr.value}"`)
-      .join(" ");
-    if (dir === "rtl" || dir === "ltr") {
-      if (HEADER_TAGS.includes(tag as keyof HTMLElementTagNameMap)) {
-        return `<${tag} dir="${dir}" ${otherAttributes}>${turndown.turndown(node.innerHTML)}</${tag}>`;
-      } else if (BLOCK_TAGS.includes(tag as keyof HTMLElementTagNameMap)) {
-        return `\n<div dir="${dir}" ${otherAttributes}>\n\n${turndown.turndown(node.innerHTML)}\n\n</div>`;
-      } else {
-        return `<span dir="${dir}">${turndown.turndown(`<${tag} ${otherAttributes}>${content}</${tag}>`)}</span>`;
-      }
-    }
-    return content;
-  },
-});
+  customTranslators,
+);
 
 export class Extract {
   private getMetaContent(doc: Document, selectors: string[]): string | null {
@@ -200,7 +112,7 @@ export class Extract {
         favicon: favicon,
       };
 
-      const content = turndown.turndown(article.content);
+      const content = htmlToMarkdown.translate(article.content);
       if (metadata.textDirection !== TextDirection.LTR) {
         return {
           content: `<div dir="${article.dir}">\n\n${content}\n\n</div>`,
