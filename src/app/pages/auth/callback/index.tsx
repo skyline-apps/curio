@@ -74,7 +74,6 @@ const AuthCallback: React.FC = () => {
   return (
     <div className="flex flex-col items-center gap-4 w-full h-dvh">
       <Spinner centered />
-      Signing in...
     </div>
   );
 };
