@@ -3,6 +3,7 @@ import { BrowserMessageContext } from "@app/providers/BrowserMessage";
 import { useCache } from "@app/providers/Cache";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { type Item } from "@app/providers/Items";
+import { useToast } from "@app/providers/Toast";
 import { ItemState } from "@app/schemas/db";
 import { UpdateFavoriteResponse } from "@app/schemas/v1/items/favorite";
 import { UpdateLabelsResponse } from "@app/schemas/v1/items/labels";
@@ -44,6 +45,7 @@ export const useItemUpdate = (): UseItemUpdate => {
     useCache();
   const { clearSelectedItems, loadedItem } = useContext(CurrentItemContext);
   const { saveItemContent } = useContext(BrowserMessageContext);
+  const { showToast } = useToast();
 
   const updateItemsStateMutationOptions: UseMutationOptions<
     UpdateStateResponse,
@@ -74,8 +76,10 @@ export const useItemUpdate = (): UseItemUpdate => {
         clearSelectedItems();
       }
     },
-    onError: () => {
+    onError: (error) => {
       invalidateCache();
+      log.error(error.message);
+      showToast("Error updating item.");
     },
   };
 
@@ -104,8 +108,10 @@ export const useItemUpdate = (): UseItemUpdate => {
     onSuccess: () => {
       invalidateCache();
     },
-    onError: () => {
+    onError: (error) => {
       invalidateCache();
+      log.error(error.message);
+      showToast("Error updating item.");
     },
   };
 
@@ -140,8 +146,10 @@ export const useItemUpdate = (): UseItemUpdate => {
         invalidateCache();
       }
     },
-    onError: () => {
+    onError: (error) => {
       invalidateCache();
+      log.error(error.message);
+      showToast("Error updating item.");
     },
   };
 
@@ -178,8 +186,10 @@ export const useItemUpdate = (): UseItemUpdate => {
         invalidateCache();
       }
     },
-    onError: () => {
+    onError: (error) => {
       invalidateCache();
+      log.error(error.message);
+      showToast("Error updating item.");
     },
   };
 
@@ -210,6 +220,10 @@ export const useItemUpdate = (): UseItemUpdate => {
         }
       }
     },
+    onError: (error) => {
+      log.error("Error refreshing content:", error);
+      showToast("Error refreshing content.");
+    },
   };
 
   const saveItemsMutationOptions: UseMutationOptions<
@@ -232,8 +246,10 @@ export const useItemUpdate = (): UseItemUpdate => {
     onSuccess: () => {
       invalidateCache();
     },
-    onError: () => {
+    onError: (error) => {
       invalidateCache();
+      log.error("Error saving items:", error);
+      showToast("Error saving items.");
     },
   };
 

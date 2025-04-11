@@ -37,11 +37,14 @@ const LabelPicker: React.FC<LabelPickerProps> = ({
     const selectedLabel = unusedLabels.find((l) => l.id === key);
     if (selectedLabel) {
       setIsLoading(true);
-      await onAdd(selectedLabel);
-      setShowAutocomplete(false);
-      setIsLoading(false);
-      setInputValue("");
-      addButtonRef.current?.focus();
+      try {
+        await onAdd(selectedLabel);
+      } finally {
+        setIsLoading(false);
+        setShowAutocomplete(false);
+        setInputValue("");
+        addButtonRef.current?.focus();
+      }
     }
   };
 

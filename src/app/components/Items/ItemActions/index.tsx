@@ -1,10 +1,8 @@
 import Button from "@app/components/ui/Button";
 import { BrowserMessageContext } from "@app/providers/BrowserMessage";
 import { Item, ItemsContext } from "@app/providers/Items";
-import { useToast } from "@app/providers/Toast";
 import { ItemState } from "@app/schemas/db";
 import { cn } from "@app/utils/cn";
-import { createLogger } from "@app/utils/logger";
 import { useCallback, useContext } from "react";
 import {
   HiArchiveBox,
@@ -17,8 +15,6 @@ import {
 } from "react-icons/hi2";
 
 import { useItemUpdate } from "./actions";
-
-const log = createLogger("item-actions");
 
 interface ActionButtonDisplay {
   text: string;
@@ -40,18 +36,12 @@ const ActionButton = <T,>({
   isLoading,
 }: ActionButtonProps<T>): React.ReactNode => {
   const { fetchItems } = useContext(ItemsContext);
-  const { showToast } = useToast();
 
   const onPress = useCallback(async () => {
-    await action()
-      .then(async () => {
-        await fetchItems(true);
-      })
-      .catch((error) => {
-        log.error(error);
-        showToast("Error updating item.");
-      });
-  }, [showToast, fetchItems, action]);
+    await action().then(async () => {
+      await fetchItems(true);
+    });
+  }, [fetchItems, action]);
 
   return (
     <Button

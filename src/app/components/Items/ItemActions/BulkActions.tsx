@@ -1,9 +1,7 @@
 import Button from "@app/components/ui/Button";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { ItemsContext } from "@app/providers/Items";
-import { useToast } from "@app/providers/Toast";
 import { ItemState } from "@app/schemas/db";
-import { createLogger } from "@app/utils/logger";
 import { useCallback, useContext, useState } from "react";
 import {
   HiArchiveBox,
@@ -13,8 +11,6 @@ import {
 } from "react-icons/hi2";
 
 import { useItemUpdate } from "./actions";
-
-const log = createLogger("bulk-actions");
 
 interface BulkActionButtonProps<T> {
   action: () => Promise<T>;
@@ -35,20 +31,14 @@ const BulkActionButton = <T,>({
 }: BulkActionButtonProps<T>): React.ReactNode => {
   const [pending, setPending] = useState<boolean>(false);
   const { fetchItems } = useContext(ItemsContext);
-  const { showToast } = useToast();
 
   const onPress = useCallback(async () => {
     setPending(true);
-    await action()
-      .then(async () => {
-        await fetchItems(true);
-        setPending(false);
-      })
-      .catch((error) => {
-        log.error(error);
-        showToast("Error updating items.");
-      });
-  }, [showToast, fetchItems, action]);
+    await action().then(async () => {
+      await fetchItems(true);
+      setPending(false);
+    });
+  }, [fetchItems, action]);
 
   return (
     <Button variant="faded" size="sm" onPress={onPress} isLoading={pending}>
