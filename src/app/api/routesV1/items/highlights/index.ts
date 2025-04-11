@@ -5,6 +5,7 @@ import {
   indexHighlightDocuments,
   searchHighlightDocuments,
 } from "@app/api/lib/search";
+import { SearchError } from "@app/api/lib/search/types";
 import {
   apiDoc,
   APIResponse,
@@ -135,65 +136,71 @@ export const itemsHighlightRouter = new Hono<EnvBindings>()
           return c.json({ error: "Item not found for the given slug" }, 404);
         }
 
-        const highlightsWithProfileItemId = highlights.map((h) => ({
-          id: h.id,
-          profileItemId: profileItem[0].id,
-          startOffset: h.startOffset,
-          endOffset: h.endOffset,
-          text: h.text,
-          note: h.note,
-        }));
-
-        const savedHighlights = await db
-          .insert(profileItemHighlights)
-          .values(highlightsWithProfileItemId)
-          .onConflictDoUpdate({
-            target: profileItemHighlights.id,
-            where: eq(profileItemHighlights.profileItemId, profileItem[0].id),
-            set: {
-              startOffset: sql`excluded.start_offset`,
-              endOffset: sql`excluded.end_offset`,
-              text: sql`excluded.text`,
-              note: sql`excluded.note`,
-              updatedAt: sql`now()`,
-            },
-          })
-          .returning();
-
-        if (savedHighlights.length) {
-          await indexHighlightDocuments(
-            c,
-            savedHighlights.map((h) => ({
-              id: h.id,
-              profileId,
-              profileItemId: h.profileItemId,
-              slug: slug,
-              url: profileItem[0].url,
-              title: profileItem[0].title,
-              textDirection: profileItem[0].textDirection,
-              author: profileItem[0].author ?? undefined,
-              highlightText: h.text || "",
-              note: h.note || "",
-              startOffset: h.startOffset,
-              endOffset: h.endOffset,
-              updatedAt: h.updatedAt,
-            })),
-          );
-        }
-
-        const response = CreateOrUpdateHighlightResponseSchema.parse({
-          highlights: savedHighlights.map((h) => ({
+        return await db.transaction(async (tx) => {
+          const highlightsWithProfileItemId = highlights.map((h) => ({
             id: h.id,
+            profileItemId: profileItem[0].id,
             startOffset: h.startOffset,
             endOffset: h.endOffset,
             text: h.text,
             note: h.note,
-            createdAt: h.createdAt,
-          })),
-        });
+          }));
 
-        return c.json(response);
+          const savedHighlights = await tx
+            .insert(profileItemHighlights)
+            .values(highlightsWithProfileItemId)
+            .onConflictDoUpdate({
+              target: profileItemHighlights.id,
+              where: eq(profileItemHighlights.profileItemId, profileItem[0].id),
+              set: {
+                startOffset: sql`excluded.start_offset`,
+                endOffset: sql`excluded.end_offset`,
+                text: sql`excluded.text`,
+                note: sql`excluded.note`,
+                updatedAt: sql`now()`,
+              },
+            })
+            .returning();
+
+          if (savedHighlights.length) {
+            await indexHighlightDocuments(
+              c,
+              savedHighlights.map((h) => ({
+                id: h.id,
+                profileId,
+                profileItemId: h.profileItemId,
+                slug: slug,
+                url: profileItem[0].url,
+                title: profileItem[0].title,
+                textDirection: profileItem[0].textDirection,
+                author: profileItem[0].author ?? undefined,
+                highlightText: h.text || "",
+                note: h.note || "",
+                startOffset: h.startOffset,
+                endOffset: h.endOffset,
+                updatedAt: h.updatedAt,
+              })),
+            );
+          }
+
+          const response = CreateOrUpdateHighlightResponseSchema.parse({
+            highlights: savedHighlights.map((h) => ({
+              id: h.id,
+              startOffset: h.startOffset,
+              endOffset: h.endOffset,
+              text: h.text,
+              note: h.note,
+              createdAt: h.createdAt,
+            })),
+          });
+
+          return c.json(response);
+        });
       } catch (error) {
+        if (error instanceof SearchError) {
+          log("Error indexing highlights", { error: error.message });
+          return c.json({ error: "Failed to index highlights" }, 500);
+        }
         log("Error creating/updating highlights", { error });
         return c.json({ error: "Failed to create/update highlights" }, 500);
       }
@@ -234,29 +241,38 @@ export const itemsHighlightRouter = new Hono<EnvBindings>()
           return c.json({ error: "Item not found for the given slug" }, 404);
         }
 
-        const deletedHighlights = await db
-          .delete(profileItemHighlights)
-          .where(
-            and(
-              inArray(profileItemHighlights.id, highlightIds),
-              eq(profileItemHighlights.profileItemId, profileItem[0].id),
-            ),
-          )
-          .returning();
+        return await db.transaction(async (tx) => {
+          const deletedHighlights = await tx
+            .delete(profileItemHighlights)
+            .where(
+              and(
+                inArray(profileItemHighlights.id, highlightIds),
+                eq(profileItemHighlights.profileItemId, profileItem[0].id),
+              ),
+            )
+            .returning();
 
-        if (deletedHighlights.length) {
-          await deleteHighlightDocuments(
-            c,
-            deletedHighlights.map((h) => h.id),
+          if (deletedHighlights.length) {
+            await deleteHighlightDocuments(
+              c,
+              deletedHighlights.map((h) => h.id),
+            );
+          }
+
+          const response = DeleteHighlightResponseSchema.parse({
+            deleted: deletedHighlights.map((h) => ({ id: h.id })),
+          });
+
+          return c.json(response);
+        });
+      } catch (error) {
+        if (error instanceof SearchError) {
+          log("Error deleting highlights from index", { error: error.message });
+          return c.json(
+            { error: "Failed to delete highlights from index" },
+            500,
           );
         }
-
-        const response = DeleteHighlightResponseSchema.parse({
-          deleted: deletedHighlights.map((h) => ({ id: h.id })),
-        });
-
-        return c.json(response);
-      } catch (error) {
         log("Error deleting highlights", { error });
         return c.json({ error: "Failed to delete highlights" }, 500);
       }

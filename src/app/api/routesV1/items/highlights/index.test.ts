@@ -344,11 +344,10 @@ describe("/v1/items/highlights", () => {
       expect(response.status).toBe(400);
     });
 
-    it("should return 500 if db query fails", async () => {
-      vi.spyOn(testDb.db, "insert").mockImplementationOnce(() => {
-        throw { code: DbErrorCode.ConnectionFailure };
-      });
-
+    it("should return 500 and not save highlight if indexing fails", async () => {
+      indexHighlightDocuments.mockRejectedValueOnce(
+        new SearchError("Operation failed after 3 retries."),
+      );
       const response = await postRequest(app, "v1/items/highlights", {
         slug: "example-com",
         highlights: [
@@ -362,13 +361,27 @@ describe("/v1/items/highlights", () => {
       });
       expect(response.status).toBe(500);
       const data: ErrorResponse = await response.json();
-      expect(data.error).toBe("Failed to create/update highlights");
+      expect(data.error).toBe("Failed to index highlights");
+
+      const savedHighlights = await testDb.db
+        .select()
+        .from(profileItemHighlights);
+      expect(savedHighlights).toHaveLength(3);
     });
 
-    it("should return 500 if insert query fails", async () => {
-      vi.spyOn(testDb.db, "insert").mockImplementationOnce(() => {
-        throw { code: DbErrorCode.ConnectionFailure };
-      });
+    it("should return 500 if db query fails", async () => {
+      type PgTx = Parameters<Parameters<typeof testDb.db.transaction>[0]>[0];
+
+      vi.spyOn(testDb.db, "transaction").mockImplementationOnce(
+        async (callback) => {
+          return callback({
+            ...testDb.db,
+            insert: () => {
+              throw { code: DbErrorCode.ConnectionFailure };
+            },
+          } as unknown as PgTx);
+        },
+      );
 
       const response = await postRequest(app, "v1/items/highlights", {
         slug: "example-com",
@@ -381,10 +394,14 @@ describe("/v1/items/highlights", () => {
           },
         ],
       });
-
       expect(response.status).toBe(500);
       const data: ErrorResponse = await response.json();
       expect(data.error).toBe("Failed to create/update highlights");
+
+      const savedHighlights = await testDb.db
+        .select()
+        .from(profileItemHighlights);
+      expect(savedHighlights).toHaveLength(3);
     });
   });
 
@@ -457,6 +474,25 @@ describe("/v1/items/highlights", () => {
       expect(deleteHighlightDocuments).toHaveBeenCalledTimes(0);
     });
 
+    it("should return 500 if failed to delete from index", async () => {
+      deleteHighlightDocuments.mockRejectedValueOnce(
+        new SearchError("Operation failed after 3 retries."),
+      );
+      const response = await deleteRequest(app, "v1/items/highlights", {
+        slug: "example-com",
+        highlightIds: [MOCK_HIGHLIGHTS[0].id],
+      });
+      expect(response.status).toBe(500);
+      const data: ErrorResponse = await response.json();
+      expect(data.error).toBe("Failed to delete highlights from index");
+
+      const savedHighlight = await testDb.db
+        .select()
+        .from(profileItemHighlights)
+        .where(eq(profileItemHighlights.id, MOCK_HIGHLIGHTS[0].id));
+      expect(savedHighlight).toHaveLength(1);
+    });
+
     it("should return 500 if profile item query fails", async () => {
       vi.spyOn(testDb.db, "select").mockImplementationOnce(() => {
         throw { code: DbErrorCode.ConnectionFailure };
@@ -473,9 +509,18 @@ describe("/v1/items/highlights", () => {
     });
 
     it("should return 500 if delete query fails", async () => {
-      vi.spyOn(testDb.db, "delete").mockImplementationOnce(() => {
-        throw { code: DbErrorCode.ConnectionFailure };
-      });
+      type PgTx = Parameters<Parameters<typeof testDb.db.transaction>[0]>[0];
+
+      vi.spyOn(testDb.db, "transaction").mockImplementationOnce(
+        async (callback) => {
+          return callback({
+            ...testDb.db,
+            delete: () => {
+              throw { code: DbErrorCode.ConnectionFailure };
+            },
+          } as unknown as PgTx);
+        },
+      );
 
       const response = await deleteRequest(app, "v1/items/highlights", {
         slug: "example-com",
