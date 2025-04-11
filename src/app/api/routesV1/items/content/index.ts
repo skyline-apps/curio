@@ -4,6 +4,7 @@ import { items, profileItems } from "@app/api/db/schema";
 import { extractFromHtml } from "@app/api/lib/extract";
 import { ExtractedMetadata, ExtractError } from "@app/api/lib/extract/types";
 import { indexItemDocuments } from "@app/api/lib/search";
+import { SearchError } from "@app/api/lib/search/types";
 import { storage } from "@app/api/lib/storage";
 import { StorageError } from "@app/api/lib/storage/types";
 import {
@@ -24,6 +25,17 @@ import {
   UpdateItemContentResponseSchema,
 } from "@app/schemas/v1/items/content";
 import { Hono } from "hono";
+
+class SaveError extends Error {
+  constructor(
+    message: string,
+    public readonly statusCode?: number,
+    public readonly originalError?: Error,
+  ) {
+    super(message);
+    this.name = "SaveError";
+  }
+}
 
 export const itemsContentRouter = new Hono<EnvBindings>().post(
   "/",
@@ -51,6 +63,10 @@ export const itemsContentRouter = new Hono<EnvBindings>().post(
       const db = c.get("db");
 
       return await db.transaction(async (tx) => {
+        const existingItem = await tx
+          .select({ id: items.id, slug: items.slug })
+          .from(items)
+          .where(eq(items.url, cleanedUrl));
         const item = await tx
           .insert(items)
           .values({
@@ -64,6 +80,7 @@ export const itemsContentRouter = new Hono<EnvBindings>().post(
             },
           })
           .returning({ id: items.id, slug: items.slug, url: items.url });
+
         slug = item[0].slug;
 
         const { content, metadata: extractedMetadata } = await extractFromHtml(
@@ -91,10 +108,7 @@ export const itemsContentRouter = new Hono<EnvBindings>().post(
             )
             .limit(1);
           if (!itemMetadata.length) {
-            return c.json(
-              { error: "Item not found and metadata not provided." },
-              404,
-            );
+            throw new SaveError("Item not found and metadata not provided.");
           } else {
             metadata = itemMetadata[0];
           }
@@ -169,29 +183,52 @@ export const itemsContentRouter = new Hono<EnvBindings>().post(
             newMetadata,
             newDate,
           );
+          if (existingItem.length === 0) {
+            // Ensure item is properly indexed
+            await indexItemDocuments(c, [
+              {
+                slug: slug,
+                url: item[0].url,
+                title: newMetadata.title || item[0].url,
+                description: newMetadata.description ?? undefined,
+                author: newMetadata.author ?? undefined,
+                content: content,
+                contentVersionName: versionName,
+              },
+            ]);
+          }
           return c.json(response);
         } else {
           log("Upload error", { status: status });
-          return c.json({ error: "Error uploading item content." }, 500);
+          throw new SaveError("Error uploading item content.");
         }
       });
     } catch (error: unknown) {
       if (error instanceof StorageError) {
+        log(`Error storing content`, { error: error.message, url });
         return c.json({ error: error.message }, 500);
       } else if (error instanceof ExtractError) {
-        log(`Error extracting content for ${url}:`, error.message);
+        log(`Error extracting content`, { error: error.message, url });
+        return c.json({ error: error.message }, 500);
+      } else if (error instanceof SearchError) {
+        log(`Error indexing content`, { error: error.message, url });
+        return c.json({ error: error.message }, 500);
+      } else if (error instanceof SaveError) {
+        log(`Error updating item content`, { error: error.message, url });
         return c.json({ error: error.message }, 500);
       } else if (error instanceof Error) {
-        log(
-          `Error updating item content for ${url}:`,
-          error.name,
-          error.message.substring(0, 200),
-          error.stack,
-        );
-        return c.json({ error: "Error updating item content." }, 500);
+        log(`Unknown error updating item content`, {
+          error: `${error.name}: ${error.message.substring(0, 200)}`,
+          stack: error.stack,
+          url,
+        });
+        return c.json({ error: "Unknown updating item content." }, 500);
       } else {
-        log(`Unknown error updating item content for ${url}:`, error);
-        return c.json({ error: "Unknown error updating item content." }, 500);
+        log(`Unexpected error updating item content`, { error });
+        return c.json(
+          { error: "Unexpected error updating item content." },
+          500,
+        );
       }
     }
   },

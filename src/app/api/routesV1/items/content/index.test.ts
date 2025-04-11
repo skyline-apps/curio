@@ -3,7 +3,8 @@ import { items, profileItemHighlights, profileItems } from "@app/api/db/schema";
 import { extractFromHtml } from "@app/api/lib/extract";
 import { MOCK_METADATA } from "@app/api/lib/extract/__mocks__/index";
 import { ExtractError } from "@app/api/lib/extract/types";
-import { indexItemDocuments } from "@app/api/lib/search";
+import { indexItemDocuments } from "@app/api/lib/search/__mocks__/index";
+import { SearchError } from "@app/api/lib/search/types";
 import {
   getItemContent,
   getItemMetadata,
@@ -61,7 +62,7 @@ describe("/v1/items/content", () => {
       app = setUpMockApp("/v1/items/content", itemsContentRouter);
     });
 
-    const checkDocumentIndexed = (): void => {
+    const checkDocumentIndexed = (slug: string = TEST_ITEM_SLUG): void => {
       expect(indexItemDocuments).toHaveBeenCalledTimes(1);
       expect(indexItemDocuments).toHaveBeenCalledWith(expect.any(Object), [
         {
@@ -71,7 +72,7 @@ describe("/v1/items/content", () => {
           content: "Markdown content",
           contentVersionName: MOCK_VERSION,
           url: TEST_ITEM_URL_1,
-          slug: TEST_ITEM_SLUG,
+          slug,
         },
       ]);
     };
@@ -566,7 +567,7 @@ describe("/v1/items/content", () => {
         url: TEST_ITEM_URL_1,
         skipMetadataExtraction: true,
       });
-      expect(response.status).toBe(404);
+      expect(response.status).toBe(500);
       const data: ErrorResponse = await response.json();
       expect(data.error).toBe("Item not found and metadata not provided.");
     });
@@ -632,6 +633,46 @@ describe("/v1/items/content", () => {
       expect(data.error).toBe(
         "Invalid request parameters:\nhtmlContent: Required",
       );
+    });
+
+    it("should return 500 on new item if indexing fails", async () => {
+      indexItemDocuments.mockRejectedValueOnce(
+        new SearchError("Operation failed after 3 retries."),
+      );
+      const response = await postRequest(app, "v1/items/content", {
+        htmlContent: "<div>New content</div>",
+        url: TEST_ITEM_URL_1,
+      });
+      expect(response.status).toBe(500);
+      const data: ErrorResponse = await response.json();
+      expect(data.error).toBe("Operation failed after 3 retries.");
+      const item = await testDb.db.select().from(items);
+      expect(item.length).toBe(0);
+      const profileItem = await testDb.db.select().from(profileItems);
+      expect(profileItem.length).toBe(0);
+    });
+
+    it("should return 200 and re-index existing item", async () => {
+      vi.mocked(uploadItemContent).mockResolvedValueOnce({
+        versionName: MOCK_VERSION,
+        status: UploadStatus.SKIPPED,
+      });
+      const response = await postRequest(app, "v1/items/content", {
+        htmlContent: "<div>New content</div>",
+        url: TEST_ITEM_URL_1,
+      });
+      expect(response.status).toBe(200);
+      const data = await response.json();
+      expect(data).toEqual({
+        message: "Content already exists",
+        slug: expect.any(String),
+        status: "SKIPPED",
+      });
+      const item = await testDb.db.select().from(items);
+      expect(item.length).toBe(1);
+      const profileItem = await testDb.db.select().from(profileItems);
+      expect(profileItem.length).toBe(1);
+      checkDocumentIndexed(data.slug);
     });
   });
 });
