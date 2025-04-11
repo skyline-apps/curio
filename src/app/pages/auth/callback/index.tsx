@@ -51,7 +51,7 @@ const AuthCallback: React.FC = () => {
               error instanceof Error ? error.message : error,
             );
             await supabase.auth.signOut();
-            navigate("/login?error=session_error", { replace: true });
+            navigate("/login?error=session_error");
           }
         }
       },

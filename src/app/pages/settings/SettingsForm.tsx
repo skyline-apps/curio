@@ -49,10 +49,10 @@ const SettingsForm: React.FC = () => {
             team@curi.ooo
           </Link>
           .
-          {import.meta.env.VITE_BUILD_HASH && (
-            <p>Build number: {import.meta.env.VITE_BUILD_HASH}</p>
-          )}
         </p>
+        {import.meta.env.VITE_BUILD_HASH && (
+          <p>Build number: {import.meta.env.VITE_BUILD_HASH.substring(0, 7)}</p>
+        )}
       </div>
     </>
   );
