@@ -9,8 +9,9 @@
     "db:generate": "tsx --tsconfig ./tsconfig.api.json node_modules/drizzle-kit/bin.cjs generate --name",
     "db:migrate": "tsx --tsconfig ./tsconfig.api.json node_modules/drizzle-kit/bin.cjs migrate",
     "lint": "eslint .",
-    "preview": "npm run build && vite preview",
-    "deploy": "npm run build && wrangler deploy",
+    "preview": "vite preview",
+    "deploy:staging": "npm run build -- --mode staging && wrangler deploy",
+    "deploy:prod": "npm run build -- --mode prod && wrangler deploy",
     "test": "vitest --run --no-file-parallelism",
     "test:watch": "vitest"
   },

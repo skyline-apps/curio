@@ -14,25 +14,33 @@ jobs:
         with:
           node-version: "22.9.0"
 
-      - name: APP - Install lint rule
+      - name: Install lint rule
         working-directory: ./src/app/api/eslint-local-rules
         run: npm install && npm run build
 
-      - name: APP - Install dependencies
+      - name: Install dependencies
         working-directory: ./src/app
         run: npm install
 
-      - name: APP - Run lint
+      - name: Run lint
         working-directory: ./src/app
         run: npm run lint
 
-      - name: APP - Run build
-        working-directory: ./src/app
-        run: npm run build
-
-      - name: APP - Run tests
+      - name: Run tests
         working-directory: ./src/app
         run: npm run test
+
+      - name: Run build (staging)
+        working-directory: ./src/app
+        run: npm run build -- --mode staging
+
+      - name: Deploy (staging)
+        working-directory: ./src/app
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: deploy --env staging
+          environment: staging
 
   check-web:
     runs-on: ubuntu-latest

@@ -6,8 +6,11 @@ import svgr from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 // https://vite.dev/config/
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
   return {
+    environment: {
+      CLOUDFLARE_ENV: mode === "prod" ? "prod" : "staging",
+    },
     plugins: [
       svgr({
         include: /\.svg(\?v=\d+)?$/,
