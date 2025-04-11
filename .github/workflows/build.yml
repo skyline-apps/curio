@@ -79,7 +79,9 @@ jobs:
 
       - name: Run database migrations
         working-directory: ./src/app
-        run: POSTGRES_URL=${{ secrets.POSTGRES_URL }} npm run db:migrate
+        run: npm run db:migrate
+        env:
+          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
 
   deploy-prod:
     needs: check-app
@@ -128,7 +130,9 @@ jobs:
 
       - name: Run database migrations
         working-directory: ./src/app
-        run: POSTGRES_URL=${{ secrets.POSTGRES_URL }} npm run db:migrate
+        run: npm run db:migrate
+        env:
+          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
 
   check-web:
     runs-on: ubuntu-latest
