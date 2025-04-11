@@ -66,10 +66,15 @@ const CurioTextarea = ({
             variant="ghost"
             onPress={async () => {
               setLoading(true);
-              props.onSave?.().then(() => {
-                setEditable(false);
-                setLoading(false);
-              });
+              props
+                .onSave?.()
+                .then(() => {
+                  setEditable(false);
+                  setLoading(false);
+                })
+                .catch(() => {
+                  setLoading(false);
+                });
             }}
             isLoading={loading}
           >
