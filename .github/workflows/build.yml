@@ -66,6 +66,7 @@ jobs:
           VITE_POSTHOG_KEY: ${{ vars.POSTHOG_KEY }}
           VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          VITE_BUILD_HASH: ${{ github.sha }}
 
       - name: Deploy to Cloudflare (staging)
         uses: cloudflare/wrangler-action@v3
@@ -104,6 +105,12 @@ jobs:
         run: npm run build -- --mode prod
         env:
           CLOUDFLARE_ENV: prod
+          VITE_CURIO_URL: ${{ vars.CURIO_URL }}
+          VITE_POSTHOG_HOST: ${{ vars.POSTHOG_HOST }}
+          VITE_POSTHOG_KEY: ${{ vars.POSTHOG_KEY }}
+          VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          VITE_BUILD_HASH: ${{ github.sha }}
 
       - name: Deploy to Cloudflare (production)
         uses: cloudflare/wrangler-action@v3
