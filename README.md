@@ -56,16 +56,17 @@ To clear the database, run
 ## Deployment
 ### Web app
 1. Set up Supabase app. We use their database, storage, and auth services.
-2. Set up Cloudflare account. The application will be deployed to their Workers & Pages service.
-  - Only the variables in the first section of the `.env.template` are needed. Populate them in `.env.staging` and `.env.prod`.
+2. Set up a Posthog account and populate the environment variables `POSTHOG_KEY` and `POSTHOG_HOST`.
+3. Set up Cloudflare account. The application will be deployed to their Workers & Pages service.
+  - Only the variables in the first section of the `.env.template` are needed. Populate them in `.env.staging` and `.env.prod` and in the project settings per environment.
   - For the `POSTGRES_URL` variable, make sure to use the "Transaction pooler" Supabase Postgres URL.
   - Also generate a `SEARCH_MASTER_API_KEY` (at least 16 bytes) and `SEARCH_APPLICATION_API_KEY` (a UUID v4).
-3. Set up a Posthog account and populate the environment variables `POSTHOG_KEY` and `POSTHOG_HOST`.
-4. Run database migrations against the production database using `DOTENV_CONFIG_PATH=/path/to/.env.prod npm run db:migrate`. You can also set this up to run automatically with the build process.
+4. Run database migrations against the production database using `DOTENV_CONFIG_PATH=/path/to/.env.prod npm run db:migrate`. This is also set up to run automatically with the GitHub Actions build process.
 5. Configure the Supabase storage settings.
   - Create a bucket `items`. Set it to be public with the allowed MIME type `text/markdown`.
   - Create a new policy on the `items` bucket from scratch. Title it "Allow read access for everyone", allow the `SELECT` operation for all roles, and keep the default policy definition `bucket_id = 'items'`.
   - Create a new policy on the `items` bucket. Title it "Allow authenticated to upload", allow the `INSERT` and `UPDATE` operations for the `authenticated` role, and keep the default policy definition.
+6. Populate the environment variables and secrets in GitHub so that the Actions build pipeline can deploy.
 
 ### Cloud services
 1. Set up a GCP account.

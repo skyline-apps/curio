@@ -76,6 +76,10 @@ jobs:
           workingDirectory: 'src/app'
           command: deploy
 
+      - name: Run database migrations
+        working-directory: ./src/app
+        run: POSTGRES_URL=${{ secrets.POSTGRES_URL }} npm run db:migrate
+
   deploy-prod:
     needs: check-app
     name: Deploy app (production)
@@ -119,6 +123,10 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: 'src/app'
           command: deploy
+
+      - name: Run database migrations
+        working-directory: ./src/app
+        run: POSTGRES_URL=${{ secrets.POSTGRES_URL }} npm run db:migrate
 
   check-web:
     runs-on: ubuntu-latest
