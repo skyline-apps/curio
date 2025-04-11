@@ -38,7 +38,9 @@ const AuthCallback: React.FC = () => {
             });
 
             if (!response.ok) {
-              throw new Error("Failed to set session cookie");
+              throw new Error(
+                `Failed to set session cookie: ${await response.text()}`,
+              );
             }
 
             refreshUser();
@@ -48,6 +50,7 @@ const AuthCallback: React.FC = () => {
               "Error setting session cookie:",
               error instanceof Error ? error.message : error,
             );
+            await supabase.auth.signOut();
             navigate("/login?error=session_error", { replace: true });
           }
         }

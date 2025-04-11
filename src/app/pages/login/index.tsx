@@ -7,17 +7,24 @@ import Navbar from "@app/components/Navbar";
 import Spinner from "@app/components/ui/Spinner";
 import { useUser } from "@app/providers/User";
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 type LoginPageProps = Record<never, never>;
 
 const LoginPage: React.FC<LoginPageProps> = ({}: LoginPageProps) => {
   const { user } = useUser();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   if (user && user.id) {
     // Already signed in; redirect to home
     navigate("/home");
     return <Spinner centered />;
+  }
+  const error = searchParams.get("error");
+  let errorMessage = error;
+  if (error === "session_error") {
+    errorMessage =
+      "There was a problem signing in. Please try again and contact us if this persists.";
   }
 
   return (
@@ -33,6 +40,11 @@ const LoginPage: React.FC<LoginPageProps> = ({}: LoginPageProps) => {
             <GoogleSignIn nextUrl="/home" />
             <p className="text-secondary text-xs">or</p>
             <EmailSignIn />
+            {errorMessage && (
+              <p className="text-danger text-sm text-center mt-2">
+                {errorMessage}
+              </p>
+            )}
             <p className="text-secondary text-xs text-center mt-2">
               By signing up, you agree to our{" "}
               <Link className="hover:underline" to="/terms" target="_blank">
