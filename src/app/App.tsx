@@ -8,6 +8,7 @@ import ContentPage from "@app/pages/content";
 import HomePage from "@app/pages/home";
 import InboxPage from "@app/pages/inbox";
 import LoginPage from "@app/pages/login";
+import RedirectPage from "@app/pages/login/redirect";
 import NotFound from "@app/pages/not-found";
 import NotesPage from "@app/pages/notes";
 import PrivacyPage from "@app/pages/privacy";
@@ -67,6 +68,10 @@ export const App = (): React.ReactNode => {
           <Route
             path="/login"
             element={user?.id ? <HomeRedirect /> : <LoginPage />}
+          />
+          <Route
+            path="/login/redirect"
+            element={user?.id ? <HomeRedirect /> : <RedirectPage />}
           />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/privacy" element={<PrivacyPage />} />
