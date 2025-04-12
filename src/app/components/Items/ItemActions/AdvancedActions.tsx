@@ -14,9 +14,13 @@ import { useItemUpdate } from "./actions";
 
 interface AdvancedActionsProps {
   item: Item;
+  onItemActionSuccess?: () => void;
 }
 
-export const AdvancedActions: React.FC<AdvancedActionsProps> = ({ item }) => {
+export const AdvancedActions: React.FC<AdvancedActionsProps> = ({
+  item,
+  onItemActionSuccess,
+}) => {
   const { markUnread, markRead, refetchItem } = useItemUpdate();
 
   return (
@@ -28,7 +32,10 @@ export const AdvancedActions: React.FC<AdvancedActionsProps> = ({ item }) => {
       </DropdownTrigger>
       <DropdownMenu className="w-48">
         {!!item.metadata.lastReadAt ? (
-          <DropdownItem key="mark-unread" onPress={() => markUnread(item)}>
+          <DropdownItem
+            key="mark-unread"
+            onPress={() => markUnread(item).then(() => onItemActionSuccess?.())}
+          >
             Mark as unread
           </DropdownItem>
         ) : (

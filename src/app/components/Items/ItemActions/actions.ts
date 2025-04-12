@@ -80,6 +80,8 @@ export const useItemUpdate = (): UseItemUpdate => {
       if (!loadedItem) {
         invalidateCache();
         clearSelectedItems();
+      } else {
+        invalidateCache();
       }
     },
     onError: (error) => {

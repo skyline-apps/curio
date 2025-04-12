@@ -12,9 +12,9 @@ import RedirectPage from "@app/pages/login/redirect";
 import NotFound from "@app/pages/not-found";
 import NotesPage from "@app/pages/notes";
 import PrivacyPage from "@app/pages/privacy";
-import ProfilePage from "@app/pages/profile";
 import SettingsPage from "@app/pages/settings";
 import TermsPage from "@app/pages/terms";
+import UserPage from "@app/pages/user";
 import { useUser } from "@app/providers/User";
 import React, { useEffect } from "react";
 import {
@@ -98,7 +98,7 @@ export const App = (): React.ReactNode => {
               </PublicLayout>
             }
           >
-            <Route path="/u/:username" element={<ProfilePage />} />
+            <Route path="/u/:username?" element={<UserPage />} />
             <Route path="/item/:slug" element={<ContentPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />

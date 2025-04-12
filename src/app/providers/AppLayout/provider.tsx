@@ -9,9 +9,9 @@ import {
   updateLayoutSettings,
 } from "@app/utils/displayStorage";
 import React, { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
-import { AppLayoutContext } from ".";
+import { AppLayoutContext, SidebarKey } from ".";
 
 interface AppLayoutProviderProps {
   children: React.ReactNode;
@@ -20,7 +20,9 @@ interface AppLayoutProviderProps {
 export const AppLayoutProvider: React.FC<AppLayoutProviderProps> = ({
   children,
 }: AppLayoutProviderProps): React.ReactNode => {
+  const [rootPage, setRootPage] = useState<SidebarKey>(SidebarKey.NONE);
   const [appLayout, setAppLayout] = useState<AppLayoutSettings>(DEFAULT_LAYOUT);
+  const { pathname } = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,6 +36,19 @@ export const AppLayoutProvider: React.FC<AppLayoutProviderProps> = ({
     },
     [appLayout],
   );
+
+  const updateRootPage = useCallback(
+    (page: SidebarKey): void => {
+      setRootPage(page);
+    },
+    [setRootPage],
+  );
+
+  const navigateToRoot = useCallback(() => {
+    if (!pathname.startsWith(rootPage) && rootPage !== SidebarKey.NONE) {
+      navigate(rootPage);
+    }
+  }, [navigate, rootPage, pathname]);
 
   const toggleSidebars = useCallback(() => {
     const current = appLayout.leftSidebarOpen;
@@ -119,6 +134,8 @@ export const AppLayoutProvider: React.FC<AppLayoutProviderProps> = ({
       value={{
         appLayout,
         updateAppLayout,
+        updateRootPage,
+        navigateToRoot,
       }}
     >
       {children}

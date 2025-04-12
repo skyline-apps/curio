@@ -1,5 +1,6 @@
 import Icon from "@app/components/ui/Icon";
 import { Tab, Tabs } from "@app/components/ui/Tabs";
+import { SidebarKey } from "@app/providers/AppLayout";
 import { cn } from "@app/utils/cn";
 import React from "react";
 import {
@@ -10,11 +11,10 @@ import {
 } from "react-icons/hi2";
 
 import SidebarButton from "./SidebarButton";
-import { SidebarKey } from "./types";
 
 interface NavigationMenuProps {
   sidebarOpen: boolean;
-  selectedKey: string;
+  selectedKey: SidebarKey;
   onNavigation: (key: React.Key) => void;
 }
 

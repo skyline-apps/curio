@@ -6,6 +6,7 @@ import {
 } from "@app/components/ui/Dropdown";
 import Icon from "@app/components/ui/Icon";
 import { User } from "@app/components/ui/User";
+import { SidebarKey } from "@app/providers/AppLayout";
 import { cn } from "@app/utils/cn";
 import React from "react";
 import {
@@ -24,7 +25,7 @@ interface UserData {
 interface UserMenuProps {
   user: UserData;
   sidebarOpen: boolean;
-  selectedKey: string;
+  selectedKey: SidebarKey;
   onLogout: () => void;
   onNavigate: (path: string) => void;
 }
@@ -38,13 +39,13 @@ const UserMenu: React.FC<UserMenuProps> = ({
 }) => {
   const userActionItems = [
     {
-      key: "profile",
+      key: SidebarKey.PROFILE,
       label: "Profile",
       icon: <HiOutlineUser />,
       onPress: () => onNavigate(`/u/${user.username}`),
     },
     {
-      key: "settings",
+      key: SidebarKey.SETTINGS,
       label: "Settings",
       icon: <HiOutlineCog6Tooth />,
       onPress: () => onNavigate("/settings"),

@@ -1,7 +1,7 @@
 import NewItemModal from "@app/components/NewItemModal";
 import Button from "@app/components/ui/Button";
 import Icon from "@app/components/ui/Icon";
-import { useAppLayout } from "@app/providers/AppLayout";
+import { SidebarKey, useAppLayout } from "@app/providers/AppLayout";
 import {
   BrowserMessageContext,
   EventType,
@@ -18,16 +18,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import NavigationMenu from "./NavigationMenu";
 import SidebarHeader from "./SidebarHeader";
-import { SidebarKey } from "./types";
 import UserMenu from "./UserMenu";
 
 const LeftSidebar: React.FC = () => {
   const { user, handleLogout } = useUser();
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const [selectedKey, setSelectedKey] = useState<string>(SidebarKey.NONE);
+  const [selectedKey, setSelectedKey] = useState<SidebarKey>(SidebarKey.NONE);
   const [showNewItemModal, setShowNewItemModal] = useState<boolean>(false);
-  const { appLayout, updateAppLayout } = useAppLayout();
+  const { appLayout, updateAppLayout, updateRootPage } = useAppLayout();
   const { addMessageListener, removeMessageListener } = useContext(
     BrowserMessageContext,
   );
@@ -44,13 +43,15 @@ const LeftSidebar: React.FC = () => {
   }, [addMessageListener, removeMessageListener]);
 
   useEffect(() => {
-    const newSelectedKey = Object.values(SidebarKey).includes(
-      pathname as SidebarKey,
-    )
-      ? pathname
-      : SidebarKey.NONE;
+    const newSelectedKey =
+      Object.values(SidebarKey).find(
+        (key) => !!key && pathname.startsWith(key),
+      ) ?? SidebarKey.NONE;
     setSelectedKey(newSelectedKey);
-  }, [pathname]);
+    if (newSelectedKey !== SidebarKey.NONE) {
+      updateRootPage(newSelectedKey);
+    }
+  }, [pathname, updateRootPage]);
 
   const sidebarOpen = appLayout.leftSidebarOpen;
 
@@ -62,6 +63,17 @@ const LeftSidebar: React.FC = () => {
     updateAppLayout({
       leftSidebarOpen: !sidebarOpen,
     });
+  };
+
+  const toNavigationKey = (key: SidebarKey): SidebarKey => {
+    return [
+      SidebarKey.HOME,
+      SidebarKey.INBOX,
+      SidebarKey.NOTES,
+      SidebarKey.ARCHIVE,
+    ].includes(key)
+      ? key
+      : SidebarKey.NONE;
   };
 
   return (
@@ -77,7 +89,7 @@ const LeftSidebar: React.FC = () => {
           <SidebarHeader sidebarOpen={sidebarOpen} />
           <NavigationMenu
             sidebarOpen={sidebarOpen}
-            selectedKey={selectedKey}
+            selectedKey={toNavigationKey(selectedKey)}
             onNavigation={handleNavigation}
           />
         </div>

@@ -25,6 +25,7 @@ interface ActionButtonProps<T> {
   activeDisplay?: ActionButtonDisplay;
   isActive?: boolean;
   isLoading?: boolean;
+  onActionSuccess?: () => void;
 }
 const ActionButton = <T,>({
   action,
@@ -32,14 +33,16 @@ const ActionButton = <T,>({
   activeDisplay,
   isActive,
   isLoading,
+  onActionSuccess,
 }: ActionButtonProps<T>): React.ReactNode => {
   const { fetchItems } = useContext(ItemsContext);
 
   const onPress = useCallback(async () => {
     await action().then(async () => {
       await fetchItems(true);
+      onActionSuccess?.();
     });
-  }, [fetchItems, action]);
+  }, [fetchItems, action, onActionSuccess]);
 
   return (
     <Button
@@ -61,12 +64,14 @@ interface ItemActionsProps {
   className?: string;
   item?: Item;
   showExpanded?: boolean;
+  onItemActionSuccess?: () => void;
 }
 
 const ItemActions = ({
   item,
   showExpanded,
   className,
+  onItemActionSuccess,
 }: ItemActionsProps): React.ReactElement => {
   const { updateItemsState, updateItemsFavorite } = useItemUpdate();
 
@@ -96,6 +101,7 @@ const ItemActions = ({
         defaultDisplay={{ text: "Archive", icon: <HiOutlineArchiveBox /> }}
         activeDisplay={{ text: "Unarchive", icon: <HiArchiveBox /> }}
         isActive={item.metadata.state === ItemState.ARCHIVED}
+        onActionSuccess={onItemActionSuccess}
       />
       {showExpanded && (
         <>
@@ -111,6 +117,7 @@ const ItemActions = ({
             defaultDisplay={{ text: "Delete", icon: <HiOutlineTrash /> }}
             activeDisplay={{ text: "Restore", icon: <HiTrash /> }}
             isActive={item.metadata.state === ItemState.DELETED}
+            onActionSuccess={onItemActionSuccess}
           />
         </>
       )}

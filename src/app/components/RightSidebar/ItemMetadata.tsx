@@ -4,6 +4,7 @@ import { useItemUpdate } from "@app/components/Items/ItemActions/actions";
 import AdvancedActions from "@app/components/Items/ItemActions/AdvancedActions";
 import OtherItemActions from "@app/components/Items/ItemActions/OtherItemActions";
 import Labels, { Label } from "@app/components/Labels";
+import { useAppLayout } from "@app/providers/AppLayout";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import type { Item, PublicItem } from "@app/providers/Items";
 import { useSettings } from "@app/providers/Settings";
@@ -94,6 +95,11 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
   const { isEditable } = useContext(CurrentItemContext);
   const { labels } = useSettings();
   const { addItemsLabel, removeItemsLabel } = useItemUpdate();
+  const { navigateToRoot } = useAppLayout();
+
+  const onItemActionSuccess = useCallback(() => {
+    navigateToRoot();
+  }, [navigateToRoot]);
 
   const handleAddLabel = useCallback(
     async (label: Label): Promise<void> => {
@@ -154,8 +160,15 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
           {isEditable(item) ? (
             !readonly ? (
               <div className="flex justify-between">
-                <ItemActions item={item} showExpanded />
-                <AdvancedActions item={item} />
+                <ItemActions
+                  item={item}
+                  showExpanded
+                  onItemActionSuccess={onItemActionSuccess}
+                />
+                <AdvancedActions
+                  item={item}
+                  onItemActionSuccess={onItemActionSuccess}
+                />
               </div>
             ) : null
           ) : user.id ? (
