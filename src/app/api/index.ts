@@ -7,7 +7,6 @@ import { getDb } from "@app/api/db";
 import { requestLogger } from "@app/api/middleware/logger";
 import { v1Router } from "@app/api/routesV1";
 import { EnvBindings } from "@app/api/utils/env";
-import { createLogger } from "@app/api/utils/logger";
 import { ExecutionContext, Hono } from "hono";
 import { cors } from "hono/cors";
 import { prettyJSON } from "hono/pretty-json";
@@ -23,8 +22,6 @@ api.use("*", async (c, next) => {
   if (!c.env.VITE_CURIO_URL) {
     throw new Error("VITE_CURIO_URL environment variable is not set");
   }
-
-  c.set("log", createLogger(c));
 
   c.set("db", getDb(c));
 

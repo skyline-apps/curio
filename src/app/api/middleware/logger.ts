@@ -47,6 +47,7 @@ export const requestLogger = (): MiddlewareHandler => {
       return await next();
     }
     const axiomLogger = createLogger(c);
+    c.set("log", axiomLogger);
     const { method, url } = c.req;
 
     const path = url.slice(url.indexOf("/", 8));
