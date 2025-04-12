@@ -9,7 +9,7 @@ import {
 export type Logger = AxiomLogger;
 
 export const createLogger = (c: EnvContext): AxiomLogger => {
-  const hasAxiom = c.env.AXIOM_DATASET && c.env.AXIOM_TOKEN;
+  const hasAxiom = !!c.env.AXIOM_DATASET && !!c.env.AXIOM_TOKEN;
 
   return new AxiomLogger({
     transports: [

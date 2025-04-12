@@ -43,7 +43,8 @@ function log(
 
 export const requestLogger = (): MiddlewareHandler => {
   return async function logger(c, next) {
-    const logFn = createLogger(c).info;
+    const axiomLogger = createLogger(c);
+    const logFn = axiomLogger.info;
     const { method, url } = c.req;
 
     const path = url.slice(url.indexOf("/", 8));
@@ -55,5 +56,9 @@ export const requestLogger = (): MiddlewareHandler => {
     await next();
 
     log(logFn, LogPrefix.Outgoing, method, path, c.res.status, time(start));
+
+    if (typeof axiomLogger.flush === "function") {
+      await axiomLogger.flush();
+    }
   };
 };
