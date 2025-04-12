@@ -32,7 +32,7 @@ import {
   TEST_LABEL_ID_2,
 } from "@app/api/utils/test/data";
 import { testDb } from "@app/api/utils/test/provider";
-import { ItemState, TextDirection } from "@app/schemas/db";
+import { ItemSource, ItemState, TextDirection } from "@app/schemas/db";
 import { GetItemsResponse } from "@app/schemas/v1/items";
 import { Hono } from "hono";
 import { beforeAll, describe, expect, it, vi } from "vitest";
@@ -784,6 +784,7 @@ describe("/v1/items", () => {
             metadata: {
               title: "New title",
               description: "New description",
+              source: ItemSource.OMNIVORE,
             },
           },
           {
@@ -812,6 +813,7 @@ describe("/v1/items", () => {
               state: ItemState.ACTIVE,
               isFavorite: false,
               readingProgress: 0,
+              source: ItemSource.OMNIVORE,
             }),
             createdAt: expect.any(String),
           },
@@ -823,6 +825,7 @@ describe("/v1/items", () => {
             metadata: expect.objectContaining({
               title: "Example title",
               versionName: null,
+              source: null,
             }),
             createdAt: expect.any(String),
           },

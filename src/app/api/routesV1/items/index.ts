@@ -260,6 +260,7 @@ export const itemsRouter = new Hono<EnvBindings>()
               favicon: item.metadata?.favicon || sql`NULL`,
               textDirection: item.metadata?.textDirection || TextDirection.LTR,
               textLanguage: item.metadata?.textLanguage || "",
+              source: item.metadata?.source || sql`NULL`,
               publishedAt: item.metadata?.publishedAt
                 ? new Date(item.metadata.publishedAt)
                 : sql`NULL`,
@@ -287,6 +288,7 @@ export const itemsRouter = new Hono<EnvBindings>()
                 favicon: sql`COALESCE(EXCLUDED.favicon, ${profileItems.favicon})`,
                 textDirection: sql`COALESCE(EXCLUDED.text_direction, ${profileItems.textDirection})`,
                 textLanguage: sql`COALESCE(EXCLUDED.text_language, ${profileItems.textLanguage})`,
+                source: sql`COALESCE(EXCLUDED.source, ${profileItems.source})`,
                 publishedAt: sql`COALESCE(EXCLUDED.published_at, ${profileItems.publishedAt})`,
                 stateUpdatedAt: sql`CASE
               WHEN EXCLUDED.state <> profile_items.state
