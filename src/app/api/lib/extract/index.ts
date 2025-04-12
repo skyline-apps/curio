@@ -75,7 +75,7 @@ export class Extract {
   ): Promise<{ content: string; metadata: ExtractedMetadata }> {
     try {
       // Ensure we have a full HTML structure for linkedom/Readability
-      const fullHtml = html.trim().match(/^<html/i)
+      const fullHtml = html.trim().match(/<html/i)
         ? html
         : `<!DOCTYPE html><html><body>${html}</body></html>`;
 

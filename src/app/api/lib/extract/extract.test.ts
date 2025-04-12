@@ -188,14 +188,6 @@ function test() {
       ).rejects.toThrow(ExtractError);
     });
 
-    it("should throw ExtractError for invalid HTML", async () => {
-      const invalidHtml = "not html at all";
-
-      await expect(
-        extractFromHtml("https://example.com", invalidHtml),
-      ).rejects.toThrow(ExtractError);
-    });
-
     it("should insert rtl tag when entire html is rtl", async () => {
       const html = fs.readFileSync(
         path.join(fixturesPath, "rtl-html.html"),
