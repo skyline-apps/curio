@@ -784,7 +784,7 @@ describe("/v1/items", () => {
             metadata: {
               title: "New title",
               description: "New description",
-              source: ItemSource.OMNIVORE,
+              source: "omnivore",
             },
           },
           {
