@@ -126,6 +126,9 @@ export class Search {
     }
 
     if (!this.axiosInstance) {
+      const log = c.get("log");
+      log.info("Set up search endpoint", { endpoint });
+
       this.axiosInstance = axios.create({
         baseURL: endpoint,
         headers: {
