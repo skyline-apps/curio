@@ -34,6 +34,7 @@ async function sendItems(items: any[]) {
             url: convertUrl(item.url),
             metadata: {
                 ...item.metadata,
+                source: "omnivore",
                 description: item.metadata.description?.substring(0, 2048),
                 stateUpdatedAt: item.metadata.savedAt,
             }
