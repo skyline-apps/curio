@@ -1,5 +1,6 @@
 import { type TransactionDB } from "@app/api/db";
 import { EnvBindings } from "@app/api/utils/env";
+import { createLogger } from "@app/api/utils/logger";
 import { MOCK_ENV } from "@app/api/utils/test/env";
 import { testDb } from "@app/api/utils/test/provider";
 import { Hono, MiddlewareHandler } from "hono";
@@ -39,6 +40,7 @@ export const setUpMockApp = (
     app.use(createMockAuthMiddleware(userId));
   }
   app.use("*", (c, next) => {
+    c.set("log", createLogger(c));
     c.set("db", testDb.db as unknown as TransactionDB);
     return next();
   });
