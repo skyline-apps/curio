@@ -20,10 +20,9 @@ resource "aws_lambda_function" "email_processor" {
 
   environment {
     variables = {
-      API_ENDPOINT             = var.api_endpoint
-      VERCEL_PROTECTION_BYPASS = var.vercel_protection_bypass
-      CURIO_APP_SECRET         = var.curio_app_secret
-      S3_BUCKET_NAME           = aws_s3_bucket.email_storage.id
+      API_ENDPOINT     = var.api_endpoint
+      CURIO_APP_SECRET = var.curio_app_secret
+      S3_BUCKET_NAME   = aws_s3_bucket.email_storage.id
 
       HEALTHCHECK_TOKEN          = var.email_healthcheck_token
       HEALTHCHECK_ERROR_ENDPOINT = var.email_healthcheck_error_endpoint

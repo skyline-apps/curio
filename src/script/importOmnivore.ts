@@ -4,7 +4,6 @@ import unzipper from "unzipper";
 import fetch from "node-fetch";
 
 const API_HOSTNAME = process.env.API_HOSTNAME || "http://localhost:3000";
-const BYPASS = process.env.BYPASS || "";
 const API_KEY = process.env.API_KEY || "";
 const ITEMS_ENDPOINT = `${API_HOSTNAME}/api/v1/items`;
 const CONTENT_ENDPOINT = `${API_HOSTNAME}/api/v1/items/content`;
@@ -41,7 +40,7 @@ async function sendItems(items: any[]) {
         }));
         const response = await fetch(ITEMS_ENDPOINT, {
             method: "POST",
-            headers: { "Content-Type": "application/json", "x-api-key": API_KEY, 'x-vercel-protection-bypass': BYPASS },
+            headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
             body: JSON.stringify({ items: batch }),
         });
 
@@ -55,7 +54,7 @@ async function sendItems(items: any[]) {
 async function sendItemContent(url: string, htmlContent: string, contentPath: string) {
     const response = await fetch(CONTENT_ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": API_KEY, 'x-vercel-protection-bypass': BYPASS },
+        headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
         body: JSON.stringify({ htmlContent, url: convertUrl(url), skipMetadataExtraction: true }),
     });
 

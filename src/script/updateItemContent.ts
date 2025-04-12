@@ -1,7 +1,6 @@
 import fs from "fs";
 
 const API_HOSTNAME = process.env.API_HOSTNAME || "http://localhost:3000";
-const BYPASS = process.env.BYPASS || "";
 const API_KEY = process.env.API_KEY || "";
 const CONTENT_ENDPOINT = `${API_HOSTNAME}/api/v1/items/content`;
 
@@ -15,7 +14,7 @@ async function sendItemContent(url: string, contentPath: string) {
 }
     const response = await fetch(CONTENT_ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": API_KEY, 'x-vercel-protection-bypass': BYPASS },
+        headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
         body: JSON.stringify({ htmlContent, url, skipMetadataExtraction: false }),
     });
 

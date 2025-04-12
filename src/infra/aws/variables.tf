@@ -29,12 +29,6 @@ variable "ses_email_identity_sender" {
   type        = string
 }
 
-variable "vercel_protection_bypass" {
-  description = "Vercel protection bypass token"
-  type        = string
-  sensitive   = true
-}
-
 variable "curio_app_secret" {
   description = "Curio app secret for API authentication"
   type        = string

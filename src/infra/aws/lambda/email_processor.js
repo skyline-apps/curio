@@ -71,7 +71,6 @@ exports.handler = async (event) => {
             headers: {
                 'Content-Type': 'application/json',
                 'Content-Length': Buffer.byteLength(postData),
-                'x-vercel-protection-bypass': process.env.VERCEL_PROTECTION_BYPASS,
                 'x-curio-app-secret': process.env.CURIO_APP_SECRET
             }
         };

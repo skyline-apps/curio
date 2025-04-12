@@ -8,7 +8,6 @@ module "aws" {
   ses_email_identity_receiver = var.receiver_email_domain
   ses_email_identity_sender   = var.sender_email_domain
   curio_app_secret            = var.curio_app_secret
-  vercel_protection_bypass    = var.vercel_protection_bypass
 
   email_healthcheck_error_endpoint = var.email_healthcheck_error_endpoint
   email_healthcheck_warn_endpoint  = var.email_healthcheck_warn_endpoint
