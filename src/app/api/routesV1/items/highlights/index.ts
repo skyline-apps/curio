@@ -14,7 +14,6 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import {
   CreateOrUpdateHighlightRequest,
   CreateOrUpdateHighlightRequestSchema,
@@ -43,6 +42,7 @@ export const itemsHighlightRouter = new Hono<EnvBindings>()
       parseError<GetHighlightsRequest, GetHighlightsResponse>,
     ),
     async (c): Promise<APIResponse<GetHighlightsResponse>> => {
+      const log = c.get("log");
       const profileId = c.get("profileId")!;
       try {
         const { offset, limit, search } = c.req.valid("query");
@@ -86,7 +86,7 @@ export const itemsHighlightRouter = new Hono<EnvBindings>()
 
         return c.json(response);
       } catch (error) {
-        log("Error getting highlights", error);
+        log.error("Error getting highlights", { error });
         return c.json({ error: "Internal server error" }, 500);
       }
     },
@@ -109,9 +109,10 @@ export const itemsHighlightRouter = new Hono<EnvBindings>()
       >,
     ),
     async (c): Promise<APIResponse<CreateOrUpdateHighlightResponse>> => {
+      const log = c.get("log");
       const profileId = c.get("profileId")!;
+      const { slug, highlights } = c.req.valid("json");
       try {
-        const { slug, highlights } = c.req.valid("json");
         if (!slug) {
           return c.json({ error: "No slug provided." }, 400);
         }
@@ -198,10 +199,18 @@ export const itemsHighlightRouter = new Hono<EnvBindings>()
         });
       } catch (error) {
         if (error instanceof SearchError) {
-          log("Error indexing highlights", { error: error.message });
+          log.error("Error indexing highlights", {
+            profileId,
+            slug,
+            error: error.message,
+          });
           return c.json({ error: "Failed to index highlights" }, 500);
         }
-        log("Error creating/updating highlights", { error });
+        log.error("Error creating/updating highlights", {
+          profileId,
+          slug,
+          error,
+        });
         return c.json({ error: "Failed to create/update highlights" }, 500);
       }
     },
@@ -221,10 +230,10 @@ export const itemsHighlightRouter = new Hono<EnvBindings>()
       parseError<DeleteHighlightRequest, DeleteHighlightResponse>,
     ),
     async (c): Promise<APIResponse<DeleteHighlightResponse>> => {
+      const log = c.get("log");
       const profileId = c.get("profileId")!;
+      const { slug, highlightIds } = c.req.valid("json");
       try {
-        const { slug, highlightIds } = c.req.valid("json");
-
         const db = c.get("db");
         const profileItem = await db
           .select({
@@ -267,13 +276,17 @@ export const itemsHighlightRouter = new Hono<EnvBindings>()
         });
       } catch (error) {
         if (error instanceof SearchError) {
-          log("Error deleting highlights from index", { error: error.message });
+          log.error("Error deleting highlights from index", {
+            profileId,
+            slug,
+            error: error.message,
+          });
           return c.json(
             { error: "Failed to delete highlights from index" },
             500,
           );
         }
-        log("Error deleting highlights", { error });
+        log.error("Error deleting highlights", { profileId, slug, error });
         return c.json({ error: "Failed to delete highlights" }, 500);
       }
     },

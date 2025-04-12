@@ -9,7 +9,6 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import { ItemState } from "@app/schemas/db";
 import {
   UpdateStateRequest,
@@ -30,9 +29,10 @@ export const itemsStateRouter = new Hono<EnvBindings>().post(
     parseError<UpdateStateRequest, UpdateStateResponse>,
   ),
   async (c): Promise<APIResponse<UpdateStateResponse>> => {
+    const log = c.get("log");
     const profileId = c.get("profileId")!;
+    const { slugs, state } = c.req.valid("json");
     try {
-      const { slugs, state } = c.req.valid("json");
       if (!slugs || slugs.length === 0) {
         return c.json({ error: "No slugs provided." }, 400);
       }
@@ -91,7 +91,7 @@ export const itemsStateRouter = new Hono<EnvBindings>().post(
         return c.json(response);
       });
     } catch (error) {
-      log("Error updating item states:", error);
+      log.error("Error updating item states", { error, profileId, slugs });
       return c.json({ error: "Error updating item states." }, 500);
     }
   },

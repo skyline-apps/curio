@@ -4,25 +4,27 @@
 import logoutRoutes from "@app/api/auth/logout";
 import sessionRoutes from "@app/api/auth/session";
 import { getDb } from "@app/api/db";
+import { requestLogger } from "@app/api/middleware/logger";
 import { v1Router } from "@app/api/routesV1";
 import { EnvBindings } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
+import { createLogger } from "@app/api/utils/logger";
 import { ExecutionContext, Hono } from "hono";
 import { cors } from "hono/cors";
-import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
 import { openAPISpecs } from "hono-openapi";
 
 export const api = new Hono<EnvBindings>();
 
 // Middleware
-api.use("*", logger(log));
+api.use("*", requestLogger());
 api.use("*", prettyJSON());
 api.use("*", async (c, next) => {
   // Parse CORS origins from environment variable
   if (!c.env.VITE_CURIO_URL) {
     throw new Error("VITE_CURIO_URL environment variable is not set");
   }
+
+  c.set("log", createLogger(c));
 
   c.set("db", getDb(c));
 

@@ -21,7 +21,6 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import { generateSlug } from "@app/api/utils/url";
 import { ItemSource } from "@app/schemas/db";
 import { UploadStatus } from "@app/schemas/types";
@@ -44,6 +43,7 @@ export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
     parseError<UploadEmailRequest, UploadEmailResponse>,
   ),
   async (c): Promise<APIResponse<UploadEmailResponse>> => {
+    const log = c.get("log");
     const requestSecret = c.req.header("x-curio-app-secret");
     const appSecret = c.env.CURIO_APP_SECRET;
     if (!appSecret || requestSecret !== appSecret) {
@@ -115,7 +115,10 @@ export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
             content = result.content;
           } catch (error) {
             if (error instanceof ExtractError) {
-              log("Failed to extract content", { error });
+              log.error("Failed to extract content from email", {
+                slug: itemSlug,
+                error,
+              });
             }
           }
         }
@@ -169,7 +172,7 @@ export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
       });
     } catch (error) {
       if (error instanceof EmailError) {
-        log("Failed to parse email", { error: error.message });
+        log.error("Failed to parse email", { error: error.message });
         return c.json(
           {
             status: UploadStatus.ERROR,
@@ -178,7 +181,7 @@ export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
           400,
         );
       } else if (error instanceof StorageError) {
-        log("Failed to store content", { error: error.message });
+        log.error("Failed to store content", { error: error.message });
         return c.json(
           {
             status: UploadStatus.ERROR,
@@ -187,7 +190,7 @@ export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
           500,
         );
       } else if (error instanceof SearchError) {
-        log("Failed to index content", { error: error.message });
+        log.error("Failed to index content", { error: error.message });
         return c.json(
           {
             status: UploadStatus.ERROR,
@@ -196,7 +199,7 @@ export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
           500,
         );
       }
-      log("Unexpected error", { error });
+      log.error("Unexpected error", { error });
       return c.json(
         {
           status: UploadStatus.ERROR,

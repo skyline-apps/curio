@@ -10,7 +10,6 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings, EnvContext } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import {
   PersonalRecommendationType,
   RecommendationType,
@@ -54,6 +53,7 @@ export const itemsRecommendedRouter = new Hono<EnvBindings>().get(
     parseError<GetRecommendationsRequest, GetRecommendationsResponse>,
   ),
   async (c): Promise<APIResponse<GetRecommendationsResponse>> => {
+    const log = c.get("log");
     const profileId = c.get("profileId")!;
     try {
       const allRecommendations: (
@@ -139,7 +139,7 @@ export const itemsRecommendedRouter = new Hono<EnvBindings>().get(
         }),
       );
     } catch (error) {
-      log("Error fetching recommendations:", error);
+      log.error("Error fetching recommendations", { error, profileId });
       return c.json({ error: "Error fetching recommendations." }, 500);
     }
   },

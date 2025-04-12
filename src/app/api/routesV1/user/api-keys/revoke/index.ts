@@ -8,7 +8,6 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import {
   RevokeApiKeyRequest,
   RevokeApiKeyRequestSchema,
@@ -28,6 +27,7 @@ export const userApiKeysRevokeRouter = new Hono<EnvBindings>().post(
     parseError<RevokeApiKeyRequest, RevokeApiKeyResponse>,
   ),
   async (c): Promise<APIResponse<RevokeApiKeyResponse>> => {
+    const log = c.get("log");
     const profileId = c.get("profileId")!;
     const { keyId } = c.req.valid("json");
 
@@ -47,7 +47,7 @@ export const userApiKeysRevokeRouter = new Hono<EnvBindings>().post(
 
       return c.json({ error: "API key not found" }, 404);
     } catch (error) {
-      log(`Error revoking API key ${keyId} for user ${profileId}:`, error);
+      log.error(`Error revoking API key`, { keyId, profileId, error });
       return c.json({ error: "Failed to revoke API key" }, 500);
     }
   },

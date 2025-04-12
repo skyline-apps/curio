@@ -8,7 +8,6 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import { generateApiKey } from "@app/api/utils/random";
 import {
   CreateApiKeyRequest,
@@ -34,6 +33,7 @@ export const userApiKeysRouter = new Hono<EnvBindings>()
       parseError<GetApiKeysRequest, GetApiKeysResponse>,
     ),
     async (c): Promise<APIResponse<GetApiKeysResponse>> => {
+      const log = c.get("log");
       const profileId = c.get("profileId")!;
 
       try {
@@ -44,7 +44,7 @@ export const userApiKeysRouter = new Hono<EnvBindings>()
 
         return c.json(GetApiKeysResponseSchema.parse({ keys }));
       } catch (error) {
-        log(`Error listing API keys for user ${profileId}:`, error);
+        log.error(`Error listing API keys for user`, { profileId, error });
         return c.json({ error: "Failed to list API keys" }, 500);
       }
     },
@@ -60,10 +60,11 @@ export const userApiKeysRouter = new Hono<EnvBindings>()
       parseError<CreateApiKeyRequest, CreateApiKeyResponse>,
     ),
     async (c): Promise<APIResponse<CreateApiKeyResponse>> => {
+      const log = c.get("log");
       const profileId = c.get("profileId")!;
+      const { name } = c.req.valid("json");
 
       try {
-        const { name } = c.req.valid("json");
         if (!name || name.length > 30) {
           return c.json({ error: "Invalid name" }, 400);
         }
@@ -81,7 +82,11 @@ export const userApiKeysRouter = new Hono<EnvBindings>()
 
         return c.json(CreateApiKeyResponseSchema.parse(apiKey));
       } catch (error) {
-        log(`Error creating API key for user ${profileId}:`, error);
+        log.error(`Error creating API key for user`, {
+          profileId,
+          error,
+          name,
+        });
         return c.json({ error: "Failed to create API key" }, 500);
       }
     },

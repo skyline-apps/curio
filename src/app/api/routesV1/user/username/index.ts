@@ -9,7 +9,6 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import { usernameError } from "@app/api/utils/username";
 import {
   UpdateUsernameRequest,
@@ -30,6 +29,7 @@ export const userUsernameRouter = new Hono<EnvBindings>().post(
     parseError<UpdateUsernameRequest, UpdateUsernameResponse>,
   ),
   async (c): Promise<APIResponse<UpdateUsernameResponse>> => {
+    const log = c.get("log");
     const profileId = c.get("profileId")!;
     try {
       const { username: newUsername } = c.req.valid("json");
@@ -54,7 +54,7 @@ export const userUsernameRouter = new Hono<EnvBindings>().post(
         .returning({ updatedUsername: profiles.username });
 
       if (!updates.length) {
-        log(`Failed to update username for user ${profileId}.`);
+        log.error(`Failed to update username for user`, { profileId });
         return c.json({ error: "Failed to update username." }, 500);
       }
       // Return the updated username
@@ -65,7 +65,7 @@ export const userUsernameRouter = new Hono<EnvBindings>().post(
       if (checkDbError(error as DbError) === DbErrorCode.UniqueViolation) {
         return c.json({ error: "Username already in use." }, 400);
       }
-      log(`Error updating username for user ${profileId}:`, error);
+      log.error(`Error updating username for user`, { profileId, error });
       return c.json({ error: "Unknown error updating username." }, 500);
     }
   },

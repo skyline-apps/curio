@@ -8,7 +8,6 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import {
   BulkDeleteLabelsRequest,
   BulkDeleteLabelsRequestSchema,
@@ -33,9 +32,10 @@ export const itemsLabelsRouter = new Hono<EnvBindings>()
       parseError<UpdateLabelsRequest, UpdateLabelsResponse>,
     ),
     async (c): Promise<APIResponse<UpdateLabelsResponse>> => {
+      const log = c.get("log");
       const profileId = c.get("profileId")!;
+      const { slugs, labelIds } = c.req.valid("json");
       try {
-        const { slugs, labelIds } = c.req.valid("json");
         if (!slugs || slugs.length === 0) {
           return c.json({ error: "No slugs provided." }, 400);
         }
@@ -75,7 +75,12 @@ export const itemsLabelsRouter = new Hono<EnvBindings>()
         });
         return c.json(response);
       } catch (error) {
-        log("Error updating labels", { error });
+        log.error("Error updating labels", {
+          error,
+          slugs,
+          labelIds,
+          profileId,
+        });
         return c.json({ error: "Failed to update labels" }, 500);
       }
     },
@@ -95,10 +100,11 @@ export const itemsLabelsRouter = new Hono<EnvBindings>()
       parseError<BulkDeleteLabelsRequest, BulkDeleteLabelsResponse>,
     ),
     async (c): Promise<APIResponse<BulkDeleteLabelsResponse>> => {
+      const log = c.get("log");
       const profileId = c.get("profileId")!;
+      const { slugs, labelIds } = c.req.valid("json");
 
       try {
-        const { slugs, labelIds } = c.req.valid("json");
         if (!slugs || slugs.length === 0) {
           return c.json({ error: "No slugs provided." }, 400);
         }
@@ -145,7 +151,12 @@ export const itemsLabelsRouter = new Hono<EnvBindings>()
 
         return c.json(response);
       } catch (error) {
-        log("Error deleting labels", { error });
+        log.error("Error deleting labels", {
+          error,
+          slugs,
+          labelIds,
+          profileId,
+        });
         return c.json({ error: "Failed to delete labels" }, 500);
       }
     },

@@ -15,7 +15,6 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import { cleanUrl, generateSlug } from "@app/api/utils/url";
 import { UploadStatus } from "@app/schemas/types";
 import {
@@ -52,6 +51,7 @@ export const itemsContentRouter = new Hono<EnvBindings>().post(
     parseError<UpdateItemContentRequest, UpdateItemContentResponse>,
   ),
   async (c): Promise<APIResponse<UpdateItemContentResponse>> => {
+    const log = c.get("log");
     const { url, htmlContent, skipMetadataExtraction } = c.req.valid("json");
     const profileId = c.get("profileId")!;
 
@@ -199,32 +199,53 @@ export const itemsContentRouter = new Hono<EnvBindings>().post(
           }
           return c.json(response);
         } else {
-          log("Upload error", { status: status });
+          log.error("Upload error", { status: status, profileId, url });
           throw new SaveError("Error uploading item content.");
         }
       });
     } catch (error: unknown) {
       if (error instanceof StorageError) {
-        log(`Error storing content`, { error: error.message, url });
+        log.error(`Error storing content`, {
+          error: error.message,
+          profileId,
+          url,
+        });
         return c.json({ error: error.message }, 500);
       } else if (error instanceof ExtractError) {
-        log(`Error extracting content`, { error: error.message, url });
+        log.error(`Error extracting content`, {
+          error: error.message,
+          profileId,
+          url,
+        });
         return c.json({ error: error.message }, 500);
       } else if (error instanceof SearchError) {
-        log(`Error indexing content`, { error: error.message, url });
+        log.error(`Error indexing content`, {
+          error: error.message,
+          profileId,
+          url,
+        });
         return c.json({ error: error.message }, 500);
       } else if (error instanceof SaveError) {
-        log(`Error updating item content`, { error: error.message, url });
+        log.error(`Error updating item content`, {
+          error: error.message,
+          profileId,
+          url,
+        });
         return c.json({ error: error.message }, 500);
       } else if (error instanceof Error) {
-        log(`Unknown error updating item content`, {
+        log.error(`Unknown error updating item content`, {
           error: `${error.name}: ${error.message.substring(0, 200)}`,
           stack: error.stack,
+          profileId,
           url,
         });
         return c.json({ error: "Unknown updating item content." }, 500);
       } else {
-        log(`Unexpected error updating item content`, { error });
+        log.error(`Unexpected error updating item content`, {
+          error,
+          profileId,
+          url,
+        });
         return c.json(
           { error: "Unexpected error updating item content." },
           500,

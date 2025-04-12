@@ -12,7 +12,6 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import { cleanUrl, generateSlug } from "@app/api/utils/url";
 import { ItemState, TextDirection } from "@app/schemas/db";
 import {
@@ -39,11 +38,12 @@ export const itemsRouter = new Hono<EnvBindings>()
       parseError<GetItemsRequest, GetItemsResponse>,
     ),
     async (c): Promise<APIResponse<GetItemsResponse>> => {
+      const log = c.get("log");
       const profileId = c.get("profileId")!;
+      const { limit, slugs, urls, cursor, filters, search, offset } =
+        c.req.valid("query");
       try {
         const db = c.get("db");
-        const { limit, slugs, urls, cursor, filters, search, offset } =
-          c.req.valid("query");
         const cleanedUrls = urls?.map((url) => cleanUrl(url)) ?? [];
         const response: Partial<GetItemsResponse> = {};
 
@@ -174,7 +174,13 @@ export const itemsRouter = new Hono<EnvBindings>()
 
         return c.json(GetItemsResponseSchema.parse(response));
       } catch (error) {
-        log("Error fetching items:", error);
+        log.error("Error fetching items", {
+          error,
+          profileId,
+          slugs,
+          urls,
+          search,
+        });
         return c.json({ error: "Error fetching items." }, 500);
       }
     },
@@ -194,10 +200,11 @@ export const itemsRouter = new Hono<EnvBindings>()
       parseError<CreateOrUpdateItemsRequest, CreateOrUpdateItemsResponse>,
     ),
     async (c) => {
+      const log = c.get("log");
       const profileId = c.get("profileId")!;
+      const { items: newItems } = c.req.valid("json");
       try {
         const db = c.get("db");
-        const { items: newItems } = c.req.valid("json");
 
         const now = new Date();
 
@@ -341,7 +348,11 @@ export const itemsRouter = new Hono<EnvBindings>()
           return c.json(response);
         });
       } catch (error) {
-        log("Error creating items:", error);
+        log.error("Error creating items", {
+          error,
+          profileId,
+          urls: newItems.map((item) => item.url),
+        });
         return c.json({ error: "Error creating items." }, 500);
       }
     },

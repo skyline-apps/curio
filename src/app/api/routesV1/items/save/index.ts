@@ -9,7 +9,6 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import { ItemState } from "@app/schemas/db";
 import {
   SaveRequest,
@@ -24,9 +23,10 @@ export const itemsSaveRouter = new Hono<EnvBindings>().post(
   describeRoute(apiDoc("post", SaveRequestSchema, SaveResponseSchema)),
   zValidator("json", SaveRequestSchema, parseError<SaveRequest, SaveResponse>),
   async (c): Promise<APIResponse<SaveResponse>> => {
+    const log = c.get("log");
     const profileId = c.get("profileId")!;
+    const { slugs } = c.req.valid("json");
     try {
-      const { slugs } = c.req.valid("json");
       if (!slugs || slugs.length === 0) {
         return c.json({ error: "No slugs provided." }, 400);
       }
@@ -114,7 +114,7 @@ export const itemsSaveRouter = new Hono<EnvBindings>().post(
         200,
       );
     } catch (error) {
-      log("Error saving items:", error);
+      log.error("Error saving items", { error, profileId, slugs });
       return c.json({ error: "Error saving items." }, 500);
     }
   },

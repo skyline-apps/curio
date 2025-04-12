@@ -5,7 +5,6 @@
 import { sql } from "@app/api/db";
 import { appConfig } from "@app/api/db/schema";
 import { EnvContext } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import axios, { AxiosError, AxiosInstance } from "axios";
 
 import {
@@ -143,7 +142,6 @@ export class Search {
     this.axiosInstance = null;
     this.lastUsedApiKey = null;
     this.lastUsedEndpoint = null;
-    log("Axios instance reset.");
   }
 
   async populateSearchConfig(c: EnvContext): Promise<void> {

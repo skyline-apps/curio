@@ -9,7 +9,6 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import {
   MarkUnreadItemRequest,
   MarkUnreadItemRequestSchema,
@@ -34,9 +33,10 @@ export const itemsReadRouter = new Hono<EnvBindings>()
       parseError<ReadItemRequest, ReadItemResponse>,
     ),
     async (c): Promise<APIResponse<ReadItemResponse>> => {
+      const log = c.get("log");
       const profileId = c.get("profileId")!;
+      const { slug, readingProgress } = c.req.valid("json");
       try {
-        const { slug, readingProgress } = c.req.valid("json");
         const db = c.get("db");
 
         const itemData = await db
@@ -93,7 +93,7 @@ export const itemsReadRouter = new Hono<EnvBindings>()
 
         return c.json(response);
       } catch (error) {
-        log("Error reading item:", error);
+        log.error("Error reading item", { error, profileId, slug });
         return c.json({ error: "Error reading item." }, 500);
       }
     },
@@ -113,10 +113,11 @@ export const itemsReadRouter = new Hono<EnvBindings>()
       parseError<MarkUnreadItemRequest, MarkUnreadItemResponse>,
     ),
     async (c): Promise<APIResponse<MarkUnreadItemResponse>> => {
+      const log = c.get("log");
       const profileId = c.get("profileId")!;
+      const { slug } = c.req.valid("json");
 
       try {
-        const { slug } = c.req.valid("json");
         const db = c.get("db");
 
         const itemData = await db
@@ -162,7 +163,7 @@ export const itemsReadRouter = new Hono<EnvBindings>()
 
         return c.json(response);
       } catch (error) {
-        log("Error reading item:", error);
+        log.error("Error reading item", { error, profileId, slug });
         return c.json({ error: "Error reading item." }, 500);
       }
     },

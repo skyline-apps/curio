@@ -8,7 +8,6 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import {
   UpdateFavoriteRequest,
   UpdateFavoriteRequestSchema,
@@ -28,10 +27,11 @@ export const itemsFavoriteRouter = new Hono<EnvBindings>().post(
     parseError<UpdateFavoriteRequest, UpdateFavoriteResponse>,
   ),
   async (c): Promise<APIResponse<UpdateFavoriteResponse>> => {
+    const log = c.get("log");
     const profileId = c.get("profileId")!;
+    const { slugs, favorite } = c.req.valid("json");
     try {
       const db = c.get("db");
-      const { slugs, favorite } = c.req.valid("json");
       if (!slugs || slugs.length === 0) {
         return c.json({ error: "No slugs provided." }, 400);
       }
@@ -60,7 +60,7 @@ export const itemsFavoriteRouter = new Hono<EnvBindings>().post(
 
       return c.json(response);
     } catch (error) {
-      log("Error favoriting items:", error);
+      log.error("Error favoriting items", { error, profileId, slugs });
       return c.json({ error: "Error favoriting items." }, 500);
     }
   },

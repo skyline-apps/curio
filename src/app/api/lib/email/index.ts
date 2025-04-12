@@ -1,5 +1,4 @@
 import { ExtractedMetadata } from "@app/api/lib/extract/types";
-import log from "@app/api/utils/logger";
 import { cleanUrl, getRootDomain } from "@app/api/utils/url";
 import { TextDirection } from "@app/schemas/db";
 import { FALLBACK_HOSTNAME } from "@app/schemas/types";
@@ -156,8 +155,7 @@ export async function parseIncomingEmail(
       };
     })
     .catch((err) => {
-      log("Failed to parse email", { err });
-      throw new EmailError("Failed to parse email");
+      throw new EmailError(`Failed to parse email: ${err.message}`);
     });
 }
 

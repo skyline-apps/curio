@@ -3,7 +3,6 @@ import { checkDbError, DbError, DbErrorCode } from "@app/api/db/errors";
 import { apiKeys, profiles } from "@app/api/db/schema";
 import { createClient } from "@app/api/lib/supabase/client";
 import { EnvContext } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import { createUsernameSlug } from "@app/api/utils/username";
 import { createMiddleware } from "hono/factory";
 
@@ -26,6 +25,7 @@ export const authMiddleware = createMiddleware(
     c: EnvContext,
     next: () => Promise<Response | void>,
   ): Promise<Response | void> => {
+    const log = c.get("log");
     try {
       // Check if API key is provided for API routes
       const apiKey = c.req.header("x-api-key");
@@ -110,7 +110,7 @@ export const authMiddleware = createMiddleware(
       if (checkDbError(error as DbError) === DbErrorCode.ConnectionFailure) {
         return c.json({ error: "Error connecting to database" }, 500);
       }
-      log("Error authenticating", error);
+      log.error("Unknown error authenticating", { error });
       return c.json({ error: "Error authenticating" }, 500);
     }
   },

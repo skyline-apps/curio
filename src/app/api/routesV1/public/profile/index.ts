@@ -9,7 +9,6 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import { ItemState } from "@app/schemas/db";
 import {
   ItemResultSchema,
@@ -34,6 +33,7 @@ export const publicProfileRouter = new Hono<EnvBindings>().get(
     parseError<GetProfileRequest, GetProfileResponse>,
   ),
   async (c): Promise<APIResponse<GetProfileResponse>> => {
+    const log = c.get("log");
     const userProfileId = c.get("profileId");
     const { username, limit, cursor } = c.req.valid("query");
     try {
@@ -103,7 +103,11 @@ export const publicProfileRouter = new Hono<EnvBindings>().get(
 
       return c.json(response);
     } catch (error) {
-      log(`Error fetching profile for username ${username}`, error);
+      log.error(`Error fetching profile for username`, {
+        username,
+        error,
+        profileId: userProfileId,
+      });
       return c.json({ error: "Error fetching profile." }, 500);
     }
   },

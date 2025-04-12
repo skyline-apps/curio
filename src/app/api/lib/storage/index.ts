@@ -2,7 +2,6 @@ import { ExtractedMetadata } from "@app/api/lib/extract/types";
 import { StorageError } from "@app/api/lib/storage/types";
 import { createClient, type StorageClient } from "@app/api/lib/supabase/client";
 import { EnvContext } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import { TextDirection } from "@app/schemas/db";
 import { UploadStatus } from "@app/schemas/types";
 import { createHash } from "crypto";
@@ -19,6 +18,7 @@ export class Storage {
 
   private async getStorageClient(c: EnvContext): Promise<StorageClient> {
     const now = Date.now();
+    const log = c.get("log");
     if (!this.storage || now - this.lastInitTime > this.REFRESH_INTERVAL) {
       const supabase = await createClient(c, true);
       this.storage = supabase.storage;
@@ -28,7 +28,7 @@ export class Storage {
         // Verify we can access the bucket
         await this.storage.from(ITEMS_BUCKET).list();
       } catch (error) {
-        log("Failed to verify storage access", { error });
+        log.error("Failed to verify storage access", { error });
         // Reset storage client to force re-initialization on next attempt
         this.storage = null;
         throw new StorageError("Failed to initialize storage client");
@@ -50,6 +50,7 @@ export class Storage {
     versionName: string;
     status: Exclude<UploadStatus, UploadStatus.ERROR>;
   }> {
+    const log = c.get("log");
     const storage = await this.getStorageClient(c);
     const timestamp = new Date().toISOString();
     const contentHash = this.computeContentHash(content);
@@ -70,8 +71,9 @@ export class Storage {
           }
           const existingMetadata = data.metadata;
           if (existingMetadata && existingMetadata.hash === contentHash) {
-            log("Content already exists, skipping upload", {
+            log.info("Content already exists, skipping upload", {
               slug,
+              version: version.name,
               hash: contentHash,
             });
             return {
@@ -80,9 +82,10 @@ export class Storage {
             };
           }
         } catch (e) {
-          log("Failed to parse version metadata", {
+          log.error("Failed to parse version metadata", {
+            slug,
+            version: version.name,
             error: e,
-            version,
           });
         }
       }
@@ -110,7 +113,7 @@ export class Storage {
       defaultMetadata = (data?.metadata as VersionMetadata) || null;
     } catch (error) {
       // Main file doesn't exist yet, or error reading it
-      log(`No existing content for ${slug} or error reading it:`, error);
+      log.debug(`No existing content or error reading it`, { slug, error });
     }
 
     // This is either the first version or a longer version than current
@@ -126,7 +129,10 @@ export class Storage {
       });
 
     if (versionError) {
-      log(`Error uploading version for item ${slug}:`, versionError);
+      log.error(`Error uploading version for item`, {
+        slug,
+        error: versionError,
+      });
       throw new StorageError("Failed to upload version");
     }
 
@@ -147,7 +153,10 @@ export class Storage {
       });
 
     if (mainError) {
-      log(`Error updating main file for item ${slug}:`, mainError);
+      log.error(`Error updating main file for item`, {
+        slug,
+        error: mainError,
+      });
       throw new StorageError("Failed to update main file");
     }
 
@@ -159,6 +168,7 @@ export class Storage {
     slug: string,
     version: string | null,
   ): Promise<{ version: string | null; versionName: string; content: string }> {
+    const log = c.get("log");
     const storage = await this.getStorageClient(c);
     const versionPath = version
       ? `${slug}/versions/${version}.md`
@@ -176,11 +186,17 @@ export class Storage {
         return this.getItemContent(c, slug, null);
       } else {
         if (error) {
-          log(`Error getting content for ${slug}:`, error);
+          log.error(`Error getting content for item`, { slug, error });
         } else if (metadataError) {
-          log(`Error getting metadata for ${slug}:`, metadataError);
+          log.error(`Error getting metadata for item when getting content`, {
+            slug,
+            error: metadataError,
+          });
         } else if (!metadata.metadata) {
-          log(`Error getting metadata for ${slug}:`, "metadata is null");
+          log.error(`Error getting metadata for item when getting content`, {
+            slug,
+            error: "metadata is null",
+          });
         }
         throw new StorageError("Failed to download content");
       }
@@ -194,17 +210,19 @@ export class Storage {
   }
 
   async getItemMetadata(c: EnvContext, slug: string): Promise<VersionMetadata> {
+    const log = c.get("log");
     const storage = await this.getStorageClient(c);
     const { data, error } = await storage
       .from(ITEMS_BUCKET)
       .info(`${slug}/${DEFAULT_NAME}.md`);
 
     if (error) {
-      log(`Error getting metadata for item ${slug}:`, error);
+      log.error(`Error getting metadata for item`, { slug, error });
       throw new StorageError("Failed to get metadata");
     }
 
     if (!data.metadata?.title) {
+      log.error(`Error getting metadata title for item`, { slug });
       throw new StorageError("Failed to verify metadata contents");
     }
 

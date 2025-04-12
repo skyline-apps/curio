@@ -10,7 +10,6 @@ import {
   TransactionDB,
 } from "@app/api/db";
 import { itemRecommendations, profileItems } from "@app/api/db/schema";
-import log from "@app/api/utils/logger";
 import { ItemState, RecommendationType } from "@app/schemas/db";
 
 export type GlobalRecommendation = {
@@ -116,55 +115,50 @@ async function computeAndStoreGlobalRecommendations(
 ): Promise<void> {
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-  try {
-    const recommendedItems: Record<RecommendationType, { itemId: string }[]> = {
-      [RecommendationType.POPULAR]: [],
-    };
-    await db.transaction(async (tx) => {
-      const popularItemIds = await tx
-        .select({
-          itemId: profileItems.itemId,
-          count: sql<number>`count(*)`.as("count"),
-        })
-        .from(profileItems)
-        .where(
-          and(
-            not(eq(profileItems.state, ItemState.DELETED)),
-            gt(profileItems.savedAt, oneWeekAgo),
-            isNull(profileItems.source),
-            not(isNull(profileItems.thumbnail)),
-          ),
-        )
-        .groupBy(profileItems.itemId)
-        .orderBy(desc(sql<number>`count(*)`))
-        .limit(5);
+  const recommendedItems: Record<RecommendationType, { itemId: string }[]> = {
+    [RecommendationType.POPULAR]: [],
+  };
+  await db.transaction(async (tx) => {
+    const popularItemIds = await tx
+      .select({
+        itemId: profileItems.itemId,
+        count: sql<number>`count(*)`.as("count"),
+      })
+      .from(profileItems)
+      .where(
+        and(
+          not(eq(profileItems.state, ItemState.DELETED)),
+          gt(profileItems.savedAt, oneWeekAgo),
+          isNull(profileItems.source),
+          not(isNull(profileItems.thumbnail)),
+        ),
+      )
+      .groupBy(profileItems.itemId)
+      .orderBy(desc(sql<number>`count(*)`))
+      .limit(5);
 
-      recommendedItems[RecommendationType.POPULAR] = popularItemIds.map(
-        (item) => ({
+    recommendedItems[RecommendationType.POPULAR] = popularItemIds.map(
+      (item) => ({
+        itemId: item.itemId,
+      }),
+    );
+    const recommendationsToInsert = Object.entries(recommendedItems).flatMap(
+      ([type, items]) =>
+        items.map((item) => ({
+          type: type as RecommendationType,
           itemId: item.itemId,
-        }),
-      );
-      const recommendationsToInsert = Object.entries(recommendedItems).flatMap(
-        ([type, items]) =>
-          items.map((item) => ({
-            type: type as RecommendationType,
-            itemId: item.itemId,
-          })),
-      );
+        })),
+    );
 
-      // Insert new recommendations if we have any
-      if (recommendationsToInsert.length > 0) {
-        await tx.delete(itemRecommendations);
-        await tx
-          .insert(itemRecommendations)
-          .values(recommendationsToInsert)
-          .onConflictDoNothing({
-            target: [itemRecommendations.type, itemRecommendations.itemId],
-          });
-      }
-    });
-  } catch (error) {
-    log(`Error computing global recommendations: ${error}`);
-    throw error;
-  }
+    // Insert new recommendations if we have any
+    if (recommendationsToInsert.length > 0) {
+      await tx.delete(itemRecommendations);
+      await tx
+        .insert(itemRecommendations)
+        .values(recommendationsToInsert)
+        .onConflictDoNothing({
+          target: [itemRecommendations.type, itemRecommendations.itemId],
+        });
+    }
+  });
 }

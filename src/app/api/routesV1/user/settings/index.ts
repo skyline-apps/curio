@@ -8,7 +8,6 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import {
   GetSettingsRequest,
   GetSettingsRequestSchema,
@@ -35,7 +34,8 @@ export const userSettingsRouter = new Hono<EnvBindings>()
       parseError<GetSettingsRequest, GetSettingsResponse>,
     ),
     async (c): Promise<APIResponse<GetSettingsResponse>> => {
-      const userId = c.get("userId");
+      const log = c.get("log");
+      const profileId = c.get("profileId");
       try {
         const db = c.get("db");
         const profileResult = await db
@@ -50,9 +50,7 @@ export const userSettingsRouter = new Hono<EnvBindings>()
             public: profiles.public,
           })
           .from(profiles)
-          .where(
-            and(eq(profiles.userId, userId!), eq(profiles.isEnabled, true)),
-          )
+          .where(and(eq(profiles.id, profileId!), eq(profiles.isEnabled, true)))
           .limit(1);
         if (!profileResult || profileResult.length === 0) {
           return c.json({ error: "Unauthorized" }, 401);
@@ -60,10 +58,7 @@ export const userSettingsRouter = new Hono<EnvBindings>()
         const settings = GetSettingsResponseSchema.parse(profileResult[0]);
         return c.json(settings);
       } catch (error) {
-        log(
-          `Database connection error fetching settings for user ${userId}`,
-          error,
-        );
+        log.error(`Error fetching settings for user`, { profileId, error });
         return c.json({ error: "Error fetching settings." }, 500);
       }
     },
@@ -79,7 +74,8 @@ export const userSettingsRouter = new Hono<EnvBindings>()
       parseError<UpdateSettingsRequest, UpdateSettingsResponse>,
     ),
     async (c): Promise<APIResponse<UpdateSettingsResponse>> => {
-      const userId = c.get("userId");
+      const log = c.get("log");
+      const profileId = c.get("profileId");
       try {
         const settings = c.req.valid("json");
         const settingsKeys = Object.keys(settings);
@@ -99,7 +95,7 @@ export const userSettingsRouter = new Hono<EnvBindings>()
         const updates = await db
           .update(profiles)
           .set({ ...settings })
-          .where(eq(profiles.userId, userId!))
+          .where(eq(profiles.id, profileId!))
           .returning(returnFields);
 
         if (!updates.length) {
@@ -110,7 +106,7 @@ export const userSettingsRouter = new Hono<EnvBindings>()
           UpdateSettingsResponseSchema.parse(updates[0]);
         return c.json(response);
       } catch (error) {
-        log(`Error updating settings for user ${userId}`, error);
+        log.error(`Error updating settings for user`, { profileId, error });
         return c.json({ error: "Error updating settings." }, 500);
       }
     },

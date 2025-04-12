@@ -1,4 +1,5 @@
 import { TransactionDB } from "@app/api/db";
+import { type Logger } from "@app/api/utils/logger";
 import { type Context } from "hono";
 import { z } from "zod";
 
@@ -17,6 +18,8 @@ export const EnvSchema = z.object({
   SEARCH_APPLICATION_API_KEY: z.string(),
   SEARCH_ENDPOINT_URL: z.string(),
   SEARCH_EXTERNAL_ENDPOINT_URL: z.string(),
+  AXIOM_TOKEN: z.string(),
+  AXIOM_DATASET: z.string(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
@@ -28,6 +31,7 @@ export type EnvBindings = {
     userId?: string;
     profileId?: string;
     authOptional?: boolean;
+    log: Logger;
   };
 };
 

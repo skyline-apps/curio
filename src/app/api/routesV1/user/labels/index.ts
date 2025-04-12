@@ -9,7 +9,6 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import {
   CreateOrUpdateLabelsRequest,
   CreateOrUpdateLabelsRequestSchema,
@@ -38,6 +37,7 @@ export const userLabelsRouter = new Hono<EnvBindings>()
       parseError<GetLabelsRequest, GetLabelsResponse>,
     ),
     async (c): Promise<APIResponse<GetLabelsResponse>> => {
+      const log = c.get("log");
       const profileId = c.get("profileId")!;
       try {
         const db = c.get("db");
@@ -55,7 +55,7 @@ export const userLabelsRouter = new Hono<EnvBindings>()
         });
         return c.json(response);
       } catch (error) {
-        log(`Error fetching labels for user ${profileId}`, error);
+        log.error(`Error fetching labels for user`, { error, profileId });
         return c.json({ error: "Error fetching labels." }, 500);
       }
     },
@@ -75,6 +75,7 @@ export const userLabelsRouter = new Hono<EnvBindings>()
       parseError<CreateOrUpdateLabelsRequest, CreateOrUpdateLabelsResponse>,
     ),
     async (c): Promise<APIResponse<CreateOrUpdateLabelsResponse>> => {
+      const log = c.get("log");
       const profileId = c.get("profileId")!;
       try {
         const { labels } = c.req.valid("json");
@@ -114,7 +115,7 @@ export const userLabelsRouter = new Hono<EnvBindings>()
         if (checkDbError(error as DbError) === DbErrorCode.UniqueViolation) {
           return c.json({ error: "Label name already in use." }, 400);
         }
-        log(`Error updating labels for user ${profileId}`, error);
+        log.error(`Error updating labels for user`, { profileId, error });
         return c.json({ error: "Error updating labels." }, 500);
       }
     },
@@ -130,6 +131,7 @@ export const userLabelsRouter = new Hono<EnvBindings>()
       parseError<DeleteLabelsRequest, DeleteLabelsResponse>,
     ),
     async (c): Promise<APIResponse<DeleteLabelsResponse>> => {
+      const log = c.get("log");
       const profileId = c.get("profileId")!;
       try {
         const { ids } = c.req.valid("json");
@@ -151,7 +153,7 @@ export const userLabelsRouter = new Hono<EnvBindings>()
         });
         return c.json(response);
       } catch (error) {
-        log(`Error deleting labels for user ${profileId}`, error);
+        log.error(`Error deleting labels for user`, { profileId, error });
         return c.json({ error: "Error deleting labels." }, 500);
       }
     },

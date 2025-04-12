@@ -3,12 +3,12 @@
 /* eslint-disable @local/eslint-local-rules/response-parse */
 import { createClient } from "@app/api/lib/supabase/client";
 import { EnvBindings, EnvContext } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import { Hono } from "hono";
 
 const sessionRoutes = new Hono<EnvBindings>();
 
 sessionRoutes.post("/", async (c: EnvContext) => {
+  const log = c.get("log");
   try {
     const { accessToken, refreshToken } = await c.req.json<{
       accessToken?: string;
@@ -30,7 +30,7 @@ sessionRoutes.post("/", async (c: EnvContext) => {
     });
 
     if (error) {
-      log("Supabase setSession error:", error.message);
+      log.error("Supabase setSession error:", { error: error.message });
       return c.json(
         { error: "Failed to set session", details: error.message },
         { status: 500 },
@@ -40,10 +40,9 @@ sessionRoutes.post("/", async (c: EnvContext) => {
     // Cookies are set automatically by the `setAll` handler in createClient
     return c.json({ success: true });
   } catch (err) {
-    log(
-      "Error processing /api/auth/session request:",
-      err instanceof Error ? err.message : err,
-    );
+    log.error("Error processing /api/auth/session request", {
+      error: err instanceof Error ? err.message : err,
+    });
     return c.json({ error: "Internal server error" }, { status: 500 });
   }
 });

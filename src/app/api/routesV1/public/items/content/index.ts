@@ -11,7 +11,6 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings, EnvContext } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import {
   GetItemContentRequest,
   GetItemContentRequestSchema,
@@ -26,6 +25,7 @@ async function getDefaultContent(
   db: TransactionDB,
   slug: string,
 ): Promise<APIResponse<GetItemContentResponse>> {
+  const log = c.get("log");
   const itemResult = await db
     .select({
       id: items.id,
@@ -47,7 +47,8 @@ async function getDefaultContent(
     metadata = await getItemMetadata(c, slug);
   } catch (error: unknown) {
     if (error instanceof StorageError) {
-      log("Error fetching default content, returning item info", {
+      log.warn("Error fetching metadata for item", {
+        slug,
         error: error.message,
       });
       return c.json({ error: "Item not found." }, 404);
@@ -83,7 +84,8 @@ async function getDefaultContent(
     return c.json(response);
   } catch (error: unknown) {
     if (error instanceof StorageError) {
-      log("Error fetching default content, returning item info", {
+      log.warn("Error fetching default content, returning item info", {
+        slug,
         error: error.message,
       });
       return c.json(
@@ -116,6 +118,7 @@ export const publicItemsContentRouter = new Hono<EnvBindings>().get(
     parseError<GetItemContentRequest, GetItemContentResponse>,
   ),
   async (c): Promise<APIResponse<GetItemContentResponse>> => {
+    const log = c.get("log");
     const profileId = c.get("profileId");
 
     const { slug } = c.req.valid("query");
@@ -201,7 +204,9 @@ export const publicItemsContentRouter = new Hono<EnvBindings>().get(
       } catch (error: unknown) {
         // Still return metadata if content can't be loaded
         if (error instanceof StorageError) {
-          log("Error fetching default content, returning item info", {
+          log.warn("Error fetching default content, returning item info", {
+            profileId,
+            slug,
             error: error.message,
           });
           return c.json(
@@ -214,10 +219,14 @@ export const publicItemsContentRouter = new Hono<EnvBindings>().get(
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
-        log(`Error getting item content for ${slug}:`, error);
+        log.error("Error getting item content", { error, slug, profileId });
         return c.json({ error: "Error getting item content." }, 500);
       } else {
-        log(`Unknown error getting item content for ${slug}:`, error);
+        log.error("Unknown error getting item content", {
+          error,
+          slug,
+          profileId,
+        });
         return c.json({ error: "Unknown error getting item content." }, 500);
       }
     }

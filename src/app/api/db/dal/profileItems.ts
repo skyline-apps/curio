@@ -10,7 +10,6 @@ import { ExtractedMetadata } from "@app/api/lib/extract/types";
 import { searchItemDocuments } from "@app/api/lib/search";
 import { SearchError } from "@app/api/lib/search/types";
 import { EnvContext } from "@app/api/utils/env";
-import log from "@app/api/utils/logger";
 import { ItemSource, ItemState } from "@app/schemas/db";
 
 export const LABELS_CLAUSE = sql<
@@ -83,6 +82,7 @@ export async function getRelevantProfileItemIds(
       total: number;
     }
 > {
+  const log = c.get("log");
   if (!search) {
     return {
       success: false,
@@ -111,9 +111,10 @@ export async function getRelevantProfileItemIds(
     };
   } catch (error) {
     if (error instanceof SearchError) {
-      log(
-        `Failed to search items for ${search}, falling back to normal search: ${error.message}`,
-      );
+      log.warn(`Failed to search items, falling back to normal search`, {
+        search,
+        error: error.message,
+      });
       return {
         success: false,
         searchResults: null,
