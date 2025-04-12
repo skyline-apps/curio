@@ -74,7 +74,13 @@ export class Extract {
     html: string,
   ): Promise<{ content: string; metadata: ExtractedMetadata }> {
     try {
-      const { document } = parseHTML(html, { location: new URL(url) });
+      // Ensure we have a full HTML structure for linkedom/Readability
+      const fullHtml = html.trim().match(/^<html/i)
+        ? html
+        : `<!DOCTYPE html><html><body>${html}</body></html>`;
+
+      // Pass the potentially wrapped HTML to parseHTML
+      const { document } = parseHTML(fullHtml, { location: new URL(url) });
 
       const reader = new Readability(document, {
         // @ts-expect-error: https://github.com/mozilla/readability/issues/966
