@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from "@app/api/db";
+import { and, desc, eq, not, sql } from "@app/api/db";
 import { fetchOwnItemResults } from "@app/api/db/dal/profileItems";
 import { profileItems, profiles } from "@app/api/db/schema";
 import {
@@ -10,6 +10,7 @@ import {
 } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
 import log from "@app/api/utils/logger";
+import { ItemState } from "@app/schemas/db";
 import {
   ItemResultSchema,
   PublicItemResultSchema,
@@ -61,6 +62,7 @@ export const publicProfileRouter = new Hono<EnvBindings>().get(
       let whereClause = and(
         eq(profileItems.profileId, profile.id),
         eq(profileItems.isFavorite, true),
+        not(eq(profileItems.state, ItemState.DELETED)),
       );
 
       if (cursor) {

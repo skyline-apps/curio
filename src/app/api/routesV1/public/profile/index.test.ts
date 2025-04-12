@@ -32,6 +32,8 @@ const TEST_ITEM_ID_3 = "123e4567-e89b-12d3-a456-426614174003";
 const TEST_ITEM_URL_3 = "https://example3.com/";
 const TEST_ITEM_ID_4 = "123e4567-e89b-12d3-a456-426614174004";
 const TEST_ITEM_URL_4 = "https://example4.com/";
+const TEST_ITEM_ID_5 = "123e4567-e89b-12d3-a456-426614174005";
+const TEST_ITEM_URL_5 = "https://example5.com/";
 const TEST_LABEL_ID_1 = "123e4567-e89b-12d3-a456-426614174005";
 const TEST_LABEL_ID_2 = "123e4567-e89b-12d3-a456-426614174006";
 
@@ -63,6 +65,13 @@ const MOCK_ITEMS = [
     slug: "example4-com",
     createdAt: new Date("2025-01-10T12:55:56-08:00"),
     updatedAt: new Date("2025-01-10T12:55:56-08:00"),
+  },
+  {
+    id: TEST_ITEM_ID_5,
+    url: TEST_ITEM_URL_5,
+    slug: "example5-com",
+    createdAt: new Date("2025-01-10T12:56:56-08:00"),
+    updatedAt: new Date("2025-01-10T12:56:56-08:00"),
   },
 ];
 
@@ -138,6 +147,25 @@ const MOCK_PROFILE_ITEMS = [
   },
   {
     id: "12345678-1234-1234-1234-123456789015",
+    profileId: DEFAULT_TEST_PROFILE_ID,
+    itemId: TEST_ITEM_ID_5,
+    title: "Example 5",
+    description: "Fifth example item",
+    author: "Test Author",
+    isFavorite: true,
+    thumbnail: "https://example.com/thumb5.jpg",
+    favicon: "https://example.com/favicon5.ico",
+    publishedAt: new Date("2025-01-10T12:52:56-08:00"),
+    savedAt: new Date("2025-01-10T12:52:56-08:04"),
+    stateUpdatedAt: new Date("2025-01-10T12:53:59-08:00"),
+    state: ItemState.DELETED,
+    readingProgress: 5,
+    lastReadAt: new Date("2025-01-15T12:00:00-08:00"),
+    versionName: "2024-01-01",
+    textLanguage: "en",
+  },
+  {
+    id: "12345678-1234-1234-1234-123456789016",
     profileId: DEFAULT_TEST_PROFILE_ID_2,
     itemId: TEST_ITEM_ID_3,
     title: "Example 3 New title",
@@ -148,7 +176,7 @@ const MOCK_PROFILE_ITEMS = [
     favicon: "https://example.com/favicon3.ico",
     publishedAt: new Date("2025-01-10T12:52:56-08:00"),
     savedAt: new Date("2025-01-10T12:52:56-08:04"),
-    stateUpdatedAt: new Date("2025-01-10T12:53:00-08:00"),
+    stateUpdatedAt: new Date("2025-01-10T12:54:00-08:00"),
     textLanguage: "en",
   },
 ];
