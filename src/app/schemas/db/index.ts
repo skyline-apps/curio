@@ -25,6 +25,8 @@ export enum ItemState {
 
 export enum ItemSource {
   EMAIL = "email",
+  OMNIVORE = "omnivore",
+  INSTAPAPER = "instapaper",
 }
 
 export enum TextDirection {

@@ -152,7 +152,11 @@ export const textDirection = pgEnum("text_direction", [
   TextDirection.AUTO,
 ]);
 
-export const itemSource = pgEnum("item_source", [ItemSource.EMAIL]);
+export const itemSource = pgEnum("item_source", [
+  ItemSource.EMAIL,
+  ItemSource.OMNIVORE,
+  ItemSource.INSTAPAPER,
+]);
 
 export const profileItems = pgTable(
   "profile_items",
