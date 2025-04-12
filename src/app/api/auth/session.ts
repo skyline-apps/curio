@@ -30,7 +30,7 @@ sessionRoutes.post("/", async (c: EnvContext) => {
     });
 
     if (error) {
-      log.error("Supabase setSession error:", { error: error.message });
+      log.error("Supabase setSession error:", { error });
       return c.json(
         { error: "Failed to set session", details: error.message },
         { status: 500 },
@@ -39,9 +39,9 @@ sessionRoutes.post("/", async (c: EnvContext) => {
 
     // Cookies are set automatically by the `setAll` handler in createClient
     return c.json({ success: true });
-  } catch (err) {
+  } catch (error) {
     log.error("Error processing /api/auth/session request", {
-      error: err instanceof Error ? err.message : err,
+      error,
     });
     return c.json({ error: "Internal server error" }, { status: 500 });
   }

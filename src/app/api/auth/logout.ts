@@ -22,9 +22,9 @@ logoutRoutes.post("/", async (c: EnvContext) => {
     }
 
     return c.json({ success: true });
-  } catch (err) {
+  } catch (error) {
     log.error("Error processing /api/auth/logout request", {
-      error: err instanceof Error ? err.message : err,
+      error,
     });
     return c.json({ error: "Internal server error" }, { status: 500 });
   }

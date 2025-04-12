@@ -172,7 +172,7 @@ export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
       });
     } catch (error) {
       if (error instanceof EmailError) {
-        log.error("Failed to parse email", { error: error.message });
+        log.error("Failed to parse email", { error });
         return c.json(
           {
             status: UploadStatus.ERROR,
@@ -181,7 +181,7 @@ export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
           400,
         );
       } else if (error instanceof StorageError) {
-        log.error("Failed to store content", { error: error.message });
+        log.error("Failed to store content", { error });
         return c.json(
           {
             status: UploadStatus.ERROR,
@@ -190,7 +190,7 @@ export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
           500,
         );
       } else if (error instanceof SearchError) {
-        log.error("Failed to index content", { error: error.message });
+        log.error("Failed to index content", { error });
         return c.json(
           {
             status: UploadStatus.ERROR,

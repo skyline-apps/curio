@@ -202,7 +202,7 @@ export const itemsHighlightRouter = new Hono<EnvBindings>()
           log.error("Error indexing highlights", {
             profileId,
             slug,
-            error: error.message,
+            error,
           });
           return c.json({ error: "Failed to index highlights" }, 500);
         }
@@ -279,7 +279,7 @@ export const itemsHighlightRouter = new Hono<EnvBindings>()
           log.error("Error deleting highlights from index", {
             profileId,
             slug,
-            error: error.message,
+            error,
           });
           return c.json(
             { error: "Failed to delete highlights from index" },

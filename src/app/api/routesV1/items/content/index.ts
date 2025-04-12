@@ -206,36 +206,35 @@ export const itemsContentRouter = new Hono<EnvBindings>().post(
     } catch (error: unknown) {
       if (error instanceof StorageError) {
         log.error(`Error storing content`, {
-          error: error.message,
+          error,
           profileId,
           url,
         });
         return c.json({ error: error.message }, 500);
       } else if (error instanceof ExtractError) {
         log.error(`Error extracting content`, {
-          error: error.message,
+          error,
           profileId,
           url,
         });
         return c.json({ error: error.message }, 500);
       } else if (error instanceof SearchError) {
         log.error(`Error indexing content`, {
-          error: error.message,
+          error,
           profileId,
           url,
         });
         return c.json({ error: error.message }, 500);
       } else if (error instanceof SaveError) {
         log.error(`Error updating item content`, {
-          error: error.message,
+          error,
           profileId,
           url,
         });
         return c.json({ error: error.message }, 500);
       } else if (error instanceof Error) {
         log.error(`Unknown error updating item content`, {
-          error: `${error.name}: ${error.message.substring(0, 200)}`,
-          stack: error.stack,
+          error,
           profileId,
           url,
         });

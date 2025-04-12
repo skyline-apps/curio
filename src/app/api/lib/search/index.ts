@@ -37,7 +37,6 @@ const getBackoffDelay = (retryCount: number, config: RetryConfig): number => {
 };
 
 async function withRetry<T>(
-  c: EnvContext,
   operation: () => Promise<T>,
   config: RetryConfig = DEFAULT_RETRY_CONFIG,
 ): Promise<T> {
@@ -58,8 +57,6 @@ async function withRetry<T>(
       if (error instanceof AxiosError && error.response?.status) {
         const status = error.response.status;
         if (status >= 400 && status < 500 && status !== 429) {
-          const log = c.get("log");
-          log.error(error.message, { error });
           throw new SearchError(
             `Search operation failed: ${error.message}`,
             status,
@@ -126,9 +123,6 @@ export class Search {
     }
 
     if (!this.axiosInstance) {
-      const log = c.get("log");
-      log.info("Set up search endpoint", { endpoint });
-
       this.axiosInstance = axios.create({
         baseURL: endpoint,
         headers: {
@@ -178,7 +172,7 @@ export class Search {
   ): Promise<void> {
     const axiosInstance = await this.createAxiosInstance(c);
 
-    await withRetry(c, async () => {
+    await withRetry(async () => {
       const response = await axiosInstance.put(
         "/indexes/items/documents",
         documents,
@@ -201,7 +195,7 @@ export class Search {
       filter: [...(options.filter || [])],
     };
 
-    return withRetry(c, async () => {
+    return withRetry(async () => {
       const response = await axiosInstance.post("/indexes/items/search", {
         q: query,
         attributesToCrop: ["content"],
@@ -230,7 +224,7 @@ export class Search {
   ): Promise<void> {
     const axiosInstance = await this.createAxiosInstance(c);
 
-    await withRetry(c, async () => {
+    await withRetry(async () => {
       const response = await axiosInstance.put(
         "/indexes/highlights/documents",
         documents,
@@ -254,7 +248,7 @@ export class Search {
       filter: [...(options.filter || []), `profileId="${profileId}"`],
     };
 
-    return withRetry(c, async () => {
+    return withRetry(async () => {
       const response = await axiosInstance.post("/indexes/highlights/search", {
         q: query,
         attributesToCrop: ["highlightText", "note"],
@@ -297,7 +291,7 @@ export class Search {
   ): Promise<void> {
     const axiosInstance = await this.createAxiosInstance(c);
 
-    return withRetry(c, async () => {
+    return withRetry(async () => {
       const response = await axiosInstance.post(
         "/indexes/highlights/documents/delete",
         {

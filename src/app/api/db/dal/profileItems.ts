@@ -113,7 +113,7 @@ export async function getRelevantProfileItemIds(
     if (error instanceof SearchError) {
       log.warn(`Failed to search items, falling back to normal search`, {
         search,
-        error: error.message,
+        error,
       });
       return {
         success: false,

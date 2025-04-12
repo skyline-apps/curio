@@ -49,7 +49,7 @@ async function getDefaultContent(
     if (error instanceof StorageError) {
       log.warn("Error fetching metadata for item", {
         slug,
-        error: error.message,
+        error,
       });
       return c.json({ error: "Item not found." }, 404);
     } else {
@@ -86,7 +86,7 @@ async function getDefaultContent(
     if (error instanceof StorageError) {
       log.warn("Error fetching default content, returning item info", {
         slug,
-        error: error.message,
+        error,
       });
       return c.json(
         GetItemContentResponseSchema.parse({
@@ -207,7 +207,7 @@ export const publicItemsContentRouter = new Hono<EnvBindings>().get(
           log.warn("Error fetching default content, returning item info", {
             profileId,
             slug,
-            error: error.message,
+            error,
           });
           return c.json(
             GetItemContentResponseSchema.parse({ item: itemResponse }),

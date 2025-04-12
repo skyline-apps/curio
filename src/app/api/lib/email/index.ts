@@ -154,8 +154,8 @@ export async function parseIncomingEmail(
         headers: parsed.headers || new Map(),
       };
     })
-    .catch((err) => {
-      throw new EmailError(`Failed to parse email: ${err.message}`);
+    .catch((error) => {
+      throw new EmailError(`Failed to parse email: ${error.message}`);
     });
 }
 
