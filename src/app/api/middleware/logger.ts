@@ -43,17 +43,27 @@ function log(
 
 export const requestLogger = (): MiddlewareHandler => {
   return async function logger(c, next) {
+    if (c.req.path === "/api/health") {
+      return await next();
+    }
     const axiomLogger = createLogger(c);
-    const logFn = axiomLogger.info;
     const { method, url } = c.req;
 
     const path = url.slice(url.indexOf("/", 8));
 
-    log(logFn, LogPrefix.Incoming, method, path);
+    log(axiomLogger.info, LogPrefix.Incoming, method, path);
 
     const start = Date.now();
 
     await next();
+
+    let logFn = axiomLogger.warn;
+
+    if (c.res.status === 200) {
+      logFn = axiomLogger.info;
+    } else if (c.res.status >= 500) {
+      logFn = axiomLogger.error;
+    }
 
     log(logFn, LogPrefix.Outgoing, method, path, c.res.status, time(start));
 
