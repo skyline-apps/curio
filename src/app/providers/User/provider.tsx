@@ -11,6 +11,21 @@ import { User, UserContext } from ".";
 
 const log = createLogger("User");
 
+const getSupabaseProjectRef = (): string | null => {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  if (!url) {
+    log.error("VITE_SUPABASE_URL is not defined");
+    return null;
+  }
+  try {
+    const hostname = new URL(url).hostname;
+    return hostname.split(".")[0];
+  } catch (e) {
+    log.error("Could not parse VITE_SUPABASE_URL", e);
+    return null;
+  }
+};
+
 interface UserProviderProps {
   children: React.ReactNode;
 }
@@ -123,6 +138,16 @@ export const UserProvider: React.FC<UserProviderProps> = ({
       clearTheme();
       initializeTheme();
       posthog.reset();
+
+      try {
+        const projectRef = getSupabaseProjectRef();
+        if (projectRef) {
+          const key = `sb-${projectRef}-auth-token`;
+          localStorage.removeItem(key);
+        }
+      } catch (e) {
+        log.error("Failed to remove Supabase auth token from localStorage", e);
+      }
     }
   }, [clearUser]);
 
