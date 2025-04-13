@@ -26,8 +26,6 @@ export const createClient = async (
       },
       cookieOptions: {
         secure: c.env.VITE_CURIO_URL.startsWith("https://"),
-        // sameSite: "lax",
-        // domain: undefined,
       },
     },
   );

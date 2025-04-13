@@ -110,12 +110,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({
 
   const handleLogout = useCallback(async (): Promise<void> => {
     try {
-      const supabase = getSupabaseClient();
-      const { error: clientSignOutError } = await supabase.auth.signOut();
-      if (clientSignOutError) {
-        log.error("Issue signing out from browser", clientSignOutError);
-      }
-
       const backendResponse = await fetch("/api/auth/logout", {
         method: "POST",
       });

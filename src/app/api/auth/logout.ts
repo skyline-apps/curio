@@ -13,14 +13,9 @@ logoutRoutes.post("/", async (c: EnvContext) => {
     const supabase = await createClient(c);
 
     const { error } = await supabase.auth.signOut();
-
     if (error) {
-      return c.json({
-        success: true,
-        error: `Server signout failed: ${error.message}`,
-      });
+      log.warn("Server-side supabase.auth.signOut() failed", { error });
     }
-
     return c.json({ success: true });
   } catch (error) {
     log.error("Error processing /api/auth/logout request", {
