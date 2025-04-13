@@ -43,7 +43,10 @@ function log(
 
 export const requestLogger = (): MiddlewareHandler => {
   return async function logger(c, next) {
-    if (c.req.path === "/api/health") {
+    if (
+      c.req.path === "/api/health" ||
+      c.req.header("x-healthcheck") === "true"
+    ) {
       return await next();
     }
     const axiomLogger = createLogger(c);
