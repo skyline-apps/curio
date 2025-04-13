@@ -61,6 +61,7 @@ To clear the database, run
   - Only the variables in the first section of the `.env.template` are needed. Populate them in `.env.staging` and `.env.prod` and in the project settings per environment.
   - For the `POSTGRES_URL` variable, make sure to use the "Transaction pooler" Supabase Postgres URL.
   - Also generate a `SEARCH_MASTER_API_KEY` (at least 16 bytes) and `SEARCH_APPLICATION_API_KEY` (a UUID v4).
+  - When setting up the domain in Cloudflare, make sure to use "Full (strict)" mode for SSL/TLS encryption.
 4. Run database migrations against the production database using `DOTENV_CONFIG_PATH=/path/to/.env.prod npm run db:migrate`. This is also set up to run automatically with the GitHub Actions build process.
 5. Configure the Supabase storage settings.
   - Create a bucket `items`. Set it to be public with the allowed MIME type `text/markdown`.
