@@ -17,21 +17,18 @@ export const createLogger = (
 
   return new AxiomLogger({
     transports: [
-      new ConsoleTransport({
-        logLevel,
-        prettyPrint: true,
-      }),
-      ...(hasAxiom
-        ? [
-            new AxiomJSTransport({
-              axiom: new Axiom({
-                token: c.env.AXIOM_TOKEN,
-              }),
-              dataset: c.env.AXIOM_DATASET,
-              logLevel,
+      hasAxiom
+        ? new AxiomJSTransport({
+            axiom: new Axiom({
+              token: c.env.AXIOM_TOKEN,
             }),
-          ]
-        : []),
+            dataset: c.env.AXIOM_DATASET,
+            logLevel,
+          })
+        : new ConsoleTransport({
+            logLevel,
+            prettyPrint: true,
+          }),
     ],
   });
 };
