@@ -44,16 +44,14 @@ function log(
 
 export const requestLogger = (): MiddlewareHandler => {
   return async function logger(c, next) {
-    if (c.req.path === "/api/health") {
+    const { method, path } = c.req;
+    if (path === "/api/health") {
       return await next();
     }
     const logDisabled = c.req.header("x-healthcheck") === "true";
-    const axiomLogger = createLogger(c);
+    const axiomLogger = createLogger(c, logDisabled ? "warn" : "info");
 
     c.set("log", axiomLogger);
-    const { method, url } = c.req;
-
-    const path = url.slice(url.indexOf("/", 8));
 
     if (!logDisabled) {
       log(axiomLogger.info, LogPrefix.Incoming, method, path);

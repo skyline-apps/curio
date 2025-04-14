@@ -4,17 +4,21 @@ import {
   AxiomJSTransport,
   ConsoleTransport,
   Logger as AxiomLogger,
+  LogLevel,
 } from "@axiomhq/logging";
 
 export type Logger = AxiomLogger;
 
-export const createLogger = (c: EnvContext): AxiomLogger => {
+export const createLogger = (
+  c: EnvContext,
+  logLevel: LogLevel = "info",
+): AxiomLogger => {
   const hasAxiom = !!c.env.AXIOM_DATASET && !!c.env.AXIOM_TOKEN;
 
   return new AxiomLogger({
     transports: [
       new ConsoleTransport({
-        logLevel: "info",
+        logLevel,
         prettyPrint: true,
       }),
       ...(hasAxiom
@@ -24,7 +28,7 @@ export const createLogger = (c: EnvContext): AxiomLogger => {
                 token: c.env.AXIOM_TOKEN,
               }),
               dataset: c.env.AXIOM_DATASET,
-              logLevel: "info",
+              logLevel,
             }),
           ]
         : []),
