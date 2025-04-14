@@ -4,7 +4,7 @@ const API_ENDPOINTS = {
     content: `${API_HOST}/api/v1/items/content`,
 };
 
-async function saveContent(url, htmlContent) {
+async function saveContent(url, htmlContent, skipMetadataExtraction = false) {
     const storageData = await browser.storage.local.get('curioApiKey');
     const apiKey = storageData.curioApiKey;
 
@@ -16,7 +16,7 @@ async function saveContent(url, htmlContent) {
     const contentResponse = await fetch(API_ENDPOINTS.content, {
         method: 'POST',
         headers: headers,
-        body: JSON.stringify({ url, htmlContent })
+        body: JSON.stringify({ url, htmlContent, skipMetadataExtraction })
     });
 
     if (!contentResponse.ok) {
@@ -73,7 +73,7 @@ async function handleSaveRequest(request, sender, sendResponse) {
         try {
             // Handle new tab creation - no toast needed
             const tab = await new Promise(resolve =>
-                browser.tabs.create({ url: request.targetUrl, active: false }, resolve)
+                browser.tabs.create({ url: request.overrideOpenUrl || request.targetUrl, active: false }, resolve)
             );
 
             if (request.fromTab) {
@@ -105,7 +105,9 @@ async function handleSaveRequest(request, sender, sendResponse) {
                 });
             });
 
-            const response = await saveContent(pageData.url, pageData.html);
+            const response = await saveContent(request.targetUrl, pageData.html, !!request.overrideOpenUrl).catch(error => {
+                throw error;
+            });
             if (request.fromTab) {
                 showToast(request.fromTab, "Link saved!", "Open in Curio", `${API_HOST}/item/${response.slug}`);
             }

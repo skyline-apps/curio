@@ -15,7 +15,8 @@ window.addEventListener('message', function (event) {
     if (event.data.type === 'CURIO_SAVE_REQUEST') {
         browser.runtime.sendMessage({
             action: 'saveCurioPage',
-            targetUrl: event.data.url
+            targetUrl: event.data.url,
+            overrideOpenUrl: event.data.overrideOpenUrl,
         }, function (response) {
             if (response.success) {
                 window.postMessage({

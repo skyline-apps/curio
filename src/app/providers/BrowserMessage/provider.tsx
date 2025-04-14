@@ -142,7 +142,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
   }, [getExtensionName, getExtensionLink]);
 
   const saveItemContent = useCallback(
-    async (url: string): Promise<void> => {
+    async (url: string, overrideOpenUrl?: string): Promise<void> => {
       try {
         setSavingItem(url);
         setSavingError(null);
@@ -182,6 +182,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
             {
               type: "CURIO_SAVE_REQUEST",
               url,
+              overrideOpenUrl,
               timeoutId: currentTimeoutId,
             },
             origin,

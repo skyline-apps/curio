@@ -10,7 +10,7 @@ interface BrowserMessageContextType {
   addMessageListener: (callback: (event: MessageEvent) => void) => void;
   removeMessageListener: (callback: (event: MessageEvent) => void) => void;
   checkExtensionInstalled: () => void;
-  saveItemContent: (url: string) => Promise<void>;
+  saveItemContent: (url: string, overrideOpenUrl?: string) => Promise<void>;
   savingItem: string | null;
   savingError: React.ReactElement | null;
   clearSavingError: () => void;

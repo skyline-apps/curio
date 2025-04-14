@@ -14,6 +14,7 @@ import {
 import { SaveResponse } from "@app/schemas/v1/items/save";
 import { UpdateStateResponse } from "@app/schemas/v1/items/state";
 import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
+import config from "@app/utils/config.json";
 import { createLogger } from "@app/utils/logger";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { useContext } from "react";
@@ -41,7 +42,7 @@ interface UseItemUpdate {
   ) => Promise<UpdateLabelsResponse>;
   markRead: (item: Item) => Promise<ReadItemResponse>;
   markUnread: (item: Item) => Promise<MarkUnreadItemResponse>;
-  refetchItem: (item: Item) => Promise<void>;
+  refetchItem: (item: Item, useArchive?: boolean) => Promise<void>;
   saveExistingItems: (itemSlugs: string[]) => Promise<void>;
   isSavingExisting: boolean;
 }
@@ -257,16 +258,19 @@ export const useItemUpdate = (): UseItemUpdate => {
   const updateItemContentMutationOptions: UseMutationOptions<
     void,
     Error,
-    { item: Item }
+    { item: Item; useArchive?: boolean }
   > = {
-    mutationFn: async ({ item }) => {
+    mutationFn: async ({ item, useArchive }) => {
       if (!item?.url) return;
+      const overrideOpenUrl = useArchive
+        ? config.archiveLinkTemplate + item.url
+        : undefined;
       if (item.metadata.versionName) {
         showConfirm(
           "Are you sure you want to refresh this item? This will erase any notes, highlights, and reading progress.",
           async () => {
             try {
-              await saveItemContent(item.url);
+              await saveItemContent(item.url, overrideOpenUrl);
             } catch (error) {
               log.error("Error refreshing content:", error);
             }
@@ -275,7 +279,7 @@ export const useItemUpdate = (): UseItemUpdate => {
         );
       } else {
         try {
-          await saveItemContent(item.url);
+          await saveItemContent(item.url, overrideOpenUrl);
         } catch (error) {
           log.error("Error refreshing content:", error);
         }
@@ -375,8 +379,11 @@ export const useItemUpdate = (): UseItemUpdate => {
     return await markUnreadMutation.mutateAsync({ item });
   };
 
-  const refetchItem = async (item: Item): Promise<void> => {
-    return await updateItemContentMutation.mutateAsync({ item });
+  const refetchItem = async (
+    item: Item,
+    useArchive?: boolean,
+  ): Promise<void> => {
+    return await updateItemContentMutation.mutateAsync({ item, useArchive });
   };
 
   const saveExistingItems = async (itemSlugs: string[]): Promise<void> => {
