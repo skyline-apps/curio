@@ -17,8 +17,7 @@ const humanize = (times: string[]): string => {
   return orderTimes.join(separator);
 };
 
-const time = (start: number): string => {
-  const delta = Date.now() - start;
+const time = (delta: number): string => {
   return humanize([
     delta < 1000 ? delta + "ms" : Math.round(delta / 1000) + "s",
   ]);
@@ -28,18 +27,30 @@ type PrintFunc = (str: string, data: Record<string, unknown>) => void;
 
 function log(
   fn: PrintFunc,
+  includeMetadata: boolean,
   prefix: string,
   method: string,
   path: string,
-  status: number = 0,
   profileId?: string,
-  elapsed?: string,
+  status?: number,
+  elapsedMs?: number,
 ): void {
   const out =
     prefix === LogPrefix.Incoming
       ? `${prefix} ${method} ${path}`
-      : `${prefix} ${method} ${path} ${status} ${elapsed}`;
-  fn(out, { profileId });
+      : `${prefix} ${method} ${path} ${status} ${time(elapsedMs ?? 0)}`;
+  fn(
+    out,
+    includeMetadata
+      ? {
+          profileId,
+          method,
+          path,
+          status,
+          elapsedMs,
+        }
+      : {},
+  );
 }
 
 export const requestLogger = (): MiddlewareHandler => {
@@ -48,41 +59,44 @@ export const requestLogger = (): MiddlewareHandler => {
     if (path === "/api/health") {
       return await next();
     }
+    const usingAxiom = !!c.env.AXIOM_TOKEN;
     const logDisabled = c.req.header("x-healthcheck") === "true";
-    const axiomLogger = createLogger(c, logDisabled ? "warn" : "info");
+    const logger = createLogger(c, logDisabled ? "warn" : "info");
 
-    c.set("log", axiomLogger);
+    c.set("log", logger);
 
     if (!logDisabled) {
-      log(axiomLogger.info, LogPrefix.Incoming, method, path);
+      log(logger.info, usingAxiom, LogPrefix.Incoming, method, path);
     }
 
     const start = Date.now();
 
     await next();
 
-    let logFn = axiomLogger.warn;
+    let logFn = logger.warn;
 
     if (c.res.status === 200) {
-      logFn = axiomLogger.info;
+      logFn = logger.info;
     } else if (c.res.status >= 500) {
-      logFn = axiomLogger.error;
+      logFn = logger.error;
     }
 
+    const delta = Date.now() - start;
     if (!logDisabled || (logDisabled && c.res.status !== 200)) {
       log(
         logFn,
+        usingAxiom,
         LogPrefix.Outgoing,
         method,
         path,
-        c.res.status,
         c.get("profileId"),
-        time(start),
+        c.res.status,
+        delta,
       );
     }
 
-    if (typeof axiomLogger.flush === "function") {
-      await axiomLogger.flush();
+    if (typeof logger.flush === "function") {
+      await logger.flush();
     }
   };
 };
