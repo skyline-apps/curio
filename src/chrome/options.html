@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Curio Saver Options</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 10px;
+            width: 300px;
+            margin: 0 auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            height: 32px;
+            padding: 8px;
+            margin: 12px 0;
+            cursor: pointer;
+            background-color: #759763;
+            border: none;
+            border-radius: 2px;
+            color: white;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button:hover {
+            background-color: #5A8254;
+        }
+
+        button:disabled {
+            cursor: auto;
+            background-color: #92AB72;
+        }
+
+        a {
+            color: #759763;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #5A8254;
+            text-decoration: underline;
+        }
+
+        #status {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <label for="apiKey">API Key:</label>
+    <p>Optional. Use this API key to bypass automatic cookie-based authentication. Get your API key from the <a
+            href="https://curi.ooo/settings" target="_blank">settings page</a>.</p>
+    <input type="password" id="apiKey" name="apiKey">
+    <button id="save">Save</button>
+    <div id="status"></div>
+    <script src="options.js"></script>
+</body>
+
+</html>

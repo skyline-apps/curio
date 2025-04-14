@@ -5,11 +5,17 @@ const API_ENDPOINTS = {
 };
 
 async function saveContent(url, htmlContent) {
+    const storageData = await new Promise(resolve => chrome.storage.local.get('curioApiKey', resolve));
+    const apiKey = storageData.curioApiKey;
+
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(apiKey && { 'x-api-key': apiKey })
+    };
+
     const contentResponse = await fetch(API_ENDPOINTS.content, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify({ url, htmlContent })
     });
 
@@ -103,7 +109,9 @@ async function handleSaveRequest(request, sender, sendResponse) {
             if (request.fromTab) {
                 showToast(request.fromTab, "Link saved!", "Open in Curio", `${API_HOST}/item/${response.slug}`);
             }
-            chrome.tabs.remove(tab.id);
+            if (tab && tab.id) {
+                chrome.tabs.remove(tab.id);
+            }
             return { success: true, data: response };
         } catch (error) {
             if (request.fromTab) {
@@ -117,7 +125,6 @@ async function handleSaveRequest(request, sender, sendResponse) {
         } finally {
             await resetIcon();
         }
-
     } else {
         const tab = await new Promise(resolve =>
             chrome.tabs.query({ active: true, currentWindow: true }, resolve)
@@ -191,6 +198,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 success: false,
                 error: error.message
             }));
-        return true; // Keep message channel open
+        return true;
     }
 });
