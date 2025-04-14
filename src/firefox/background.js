@@ -5,11 +5,17 @@ const API_ENDPOINTS = {
 };
 
 async function saveContent(url, htmlContent) {
+    const storageData = await browser.storage.local.get('curioApiKey');
+    const apiKey = storageData.curioApiKey;
+
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(apiKey && { 'x-api-key': apiKey })
+    };
+
     const contentResponse = await fetch(API_ENDPOINTS.content, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify({ url, htmlContent })
     });
 
@@ -103,7 +109,9 @@ async function handleSaveRequest(request, sender, sendResponse) {
             if (request.fromTab) {
                 showToast(request.fromTab, "Link saved!", "Open in Curio", `${API_HOST}/item/${response.slug}`);
             }
-            browser.tabs.remove(tab.id);
+            if (tab && tab.id) {
+                browser.tabs.remove(tab.id);
+            }
             return { success: true, data: response };
         } catch (error) {
             if (request.fromTab) {
