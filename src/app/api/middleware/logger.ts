@@ -24,7 +24,7 @@ const time = (start: number): string => {
   ]);
 };
 
-type PrintFunc = (str: string) => void;
+type PrintFunc = (str: string, data: Record<string, unknown>) => void;
 
 function log(
   fn: PrintFunc,
@@ -32,13 +32,14 @@ function log(
   method: string,
   path: string,
   status: number = 0,
+  profileId?: string,
   elapsed?: string,
 ): void {
   const out =
     prefix === LogPrefix.Incoming
       ? `${prefix} ${method} ${path}`
       : `${prefix} ${method} ${path} ${status} ${elapsed}`;
-  fn(out);
+  fn(out, { profileId });
 }
 
 export const requestLogger = (): MiddlewareHandler => {
@@ -71,7 +72,15 @@ export const requestLogger = (): MiddlewareHandler => {
     }
 
     if (!logDisabled || (logDisabled && c.res.status !== 200)) {
-      log(logFn, LogPrefix.Outgoing, method, path, c.res.status, time(start));
+      log(
+        logFn,
+        LogPrefix.Outgoing,
+        method,
+        path,
+        c.res.status,
+        c.get("profileId"),
+        time(start),
+      );
     }
 
     if (typeof axiomLogger.flush === "function") {
