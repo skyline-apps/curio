@@ -43,19 +43,20 @@ function log(
 
 export const requestLogger = (): MiddlewareHandler => {
   return async function logger(c, next) {
-    if (
-      c.req.path === "/api/health" ||
-      c.req.header("x-healthcheck") === "true"
-    ) {
+    if (c.req.path === "/api/health") {
       return await next();
     }
+    const logDisabled = c.req.header("x-healthcheck") === "true";
     const axiomLogger = createLogger(c);
+
     c.set("log", axiomLogger);
     const { method, url } = c.req;
 
     const path = url.slice(url.indexOf("/", 8));
 
-    log(axiomLogger.info, LogPrefix.Incoming, method, path);
+    if (!logDisabled) {
+      log(axiomLogger.info, LogPrefix.Incoming, method, path);
+    }
 
     const start = Date.now();
 
@@ -69,7 +70,9 @@ export const requestLogger = (): MiddlewareHandler => {
       logFn = axiomLogger.error;
     }
 
-    log(logFn, LogPrefix.Outgoing, method, path, c.res.status, time(start));
+    if (!logDisabled || (logDisabled && c.res.status !== 200)) {
+      log(logFn, LogPrefix.Outgoing, method, path, c.res.status, time(start));
+    }
 
     if (typeof axiomLogger.flush === "function") {
       await axiomLogger.flush();
