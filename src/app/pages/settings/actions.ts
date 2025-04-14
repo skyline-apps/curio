@@ -5,6 +5,7 @@ import {
 import { RevokeApiKeyResponse } from "@app/schemas/v1/user/api-keys/revoke";
 import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
+import { useCallback } from "react";
 
 export type ApiKey = GetApiKeysResponse["keys"][0];
 
@@ -50,19 +51,25 @@ export const useApiKeys = (): UseApiKeys => {
   const createApiKeyMutation = useMutation(createApiKeyMutationOptions);
   const revokeApiKeyMutation = useMutation(revokeApiKeyMutationOptions);
 
-  const createApiKey = async (name: string): Promise<CreateApiKeyResponse> => {
-    return await createApiKeyMutation.mutateAsync({ name });
-  };
+  const createApiKey = useCallback(
+    async (name: string): Promise<CreateApiKeyResponse> => {
+      return await createApiKeyMutation.mutateAsync({ name });
+    },
+    [createApiKeyMutation],
+  );
 
-  const revokeApiKey = async (id: string): Promise<RevokeApiKeyResponse> => {
-    return await revokeApiKeyMutation.mutateAsync({ id });
-  };
+  const revokeApiKey = useCallback(
+    async (id: string): Promise<RevokeApiKeyResponse> => {
+      return await revokeApiKeyMutation.mutateAsync({ id });
+    },
+    [revokeApiKeyMutation],
+  );
 
-  const listApiKeys = async (): Promise<GetApiKeysResponse> => {
+  const listApiKeys = useCallback(async (): Promise<GetApiKeysResponse> => {
     return await authenticatedFetch("/api/v1/user/api-keys").then(
       handleAPIResponse<GetApiKeysResponse>,
     );
-  };
+  }, []);
 
   return {
     createApiKey,
