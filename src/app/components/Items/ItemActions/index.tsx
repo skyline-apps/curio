@@ -39,8 +39,8 @@ const ActionButton = <T,>({
 
   const onPress = useCallback(async () => {
     await action().then(async () => {
-      await fetchItems(true);
       onActionSuccess?.();
+      await fetchItems(true);
     });
   }, [fetchItems, action, onActionSuccess]);
 

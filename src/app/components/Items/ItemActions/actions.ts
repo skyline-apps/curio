@@ -221,9 +221,7 @@ export const useItemUpdate = (): UseItemUpdate => {
         body: JSON.stringify({ slug: item.slug, readingProgress: 0 }),
       }).then(handleAPIResponse<ReadItemResponse>);
     },
-    onSuccess: () => {
-      invalidateCache();
-    },
+    onSuccess: () => {},
     onError: (error) => {
       invalidateCache();
       log.error(error.message);
@@ -248,9 +246,7 @@ export const useItemUpdate = (): UseItemUpdate => {
         body: JSON.stringify({ slug: item.slug }),
       }).then(handleAPIResponse<MarkUnreadItemResponse>);
     },
-    onSuccess: () => {
-      invalidateCache();
-    },
+    onSuccess: () => {},
     onError: (error) => {
       invalidateCache();
       log.error(error.message);
