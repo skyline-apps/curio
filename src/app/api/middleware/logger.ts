@@ -31,7 +31,7 @@ function log(
   prefix: string,
   method: string,
   path: string,
-  profileId?: string,
+  userId?: string,
   status?: number,
   elapsedMs?: number,
 ): void {
@@ -43,7 +43,7 @@ function log(
     out,
     includeMetadata
       ? {
-          profileId,
+          userId,
           method,
           path,
           status,
@@ -89,7 +89,7 @@ export const requestLogger = (): MiddlewareHandler => {
         LogPrefix.Outgoing,
         method,
         path,
-        c.get("profileId"),
+        c.get("userId"),
         c.res.status,
         delta,
       );
