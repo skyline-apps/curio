@@ -181,7 +181,10 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'saveCurioPage') {
+    if (request.action === 'ping') {
+        sendResponse({ status: "awake" });
+        return false;
+    } else if (request.action === 'saveCurioPage') {
         handleSaveRequest(request, sender, sendResponse)
             .then(sendResponse)
             .catch(error => sendResponse({

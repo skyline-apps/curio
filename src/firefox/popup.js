@@ -36,6 +36,13 @@ const checkExistingItems = async () => {
 };
 
 window.onload = () => {
+    // Send a ping to wake up the service worker
+    browser.runtime.sendMessage({ action: 'ping' }, (response) => {
+        if (browser.runtime.lastError) {
+            console.error("Ping failed:", browser.runtime.lastError.message);
+        }
+    });
+
     errorMessage.style.display = 'none';
     checkExistingItems().catch((_) => {
         saveButton.disabled = false;
