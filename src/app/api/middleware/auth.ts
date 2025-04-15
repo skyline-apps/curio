@@ -3,7 +3,6 @@ import { checkDbError, DbError, DbErrorCode } from "@app/api/db/errors";
 import { apiKeys, profiles } from "@app/api/db/schema";
 import { createClient } from "@app/api/lib/supabase/client";
 import { EnvContext } from "@app/api/utils/env";
-import { createUsernameSlug } from "@app/api/utils/username";
 import { createMiddleware } from "hono/factory";
 
 const returnDefault = async (
@@ -81,24 +80,9 @@ export const authMiddleware = createMiddleware(
         .where(eq(profiles.userId, user.id))
         .limit(1);
 
-      let profile = profileResult[0];
+      const profile = profileResult[0];
 
-      if (!profile) {
-        const newProfile = await db
-          .insert(profiles)
-          .values({
-            userId: user.id,
-            username: createUsernameSlug(user.email),
-          })
-          .returning({ id: profiles.id, isEnabled: profiles.isEnabled });
-        if (!newProfile || newProfile.length === 0) {
-          throw new Error("Error creating profile for new user");
-        }
-
-        profile = newProfile[0];
-      }
-
-      if (!profile.isEnabled) {
+      if (!profile || !profile.isEnabled) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
