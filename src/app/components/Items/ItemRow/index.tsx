@@ -80,6 +80,9 @@ const ItemRow: React.FC<ItemRowProps> = ({
             <Link
               to={`/item/${item.slug}`}
               className="text-sm shrink-0 text-foreground hover:underline truncate"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
             >
               {isRead ? (
                 <div className="text-secondary-600">{item.metadata.title}</div>
