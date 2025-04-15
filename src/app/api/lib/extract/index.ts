@@ -72,6 +72,7 @@ export class Extract {
   async extractFromHtml(
     url: string,
     html: string,
+    skipSimplification: boolean = false,
   ): Promise<{ content: string; metadata: ExtractedMetadata }> {
     try {
       // Ensure we have a full HTML structure for linkedom/Readability
@@ -118,7 +119,9 @@ export class Extract {
         favicon: favicon,
       };
 
-      const content = htmlToMarkdown.translate(article.content);
+      const content = htmlToMarkdown.translate(
+        skipSimplification ? html : article.content,
+      );
       if (metadata.textDirection !== TextDirection.LTR) {
         return {
           content: `<div dir="${article.dir}">\n\n${content}\n\n</div>`,

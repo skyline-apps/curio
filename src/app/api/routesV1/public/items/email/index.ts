@@ -104,7 +104,15 @@ export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
         let content = email.textContent || "";
         if (email.htmlContent) {
           try {
-            const result = await extractFromHtml(itemUrl, email.htmlContent);
+            const subject = email.subject.toLowerCase();
+            const skipSimplification =
+              (subject.includes("verif") || subject.includes("confirm")) &&
+              (subject.includes("subscri") || subject.includes("email"));
+            const result = await extractFromHtml(
+              itemUrl,
+              email.htmlContent,
+              skipSimplification,
+            );
             content = result.content;
           } catch (error) {
             if (error instanceof ExtractError) {

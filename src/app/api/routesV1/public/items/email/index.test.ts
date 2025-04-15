@@ -9,6 +9,7 @@ import {
   parseIncomingEmail,
 } from "@app/api/lib/email/__mocks__/index";
 import { EmailError } from "@app/api/lib/email/types";
+import * as extract from "@app/api/lib/extract";
 import { indexItemDocuments } from "@app/api/lib/search/__mocks__/index";
 import { SearchError } from "@app/api/lib/search/types";
 import {
@@ -101,6 +102,7 @@ describe("/v1/items/email", () => {
     };
 
     it("should return 200 when receiving new email content", async () => {
+      const extractFromHtml = vi.spyOn(extract, "extractFromHtml");
       const response = await postRequest(
         app,
         "v1/public/items/email",
@@ -113,6 +115,11 @@ describe("/v1/items/email", () => {
       );
 
       expect(response.status).toBe(200);
+      expect(extractFromHtml).toHaveBeenCalledExactlyOnceWith(
+        MOCK_EMAIL_URL,
+        MOCK_EMAIL.htmlContent,
+        false,
+      );
 
       expect(uploadItemContent).toHaveBeenCalledExactlyOnceWith(
         expect.any(Object),
@@ -144,6 +151,37 @@ describe("/v1/items/email", () => {
 
       checkDocumentIndexed();
     });
+
+    it.each([
+      "Verify your email address",
+      "Confirm your newsletter subscription",
+    ])(
+      "should skip article simplification on verification emails %s",
+      async (subject) => {
+        parseIncomingEmail.mockResolvedValueOnce({
+          ...MOCK_EMAIL,
+          subject,
+        });
+        const extractFromHtml = vi.spyOn(extract, "extractFromHtml");
+        const response = await postRequest(
+          app,
+          "v1/public/items/email",
+          {
+            emailBody: "dummy email",
+          },
+          {
+            "x-curio-app-secret": MOCK_SECRET,
+          },
+        );
+
+        expect(response.status).toBe(200);
+        expect(extractFromHtml).toHaveBeenCalledExactlyOnceWith(
+          MOCK_EMAIL_URL,
+          MOCK_EMAIL.htmlContent,
+          true,
+        );
+      },
+    );
 
     it("should return 400 when unable to parse incoming email", async () => {
       vi.mocked(parseIncomingEmail).mockRejectedValueOnce(

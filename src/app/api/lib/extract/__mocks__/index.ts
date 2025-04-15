@@ -17,6 +17,7 @@ export class Extract {
   async extractFromHtml(
     _url: string,
     _html: string,
+    _skipSimplification: boolean = false,
   ): Promise<{ content: string; metadata: ExtractedMetadata }> {
     return { content: "", metadata: MOCK_METADATA };
   }

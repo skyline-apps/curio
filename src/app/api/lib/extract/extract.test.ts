@@ -284,6 +284,32 @@ function test() {
       expect(lines[9]).toBe("");
       expect(lines[10]).toBe("</div>");
     });
+
+    it("should allow skipping simplification", async () => {
+      const html = fs.readFileSync(
+        path.join(fixturesPath, "simple.html"),
+        "utf-8",
+      );
+      const { content } = await extract.extractFromHtml(
+        "http://example.com",
+        html,
+        true,
+      );
+      const lines = content.split("\n");
+      expect(lines[0]).toBe("Menu items that should be ignored");
+      expect(lines[1]).toBe("");
+      expect(lines[2]).toBe("# Main Content");
+      expect(lines[3]).toBe("");
+      expect(lines[4]).toBe(
+        "This is a simple paragraph with some **bold text**.",
+      );
+      expect(lines[5]).toBe("");
+      expect(lines[6]).toBe("![Test image](test.jpg) ");
+      expect(lines[7]).toBe("- List item 1");
+      expect(lines[8]).toBe("- List item 2");
+      expect(lines[9]).toBe("");
+      expect(lines[10]).toBe("Footer content that should be ignored");
+    });
   });
 
   describe("extract metadata", () => {
