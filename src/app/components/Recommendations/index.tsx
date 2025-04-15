@@ -20,7 +20,7 @@ const Recommendations: React.FC = () => {
 
   if (!recommendations.length || error) {
     return (
-      <div className="w-full h-full flex items-center justify-center text-sm text-secondary">
+      <div className="w-full h-full flex items-center justify-center text-sm text-secondary-700">
         Oops! There was an issue loading this page.
       </div>
     );
