@@ -49,7 +49,7 @@ export const userUsernameRouter = new Hono<EnvBindings>().post(
       // Update the username in the database
       const updates = await db
         .update(profiles)
-        .set({ username: newUsername })
+        .set({ username: newUsername.toLowerCase() })
         .where(eq(profiles.id, profileId))
         .returning({ updatedUsername: profiles.username });
 

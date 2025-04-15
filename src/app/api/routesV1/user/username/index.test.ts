@@ -71,6 +71,15 @@ describe("POST /v1/user/username", () => {
     expect(data).toEqual({ error: "Username already in use." });
   });
 
+  it("should return 400 if duplicating username with different casing", async () => {
+    const response = await postRequest(app, "v1/user/username", {
+      username: DEFAULT_TEST_USERNAME_2.toUpperCase(),
+    });
+    expect(response.status).toBe(400);
+    const data = await response.json();
+    expect(data).toEqual({ error: "Username already in use." });
+  });
+
   it("should return 500 if database error in update", async () => {
     vi.spyOn(testDb.db, "update").mockImplementationOnce(() => {
       throw { code: DbErrorCode.ConnectionFailure };
