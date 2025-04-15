@@ -29,13 +29,10 @@ export const AppLayoutProvider: React.FC<AppLayoutProviderProps> = ({
     setAppLayout(loadLayoutSettings());
   }, []);
 
-  const updateAppLayout = useCallback(
-    (settings: Partial<AppLayoutSettings>): void => {
-      setAppLayout({ ...appLayout, ...settings });
-      updateLayoutSettings({ ...appLayout, ...settings });
-    },
-    [appLayout],
-  );
+  const updateAppLayout = (settings: Partial<AppLayoutSettings>): void => {
+    setAppLayout({ ...appLayout, ...settings });
+    updateLayoutSettings({ ...appLayout, ...settings });
+  };
 
   const updateRootPage = useCallback(
     (page: SidebarKey): void => {
@@ -56,7 +53,7 @@ export const AppLayoutProvider: React.FC<AppLayoutProviderProps> = ({
       leftSidebarOpen: !current,
       rightSidebarOpen: !current,
     });
-  }, [appLayout, updateAppLayout]);
+  }, [appLayout]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const navigateHome = useCallback(() => {
     navigate("/home");
