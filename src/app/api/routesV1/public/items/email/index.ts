@@ -104,14 +104,7 @@ export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
         let content = email.textContent || "";
         if (email.htmlContent) {
           try {
-            let modifiedHtml = email.htmlContent;
-            if (
-              !modifiedHtml.includes("<body>") &&
-              !modifiedHtml.includes("<html>")
-            ) {
-              modifiedHtml = `<html><body>${modifiedHtml}</body></html>`;
-            }
-            const result = await extractFromHtml(itemUrl, modifiedHtml);
+            const result = await extractFromHtml(itemUrl, email.htmlContent);
             content = result.content;
           } catch (error) {
             if (error instanceof ExtractError) {
