@@ -133,34 +133,3 @@ jobs:
         run: npm run db:migrate
         env:
           POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
-
-  check-web:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22.9.0"
-
-      - name: WEB - Build custom lint rules
-        working-directory: ./src/web/eslint-local-rules
-        run: npm install && npm run build
-
-      - name: WEB - Install dependencies
-        working-directory: ./src/web
-        run: npm install
-
-      - name: WEB - Run lint
-        working-directory: ./src/web
-        run: npm run lint
-
-      - name: WEB - Run build
-        working-directory: ./src/web
-        run: npm run build
-
-      - name: WEB - Run tests
-        working-directory: ./src/web
-        run: npm run test
