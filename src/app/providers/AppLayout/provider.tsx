@@ -8,7 +8,7 @@ import {
   loadLayoutSettings,
   updateLayoutSettings,
 } from "@app/utils/displayStorage";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { AppLayoutContext, SidebarKey } from ".";
@@ -29,10 +29,16 @@ export const AppLayoutProvider: React.FC<AppLayoutProviderProps> = ({
     setAppLayout(loadLayoutSettings());
   }, []);
 
-  const updateAppLayout = (settings: Partial<AppLayoutSettings>): void => {
-    setAppLayout({ ...appLayout, ...settings });
-    updateLayoutSettings({ ...appLayout, ...settings });
-  };
+  const updateAppLayout = useCallback(
+    (settings: Partial<AppLayoutSettings>): void => {
+      setAppLayout((prevLayout) => {
+        const newLayout = { ...prevLayout, ...settings };
+        updateLayoutSettings(newLayout);
+        return newLayout;
+      });
+    },
+    [],
+  );
 
   const updateRootPage = useCallback(
     (page: SidebarKey): void => {
@@ -48,12 +54,13 @@ export const AppLayoutProvider: React.FC<AppLayoutProviderProps> = ({
   }, [navigate, rootPage, pathname]);
 
   const toggleSidebars = useCallback(() => {
-    const current = appLayout.leftSidebarOpen;
+    // Read the current value from the state
+    const currentIsOpen = appLayout.leftSidebarOpen;
     updateAppLayout({
-      leftSidebarOpen: !current,
-      rightSidebarOpen: !current,
+      leftSidebarOpen: !currentIsOpen,
+      rightSidebarOpen: !currentIsOpen,
     });
-  }, [appLayout]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [appLayout.leftSidebarOpen, updateAppLayout]);
 
   const navigateHome = useCallback(() => {
     navigate("/home");
@@ -126,15 +133,17 @@ export const AppLayoutProvider: React.FC<AppLayoutProviderProps> = ({
     },
   });
 
+  const contextValue = useMemo(() => {
+    return {
+      appLayout,
+      updateAppLayout,
+      updateRootPage,
+      navigateToRoot,
+    };
+  }, [appLayout, updateAppLayout, updateRootPage, navigateToRoot]);
+
   return (
-    <AppLayoutContext.Provider
-      value={{
-        appLayout,
-        updateAppLayout,
-        updateRootPage,
-        navigateToRoot,
-      }}
-    >
+    <AppLayoutContext.Provider value={contextValue}>
       {children}
     </AppLayoutContext.Provider>
   );
