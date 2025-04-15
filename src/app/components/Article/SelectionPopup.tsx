@@ -25,28 +25,50 @@ export const SelectionPopup = ({
 
   const updatePosition = useCallback(() => {
     if (!selection || !containerRef.current) return null;
-    if (selection.rangeCount === 0 || selection.getRangeAt(0).collapsed)
-      return null;
+    if (selection.rangeCount === 0) return null; // Check rangeCount first
 
     const range = selection.getRangeAt(0);
-    const rects = range.getClientRects();
-    if (rects.length === 0) return null;
+    if (range.collapsed) return null; // Check collapsed state
 
-    const firstRect = rects[0];
+    const rangeRect = range.getBoundingClientRect(); // Use overall bounding box
+    // Check for empty rects which can happen in some cases
+    // Fixed lint error: Wrap long condition
+    if (
+      rangeRect.width === 0 &&
+      rangeRect.height === 0 &&
+      rangeRect.top === 0 &&
+      rangeRect.left === 0
+    ) {
+      return null;
+    }
+
     const containerRect = containerRef.current.getBoundingClientRect();
+    const scrollTop = containerRef.current.scrollTop;
+    const scrollLeft = containerRef.current.scrollLeft;
 
-    // Calculate position relative to the container
-    const top = firstRect.top + window.scrollY - containerRect.top - 50; // 50px above selection
-    const left = firstRect.left - containerRect.left + firstRect.width / 2 - 50; // Centered
+    // Calculate position relative to the container, accounting for container scroll
+    // Position roughly 50px above the top of the selection range
+    const top = rangeRect.top - containerRect.top + scrollTop - 50;
+    // Center horizontally based on the range's bounding box
+    const left =
+      rangeRect.left - containerRect.left + scrollLeft + rangeRect.width / 2;
 
-    // Ensure popup stays within container bounds
+    // Estimate popup dimensions for clamping (adjust if needed)
+    const popupHeight = 50;
+    const popupWidth = 120; // Adjust based on actual button/content width
+
+    // Ensure popup stays within container bounds, adjusting for popup size
     const adjustedTop = Math.max(
-      10,
-      Math.min(top, containerRef.current.scrollHeight - 60),
+      scrollTop + 10, // Min top padding relative to scroll position
+      Math.min(top, containerRect.height + scrollTop - popupHeight - 10), // Max top within container
     );
+    // Adjust left position to center the popup itself and clamp
     const adjustedLeft = Math.max(
-      10,
-      Math.min(left, containerRef.current.clientWidth - 100),
+      scrollLeft + 10, // Min left padding relative to scroll position
+      Math.min(
+        left - popupWidth / 2, // Center the popup
+        containerRect.width + scrollLeft - popupWidth - 10, // Max left within container
+      ),
     );
 
     return {
