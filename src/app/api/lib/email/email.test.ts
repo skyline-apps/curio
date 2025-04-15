@@ -7,6 +7,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   extractMetadataFromEmail,
   extractUrlFromEmail,
+  isVerificationEmail,
   parseIncomingEmail,
 } from ".";
 import type { Email } from "./types";
@@ -443,6 +444,46 @@ https://substack.com/another-post-weekly?param2=value2
       );
       expect(result.textDirection).toBe(TextDirection.RTL);
       expect(result.textLanguage).toBe("ar");
+    });
+  });
+
+  describe("isVerificationEmail", () => {
+    it("should return true for verification emails", () => {
+      const matchingSubjects = [
+        "Complete your sign up to News Weekly",
+        "Finish your sign-up",
+        "Finish signing up for our newsletter",
+        "Verify your News Weekly email",
+        "Confirm your subscription to News Weekly",
+      ];
+      for (const subject of matchingSubjects) {
+        const email = makeTestEmail(
+          "sender@example.com",
+          "Sender",
+          subject,
+          "Some content",
+        );
+        expect(isVerificationEmail(email)).toBe(true);
+      }
+    });
+
+    it("should return false for regular emails", () => {
+      const matchingSubjects = [
+        "Today in News Weekly",
+        "The latest in chip verification",
+        "Signs of a slowing market",
+        "Racing towards completion",
+        "Subscription-based services are coming back",
+      ];
+      for (const subject of matchingSubjects) {
+        const email = makeTestEmail(
+          "sender@example.com",
+          "Sender",
+          subject,
+          "Some content",
+        );
+        expect(isVerificationEmail(email)).toBe(false);
+      }
     });
   });
 });

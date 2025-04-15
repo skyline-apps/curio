@@ -2,6 +2,7 @@ import { desc, eq } from "@app/api/db";
 import { DbErrorCode } from "@app/api/db/errors";
 import { items, profileItemHighlights, profileItems } from "@app/api/db/schema";
 import {
+  isVerificationEmail,
   MOCK_EMAIL,
   MOCK_EMAIL_DATE,
   MOCK_EMAIL_SLUG,
@@ -152,36 +153,27 @@ describe("/v1/items/email", () => {
       checkDocumentIndexed();
     });
 
-    it.each([
-      "Verify your email address",
-      "Confirm your newsletter subscription",
-    ])(
-      "should skip article simplification on verification emails %s",
-      async (subject) => {
-        parseIncomingEmail.mockResolvedValueOnce({
-          ...MOCK_EMAIL,
-          subject,
-        });
-        const extractFromHtml = vi.spyOn(extract, "extractFromHtml");
-        const response = await postRequest(
-          app,
-          "v1/public/items/email",
-          {
-            emailBody: "dummy email",
-          },
-          {
-            "x-curio-app-secret": MOCK_SECRET,
-          },
-        );
+    it("should skip article simplification on verification emails", async () => {
+      isVerificationEmail.mockReturnValueOnce(true);
+      const extractFromHtml = vi.spyOn(extract, "extractFromHtml");
+      const response = await postRequest(
+        app,
+        "v1/public/items/email",
+        {
+          emailBody: "dummy email",
+        },
+        {
+          "x-curio-app-secret": MOCK_SECRET,
+        },
+      );
 
-        expect(response.status).toBe(200);
-        expect(extractFromHtml).toHaveBeenCalledExactlyOnceWith(
-          MOCK_EMAIL_URL,
-          MOCK_EMAIL.htmlContent,
-          true,
-        );
-      },
-    );
+      expect(response.status).toBe(200);
+      expect(extractFromHtml).toHaveBeenCalledExactlyOnceWith(
+        MOCK_EMAIL_URL,
+        MOCK_EMAIL.htmlContent,
+        true,
+      );
+    });
 
     it("should return 400 when unable to parse incoming email", async () => {
       vi.mocked(parseIncomingEmail).mockRejectedValueOnce(

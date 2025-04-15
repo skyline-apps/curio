@@ -28,3 +28,5 @@ export const extractMetadataFromEmail = vi.fn().mockReturnValue({
   favicon: null,
   publishedAt: MOCK_EMAIL_DATE,
 });
+
+export const isVerificationEmail = vi.fn().mockReturnValue(false);

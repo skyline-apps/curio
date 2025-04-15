@@ -4,6 +4,7 @@ import { items, profiles } from "@app/api/db/schema";
 import {
   extractMetadataFromEmail,
   extractUrlFromEmail,
+  isVerificationEmail,
   parseIncomingEmail,
 } from "@app/api/lib/email";
 import { EmailError } from "@app/api/lib/email/types";
@@ -104,10 +105,8 @@ export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
         let content = email.textContent || "";
         if (email.htmlContent) {
           try {
-            const subject = email.subject.toLowerCase();
-            const skipSimplification =
-              (subject.includes("verif") || subject.includes("confirm")) &&
-              (subject.includes("subscri") || subject.includes("email"));
+            const skipSimplification = isVerificationEmail(email);
+
             const result = await extractFromHtml(
               itemUrl,
               email.htmlContent,

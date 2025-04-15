@@ -290,3 +290,18 @@ export function extractMetadataFromEmail({
     textLanguage: language,
   };
 }
+
+export function isVerificationEmail(email: Email): boolean {
+  const subject = email.subject.toLowerCase();
+  const actionKeywords = ["verif", "confirm"];
+  const subscriptionKeywords = ["subscri", "email"];
+  const finishKeywords = ["finish", "complete"];
+  const signUpKeywords = ["sign", "up"];
+  const verificationAsk =
+    actionKeywords.some((kw) => subject.includes(kw)) &&
+    subscriptionKeywords.some((kw) => subject.includes(kw));
+  const signUpAsk =
+    finishKeywords.some((kw) => subject.includes(kw)) &&
+    signUpKeywords.every((kw) => subject.includes(kw));
+  return verificationAsk || signUpAsk;
+}
