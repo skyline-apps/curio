@@ -27,7 +27,7 @@ services:
     build:
       context: ./
       dockerfile: ./docker/curio-app/Dockerfile
-    container_name: curio-app
+    container_name: curio
     network_mode: host
     working_dir: /app
     command: >
@@ -48,41 +48,6 @@ services:
             - /app/node_modules
         - action: rebuild
           path: ./src/app/package.json
-  web:
-    build:
-      context: ./
-      dockerfile: ./docker/curio/Dockerfile
-    container_name: curio
-    network_mode: host
-    working_dir: /app
-    command: >
-      npm run dev
-    depends_on:
-      - db
-    environment:
-      POSTGRES_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}"
-      NEXT_PUBLIC_CURIO_URL: ${CURIO_URL}
-      NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
-      NEXT_PUBLIC_POSTHOG_KEY: ${POSTHOG_KEY}
-      NEXT_PUBLIC_POSTHOG_HOST: ${POSTHOG_HOST}
-      SEARCH_APPLICATION_API_KEY: ${SEARCH_APPLICATION_API_KEY}
-      SEARCH_ENDPOINT_URL: ${SEARCH_ENDPOINT_URL}
-      SEARCH_EXTERNAL_ENDPOINT_URL: ${SEARCH_EXTERNAL_ENDPOINT_URL}
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
-      CURIO_APP_SECRET: ${CURIO_APP_SECRET}
-      CURIO_EMAIL_DOMAIN: ${CURIO_EMAIL_DOMAIN}
-    mem_limit: "6G"
-    cpus: 4
-    develop:
-      watch:
-        - action: sync
-          path: ./src/web
-          target: /app
-          ignore:
-            - /app/node_modules
-        - action: rebuild
-          path: ./src/web/package.json
   search:
     image: getmeili/meilisearch:v1.12
     container_name: search
