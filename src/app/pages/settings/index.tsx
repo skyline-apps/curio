@@ -9,7 +9,7 @@ const SettingsPage: React.FC = () => {
   }, []);
 
   const { user } = useUser();
-  if (!user.id || !user.username) {
+  if (!user.id) {
     return <p className="text-danger">User not found.</p>;
   }
 

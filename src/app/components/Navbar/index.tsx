@@ -7,6 +7,7 @@ import {
   DropdownTrigger,
 } from "@app/components/ui/Dropdown";
 import Icon from "@app/components/ui/Icon";
+import { useSettings } from "@app/providers/Settings";
 import { useUser } from "@app/providers/User";
 import { Navbar, NavbarBrand, NavbarContent } from "@heroui/navbar";
 import React from "react";
@@ -14,6 +15,7 @@ import { HiOutlineUser } from "react-icons/hi2";
 
 const CurioNavbar: React.FC = () => {
   const { user, handleLogout } = useUser();
+  const { username } = useSettings();
 
   return (
     <Navbar classNames={{ wrapper: "px-4" }} isBordered maxWidth="full">
@@ -32,7 +34,7 @@ const CurioNavbar: React.FC = () => {
               <DropdownItem
                 key="logout"
                 onPress={handleLogout}
-                description={user.username}
+                description={username}
               >
                 Log out
               </DropdownItem>

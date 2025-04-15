@@ -17,13 +17,9 @@ import {
 
 import SidebarButton from "./SidebarButton";
 
-interface UserData {
+interface UserMenuProps {
   username: string | null;
   email: string | null;
-}
-
-interface UserMenuProps {
-  user: UserData;
   sidebarOpen: boolean;
   selectedKey: SidebarKey;
   onLogout: () => void;
@@ -31,7 +27,8 @@ interface UserMenuProps {
 }
 
 const UserMenu: React.FC<UserMenuProps> = ({
-  user,
+  username,
+  email,
   sidebarOpen,
   selectedKey,
   onLogout,
@@ -42,7 +39,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
       key: SidebarKey.PROFILE,
       label: "Profile",
       icon: <HiOutlineUser />,
-      onPress: () => onNavigate(`/u/${user.username}`),
+      onPress: () => onNavigate(`/u/${username}`),
     },
     {
       key: SidebarKey.SETTINGS,
@@ -64,7 +61,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
         <Dropdown>
           <DropdownTrigger className="p-2">
             <div className="flex justify-start w-full h-full">
-              <User name={user.username ?? ""} description={user.email ?? ""} />
+              <User name={username ?? ""} description={email ?? ""} />
             </div>
           </DropdownTrigger>
           <DropdownMenu>

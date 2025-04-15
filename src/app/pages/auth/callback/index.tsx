@@ -43,6 +43,12 @@ const AuthCallback: React.FC = () => {
               );
             }
 
+            const { success } = await response.json();
+
+            if (!success) {
+              throw new Error("Failed to set session cookie");
+            }
+
             refreshUser();
             navigate(nextUrl, { replace: true });
           } catch (error) {

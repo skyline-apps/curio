@@ -1,6 +1,8 @@
 import { showConfirm } from "@app/components/ui/Modal/actions";
 import { useToast } from "@app/providers/Toast";
 import { useUser } from "@app/providers/User";
+import type { GetUserResponse } from "@app/schemas/v1/user";
+import { type UpdateEmailResponse } from "@app/schemas/v1/user/email";
 import type {
   CreateOrUpdateLabelsResponse,
   DeleteLabelsResponse,
@@ -11,6 +13,7 @@ import type {
   UpdateSettingsRequest,
   UpdateSettingsResponse,
 } from "@app/schemas/v1/user/settings";
+import { type UpdateUsernameResponse } from "@app/schemas/v1/user/username";
 import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import {
   initializeTheme,
@@ -27,6 +30,13 @@ import { SettingsContext } from ".";
 interface SettingsProviderProps {
   children: React.ReactNode;
 }
+
+const fetchProfile = async (): Promise<GetUserResponse> => {
+  const response = await authenticatedFetch("/api/v1/user", {
+    method: "GET",
+  });
+  return handleAPIResponse<GetUserResponse>(response);
+};
 
 const fetchSettings = async (): Promise<GetSettingsResponse> => {
   const response = await authenticatedFetch("/api/v1/user/settings", {
@@ -55,6 +65,13 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
+  const { data: currentProfile, refetch: loadProfile } = useQuery({
+    queryKey: ["profile"],
+    queryFn: fetchProfile,
+    retry: 1,
+    enabled: !!user.id,
+  });
+
   const { data: currentSettings, refetch: loadSettings } = useQuery({
     queryKey: ["settings"],
     queryFn: fetchSettings,
@@ -71,6 +88,40 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     queryFn: fetchLabels,
     retry: 1,
     enabled: !!user.id,
+  });
+
+  const changeUsernameMutation = useMutation({
+    mutationFn: async (username: string) => {
+      const response = await authenticatedFetch("/api/v1/user/username", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: user.id, username: username }),
+      });
+      return handleAPIResponse<UpdateUsernameResponse>(response);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+    },
+    onError: () => {
+      showToast("Failed to update username", { type: "error" });
+    },
+  });
+
+  const updateNewsletterEmailMutation = useMutation({
+    mutationFn: async () => {
+      const response = await authenticatedFetch("/api/v1/user/email", {
+        method: "POST",
+      });
+      return handleAPIResponse<UpdateEmailResponse>(response);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+    },
+    onError: () => {
+      showToast("Failed to update newsletter email", { type: "error" });
+    },
   });
 
   const updateSettingsMutation = useMutation({
@@ -160,11 +211,12 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
 
   useEffect(() => {
     if (user.id) {
+      loadProfile();
       loadSettings();
       loadLabels();
     }
     initializeTheme();
-  }, [user.id, loadSettings, loadLabels]);
+  }, [user.id, loadSettings, loadLabels, loadProfile]);
 
   useEffect(() => {
     if (currentSettings?.colorScheme) {
@@ -182,16 +234,31 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     if (!currentSettings) {
       return;
     }
-    if (currentSettings.analyticsTracking && user.id) {
+    if (
+      currentSettings.analyticsTracking &&
+      user.id &&
+      currentProfile?.username
+    ) {
       posthog.opt_in_capturing();
       posthog.identify(user.id, {
-        username: user.username,
+        username: currentProfile.username,
         email: user.email,
       });
     } else {
       posthog.opt_out_capturing();
     }
-  }, [currentSettings?.analyticsTracking, user.id, user.username]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentSettings?.analyticsTracking, user.id, currentProfile?.username]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const changeUsername = async (
+    username: string,
+  ): Promise<UpdateUsernameResponse | void> => {
+    return changeUsernameMutation.mutateAsync(username);
+  };
+
+  const updateNewsletterEmail =
+    async (): Promise<UpdateEmailResponse | void> => {
+      return updateNewsletterEmailMutation.mutateAsync();
+    };
 
   const updateSettings = async (
     field: keyof UpdateSettingsRequest,
@@ -269,6 +336,10 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   return (
     <SettingsContext.Provider
       value={{
+        username: currentProfile?.username ?? "",
+        newsletterEmail: currentProfile?.newsletterEmail ?? null,
+        changeUsername,
+        updateNewsletterEmail,
         settings: currentSettings,
         updateSettings,
         labels: currentLabels?.labels,

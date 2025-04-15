@@ -6,6 +6,7 @@ import {
   BrowserMessageContext,
   EventType,
 } from "@app/providers/BrowserMessage";
+import { useSettings } from "@app/providers/Settings";
 import { useUser } from "@app/providers/User";
 import { cn } from "@app/utils/cn";
 import React, { useContext, useEffect, useState } from "react";
@@ -22,6 +23,7 @@ import UserMenu from "./UserMenu";
 
 const LeftSidebar: React.FC = () => {
   const { user, handleLogout } = useUser();
+  const { username } = useSettings();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [selectedKey, setSelectedKey] = useState<SidebarKey>(SidebarKey.NONE);
@@ -111,7 +113,8 @@ const LeftSidebar: React.FC = () => {
           )}
         >
           <UserMenu
-            user={user}
+            username={username}
+            email={user.email}
             sidebarOpen={sidebarOpen}
             selectedKey={selectedKey}
             onLogout={handleLogout}

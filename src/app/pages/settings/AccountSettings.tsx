@@ -8,6 +8,7 @@ import { Dialog } from "@app/components/ui/Modal/Dialog";
 import Snippet from "@app/components/ui/Snippet";
 import Spinner from "@app/components/ui/Spinner";
 import { type ApiKey, useApiKeys } from "@app/pages/settings/actions";
+import { useSettings } from "@app/providers/Settings";
 import { useToast } from "@app/providers/Toast";
 import { useUser } from "@app/providers/User";
 import { createLogger } from "@app/utils/logger";
@@ -19,8 +20,10 @@ const log = createLogger("AccountSettings");
 const AccountSettings: React.FC = () => {
   const { listApiKeys, createApiKey, revokeApiKey } = useApiKeys();
   const { showToast } = useToast();
-  const { user, changeUsername, updateNewsletterEmail } = useUser();
-  const [newUsername, setNewUsername] = useState<string>(user.username || "");
+  const { user } = useUser();
+  const { username, newsletterEmail, changeUsername, updateNewsletterEmail } =
+    useSettings();
+  const [newUsername, setNewUsername] = useState<string>(username || "");
   const [usernameSuccess, setUsernameSuccess] = useState<string>("");
   const [usernameError, setUsernameError] = useState<string>("");
   const [newsletterError, setNewsletterError] = useState<string>("");
@@ -36,10 +39,10 @@ const AccountSettings: React.FC = () => {
   const [isRefreshingKeys, setIsRefreshingKeys] = useState<boolean>(true);
 
   useEffect(() => {
-    if (user?.username) {
-      setNewUsername(user.username);
+    if (username) {
+      setNewUsername(username);
     }
-  }, [user?.username]);
+  }, [username]);
 
   const loadApiKeys = useCallback(async (): Promise<void> => {
     listApiKeys()
@@ -121,7 +124,7 @@ const AccountSettings: React.FC = () => {
 
   const refreshNewsletterEmail = async (): Promise<void> => {
     setNewsletterError("");
-    if (user?.newsletterEmail) {
+    if (newsletterEmail) {
       showConfirm(
         "Are you sure you want to update your newsletter email? Newsletters using your existing email will no longer arrive in your inbox.",
         async () => {
@@ -154,7 +157,7 @@ const AccountSettings: React.FC = () => {
     return <Spinner />;
   }
 
-  const submitEnabled = newUsername !== user.username;
+  const submitEnabled = newUsername !== username;
 
   return (
     <div className="space-y-8">
@@ -190,12 +193,12 @@ const AccountSettings: React.FC = () => {
         errorMessage={newsletterError}
       >
         <div className="flex gap-2 w-full max-w-96">
-          {user?.newsletterEmail && (
+          {newsletterEmail && (
             <>
               <Input
                 type="text"
                 name="newsletterEmail"
-                value={user.newsletterEmail}
+                value={newsletterEmail}
                 className="flex-1"
                 disabled
               />
@@ -204,8 +207,8 @@ const AccountSettings: React.FC = () => {
                 tooltip="Copy to clipboard"
                 size="sm"
                 onPress={() => {
-                  if (user.newsletterEmail) {
-                    navigator.clipboard.writeText(user.newsletterEmail);
+                  if (newsletterEmail) {
+                    navigator.clipboard.writeText(newsletterEmail);
                     showToast("Newsletter email copied to clipboard!", {
                       disappearing: true,
                     });

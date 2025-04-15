@@ -1,6 +1,3 @@
-import { type UpdateEmailResponse } from "@app/schemas/v1/user/email";
-import { type UpdateUsernameResponse } from "@app/schemas/v1/user/username";
-import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import { clearTheme, initializeTheme } from "@app/utils/displayStorage";
 import { createLogger } from "@app/utils/logger";
 import { getSupabaseClient } from "@app/utils/supabase";
@@ -36,17 +33,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentUser, setCurrentUser] = useState<User>({
     id: null,
-    username: null,
     email: null,
-    newsletterEmail: null,
   });
 
   const clearUser = useCallback((): void => {
     setCurrentUser({
       id: null,
-      username: null,
       email: null,
-      newsletterEmail: null,
     });
   }, []);
 
@@ -58,23 +51,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({
         data: { user },
       } = await supabase.auth.getUser();
 
-      if (user) {
-        const profile = await supabase
-          .from("profiles")
-          .select("username, newsletter_email")
-          .eq("user_id", user.id)
-          .eq("is_enabled", true)
-          .single();
-
-        if (!profile.data) {
-          throw new Error("Profile not found");
-        }
-
+      if (user?.id && user?.email) {
         setCurrentUser({
           id: user.id,
-          email: user.email || null,
-          username: profile.data?.username,
-          newsletterEmail: profile.data?.newsletter_email,
+          email: user.email,
         });
       } else {
         clearUser();
@@ -89,44 +69,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({
   useEffect(() => {
     refreshUser();
   }, [refreshUser]);
-
-  const changeUsername = useCallback(
-    async (username: string): Promise<void> => {
-      return authenticatedFetch("/api/v1/user/username", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId: currentUser.id, username: username }),
-      })
-        .then(handleAPIResponse<UpdateUsernameResponse>)
-        .then((result) => {
-          const { updatedUsername } = result;
-          if (!updatedUsername) {
-            throw Error("Failed to update username");
-          }
-          setCurrentUser({ ...currentUser, username: updatedUsername });
-        });
-    },
-    [currentUser],
-  );
-
-  const updateNewsletterEmail = useCallback(async (): Promise<void> => {
-    return authenticatedFetch("/api/v1/user/email", {
-      method: "POST",
-    })
-      .then(handleAPIResponse<UpdateEmailResponse>)
-      .then((result) => {
-        const { updatedNewsletterEmail } = result;
-        if (!updatedNewsletterEmail) {
-          throw Error("Failed to update newsletter email");
-        }
-        setCurrentUser({
-          ...currentUser,
-          newsletterEmail: updatedNewsletterEmail,
-        });
-      });
-  }, [currentUser]);
 
   const handleLogout = useCallback(async (): Promise<void> => {
     try {
@@ -163,8 +105,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({
         isLoading,
         refreshUser,
         clearUser,
-        changeUsername,
-        updateNewsletterEmail,
         handleLogout,
       }}
     >

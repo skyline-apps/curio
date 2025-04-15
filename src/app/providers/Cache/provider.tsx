@@ -13,7 +13,7 @@ import {
   ITEMS_QUERY_KEY,
   type ItemsPage,
 } from "@app/providers/Items";
-import { useUser } from "@app/providers/User";
+import { useSettings } from "@app/providers/Settings";
 import { InfiniteData, useQueryClient } from "@tanstack/react-query";
 import React, { useCallback } from "react";
 
@@ -30,7 +30,7 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
   children,
 }: CacheProviderProps): React.ReactNode => {
   const queryClient = useQueryClient();
-  const { user } = useUser();
+  const { username } = useSettings();
 
   const invalidateCache = useCallback(
     (slug?: string) => {
@@ -42,13 +42,13 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
         queryClient.invalidateQueries({ queryKey: [ITEM_CONTENT_QUERY_KEY] });
       }
       queryClient.invalidateQueries({ queryKey: [ITEMS_QUERY_KEY] });
-      if (user.username) {
+      if (username) {
         queryClient.invalidateQueries({
-          queryKey: [PROFILE_QUERY_KEY, user.username],
+          queryKey: [PROFILE_QUERY_KEY, username],
         });
       }
     },
-    [queryClient, user.username],
+    [queryClient, username],
   );
 
   const optimisticUpdateItems = useCallback(

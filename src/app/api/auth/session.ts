@@ -60,7 +60,10 @@ sessionRoutes.post("/", async (c: EnvContext) => {
           userId: user.id,
         },
       })
-      .returning({ id: profiles.id, isEnabled: profiles.isEnabled });
+      .returning({
+        id: profiles.id,
+        isEnabled: profiles.isEnabled,
+      });
 
     if (!newProfile || newProfile.length === 0) {
       throw new Error("Error creating profile for new user");

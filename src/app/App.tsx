@@ -98,7 +98,7 @@ export const App = (): React.ReactNode => {
               </PublicLayout>
             }
           >
-            <Route path="/u/:username?" element={<UserPage />} />
+            <Route path="/u/:username" element={<UserPage />} />
             <Route path="/item/:slug" element={<ContentPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
