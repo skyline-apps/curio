@@ -267,6 +267,13 @@
       "when": 1744430382925,
       "tag": "0037_add_additional_item_sources",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1744691572945,
+      "tag": "0038_add_unique_constraint_on_users",
+      "breakpoints": true
     }
   ]
 }
