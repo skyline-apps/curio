@@ -55,16 +55,22 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
-  const { data: currentSettings } = useQuery({
+  const { data: currentSettings, refetch: loadSettings } = useQuery({
     queryKey: ["settings"],
     queryFn: fetchSettings,
     retry: 1,
+    enabled: !!user.id,
   });
 
-  const { data: currentLabels, isPending: loadingLabels } = useQuery({
+  const {
+    data: currentLabels,
+    isPending: loadingLabels,
+    refetch: loadLabels,
+  } = useQuery({
     queryKey: ["labels"],
     queryFn: fetchLabels,
     retry: 1,
+    enabled: !!user.id,
   });
 
   const updateSettingsMutation = useMutation({
@@ -153,8 +159,12 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   });
 
   useEffect(() => {
+    if (user.id) {
+      loadSettings();
+      loadLabels();
+    }
     initializeTheme();
-  }, []);
+  }, [user.id, loadSettings, loadLabels]);
 
   useEffect(() => {
     if (currentSettings?.colorScheme) {

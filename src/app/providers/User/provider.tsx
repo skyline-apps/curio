@@ -63,7 +63,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({
           .from("profiles")
           .select("username, newsletter_email")
           .eq("user_id", user.id)
+          .eq("is_enabled", true)
           .single();
+
+        if (!profile.data) {
+          throw new Error("Profile not found");
+        }
 
         setCurrentUser({
           id: user.id,
