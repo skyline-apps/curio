@@ -56,7 +56,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
   ];
 
   return (
-    <div className="flex-1 overflow-x-hidden">
+    <div className="flex-1 overflow-hidden">
       <div className={cn(sidebarOpen ? "hidden md:block" : "hidden")}>
         <Dropdown>
           <DropdownTrigger className="p-2">

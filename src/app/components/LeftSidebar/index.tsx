@@ -87,7 +87,7 @@ const LeftSidebar: React.FC = () => {
           { "overflow-hidden w-0 md:w-16": !sidebarOpen },
         )}
       >
-        <div className="grow">
+        <div className="flex-1">
           <SidebarHeader sidebarOpen={sidebarOpen} />
           <NavigationMenu
             sidebarOpen={sidebarOpen}
@@ -95,47 +95,53 @@ const LeftSidebar: React.FC = () => {
             onNavigation={handleNavigation}
           />
         </div>
-        <Button
-          className={cn("m-2 min-w-10", {
-            "self-center": !sidebarOpen,
-            "hidden md:flex": !sidebarOpen,
-          })}
-          isIconOnly={!sidebarOpen}
-          onPress={() => setShowNewItemModal(true)}
-        >
-          <Icon icon={<HiPlus />} />
-          <span className="hidden md:block">{sidebarOpen && "Add new"}</span>
-        </Button>
-        <div
-          className={cn(
-            "flex items-center",
-            sidebarOpen ? "flex-col md:flex-row gap-2" : "flex-col",
-          )}
-        >
-          <UserMenu
-            username={username}
-            email={user.email}
-            sidebarOpen={sidebarOpen}
-            selectedKey={selectedKey}
-            onLogout={handleLogout}
-            onNavigate={handleNavigation}
-          />
+        <div className="flex flex-col overflow-y-hidden">
           <Button
-            isIconOnly
-            variant="faded"
-            onPress={toggleSidebar}
-            aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            className={cn("m-2 shrink min-h-8 min-w-10", {
+              "self-center": !sidebarOpen,
+              "hidden md:flex": !sidebarOpen,
+            })}
+            isIconOnly={!sidebarOpen}
+            onPress={() => setShowNewItemModal(true)}
+          >
+            <Icon icon={<HiPlus />} />
+            <span className="hidden md:block">{sidebarOpen && "Add new"}</span>
+          </Button>
+          <div
             className={cn(
-              "flex-none w-10 z-10 m-2",
-              sidebarOpen ? "" : "absolute left-0 bottom-0 md:relative",
+              "flex items-center min-h-12 justify-end overflow-y-hidden",
+              sidebarOpen ? "flex-col md:flex-row gap-2" : "flex-col",
             )}
           >
-            <Icon
-              icon={
-                sidebarOpen ? <HiChevronDoubleLeft /> : <HiChevronDoubleRight />
-              }
+            <UserMenu
+              username={username}
+              email={user.email}
+              sidebarOpen={sidebarOpen}
+              selectedKey={selectedKey}
+              onLogout={handleLogout}
+              onNavigate={handleNavigation}
             />
-          </Button>
+            <Button
+              isIconOnly
+              variant="faded"
+              onPress={toggleSidebar}
+              aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+              className={cn(
+                "flex-none w-10 z-10 m-2",
+                sidebarOpen ? "" : "absolute left-0 bottom-0 md:relative",
+              )}
+            >
+              <Icon
+                icon={
+                  sidebarOpen ? (
+                    <HiChevronDoubleLeft />
+                  ) : (
+                    <HiChevronDoubleRight />
+                  )
+                }
+              />
+            </Button>
+          </div>
         </div>
       </aside>
       <NewItemModal
