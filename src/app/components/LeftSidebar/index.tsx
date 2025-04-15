@@ -2,6 +2,7 @@ import NewItemModal from "@app/components/NewItemModal";
 import Button from "@app/components/ui/Button";
 import Icon from "@app/components/ui/Icon";
 import { SidebarKey, useAppLayout } from "@app/providers/AppLayout";
+import { useSidebarSwipe } from "@app/providers/AppLayout/useSidebarSwipe";
 import {
   BrowserMessageContext,
   EventType,
@@ -78,9 +79,17 @@ const LeftSidebar: React.FC = () => {
       : SidebarKey.NONE;
   };
 
+  const bind = useSidebarSwipe({
+    isOpen: sidebarOpen,
+    onOpen: () => updateAppLayout({ leftSidebarOpen: true }),
+    onClose: () => updateAppLayout({ leftSidebarOpen: false }),
+    side: "left",
+  });
+
   return (
     <>
       <aside
+        {...bind()}
         className={cn(
           "flex flex-col justify-between h-dvh border-r-1 border-divider transition-all duration-300 ease-in-out",
           "w-16 md:w-64",

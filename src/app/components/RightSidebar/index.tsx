@@ -3,6 +3,7 @@ import Button from "@app/components/ui/Button";
 import Icon from "@app/components/ui/Icon";
 import Spinner from "@app/components/ui/Spinner";
 import { useAppLayout } from "@app/providers/AppLayout";
+import { useSidebarSwipe } from "@app/providers/AppLayout/useSidebarSwipe"; // Import the hook
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { HighlightsContext } from "@app/providers/Highlights";
 import { ItemsContext } from "@app/providers/Items";
@@ -35,12 +36,22 @@ const RightSidebar: React.FC = () => {
   } = useAppLayout();
   const { totalItems } = useContext(ItemsContext);
 
+  const sidebarOpen = rightSidebarOpen;
+
+  const bind = useSidebarSwipe({
+    isOpen: sidebarOpen,
+    onOpen: () => updateAppLayout({ rightSidebarOpen: true }),
+    onClose: () => updateAppLayout({ rightSidebarOpen: false }),
+    side: "right",
+  });
+
   const toggleSidebar = (): void => {
-    updateAppLayout({ rightSidebarOpen: !rightSidebarOpen });
+    updateAppLayout({ rightSidebarOpen: !sidebarOpen });
   };
 
   return (
     <aside
+      {...bind()}
       className={cn(
         "border-l-1 border-divider transition-all duration-300 ease-in-out absolute right-0 top-0 bottom-0 lg:relative bg-background-400 shadow-lg z-20",
         rightSidebarOpen ? "w-80" : "w-0 lg:w-16",
