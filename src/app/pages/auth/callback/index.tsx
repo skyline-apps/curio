@@ -50,7 +50,7 @@ const AuthCallback: React.FC = () => {
             }
 
             refreshUser();
-            navigate(nextUrl, { replace: true });
+            window.location.href = nextUrl;
           } catch (error) {
             log.error(
               "Error setting session cookie:",
