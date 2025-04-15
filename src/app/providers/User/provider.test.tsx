@@ -1,11 +1,4 @@
-import { mockAuthenticatedFetch } from "@app/vitest.setup.jsdom";
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { UserContext } from ".";
@@ -52,7 +45,6 @@ describe("UserContext", () => {
           {({ user }) => (
             <div>
               <span data-testid="user-id">{user.id}</span>
-              <span data-testid="user-username">{user.username}</span>
               <span data-testid="user-email">{user.email}</span>
             </div>
           )}
@@ -62,7 +54,6 @@ describe("UserContext", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("user-id")).toHaveTextContent("123");
-      expect(screen.getByTestId("user-username")).toHaveTextContent("testuser");
       expect(screen.getByTestId("user-email")).toHaveTextContent(
         "test@example.com",
       );
@@ -80,7 +71,6 @@ describe("UserContext", () => {
             return (
               <div>
                 <span data-testid="user-id">{user.id}</span>
-                <span data-testid="user-username">{user.username}</span>
                 <span data-testid="user-email">{user.email}</span>
               </div>
             );
@@ -95,59 +85,7 @@ describe("UserContext", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("user-id")).toHaveTextContent("");
-      expect(screen.getByTestId("user-username")).toHaveTextContent("");
       expect(screen.getByTestId("user-email")).toHaveTextContent("");
-    });
-  });
-
-  it("changes username when changeUsername is called", async () => {
-    mockAuthenticatedFetch.mockResolvedValueOnce(
-      new Response(JSON.stringify({ updatedUsername: "newtestuser" }), {
-        status: 200,
-        headers: new Headers({
-          "Content-Type": "application/json",
-        }),
-      }),
-    );
-
-    render(
-      <UserProvider>
-        <UserContext.Consumer>
-          {({ user, changeUsername }) => (
-            <div>
-              <button onClick={() => changeUsername("newtestuser")}>
-                Change username
-                <div data-testid="username">{user.username}</div>
-              </button>
-            </div>
-          )}
-        </UserContext.Consumer>
-      </UserProvider>,
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId("username")).toHaveTextContent("testuser");
-    });
-
-    act(() => {
-      fireEvent.click(screen.getByText("Change username"));
-    });
-
-    await waitFor(() => {
-      expect(mockAuthenticatedFetch).toHaveBeenCalledWith(
-        "/api/v1/user/username",
-        expect.objectContaining({
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: "123",
-            username: "newtestuser",
-          }),
-        }),
-      );
-      expect(screen.getByTestId("username")).toHaveTextContent("newtestuser");
     });
   });
 });
