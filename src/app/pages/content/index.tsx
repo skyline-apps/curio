@@ -51,7 +51,7 @@ const ItemPage: React.FC = () => {
     return (
       <div
         className={cn(
-          "w-full lg:w-4xl max-w-4xl self-start pl-6 pt-4 mx-auto",
+          "w-full lg:w-4xl max-w-4xl self-start pl-2 pt-4 mx-auto",
           fontClass,
         )}
       >
