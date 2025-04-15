@@ -6,6 +6,7 @@ import {
 } from "@app/components/Article/displaySettings";
 import KeyboardShortcuts from "@app/components/KeyboardShortcuts";
 import { Progress } from "@app/components/ui/Progress";
+import { useAppLayout } from "@app/providers/AppLayout";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { useSettings } from "@app/providers/Settings";
 import { DisplayFont, DisplayFontSize, TextDirection } from "@app/schemas/db";
@@ -18,6 +19,7 @@ const ItemPage: React.FC = () => {
     useContext(CurrentItemContext);
   const { slug } = useParams();
   const { settings } = useSettings();
+  const { updateAppLayout } = useAppLayout();
   const { displayFont, displayFontSize } = settings || {};
   const metadata = loadedItem?.item.metadata;
 
@@ -30,6 +32,16 @@ const ItemPage: React.FC = () => {
     displayHeaderSizeClass[displayFontSize || DisplayFontSize.MD];
   const proseSizeClass =
     displayFontSizeClass[displayFontSize || DisplayFontSize.MD];
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (window.innerWidth < 1048) {
+        updateAppLayout({ rightSidebarOpen: false, leftSidebarOpen: false });
+      } else {
+        updateAppLayout({ rightSidebarOpen: true });
+      }
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (typeof slug === "string") {

@@ -62,10 +62,12 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   }, [pathname, clearSelectedItems]);
 
   const maybeOpenSidebar = useCallback((): void => {
-    if (typeof window !== "undefined" && window.innerWidth > 1048) {
-      updateAppLayout({ rightSidebarOpen: true });
-    } else {
-      updateAppLayout({ rightSidebarOpen: false });
+    if (typeof window !== "undefined") {
+      if (window.innerWidth > 1048) {
+        updateAppLayout({ rightSidebarOpen: true });
+      } else {
+        updateAppLayout({ rightSidebarOpen: false });
+      }
     }
   }, [updateAppLayout]);
 
