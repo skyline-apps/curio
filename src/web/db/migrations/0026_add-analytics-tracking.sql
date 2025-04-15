@@ -1,1 +1,0 @@
-ALTER TABLE "profiles" ADD COLUMN "analytics_tracking" boolean DEFAULT true NOT NULL;

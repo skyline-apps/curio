@@ -1,1 +1,0 @@
-ALTER TABLE "profile_items" ALTER COLUMN "title" SET NOT NULL;

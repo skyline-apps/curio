@@ -1,1 +1,0 @@
-ALTER TABLE "profile_items" ALTER COLUMN "state_updated_at" SET DEFAULT now();

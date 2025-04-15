@@ -1,1 +1,0 @@
-ALTER TABLE "profiles" ADD COLUMN "public" boolean DEFAULT false NOT NULL;

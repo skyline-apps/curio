@@ -1,1 +1,0 @@
-ALTER TYPE "public"."text_direction" ADD VALUE 'auto';

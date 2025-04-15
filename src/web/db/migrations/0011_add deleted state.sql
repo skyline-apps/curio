@@ -1,1 +1,0 @@
-ALTER TYPE "public"."item_state" ADD VALUE 'deleted';

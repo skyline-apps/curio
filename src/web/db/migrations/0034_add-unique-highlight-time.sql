@@ -1,1 +1,0 @@
-ALTER TABLE "profile_item_highlights" ADD CONSTRAINT "profile_item_highlights_updated_at_unique" UNIQUE("updated_at");
