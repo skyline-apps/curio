@@ -12,7 +12,6 @@ vi.mock("@app/utils/logger");
 
 // Mock user
 const DEFAULT_TEST_USER_ID = "123e4567-e89b-12d3-a456-426614174002";
-const DEFAULT_TEST_USERNAME = "defaultuser";
 
 vi.mock("@app/providers/User/provider", () => ({
   UserProvider: ({ children }: { children: React.ReactNode }) => (
@@ -20,14 +19,10 @@ vi.mock("@app/providers/User/provider", () => ({
       value={{
         user: {
           id: DEFAULT_TEST_USER_ID,
-          username: DEFAULT_TEST_USERNAME,
           email: "test@example.com",
-          newsletterEmail: null,
         },
         refreshUser: vi.fn(),
         clearUser: vi.fn(),
-        changeUsername: vi.fn(),
-        updateNewsletterEmail: vi.fn(),
         handleLogout: vi.fn(),
         isLoading: false,
       }}

@@ -14,17 +14,14 @@ vi.mock("@app/components/CurioBrand", () => ({
 
 describe("Navbar", () => {
   const mockHandleLogout = vi.fn();
-  const mockChangeUsername = vi.fn();
   const MockNoUserProvider = ({
     children,
   }: React.PropsWithChildren): React.ReactElement => (
     <UserContext.Provider
       value={{
-        user: { id: null, username: null, email: null, newsletterEmail: null },
+        user: { id: null, email: null },
         refreshUser: vi.fn(),
         clearUser: vi.fn(),
-        changeUsername: mockChangeUsername,
-        updateNewsletterEmail: vi.fn(),
         handleLogout: mockHandleLogout,
         isLoading: false,
       }}
@@ -39,14 +36,10 @@ describe("Navbar", () => {
       value={{
         user: {
           id: "user1",
-          username: "testuser",
           email: "user@email.com",
-          newsletterEmail: null,
         },
         refreshUser: vi.fn(),
         clearUser: vi.fn(),
-        changeUsername: mockChangeUsername,
-        updateNewsletterEmail: vi.fn(),
         handleLogout: mockHandleLogout,
         isLoading: false,
       }}
