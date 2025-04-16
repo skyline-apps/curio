@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-imports */
 import { EnvContext } from "@app/api/utils/env";
 import { TypedResponse, ValidationTargets } from "hono";
 import { DescribeRouteOptions } from "hono-openapi";

@@ -114,6 +114,14 @@ export default defineConfig([
               name: "tailwind-merge",
               message: "Please use `cn` from `@app/utils/cn`",
             },
+            {
+              name: "@hono/zod-validator",
+              message: "Please use `zValidator` from `@app/api/utils/api`",
+            },
+            {
+              name: "hono-openapi/zod",
+              message: "Please use `zValidator` from `@app/api/utils/api`",
+            },
           ],
           patterns: [
             {
