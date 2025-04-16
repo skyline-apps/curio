@@ -1,0 +1,39 @@
+{
+    "$schema": "../../node_modules/wrangler/config-schema.json",
+    "name": "curio-consumer",
+    "main": "index.ts",
+    "compatibility_date": "2025-04-03",
+    "compatibility_flags": [
+        "nodejs_compat"
+    ],
+    "keep_vars": true,
+    "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1
+    },
+    "env": {
+        "staging": {
+            "name": "curio-consumer-staging",
+            "vars": {
+                "ENVIRONMENT": "staging"
+            }
+        },
+        "prod": {
+            "name": "curio-consumer-prod",
+            "vars": {
+                "ENVIRONMENT": "prod"
+            }
+        }
+    },
+    "queues": {
+        "consumers": [
+            {
+                "queue": "items-fetcher",
+                "max_batch_size": 1
+                // "max_wait_time_ms": 1000,
+                // "max_retries": 3,
+                // "dead_letter_queue": "my-dead-letter-queue"
+            }
+        ]
+    }
+}

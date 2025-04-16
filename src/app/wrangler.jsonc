@@ -33,5 +33,19 @@
         "ENVIRONMENT": "prod"
       }
     }
+  },
+  "queues": {
+    "producers": [
+      {
+        "queue": "items-fetcher",
+        "binding": "ITEMS_FETCHER_QUEUE"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "items-fetcher",
+        "max_batch_size": 1,
+      }
+    ]
   }
 }

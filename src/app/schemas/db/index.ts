@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export enum ColorScheme {
   AUTO = "auto",
   LIGHT = "light",
@@ -56,3 +58,24 @@ export enum JobType {
   IMPORT_INSTAPAPER = "import_instapaper",
   IMPORT_OMNIVORE = "import_omnivore",
 }
+
+export const OAuth1TokenSchema = z.object({
+  oauth_token: z.string().min(1),
+  oauth_token_secret: z.string().min(1),
+});
+
+export enum ImportStatus {
+  NOT_STARTED = "not_started",
+  FETCHED_ITEMS = "fetched_items",
+}
+
+export const ImportMetadataSchema = z.object({
+  status: z.nativeEnum(ImportStatus),
+  numberOfItems: z.number().optional(),
+});
+
+export type ImportMetadata = z.infer<typeof ImportMetadataSchema>;
+
+export const ImportInstapaperMetadataSchema = ImportMetadataSchema.extend({
+  accessToken: OAuth1TokenSchema,
+});
