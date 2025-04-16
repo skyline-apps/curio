@@ -1,4 +1,3 @@
-import { EnvContext } from "@app/api/utils/env";
 import { Axiom } from "@axiomhq/js";
 import {
   AxiomJSTransport,
@@ -9,20 +8,22 @@ import {
 
 export type Logger = AxiomLogger;
 
+export type LoggerEnv = { AXIOM_DATASET?: string; AXIOM_TOKEN?: string };
+
 export const createLogger = (
-  c: EnvContext,
+  env: LoggerEnv,
   logLevel: LogLevel = "info",
 ): AxiomLogger => {
-  const hasAxiom = !!c.env.AXIOM_DATASET && !!c.env.AXIOM_TOKEN;
+  const hasAxiom = !!env.AXIOM_DATASET && !!env.AXIOM_TOKEN;
 
   return new AxiomLogger({
     transports: [
       hasAxiom
         ? new AxiomJSTransport({
             axiom: new Axiom({
-              token: c.env.AXIOM_TOKEN,
+              token: env.AXIOM_TOKEN!,
             }),
-            dataset: c.env.AXIOM_DATASET,
+            dataset: env.AXIOM_DATASET!,
             logLevel,
           })
         : new ConsoleTransport({

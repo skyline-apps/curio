@@ -23,7 +23,7 @@ api.use("*", async (c, next) => {
     throw new Error("VITE_CURIO_URL environment variable is not set");
   }
 
-  c.set("db", getDb(c));
+  c.set("db", getDb(c.env));
 
   // Apply CORS middleware with dynamic origins
   return cors({

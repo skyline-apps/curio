@@ -40,7 +40,7 @@ export const setUpMockApp = (
     app.use(createMockAuthMiddleware(userId));
   }
   app.use("*", (c, next) => {
-    c.set("log", createLogger(c));
+    c.set("log", createLogger(c.env));
     c.set("db", testDb.db as unknown as TransactionDB);
     return next();
   });

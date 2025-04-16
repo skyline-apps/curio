@@ -20,6 +20,8 @@ export const EnvSchema = z.object({
   SEARCH_EXTERNAL_ENDPOINT_URL: z.string(),
   AXIOM_TOKEN: z.string(),
   AXIOM_DATASET: z.string(),
+  INSTAPAPER_OAUTH_CONSUMER_ID: z.string(),
+  INSTAPAPER_OAUTH_CONSUMER_SECRET: z.string(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

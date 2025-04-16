@@ -61,7 +61,7 @@ export const requestLogger = (): MiddlewareHandler => {
     }
     const usingAxiom = !!c.env.AXIOM_TOKEN;
     const logDisabled = c.req.header("x-healthcheck") === "true";
-    const logger = createLogger(c, logDisabled ? "warn" : "info");
+    const logger = createLogger(c.env, logDisabled ? "warn" : "info");
 
     c.set("log", logger);
 
