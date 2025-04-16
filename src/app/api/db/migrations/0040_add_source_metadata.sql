@@ -1,0 +1,1 @@
+ALTER TABLE "profile_items" ADD COLUMN "source_metadata" jsonb;

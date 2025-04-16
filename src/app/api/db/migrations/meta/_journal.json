@@ -274,6 +274,20 @@
       "when": 1744691572945,
       "tag": "0038_add_unique_constraint_on_users",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1744756993231,
+      "tag": "0039_add_jobs_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1744777839043,
+      "tag": "0040_add_source_metadata",
+      "breakpoints": true
     }
   ]
 }

@@ -4,6 +4,8 @@ import {
   DisplayFontSize,
   ItemSource,
   ItemState,
+  JobStatus,
+  JobType,
   PersonalRecommendationType,
   RecommendationType,
   TextDirection,
@@ -14,6 +16,7 @@ import {
   foreignKey,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgSchema,
   pgTable,
@@ -186,6 +189,7 @@ export const profileItems = pgTable(
       .defaultNow(),
     versionName: text("version_name"),
     source: itemSource("source"),
+    sourceMetadata: jsonb("source_metadata"),
     textDirection: textDirection("text_direction")
       .notNull()
       .default(TextDirection.LTR),
@@ -380,6 +384,38 @@ export const profileItemRecommendations = pgTable(
     ),
   }),
 ).enableRLS();
+
+export const jobStatusEnum = pgEnum("job_status", [
+  JobStatus.PENDING,
+  JobStatus.RUNNING,
+  JobStatus.COMPLETED,
+  JobStatus.FAILED,
+]);
+
+export const jobTypeEnum = pgEnum("job_type", [
+  JobType.IMPORT_INSTAPAPER,
+  JobType.IMPORT_OMNIVORE,
+]);
+
+export const jobs = pgTable("jobs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  profileId: uuid("profile_id")
+    .notNull()
+    .references(() => profiles.id, { onDelete: "cascade" }),
+  status: jobStatusEnum("status").default(JobStatus.PENDING).notNull(),
+  type: jobTypeEnum("type").notNull(),
+  metadata: jsonb("metadata"),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+  startedAt: timestamp("started_at", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+});
 
 export type InsertProfile = typeof profiles.$inferInsert;
 export type SelectProfile = typeof profiles.$inferSelect;

@@ -44,3 +44,15 @@ export enum PersonalRecommendationType {
   FAVORITE_AUTHOR = "favorite_author",
   FAVORITES = "favorites",
 }
+
+export enum JobStatus {
+  PENDING = "pending",
+  RUNNING = "running",
+  COMPLETED = "completed",
+  FAILED = "failed",
+}
+
+export enum JobType {
+  IMPORT_INSTAPAPER = "import_instapaper",
+  IMPORT_OMNIVORE = "import_omnivore",
+}
