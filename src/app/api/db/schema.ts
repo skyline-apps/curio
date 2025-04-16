@@ -415,7 +415,7 @@ export const jobs = pgTable("jobs", {
     .$onUpdate(() => new Date()),
   startedAt: timestamp("started_at", { withTimezone: true }),
   completedAt: timestamp("completed_at", { withTimezone: true }),
-});
+}).enableRLS();
 
 export type InsertProfile = typeof profiles.$inferInsert;
 export type SelectProfile = typeof profiles.$inferSelect;

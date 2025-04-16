@@ -288,6 +288,13 @@
       "when": 1744777839043,
       "tag": "0040_add_source_metadata",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1744781738146,
+      "tag": "0041_add_rls_to_jobs",
+      "breakpoints": true
     }
   ]
 }
