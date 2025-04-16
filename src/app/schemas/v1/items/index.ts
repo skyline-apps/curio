@@ -79,6 +79,11 @@ const ItemMetadataBaseSchema = PublicItemMetadataSchema.merge(
       .nativeEnum(ItemSource)
       .nullable()
       .describe("Where the item was saved from."),
+    sourceMetadata: z
+      .object({})
+      .nullable()
+      .optional()
+      .describe("Additional metadata from the item source."),
     isFavorite: z.boolean().describe("Whether the item is favorited."),
     readingProgress: z
       .number()
@@ -244,7 +249,11 @@ const ItemMetadataUpdateSchema = ItemMetadataSchema.merge(
       .optional()
       .describe("The favicon URL of the item."),
   }),
-).strict();
+)
+  .strict()
+  .partial();
+
+export type ItemMetadataUpdate = z.infer<typeof ItemMetadataUpdateSchema>;
 
 export const CreateOrUpdateItemsRequestSchema = z.object({
   items: z.array(

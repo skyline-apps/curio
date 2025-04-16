@@ -1,5 +1,7 @@
 import { and, desc, eq, ilike, not, or, type SQL, sql } from "@app/api/db";
+import { createOrUpdateItems } from "@app/api/db/dal/items";
 import {
+  createOrUpdateProfileItems,
   fetchOwnItemResults,
   getRelevantProfileItemIds,
 } from "@app/api/db/dal/profileItems";
@@ -12,8 +14,8 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
-import { cleanUrl, generateSlug } from "@app/api/utils/url";
-import { ItemState, TextDirection } from "@app/schemas/db";
+import { cleanUrl } from "@app/api/utils/url";
+import { ItemState } from "@app/schemas/db";
 import {
   CreateOrUpdateItemsRequest,
   CreateOrUpdateItemsRequestSchema,
@@ -206,125 +208,18 @@ export const itemsRouter = new Hono<EnvBindings>()
       try {
         const db = c.get("db");
 
-        const now = new Date();
-
         return await db.transaction(async (tx) => {
-          const itemsToInsert = newItems.map((item) => ({
-            url: cleanUrl(item.url),
-            slug: generateSlug(item.url),
-            createdAt: now,
-            updatedAt: now,
-          }));
-
-          const insertedItems = await tx
-            .insert(items)
-            .values(itemsToInsert)
-            .onConflictDoUpdate({
-              target: items.url,
-              set: { slug: items.slug }, // Should be a no-op, needed to include the non-updated rows in the url to ID map
-            })
-            .returning({
-              id: items.id,
-              url: items.url,
-              slug: items.slug,
-              createdAt: items.createdAt,
-            });
-
-          const urlToItemId = new Map(
-            insertedItems.map((item) => [item.url, item.id]),
+          const insertedItems = await createOrUpdateItems(
+            tx,
+            newItems.map((item) => item.url),
           );
 
-          const itemIds = insertedItems.map((item) => item.id);
-
-          const stateUpdatedAtSet = new Set<string>();
-          const profileItemsToInsert = newItems.map((item) => {
-            const cleanedUrl = cleanUrl(item.url);
-            const itemId = urlToItemId.get(cleanedUrl);
-            if (!itemId) {
-              throw new Error(
-                `Failed to find itemId for URL ${item.url}. This should never happen.`,
-              );
-            }
-            const itemIndex = itemIds.indexOf(itemId);
-
-            // Calculate stateUpdatedAt value
-            let stateUpdatedAt = item.metadata?.stateUpdatedAt
-              ? new Date(item.metadata?.stateUpdatedAt)
-              : new Date(new Date().getTime() + itemIndex);
-
-            // Check for duplicate stateUpdatedAt values
-            const stateUpdatedAtStr = stateUpdatedAt.toISOString();
-            if (stateUpdatedAtSet.has(stateUpdatedAtStr)) {
-              stateUpdatedAt = new Date(stateUpdatedAt.getTime() + 1);
-            }
-            stateUpdatedAtSet.add(stateUpdatedAtStr);
-
-            return {
-              title: item.metadata?.title || cleanedUrl,
-              description: item.metadata?.description || sql`NULL`,
-              author: item.metadata?.author || sql`NULL`,
-              thumbnail: item.metadata?.thumbnail || sql`NULL`,
-              favicon: item.metadata?.favicon || sql`NULL`,
-              textDirection: item.metadata?.textDirection || TextDirection.LTR,
-              textLanguage: item.metadata?.textLanguage || "",
-              source: item.metadata?.source || sql`NULL`,
-              publishedAt: item.metadata?.publishedAt
-                ? new Date(item.metadata.publishedAt)
-                : sql`NULL`,
-              updatedAt: new Date(),
-              profileId,
-              state: ItemState.ACTIVE,
-              stateUpdatedAt,
-              itemId,
-            };
-          });
-
-          const insertedMetadata = await tx
-            .insert(profileItems)
-            .values(profileItemsToInsert)
-            .onConflictDoUpdate({
-              target: [profileItems.profileId, profileItems.itemId],
-              set: {
-                title: sql`CASE
-              WHEN EXCLUDED.title = (SELECT url FROM items WHERE id = profile_items.item_id) THEN COALESCE(profile_items.title, EXCLUDED.title)
-              ELSE EXCLUDED.title
-            END`,
-                description: sql`COALESCE(EXCLUDED.description, ${profileItems.description})`,
-                author: sql`COALESCE(EXCLUDED.author, ${profileItems.author})`,
-                thumbnail: sql`COALESCE(EXCLUDED.thumbnail, ${profileItems.thumbnail})`,
-                favicon: sql`COALESCE(EXCLUDED.favicon, ${profileItems.favicon})`,
-                textDirection: sql`COALESCE(EXCLUDED.text_direction, ${profileItems.textDirection})`,
-                textLanguage: sql`COALESCE(EXCLUDED.text_language, ${profileItems.textLanguage})`,
-                source: sql`COALESCE(EXCLUDED.source, ${profileItems.source})`,
-                publishedAt: sql`COALESCE(EXCLUDED.published_at, ${profileItems.publishedAt})`,
-                stateUpdatedAt: sql`CASE
-              WHEN EXCLUDED.state <> profile_items.state
-              THEN EXCLUDED.state_updated_at
-              ELSE profile_items.state_updated_at
-            END`,
-                updatedAt: sql`now()`,
-                state: ItemState.ACTIVE,
-              },
-            })
-            .returning({
-              profileItemId: profileItems.id,
-              itemId: profileItems.itemId,
-              title: profileItems.title,
-              description: profileItems.description,
-              author: profileItems.author,
-              thumbnail: profileItems.thumbnail,
-              favicon: profileItems.favicon,
-              textDirection: profileItems.textDirection,
-              textLanguage: profileItems.textLanguage,
-              publishedAt: profileItems.publishedAt,
-              savedAt: profileItems.savedAt,
-              state: profileItems.state,
-              source: profileItems.source,
-              isFavorite: profileItems.isFavorite,
-              readingProgress: profileItems.readingProgress,
-              lastReadAt: profileItems.lastReadAt,
-              versionName: profileItems.versionName,
-            });
+          const insertedMetadata = await createOrUpdateProfileItems(
+            tx,
+            profileId,
+            insertedItems,
+            newItems,
+          );
 
           const response: CreateOrUpdateItemsResponse =
             CreateOrUpdateItemsResponseSchema.parse({
@@ -334,7 +229,7 @@ export const itemsRouter = new Hono<EnvBindings>()
                 );
                 const {
                   itemId: _itemId,
-                  profileItemId,
+                  id: profileItemId,
                   ...metadataWithoutId
                 } = metadata || {};
                 return ItemResultWithoutLabelsSchema.parse({

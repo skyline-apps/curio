@@ -1,4 +1,5 @@
-import { and, eq, inArray, sql } from "@app/api/db";
+import { and, eq, inArray } from "@app/api/db";
+import { createOrUpdateLabels } from "@app/api/db/dal/userLabels";
 import { checkDbError, DbError, DbErrorCode } from "@app/api/db/errors";
 import { profileLabels } from "@app/api/db/schema";
 import {
@@ -80,32 +81,7 @@ export const userLabelsRouter = new Hono<EnvBindings>()
       try {
         const { labels } = c.req.valid("json");
         const db = c.get("db");
-        const now = new Date();
-        const newLabels = labels.map((label) => ({
-          id: "id" in label ? label.id : undefined,
-          profileId,
-          name: label.name ?? "",
-          color: label.color ?? "",
-          createdAt: now,
-          updatedAt: now,
-        }));
-        const updatedLabels = await db
-          .insert(profileLabels)
-          .values(newLabels)
-          .onConflictDoUpdate({
-            target: [profileLabels.id],
-            set: {
-              name: sql`CASE WHEN EXCLUDED.name = '' THEN profile_labels.name ELSE EXCLUDED.name END`,
-              color: sql`CASE WHEN EXCLUDED.color = '' THEN profile_labels.color ELSE EXCLUDED.color END`,
-              updatedAt: sql`now()`,
-            },
-            where: eq(profileLabels.profileId, profileId),
-          })
-          .returning({
-            id: profileLabels.id,
-            name: profileLabels.name,
-            color: profileLabels.color,
-          });
+        const updatedLabels = await createOrUpdateLabels(db, profileId, labels);
 
         const response = CreateOrUpdateLabelsResponseSchema.parse({
           labels: updatedLabels,
