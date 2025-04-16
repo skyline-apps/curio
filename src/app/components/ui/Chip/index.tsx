@@ -2,11 +2,10 @@ import Button from "@app/components/ui/Button";
 import { INPUT_CLASSES } from "@app/components/ui/Input";
 import Spinner from "@app/components/ui/Spinner";
 import { cn } from "@app/utils/cn";
+import { COLOR_PALETTE } from "@app/utils/colors";
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
 import React, { useEffect, useRef, useState } from "react";
 import { HiOutlineXMark } from "react-icons/hi2";
-
-import { COLOR_PALETTE } from "./colors";
 
 interface ChipProps extends React.HTMLAttributes<HTMLDivElement> {
   value: string;

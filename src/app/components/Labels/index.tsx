@@ -1,9 +1,9 @@
 import Button from "@app/components/ui/Button";
 import { Chip } from "@app/components/ui/Chip";
-import { COLOR_PALETTE } from "@app/components/ui/Chip/colors";
 import Icon from "@app/components/ui/Icon";
 import Spinner from "@app/components/ui/Spinner";
 import { Tooltip } from "@app/components/ui/Tooltip";
+import { COLOR_PALETTE } from "@app/utils/colors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { HiOutlinePlus, HiOutlineTag } from "react-icons/hi2";
 
