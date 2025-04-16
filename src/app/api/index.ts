@@ -7,6 +7,9 @@ import { getDb } from "@app/api/db";
 import { requestLogger } from "@app/api/middleware/logger";
 import { v1Router } from "@app/api/routesV1";
 import { EnvBindings } from "@app/api/utils/env";
+import { itemsFetcherQueue, QueueMessage } from "@app/queues/itemsFetcher";
+import { type Env } from "@app/queues/itemsFetcher/env";
+import type { MessageBatch } from "@cloudflare/workers-types";
 import { ExecutionContext, Hono } from "hono";
 import { cors } from "hono/cors";
 import { prettyJSON } from "hono/pretty-json";
@@ -78,5 +81,8 @@ export default {
     }
 
     return new Response(null, { status: 404 });
+  },
+  async queue(batch: MessageBatch<QueueMessage>, env: Env): Promise<void> {
+    await itemsFetcherQueue(batch, env);
   },
 };

@@ -5,7 +5,11 @@ import { profileLabels } from "@app/api/db/schema";
 import { Instapaper, type OAuthToken } from "@app/api/lib/instapaper";
 import type { InstapaperBookmark } from "@app/api/lib/instapaper/types";
 import { Logger } from "@app/api/utils/logger";
-import { ImportInstapaperMetadataSchema, ItemSource } from "@app/schemas/db";
+import {
+  ImportInstapaperMetadataSchema,
+  ItemSource,
+  ItemState,
+} from "@app/schemas/db";
 import { COLOR_PALETTE } from "@app/utils/colors";
 
 import { Job } from ".";
@@ -37,86 +41,101 @@ export class InstapaperImporter extends Importer {
     let lastBatchSize = 0;
 
     try {
-      do {
-        const bookmarks: InstapaperBookmark[] =
-          await this.instapaper.listBookmarks(
-            this.token,
-            BATCH_SIZE,
-            "unread",
-            have.join(","),
-          );
+      const folders = {
+        unread: ItemState.ACTIVE,
+        archive: ItemState.ARCHIVED,
+      };
+      await Promise.all(
+        Object.entries(folders).map(async ([folder, state]) => {
+          do {
+            const bookmarks: InstapaperBookmark[] =
+              await this.instapaper.listBookmarks(
+                this.token,
+                BATCH_SIZE,
+                folder,
+                have.join(","),
+              );
 
-        lastBatchSize = bookmarks.length;
-        if (lastBatchSize === 0) {
-          break;
-        }
+            lastBatchSize = bookmarks.length;
+            if (lastBatchSize === 0) {
+              break;
+            }
 
-        fetchedBookmarks += lastBatchSize;
+            fetchedBookmarks += lastBatchSize;
 
-        have.push(...bookmarks.map((b) => b.bookmark_id.toString()));
+            have.push(...bookmarks.map((b) => b.bookmark_id.toString()));
 
-        const newLabels = Array.from(
-          new Set(
-            bookmarks
-              .map((b) => b.tags.map((t) => t.name))
-              .flat()
-              .filter((name) => name !== ""),
-          ),
-        )
-          .filter((name) => !tags.has(name))
-          .map((name) => ({
-            profileId: this.job.profileId,
-            name,
-            color:
-              COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)],
-          }));
+            const newLabels = Array.from(
+              new Set(
+                bookmarks
+                  .map((b) => b.tags.map((t) => t.name))
+                  .flat()
+                  .filter((name) => name !== ""),
+              ),
+            )
+              .filter((name) => !tags.has(name))
+              .map((name) => ({
+                profileId: this.job.profileId,
+                name,
+                color:
+                  COLOR_PALETTE[
+                    Math.floor(Math.random() * COLOR_PALETTE.length)
+                  ],
+              }));
 
-        await this.db.transaction(async (tx) => {
-          const insertedItems = await createOrUpdateItems(
-            tx,
-            bookmarks.map((b) => b.url),
-          );
-          const insertedLabels = await this.db
-            .insert(profileLabels)
-            .values(newLabels)
-            .onConflictDoUpdate({
-              target: [profileLabels.name, profileLabels.profileId],
-              set: { name: profileLabels.name },
-            })
-            .returning({
-              id: profileLabels.id,
-              name: profileLabels.name,
+            await this.db.transaction(async (tx) => {
+              const insertedItems = await createOrUpdateItems(
+                tx,
+                bookmarks.map((b) => b.url),
+              );
+              let insertedLabels: { id: string; name: string }[] = [];
+              if (newLabels.length > 0) {
+                insertedLabels = await tx
+                  .insert(profileLabels)
+                  .values(newLabels)
+                  .onConflictDoUpdate({
+                    target: [profileLabels.name, profileLabels.profileId],
+                    set: { name: profileLabels.name },
+                  })
+                  .returning({
+                    id: profileLabels.id,
+                    name: profileLabels.name,
+                  });
+                tags = new Set([...tags, ...insertedLabels.map((l) => l.name)]);
+              }
+              const newProfileItems = bookmarks.map((b) => ({
+                url: b.url,
+                metadata: {
+                  title: b.title,
+                  description: b.description || null,
+                  source: ItemSource.INSTAPAPER,
+                  sourceMetadata: { bookmarkId: b.bookmark_id },
+                  isFavorite: b.starred === "1",
+                  readingProgress: Math.round(b.progress * 100),
+                  lastReadAt: b.progress_timestamp
+                    ? new Date(b.progress_timestamp).toUTCString()
+                    : null,
+                  state,
+                },
+                labelIds: b.tags.map(
+                  (t) => insertedLabels.find((l) => l.name === t.name)!.id,
+                ),
+              }));
+
+              await createOrUpdateProfileItems(
+                tx,
+                this.job.profileId,
+                insertedItems,
+                newProfileItems,
+              );
             });
-          tags = new Set([...tags, ...insertedLabels.map((l) => l.name)]);
-          const newProfileItems = bookmarks.map((b) => ({
-            url: b.url,
-            metadata: {
-              title: b.title,
-              description: b.description || null,
-              source: ItemSource.INSTAPAPER,
-              sourceMetadata: { bookmarkId: b.bookmark_id },
-              isFavorite: b.starred === "1",
-              readingProgress: Math.round(b.progress * 100),
-              lastReadAt: b.progress_timestamp
-                ? new Date(b.progress_timestamp).toUTCString()
-                : null,
-            },
-            labelIds: b.tags.map(
-              (t) => insertedLabels.find((l) => l.name === t.name)!.id,
-            ),
-          }));
-
-          await createOrUpdateProfileItems(
-            tx,
-            this.job.profileId,
-            insertedItems,
-            newProfileItems,
-          );
-        });
-      } while (lastBatchSize === BATCH_SIZE);
-
-      this.log.info(
-        `Successfully fetched ${fetchedBookmarks} bookmarks for job ${this.job.id}`,
+            this.log.info(`Successfully fetched bookmarks for folder`, {
+              jobId: this.job.id,
+              folder,
+              bookmarks: bookmarks.length,
+            });
+          } while (lastBatchSize === BATCH_SIZE);
+        }),
       );
       return fetchedBookmarks;
     } catch (error) {

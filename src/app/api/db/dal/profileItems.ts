@@ -243,7 +243,7 @@ export async function createOrUpdateProfileItems(
         : sql`NULL`,
       updatedAt: new Date(),
       profileId,
-      state: ItemState.ACTIVE,
+      state: item.metadata?.state || ItemState.ACTIVE,
       stateUpdatedAt,
       itemId,
       isFavorite: item.metadata?.isFavorite,
@@ -279,7 +279,7 @@ export async function createOrUpdateProfileItems(
               ELSE profile_items.state_updated_at
             END`,
         updatedAt: sql`now()`,
-        state: ItemState.ACTIVE,
+        state: sql`EXCLUDED.state`,
         isFavorite: sql`(${profileItems.isFavorite} OR EXCLUDED.is_favorite)`,
       },
     })
