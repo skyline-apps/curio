@@ -23,17 +23,22 @@ export class Importer {
     return null;
   }
 
+  public async fetchItems(): Promise<number | null> {
+    return null;
+  }
+
   public async handleImport(): Promise<void> {
     const metadata = this.job.metadata as ImportMetadata;
+    let totalItems, processedItems: number;
     if (metadata.status === ImportStatus.NOT_STARTED) {
-      const numberOfItems = await this.fetchMetadata();
-      if (numberOfItems === null) {
+      totalItems = await this.fetchMetadata();
+      if (totalItems === null) {
         this.log.error("Failed to import metadata");
         throw new Error("Failed to import metadata");
       }
       this.log.info(`Successfully imported items`, {
         jobId: this.job.id,
-        numberOfItems,
+        totalItems,
       });
       await this.db
         .update(jobs)
@@ -41,7 +46,29 @@ export class Importer {
           metadata: {
             ...metadata,
             status: ImportStatus.FETCHED_ITEMS,
-            numberOfItems,
+            totalItems,
+          },
+        })
+        .where(eq(jobs.id, this.job.id));
+    } else {
+      totalItems = metadata.totalItems;
+    }
+    if (totalItems === null || totalItems === undefined) {
+      throw new Error("No items to import");
+    }
+    processedItems = 0;
+    while (processedItems < totalItems) {
+      const items = await this.fetchItems();
+      if (items === null) {
+        return;
+      }
+      processedItems += items;
+      await this.db
+        .update(jobs)
+        .set({
+          metadata: {
+            ...metadata,
+            processedItems,
           },
         })
         .where(eq(jobs.id, this.job.id));

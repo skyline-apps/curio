@@ -1,12 +1,17 @@
-import { TransactionDB } from "@app/api/db";
+import { and, eq, isNull, TransactionDB } from "@app/api/db";
 import { createOrUpdateItems } from "@app/api/db/dal/items";
 import { createOrUpdateProfileItems } from "@app/api/db/dal/profileItems";
-import { profileLabels } from "@app/api/db/schema";
+import { items, profileItems, profileLabels } from "@app/api/db/schema";
+import { extractFromHtml } from "@app/api/lib/extract";
+import { ExtractError } from "@app/api/lib/extract/types";
 import { Instapaper, type OAuthToken } from "@app/api/lib/instapaper";
 import type { InstapaperBookmark } from "@app/api/lib/instapaper/types";
+import { storage } from "@app/api/lib/storage";
+import { StorageError } from "@app/api/lib/storage/types";
 import { Logger } from "@app/api/utils/logger";
 import {
   ImportInstapaperMetadataSchema,
+  InstapaperProfileItemMetadataSchema,
   ItemSource,
   ItemState,
 } from "@app/schemas/db";
@@ -15,6 +20,8 @@ import { COLOR_PALETTE } from "@app/utils/colors";
 import { Job } from ".";
 import type { Env } from "./env";
 import { Importer } from "./importer";
+
+const BATCH_SIZE = 50;
 
 export class InstapaperImporter extends Importer {
   private readonly instapaper: Instapaper;
@@ -60,8 +67,6 @@ export class InstapaperImporter extends Importer {
             if (lastBatchSize === 0) {
               break;
             }
-
-            fetchedBookmarks += lastBatchSize;
 
             have.push(...bookmarks.map((b) => b.bookmark_id.toString()));
 
@@ -109,7 +114,9 @@ export class InstapaperImporter extends Importer {
                   title: b.title,
                   description: b.description || null,
                   source: ItemSource.INSTAPAPER,
-                  sourceMetadata: { bookmarkId: b.bookmark_id },
+                  sourceMetadata: InstapaperProfileItemMetadataSchema.parse({
+                    bookmarkId: b.bookmark_id,
+                  }),
                   isFavorite: b.starred === "1",
                   readingProgress: Math.round(b.progress * 100),
                   lastReadAt: b.progress_timestamp
@@ -122,12 +129,16 @@ export class InstapaperImporter extends Importer {
                 ),
               }));
 
-              await createOrUpdateProfileItems(
+              const insertedProfileItems = await createOrUpdateProfileItems(
                 tx,
                 this.job.profileId,
                 insertedItems,
                 newProfileItems,
               );
+              const newUnsavedItems = insertedProfileItems.filter(
+                (item) => !item.savedAt,
+              );
+              fetchedBookmarks += newUnsavedItems.length;
             });
             this.log.info(`Successfully fetched bookmarks for folder`, {
               jobId: this.job.id,
@@ -140,6 +151,103 @@ export class InstapaperImporter extends Importer {
       return fetchedBookmarks;
     } catch (error) {
       this.log.error("Error during Instapaper bookmark fetch loop", {
+        error,
+        jobId: this.job.id,
+      });
+      throw error;
+    }
+  }
+
+  public async fetchItems(): Promise<number | null> {
+    try {
+      const nextItems = await this.db
+        .select({
+          id: profileItems.id,
+          sourceMetadata: profileItems.sourceMetadata,
+          url: items.url,
+          slug: items.slug,
+          metadata: {
+            title: profileItems.title,
+            description: profileItems.description,
+            author: profileItems.author,
+            publishedAt: profileItems.publishedAt,
+            thumbnail: profileItems.thumbnail,
+            favicon: profileItems.favicon,
+            textDirection: profileItems.textDirection,
+            textLanguage: profileItems.textLanguage,
+          },
+        })
+        .from(profileItems)
+        .innerJoin(items, eq(profileItems.itemId, items.id))
+        .where(
+          and(
+            eq(profileItems.profileId, this.job.profileId),
+            eq(profileItems.source, ItemSource.INSTAPAPER),
+            isNull(profileItems.savedAt),
+          ),
+        )
+        .limit(BATCH_SIZE);
+      if (nextItems.length === 0) {
+        return null;
+      }
+      this.log.info("Collected items to fetch", {
+        jobId: this.job.id,
+        items: nextItems.length,
+      });
+      for (const item of nextItems) {
+        const { bookmarkId } = InstapaperProfileItemMetadataSchema.parse(
+          item.sourceMetadata,
+        );
+        const htmlContent = await this.instapaper.getBookmarkText(
+          this.token,
+          bookmarkId,
+        );
+        if (!htmlContent) {
+          this.log.error("Failed to fetch Instapaper bookmark content", {
+            jobId: this.job.id,
+            itemId: item.id,
+          });
+        } else {
+          try {
+            const { content } = await extractFromHtml(item.url, htmlContent);
+            await storage.uploadItemContent(
+              this.env,
+              item.slug,
+              content,
+              item.metadata,
+            );
+          } catch (error) {
+            if (error instanceof ExtractError) {
+              this.log.error("Failed to extract metadata from HTML", {
+                jobId: this.job.id,
+                profileItemId: item.id,
+                error,
+              });
+            } else if (error instanceof StorageError) {
+              this.log.error("Failed to upload item content", {
+                jobId: this.job.id,
+                profileItemId: item.id,
+                error,
+              });
+            } else {
+              this.log.error("Failed to fetch Instapaper bookmark content", {
+                jobId: this.job.id,
+                profileItemId: item.id,
+                error,
+              });
+            }
+          }
+        }
+        await this.db
+          .update(profileItems)
+          .set({
+            savedAt: new Date(),
+          })
+          .where(eq(profileItems.id, item.id));
+      }
+      return nextItems.length;
+    } catch (error) {
+      this.log.error("Error during Instapaper item fetch", {
         error,
         jobId: this.job.id,
       });

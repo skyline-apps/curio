@@ -71,11 +71,16 @@ export enum ImportStatus {
 
 export const ImportMetadataSchema = z.object({
   status: z.nativeEnum(ImportStatus),
-  numberOfItems: z.number().optional(),
+  totalItems: z.number().optional(),
+  processedItems: z.number().optional(),
 });
 
 export type ImportMetadata = z.infer<typeof ImportMetadataSchema>;
 
 export const ImportInstapaperMetadataSchema = ImportMetadataSchema.extend({
   accessToken: OAuth1TokenSchema,
+});
+
+export const InstapaperProfileItemMetadataSchema = z.object({
+  bookmarkId: z.number(),
 });
