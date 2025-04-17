@@ -1,9 +1,9 @@
 import { ExtractedMetadata } from "@app/api/lib/extract/types";
 import { StorageError } from "@app/api/lib/storage/types";
-import { createClient, type StorageClient } from "@app/api/lib/supabase/client";
-import { EnvContext } from "@app/api/utils/env";
+import { type StorageClient } from "@app/api/lib/supabase/client";
 import { TextDirection } from "@app/schemas/db";
 import { UploadStatus } from "@app/schemas/types";
+import { createServerClient } from "@supabase/ssr"; // eslint-disable-line no-restricted-imports
 import { createHash } from "crypto";
 
 import { type VersionMetadata } from "./types";
@@ -11,16 +11,31 @@ import { type VersionMetadata } from "./types";
 const DEFAULT_NAME = "default";
 const ITEMS_BUCKET = "items";
 
+export type StorageEnv = {
+  VITE_SUPABASE_URL: string;
+  SUPABASE_SERVICE_ROLE_KEY: string;
+};
+
 export class Storage {
   private storage: StorageClient | null = null;
   private lastInitTime: number = 0;
   private readonly REFRESH_INTERVAL = 3600000; // 1 hour in milliseconds
 
-  private async getStorageClient(c: EnvContext): Promise<StorageClient> {
+  private async getStorageClient(env: StorageEnv): Promise<StorageClient> {
     const now = Date.now();
-    const log = c.get("log");
     if (!this.storage || now - this.lastInitTime > this.REFRESH_INTERVAL) {
-      const supabase = await createClient(c, true);
+      const supabase = createServerClient(
+        env.VITE_SUPABASE_URL,
+        env.SUPABASE_SERVICE_ROLE_KEY,
+        {
+          cookies: {
+            getAll() {
+              return [];
+            },
+            setAll() {},
+          },
+        },
+      );
       this.storage = supabase.storage;
       this.lastInitTime = now;
 
@@ -28,10 +43,14 @@ export class Storage {
         // Verify we can access the bucket
         await this.storage.from(ITEMS_BUCKET).list();
       } catch (error) {
-        log.error("Failed to verify storage access", { error });
         // Reset storage client to force re-initialization on next attempt
         this.storage = null;
-        throw new StorageError("Failed to initialize storage client");
+        if (error instanceof Error) {
+          throw new StorageError(
+            `Failed to initialize storage client: ${error.message}`,
+          );
+        }
+        throw new StorageError(`Failed to initialize storage client: ${error}`);
       }
     }
     return this.storage;
@@ -42,7 +61,7 @@ export class Storage {
   }
 
   async uploadItemContent(
-    c: EnvContext,
+    env: StorageEnv,
     slug: string,
     content: string,
     metadata: ExtractedMetadata,
@@ -50,8 +69,7 @@ export class Storage {
     versionName: string;
     status: Exclude<UploadStatus, UploadStatus.ERROR>;
   }> {
-    const log = c.get("log");
-    const storage = await this.getStorageClient(c);
+    const storage = await this.getStorageClient(env);
     const timestamp = new Date().toISOString();
     const contentHash = this.computeContentHash(content);
 
@@ -71,23 +89,12 @@ export class Storage {
           }
           const existingMetadata = data.metadata;
           if (existingMetadata && existingMetadata.hash === contentHash) {
-            log.info("Content already exists, skipping upload", {
-              slug,
-              version: version.name,
-              hash: contentHash,
-            });
             return {
               versionName: version.name,
               status: UploadStatus.SKIPPED,
             };
           }
-        } catch (e) {
-          log.error("Failed to parse version metadata", {
-            slug,
-            version: version.name,
-            error: e,
-          });
-        }
+        } catch (_) {}
       }
     }
     let fileMetadata: VersionMetadata;
@@ -111,10 +118,7 @@ export class Storage {
         .from(ITEMS_BUCKET)
         .info(`${slug}/${DEFAULT_NAME}.md`);
       defaultMetadata = (data?.metadata as VersionMetadata) || null;
-    } catch (error) {
-      // Main file doesn't exist yet, or error reading it
-      log.debug(`No existing content or error reading it`, { slug, error });
-    }
+    } catch (_) {}
 
     // This is either the first version or a longer version than current
     const versionPath = `${slug}/versions/${timestamp}.md`;
@@ -129,10 +133,6 @@ export class Storage {
       });
 
     if (versionError) {
-      log.error(`Error uploading version for item`, {
-        slug,
-        error: versionError,
-      });
       throw new StorageError("Failed to upload version");
     }
 
@@ -153,10 +153,6 @@ export class Storage {
       });
 
     if (mainError) {
-      log.error(`Error updating main file for item`, {
-        slug,
-        error: mainError,
-      });
       throw new StorageError("Failed to update main file");
     }
 
@@ -164,12 +160,11 @@ export class Storage {
   }
 
   async getItemContent(
-    c: EnvContext,
+    env: StorageEnv,
     slug: string,
     version: string | null,
   ): Promise<{ version: string | null; versionName: string; content: string }> {
-    const log = c.get("log");
-    const storage = await this.getStorageClient(c);
+    const storage = await this.getStorageClient(env);
     const versionPath = version
       ? `${slug}/versions/${version}.md`
       : `${slug}/${DEFAULT_NAME}.md`;
@@ -183,21 +178,8 @@ export class Storage {
 
     if (error || metadataError || !metadata.metadata) {
       if (version) {
-        return this.getItemContent(c, slug, null);
+        return this.getItemContent(env, slug, null);
       } else {
-        if (error) {
-          log.error(`Error getting content for item`, { slug, error });
-        } else if (metadataError) {
-          log.error(`Error getting metadata for item when getting content`, {
-            slug,
-            error: metadataError,
-          });
-        } else if (!metadata.metadata) {
-          log.error(`Error getting metadata for item when getting content`, {
-            slug,
-            error: "metadata is null",
-          });
-        }
         throw new StorageError("Failed to download content");
       }
     }
@@ -209,20 +191,20 @@ export class Storage {
     };
   }
 
-  async getItemMetadata(c: EnvContext, slug: string): Promise<VersionMetadata> {
-    const log = c.get("log");
-    const storage = await this.getStorageClient(c);
+  async getItemMetadata(
+    env: StorageEnv,
+    slug: string,
+  ): Promise<VersionMetadata> {
+    const storage = await this.getStorageClient(env);
     const { data, error } = await storage
       .from(ITEMS_BUCKET)
       .info(`${slug}/${DEFAULT_NAME}.md`);
 
     if (error) {
-      log.error(`Error getting metadata for item`, { slug, error });
       throw new StorageError("Failed to get metadata");
     }
 
     if (!data.metadata?.title) {
-      log.error(`Error getting metadata title for item`, { slug });
       throw new StorageError("Failed to verify metadata contents");
     }
 
@@ -242,23 +224,23 @@ export const storage = new Storage();
 
 // Export bound methods to preserve 'this' context
 export const uploadItemContent = (
-  c: EnvContext,
+  env: StorageEnv,
   slug: string,
   content: string,
   metadata: ExtractedMetadata,
 ): Promise<{
   versionName: string;
   status: Exclude<UploadStatus, UploadStatus.ERROR>;
-}> => storage.uploadItemContent(c, slug, content, metadata);
+}> => storage.uploadItemContent(env, slug, content, metadata);
 
 export const getItemContent = (
-  c: EnvContext,
+  env: StorageEnv,
   slug: string,
   version: string | null,
 ): Promise<{ version: string | null; versionName: string; content: string }> =>
-  storage.getItemContent(c, slug, version);
+  storage.getItemContent(env, slug, version);
 
 export const getItemMetadata = (
-  c: EnvContext,
+  env: StorageEnv,
   slug: string,
-): Promise<VersionMetadata> => storage.getItemMetadata(c, slug);
+): Promise<VersionMetadata> => storage.getItemMetadata(env, slug);

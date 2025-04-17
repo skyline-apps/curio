@@ -63,7 +63,7 @@ export const itemsSaveRouter = new Hono<EnvBindings>().post(
       const baseDate = new Date();
       const itemsWithMetadata = await Promise.all(
         itemsToSave.map(async (item, index) => {
-          const metadata = await getItemMetadata(c, item.slug);
+          const metadata = await getItemMetadata(c.env, item.slug);
           const newDate = new Date(baseDate.getTime() + index);
           return {
             itemId: item.id,

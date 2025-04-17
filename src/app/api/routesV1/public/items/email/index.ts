@@ -124,7 +124,7 @@ export const publicItemsEmailRouter = new Hono<EnvBindings>().post(
         }
 
         const { versionName, status } = await storage.uploadItemContent(
-          c,
+          c.env,
           itemSlug,
           content,
           metadata,

@@ -184,7 +184,7 @@ async function fetchPublicItemResults(
   const results: PublicItemResult[] = [];
 
   for (const itemResult of itemResults) {
-    const metadata = await getItemMetadata(c, itemResult.slug);
+    const metadata = await getItemMetadata(c.env, itemResult.slug);
     results.push(
       PublicItemResultSchema.parse({
         id: itemResult.id,

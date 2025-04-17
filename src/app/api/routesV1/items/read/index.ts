@@ -64,7 +64,7 @@ export const itemsReadRouter = new Hono<EnvBindings>()
 
         if (itemData[0].versionName === null) {
           const { timestamp } = await storage.getItemMetadata(
-            c,
+            c.env,
             itemData[0].slug,
           );
           updatedFields.versionName = timestamp || null;

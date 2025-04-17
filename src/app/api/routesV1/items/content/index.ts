@@ -117,7 +117,7 @@ export const itemsContentRouter = new Hono<EnvBindings>().post(
         }
 
         const { versionName, status } = await storage.uploadItemContent(
-          c,
+          c.env,
           slug,
           content,
           metadata,
@@ -167,7 +167,7 @@ export const itemsContentRouter = new Hono<EnvBindings>().post(
           status === UploadStatus.STORED_VERSION ||
           status === UploadStatus.SKIPPED
         ) {
-          const defaultMetadata = await storage.getItemMetadata(c, slug);
+          const defaultMetadata = await storage.getItemMetadata(c.env, slug);
           const newMetadata = { ...metadata };
           Object.entries(defaultMetadata).forEach(([key, value]) => {
             if (value !== null && value !== undefined) {

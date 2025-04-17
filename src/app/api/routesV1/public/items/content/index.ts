@@ -44,7 +44,7 @@ async function getDefaultContent(
   let metadata: VersionMetadata;
 
   try {
-    metadata = await getItemMetadata(c, slug);
+    metadata = await getItemMetadata(c.env, slug);
   } catch (error: unknown) {
     if (error instanceof StorageError) {
       log.warn("Error fetching metadata for item", {
@@ -58,7 +58,7 @@ async function getDefaultContent(
   }
 
   try {
-    const { content } = await getItemContent(c, slug, null);
+    const { content } = await getItemContent(c.env, slug, null);
 
     const response = GetItemContentResponseSchema.parse({
       content,
@@ -167,7 +167,7 @@ export const publicItemsContentRouter = new Hono<EnvBindings>().get(
 
       try {
         const { version, content } = await getItemContent(
-          c,
+          c.env,
           slug,
           itemResponse.metadata.versionName,
         );
