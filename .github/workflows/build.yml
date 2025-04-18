@@ -69,6 +69,12 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
           VITE_BUILD_HASH: ${{ github.sha }}
 
+      - name: Run database migrations
+        working-directory: ./src/app
+        run: npm run db:migrate
+        env:
+          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+
       - name: Deploy to Cloudflare (staging)
         uses: cloudflare/wrangler-action@v3
         with:
@@ -77,11 +83,13 @@ jobs:
           workingDirectory: 'src/app'
           command: deploy
 
-      - name: Run database migrations
-        working-directory: ./src/app
-        run: npm run db:migrate
-        env:
-          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+      - name: Deploy itemsFetcher consumer to Cloudflare (staging)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: 'src/app/queues/itemsFetcher'
+          command: deploy
 
   deploy-prod:
     needs: check-app
@@ -120,6 +128,12 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
           VITE_BUILD_HASH: ${{ github.sha }}
 
+      - name: Run database migrations
+        working-directory: ./src/app
+        run: npm run db:migrate
+        env:
+          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+
       - name: Deploy to Cloudflare (production)
         uses: cloudflare/wrangler-action@v3
         with:
@@ -128,8 +142,10 @@ jobs:
           workingDirectory: 'src/app'
           command: deploy
 
-      - name: Run database migrations
-        working-directory: ./src/app
-        run: npm run db:migrate
-        env:
-          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+      - name: Deploy itemsFetcher consumer to Cloudflare (production)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: 'src/app/queues/itemsFetcher'
+          command: deploy

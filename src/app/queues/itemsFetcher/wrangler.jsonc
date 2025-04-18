@@ -30,9 +30,6 @@
             {
                 "queue": "items-fetcher",
                 "max_batch_size": 1
-                // "max_wait_time_ms": 1000,
-                // "max_retries": 3,
-                // "dead_letter_queue": "my-dead-letter-queue"
             }
         ]
     }

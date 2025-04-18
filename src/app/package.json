@@ -10,8 +10,10 @@
     "db:migrate": "tsx --tsconfig ./tsconfig.api.json node_modules/drizzle-kit/bin.cjs migrate",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy:staging": "npm run build -- --mode staging && wrangler deploy",
-    "deploy:prod": "npm run build -- --mode prod && wrangler deploy",
+    "deploy:staging": "npm run build -- --mode staging && wrangler deploy -c wrangler.jsonc",
+    "deploy:prod": "npm run build -- --mode prod && wrangler deploy -c wrangler.jsonc",
+    "deploy:consumer:staging": "wrangler deploy -c src/app/queues/itemsFetcher/wrangler.jsonc",
+    "deploy:consumer:prod": "wrangler deploy -c src/app/queues/itemsFetcher/wrangler.jsonc",
     "test": "vitest --run --no-file-parallelism",
     "test:watch": "vitest"
   },
