@@ -2,6 +2,7 @@
     "$schema": "../../node_modules/wrangler/config-schema.json",
     "name": "curio-consumer",
     "main": "index.ts",
+    "tsconfig": "../../tsconfig.json",
     "compatibility_date": "2025-04-03",
     "compatibility_flags": [
         "nodejs_compat"
