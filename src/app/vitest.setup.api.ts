@@ -15,6 +15,7 @@ import { beforeAll, beforeEach, vi } from "vitest";
 vi.mock("@app/api/lib/search");
 vi.mock("@app/api/lib/extract");
 vi.mock("@app/api/lib/email");
+vi.mock("@app/api/lib/instapaper");
 vi.mock("@app/api/lib/storage");
 vi.mock("@app/api/lib/supabase/client");
 vi.mock("@app/api/utils/supabase/server");

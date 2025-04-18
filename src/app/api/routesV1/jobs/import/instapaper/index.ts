@@ -81,7 +81,7 @@ export const importInstapaperRouter = new Hono<EnvBindings>().post(
       }
 
       try {
-        queue.send({ jobId });
+        await queue.send({ jobId });
       } catch (error) {
         log.error("Failed to send job to queue", { jobId, error });
         await db
@@ -91,7 +91,7 @@ export const importInstapaperRouter = new Hono<EnvBindings>().post(
             errorMessage: "Failed to enqueue job",
           })
           .where(eq(jobs.id, jobId));
-        return c.json({ error: "Failed to enqueue job." }, 500);
+        return c.json({ jobId, error: "Failed to enqueue job." }, 500);
       }
 
       const response = ImportInstapaperResponseSchema.parse({ jobId });

@@ -8,12 +8,12 @@ const ImportJobSchema = z.object({
   id: z.string().describe("ID of the job"),
   status: z.nativeEnum(JobStatus).describe("Status of the job"),
   type: z.nativeEnum(JobType).describe("Type of the job"),
-  metadata: ImportMetadataSchema.describe("Metadata of the job"),
+  metadata: ImportMetadataSchema.nullable().describe("Metadata of the job"),
   createdAt: dateType.describe("Date the job was created"),
-  updatedAt: dateType.describe("Date the job was last updated"),
-  startedAt: dateType.describe("Date the job started"),
-  completedAt: dateType.describe("Date the job completed"),
-  errorMessage: z.string().describe("Error message of the job"),
+  updatedAt: dateType.nullable().describe("Date the job was last updated"),
+  startedAt: dateType.nullable().describe("Date the job started"),
+  completedAt: dateType.nullable().describe("Date the job completed"),
+  errorMessage: z.string().nullable().describe("Error message of the job"),
 });
 
 export const ImportJobsRequestSchema = z.object({});

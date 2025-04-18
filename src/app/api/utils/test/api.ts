@@ -3,7 +3,9 @@ import { EnvBindings } from "@app/api/utils/env";
 import { createLogger } from "@app/api/utils/logger";
 import { MOCK_ENV } from "@app/api/utils/test/env";
 import { testDb } from "@app/api/utils/test/provider";
+import { Queue } from "@cloudflare/workers-types";
 import { Hono, MiddlewareHandler } from "hono";
+import { vi } from "vitest";
 
 export const DEFAULT_TEST_USER_ID = "123e4567-e89b-12d3-a456-426614174002";
 export const DEFAULT_TEST_USER_ID_2 = "123e4567-e89b-12d3-a456-426614174004";
@@ -16,6 +18,8 @@ const profileIdMap: Record<string, string> = {
   [DEFAULT_TEST_USER_ID]: DEFAULT_TEST_PROFILE_ID,
   [DEFAULT_TEST_USER_ID_2]: DEFAULT_TEST_PROFILE_ID_2,
 };
+
+export const MOCK_QUEUE: Queue = { send: vi.fn(), sendBatch: vi.fn() };
 
 const createMockAuthMiddleware = (
   userId: string,
@@ -42,6 +46,7 @@ export const setUpMockApp = (
   app.use("*", (c, next) => {
     c.set("log", createLogger(c.env));
     c.set("db", testDb.db as unknown as TransactionDB);
+    c.env.ITEMS_FETCHER_QUEUE = MOCK_QUEUE;
     return next();
   });
   app.route(route, router);

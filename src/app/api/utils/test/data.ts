@@ -2,7 +2,7 @@ import {
   DEFAULT_TEST_PROFILE_ID,
   DEFAULT_TEST_PROFILE_ID_2,
 } from "@app/api/utils/test/api";
-import { ItemState } from "@app/schemas/db";
+import { ItemState, JobStatus, JobType } from "@app/schemas/db";
 
 export const TEST_ITEM_ID_1 = "123e4567-e89b-12d3-a456-426614174001";
 export const TEST_ITEM_URL_1 = "https://example.com";
@@ -17,6 +17,10 @@ export const NONEXISTENT_USER_ID = "123e4567-e89b-12d3-a456-426614174003";
 export const TEST_LABEL_ID_1 = "123e4567-e89b-12d3-a456-426614174005";
 export const TEST_LABEL_ID_2 = "123e4567-e89b-12d3-a456-426614174006";
 export const TEST_LABEL_ID_3 = "123e4567-e89b-12d3-a456-426614174007";
+
+export const TEST_JOB_ID_1 = "923e4567-e89b-12d3-a456-426614174001";
+export const TEST_JOB_ID_2 = "923e4567-e89b-12d3-a456-426614174002";
+export const TEST_JOB_ID_3 = "923e4567-e89b-12d3-a456-426614174003";
 
 export const MOCK_ITEMS = [
   {
@@ -206,5 +210,29 @@ export const MOCK_HIGHLIGHTS = [
     note: null,
     createdAt: new Date("2025-01-10T12:54:56-08:00"),
     updatedAt: new Date("2025-01-10T12:54:56-08:00"),
+  },
+];
+
+export const MOCK_JOBS = [
+  {
+    id: TEST_JOB_ID_1,
+    profileId: DEFAULT_TEST_PROFILE_ID,
+    type: JobType.IMPORT_INSTAPAPER,
+    status: JobStatus.COMPLETED,
+    createdAt: new Date("2024-01-01T10:00:00Z"),
+  },
+  {
+    id: TEST_JOB_ID_2,
+    profileId: DEFAULT_TEST_PROFILE_ID,
+    type: JobType.IMPORT_OMNIVORE,
+    status: JobStatus.PENDING,
+    createdAt: new Date("2024-01-01T12:00:00Z"),
+  },
+  {
+    id: "job_other_user",
+    profileId: DEFAULT_TEST_PROFILE_ID_2,
+    type: JobType.IMPORT_INSTAPAPER,
+    status: JobStatus.PENDING,
+    createdAt: new Date("2024-01-01T13:00:00Z"),
   },
 ];
