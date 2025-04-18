@@ -62,7 +62,7 @@ export const Import: React.FC<ImportJobsProps> = () => {
               return (
                 <li
                   key={job.id}
-                  className="py-2 flex justify-between items-center gap-4"
+                  className="py-2 flex justify-between items-center gap-8"
                 >
                   <div>
                     <p className="text-sm">
