@@ -79,7 +79,7 @@ function parseUrlPreserveUnicode(url: string): {
  */
 export function generateSlug(url: string): string {
   try {
-    new URL(url);
+    const parsedUrl = new URL(url);
     const cleanedUrl = cleanUrl(url);
 
     const { hostname, pathname } = parseUrlPreserveUnicode(url);
@@ -120,6 +120,18 @@ export function generateSlug(url: string): string {
         }
       })
       .join("-");
+
+    // Include Youtube video
+    if (hostname.includes("youtube.com")) {
+      const videoId = parsedUrl.searchParams.get("v");
+      if (videoId) {
+        const videoHash = createHash("sha256")
+          .update(videoId)
+          .digest("hex")
+          .slice(0, 6);
+        return `${asciiSlug}-${videoId}-${videoHash}`;
+      }
+    }
 
     // Append hash
     return `${asciiSlug}-${hash}`;

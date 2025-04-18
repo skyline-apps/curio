@@ -328,6 +328,12 @@ describe("url", () => {
       const slug2 = slugifyString(input);
       expect(slug1).toBe(slug2);
     });
+
+    it("generates distinct slugs for youtube links", () => {
+      const slug1 = generateSlug("https://www.youtube.com/watch?v=1234567890");
+      const slug2 = generateSlug("https://www.youtube.com/watch?v=9876543210");
+      expect(slug1).not.toBe(slug2);
+    });
   });
 
   describe("getRootDomain", () => {
