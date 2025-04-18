@@ -219,7 +219,7 @@ export class InstapaperImporter extends Importer {
         } catch (error) {
           this.log.error("Failed to fetch Instapaper bookmark content", {
             jobId: this.job.id,
-            itemId: item.id,
+            profileItemId: item.id,
             error,
           });
           continue;
@@ -227,7 +227,7 @@ export class InstapaperImporter extends Importer {
         if (!htmlContent) {
           this.log.error("No content found for Instapaper bookmark", {
             jobId: this.job.id,
-            itemId: item.id,
+            profileItemId: item.id,
           });
         } else {
           try {
