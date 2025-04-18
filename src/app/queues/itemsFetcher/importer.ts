@@ -56,7 +56,7 @@ export class Importer {
     if (totalItems === null || totalItems === undefined) {
       throw new Error("No items to import");
     }
-    processedItems = 0;
+    processedItems = originalMetadata.processedItems || 0;
     while (processedItems < totalItems) {
       const items = await this.fetchItems();
       if (items === null) {
