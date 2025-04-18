@@ -88,8 +88,8 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: 'src/app/queues/itemsFetcher'
-          command: deploy -c wrangler.jsonc
+          workingDirectory: 'src/app'
+          command: deploy queues/itemsFetcher/src/index.ts --config queues/itemsFetcher/wrangler.jsonc --name items-fetcher-worker-staging
 
   deploy-prod:
     needs: check-app
@@ -147,5 +147,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: 'src/app/queues/itemsFetcher'
-          command: deploy -c wrangler.jsonc
+          workingDirectory: 'src/app'
+          command: deploy queues/itemsFetcher/src/index.ts --config queues/itemsFetcher/wrangler.jsonc --name items-fetcher-worker-prod
