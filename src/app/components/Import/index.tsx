@@ -56,7 +56,7 @@ export const Import: React.FC<ImportJobsProps> = () => {
               <HiMiniArrowPath />
             </Button>
           </div>
-          <ul className="divide-y divide-divider !mt-0">
+          <ul className="divide-y divide-divider !mt-0 max-h-[250px] overflow-y-auto">
             {importJobs.map((job) => {
               const { processedItems, totalItems } = job.metadata || {};
               return (
