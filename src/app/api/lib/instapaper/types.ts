@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+export class InstapaperError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InstapaperError";
+  }
+}
+
 export const InstapaperBookmarkSchema = z.object({
   type: z.literal("bookmark"),
   bookmark_id: z.number(),

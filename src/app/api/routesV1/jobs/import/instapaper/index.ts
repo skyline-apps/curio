@@ -2,6 +2,7 @@ import { eq } from "@app/api/db";
 import { getIncompleteJobs } from "@app/api/db/dal/jobs";
 import { jobs } from "@app/api/db/schema";
 import { Instapaper } from "@app/api/lib/instapaper";
+import { InstapaperError } from "@app/api/lib/instapaper/types";
 import {
   apiDoc,
   APIResponse,
@@ -93,6 +94,10 @@ export const importInstapaperRouter = new Hono<EnvBindings>().post(
       const response = ImportInstapaperResponseSchema.parse({ jobId });
       return c.json(response, 200);
     } catch (error) {
+      if (error instanceof InstapaperError && error.message.includes("401")) {
+        log.error("Invalid Instapaper credentials", { error: error.message });
+        return c.json({ error: "Invalid Instapaper credentials." }, 401);
+      }
       log.error("Error creating import job", { error });
       return c.json({ error: "Error creating import job." }, 500);
     }

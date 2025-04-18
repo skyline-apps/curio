@@ -6,7 +6,11 @@ import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import OAuth from "oauth-1.0a";
 import { z } from "zod";
 
-import { InstapaperBookmark, InstapaperBookmarkSchema } from "./types";
+import {
+  InstapaperBookmark,
+  InstapaperBookmarkSchema,
+  InstapaperError,
+} from "./types";
 
 export type OAuthToken = OAuth.Token;
 
@@ -28,7 +32,9 @@ export class Instapaper {
     const consumerKey = env.INSTAPAPER_OAUTH_CONSUMER_ID;
     const consumerSecret = env.INSTAPAPER_OAUTH_CONSUMER_SECRET;
     if (!consumerKey || !consumerSecret) {
-      throw new Error("Instapaper consumer key and secret are required.");
+      throw new InstapaperError(
+        "Instapaper consumer key and secret are required.",
+      );
     }
     this.consumerKey = consumerKey;
     this.consumerSecret = consumerSecret;
@@ -114,7 +120,9 @@ export class Instapaper {
         }
       }
 
-      throw new Error(`Instapaper API request failed: ${status} ${errorText}`);
+      throw new InstapaperError(
+        `Instapaper API request failed: ${status} ${errorText}`,
+      );
     }
   }
 
