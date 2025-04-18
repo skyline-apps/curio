@@ -5,9 +5,10 @@ import {
   wrapMarkdownComponent,
 } from "@app/components/Article/wrapMarkdownComponent";
 import ItemRow from "@app/components/Items/ItemRow";
-import Labels, { type Label } from "@app/components/Labels";
+import Labels from "@app/components/Labels";
 import Markdown, { type Components } from "@app/components/Markdown";
 import { type Highlight } from "@app/schemas/v1/items/highlights";
+import { Label } from "@app/schemas/v1/user/labels";
 import { cn } from "@app/utils/cn";
 import React, { useMemo, useState } from "react";
 

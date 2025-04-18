@@ -30,7 +30,7 @@ interface PickerLabelsProps extends BaseLabelsProps {
   mode: "picker";
   availableLabels: Label[];
   onAdd: (label: Label) => void | Promise<void>;
-  onCreate: (label: Omit<Label, "id">) => Label | void | Promise<Label | void>;
+  onCreate?: (label: Omit<Label, "id">) => Label | void | Promise<Label | void>;
 }
 
 interface ViewLabelsProps extends BaseLabelsProps {

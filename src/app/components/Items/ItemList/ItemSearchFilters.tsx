@@ -1,4 +1,4 @@
-import Labels, { Label } from "@app/components/Labels";
+import Labels from "@app/components/Labels";
 import Button from "@app/components/ui/Button";
 import { Checkbox } from "@app/components/ui/Checkbox";
 import { Divider } from "@app/components/ui/Divider";
@@ -11,6 +11,7 @@ import {
 import { Switch } from "@app/components/ui/Switch";
 import { ItemsContext } from "@app/providers/Items";
 import { useSettings } from "@app/providers/Settings";
+import { Label } from "@app/schemas/v1/user/labels";
 import { useCallback, useContext, useState } from "react";
 import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
 
