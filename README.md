@@ -53,6 +53,11 @@ To clear the database, run
 1. `docker compose down -v`
 2. `rm -r docker/volumes/db/data`
 
+### Job workers
+Locally, the main worker can push messages to queues, but the separate consumer workers aren't run.
+
+Instead, to run logic for a specific consumer queue locally, set it as the `queue` export in `src/app/api/index.ts`.
+
 ## Deployment
 ### Web app
 1. Set up Supabase app. We use their database, storage, and auth services.
@@ -65,9 +70,11 @@ To clear the database, run
 4. Run database migrations against the production database using `DOTENV_CONFIG_PATH=/path/to/.env.prod npm run db:migrate`. This is also set up to run automatically with the GitHub Actions build process.
 5. Configure the Supabase storage settings.
   - Create a bucket `items`. Set it to be public with the allowed MIME type `text/markdown`.
+  - Also create an `imports` bucket. It should stay private.
   - Create a new policy on the `items` bucket from scratch. Title it "Allow read access for everyone", allow the `SELECT` operation for all roles, and keep the default policy definition `bucket_id = 'items'`.
   - Create a new policy on the `items` bucket. Title it "Allow authenticated to upload", allow the `INSERT` and `UPDATE` operations for the `authenticated` role, and keep the default policy definition.
 6. Populate the environment variables and secrets in GitHub so that the Actions build pipeline can deploy.
+7. Populate the environment variables and secrets in the deployed Cloudflare workers.
 
 ### Cloud services
 1. Set up a GCP account.
