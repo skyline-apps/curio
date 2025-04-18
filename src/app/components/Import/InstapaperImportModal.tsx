@@ -21,7 +21,11 @@ export const InstapaperImportModal: React.FC<InstapaperImportModalProps> = ({
 }: InstapaperImportModalProps) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const { mutate: triggerImport, isPending } = useTriggerInstapaperImport();
+  const {
+    mutate: triggerImport,
+    isPending,
+    error,
+  } = useTriggerInstapaperImport();
 
   const handleSubmit = (): void => {
     if (username) {
@@ -73,6 +77,13 @@ export const InstapaperImportModal: React.FC<InstapaperImportModalProps> = ({
               isDisabled={isPending}
               placeholder="Enter your Instapaper password"
             />
+            {error && (
+              <p className="text-sm text-danger">
+                {error instanceof Error
+                  ? error.message
+                  : "Failed to start Instapaper import."}
+              </p>
+            )}
           </div>
         </ModalBody>
         <ModalFooter>
