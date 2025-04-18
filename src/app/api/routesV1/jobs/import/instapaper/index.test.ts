@@ -5,6 +5,7 @@ import {
   MOCK_ACCESS_TOKEN,
   mockGetAccessToken,
 } from "@app/api/lib/instapaper/__mocks__";
+import { ErrorResponse } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
 import {
   DEFAULT_TEST_PROFILE_ID,
@@ -86,7 +87,7 @@ describe("/v1/jobs/import/instapaper", () => {
         validPayload,
       );
       expect(response.status).toBe(409);
-      const data = await response.json();
+      const data: ErrorResponse = await response.json();
       expect(data.error).toBe("An import job is already in progress.");
       expect(MOCK_QUEUE.send).not.toHaveBeenCalled();
     });
@@ -105,7 +106,7 @@ describe("/v1/jobs/import/instapaper", () => {
         validPayload,
       );
       expect(response.status).toBe(409);
-      const data = await response.json();
+      const data: ErrorResponse = await response.json();
       expect(data.error).toBe("An import job is already in progress.");
       expect(MOCK_QUEUE.send).not.toHaveBeenCalled();
     });
@@ -121,7 +122,7 @@ describe("/v1/jobs/import/instapaper", () => {
         validPayload,
       );
       expect(response.status).toBe(500);
-      const data = await response.json();
+      const data: ErrorResponse = await response.json();
       expect(data.error).toBe("Error creating import job.");
       expect(MOCK_QUEUE.send).not.toHaveBeenCalled();
     });
@@ -137,7 +138,7 @@ describe("/v1/jobs/import/instapaper", () => {
         validPayload,
       );
       expect(response.status).toBe(500);
-      const data = await response.json();
+      const data: ErrorResponse = await response.json();
       expect(data.error).toBe("Error creating import job.");
       expect(MOCK_QUEUE.send).not.toHaveBeenCalled();
     });
@@ -152,7 +153,7 @@ describe("/v1/jobs/import/instapaper", () => {
         validPayload,
       );
       expect(response.status).toBe(500);
-      const data = await response.json();
+      const data: ImportInstapaperResponse = await response.json();
       expect(data.jobId).toBeDefined();
 
       const createdJob = await testDb.db
@@ -176,7 +177,7 @@ describe("/v1/jobs/import/instapaper", () => {
         invalidPayload,
       );
       expect(response.status).toBe(400);
-      const data = await response.json();
+      const data: ErrorResponse = await response.json();
       expect(data.error).toContain("Invalid request parameters");
     });
 

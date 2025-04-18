@@ -101,7 +101,7 @@ describe("/v1/jobs/import", () => {
       const response = await getRequest(app, "/v1/jobs/import");
       expect(response.status).toBe(500);
       const errorData = await response.json();
-      expect(errorData.error).toBe("Failed to get import jobs");
+      expect(errorData).toEqual({ error: "Failed to get import jobs" });
 
       vi.restoreAllMocks();
     });
