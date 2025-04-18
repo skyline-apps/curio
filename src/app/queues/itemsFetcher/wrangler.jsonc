@@ -17,21 +17,29 @@
             "name": "curio-consumer-staging",
             "vars": {
                 "ENVIRONMENT": "staging"
+            },
+            "queues": {
+                "consumers": [
+                    {
+                        "queue": "items-fetcher-staging",
+                        "max_batch_size": 1
+                    }
+                ]
             }
         },
         "prod": {
             "name": "curio-consumer-prod",
             "vars": {
                 "ENVIRONMENT": "prod"
+            },
+            "queues": {
+                "consumers": [
+                    {
+                        "queue": "items-fetcher-prod",
+                        "max_batch_size": 1
+                    }
+                ]
             }
         }
     },
-    "queues": {
-        "consumers": [
-            {
-                "queue": "items-fetcher",
-                "max_batch_size": 1
-            }
-        ]
-    }
 }

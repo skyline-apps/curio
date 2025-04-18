@@ -75,6 +75,9 @@ Instead, to run logic for a specific consumer queue locally, set it as the `queu
   - Create a new policy on the `items` bucket. Title it "Allow authenticated to upload", allow the `INSERT` and `UPDATE` operations for the `authenticated` role, and keep the default policy definition.
 6. Populate the environment variables and secrets in GitHub so that the Actions build pipeline can deploy.
 7. Populate the environment variables and secrets in the deployed Cloudflare workers.
+8. From `src/app`, run `npx wrangler queues create <QUEUE>` to create message queues.
+  - `items-fetcher-staging`
+  - `items-fetcher-prod`
 
 ### Cloud services
 1. Set up a GCP account.

@@ -22,6 +22,14 @@
       },
       "vars": {
         "ENVIRONMENT": "staging"
+      },
+      "queues": {
+        "producers": [
+          {
+            "queue": "items-fetcher-staging",
+            "binding": "ITEMS_FETCHER_QUEUE"
+          }
+        ]
       }
     },
     "prod": {
@@ -31,15 +39,15 @@
       },
       "vars": {
         "ENVIRONMENT": "prod"
+      },
+      "queues": {
+        "producers": [
+          {
+            "queue": "items-fetcher-prod",
+            "binding": "ITEMS_FETCHER_QUEUE"
+          }
+        ]
       }
     }
-  },
-  "queues": {
-    "producers": [
-      {
-        "queue": "items-fetcher",
-        "binding": "ITEMS_FETCHER_QUEUE"
-      }
-    ]
   }
 }
