@@ -13,6 +13,7 @@ export type LoggerEnv = { AXIOM_DATASET?: string; AXIOM_TOKEN?: string };
 export const createLogger = (
   env: LoggerEnv,
   logLevel: LogLevel = "info",
+  extras?: Record<string, string>,
 ): AxiomLogger => {
   const hasAxiom = !!env.AXIOM_DATASET && !!env.AXIOM_TOKEN;
 
@@ -31,5 +32,6 @@ export const createLogger = (
             prettyPrint: true,
           }),
     ],
+    args: extras,
   });
 };

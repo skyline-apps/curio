@@ -17,7 +17,7 @@ export const itemsFetcherQueue = async (
   batch: MessageBatch<QueueMessage>,
   env: Env,
 ): Promise<void> => {
-  const log = createLogger(env);
+  const log = createLogger(env, "info", { worker: "items-fetcher" });
   log.info(`Consumer received ${batch.messages.length} messages.`);
 
   const db = getDb(env);

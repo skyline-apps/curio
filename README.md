@@ -56,7 +56,7 @@ To clear the database, run
 ### Job workers
 Locally, the main worker can push messages to queues, but the separate consumer workers aren't run.
 
-Instead, to run logic for a specific consumer queue locally, set it as the `queue` export in `src/app/api/index.ts`.
+Instead, to run logic for a specific consumer queue locally, set it as the `queue` export in `src/app/api/index.ts`. Then, ensure that the `consumers` are set in `src/app/wrangler.jsonc`
 
 ## Deployment
 ### Web app

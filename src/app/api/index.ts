@@ -79,4 +79,7 @@ export default {
 
     return new Response(null, { status: 404 });
   },
+  // async queue(batch: MessageBatch<QueueMessage>, env: Env): Promise<void> {
+  //   await itemsFetcherQueue(batch, env);
+  // },
 };
