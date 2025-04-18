@@ -1,3 +1,4 @@
+import type { ImportJobsResponse } from "@app/schemas/v1/jobs/import";
 import type { UpdateEmailResponse } from "@app/schemas/v1/user/email";
 import type { GetLabelsResponse } from "@app/schemas/v1/user/labels";
 import type {
@@ -13,6 +14,9 @@ export type SettingsContextType = {
   newsletterEmail: string | null;
   changeUsername: (username: string) => Promise<UpdateUsernameResponse | void>;
   updateNewsletterEmail: () => Promise<UpdateEmailResponse | void>;
+  importJobs: ImportJobsResponse["jobs"];
+  isLoadingImportJobs: boolean;
+  loadImportJobs: (reload?: boolean) => void;
   settings?: GetSettingsResponse;
   updateSettings: (
     field: keyof UpdateSettingsRequest,
@@ -27,11 +31,15 @@ export type SettingsContextType = {
   ) => Promise<boolean>;
   deleteLabel: (labelId: string) => Promise<void>;
 };
+
 export const SettingsContext = createContext<SettingsContextType>({
   username: "",
   newsletterEmail: null,
   changeUsername: (_username: string) => Promise.resolve(),
   updateNewsletterEmail: () => Promise.resolve(),
+  importJobs: [],
+  isLoadingImportJobs: false,
+  loadImportJobs: () => {},
   updateSettings: async () => {},
   createLabel: async () => true,
   updateLabel: async () => true,

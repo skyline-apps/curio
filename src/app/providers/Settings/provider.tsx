@@ -1,6 +1,7 @@
 import { showConfirm } from "@app/components/ui/Modal/actions";
 import { useToast } from "@app/providers/Toast";
 import { useUser } from "@app/providers/User";
+import type { ImportJobsResponse } from "@app/schemas/v1/jobs/import";
 import type { GetUserResponse } from "@app/schemas/v1/user";
 import { type UpdateEmailResponse } from "@app/schemas/v1/user/email";
 import type {
@@ -23,7 +24,7 @@ import {
 } from "@app/utils/displayStorage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import posthog from "posthog-js";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 
 import { SettingsContext } from ".";
 
@@ -43,6 +44,13 @@ const fetchSettings = async (): Promise<GetSettingsResponse> => {
     method: "GET",
   });
   return handleAPIResponse<GetSettingsResponse>(response);
+};
+
+const fetchImportJobs = async (): Promise<ImportJobsResponse> => {
+  const response = await authenticatedFetch("/api/v1/jobs/import", {
+    method: "GET",
+  });
+  return handleAPIResponse<ImportJobsResponse>(response);
 };
 
 const fetchLabels = async (): Promise<GetLabelsResponse> => {
@@ -80,6 +88,17 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   });
 
   const {
+    data: currentImportJobs,
+    refetch: refetchImportJobs,
+    isFetching: isLoadingImportJobs,
+  } = useQuery({
+    queryKey: ["importJobs"],
+    queryFn: fetchImportJobs,
+    retry: 1,
+    enabled: !!user.id,
+  });
+
+  const {
     data: currentLabels,
     isPending: loadingLabels,
     refetch: loadLabels,
@@ -89,6 +108,22 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     retry: 1,
     enabled: !!user.id,
   });
+
+  const loadImportJobs = useCallback(
+    (reload: boolean = false) => {
+      refetchImportJobs().catch((error) => {
+        if (reload) {
+          showToast(
+            error instanceof Error
+              ? error.message
+              : "Failed to load import jobs",
+            { type: "error" },
+          );
+        }
+      });
+    },
+    [refetchImportJobs, showToast],
+  );
 
   const changeUsernameMutation = useMutation({
     mutationFn: async (username: string) => {
@@ -340,6 +375,9 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         newsletterEmail: currentProfile?.newsletterEmail ?? null,
         changeUsername,
         updateNewsletterEmail,
+        importJobs: currentImportJobs?.jobs ?? [],
+        isLoadingImportJobs,
+        loadImportJobs,
         settings: currentSettings,
         updateSettings,
         labels: currentLabels?.labels,

@@ -1,3 +1,4 @@
+import { Import } from "@app/components/Import";
 import Button from "@app/components/ui/Button";
 import Card from "@app/components/ui/Card";
 import { FormSection } from "@app/components/ui/Form";
@@ -227,6 +228,12 @@ const AccountSettings: React.FC = () => {
             Generate
           </Button>
         </div>
+      </FormSection>
+      <FormSection
+        title="Import"
+        description="Import items from third-party services"
+      >
+        <Import />
       </FormSection>
       <FormSection
         title="API keys"
