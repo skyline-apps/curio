@@ -243,13 +243,13 @@ export class InstapaperImporter extends Importer {
               this.log.error("Failed to extract metadata from HTML", {
                 jobId: this.job.id,
                 profileItemId: item.id,
-                error,
+                error: error.message,
               });
             } else if (error instanceof StorageError) {
               this.log.error("Failed to upload item content", {
                 jobId: this.job.id,
                 profileItemId: item.id,
-                error,
+                error: error.message,
               });
             } else {
               this.log.error("Failed to fetch Instapaper bookmark content", {

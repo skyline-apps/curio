@@ -1,7 +1,7 @@
 import { eq, getDb } from "@app/api/db";
 import { jobs } from "@app/api/db/schema";
 import { createLogger } from "@app/api/utils/logger";
-import { JobStatus, JobType } from "@app/schemas/db";
+import { ImportMetadataSchema, JobStatus, JobType } from "@app/schemas/db";
 import type { MessageBatch } from "@cloudflare/workers-types";
 
 import { type Env } from "./env";
@@ -76,12 +76,18 @@ export const itemsFetcherQueue = async (
           throw new Error(`Unsupported job type: ${job.type} for job ${jobId}`);
       }
 
+      const updatedJob = await db.query.jobs.findFirst({
+        where: eq(jobs.id, jobId),
+      });
+      const finalMetadata = ImportMetadataSchema.parse(updatedJob?.metadata);
+
       await db
         .update(jobs)
         .set({
           status: JobStatus.COMPLETED,
           completedAt: new Date(),
           errorMessage: null,
+          metadata: finalMetadata,
         })
         .where(eq(jobs.id, jobId));
       log.info(`Job ${jobId} completed successfully.`);
@@ -90,7 +96,15 @@ export const itemsFetcherQueue = async (
     } catch (error) {
       log.error(`Error processing job`, { jobId, error });
       if (job) {
+        // Ensure job was fetched before error
         try {
+          const updatedJob = await db.query.jobs.findFirst({
+            where: eq(jobs.id, jobId),
+          });
+          const finalMetadata = ImportMetadataSchema.parse(
+            updatedJob?.metadata,
+          );
+
           await db
             .update(jobs)
             .set({
@@ -98,6 +112,7 @@ export const itemsFetcherQueue = async (
               completedAt: new Date(),
               errorMessage:
                 error instanceof Error ? error.message : String(error),
+              metadata: finalMetadata,
             })
             .where(eq(jobs.id, jobId));
           log.info(`Job status updated to FAILED.`, { jobId });
