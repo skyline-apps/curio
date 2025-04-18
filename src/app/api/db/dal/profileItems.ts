@@ -206,8 +206,13 @@ export async function createOrUpdateProfileItems(
   const itemIds = createdItems.map((item) => item.id);
 
   const stateUpdatedAtSet = new Set<string>();
-  const profileItemsToInsert = newProfileItems.map((item) => {
-    const cleanedUrl = cleanUrl(item.url);
+  const deduplicatedProfileItems = new Map(
+    newProfileItems.map((item) => [cleanUrl(item.url), item]),
+  );
+
+  const profileItemsToInsert = Array.from(
+    deduplicatedProfileItems.entries(),
+  ).map(([cleanedUrl, item]) => {
     const itemId = urlToItemId.get(cleanedUrl);
     if (!itemId) {
       throw new Error(

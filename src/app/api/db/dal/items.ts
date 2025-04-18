@@ -8,8 +8,10 @@ export async function createOrUpdateItems(
   db: TransactionDB,
   itemUrls: string[],
 ): Promise<DBItem[]> {
-  const itemsToInsert = itemUrls.map((url) => ({
-    url: cleanUrl(url),
+  const cleanedUrls = Array.from(new Set(itemUrls.map((url) => cleanUrl(url))));
+
+  const itemsToInsert = cleanedUrls.map((url) => ({
+    url,
     slug: generateSlug(url),
   }));
 

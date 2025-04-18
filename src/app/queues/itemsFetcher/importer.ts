@@ -28,9 +28,9 @@ export class Importer {
   }
 
   public async handleImport(): Promise<void> {
-    const metadata = this.job.metadata as ImportMetadata;
+    const originalMetadata = this.job.metadata as ImportMetadata;
     let totalItems, processedItems: number;
-    if (metadata.status === ImportStatus.NOT_STARTED) {
+    if (originalMetadata.status === ImportStatus.NOT_STARTED) {
       totalItems = await this.fetchMetadata();
       if (totalItems === null) {
         this.log.error("Failed to import metadata");
@@ -44,14 +44,14 @@ export class Importer {
         .update(jobs)
         .set({
           metadata: {
-            ...metadata,
+            ...originalMetadata,
             status: ImportStatus.FETCHED_ITEMS,
             totalItems,
           },
         })
         .where(eq(jobs.id, this.job.id));
     } else {
-      totalItems = metadata.totalItems;
+      totalItems = originalMetadata.totalItems;
     }
     if (totalItems === null || totalItems === undefined) {
       throw new Error("No items to import");
@@ -67,7 +67,9 @@ export class Importer {
         .update(jobs)
         .set({
           metadata: {
-            ...metadata,
+            ...originalMetadata,
+            status: ImportStatus.FETCHED_ITEMS,
+            totalItems,
             processedItems,
           },
         })

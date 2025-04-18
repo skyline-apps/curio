@@ -41,11 +41,12 @@ export class InstapaperImporter extends Importer {
   }
 
   public async fetchMetadata(): Promise<number | null> {
-    const have: string[] = [];
+    let have: Set<string> = new Set();
     let tags = new Set<string>();
     let fetchedBookmarks: number = 0;
     const BATCH_SIZE = 500;
     let lastBatchSize = 0;
+    const startTime = new Date();
 
     try {
       const folders = {
@@ -55,20 +56,28 @@ export class InstapaperImporter extends Importer {
       await Promise.all(
         Object.entries(folders).map(async ([folder, state]) => {
           do {
-            const bookmarks: InstapaperBookmark[] =
-              await this.instapaper.listBookmarks(
-                this.token,
-                BATCH_SIZE,
-                folder,
-                have.join(","),
-              );
+            const bookmarks: InstapaperBookmark[] = Array.from(
+              new Map(
+                (
+                  await this.instapaper.listBookmarks(
+                    this.token,
+                    BATCH_SIZE,
+                    folder,
+                    Array.from(have).join(","),
+                  )
+                ).map((b) => [b.bookmark_id, b]),
+              ).values(),
+            );
 
             lastBatchSize = bookmarks.length;
             if (lastBatchSize === 0) {
               break;
             }
 
-            have.push(...bookmarks.map((b) => b.bookmark_id.toString()));
+            have = new Set([
+              ...have,
+              ...bookmarks.map((b) => b.bookmark_id.toString()),
+            ]);
 
             const newLabels = Array.from(
               new Set(
@@ -108,7 +117,7 @@ export class InstapaperImporter extends Importer {
                   });
                 tags = new Set([...tags, ...insertedLabels.map((l) => l.name)]);
               }
-              const newProfileItems = bookmarks.map((b) => ({
+              const newProfileItems = bookmarks.map((b, index) => ({
                 url: b.url,
                 metadata: {
                   title: b.title,
@@ -123,6 +132,9 @@ export class InstapaperImporter extends Importer {
                     ? new Date(b.progress_timestamp).toUTCString()
                     : null,
                   state,
+                  stateUpdatedAt: new Date(
+                    startTime.getTime() + index + fetchedBookmarks,
+                  ).toISOString(),
                 },
                 labelIds: b.tags.map(
                   (t) => insertedLabels.find((l) => l.name === t.name)!.id,
@@ -198,12 +210,22 @@ export class InstapaperImporter extends Importer {
         const { bookmarkId } = InstapaperProfileItemMetadataSchema.parse(
           item.sourceMetadata,
         );
-        const htmlContent = await this.instapaper.getBookmarkText(
-          this.token,
-          bookmarkId,
-        );
-        if (!htmlContent) {
+        let htmlContent: string;
+        try {
+          htmlContent = await this.instapaper.getBookmarkText(
+            this.token,
+            bookmarkId,
+          );
+        } catch (error) {
           this.log.error("Failed to fetch Instapaper bookmark content", {
+            jobId: this.job.id,
+            itemId: item.id,
+            error,
+          });
+          continue;
+        }
+        if (!htmlContent) {
+          this.log.error("No content found for Instapaper bookmark", {
             jobId: this.job.id,
             itemId: item.id,
           });
