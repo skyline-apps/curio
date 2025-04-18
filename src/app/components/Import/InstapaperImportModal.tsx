@@ -50,6 +50,14 @@ export const InstapaperImportModal: React.FC<InstapaperImportModalProps> = ({
         <ModalHeader>Import from Instapaper</ModalHeader>
         <ModalBody>
           <div className="space-y-4">
+            <p className="text-sm">
+              Import all your Instapaper bookmarks from your Unread and Archive
+              folders, as well as their tags and reading progress.
+            </p>
+            <p className="text-sm">
+              To start, enter your Instapaper username or email and password.
+              This information won't be stored in Curio.
+            </p>
             <Input
               label="Username"
               value={username}
