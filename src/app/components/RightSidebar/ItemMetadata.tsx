@@ -3,7 +3,7 @@ import ItemActions from "@app/components/Items/ItemActions";
 import { useItemUpdate } from "@app/components/Items/ItemActions/actions";
 import AdvancedActions from "@app/components/Items/ItemActions/AdvancedActions";
 import OtherItemActions from "@app/components/Items/ItemActions/OtherItemActions";
-import Labels, { Label } from "@app/components/Labels";
+import Labels from "@app/components/Labels";
 import { useAppLayout } from "@app/providers/AppLayout";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import type { Item, PublicItem } from "@app/providers/Items";
@@ -11,6 +11,7 @@ import { useSettings } from "@app/providers/Settings";
 import { useUser } from "@app/providers/User";
 import { TextDirection } from "@app/schemas/db";
 import { FALLBACK_HOSTNAME } from "@app/schemas/types";
+import type { Label } from "@app/schemas/v1/user/labels";
 import { cn } from "@app/utils/cn";
 import { useCallback, useContext } from "react";
 import { Link } from "react-router-dom";
@@ -93,7 +94,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
 }: ItemMetadataProps) => {
   const { user } = useUser();
   const { isEditable } = useContext(CurrentItemContext);
-  const { labels } = useSettings();
+  const { labels, createLabel } = useSettings();
   const { addItemsLabel, removeItemsLabel } = useItemUpdate();
   const { navigateToRoot } = useAppLayout();
 
@@ -185,6 +186,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
               labels={item.labels || []}
               mode="picker"
               onAdd={handleAddLabel}
+              onCreate={createLabel}
               onDelete={handleDeleteLabel}
             />
           )}

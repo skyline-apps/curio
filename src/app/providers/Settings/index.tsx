@@ -1,6 +1,6 @@
 import type { ImportJobsResponse } from "@app/schemas/v1/jobs/import";
 import type { UpdateEmailResponse } from "@app/schemas/v1/user/email";
-import type { GetLabelsResponse } from "@app/schemas/v1/user/labels";
+import type { GetLabelsResponse, Label } from "@app/schemas/v1/user/labels";
 import type {
   GetSettingsResponse,
   UpdateSettingsRequest,
@@ -24,7 +24,10 @@ export type SettingsContextType = {
   ) => Promise<UpdateSettingsResponse | void>;
   labels?: GetLabelsResponse["labels"];
   loadingLabels?: boolean;
-  createLabel: (label: { name: string; color?: string }) => Promise<boolean>;
+  createLabel: (label: {
+    name: string;
+    color?: string;
+  }) => Promise<Label | void>;
   updateLabel: (
     labelId: string,
     updates: { name?: string; color?: string },
@@ -41,7 +44,7 @@ export const SettingsContext = createContext<SettingsContextType>({
   isLoadingImportJobs: false,
   loadImportJobs: () => {},
   updateSettings: async () => {},
-  createLabel: async () => true,
+  createLabel: async () => {},
   updateLabel: async () => true,
   deleteLabel: async () => {},
 });

@@ -3,17 +3,12 @@ import { Chip } from "@app/components/ui/Chip";
 import Icon from "@app/components/ui/Icon";
 import Spinner from "@app/components/ui/Spinner";
 import { Tooltip } from "@app/components/ui/Tooltip";
+import type { Label } from "@app/schemas/v1/user/labels";
 import { COLOR_PALETTE } from "@app/utils/colors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { HiOutlinePlus, HiOutlineTag } from "react-icons/hi2";
 
 import LabelPicker from "./LabelPicker";
-
-export interface Label {
-  id: string;
-  name: string;
-  color: string;
-}
 
 interface BaseLabelsProps {
   labels: Label[];
@@ -28,13 +23,14 @@ interface BaseLabelsProps {
 
 interface CreateLabelsProps extends BaseLabelsProps {
   mode: "create";
-  onAdd?: (label: { name: string; color: string }) => void | Promise<void>;
+  onAdd?: (label: Omit<Label, "id">) => void | Promise<void>;
 }
 
 interface PickerLabelsProps extends BaseLabelsProps {
   mode: "picker";
   availableLabels: Label[];
   onAdd: (label: Label) => void | Promise<void>;
+  onCreate: (label: Omit<Label, "id">) => Label | void | Promise<Label | void>;
 }
 
 interface ViewLabelsProps extends BaseLabelsProps {
@@ -84,6 +80,15 @@ const Labels: React.FC<LabelsProps> = (props) => {
     if (props.onDelete) {
       await props.onDelete(labelId);
     }
+  };
+
+  const handleCreateLabel = async (name: string): Promise<Label | void> => {
+    if (!("onCreate" in props) || !props.onCreate) {
+      return;
+    }
+    const color =
+      COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)];
+    return props.onCreate({ name, color });
   };
 
   const addDraftLabel = (): void => {
@@ -167,6 +172,7 @@ const Labels: React.FC<LabelsProps> = (props) => {
         availableLabels={props.availableLabels}
         labels={props.labels}
         onAdd={props.onAdd}
+        onCreate={handleCreateLabel}
         onDelete={props.onDelete}
       />
     );

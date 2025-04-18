@@ -5,15 +5,16 @@ import {
 import Button from "@app/components/ui/Button";
 import { Chip } from "@app/components/ui/Chip";
 import Icon from "@app/components/ui/Icon";
+import type { Label } from "@app/schemas/v1/user/labels";
+import { brown } from "@app/utils/colors";
 import React, { Key, useMemo, useRef, useState } from "react";
 import { HiOutlinePlus } from "react-icons/hi2";
-
-import { Label } from ".";
 
 interface LabelPickerProps {
   labels: Label[];
   availableLabels: Label[];
   onAdd: (label: Label) => void | Promise<void>;
+  onCreate?: (name: string) => Promise<Label | void>;
   onDelete?: (labelId: string) => void | Promise<void>;
 }
 
@@ -21,6 +22,7 @@ const LabelPicker: React.FC<LabelPickerProps> = ({
   labels,
   availableLabels,
   onAdd,
+  onCreate,
   onDelete,
 }) => {
   const [showAutocomplete, setShowAutocomplete] = useState<boolean>(false);
@@ -30,15 +32,33 @@ const LabelPicker: React.FC<LabelPickerProps> = ({
 
   const unusedLabels = useMemo(() => {
     const usedIds = new Set(labels.map((l) => l.id));
-    return availableLabels.filter((l) => !usedIds.has(l.id));
-  }, [labels, availableLabels]);
+    const remainingLabels: Label[] = availableLabels.filter(
+      (l) => !usedIds.has(l.id),
+    );
+    if (inputValue && !!onCreate) {
+      remainingLabels.push({
+        id: "",
+        name: inputValue,
+        color: brown[600],
+      });
+    }
+    return remainingLabels;
+  }, [labels, inputValue, availableLabels, onCreate]);
 
   const handleSelectionChange = async (key: Key | null): Promise<void> => {
     const selectedLabel = unusedLabels.find((l) => l.id === key);
     if (selectedLabel) {
       setIsLoading(true);
       try {
-        await onAdd(selectedLabel);
+        if (selectedLabel.id) {
+          await onAdd(selectedLabel);
+        } else if (!!onCreate) {
+          const newLabel = await onCreate(selectedLabel.name);
+          if (!newLabel) {
+            return;
+          }
+          await onAdd(newLabel);
+        }
       } finally {
         setIsLoading(false);
         setShowAutocomplete(false);
@@ -54,9 +74,6 @@ const LabelPicker: React.FC<LabelPickerProps> = ({
     }
   };
 
-  const noLabelsDefined = availableLabels.length === 0;
-  const hasLabelsRemaining = unusedLabels.length > 0;
-
   return (
     <div className="flex flex-wrap items-center gap-2">
       {labels.map((label) => (
@@ -67,19 +84,16 @@ const LabelPicker: React.FC<LabelPickerProps> = ({
           value={label.name}
         />
       ))}
-      {((!showAutocomplete && hasLabelsRemaining) || noLabelsDefined) && (
+      {!showAutocomplete && (
         <Button
           ref={addButtonRef}
           isIconOnly
           onPress={() => {
-            if (hasLabelsRemaining) {
-              setShowAutocomplete(true);
-            }
+            setShowAutocomplete(true);
           }}
           size="xs"
           isLoading={isLoading}
-          disabled={!hasLabelsRemaining}
-          tooltip={noLabelsDefined ? "Define labels in Settings" : "Add label"}
+          tooltip="Add label"
         >
           <Icon icon={<HiOutlinePlus />} />
         </Button>
@@ -94,6 +108,11 @@ const LabelPicker: React.FC<LabelPickerProps> = ({
           size="sm"
           variant="flat"
           autoFocus
+          listboxProps={{
+            emptyContent: availableLabels.length
+              ? "No labels available"
+              : "No labels yet",
+          }}
           onOpenChange={(isOpen) => {
             if (!isOpen) {
               setShowAutocomplete(false);
@@ -108,6 +127,7 @@ const LabelPicker: React.FC<LabelPickerProps> = ({
               className="text-xs"
               textValue={item.name}
             >
+              {!item.id ? "Create " : ""}
               <Chip
                 className="pointer-events-none"
                 color={item.color}

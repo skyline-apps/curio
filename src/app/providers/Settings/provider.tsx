@@ -8,6 +8,7 @@ import type {
   CreateOrUpdateLabelsResponse,
   DeleteLabelsResponse,
   GetLabelsResponse,
+  Label,
 } from "@app/schemas/v1/user/labels";
 import type {
   GetSettingsResponse,
@@ -308,17 +309,23 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   const createLabel = async (label: {
     name: string;
     color?: string;
-  }): Promise<boolean> => {
+  }): Promise<Label | void> => {
     try {
-      await labelsMutation.mutateAsync({ type: LabelAction.CREATE, label });
+      const newLabel = (await labelsMutation.mutateAsync({
+        type: LabelAction.CREATE,
+        label,
+      })) as CreateOrUpdateLabelsResponse;
+      if (!newLabel || !newLabel.labels || newLabel.labels.length !== 1) {
+        return;
+      }
       showToast("Label created successfully", { disappearing: true });
-      return true;
+      return newLabel.labels[0];
     } catch (error: unknown) {
       showToast(
         error instanceof Error ? error.message : "Failed to create label",
         { type: "error" },
       );
-      return false;
+      return;
     }
   };
 
