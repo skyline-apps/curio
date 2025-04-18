@@ -5,7 +5,10 @@ import { items, profileItems, profileLabels } from "@app/api/db/schema";
 import { extractFromHtml } from "@app/api/lib/extract";
 import { ExtractError } from "@app/api/lib/extract/types";
 import { Instapaper, type OAuthToken } from "@app/api/lib/instapaper";
-import type { InstapaperBookmark } from "@app/api/lib/instapaper/types";
+import {
+  type InstapaperBookmark,
+  InstapaperError,
+} from "@app/api/lib/instapaper/types";
 import { storage } from "@app/api/lib/storage";
 import { StorageError } from "@app/api/lib/storage/types";
 import { Logger } from "@app/api/utils/logger";
@@ -217,11 +220,15 @@ export class InstapaperImporter extends Importer {
             bookmarkId,
           );
         } catch (error) {
-          this.log.error("Failed to fetch Instapaper bookmark content", {
-            jobId: this.job.id,
-            profileItemId: item.id,
-            error,
-          });
+          if (error instanceof InstapaperError) {
+            this.log.warn("Failed to fetch Instapaper bookmark content", {
+              jobId: this.job.id,
+              profileItemId: item.id,
+              error,
+            });
+          } else {
+            throw error;
+          }
         }
         if (htmlContent) {
           try {
@@ -234,19 +241,19 @@ export class InstapaperImporter extends Importer {
             );
           } catch (error) {
             if (error instanceof ExtractError) {
-              this.log.error("Failed to extract metadata from HTML", {
+              this.log.warn("Failed to extract content from HTML", {
                 jobId: this.job.id,
                 profileItemId: item.id,
                 error: error.message,
               });
             } else if (error instanceof StorageError) {
-              this.log.error("Failed to upload item content", {
+              this.log.warn("Failed to upload item content", {
                 jobId: this.job.id,
                 profileItemId: item.id,
                 error: error.message,
               });
             } else {
-              this.log.error("Failed to fetch Instapaper bookmark content", {
+              this.log.warn("Failed to save Instapaper bookmark content", {
                 jobId: this.job.id,
                 profileItemId: item.id,
                 error,
