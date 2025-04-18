@@ -81,6 +81,10 @@ export const ImportInstapaperMetadataSchema = ImportMetadataSchema.extend({
   accessToken: OAuth1TokenSchema,
 });
 
+export const ImportOmnivoreMetadataSchema = ImportMetadataSchema.extend({
+  storageKey: z.string().min(1),
+});
+
 export const InstapaperProfileItemMetadataSchema = z.object({
   bookmarkId: z.number(),
 });

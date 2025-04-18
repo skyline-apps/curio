@@ -10,6 +10,7 @@ import { type VersionMetadata } from "./types";
 
 const DEFAULT_NAME = "default";
 const ITEMS_BUCKET = "items";
+const IMPORT_BUCKET = "imports";
 
 export type StorageEnv = {
   VITE_SUPABASE_URL: string;
@@ -216,6 +217,29 @@ export class Storage {
       data.metadata.textLanguage = "";
     }
     return data.metadata as VersionMetadata;
+  }
+
+  async uploadImportFile(
+    env: StorageEnv,
+    objectKey: string,
+    file: File,
+  ): Promise<void> {
+    const storage = await this.getStorageClient(env);
+    const { error } = await storage.from(IMPORT_BUCKET).upload(objectKey, file);
+    if (error) {
+      throw new StorageError("Failed to upload file");
+    }
+  }
+
+  async readImportFile(env: StorageEnv, objectKey: string): Promise<Blob> {
+    const storage = await this.getStorageClient(env);
+    const { data, error } = await storage
+      .from(IMPORT_BUCKET)
+      .download(objectKey);
+    if (error) {
+      throw new StorageError("Failed to read file");
+    }
+    return data;
   }
 }
 

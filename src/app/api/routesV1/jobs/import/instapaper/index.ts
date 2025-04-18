@@ -1,4 +1,5 @@
-import { and, eq, inArray } from "@app/api/db";
+import { eq } from "@app/api/db";
+import { getIncompleteJobs } from "@app/api/db/dal/jobs";
 import { jobs } from "@app/api/db/schema";
 import { Instapaper } from "@app/api/lib/instapaper";
 import {
@@ -47,16 +48,11 @@ export const importInstapaperRouter = new Hono<EnvBindings>().post(
       const instapaper = new Instapaper(c.env);
 
       const accessToken = await instapaper.getAccessToken(username, password);
-      const existingJobs = await db
-        .select()
-        .from(jobs)
-        .where(
-          and(
-            eq(jobs.profileId, profileId),
-            eq(jobs.type, JobType.IMPORT_INSTAPAPER),
-            inArray(jobs.status, [JobStatus.PENDING, JobStatus.RUNNING]),
-          ),
-        );
+      const existingJobs = await getIncompleteJobs(
+        db,
+        profileId,
+        JobType.IMPORT_INSTAPAPER,
+      );
 
       if (existingJobs.length > 0) {
         return c.json({ error: "An import job is already in progress." }, 409);
