@@ -89,6 +89,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: 'src/app/queues/itemsFetcher'
+          configFile: 'wrangler.jsonc'
           command: deploy
 
   deploy-prod:
@@ -148,4 +149,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: 'src/app/queues/itemsFetcher'
+          configFile: 'wrangler.jsonc'
           command: deploy
