@@ -210,7 +210,7 @@ export class InstapaperImporter extends Importer {
         const { bookmarkId } = InstapaperProfileItemMetadataSchema.parse(
           item.sourceMetadata,
         );
-        let htmlContent: string;
+        let htmlContent: string | null = null;
         try {
           htmlContent = await this.instapaper.getBookmarkText(
             this.token,
@@ -222,14 +222,8 @@ export class InstapaperImporter extends Importer {
             profileItemId: item.id,
             error,
           });
-          continue;
         }
-        if (!htmlContent) {
-          this.log.error("No content found for Instapaper bookmark", {
-            jobId: this.job.id,
-            profileItemId: item.id,
-          });
-        } else {
+        if (htmlContent) {
           try {
             const { content } = await extractFromHtml(item.url, htmlContent);
             await storage.uploadItemContent(
