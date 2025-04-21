@@ -18,7 +18,7 @@ import {
 import { Hono } from "hono";
 
 import { importInstapaperRouter } from "./instapaper";
-import { omnivoreImportRouter } from "./omnivore";
+import { importOmnivoreRouter } from "./omnivore";
 
 const importRouter = new Hono<EnvBindings>().get(
   "/",
@@ -61,6 +61,6 @@ const importRouter = new Hono<EnvBindings>().get(
 );
 
 importRouter.route("/instapaper", importInstapaperRouter);
-importRouter.route("/omnivore", omnivoreImportRouter);
+importRouter.route("/omnivore", importOmnivoreRouter);
 
 export { importRouter };

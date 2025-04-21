@@ -34,9 +34,9 @@ const createMockAuthMiddleware = (
   };
 };
 
-export const setUpMockApp = (
-  route: string,
-  router: Hono<EnvBindings>,
+export const setUpMockApp = <T extends Hono<EnvBindings>>(
+  basePath: string,
+  router: T,
   userId: string | null = DEFAULT_TEST_USER_ID,
 ): Hono<EnvBindings> => {
   const app = new Hono<EnvBindings>();
@@ -49,7 +49,7 @@ export const setUpMockApp = (
     c.env.ITEMS_FETCHER_QUEUE = MOCK_QUEUE;
     return next();
   });
-  app.route(route, router);
+  app.route(basePath, router);
   return app;
 };
 
@@ -78,7 +78,7 @@ export const postRequest = async (
   headers?: Record<string, string>,
 ): Promise<Response> => {
   return await app.request(
-    `${endpoint}`,
+    endpoint,
     {
       method: "POST",
       headers: {
@@ -98,7 +98,7 @@ export const deleteRequest = async (
   headers?: Record<string, string>,
 ): Promise<Response> => {
   return await app.request(
-    `${endpoint}`,
+    endpoint,
     {
       method: "DELETE",
       headers: {
@@ -106,6 +106,25 @@ export const deleteRequest = async (
         ...(headers ? headers : {}),
       },
       body: JSON.stringify(body ?? {}),
+    },
+    MOCK_ENV,
+  );
+};
+
+export const postRequestFormData = async (
+  app: Hono<EnvBindings>,
+  endpoint: string,
+  formData: FormData,
+  headers: Record<string, string> = {},
+): Promise<Response> => {
+  return await app.request(
+    endpoint,
+    {
+      method: "POST",
+      headers: {
+        ...headers,
+      },
+      body: formData,
     },
     MOCK_ENV,
   );

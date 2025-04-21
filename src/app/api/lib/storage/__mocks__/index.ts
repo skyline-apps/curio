@@ -26,6 +26,10 @@ export const getItemMetadata = vi.fn().mockResolvedValue({
   ...MOCK_METADATA,
 });
 
+export const uploadImportFile = vi.fn().mockResolvedValue({});
+
+export const readImportFile = vi.fn().mockResolvedValue(new Blob());
+
 // Export class with mock functions
 export class Storage {
   async uploadItemContent(
@@ -53,6 +57,18 @@ export class Storage {
     slug: string,
   ): Promise<VersionMetadata> {
     return getItemMetadata(env, slug);
+  }
+
+  async uploadImportFile(
+    env: StorageEnv,
+    objectKey: string,
+    file: File,
+  ): Promise<void> {
+    return uploadImportFile(env, objectKey, file);
+  }
+
+  async readImportFile(env: StorageEnv, objectKey: string): Promise<Blob> {
+    return readImportFile(env, objectKey);
   }
 }
 
