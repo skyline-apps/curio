@@ -2,7 +2,7 @@ import { Input, InputProps } from "@heroui/react";
 import React from "react";
 
 export const INPUT_CLASSES =
-  "bg-default-50 dark:bg-default-950 hover:bg-default-75 data-[hover=true]:bg-default-75 group-data-[focus=true]:bg-default-75 dark:hover:bg-default-950 dark:group-data-[focus=true]:bg-default-950 dark:data-[hover=true]:bg-default-950";
+  "bg-default-50 dark:bg-default-950 hover:bg-default-75 data-[hover=true]:bg-default-75 group-data-[focus=true]:bg-default-75 dark:hover:bg-default-975 dark:group-data-[focus=true]:bg-default-975 dark:data-[hover=true]:bg-default-975";
 export const INPUT_BG_CLASSES =
   "bg-default-25 dark:bg-default-975 hover:bg-default-75 data-[hover=true]:bg-default-75 group-data-[focus=true]:bg-default-75 dark:hover:bg-default-975 dark:group-data-[focus=true]:bg-default-975 dark:data-[hover=true]:bg-default-975";
 

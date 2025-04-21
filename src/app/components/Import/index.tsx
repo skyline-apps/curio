@@ -5,6 +5,7 @@ import { useContext, useEffect, useState } from "react";
 import { HiMiniArrowPath } from "react-icons/hi2";
 
 import { InstapaperImportModal } from "./InstapaperImportModal";
+import { OmnivoreImportModal } from "./OmnivoreImportModal";
 
 const statusStyles: Record<JobStatus, string> = {
   [JobStatus.PENDING]: "bg-secondary-300 dark:bg-secondary-600",
@@ -24,7 +25,9 @@ export const Import: React.FC<ImportJobsProps> = () => {
   const { importJobs, loadImportJobs, isLoadingImportJobs } =
     useContext(SettingsContext);
 
-  const [showInstapaperModal, setShowInstapaperModal] = useState(false);
+  const [showInstapaperModal, setShowInstapaperModal] =
+    useState<boolean>(false);
+  const [showOmnivoreModal, setShowOmnivoreModal] = useState<boolean>(false);
 
   useEffect(() => {
     loadImportJobs();
@@ -34,15 +37,32 @@ export const Import: React.FC<ImportJobsProps> = () => {
     loadImportJobs(true);
   };
 
+  const handleSourceClick = (sourceId: string): void => {
+    if (sourceId === "instapaper") {
+      setShowInstapaperModal(true);
+    } else if (sourceId === "omnivore") {
+      setShowOmnivoreModal(true);
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <Button
-        size="sm"
-        color="primary"
-        onPress={() => setShowInstapaperModal(true)}
-      >
-        Import from Instapaper
-      </Button>
+      <div className="flex flex-col gap-1 items-start">
+        <Button
+          size="sm"
+          color="primary"
+          onPress={() => handleSourceClick("instapaper")}
+        >
+          Import from Instapaper
+        </Button>
+        <Button
+          size="sm"
+          color="primary"
+          onPress={() => handleSourceClick("omnivore")}
+        >
+          Import from Omnivore
+        </Button>
+      </div>
       {importJobs.length > 0 && (
         <>
           <div className="flex justify-between">
@@ -96,6 +116,10 @@ export const Import: React.FC<ImportJobsProps> = () => {
       <InstapaperImportModal
         isOpen={showInstapaperModal}
         onClose={() => setShowInstapaperModal(false)}
+      />
+      <OmnivoreImportModal
+        isOpen={showOmnivoreModal}
+        onClose={() => setShowOmnivoreModal(false)}
       />
     </div>
   );
