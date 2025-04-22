@@ -22,9 +22,12 @@ export type CurrentItemContextType = {
     // Selected items must be loaded by the ItemsProvider
     slugs: string[],
     index: number,
-    replace?: boolean, // Clear out all other selections for this one
-    selectRange?: boolean, // Select a range from the lastSelectionIndex to this index
-    startSelecting?: boolean, // Start selecting, even if we're replacing
+    options?: {
+      replace?: boolean; // Clear out all other selections for this one
+      selectRange?: boolean; // Select a range from the lastSelectionIndex to this index
+      startSelecting?: boolean; // Start selecting, even if we're replacing
+      showSidebar?: boolean; // Whether to show the sidebar at all
+    },
   ) => void;
   previewItem: (item: Item | PublicItem) => void;
   clearSelectedItems: () => void;

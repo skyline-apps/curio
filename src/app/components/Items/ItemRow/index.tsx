@@ -25,7 +25,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
   onLongPress,
 }: ItemRowProps) => {
   const { searchQuery } = useContext(ItemsContext);
-  const { currentItem, selectedItems, lastSelectionIndex } =
+  const { currentItem, selectedItems, lastSelectionIndex, selectItems } =
     useContext(CurrentItemContext);
   const getHostname = (url: string): string =>
     new URL(url).hostname
@@ -82,6 +82,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
               className="text-sm shrink-0 text-foreground hover:underline truncate"
               onClick={(e) => {
                 e.stopPropagation();
+                selectItems([item.slug], index, { showSidebar: false });
               }}
             >
               {isRead ? (

@@ -75,14 +75,23 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     (
       slugs: string[],
       index: number,
-      replace: boolean = true,
-      selectRange: boolean = false,
-      startSelecting: boolean = false,
+      options: {
+        replace?: boolean;
+        selectRange?: boolean;
+        startSelecting?: boolean;
+        showSidebar?: boolean;
+      } = {
+        replace: true,
+        selectRange: false,
+        startSelecting: false,
+        showSidebar: true,
+      },
     ) => {
       setCurrentPreviewItem(null);
+      const { replace, selectRange, startSelecting, showSidebar } = options;
       if (replace && !inSelectionMode) {
         setSelectedItems(new Set(slugs));
-        updateAppLayout({ rightSidebarOpen: !!slugs.length });
+        updateAppLayout({ rightSidebarOpen: showSidebar && !!slugs.length });
       } else if (selectRange && lastSelectionIndex !== null) {
         // Handle shift-click range selection
         const start = Math.min(lastSelectionIndex, index);
@@ -102,7 +111,9 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
           }
         });
         setSelectedItems(newSelection);
-        maybeOpenSidebar();
+        if (showSidebar) {
+          maybeOpenSidebar();
+        }
       }
       setLastSelectionIndex(index);
       if (startSelecting) {

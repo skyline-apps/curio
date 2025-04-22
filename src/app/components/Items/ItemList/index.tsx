@@ -46,18 +46,20 @@ const ItemList: React.FC<ItemListProps> = ({}: ItemListProps) => {
             index={index}
             item={item}
             onLongPress={() => {
-              selectItems([item.slug], index, false, false, true);
+              selectItems([item.slug], index, {
+                replace: false,
+                selectRange: false,
+                startSelecting: true,
+              });
             }}
             onClick={(e: React.MouseEvent) => {
               e.preventDefault();
               const isCtrlPressed = e.ctrlKey || e.metaKey;
               const isShiftPressed = e.shiftKey;
-              selectItems(
-                [item.slug],
-                index,
-                !isCtrlPressed && !isShiftPressed,
-                isShiftPressed,
-              );
+              selectItems([item.slug], index, {
+                replace: !isCtrlPressed && !isShiftPressed,
+                selectRange: isShiftPressed,
+              });
             }}
           />
         )}

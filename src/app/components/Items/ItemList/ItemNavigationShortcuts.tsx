@@ -57,13 +57,11 @@ export const ItemNavigationShortcuts = (): null => {
 
   const selectCurrentItem = (): boolean => {
     if (lastSelectionIndex !== null) {
-      selectItems(
-        [items[lastSelectionIndex].slug],
-        lastSelectionIndex,
-        false,
-        false,
-        true,
-      );
+      selectItems([items[lastSelectionIndex].slug], lastSelectionIndex, {
+        replace: false,
+        selectRange: false,
+        startSelecting: true,
+      });
     }
     return true;
   };
