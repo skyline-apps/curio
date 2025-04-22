@@ -12,7 +12,12 @@ export async function authenticatedFetch(
   options: RequestInit = {},
 ): Promise<Response> {
   const headers = new Headers(options.headers);
-  if (options.method !== "GET") {
+
+  if (
+    options.method !== "GET" &&
+    !headers.has("Content-Type") &&
+    !(options.body instanceof FormData)
+  ) {
     headers.set("Content-Type", "application/json");
   }
 
