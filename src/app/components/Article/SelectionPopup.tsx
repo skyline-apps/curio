@@ -123,6 +123,7 @@ export const SelectionPopup = ({
               color="warning"
               isLoading={isSaving}
               onPress={onHighlightSave}
+              onMouseDown={(e) => e.preventDefault()}
             >
               Highlight
             </Button>

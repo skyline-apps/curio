@@ -10,8 +10,19 @@ const log = createLogger("useHighlightSelection");
 
 type UseHighlightSelectionProps = Record<never, never>;
 
+interface CapturedSelectionInfo {
+  text: string;
+  startContainer: Node;
+  startOffset: number;
+  endContainer: Node;
+  endOffset: number;
+  startBaseOffset: number;
+  endBaseOffset: number;
+}
+
 interface UseHighlightSelectionResult {
-  currentSelection: Selection | null;
+  currentSelectionInfo: CapturedSelectionInfo | null;
+  liveSelection: Selection | null;
   handleSelection: () => void;
   clearSelection: () => void;
   saveHighlight: () => Promise<void>;
@@ -32,57 +43,44 @@ export function findPreviousOffset(node: Node): number {
   return 0;
 }
 
-export function calculateHighlight(selection: Selection): NewHighlight | null {
-  const range = selection.getRangeAt(0);
-  if (!range || range.collapsed) {
+function findLastTextNode(node: Node): Text | null {
+  if (node.nodeType === Node.TEXT_NODE) {
+    return node as Text;
+  }
+  if (node.nodeType === Node.ELEMENT_NODE) {
+    for (let i = node.childNodes.length - 1; i >= 0; i--) {
+      const lastChild = node.childNodes[i];
+      const found = findLastTextNode(lastChild);
+      if (found) {
+        return found;
+      }
+    }
+  }
+  return null;
+}
+
+export function calculateHighlight(
+  selectionInfo: CapturedSelectionInfo,
+): NewHighlight | null {
+  if (!selectionInfo.text) {
     return null;
   }
 
-  const selectedText = selection.toString().trim();
-  if (!selectedText) {
-    return null;
-  }
-  // Get the closest elements with data-start-offset and data-end-offset
-  const startElement =
-    range.startContainer instanceof Element
-      ? range.startContainer
-      : range.startContainer.parentElement;
-  const endElement =
-    range.endContainer instanceof Element
-      ? range.endContainer
-      : range.endContainer.parentElement;
+  const startPrevOffset = findPreviousOffset(selectionInfo.startContainer);
+  const endPrevOffset = findPreviousOffset(selectionInfo.endContainer);
 
-  // Check if both elements have data-start-offset
-  if (
-    !startElement?.hasAttribute("data-start-offset") ||
-    !endElement?.hasAttribute("data-start-offset")
-  ) {
-    log.debug("Ignoring selection - missing data-start-offset attribute");
-    return null;
-  }
-
-  // Get the offsets from the data attributes
-  const startBaseOffset = parseInt(
-    startElement.getAttribute("data-start-offset") || "0",
-    10,
-  );
-  const endBaseOffset = parseInt(
-    endElement.getAttribute("data-start-offset") || "0",
-    10,
-  );
-
-  // Find the offset from the previous sibling with data-end-offset
-  const startPrevOffset = findPreviousOffset(range.startContainer);
-  const endPrevOffset = findPreviousOffset(range.endContainer);
-
-  // Calculate final offsets using previous sibling's end offset
+  // Calculate final offsets using captured base offsets
   const finalStartOffset =
-    Math.max(startBaseOffset, startPrevOffset) + range.startOffset;
+    Math.max(selectionInfo.startBaseOffset, startPrevOffset) +
+    selectionInfo.startOffset;
+
+  // Calculate end offset using original logic first
   const finalEndOffset =
-    Math.max(endBaseOffset, endPrevOffset) + range.endOffset;
+    Math.max(selectionInfo.endBaseOffset, endPrevOffset) +
+    selectionInfo.endOffset;
 
   const highlight = {
-    text: selectedText,
+    text: selectionInfo.text,
     startOffset: finalStartOffset,
     endOffset: finalEndOffset,
     note: "",
@@ -95,9 +93,9 @@ export function useHighlightSelection({}: UseHighlightSelectionProps): UseHighli
   const { updateAppLayout } = useAppLayout();
   const { currentItem, selectedHighlight, setSelectedHighlight } =
     useContext(CurrentItemContext);
-  const [currentSelection, setCurrentSelection] = useState<Selection | null>(
-    null,
-  );
+  const [currentSelectionInfo, setCurrentSelectionInfo] =
+    useState<CapturedSelectionInfo | null>(null);
+  const [liveSelection, setLiveSelection] = useState<Selection | null>(null);
   const { createHighlight, isUpdating } = useHighlightUpdate({
     currentHighlight: selectedHighlight,
     itemSlug: currentItem?.slug || "",
@@ -106,15 +104,76 @@ export function useHighlightSelection({}: UseHighlightSelectionProps): UseHighli
 
   const handleSelection = useCallback((): void => {
     const selection = window.getSelection();
-    if (selection && !selection.isCollapsed) {
-      setCurrentSelection(selection);
+    if (selection && !selection.isCollapsed && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const text = selection.toString().trim();
+
+      // Initialize captured details
+      const capturedStartContainer = range.startContainer;
+      const capturedStartOffset = range.startOffset;
+      let capturedEndContainer = range.endContainer;
+      let capturedEndOffset = range.endOffset;
+
+      // If selection ends in an Element node (potentially the whole element),
+      // try to snap the end boundary to the end of the last text node within it.
+      if (
+        capturedEndContainer.nodeType === Node.ELEMENT_NODE &&
+        capturedEndOffset > 0 // Indicates selection might involve the element boundary
+      ) {
+        const lastTextNode = findLastTextNode(capturedEndContainer);
+        if (lastTextNode) {
+          capturedEndContainer = lastTextNode;
+          capturedEndOffset = lastTextNode.length;
+        }
+      }
+
+      // Find elements and get base offsets immediately using potentially normalized nodes
+      const startElement =
+        capturedStartContainer instanceof Element
+          ? capturedStartContainer
+          : capturedStartContainer.parentElement;
+      const endElement =
+        capturedEndContainer instanceof Element
+          ? capturedEndContainer
+          : capturedEndContainer.parentElement;
+
+      if (
+        text &&
+        startElement?.hasAttribute("data-start-offset") &&
+        endElement?.hasAttribute("data-start-offset")
+      ) {
+        const startBaseOffset = parseInt(
+          startElement.getAttribute("data-start-offset") || "0",
+          10,
+        );
+        const endBaseOffset = parseInt(
+          endElement.getAttribute("data-start-offset") || "0",
+          10,
+        );
+
+        setCurrentSelectionInfo({
+          text,
+          startContainer: capturedStartContainer,
+          startOffset: capturedStartOffset,
+          endContainer: capturedEndContainer,
+          endOffset: capturedEndOffset,
+          startBaseOffset,
+          endBaseOffset,
+        });
+        setLiveSelection(selection);
+      } else {
+        setCurrentSelectionInfo(null);
+        setLiveSelection(null);
+      }
     } else {
-      setCurrentSelection(null);
+      setCurrentSelectionInfo(null);
+      setLiveSelection(null);
     }
   }, []);
 
   const clearSelection = useCallback((): void => {
-    setCurrentSelection(null);
+    setCurrentSelectionInfo(null);
+    setLiveSelection(null);
     window.getSelection()?.removeAllRanges();
   }, []);
 
@@ -131,11 +190,11 @@ export function useHighlightSelection({}: UseHighlightSelectionProps): UseHighli
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const saveHighlight = useCallback(async () => {
-    if (!currentSelection) {
+    if (!currentSelectionInfo) {
       return;
     }
     try {
-      const highlight = calculateHighlight(currentSelection);
+      const highlight = calculateHighlight(currentSelectionInfo);
       if (!highlight) {
         showToast("Invalid highlight");
         return;
@@ -149,7 +208,7 @@ export function useHighlightSelection({}: UseHighlightSelectionProps): UseHighli
       showToast("Error saving highlight.");
     }
   }, [
-    currentSelection,
+    currentSelectionInfo,
     createHighlight,
     updateAppLayout,
     clearSelection,
@@ -157,7 +216,8 @@ export function useHighlightSelection({}: UseHighlightSelectionProps): UseHighli
   ]);
 
   return {
-    currentSelection,
+    currentSelectionInfo,
+    liveSelection,
     handleSelection,
     clearSelection,
     selectedHighlight,

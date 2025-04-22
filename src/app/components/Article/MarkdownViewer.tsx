@@ -39,7 +39,8 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = memo(
     const contentRef = useRef<HTMLDivElement>(null);
 
     const {
-      currentSelection,
+      currentSelectionInfo,
+      liveSelection,
       handleSelection,
       saveHighlight,
       isSavingHighlight,
@@ -103,9 +104,9 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = memo(
             {children || ""}
           </ReactMarkdown>
         </div>
-        {currentSelection && (
+        {currentSelectionInfo && liveSelection && (
           <SelectionPopup
-            selection={currentSelection}
+            selection={liveSelection}
             containerRef={contentRef}
             onHighlightSave={isEditable ? saveHighlight : undefined}
             isSaving={isSavingHighlight}
