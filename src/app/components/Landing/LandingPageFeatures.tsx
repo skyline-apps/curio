@@ -1,4 +1,7 @@
-import { calculateHighlight } from "@app/components/Article/useHighlightSelection";
+import {
+  calculateHighlight,
+  captureAndNormalizeSelectionInfo,
+} from "@app/components/Article/useHighlightSelection";
 import {
   ALL_COMPONENTS,
   removeHighlightsOverlap,
@@ -79,11 +82,16 @@ const LandingPageFeatures: React.FC = () => {
 
   const handleSelection = (): void => {
     const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) {
+    const selectionInfo = captureAndNormalizeSelectionInfo(selection);
+
+    if (!selectionInfo) {
+      clearSelection();
       return;
     }
-    const highlight = calculateHighlight(selection);
+
+    const highlight = calculateHighlight(selectionInfo);
     if (!highlight) {
+      clearSelection();
       return;
     }
     setDraftHighlight({

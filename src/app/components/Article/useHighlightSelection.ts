@@ -88,6 +88,69 @@ export function calculateHighlight(
   return highlight;
 }
 
+export function captureAndNormalizeSelectionInfo(
+  selection: Selection | null,
+): CapturedSelectionInfo | null {
+  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+    return null;
+  }
+
+  const range = selection.getRangeAt(0);
+  const text = selection.toString().trim();
+  if (!text) {
+    return null;
+  }
+
+  let capturedEndContainer = range.endContainer;
+  let capturedEndOffset = range.endOffset;
+
+  if (
+    capturedEndContainer.nodeType === Node.ELEMENT_NODE &&
+    capturedEndOffset > 0
+  ) {
+    const lastTextNode = findLastTextNode(capturedEndContainer);
+    if (lastTextNode) {
+      capturedEndContainer = lastTextNode;
+      capturedEndOffset = lastTextNode.length;
+    }
+  }
+
+  const startElement =
+    range.startContainer instanceof Element
+      ? range.startContainer
+      : range.startContainer.parentElement;
+  const endElement =
+    capturedEndContainer instanceof Element
+      ? capturedEndContainer
+      : capturedEndContainer.parentElement;
+
+  if (
+    !startElement?.hasAttribute("data-start-offset") ||
+    !endElement?.hasAttribute("data-start-offset")
+  ) {
+    return null;
+  }
+
+  const startBaseOffset = parseInt(
+    startElement.getAttribute("data-start-offset") || "0",
+    10,
+  );
+  const endBaseOffset = parseInt(
+    endElement.getAttribute("data-start-offset") || "0",
+    10,
+  );
+
+  return {
+    text,
+    startContainer: range.startContainer,
+    startOffset: range.startOffset,
+    endContainer: capturedEndContainer,
+    endOffset: capturedEndOffset,
+    startBaseOffset,
+    endBaseOffset,
+  };
+}
+
 export function useHighlightSelection({}: UseHighlightSelectionProps): UseHighlightSelectionResult {
   const { showToast } = useToast();
   const { updateAppLayout } = useAppLayout();
@@ -104,71 +167,10 @@ export function useHighlightSelection({}: UseHighlightSelectionProps): UseHighli
 
   const handleSelection = useCallback((): void => {
     const selection = window.getSelection();
-    if (selection && !selection.isCollapsed && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      const text = selection.toString().trim();
+    const capturedInfo = captureAndNormalizeSelectionInfo(selection);
 
-      // Initialize captured details
-      const capturedStartContainer = range.startContainer;
-      const capturedStartOffset = range.startOffset;
-      let capturedEndContainer = range.endContainer;
-      let capturedEndOffset = range.endOffset;
-
-      // If selection ends in an Element node (potentially the whole element),
-      // try to snap the end boundary to the end of the last text node within it.
-      if (
-        capturedEndContainer.nodeType === Node.ELEMENT_NODE &&
-        capturedEndOffset > 0 // Indicates selection might involve the element boundary
-      ) {
-        const lastTextNode = findLastTextNode(capturedEndContainer);
-        if (lastTextNode) {
-          capturedEndContainer = lastTextNode;
-          capturedEndOffset = lastTextNode.length;
-        }
-      }
-
-      // Find elements and get base offsets immediately using potentially normalized nodes
-      const startElement =
-        capturedStartContainer instanceof Element
-          ? capturedStartContainer
-          : capturedStartContainer.parentElement;
-      const endElement =
-        capturedEndContainer instanceof Element
-          ? capturedEndContainer
-          : capturedEndContainer.parentElement;
-
-      if (
-        text &&
-        startElement?.hasAttribute("data-start-offset") &&
-        endElement?.hasAttribute("data-start-offset")
-      ) {
-        const startBaseOffset = parseInt(
-          startElement.getAttribute("data-start-offset") || "0",
-          10,
-        );
-        const endBaseOffset = parseInt(
-          endElement.getAttribute("data-start-offset") || "0",
-          10,
-        );
-
-        setCurrentSelectionInfo({
-          text,
-          startContainer: capturedStartContainer,
-          startOffset: capturedStartOffset,
-          endContainer: capturedEndContainer,
-          endOffset: capturedEndOffset,
-          startBaseOffset,
-          endBaseOffset,
-        });
-        setLiveSelection(selection);
-      } else {
-        setCurrentSelectionInfo(null);
-        setLiveSelection(null);
-      }
-    } else {
-      setCurrentSelectionInfo(null);
-      setLiveSelection(null);
-    }
+    setCurrentSelectionInfo(capturedInfo);
+    setLiveSelection(capturedInfo ? selection : null);
   }, []);
 
   const clearSelection = useCallback((): void => {
