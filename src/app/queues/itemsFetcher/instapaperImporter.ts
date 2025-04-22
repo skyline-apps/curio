@@ -18,7 +18,6 @@ import {
   ItemSource,
   ItemState,
 } from "@app/schemas/db";
-import { COLOR_PALETTE } from "@app/utils/colors";
 
 import { Job } from ".";
 import type { Env } from "./env";
@@ -45,10 +44,11 @@ export class InstapaperImporter extends Importer {
 
   public async fetchMetadata(): Promise<number | null> {
     let have: Set<string> = new Set();
-    let tags = new Set<string>();
+    let labels = new Set<string>();
+    let lastBatchSize = 0;
     let fetchedBookmarks: number = 0;
     const BATCH_SIZE = 500;
-    let lastBatchSize = 0;
+    let bookmarkOffset = 0;
     const startTime = new Date();
 
     try {
@@ -56,113 +56,101 @@ export class InstapaperImporter extends Importer {
         unread: ItemState.ACTIVE,
         archive: ItemState.ARCHIVED,
       };
-      await Promise.all(
-        Object.entries(folders).map(async ([folder, state]) => {
-          do {
-            const bookmarks: InstapaperBookmark[] = Array.from(
-              new Map(
-                (
-                  await this.instapaper.listBookmarks(
-                    this.token,
-                    BATCH_SIZE,
-                    folder,
-                    Array.from(have).join(","),
-                  )
-                ).map((b) => [b.bookmark_id, b]),
-              ).values(),
+      for (const [folder, state] of Object.entries(folders)) {
+        do {
+          const bookmarks: InstapaperBookmark[] = Array.from(
+            new Map(
+              (
+                await this.instapaper.listBookmarks(
+                  this.token,
+                  BATCH_SIZE,
+                  folder,
+                  Array.from(have).join(","),
+                )
+              ).map((b) => [b.bookmark_id, b]),
+            ).values(),
+          );
+
+          lastBatchSize = bookmarks.length;
+          if (lastBatchSize === 0) {
+            break;
+          }
+
+          have = new Set([
+            ...have,
+            ...bookmarks.map((b) => b.bookmark_id.toString()),
+          ]);
+
+          const newLabels = this.generateLabelsToInsert(
+            bookmarks.map((b) => b.tags.map((t) => t.name)).flat(),
+          );
+
+          await this.db.transaction(async (tx) => {
+            const insertedItems = await createOrUpdateItems(
+              tx,
+              bookmarks.map((b) => b.url),
             );
-
-            lastBatchSize = bookmarks.length;
-            if (lastBatchSize === 0) {
-              break;
+            let insertedLabels: { id: string; name: string }[] = [];
+            if (newLabels.length > 0) {
+              insertedLabels = await tx
+                .insert(profileLabels)
+                .values(newLabels)
+                .onConflictDoUpdate({
+                  target: [profileLabels.name, profileLabels.profileId],
+                  set: { name: profileLabels.name },
+                })
+                .returning({
+                  id: profileLabels.id,
+                  name: profileLabels.name,
+                });
+              labels = new Set([
+                ...labels,
+                ...insertedLabels.map((l) => l.name),
+              ]);
             }
-
-            have = new Set([
-              ...have,
-              ...bookmarks.map((b) => b.bookmark_id.toString()),
-            ]);
-
-            const newLabels = Array.from(
-              new Set(
-                bookmarks
-                  .map((b) => b.tags.map((t) => t.name))
-                  .flat()
-                  .filter((name) => name !== ""),
+            const newProfileItems = bookmarks.map((b, index) => ({
+              url: b.url,
+              metadata: {
+                title: b.title,
+                description: b.description || null,
+                source: ItemSource.INSTAPAPER,
+                sourceMetadata: InstapaperProfileItemMetadataSchema.parse({
+                  bookmarkId: b.bookmark_id,
+                }),
+                isFavorite: b.starred === "1",
+                readingProgress: Math.round(b.progress * 100),
+                lastReadAt: b.progress_timestamp
+                  ? new Date(b.progress_timestamp).toUTCString()
+                  : null,
+                state,
+                stateUpdatedAt: new Date(
+                  startTime.getTime() + bookmarkOffset + index,
+                ).toISOString(),
+              },
+              labelIds: b.tags.map(
+                (t) => insertedLabels.find((l) => l.name === t.name)!.id,
               ),
-            )
-              .filter((name) => !tags.has(name))
-              .map((name) => ({
-                profileId: this.job.profileId,
-                name,
-                color:
-                  COLOR_PALETTE[
-                    Math.floor(Math.random() * COLOR_PALETTE.length)
-                  ],
-              }));
+            }));
 
-            await this.db.transaction(async (tx) => {
-              const insertedItems = await createOrUpdateItems(
-                tx,
-                bookmarks.map((b) => b.url),
-              );
-              let insertedLabels: { id: string; name: string }[] = [];
-              if (newLabels.length > 0) {
-                insertedLabels = await tx
-                  .insert(profileLabels)
-                  .values(newLabels)
-                  .onConflictDoUpdate({
-                    target: [profileLabels.name, profileLabels.profileId],
-                    set: { name: profileLabels.name },
-                  })
-                  .returning({
-                    id: profileLabels.id,
-                    name: profileLabels.name,
-                  });
-                tags = new Set([...tags, ...insertedLabels.map((l) => l.name)]);
-              }
-              const newProfileItems = bookmarks.map((b, index) => ({
-                url: b.url,
-                metadata: {
-                  title: b.title,
-                  description: b.description || null,
-                  source: ItemSource.INSTAPAPER,
-                  sourceMetadata: InstapaperProfileItemMetadataSchema.parse({
-                    bookmarkId: b.bookmark_id,
-                  }),
-                  isFavorite: b.starred === "1",
-                  readingProgress: Math.round(b.progress * 100),
-                  lastReadAt: b.progress_timestamp
-                    ? new Date(b.progress_timestamp).toUTCString()
-                    : null,
-                  state,
-                  stateUpdatedAt: new Date(
-                    startTime.getTime() + index + fetchedBookmarks,
-                  ).toISOString(),
-                },
-                labelIds: b.tags.map(
-                  (t) => insertedLabels.find((l) => l.name === t.name)!.id,
-                ),
-              }));
-
-              const insertedProfileItems = await createOrUpdateProfileItems(
-                tx,
-                this.job.profileId,
-                insertedItems,
-                newProfileItems,
-              );
-              const newUnsavedItems = insertedProfileItems.filter(
-                (item) => !item.savedAt,
-              );
-              fetchedBookmarks += newUnsavedItems.length;
-            });
-            this.log.info(`Successfully fetched bookmarks for folder`, {
-              jobId: this.job.id,
-              folder,
-              bookmarks: bookmarks.length,
-            });
-          } while (lastBatchSize === BATCH_SIZE);
-        }),
-      );
+            const insertedProfileItems = await createOrUpdateProfileItems(
+              tx,
+              this.job.profileId,
+              insertedItems,
+              newProfileItems,
+            );
+            const newUnsavedItems = insertedProfileItems.filter(
+              (item) => !item.savedAt,
+            );
+            fetchedBookmarks += newUnsavedItems.length;
+          });
+          this.log.info(`Successfully fetched items from Instapaper folder`, {
+            jobId: this.job.id,
+            folder,
+            items: bookmarks.length,
+          });
+          bookmarkOffset += bookmarks.length;
+        } while (lastBatchSize === BATCH_SIZE);
+      }
       return fetchedBookmarks;
     } catch (error) {
       this.log.error("Error during Instapaper bookmark fetch loop", {

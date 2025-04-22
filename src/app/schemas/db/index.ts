@@ -88,3 +88,7 @@ export const ImportOmnivoreMetadataSchema = ImportMetadataSchema.extend({
 export const InstapaperProfileItemMetadataSchema = z.object({
   bookmarkId: z.number(),
 });
+
+export const OmnivoreProfileItemMetadataSchema = z.object({
+  omnivoreSlug: z.string(),
+});

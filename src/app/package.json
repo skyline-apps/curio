@@ -38,6 +38,7 @@
     "bcp-47-match": "^2.0.3",
     "crypto-random-string": "^5.0.0",
     "drizzle-orm": "^0.38.4",
+    "fflate": "^0.8.2",
     "framer-motion": "^11.11.7",
     "franc": "^6.2.0",
     "hono": "^4.7.5",

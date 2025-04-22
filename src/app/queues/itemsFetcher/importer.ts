@@ -1,10 +1,16 @@
 import { eq, TransactionDB } from "@app/api/db";
-import { jobs } from "@app/api/db/schema";
+import { jobs, profileLabels } from "@app/api/db/schema";
 import { Logger } from "@app/api/utils/logger";
 import { ImportMetadata, ImportStatus } from "@app/schemas/db";
+import { COLOR_PALETTE } from "@app/utils/colors";
 
 import { Job } from ".";
 import type { Env } from "./env";
+
+type Label = Omit<
+  typeof profileLabels.$inferSelect,
+  "id" | "createdAt" | "updatedAt"
+>;
 
 export class Importer {
   protected job: Job;
@@ -17,6 +23,17 @@ export class Importer {
     this.db = db;
     this.env = env;
     this.log = log;
+  }
+
+  protected generateLabelsToInsert(labelNames: string[]): Label[] {
+    const newLabels = Array.from(
+      new Set(labelNames.filter((name) => name !== "")),
+    ).map((name) => ({
+      profileId: this.job.profileId,
+      name,
+      color: COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)],
+    }));
+    return newLabels;
   }
 
   public async fetchMetadata(): Promise<number | null> {

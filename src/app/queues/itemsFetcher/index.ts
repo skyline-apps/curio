@@ -2,10 +2,14 @@ import { eq, getDb } from "@app/api/db";
 import { jobs } from "@app/api/db/schema";
 import { createLogger } from "@app/api/utils/logger";
 import { ImportMetadataSchema, JobStatus, JobType } from "@app/schemas/db";
-import type { MessageBatch } from "@cloudflare/workers-types";
+import type { MessageBatch as MessageBatchType } from "@cloudflare/workers-types";
 
 import { type Env } from "./env";
 import { InstapaperImporter } from "./instapaperImporter";
+import { OmnivoreImporter } from "./omnivoreImporter";
+
+export type WorkerEnv = Env;
+export type MessageBatch<T> = MessageBatchType<T>;
 
 export type Job = typeof jobs.$inferSelect;
 
@@ -71,6 +75,10 @@ export const itemsFetcherQueue = async (
         case JobType.IMPORT_INSTAPAPER:
           const instapaperImporter = new InstapaperImporter(job, db, env, log);
           await instapaperImporter.handleImport();
+          break;
+        case JobType.IMPORT_OMNIVORE:
+          const omnivoreImporter = new OmnivoreImporter(job, db, env, log);
+          await omnivoreImporter.handleImport();
           break;
         default:
           throw new Error(`Unsupported job type: ${job.type} for job ${jobId}`);
