@@ -7,6 +7,13 @@ import { getDb } from "@app/api/db";
 import { requestLogger } from "@app/api/middleware/logger";
 import { v1Router } from "@app/api/routesV1";
 import { EnvBindings } from "@app/api/utils/env";
+// Uncommment the below to run import locally
+// import {
+//   itemsFetcherQueue,
+//   type MessageBatch,
+//   QueueMessage,
+//   type WorkerEnv,
+// } from "@app/queues/itemsFetcher";
 import { ExecutionContext, Hono } from "hono";
 import { cors } from "hono/cors";
 import { prettyJSON } from "hono/pretty-json";
@@ -79,7 +86,10 @@ export default {
 
     return new Response(null, { status: 404 });
   },
-  // async queue(batch: MessageBatch<QueueMessage>, env: Env): Promise<void> {
+  // async queue(
+  //   batch: MessageBatch<QueueMessage>,
+  //   env: WorkerEnv,
+  // ): Promise<void> {
   //   await itemsFetcherQueue(batch, env);
   // },
 };
