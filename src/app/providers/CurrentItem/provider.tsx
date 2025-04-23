@@ -75,20 +75,21 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     (
       slugs: string[],
       index: number,
-      options: {
+      options?: {
         replace?: boolean;
         selectRange?: boolean;
         startSelecting?: boolean;
         showSidebar?: boolean;
-      } = {
+      },
+    ) => {
+      setCurrentPreviewItem(null);
+      const { replace, selectRange, startSelecting, showSidebar } = {
         replace: true,
         selectRange: false,
         startSelecting: false,
         showSidebar: true,
-      },
-    ) => {
-      setCurrentPreviewItem(null);
-      const { replace, selectRange, startSelecting, showSidebar } = options;
+        ...options,
+      };
       if (replace && !inSelectionMode) {
         setSelectedItems(new Set(slugs));
         updateAppLayout({ rightSidebarOpen: showSidebar && !!slugs.length });
