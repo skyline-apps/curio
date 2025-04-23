@@ -8,6 +8,7 @@ import ContentPage from "@app/pages/content";
 import HomePage from "@app/pages/home";
 import InboxPage from "@app/pages/inbox";
 import LoginPage from "@app/pages/login";
+import MobileLoginPage from "@app/pages/login/mobile";
 import RedirectPage from "@app/pages/login/redirect";
 import NotFound from "@app/pages/not-found";
 import NotesPage from "@app/pages/notes";
@@ -18,6 +19,7 @@ import UserPage from "@app/pages/user";
 import { SidebarKey } from "@app/providers/AppLayout";
 import { useUser } from "@app/providers/User";
 import { getStoredRootPage } from "@app/utils/displayStorage";
+import { isNativePlatform } from "@app/utils/platform";
 import React, { useEffect } from "react";
 import {
   BrowserRouter,
@@ -62,6 +64,8 @@ const RootPageRedirect = (): React.ReactNode => {
 export const App = (): React.ReactNode => {
   const { user } = useUser();
 
+  const isNative = isNativePlatform();
+
   return (
     <BrowserRouter>
       <Routes>
@@ -75,11 +79,27 @@ export const App = (): React.ReactNode => {
         >
           <Route
             path="/"
-            element={user?.id ? <RootPageRedirect /> : <MainPage />}
+            element={
+              user?.id ? (
+                <RootPageRedirect />
+              ) : isNative ? (
+                <MobileLoginPage />
+              ) : (
+                <MainPage />
+              )
+            }
           />
           <Route
             path="/login"
-            element={user?.id ? <RootPageRedirect /> : <LoginPage />}
+            element={
+              user?.id ? (
+                <RootPageRedirect />
+              ) : isNative ? (
+                <MobileLoginPage />
+              ) : (
+                <LoginPage />
+              )
+            }
           />
           <Route
             path="/login/redirect"

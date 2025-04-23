@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Curio</string>
+    <string name="title_activity_main">Curio</string>
+    <string name="package_name">ooo.curi.app</string>
+    <string name="custom_url_scheme">ooo.curi.app</string>
+</resources>
