@@ -88,7 +88,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
               {isRead ? (
                 <div className="text-secondary-600">{item.metadata.title}</div>
               ) : (
-                <div className="font-medium">{item.metadata.title}</div>
+                <div className="font-bold">{item.metadata.title}</div>
               )}
             </Link>
             <p className="text-xs text-secondary-700 hidden md:block">
