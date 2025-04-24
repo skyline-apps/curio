@@ -1,6 +1,7 @@
 import { getSupabaseProjectRef } from "@app/utils/api";
 import { clearTheme, initializeTheme } from "@app/utils/displayStorage";
 import { createLogger } from "@app/utils/logger";
+import { storage } from "@app/utils/storage";
 import { getSupabaseClient } from "@app/utils/supabase";
 import posthog from "posthog-js";
 import React, { useCallback, useEffect, useState } from "react";
@@ -76,10 +77,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({
         const projectRef = getSupabaseProjectRef();
         if (projectRef) {
           const key = `sb-${projectRef}-auth-token`;
-          localStorage.removeItem(key);
+          storage.removeItem(key);
         }
       } catch (e) {
-        log.error("Failed to remove Supabase auth token from localStorage", e);
+        log.error("Failed to remove Supabase auth token from storage", e);
       }
     }
   }, [clearUser]);
