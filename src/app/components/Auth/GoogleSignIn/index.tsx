@@ -27,20 +27,20 @@ const GoogleOAuthButton: React.FC<GoogleOAuthButtonProps> = ({
         provider: "google",
         options: {
           redirectTo: `${redirectTo}/auth/callback?next=${nextUrl || ""}`,
-          skipBrowserRedirect: isNative,
+          skipBrowserRedirect: true,
         },
       });
-
-      if (!isNative) {
-        return;
-      }
 
       if (error) {
         throw error;
       }
 
       if (data.url) {
-        await Browser.open({ url: data.url });
+        if (isNative) {
+          await Browser.open({ url: data.url });
+        } else {
+          window.location.href = data.url;
+        }
       } else {
         setErrorMessage("Could not get Google sign in URL.");
       }

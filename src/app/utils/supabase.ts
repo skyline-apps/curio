@@ -3,6 +3,8 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js"; // eslint-
 
 import { isNativePlatform } from "./platform";
 
+export { type Session } from "@supabase/supabase-js"; // eslint-disable-line no-restricted-imports
+
 const customStorageAdapter = {
   getItem: async (key: string): Promise<string | null> => {
     const { value } = await Preferences.get({ key });

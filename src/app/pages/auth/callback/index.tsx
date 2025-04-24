@@ -1,7 +1,7 @@
 import Spinner from "@app/components/ui/Spinner";
 import { useUser } from "@app/providers/User";
 import { createLogger } from "@app/utils/logger";
-import { getSupabaseClient } from "@app/utils/supabase";
+import { getSupabaseClient, type Session } from "@app/utils/supabase";
 import React, { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -27,18 +27,25 @@ const AuthCallback: React.FC = () => {
 
     const exchangeCode = async (code: string): Promise<void> => {
       try {
-        const { data, error } =
-          await supabase.auth.exchangeCodeForSession(code);
+        let session: Session | null = null;
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+          session = data.session;
+        } else {
+          const { data, error } =
+            await supabase.auth.exchangeCodeForSession(code);
 
-        if (error) {
-          throw new Error(`Code exchange failed: ${error.message}`);
+          if (error) {
+            throw new Error(`Code exchange failed: ${error.message}`);
+          }
+
+          if (!data.session) {
+            throw new Error(
+              "Code exchange successful, but no session returned.",
+            );
+          }
+          session = data.session;
         }
-
-        if (!data.session) {
-          throw new Error("Code exchange successful, but no session returned.");
-        }
-
-        const session = data.session;
 
         const response = await fetch(`${host}/api/auth/session`, {
           method: "POST",
@@ -79,11 +86,7 @@ const AuthCallback: React.FC = () => {
       log.error("No code parameter found.");
       navigate("/login?error=no_code");
     }
-
-    return () => {
-      processing.current = false;
-    };
-  }, [searchParams, navigate, refreshUser, host]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="flex flex-col items-center gap-4 w-full h-dvh">
