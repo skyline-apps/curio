@@ -94,7 +94,7 @@ const LeftSidebar: React.FC = () => {
       <aside
         {...bind()}
         className={cn(
-          "flex flex-col justify-between h-dvh border-r-1 border-divider transition-all duration-300 ease-in-out",
+          "flex flex-col justify-between h-full border-r-1 border-divider transition-all duration-300 ease-in-out",
           "w-16 md:w-64",
           { "overflow-hidden w-0 md:w-16": !sidebarOpen },
         )}

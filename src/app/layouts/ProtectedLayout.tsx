@@ -21,7 +21,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { pathname } = useLocation();
 
   return username && settings ? (
-    <div className="flex flex-row h-dvh w-full">
+    <div className="flex flex-row h-full w-full">
       {(isFetchingItems || isFetchingHighlights) && (
         <Progress
           aria-label="Loading..."

@@ -17,18 +17,12 @@ const RootLayout: React.FC<RootLayoutProps> = ({
     <Providers>
       <main
         className={cn(
-          "w-full h-full min-h-dvh flex flex-col font-sans select-none",
+          "w-full h-dvh flex flex-col font-sans select-none pt-8",
+          isNativePlatform() &&
+            "pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]",
         )}
       >
-        <div
-          className={cn(
-            "flex-1 flex flex-col",
-            isNativePlatform() &&
-              "pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]",
-          )}
-        >
-          {children}
-        </div>
+        {children}
       </main>
     </Providers>
   );
