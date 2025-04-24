@@ -10,6 +10,11 @@ export const createClient = async (
   c: EnvContext,
   useAdmin: boolean = false,
 ): Promise<SupabaseClient> => {
+  const requestHost = new URL(c.req.url).hostname;
+  const domainParts = requestHost.split(".");
+  const baseDomain =
+    domainParts.length > 1 ? domainParts.slice(-2).join(".") : requestHost;
+
   return createServerClient(
     c.env.VITE_SUPABASE_URL!,
     useAdmin ? c.env.SUPABASE_SERVICE_ROLE_KEY! : c.env.VITE_SUPABASE_ANON_KEY!,
@@ -19,9 +24,17 @@ export const createClient = async (
           return parseCookieHeader(c.req.header("Cookie") ?? "");
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            setCookie(c, name, value, options),
-          );
+          cookiesToSet.forEach(({ name, value, options }) => {
+            const secureOptions = {
+              ...options,
+              sameSite: "None",
+              secure: true,
+              httpOnly: true,
+              domain: baseDomain,
+              path: "/",
+            };
+            setCookie(c, name, value, secureOptions);
+          });
         },
       },
       cookieOptions: {
