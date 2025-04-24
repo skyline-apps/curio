@@ -1,4 +1,5 @@
 import Button from "@app/components/ui/Button";
+import { isNativePlatform } from "@app/utils/platform";
 import { getSupabaseClient } from "@app/utils/supabase";
 import { Browser } from "@capacitor/browser";
 import { useState } from "react";
@@ -19,15 +20,20 @@ const GoogleOAuthButton: React.FC<GoogleOAuthButtonProps> = ({
     setIsSigningIn(true);
     setErrorMessage(null);
     const supabase = getSupabaseClient();
+    const isNative = isNativePlatform();
 
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: `${redirectTo}/auth/callback?next=${nextUrl || ""}`,
-          skipBrowserRedirect: true,
+          skipBrowserRedirect: isNative,
         },
       });
+
+      if (!isNative) {
+        return;
+      }
 
       if (error) {
         throw error;
