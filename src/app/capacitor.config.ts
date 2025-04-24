@@ -7,11 +7,6 @@ const config: CapacitorConfig = {
   server: {
     hostname: "curio",
   },
-  plugins: {
-    CapacitorCookies: {
-      enabled: true,
-    },
-  },
 };
 
 export default config;

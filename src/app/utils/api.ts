@@ -1,4 +1,5 @@
 import { createLogger } from "@app/utils/logger";
+import { isNativePlatform } from "@app/utils/platform";
 import { getSupabaseClient } from "@app/utils/supabase";
 
 const log = createLogger("api");
@@ -46,6 +47,18 @@ export async function authenticatedFetch(
   const baseUrl = import.meta.env.VITE_CURIO_URL;
   if (!baseUrl) {
     throw new Error("VITE_CURIO_URL is not defined in environment variables.");
+  }
+
+  if (isNativePlatform()) {
+    const supabase = getSupabaseClient();
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+    if (sessionError || !session) {
+      throw new Error("User not authenticated");
+    }
+    headers.set("Authorization", `Bearer ${session.access_token}`);
   }
 
   const cleanBaseUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
