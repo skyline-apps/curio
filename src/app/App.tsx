@@ -1,3 +1,4 @@
+import AppUrlListener from "@app/components/AppUrlListener";
 import ProtectedLayout from "@app/layouts/ProtectedLayout";
 import PublicLayout from "@app/layouts/PublicLayout";
 import RootLayout from "@app/layouts/RootLayout";
@@ -68,6 +69,7 @@ export const App = (): React.ReactNode => {
 
   return (
     <BrowserRouter>
+      <AppUrlListener></AppUrlListener>
       <Routes>
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route
