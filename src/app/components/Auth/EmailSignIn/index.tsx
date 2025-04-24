@@ -10,6 +10,7 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({}: EmailSignInProps) => {
   const [isSigningIn, setIsSigningIn] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const redirectTo = import.meta.env.VITE_CURIO_URL || location.origin;
 
   const handleSignInWithEmail = async (): Promise<void> => {
     setErrorMessage(null);
@@ -19,7 +20,7 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({}: EmailSignInProps) => {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${location.origin}/auth/callback`,
+        emailRedirectTo: `${redirectTo}/auth/callback`,
       },
     });
     setIsSigningIn(false);

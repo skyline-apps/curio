@@ -38,10 +38,21 @@ export async function handleAPIResponse<T>(response: Response): Promise<T> {
 }
 
 export async function authenticatedFetch(
-  url: string,
+  relativePath: string,
   options: RequestInit = {},
 ): Promise<Response> {
   const headers = new Headers(options.headers);
+
+  const baseUrl = import.meta.env.VITE_CURIO_URL;
+  if (!baseUrl) {
+    throw new Error("VITE_CURIO_URL is not defined in environment variables.");
+  }
+
+  const cleanBaseUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+  const cleanRelativePath = relativePath.startsWith("/")
+    ? relativePath
+    : `/${relativePath}`;
+  const fullUrl = `${cleanBaseUrl}${cleanRelativePath}`;
 
   if (
     options.method !== "GET" &&
@@ -51,9 +62,10 @@ export async function authenticatedFetch(
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(url, {
+  const response = await fetch(fullUrl, {
     ...options,
     headers,
+    credentials: "include",
   });
 
   if (response.status === 401) {

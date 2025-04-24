@@ -1,4 +1,20 @@
+import { Preferences } from "@capacitor/preferences";
 import { createClient, SupabaseClient } from "@supabase/supabase-js"; // eslint-disable-line no-restricted-imports
+
+import { isNativePlatform } from "./platform";
+
+const customStorageAdapter = {
+  getItem: async (key: string): Promise<string | null> => {
+    const { value } = await Preferences.get({ key });
+    return value;
+  },
+  setItem: async (key: string, value: string): Promise<void> => {
+    await Preferences.set({ key, value });
+  },
+  removeItem: async (key: string): Promise<void> => {
+    await Preferences.remove({ key });
+  },
+};
 
 let supabase: SupabaseClient | null = null;
 
@@ -15,6 +31,7 @@ export const getSupabaseClient = (): SupabaseClient => {
 
     supabase = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
+        storage: isNativePlatform() ? customStorageAdapter : undefined,
         flowType: "pkce",
         persistSession: true,
         autoRefreshToken: true,

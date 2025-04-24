@@ -4,6 +4,9 @@ const config: CapacitorConfig = {
   appId: "ooo.curi.app",
   appName: "Curio",
   webDir: "dist/client",
+  server: {
+    hostname: "curio",
+  },
   plugins: {
     CapacitorCookies: {
       enabled: true,

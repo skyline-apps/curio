@@ -2,7 +2,7 @@ import Spinner from "@app/components/ui/Spinner";
 import { useUser } from "@app/providers/User";
 import { createLogger } from "@app/utils/logger";
 import { getSupabaseClient } from "@app/utils/supabase";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const log = createLogger("auth");
@@ -11,74 +11,79 @@ const AuthCallback: React.FC = () => {
   const { refreshUser } = useUser();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const processing = useRef(false);
+
+  const host = import.meta.env.VITE_CURIO_URL;
 
   useEffect(() => {
+    if (processing.current) {
+      return;
+    }
+    processing.current = true;
+
     const supabase = getSupabaseClient();
     const nextUrl = searchParams.get("next") || "/home";
+    const authCode = searchParams.get("code");
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
-          if (authListener) {
-            authListener.subscription.unsubscribe();
-          }
-          if (!session) {
-            throw new Error("No session found");
-          }
-          try {
-            const response = await fetch("/api/auth/session", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                accessToken: session.access_token,
-                refreshToken: session.refresh_token,
-              }),
-            });
+    const exchangeCode = async (code: string): Promise<void> => {
+      try {
+        const { data, error } =
+          await supabase.auth.exchangeCodeForSession(code);
 
-            if (!response.ok) {
-              throw new Error(
-                `Failed to set session cookie: ${await response.text()}`,
-              );
-            }
-
-            const { success } = await response.json();
-
-            if (!success) {
-              throw new Error("Failed to set session cookie");
-            }
-
-            refreshUser();
-            window.location.href = nextUrl;
-          } catch (error) {
-            log.error(
-              "Error setting session cookie:",
-              error instanceof Error ? error.message : error,
-            );
-            await supabase.auth.signOut();
-            navigate("/login?error=session_error");
-          }
+        if (error) {
+          throw new Error(`Code exchange failed: ${error.message}`);
         }
-      },
-    );
 
-    const timer = setTimeout(() => {
-      log.warn("Timeout waiting for session, attempting redirect anyway.");
-      if (authListener) {
-        authListener.subscription.unsubscribe();
-      }
-      refreshUser();
-      navigate(nextUrl, { replace: true });
-    }, 5000);
+        if (!data.session) {
+          throw new Error("Code exchange successful, but no session returned.");
+        }
 
-    return () => {
-      clearTimeout(timer);
-      if (authListener) {
-        authListener.subscription.unsubscribe();
+        const session = data.session;
+
+        const response = await fetch(`${host}/api/auth/session`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            accessToken: session.access_token,
+            refreshToken: session.refresh_token,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Error logging in on backend: ${errorText}`);
+        }
+
+        refreshUser();
+        navigate(nextUrl);
+      } catch (e) {
+        if (e instanceof Error) {
+          log.error("Error during manual code exchange or backend call:", {
+            error: e.message,
+          });
+        }
+        await supabase.auth
+          .signOut()
+          .catch((err) => log.error("Sign out failed:", err));
+        navigate(
+          `/login?error=${e instanceof Error ? encodeURIComponent(e.message) : "session_error"}`,
+        );
       }
     };
-  }, [navigate, searchParams, refreshUser]);
+
+    if (authCode) {
+      exchangeCode(authCode);
+    } else {
+      log.error("No code parameter found.");
+      navigate("/login?error=no_code");
+    }
+
+    return () => {
+      processing.current = false;
+    };
+  }, [searchParams, navigate, refreshUser, host]);
 
   return (
     <div className="flex flex-col items-center gap-4 w-full h-dvh">

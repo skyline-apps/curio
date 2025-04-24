@@ -26,6 +26,8 @@ const MobileLoginPage: React.FC<
   if (error === "session_error") {
     errorMessage =
       "There was a problem signing in. Please try again and contact us if this persists.";
+  } else if (error === "no_code") {
+    errorMessage = "No authentication code found.";
   }
 
   return (
