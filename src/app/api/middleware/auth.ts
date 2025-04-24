@@ -62,13 +62,19 @@ export const authMiddleware = createMiddleware(
       // Create client - it automatically reads cookies from the request
       const supabase = await createClient(c);
 
-      // Get current user - this verifies the session based on cookies handled by ssr client
+      // Check for Bearer token in Authorization header
+      const authHeader = c.req.header("Authorization");
+      const token = authHeader?.startsWith("Bearer ")
+        ? authHeader.substring(7)
+        : undefined;
+
+      // Get current user - verifies session via cookies OR validates the provided Bearer token if present.
       const {
         data: { user },
         error,
-      } = await supabase.auth.getUser();
+      } = await supabase.auth.getUser(token);
 
-      // If getUser fails or returns no user, authentication fails
+      // If getUser fails or returns no user (regardless of method), authentication fails
       if (error || !user?.email) {
         return returnDefault(c, next);
       }
