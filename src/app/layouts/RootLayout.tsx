@@ -17,7 +17,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({
     <Providers>
       <main
         className={cn(
-          "w-full h-dvh flex flex-col font-sans select-none pt-8",
+          "w-full h-dvh flex flex-col font-sans select-none",
           isNativePlatform() &&
             "pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]",
         )}
