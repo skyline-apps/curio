@@ -3,12 +3,14 @@ import Navbar from "@app/components/Navbar";
 import Button from "@app/components/ui/Button";
 import Spinner from "@app/components/ui/Spinner";
 import { useUser } from "@app/providers/User";
+import { isNativePlatform } from "@app/utils/platform";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const RedirectPage: React.FC = () => {
   const { user } = useUser();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const isNative = isNativePlatform();
   if (user && user.id) {
     // Already signed in; redirect to home
     navigate("/home");
@@ -28,7 +30,7 @@ const RedirectPage: React.FC = () => {
 
   return (
     <div className="flex flex-col w-full h-dvh">
-      <Navbar />
+      {!isNative && <Navbar />}
       <div className="flex-1">
         <div className="flex flex-col gap-4 my-16">
           <div className="w-full flex flex-col items-center gap-4 py-16">
@@ -40,7 +42,7 @@ const RedirectPage: React.FC = () => {
           </div>
         </div>
       </div>
-      <Footer />
+      {!isNative && <Footer />}
     </div>
   );
 };

@@ -1,6 +1,8 @@
 import Spinner from "@app/components/ui/Spinner";
 import { Tooltip } from "@app/components/ui/Tooltip";
 import { cn } from "@app/utils/cn";
+import { isNativePlatform } from "@app/utils/platform";
+import { Browser } from "@capacitor/browser";
 import { Button, ButtonProps } from "@heroui/react";
 import React, { forwardRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -68,7 +70,11 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
       const handlePress = (): void => {
         setPressed(true);
         if (href.startsWith("http")) {
-          window.location.href = href;
+          if (isNativePlatform()) {
+            Browser.open({ url: href });
+          } else {
+            window.location.href = href;
+          }
         } else {
           navigate(href);
         }
