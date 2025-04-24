@@ -58,3 +58,6 @@ terraform.tfvars
 src/script/data
 src/script/generated
 lambda.zip
+
+# sensitive
+*.keystore

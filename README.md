@@ -21,6 +21,17 @@ Create a new database migration by first editing `src/app/api/db/schema.ts`. The
 
 Run the migration against your local development database by running `docker exec -it curio bash` and then `npm run db:migrate`.
 
+### Mobile apps
+First, make sure you build the frontend with `.env` populated by running `npm run build` from `src/app`. Then run `npx cap sync` to set up mobile app files.
+
+```bash
+$ npx cap run android
+$ npx cap run ios
+```
+
+Follow [these instructions](https://capacitorjs.com/docs/guides/deep-links) to set up app deep links.
+
+
 ### Browser extensions
 The Chrome extension is at `src/chrome`, and the Firefox extension is at `src/firefox`.
 To develop locally using the extensions, first make sure that the API hostname values are correctly set in all the files of the extension.
