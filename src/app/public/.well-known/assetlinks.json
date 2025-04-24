@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "ooo.curi.app",
+            "sha256_cert_fingerprints": [
+                "C8:C6:85:66:46:0D:2E:54:41:0B:4F:34:BF:8D:C6:54:55:5A:B7:10:D3:32:68:34:7F:5A:9B:1E:5B:EA:38:D7"
+            ]
+        }
+    }
+]
