@@ -40,8 +40,15 @@ api.use("*", async (c, next) => {
         return "*";
       }
 
+      const allowedOrigins = [
+        c.env.VITE_CURIO_URL,
+        // See https://ionicframework.com/docs/troubleshooting/cors#solutions-for-cors-errors.
+        "https://curio", // For Android apps
+        "capacitor://curio", // For iOS apps
+      ];
+
       // Check if origin is in the allowed list
-      return c.env.VITE_CURIO_URL === origin ? origin : null;
+      return allowedOrigins.includes(origin) ? origin : null;
     },
     credentials: true,
   })(c, next);
