@@ -22,6 +22,12 @@ import {
 } from "@app/schemas/v1/jobs/import/omnivore";
 import { Hono } from "hono";
 
+const ALLOWED_FILE_TYPES = [
+  "application/zip",
+  "application/x-zip-compressed",
+  "application/octet-stream",
+];
+
 // eslint-disable-next-line @local/eslint-local-rules/api-validation
 export const importOmnivoreRouter = new Hono<EnvBindings>().post(
   "/",
@@ -57,16 +63,25 @@ export const importOmnivoreRouter = new Hono<EnvBindings>().post(
             400,
           );
         }
-        if (fileValue.type !== "application/zip") {
+        if (
+          !ALLOWED_FILE_TYPES.includes(fileValue.type) &&
+          !fileValue.name.toLowerCase().endsWith(".zip")
+        ) {
+          log.warn(`Unexpected file type received`, {
+            profileId,
+            fileType: fileValue.type,
+          });
           return c.json(
-            { error: "Invalid file type. Please upload a ZIP file." },
+            { error: "Invalid file type. Please upload a .zip file." },
             400,
           );
         }
         file = fileValue;
-        log.info(`Received file: ${file.name}, size: ${file.size} bytes`);
       } catch (error) {
-        log.error("Failed to parse form data or invalid file", { error });
+        log.error("Failed to parse form data or invalid file", {
+          profileId,
+          error,
+        });
         return c.json(
           { error: "Failed to parse form data or invalid file." },
           400,
@@ -75,7 +90,6 @@ export const importOmnivoreRouter = new Hono<EnvBindings>().post(
 
       const newJobId = crypto.randomUUID();
       const storageKey = `${profileId}/${newJobId}.zip`;
-      log.info(`Preparing to upload file to storage with key: ${storageKey}`);
       await storage.uploadImportFile(c.env, storageKey, file);
 
       const [newJob] = await db

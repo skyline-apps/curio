@@ -80,7 +80,7 @@ export const importInstapaperRouter = new Hono<EnvBindings>().post(
       try {
         await queue.send({ jobId });
       } catch (error) {
-        log.error("Failed to send job to queue", { jobId, error });
+        log.error("Failed to send job to queue", { jobId, error, profileId });
         await db
           .update(jobs)
           .set({
@@ -95,10 +95,13 @@ export const importInstapaperRouter = new Hono<EnvBindings>().post(
       return c.json(response, 200);
     } catch (error) {
       if (error instanceof InstapaperError && error.message.includes("401")) {
-        log.error("Invalid Instapaper credentials", { error: error.message });
+        log.error("Invalid Instapaper credentials", {
+          error: error.message,
+          profileId,
+        });
         return c.json({ error: "Invalid Instapaper credentials." }, 401);
       }
-      log.error("Error creating import job", { error });
+      log.error("Error creating import job", { error, profileId });
       return c.json({ error: "Error creating import job." }, 500);
     }
   },
