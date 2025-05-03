@@ -167,7 +167,7 @@ describe("/v1/jobs/import/omnivore", () => {
       );
       expect(response.status).toBe(400);
       const data: ErrorResponse = await response.json();
-      expect(data.error).toBe("Invalid file type. Please upload a ZIP file.");
+      expect(data.error).toBe("Invalid file type. Please upload a .zip file.");
       expect(uploadImportFile).not.toHaveBeenCalled();
       expect(MOCK_QUEUE.send).not.toHaveBeenCalled();
     });
