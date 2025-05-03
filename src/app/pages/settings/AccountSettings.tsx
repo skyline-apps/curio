@@ -190,7 +190,7 @@ const AccountSettings: React.FC = () => {
 
       <FormSection
         title="Newsletter email"
-        description="Subscribe to email newsletters with this email to receive them in your Curio inbox."
+        description="Subscribe to email newsletters with this address to receive them in your Curio inbox."
         errorMessage={newsletterError}
       >
         <div className="flex gap-2 w-full max-w-96">
