@@ -68,11 +68,13 @@ export class OmnivoreImporter extends Importer {
       this.zipContents = unzipSync(fileData);
       this.log.info("Successfully unzipped Omnivore archive in memory", {
         jobId: this.job.id,
+        storageKey: this.storageKey,
       });
     } catch (unzipError) {
       this.log.error("Failed to unzip Omnivore archive", {
         error: unzipError,
         jobId: this.job.id,
+        storageKey: this.storageKey,
       });
       throw unzipError;
     }
@@ -274,6 +276,11 @@ export class OmnivoreImporter extends Importer {
               });
             }
           }
+        } else {
+          this.log.warn("No content found for Omnivore bookmark", {
+            jobId: this.job.id,
+            profileItemId: item.id,
+          });
         }
         await this.db
           .update(profileItems)
