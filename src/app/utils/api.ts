@@ -1,4 +1,7 @@
+import { createLogger } from "@app/utils/logger";
 import { getSupabaseClient } from "@app/utils/supabase";
+
+const log = createLogger("api");
 
 export async function handleAPIResponse<T>(response: Response): Promise<T> {
   if (response.status < 200 || response.status >= 300) {
@@ -29,12 +32,35 @@ export async function authenticatedFetch(
   });
 
   if (response.status === 401) {
+    log.warn("401 received, attempting to refresh session");
     try {
       const supabase = getSupabaseClient();
-      await supabase.auth.signOut();
-    } catch (_) {}
-    window.localStorage.clear();
-    window.location.href = "/login";
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error("No session found");
+      }
+      const response = await fetch("/api/auth/session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          accessToken: session.access_token,
+          refreshToken: session.refresh_token,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to set session cookie: ${await response.text()}`,
+        );
+      }
+    } catch (_) {
+      window.localStorage.clear();
+      window.location.href = "/login";
+    }
   }
 
   return response;
