@@ -21,7 +21,6 @@ const SidebarButton: React.FC<SidebarButtonProps> = ({
       variant={isSelected ? "flat" : "light"}
       onPress={onPress}
       aria-label={label}
-      className="mx-2"
     >
       <Icon icon={icon} />
     </Button>

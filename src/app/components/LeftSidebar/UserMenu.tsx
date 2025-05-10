@@ -80,7 +80,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
       <div
         className={cn("flex flex-col items-center space-y-2 py-2", {
           "md:hidden": sidebarOpen,
-          "hidden md:block": !sidebarOpen,
+          "hidden md:flex": !sidebarOpen,
         })}
       >
         {userActionItems.map((item) => (

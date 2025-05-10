@@ -117,7 +117,7 @@ const RightSidebar: React.FC = () => {
         onPress={toggleSidebar}
         aria-label={rightSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
         className={cn(
-          "flex-none w-10 m-2 flex",
+          "flex-none m-2 flex",
           rightSidebarOpen ? "" : "absolute right-0 bottom-0 lg:relative",
         )}
       >

@@ -140,7 +140,7 @@ const LeftSidebar: React.FC = () => {
               onPress={toggleSidebar}
               aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
               className={cn(
-                "flex-none w-10 z-10 m-2",
+                "flex-none m-2 z-10",
                 sidebarOpen ? "" : "absolute left-0 bottom-0 md:relative",
               )}
             >
