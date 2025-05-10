@@ -112,8 +112,10 @@ export const useInAppBrowserCapture = ({
       }, SCRIPT_EXECUTION_TIMEOUT_MS);
 
       localIabRef.executeScript(
-        { code: "document.documentElement.outerHTML;" },
-        (values) => {
+        {
+          code: "webkit.messageHandlers.cordova_iab.postMessage(JSON.stringify({ html: document.documentElement.outerHTML }));",
+        },
+        (_values) => {
           if (scriptExecutionTimeoutIdRef.current) {
             clearTimeout(scriptExecutionTimeoutIdRef.current);
             scriptExecutionTimeoutIdRef.current = null;
@@ -123,31 +125,23 @@ export const useInAppBrowserCapture = ({
             );
             if (!isCapturing && iabRef.current !== localIabRef) return;
           }
-          try {
-            const htmlContent =
-              values && values[0] ? (values[0] as string) : null;
-            const htmlLength = htmlContent ? htmlContent.length : 0;
-            log.info("Script execution successful. HTML length: ", htmlLength);
-            onHtmlCaptured(htmlContent, urlToSave);
-            performFullClose();
-          } catch (error) {
-            if (error instanceof Error) {
-              log.error(
-                "Error processing script execution result:",
-                error.message,
-              );
-              setCaptureError(
-                `Error processing page content: ${error.message}`,
-              );
-            } else {
-              log.error("Error processing script execution result:", error);
-              setCaptureError("Unknown error processing page content.");
-            }
-            onHtmlCaptured(null, urlToSave);
-            performFullClose();
-          }
         },
       );
+    };
+
+    const handleMessage = (event: MessageEvent): void => {
+      log.info("Message received:", JSON.stringify(event));
+      try {
+        const html = event.data.html;
+        log.info("HTML received:", html.length);
+        onHtmlCaptured(html, urlToSave);
+        performFullClose();
+      } catch (error) {
+        log.error("Error processing message:", error);
+        setCaptureError("Error processing page content.");
+        onHtmlCaptured(null, urlToSave);
+        performFullClose();
+      }
     };
 
     const handleLoadErrorEvent = (event: InAppBrowserEvent): void => {
@@ -167,7 +161,6 @@ export const useInAppBrowserCapture = ({
         log.warn(
           "Exit event for an IAB instance that is not the one managed by this current effect. Instance might be newer or already closed by its own logic.",
         );
-        return;
       }
 
       if (scriptExecutionTimeoutIdRef.current) {
@@ -182,6 +175,10 @@ export const useInAppBrowserCapture = ({
       performFullClose();
     };
 
+    localIabRef.addEventListener(
+      "message",
+      handleMessage as unknown as InAppBrowserEventListener,
+    );
     localIabRef.addEventListener("loadstop", handleLoadStopEvent);
     localIabRef.addEventListener("loaderror", handleLoadErrorEvent);
     localIabRef.addEventListener("exit", handleExitEvent);
@@ -189,6 +186,10 @@ export const useInAppBrowserCapture = ({
     localIabRef.show();
 
     return () => {
+      localIabRef.removeEventListener(
+        "message",
+        handleMessage as unknown as InAppBrowserEventListener,
+      );
       localIabRef.removeEventListener("loadstop", handleLoadStopEvent);
       localIabRef.removeEventListener("loaderror", handleLoadErrorEvent);
       localIabRef.removeEventListener("exit", handleExitEvent);

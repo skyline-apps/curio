@@ -14,7 +14,6 @@
     "deploy:prod": "npm run build -- --mode prod && wrangler deploy -c wrangler.jsonc",
     "deploy:consumer:staging": "wrangler deploy -c src/app/queues/itemsFetcher/wrangler.jsonc",
     "deploy:consumer:prod": "wrangler deploy -c src/app/queues/itemsFetcher/wrangler.jsonc",
-    "postinstall": "patch-package",
     "test": "vitest --run --no-file-parallelism",
     "test:watch": "vitest"
   },
@@ -116,9 +115,7 @@
     "eslint-plugin-unused-imports": "^4.1.4",
     "globals": "^15.15.0",
     "jsdom": "^26.0.0",
-    "patch-package": "^8.0.0",
     "postcss": "^8.5.3",
-    "postinstall-postinstall": "^2.1.0",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.7.1",
     "typescript": "~5.7.2",
