@@ -25,6 +25,29 @@ sessionRoutes.post("/", async (c: EnvContext) => {
       );
     }
 
+    // TODO: Remove this after all users have migrated to .curi.ooo domain cookies (after a few weeks)
+    const supabaseUrl = c.env.VITE_SUPABASE_URL;
+    let projectRef = null;
+    if (supabaseUrl) {
+      try {
+        const hostname = new URL(supabaseUrl).hostname;
+        projectRef = hostname.split(".")[0];
+      } catch (_) {}
+    }
+    if (projectRef) {
+      const cookieNames = [
+        `sb-${projectRef}-auth-token.0`,
+        `sb-${projectRef}-auth-token.1`,
+      ];
+      for (const name of cookieNames) {
+        c.header(
+          "Set-Cookie",
+          `${name}=; Path=/; Domain=curi.ooo; Expires=Thu, 01 Jan 1970 00:00:00 GMT`,
+          { append: true },
+        );
+      }
+    }
+
     const supabase = await createClient(c);
 
     const {
