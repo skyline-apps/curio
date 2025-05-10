@@ -96,7 +96,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     queryKey: ["importJobs"],
     queryFn: fetchImportJobs,
     retry: 1,
-    enabled: !!user.id,
+    enabled: false,
   });
 
   const {
