@@ -1,3 +1,5 @@
+import { getSupabaseClient } from "@app/utils/supabase";
+
 export async function handleAPIResponse<T>(response: Response): Promise<T> {
   if (response.status < 200 || response.status >= 300) {
     const error = await response.json();
@@ -21,8 +23,19 @@ export async function authenticatedFetch(
     headers.set("Content-Type", "application/json");
   }
 
-  return fetch(url, {
+  const response = await fetch(url, {
     ...options,
     headers,
   });
+
+  if (response.status === 401) {
+    try {
+      const supabase = getSupabaseClient();
+      await supabase.auth.signOut();
+    } catch (_) {}
+    window.localStorage.clear();
+    window.location.href = "/login";
+  }
+
+  return response;
 }
