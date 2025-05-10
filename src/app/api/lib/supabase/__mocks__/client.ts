@@ -23,7 +23,6 @@ export const supabaseMock = {
       },
       error: null,
     }),
-    setSession: vi.fn().mockResolvedValue({ error: null }),
   },
   storage: {
     from: vi.fn(() => ({
