@@ -58,6 +58,7 @@ export async function authenticatedFetch(
           `Failed to set session cookie: ${await response.text()}`,
         );
       }
+      return await authenticatedFetch(url, options);
     } catch (_) {
       window.localStorage.clear();
       window.location.href = "/login";

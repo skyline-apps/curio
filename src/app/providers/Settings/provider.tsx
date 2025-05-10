@@ -83,6 +83,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     queryFn: fetchProfile,
     retry: 1,
     enabled: !!user.id,
+    retryDelay: 1000,
   });
 
   const { data: currentSettings, refetch: loadSettings } = useQuery({
@@ -90,6 +91,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     queryFn: fetchSettings,
     retry: 1,
     enabled: !!user.id,
+    retryDelay: 1000,
   });
 
   const {
@@ -101,6 +103,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     queryFn: fetchImportJobs,
     retry: 1,
     enabled: false,
+    retryDelay: 1000,
   });
 
   const {
@@ -112,6 +115,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     queryFn: fetchLabels,
     retry: 1,
     enabled: !!user.id,
+    retryDelay: 1000,
   });
 
   const loadImportJobs = useCallback(
