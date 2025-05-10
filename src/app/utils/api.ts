@@ -15,6 +15,7 @@ export async function handleAPIResponse<T>(response: Response): Promise<T> {
 export async function authenticatedFetch(
   url: string,
   options: RequestInit = {},
+  tryRefreshSession = false,
 ): Promise<Response> {
   const headers = new Headers(options.headers);
 
@@ -31,7 +32,7 @@ export async function authenticatedFetch(
     headers,
   });
 
-  if (response.status === 401) {
+  if (response.status === 401 && tryRefreshSession) {
     log.warn("401 received, attempting to refresh session");
     try {
       const supabase = getSupabaseClient();
