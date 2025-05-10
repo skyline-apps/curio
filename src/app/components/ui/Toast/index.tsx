@@ -52,7 +52,7 @@ const Toast: React.FC<ToastProps> = ({
   return (
     <Card
       className={cn(
-        "flex flex-row items-center gap-2 text-sm fixed bottom-4 right-4 z-10 transition-opacity duration-300 py-2 px-4",
+        "flex flex-row items-center gap-2 text-sm fixed bottom-4 right-4 z-10 transition-opacity duration-300 py-2 px-4 z-50",
         visible
           ? isExiting
             ? "animate-slide-out opacity-0"
