@@ -141,7 +141,9 @@ const LeftSidebar: React.FC = () => {
               aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
               className={cn(
                 "flex-none m-2 z-10",
-                sidebarOpen ? "" : "absolute left-0 bottom-0 md:relative",
+                sidebarOpen
+                  ? ""
+                  : "fixed left-0 bottom-[env(safe-area-inset-bottom)] md:relative",
               )}
             >
               <Icon

@@ -55,6 +55,7 @@ const RightSidebar: React.FC = () => {
       id="right-sidebar"
       className={cn(
         "flex flex-col justify-between border-l-1 border-divider transition-all duration-300 ease-in-out fixed right-0 top-0 bottom-0 lg:relative bg-background-400 shadow-lg z-20",
+        "pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] h-dvh",
         rightSidebarOpen
           ? "w-80 max-w-full pointer-events-auto"
           : "w-0 pointer-events-none lg:w-16",
@@ -120,7 +121,9 @@ const RightSidebar: React.FC = () => {
         aria-label={rightSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
         className={cn(
           "flex-none m-2 flex",
-          rightSidebarOpen ? "" : "absolute right-0 bottom-0 lg:relative",
+          rightSidebarOpen
+            ? ""
+            : "fixed right-0 bottom-[env(safe-area-inset-bottom)] lg:relative",
         )}
       >
         <Icon
