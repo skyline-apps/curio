@@ -52,85 +52,84 @@ const RightSidebar: React.FC = () => {
   return (
     <aside
       {...bind()}
+      id="right-sidebar"
       className={cn(
-        "border-l-1 border-divider transition-all duration-300 ease-in-out absolute right-0 top-0 bottom-0 lg:relative bg-background-400 shadow-lg z-20",
-        rightSidebarOpen ? "w-80" : "w-0 lg:w-16",
+        "flex flex-col justify-between h-dvh border-l-1 border-divider transition-all duration-300 ease-in-out absolute right-0 top-0 bottom-0 lg:relative bg-background-400 shadow-lg z-20",
+        rightSidebarOpen ? "w-80 max-w-full" : "w-0 lg:w-16",
       )}
     >
-      <div id="right-sidebar" className="flex flex-col justify-between h-full">
-        <div className="grow overflow-hidden">
-          <div
-            className={cn(
-              "h-full w-80 transition-all duration-300 ease-in-out transform", // Explicit width needed for transition
-              rightSidebarOpen
-                ? "translate-x-0 opacity-100"
-                : "translate-x-full opacity-0",
-            )}
-          >
-            {rightSidebarOpen &&
-              (selectedHighlight && isEditable(currentItem) ? (
-                <HighlightMetadata
-                  highlight={selectedHighlight}
-                  itemSlug={currentItem.slug}
-                  textDirection={currentItem.metadata.textDirection}
-                  onUpdate={setSelectedHighlight}
-                />
-              ) : currentItem ? (
-                <ItemMetadata
-                  item={currentItem}
-                  readonly={isCurrentlyPreviewing}
-                />
-              ) : selectedItems.size > 0 ? (
-                <>
-                  <p className="text-secondary text-center pt-16">
-                    {selectedItems.size} items selected
-                  </p>
-                  <p className="text-secondary-600 text-center pb-8">
-                    {totalItems} total
-                  </p>
-                  {selectedItems.size > 0 && <BulkActions />}
-                </>
-              ) : fetching ? (
-                <Spinner centered />
-              ) : selectedHighlightPreview ? (
-                <HighlightMetadata
-                  highlight={selectedHighlightPreview}
-                  itemSlug={selectedHighlightPreview.item.slug}
-                  textDirection={
-                    selectedHighlightPreview.item.metadata.textDirection
-                  }
-                  onUpdate={(highlight) =>
-                    setSelectedHighlightPreview(highlight?.id || null)
-                  }
-                />
-              ) : (
-                <p className="text-secondary text-center pt-24">
-                  Select an item to preview it here.
-                </p>
-              ))}
-          </div>
-        </div>
-        <Button
-          isIconOnly
-          variant="faded"
-          onPress={toggleSidebar}
-          aria-label={rightSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+      <div className="grow overflow-hidden">
+        <div
           className={cn(
-            "flex-none w-10 m-2 flex",
-            rightSidebarOpen ? "" : "absolute right-0 bottom-0 lg:relative",
+            "h-full w-80 max-w-full transition-all duration-300 ease-in-out transform", // Explicit width needed for transition
+            rightSidebarOpen
+              ? "translate-x-0 opacity-100"
+              : "translate-x-full opacity-0",
           )}
         >
-          <Icon
-            icon={
-              rightSidebarOpen ? (
-                <HiChevronDoubleRight />
-              ) : (
-                <HiChevronDoubleLeft />
-              )
-            }
-          />
-        </Button>
+          {rightSidebarOpen &&
+            (selectedHighlight && isEditable(currentItem) ? (
+              <HighlightMetadata
+                highlight={selectedHighlight}
+                itemSlug={currentItem.slug}
+                textDirection={currentItem.metadata.textDirection}
+                onUpdate={setSelectedHighlight}
+              />
+            ) : currentItem ? (
+              <ItemMetadata
+                item={currentItem}
+                readonly={isCurrentlyPreviewing}
+              />
+            ) : selectedItems.size > 0 ? (
+              <>
+                <p className="text-secondary text-center pt-16">
+                  {selectedItems.size} items selected
+                </p>
+                <p className="text-secondary-600 text-center pb-8">
+                  {totalItems} total
+                </p>
+                {selectedItems.size > 0 && <BulkActions />}
+              </>
+            ) : fetching ? (
+              <Spinner centered />
+            ) : selectedHighlightPreview ? (
+              <HighlightMetadata
+                highlight={selectedHighlightPreview}
+                itemSlug={selectedHighlightPreview.item.slug}
+                textDirection={
+                  selectedHighlightPreview.item.metadata.textDirection
+                }
+                onUpdate={(highlight) =>
+                  setSelectedHighlightPreview(highlight?.id || null)
+                }
+              />
+            ) : (
+              <p className="text-secondary text-center pt-24">
+                Select an item to preview it here.
+              </p>
+            ))}
+        </div>
       </div>
+      <Button
+        isIconOnly
+        variant="faded"
+        onPress={toggleSidebar}
+        aria-label={rightSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+        className={cn(
+          "flex-none w-10 m-2 flex",
+          rightSidebarOpen ? "" : "absolute right-0 bottom-0 lg:relative",
+        )}
+      >
+        <Icon
+          icon={
+            rightSidebarOpen ? (
+              <HiChevronDoubleRight />
+            ) : (
+              <HiChevronDoubleLeft />
+            )
+          }
+        />
+      </Button>
     </aside>
   );
 };
