@@ -63,7 +63,7 @@ export const AppPageProvider: React.FC<{
           <Button
             isIconOnly
             size="sm"
-            variant="faded"
+            variant="flat"
             className="absolute top-2 right-2 z-30"
             onPress={() => setShowArticleFixedInfo((v) => !v)}
             onMouseEnter={() => setShowArticleFixedInfo(true)}
