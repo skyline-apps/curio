@@ -1,3 +1,4 @@
+import { getSupabaseProjectRef } from "@app/utils/api";
 import { clearTheme, initializeTheme } from "@app/utils/displayStorage";
 import { createLogger } from "@app/utils/logger";
 import { getSupabaseClient } from "@app/utils/supabase";
@@ -7,21 +8,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import { User, UserContext } from ".";
 
 const log = createLogger("User");
-
-const getSupabaseProjectRef = (): string | null => {
-  const url = import.meta.env.VITE_SUPABASE_URL;
-  if (!url) {
-    log.error("VITE_SUPABASE_URL is not defined");
-    return null;
-  }
-  try {
-    const hostname = new URL(url).hostname;
-    return hostname.split(".")[0];
-  } catch (e) {
-    log.error("Could not parse VITE_SUPABASE_URL", e);
-    return null;
-  }
-};
 
 interface UserProviderProps {
   children: React.ReactNode;

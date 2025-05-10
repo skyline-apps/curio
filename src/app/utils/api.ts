@@ -3,6 +3,31 @@ import { getSupabaseClient } from "@app/utils/supabase";
 
 const log = createLogger("api");
 
+export const getSupabaseProjectRef = (): string | null => {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  if (!url) {
+    log.error("VITE_SUPABASE_URL is not defined");
+    return null;
+  }
+  try {
+    const hostname = new URL(url).hostname;
+    return hostname.split(".")[0];
+  } catch (e) {
+    log.error("Could not parse VITE_SUPABASE_URL", e);
+    return null;
+  }
+};
+
+const forceLogout = (): void => {
+  const projectRef = getSupabaseProjectRef();
+  if (!projectRef) {
+    return;
+  }
+  document.cookie = `sb-${projectRef}-auth-token.0=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  document.cookie = `sb-${projectRef}-auth-token.1=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  window.localStorage.clear();
+};
+
 export async function handleAPIResponse<T>(response: Response): Promise<T> {
   if (response.status < 200 || response.status >= 300) {
     const error = await response.json();
@@ -37,7 +62,7 @@ export async function authenticatedFetch(
       const supabase = getSupabaseClient();
       await supabase.auth.signOut();
     } catch (_) {}
-    window.localStorage.clear();
+    forceLogout();
     window.location.href = "/login";
   }
 
