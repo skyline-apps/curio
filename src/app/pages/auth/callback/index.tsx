@@ -49,7 +49,7 @@ const AuthCallback: React.FC = () => {
               throw new Error("Failed to set session cookie");
             }
 
-            await refreshUser();
+            refreshUser();
             window.location.href = nextUrl;
           } catch (error) {
             log.error(
@@ -63,12 +63,12 @@ const AuthCallback: React.FC = () => {
       },
     );
 
-    const timer = setTimeout(async () => {
+    const timer = setTimeout(() => {
       log.warn("Timeout waiting for session, attempting redirect anyway.");
       if (authListener) {
         authListener.subscription.unsubscribe();
       }
-      await refreshUser();
+      refreshUser();
       navigate(nextUrl, { replace: true });
     }, 5000);
 

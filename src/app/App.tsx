@@ -54,6 +54,7 @@ export const App = (): React.ReactNode => {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/auth/callback" element={<AuthCallback />} />
         <Route
           element={
             <RootLayout>
@@ -73,7 +74,6 @@ export const App = (): React.ReactNode => {
             path="/login/redirect"
             element={user?.id ? <HomeRedirect /> : <RedirectPage />}
           />
-          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route
