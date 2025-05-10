@@ -25,7 +25,7 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [urlInput, setUrlInput] = useState<string>("");
   const {
-    checkExtensionInstalled,
+    checkSavingAvailable,
     saveItemContent,
     savingItem,
     savingError,
@@ -42,9 +42,9 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
   useEffect((): void => {
     if (isOpen) {
       clearSavingError();
-      checkExtensionInstalled();
+      checkSavingAvailable();
     }
-  }, [isOpen, clearSavingError, checkExtensionInstalled]);
+  }, [isOpen, clearSavingError, checkSavingAvailable]);
 
   const openAndSave = async (
     event: React.FormEvent<HTMLFormElement> | PressEvent,

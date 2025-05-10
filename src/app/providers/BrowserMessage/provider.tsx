@@ -6,6 +6,7 @@ import { useToast } from "@app/providers/Toast";
 import { UploadStatus } from "@app/schemas/types";
 import config from "@app/utils/config.json";
 import { createLogger } from "@app/utils/logger";
+import { isNativePlatform } from "@app/utils/platform";
 import React, {
   useCallback,
   useContext,
@@ -33,6 +34,13 @@ const getBrowserType = (): BrowserType => {
     return "chrome";
   }
   return "other";
+};
+
+const isMobileBrowser = (): boolean => {
+  const userAgent = navigator.userAgent.toLowerCase();
+  return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+    userAgent,
+  );
 };
 
 interface BrowserMessageProviderProps {
@@ -104,8 +112,25 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
     setSavingError(null);
   }, []);
 
-  const checkExtensionInstalled = useCallback((): void => {
+  const checkSavingAvailable = useCallback((): void => {
     const callback = (success: boolean): void => {
+      if (isNativePlatform()) {
+        setSavingError(null);
+        return;
+      }
+      if (isMobileBrowser()) {
+        setSavingError(
+          <>
+            <p>
+              Saving directly from mobile browsers is not currently supported.
+            </p>
+            <p>
+              Please save items using the Curio app or your desktop browser.
+            </p>
+          </>,
+        );
+        return;
+      }
       if (success) {
         setSavingError(null);
       } else {
@@ -315,7 +340,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
       value={{
         addMessageListener,
         removeMessageListener,
-        checkExtensionInstalled,
+        checkSavingAvailable,
         saveItemContent,
         savingItem,
         savingError,

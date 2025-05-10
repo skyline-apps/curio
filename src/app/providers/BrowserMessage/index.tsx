@@ -9,7 +9,7 @@ export enum EventType {
 interface BrowserMessageContextType {
   addMessageListener: (callback: (event: MessageEvent) => void) => void;
   removeMessageListener: (callback: (event: MessageEvent) => void) => void;
-  checkExtensionInstalled: () => void;
+  checkSavingAvailable: () => void;
   saveItemContent: (url: string, overrideOpenUrl?: string) => Promise<void>;
   savingItem: string | null;
   savingError: React.ReactElement | null;
@@ -19,7 +19,7 @@ interface BrowserMessageContextType {
 export const BrowserMessageContext = createContext<BrowserMessageContextType>({
   addMessageListener: () => {},
   removeMessageListener: () => {},
-  checkExtensionInstalled: () => {},
+  checkSavingAvailable: () => {},
   saveItemContent: () => Promise.resolve(),
   savingItem: null,
   savingError: null,
