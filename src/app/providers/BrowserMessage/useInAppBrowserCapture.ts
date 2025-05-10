@@ -92,10 +92,63 @@ export const useInAppBrowserCapture = ({
     const iabInstance = window.cordova.InAppBrowser.open(
       urlToOpen,
       "_blank",
-      "location=no,hidden=yes,clearcache=yes,clearsessioncache=yes",
+      "location=no,hidden=yes,clearcache=yes,clearsessioncache=yes,zoom=no",
     );
     iabRef.current = iabInstance;
     const localIabRef = iabInstance;
+
+    const handleLoadStartEvent = (): void => {
+      localIabRef.insertCSS(
+        {
+          code: `
+            #curio-overlay {
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              z-index: 9999999;
+              background-color: rgba(0, 0, 0, 0.7);
+              display: flex;
+              justify-content: center;
+              align-items: center;
+            }
+            #curio-spinner {
+              width: 50px;
+              height: 50px;
+              border: 5px solid rgba(255, 255, 255, 0.3);
+              border-top-color: #ffffff;
+              border-radius: 50%;
+              animation: curio-spin 1s linear infinite;
+            }
+            @keyframes curio-spin {
+              to { transform: rotate(360deg); }
+            }
+          `,
+        },
+        () => {},
+      );
+
+      localIabRef.executeScript(
+        {
+          code: `
+            var existingOverlay = document.getElementById('curio-overlay');
+            if (existingOverlay) {
+              var existingSpinner = document.getElementById('curio-spinner');
+              if (existingSpinner) existingSpinner.remove();
+            } else {
+            var overlay = document.createElement('div');
+            overlay.id = 'curio-overlay';
+            document.body.appendChild(overlay);
+        }
+            var spinner = document.createElement('div');
+            spinner.id = 'curio-spinner';
+            overlay.appendChild(spinner);
+          `,
+        },
+        () => {},
+      );
+    };
 
     const handleLoadStopEvent = (): void => {
       if (scriptExecutionTimeoutIdRef.current) {
@@ -179,6 +232,7 @@ export const useInAppBrowserCapture = ({
       "message",
       handleMessage as unknown as InAppBrowserEventListener,
     );
+    localIabRef.addEventListener("loadstart", handleLoadStartEvent);
     localIabRef.addEventListener("loadstop", handleLoadStopEvent);
     localIabRef.addEventListener("loaderror", handleLoadErrorEvent);
     localIabRef.addEventListener("exit", handleExitEvent);
@@ -190,6 +244,7 @@ export const useInAppBrowserCapture = ({
         "message",
         handleMessage as unknown as InAppBrowserEventListener,
       );
+      localIabRef.removeEventListener("loadstart", handleLoadStartEvent);
       localIabRef.removeEventListener("loadstop", handleLoadStopEvent);
       localIabRef.removeEventListener("loaderror", handleLoadErrorEvent);
       localIabRef.removeEventListener("exit", handleExitEvent);
