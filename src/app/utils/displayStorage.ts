@@ -68,3 +68,11 @@ export function setSystemTheme(): void {
 export function clearTheme(): void {
   localStorage.removeItem("curio_theme");
 }
+
+export function storeRootPage(page: string): void {
+  localStorage.setItem("curio_rootPage", page);
+}
+
+export function getStoredRootPage(): string | null {
+  return localStorage.getItem("curio_rootPage");
+}

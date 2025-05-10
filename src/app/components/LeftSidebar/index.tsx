@@ -51,7 +51,10 @@ const LeftSidebar: React.FC = () => {
         (key) => !!key && pathname.startsWith(key),
       ) ?? SidebarKey.NONE;
     setSelectedKey(newSelectedKey);
-    if (newSelectedKey !== SidebarKey.NONE) {
+    if (
+      newSelectedKey !== SidebarKey.NONE &&
+      newSelectedKey !== SidebarKey.SETTINGS
+    ) {
       updateRootPage(newSelectedKey);
     }
   }, [pathname, updateRootPage]);

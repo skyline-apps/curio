@@ -5,7 +5,9 @@ import {
 import {
   type AppLayoutSettings,
   DEFAULT_LAYOUT,
+  getStoredRootPage,
   loadLayoutSettings,
+  storeRootPage,
   updateLayoutSettings,
 } from "@app/utils/displayStorage";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -27,6 +29,10 @@ export const AppLayoutProvider: React.FC<AppLayoutProviderProps> = ({
 
   useEffect(() => {
     setAppLayout(loadLayoutSettings());
+    const stored = getStoredRootPage();
+    if (stored) {
+      setRootPage(stored as SidebarKey);
+    }
   }, []);
 
   const updateAppLayout = useCallback(
@@ -40,12 +46,10 @@ export const AppLayoutProvider: React.FC<AppLayoutProviderProps> = ({
     [],
   );
 
-  const updateRootPage = useCallback(
-    (page: SidebarKey): void => {
-      setRootPage(page);
-    },
-    [setRootPage],
-  );
+  const updateRootPage = useCallback((page: SidebarKey): void => {
+    setRootPage(page);
+    storeRootPage(page);
+  }, []);
 
   const navigateToRoot = useCallback(() => {
     if (!pathname.startsWith(rootPage) && rootPage !== SidebarKey.NONE) {

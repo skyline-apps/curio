@@ -15,7 +15,9 @@ import PrivacyPage from "@app/pages/privacy";
 import SettingsPage from "@app/pages/settings";
 import TermsPage from "@app/pages/terms";
 import UserPage from "@app/pages/user";
+import { SidebarKey } from "@app/providers/AppLayout";
 import { useUser } from "@app/providers/User";
+import { getStoredRootPage } from "@app/utils/displayStorage";
 import React, { useEffect } from "react";
 import {
   BrowserRouter,
@@ -40,10 +42,19 @@ const RequireAuth = ({
   return user?.id ? <>{children}</> : null;
 };
 
-const HomeRedirect = (): React.ReactNode => {
+const RootPageRedirect = (): React.ReactNode => {
   const navigate = useNavigate();
   useEffect(() => {
-    navigate("/home", { replace: true });
+    const rootPage = getStoredRootPage();
+    if (
+      rootPage &&
+      rootPage !== SidebarKey.NONE &&
+      rootPage !== SidebarKey.PROFILE
+    ) {
+      navigate(rootPage, { replace: true });
+    } else {
+      navigate("/home", { replace: true });
+    }
   }, [navigate]);
   return null;
 };
@@ -64,15 +75,15 @@ export const App = (): React.ReactNode => {
         >
           <Route
             path="/"
-            element={user?.id ? <HomeRedirect /> : <MainPage />}
+            element={user?.id ? <RootPageRedirect /> : <MainPage />}
           />
           <Route
             path="/login"
-            element={user?.id ? <HomeRedirect /> : <LoginPage />}
+            element={user?.id ? <RootPageRedirect /> : <LoginPage />}
           />
           <Route
             path="/login/redirect"
-            element={user?.id ? <HomeRedirect /> : <RedirectPage />}
+            element={user?.id ? <RootPageRedirect /> : <RedirectPage />}
           />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
