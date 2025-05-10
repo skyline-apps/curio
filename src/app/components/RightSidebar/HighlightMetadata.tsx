@@ -67,7 +67,9 @@ const HighlightMetadata: React.FC<HighlightMetadataProps> = ({
             : "border-l pl-2",
         )}
       >
-        <Markdown className="[&_*]:text-sm">{highlight.text}</Markdown>
+        <Markdown className="[&_*]:text-sm select-text">
+          {highlight.text}
+        </Markdown>
       </div>
 
       <div className="flex flex-row justify-end gap-2 shrink-0">

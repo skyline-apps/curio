@@ -132,12 +132,15 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
   const { metadata } = item;
 
   return (
-    <div className="flex-1" dir={metadata.textDirection}>
+    <div
+      className="flex flex-col h-full overflow-x-hidden overflow-y-auto"
+      dir={metadata.textDirection}
+    >
       <Thumbnail
         key={metadata.thumbnail}
         thumbnail={metadata.thumbnail ? metadata.thumbnail : undefined}
       />
-      <div className="px-4 py-2 overflow-x-hidden">
+      <div className="px-4 py-2">
         <ItemTitle title={metadata.title} slug={item.slug} />
         <ItemUrl
           title={metadata.title}
