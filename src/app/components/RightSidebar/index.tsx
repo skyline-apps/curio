@@ -54,11 +54,11 @@ const RightSidebar: React.FC = () => {
       {...bind()}
       id="right-sidebar"
       className={cn(
-        "flex flex-col justify-between h-full border-l-1 border-divider transition-all duration-300 ease-in-out absolute right-0 top-0 bottom-0 lg:relative bg-background-400 shadow-lg z-20",
+        "flex flex-col justify-between border-l-1 border-divider transition-all duration-300 ease-in-out absolute right-0 top-0 bottom-0 lg:relative bg-background-400 shadow-lg z-20",
         rightSidebarOpen ? "w-80 max-w-full" : "w-0 lg:w-16",
       )}
     >
-      <div className="grow overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
         <div
           className={cn(
             "h-full w-80 max-w-full transition-all duration-300 ease-in-out transform", // Explicit width needed for transition
