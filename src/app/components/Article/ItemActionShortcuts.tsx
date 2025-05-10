@@ -1,4 +1,5 @@
 import { useItemUpdate } from "@app/components/Items/ItemActions/actions";
+import { AppLayoutContext } from "@app/providers/AppLayout";
 import { useAppPage } from "@app/providers/AppPage";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { ItemsContext } from "@app/providers/Items";
@@ -11,6 +12,7 @@ import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
 export const ItemActionShortcuts = (): null => {
+  const { navigateToRoot } = useContext(AppLayoutContext);
   const { items } = useContext(ItemsContext);
   const { loadedItem, isEditable } = useContext(CurrentItemContext);
 
@@ -32,8 +34,8 @@ export const ItemActionShortcuts = (): null => {
     return items[(currentIndex + increment) % items.length].slug;
   };
 
-  const goHome = (): boolean => {
-    navigate("/home");
+  const goBack = (): boolean => {
+    navigateToRoot();
     return true;
   };
 
@@ -191,9 +193,9 @@ export const ItemActionShortcuts = (): null => {
 
   useKeyboardShortcuts({
     key: "Escape",
-    name: "Go home",
+    name: "Go back",
     category: ShortcutType.NAVIGATION,
-    handler: goHome,
+    handler: goBack,
     priority: 100,
   });
 
