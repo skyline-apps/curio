@@ -22,7 +22,7 @@ Create a new database migration by first editing `src/app/api/db/schema.ts`. The
 Run the migration against your local development database by running `docker exec -it curio bash` and then `npm run db:migrate`.
 
 ### Mobile apps
-First, make sure you build the frontend with `.env` populated by running `npm run build` from `src/app`. Then run `npx cap sync` to set up mobile app files.
+First, make sure you build the frontend with the production `.env` populated by running `npm run build` from `src/app`. Then run `npx cap sync` to set up mobile app files.
 
 ```bash
 $ npx cap run android
