@@ -49,7 +49,10 @@ export const AdvancedActions: React.FC<AdvancedActionsProps> = ({
           </DropdownItem>
         ) : null}
         {item.metadata.source !== ItemSource.EMAIL ? (
-          <DropdownItem key="refetch" onPress={() => refetchItem(item, true)}>
+          <DropdownItem
+            key="public-fetch"
+            onPress={() => refetchItem(item, true)}
+          >
             Fetch from public archive
           </DropdownItem>
         ) : null}
