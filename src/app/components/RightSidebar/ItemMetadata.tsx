@@ -180,7 +180,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
         <div className="flex flex-col gap-2 py-2">
           {readonly ? (
             <Labels labels={item.labels || []} mode="view" />
-          ) : (
+          ) : isEditable(item) ? (
             <Labels
               availableLabels={labels || []}
               labels={item.labels || []}
@@ -189,7 +189,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
               onCreate={createLabel}
               onDelete={handleDeleteLabel}
             />
-          )}
+          ) : null}
         </div>
       </div>
     </div>
