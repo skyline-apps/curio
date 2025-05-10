@@ -15,7 +15,6 @@ export async function handleAPIResponse<T>(response: Response): Promise<T> {
 export async function authenticatedFetch(
   url: string,
   options: RequestInit = {},
-  tryRefreshSession = false,
 ): Promise<Response> {
   const headers = new Headers(options.headers);
 
@@ -32,37 +31,14 @@ export async function authenticatedFetch(
     headers,
   });
 
-  if (response.status === 401 && tryRefreshSession) {
-    log.warn("401 received, attempting to refresh session");
+  if (response.status === 401) {
+    log.warn("Unauthorized, signing out");
     try {
       const supabase = getSupabaseClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error("No session found");
-      }
-      const response = await fetch("/api/auth/session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          accessToken: session.access_token,
-          refreshToken: session.refresh_token,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to set session cookie: ${await response.text()}`,
-        );
-      }
-      return await authenticatedFetch(url, options);
-    } catch (_) {
-      window.localStorage.clear();
-      window.location.href = "/login";
-    }
+      await supabase.auth.signOut();
+    } catch (_) {}
+    window.localStorage.clear();
+    window.location.href = "/login";
   }
 
   return response;

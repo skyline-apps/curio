@@ -34,13 +34,9 @@ interface SettingsProviderProps {
 }
 
 const fetchProfile = async (): Promise<GetUserResponse> => {
-  const response = await authenticatedFetch(
-    "/api/v1/user",
-    {
-      method: "GET",
-    },
-    true,
-  );
+  const response = await authenticatedFetch("/api/v1/user", {
+    method: "GET",
+  });
   return handleAPIResponse<GetUserResponse>(response);
 };
 
