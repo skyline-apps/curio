@@ -54,7 +54,7 @@ const RightSidebar: React.FC = () => {
       {...bind()}
       id="right-sidebar"
       className={cn(
-        "flex flex-col justify-between h-dvh border-l-1 border-divider transition-all duration-300 ease-in-out absolute right-0 top-0 bottom-0 lg:relative bg-background-400 shadow-lg z-20",
+        "flex flex-col justify-between h-full border-l-1 border-divider transition-all duration-300 ease-in-out absolute right-0 top-0 bottom-0 lg:relative bg-background-400 shadow-lg z-20",
         rightSidebarOpen ? "w-80 max-w-full" : "w-0 lg:w-16",
       )}
     >
@@ -112,7 +112,8 @@ const RightSidebar: React.FC = () => {
       </div>
       <Button
         isIconOnly
-        variant="faded"
+        size="sm"
+        variant="flat"
         onPress={toggleSidebar}
         aria-label={rightSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
         className={cn(

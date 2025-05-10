@@ -80,7 +80,7 @@ export const AppPageProvider: React.FC<{
 
   return (
     <AppPageContext.Provider value={{ containerRef, articleFixedInfoRef }}>
-      <div className="relative w-full h-full">
+      <div className="relative w-full h-full overflow-x-hidden">
         <motion.div
           ref={containerRef}
           {...bind()}
@@ -100,7 +100,7 @@ export const AppPageProvider: React.FC<{
             isIconOnly
             size="sm"
             variant="flat"
-            className="absolute top-2 right-2 z-30"
+            className="absolute top-2 right-3"
             onPress={() => setShowArticleFixedInfo((v) => !v)}
             onMouseEnter={() => setShowArticleFixedInfo(true)}
           >
@@ -109,7 +109,7 @@ export const AppPageProvider: React.FC<{
         )}
         <motion.div
           className={cn(
-            "fixed text-right top-0 right-0 lg:right-80 w-80 flex flex-col items-end gap-1 p-2 text-xs max-h-96 overflow-x-hidden overflow-y-auto text-secondary-600 *:bg-background-700 *:shrink-0",
+            "absolute text-right top-0 right-0 lg:right-80 w-80 flex flex-col items-end gap-1 p-2 text-xs max-h-96 overflow-x-hidden overflow-y-auto text-secondary-600 *:bg-background-700 *:shrink-0",
             rightSidebarOpen ? "lg:right-80" : "lg:right-16",
             !showArticleFixedInfo ? "pointer-events-none" : "",
           )}

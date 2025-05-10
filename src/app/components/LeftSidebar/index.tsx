@@ -135,7 +135,8 @@ const LeftSidebar: React.FC = () => {
             />
             <Button
               isIconOnly
-              variant="faded"
+              size="sm"
+              variant="flat"
               onPress={toggleSidebar}
               aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
               className={cn(
