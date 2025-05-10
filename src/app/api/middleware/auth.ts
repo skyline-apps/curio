@@ -1,7 +1,7 @@
 import { and, eq } from "@app/api/db";
 import { checkDbError, DbError, DbErrorCode } from "@app/api/db/errors";
 import { apiKeys, profiles } from "@app/api/db/schema";
-import { createClient, User } from "@app/api/lib/supabase/client";
+import { createClient } from "@app/api/lib/supabase/client";
 import { EnvContext } from "@app/api/utils/env";
 import { createMiddleware } from "hono/factory";
 
@@ -59,46 +59,23 @@ export const authMiddleware = createMiddleware(
         return;
       }
 
+      // Create client - it automatically reads cookies from the request
       const supabase = await createClient(c);
+
+      // Check for Bearer token in Authorization header
       const authHeader = c.req.header("Authorization");
+      const token = authHeader?.startsWith("Bearer ")
+        ? authHeader.substring(7)
+        : undefined;
 
-      let user: User | null = null;
-      let authError: Error | null = null;
+      // Get current user - verifies session via cookies OR validates the provided Bearer token if present.
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser(token);
 
-      if (authHeader?.startsWith("Bearer ")) {
-        const token = authHeader.substring(7);
-        const { data, error: bearerError } = await supabase.auth.getUser(token);
-        user = data.user;
-        authError = bearerError;
-      } else {
-        const { data, error: cookieError } = await supabase.auth.getUser();
-        user = data.user;
-        authError = cookieError;
-
-        if (user && !authError) {
-          const { data: sessionData, error: sessionRetrievalError } =
-            await supabase.auth.getSession();
-          if (sessionData.session && !sessionRetrievalError) {
-            // Re-setting the session with the existing session object.
-            // The Supabase SSR client (e.g., @supabase/ssr) when properly configured
-            // in `createClient` should handle re-issuing the Set-Cookie headers
-            // for the access and refresh tokens. This effectively "extends"
-            // their lifetime in the browser by refreshing their Max-Age/Expires attributes.
-            await supabase.auth.setSession(sessionData.session);
-          } else if (sessionRetrievalError) {
-            log.warn(
-              "AuthMiddleware: Failed to retrieve session for explicit extension.",
-              {
-                error: sessionRetrievalError.message,
-              },
-            );
-            // Continue, as authentication (getUser) might have succeeded.
-          }
-        }
-      }
-
-      // If authentication failed or no user email is present
-      if (authError || !user?.email) {
+      // If getUser fails or returns no user (regardless of method), authentication fails
+      if (error || !user?.email) {
         return returnDefault(c, next);
       }
 
