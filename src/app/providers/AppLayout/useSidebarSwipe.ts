@@ -1,8 +1,8 @@
 import { useDrag } from "react-use-gesture";
 import type { ReactEventHandlers } from "react-use-gesture/dist/types";
 
-const SWIPE_THRESHOLD_DISTANCE = 50; // Min distance in pixels for a swipe
-const SWIPE_THRESHOLD_VELOCITY = 0.3; // Min velocity for a swipe
+export const SWIPE_THRESHOLD_DISTANCE = 50; // Min distance in pixels for a swipe
+export const SWIPE_THRESHOLD_VELOCITY = 0.3; // Min velocity for a swipe
 
 interface UseSidebarSwipeProps {
   isOpen: boolean;

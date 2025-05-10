@@ -1,10 +1,15 @@
 import Button from "@app/components/ui/Button";
 import { useAppLayout } from "@app/providers/AppLayout";
+import {
+  SWIPE_THRESHOLD_DISTANCE,
+  SWIPE_THRESHOLD_VELOCITY,
+} from "@app/providers/AppLayout/useSidebarSwipe";
 import { cn } from "@app/utils/cn";
 import { motion } from "framer-motion";
 import React, { useRef } from "react";
 import { HiMiniBars4 } from "react-icons/hi2";
 import { useLocation } from "react-router-dom";
+import { useDrag } from "react-use-gesture";
 
 import { AppPageContext } from "./";
 
@@ -17,7 +22,8 @@ export const AppPageProvider: React.FC<{
   const [showArticleFixedInfo, setShowArticleFixedInfo] = React.useState(false);
   const { pathname } = useLocation();
   const {
-    appLayout: { rightSidebarOpen },
+    appLayout: { leftSidebarOpen, rightSidebarOpen },
+    updateAppLayout,
   } = useAppLayout();
 
   React.useEffect(() => {
@@ -43,11 +49,41 @@ export const AppPageProvider: React.FC<{
     return () => node.removeEventListener("scroll", onScroll);
   }, [containerRef]);
 
+  const bind = useDrag(
+    ({ axis, last, movement: [mx], velocity, direction: [dx] }) => {
+      if (axis === "y") return;
+      if (!last) return;
+      const isSwipeRight = dx > 0;
+      const isSwipeLeft = dx < 0;
+      const meetsThreshold =
+        Math.abs(mx) > SWIPE_THRESHOLD_DISTANCE ||
+        velocity > SWIPE_THRESHOLD_VELOCITY;
+
+      if (!meetsThreshold) return;
+
+      if (isSwipeRight) {
+        if (!leftSidebarOpen) {
+          updateAppLayout({ leftSidebarOpen: true });
+        } else if (rightSidebarOpen) {
+          updateAppLayout({ rightSidebarOpen: false });
+        }
+      } else if (isSwipeLeft) {
+        if (!rightSidebarOpen) {
+          updateAppLayout({ rightSidebarOpen: true });
+        } else if (leftSidebarOpen) {
+          updateAppLayout({ leftSidebarOpen: false });
+        }
+      }
+    },
+    { axis: "x", filterTaps: true, preventDefault: true },
+  );
+
   return (
     <AppPageContext.Provider value={{ containerRef, articleFixedInfoRef }}>
       <div className="relative w-full h-full">
         <motion.div
           ref={containerRef}
+          {...bind()}
           className="h-full p-2 overflow-y-auto grow"
           key={pathname}
           initial={{ opacity: 0.8, x: -2 }}
