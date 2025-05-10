@@ -16,6 +16,8 @@ import { UpdateStateResponse } from "@app/schemas/v1/items/state";
 import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import config from "@app/utils/config.json";
 import { createLogger } from "@app/utils/logger";
+import { isNativePlatform } from "@app/utils/platform";
+import { Share } from "@capacitor/share";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { useContext } from "react";
 
@@ -45,6 +47,7 @@ interface UseItemUpdate {
   refetchItem: (item: Item, useArchive?: boolean) => Promise<void>;
   saveExistingItems: (itemSlugs: string[]) => Promise<void>;
   isSavingExisting: boolean;
+  shareItem: (item: Item) => Promise<void>;
 }
 
 export const useItemUpdate = (): UseItemUpdate => {
@@ -390,6 +393,19 @@ export const useItemUpdate = (): UseItemUpdate => {
     return await saveItemsMutation.mutateAsync({ itemSlugs });
   };
 
+  const shareItem = async (item: Item): Promise<void> => {
+    const itemUrl = `${import.meta.env.VITE_CURIO_URL}/item/${item.slug}`;
+    if (isNativePlatform()) {
+      await Share.share({
+        title: item.metadata.title,
+        text: itemUrl,
+      });
+    } else {
+      navigator.clipboard.writeText(itemUrl);
+      showToast("Link copied to clipboard.");
+    }
+  };
+
   return {
     updateItemsState,
     updateItemsFavorite,
@@ -400,5 +416,6 @@ export const useItemUpdate = (): UseItemUpdate => {
     refetchItem,
     saveExistingItems,
     isSavingExisting: saveItemsMutation.isPending,
+    shareItem,
   };
 };

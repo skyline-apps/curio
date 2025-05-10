@@ -6,6 +6,7 @@ import { useCallback, useContext } from "react";
 import {
   HiArchiveBox,
   HiOutlineArchiveBox,
+  HiOutlineShare,
   HiOutlineStar,
   HiOutlineTrash,
   HiStar,
@@ -73,7 +74,7 @@ const ItemActions = ({
   className,
   onItemActionSuccess,
 }: ItemActionsProps): React.ReactElement => {
-  const { updateItemsState, updateItemsFavorite } = useItemUpdate();
+  const { updateItemsState, updateItemsFavorite, shareItem } = useItemUpdate();
 
   if (!item) {
     return <></>;
@@ -118,6 +119,10 @@ const ItemActions = ({
             activeDisplay={{ text: "Restore", icon: <HiTrash /> }}
             isActive={item.metadata.state === ItemState.DELETED}
             onActionSuccess={onItemActionSuccess}
+          />
+          <ActionButton
+            action={async () => shareItem(item)}
+            defaultDisplay={{ text: "Share", icon: <HiOutlineShare /> }}
           />
         </>
       )}
