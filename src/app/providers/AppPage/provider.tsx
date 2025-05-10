@@ -1,7 +1,9 @@
+import Button from "@app/components/ui/Button";
 import { useAppLayout } from "@app/providers/AppLayout";
 import { cn } from "@app/utils/cn";
 import { motion } from "framer-motion";
 import React, { useRef } from "react";
+import { HiMiniBars4 } from "react-icons/hi2";
 import { useLocation } from "react-router-dom";
 
 import { AppPageContext } from "./";
@@ -11,10 +13,35 @@ export const AppPageProvider: React.FC<{
 }> = ({ children }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const articleFixedInfoRef = useRef<HTMLDivElement>(null);
+  const [hasChildren, setHasChildren] = React.useState(false);
+  const [showArticleFixedInfo, setShowArticleFixedInfo] = React.useState(false);
   const { pathname } = useLocation();
   const {
     appLayout: { rightSidebarOpen },
   } = useAppLayout();
+
+  React.useEffect(() => {
+    const node = articleFixedInfoRef.current;
+    if (!node) return;
+    const update = (): void => {
+      const hasNodes = !!node && node.hasChildNodes();
+      setHasChildren(hasNodes);
+    };
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(node, { childList: true, subtree: true });
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  React.useEffect(() => {
+    const node = containerRef.current;
+    if (!node) return;
+    const onScroll = (): void => setShowArticleFixedInfo(false);
+    node.addEventListener("scroll", onScroll);
+    return () => node.removeEventListener("scroll", onScroll);
+  }, [containerRef]);
 
   return (
     <AppPageContext.Provider value={{ containerRef, articleFixedInfoRef }}>
@@ -32,15 +59,30 @@ export const AppPageProvider: React.FC<{
         >
           {children}
         </motion.div>
+        {hasChildren && !showArticleFixedInfo && (
+          <Button
+            isIconOnly
+            size="sm"
+            variant="faded"
+            className="absolute top-2 right-2 z-30"
+            onPress={() => setShowArticleFixedInfo((v) => !v)}
+            onMouseEnter={() => setShowArticleFixedInfo(true)}
+          >
+            <HiMiniBars4 />
+          </Button>
+        )}
         <motion.div
           className={cn(
             "fixed text-right top-0 right-0 lg:right-80 w-80 flex flex-col items-end gap-1 p-2 text-xs max-h-96 overflow-x-hidden overflow-y-auto text-secondary-600 *:bg-background-700 *:shrink-0",
             rightSidebarOpen ? "lg:right-80" : "lg:right-16",
+            !showArticleFixedInfo ? "pointer-events-none" : "",
           )}
           ref={articleFixedInfoRef}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 0 }}
-          whileHover={{ opacity: 1, x: 0 }}
+          initial={false}
+          animate={{
+            opacity: showArticleFixedInfo ? 1 : 0,
+            x: showArticleFixedInfo ? 0 : 20,
+          }}
           transition={{ duration: 0.2 }}
         />
       </div>
