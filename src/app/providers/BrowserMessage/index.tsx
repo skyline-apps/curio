@@ -7,8 +7,8 @@ export enum EventType {
 }
 
 interface BrowserMessageContextType {
-  addMessageListener: (callback: (event: MessageEvent) => void) => void;
-  removeMessageListener: (callback: (event: MessageEvent) => void) => void;
+  addMessageListener: (callback: (type: EventType) => void) => void;
+  removeMessageListener: (callback: (type: EventType) => void) => void;
   checkSavingAvailable: () => void;
   saveItemContent: (url: string, overrideOpenUrl?: string) => Promise<void>;
   savingItem: string | null;

@@ -6,7 +6,10 @@ import Modal, {
   ModalContent,
   ModalHeader,
 } from "@app/components/ui/Modal";
-import { BrowserMessageContext } from "@app/providers/BrowserMessage";
+import {
+  BrowserMessageContext,
+  EventType,
+} from "@app/providers/BrowserMessage";
 import { createLogger } from "@app/utils/logger";
 import type { PressEvent } from "@react-types/shared";
 import { useCallback, useContext, useEffect, useState } from "react";
@@ -30,6 +33,8 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
     savingItem,
     savingError,
     clearSavingError,
+    addMessageListener,
+    removeMessageListener,
   } = useContext(BrowserMessageContext);
 
   const closeModal = useCallback((): void => {
@@ -45,6 +50,17 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
       checkSavingAvailable();
     }
   }, [isOpen, clearSavingError, checkSavingAvailable]);
+
+  useEffect(() => {
+    const handleMessage = (type: EventType): void => {
+      if (type === EventType.SAVE_SUCCESS) {
+        closeModal();
+      }
+    };
+
+    addMessageListener(handleMessage);
+    return () => removeMessageListener(handleMessage);
+  }, [addMessageListener, removeMessageListener, closeModal]);
 
   const openAndSave = async (
     event: React.FormEvent<HTMLFormElement> | PressEvent,

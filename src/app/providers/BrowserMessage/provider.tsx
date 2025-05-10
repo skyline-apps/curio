@@ -1,14 +1,10 @@
-import ContentCaptureModal from "@app/components/ContentCaptureModal";
 import Button from "@app/components/ui/Button";
 import { useCache } from "@app/providers/Cache";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { ItemsContext } from "@app/providers/Items";
 import { useToast } from "@app/providers/Toast";
 import { UploadStatus } from "@app/schemas/types";
-import {
-  UpdateItemContentRequestSchema,
-  UpdateItemContentResponseSchema,
-} from "@app/schemas/v1/items/content";
+import { UpdateItemContentResponse } from "@app/schemas/v1/items/content";
 import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import config from "@app/utils/config.json";
 import { createLogger } from "@app/utils/logger";
@@ -24,6 +20,7 @@ import React, {
 import { Link } from "react-router-dom";
 
 import { BrowserMessageContext, EventType } from ".";
+import { useInAppBrowserCapture } from "./useInAppBrowserCapture";
 
 const log = createLogger("browser-message-provider");
 
@@ -63,6 +60,13 @@ const UNSUPPORTED_BROWSER_ERROR = (
   </>
 );
 
+const MOBILE_BROWSER_ERROR = (
+  <>
+    Saving directly from mobile browsers is not currently supported. Please save
+    items using the Curio app or your desktop browser.
+  </>
+);
+
 export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
   children,
 }: BrowserMessageProviderProps) => {
@@ -75,20 +79,10 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
   const { fetchItems } = useContext(ItemsContext);
   const { fetchContent, loadedItem } = useContext(CurrentItemContext);
   const { showToast } = useToast();
-  const listeners = useMemo(() => new Set<(event: MessageEvent) => void>(), []);
+  const listeners = useMemo(() => new Set<(type: EventType) => void>(), []);
   const installationCallback = useRef<((success: boolean) => void) | null>(
     null,
   );
-
-  const [captureModalConfig, setCaptureModalConfig] = useState<{
-    isOpen: boolean;
-    url: string | null;
-    originalUrl: string | null;
-  }>({
-    isOpen: false,
-    url: null,
-    originalUrl: null,
-  });
 
   const getExtensionName = useCallback((): string => {
     if (browser === "chrome") {
@@ -128,108 +122,113 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
     setSavingError(null);
   }, []);
 
-  const handleHtmlCaptured = async (
-    htmlContent: string | null,
-  ): Promise<void> => {
-    const originalUrlToSave = captureModalConfig.originalUrl;
-    setCaptureModalConfig({ isOpen: false, url: null, originalUrl: null });
-
-    if (!htmlContent || !originalUrlToSave) {
-      log.error("HTML capture failed or original URL missing", {
-        htmlContentProvided: !!htmlContent,
-        originalUrlToSave,
-      });
+  const handleSaveResponse = useCallback(
+    (response: UpdateItemContentResponse, isNative: boolean = false) => {
       setSavingItem(null);
-      const errorElement = <p>Failed to capture page content.</p>;
-      showToast(errorElement, {
-        dismissable: true,
-        disappearing: true,
-        duration: 5000,
-      });
-      setSavingError(errorElement);
-      return;
-    }
-
-    const payload: Zod.infer<typeof UpdateItemContentRequestSchema> = {
-      htmlContent,
-      url: originalUrlToSave,
-      skipMetadataExtraction: false,
-    };
-
-    log.info("Attempting to save content via API with payload:", payload);
-
-    try {
-      const response = await authenticatedFetch("/api/v1/items/content", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const responseData = await handleAPIResponse(response);
-
-      const result = UpdateItemContentResponseSchema.safeParse(responseData);
-      log.info("API response for content save:", {
-        status: response.status,
-        data: responseData,
-        parsedResult: result,
-      });
-
-      if (!result.success || result.data.status === UploadStatus.ERROR) {
-        const apiErrorMessage =
-          result.success && result.data.status === UploadStatus.ERROR
-            ? result.data.error
-            : "Unknown API error";
-        log.error(
-          "Error saving content via API:",
-          apiErrorMessage,
-          result.error,
-        );
+      if (response.status === UploadStatus.ERROR) {
+        log.error("Error updating content", response.error);
         const errorElement = (
-          <p>Error saving content: {apiErrorMessage}. Please try again.</p>
+          <p>
+            Error saving content.{" "}
+            {isNative ? "Try again," : "Refresh the page and try again,"} and
+            contact us if this problem persists.
+          </p>
         );
         showToast(errorElement, {
           dismissable: true,
           disappearing: true,
-          duration: 8000,
+          duration: 5000,
         });
         setSavingError(errorElement);
+        return;
+      }
+      fetchItems(true);
+      if (loadedItem?.item.slug === response.slug) {
+        fetchContent(response.slug, true);
       } else {
-        log.info("Content saved successfully via API", result.data);
-        showToast(
-          <div className="flex gap-2 items-center">
-            Item successfully saved!
-            {result.data.slug && (
-              <Button size="sm" href={`/item/${result.data.slug}`}>
-                View
-              </Button>
-            )}
-          </div>,
-          { dismissable: true, disappearing: true, duration: 5000 },
-        );
-        fetchItems(true);
-        if (result.data.slug && loadedItem?.item.slug === result.data.slug) {
-          fetchContent(result.data.slug, true);
-        } else if (result.data.slug) {
-          invalidateCache(result.data.slug);
+        invalidateCache(response.slug);
+      }
+      showToast(
+        <div className="flex gap-2 items-center">
+          Item successfully saved!
+          <Button size="sm" href={`/item/${response.slug}`}>
+            View
+          </Button>
+        </div>,
+        { dismissable: true, disappearing: true, duration: 5000 },
+      );
+      log.info("Content saved successfully", response);
+    },
+    [showToast, fetchItems, fetchContent, loadedItem, invalidateCache],
+  );
+
+  const handleHtmlCaptured = useCallback(
+    (htmlContent: string | null, urlToSave: string | null): void => {
+      async function updateContent(
+        htmlContent: string,
+        url: string,
+      ): Promise<void> {
+        try {
+          const response = await authenticatedFetch("/api/v1/items/content", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ htmlContent, url }),
+          });
+
+          const result =
+            await handleAPIResponse<UpdateItemContentResponse>(response);
+
+          handleSaveResponse(result);
+          listeners.forEach((listener) => {
+            listener(EventType.SAVE_SUCCESS);
+          });
+        } catch (e) {
+          log.error("API request failed for saving content:", e);
+          const errorElement = (
+            <p>
+              Failed to save content. Check your network connection and try
+              again.
+            </p>
+          );
+          showToast(errorElement, {
+            dismissable: true,
+            disappearing: true,
+            duration: 5000,
+          });
+          setSavingError(errorElement);
+          listeners.forEach((listener) => {
+            listener(EventType.SAVE_ERROR);
+          });
+        } finally {
+          setSavingItem(null);
         }
       }
-    } catch (e) {
-      log.error("API request failed for saving content:", e);
-      const errorElement = (
-        <p>
-          Failed to save content. Check your network connection and try again.
-        </p>
-      );
-      showToast(errorElement, {
-        dismissable: true,
-        disappearing: true,
-        duration: 5000,
-      });
-      setSavingError(errorElement);
-    } finally {
-      setSavingItem(null);
-    }
-  };
+
+      if (!htmlContent || !urlToSave) {
+        log.error("HTML capture failed or original URL missing");
+        setSavingItem(null);
+        const errorElement = <p>Failed to capture page content.</p>;
+        showToast(errorElement, {
+          dismissable: true,
+          disappearing: true,
+          duration: 5000,
+        });
+        setSavingError(errorElement);
+        listeners.forEach((listener) => {
+          listener(EventType.SAVE_ERROR);
+        });
+        return;
+      }
+
+      updateContent(htmlContent, urlToSave);
+    },
+    [handleSaveResponse, showToast, listeners],
+  );
+
+  const { startCapture, isCapturing, captureError } = useInAppBrowserCapture({
+    onHtmlCaptured: handleHtmlCaptured,
+    onCaptureProcessClosed: () => {},
+  });
 
   const checkSavingAvailable = useCallback((): void => {
     const callback = (success: boolean): void => {
@@ -238,16 +237,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
         return;
       }
       if (isMobileBrowser()) {
-        setSavingError(
-          <>
-            <p>
-              Saving directly from mobile browsers is not currently supported.
-            </p>
-            <p>
-              Please save items using the Curio app or your desktop browser.
-            </p>
-          </>,
-        );
+        setSavingError(<p>{MOBILE_BROWSER_ERROR}</p>);
         return;
       }
       if (success) {
@@ -287,29 +277,19 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
 
   const saveItemContent = useCallback(
     async (url: string, overrideOpenUrl?: string) => {
-      if (isNativePlatform()) {
-        setSavingItem(url);
-        setCaptureModalConfig({
-          isOpen: true,
-          url: overrideOpenUrl || url,
-          originalUrl: url,
-        });
+      if (!isNativePlatform() && isMobileBrowser()) {
+        setSavingError(<p>{MOBILE_BROWSER_ERROR}</p>);
         return;
       }
 
-      if (isMobileBrowser()) {
-        setSavingError(
-          <>
-            <p>
-              Saving directly from mobile browsers is not currently supported.
-            </p>
-            <p>
-              Please save items using the Curio app or your desktop browser.
-            </p>
-          </>,
-        );
+      if (isNativePlatform()) {
+        setSavingItem(url);
+        if (!isCapturing) {
+          startCapture(overrideOpenUrl || url, url);
+        }
         return;
       }
+
       try {
         setSavingItem(url);
         setSavingError(null);
@@ -378,7 +358,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
         setSavingError(errorElement);
       }
     },
-    [showToast, getExtensionName, getExtensionLink],
+    [showToast, getExtensionName, getExtensionLink, isCapturing, startCapture],
   );
 
   const handleMessage = useCallback(
@@ -396,40 +376,8 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
       }
 
       if (event.data.type === EventType.SAVE_SUCCESS) {
-        setSavingItem(null);
-        if (!event.data.data || event.data.data.status === UploadStatus.ERROR) {
-          log.error("Error updating content", event.data);
-          const errorElement = (
-            <p>
-              Error saving content. Refresh the page and try again, and contact
-              us if this problem persists.
-            </p>
-          );
-          showToast(errorElement, {
-            dismissable: true,
-            disappearing: true,
-            duration: 5000,
-          });
-          setSavingError(errorElement);
-          return;
-        }
-        fetchItems(true);
-        if (loadedItem?.item.slug === event.data.data.slug) {
-          fetchContent(event.data.data.slug, true);
-        } else {
-          invalidateCache(event.data.data.slug);
-        }
-        showToast(
-          <div className="flex gap-2 items-center">
-            Item successfully saved!
-            <Button size="sm" href={`/item/${event.data.data.slug}`}>
-              View
-            </Button>
-          </div>,
-          { dismissable: true, disappearing: true, duration: 5000 },
-        );
-        listeners.forEach((listener) => listener(event));
-        log.info("Content saved successfully", event.data);
+        handleSaveResponse(event.data.data);
+        listeners.forEach((listener) => listener(event.data.type));
       } else if (event.data.type === EventType.SAVE_ERROR) {
         setSavingItem(null);
         log.error("Error saving content", event.data);
@@ -445,17 +393,10 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
           duration: 5000,
         });
         setSavingError(errorElement);
-        listeners.forEach((listener) => listener(event));
+        listeners.forEach((listener) => listener(event.data.type));
       }
     },
-    [
-      showToast,
-      fetchItems,
-      listeners,
-      fetchContent,
-      loadedItem,
-      invalidateCache,
-    ],
+    [handleSaveResponse, showToast, listeners],
   );
 
   useEffect(() => {
@@ -464,14 +405,14 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
   }, [handleMessage]);
 
   const addMessageListener = useCallback(
-    (callback: (event: MessageEvent) => void) => {
+    (callback: (type: EventType) => void) => {
       listeners.add(callback);
     },
     [listeners],
   );
 
   const removeMessageListener = useCallback(
-    (callback: (event: MessageEvent) => void) => {
+    (callback: (type: EventType) => void) => {
       listeners.delete(callback);
     },
     [listeners],
@@ -485,28 +426,12 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
         checkSavingAvailable,
         saveItemContent,
         savingItem,
-        savingError,
+        savingError:
+          savingError || (captureError ? <p>{captureError}</p> : null),
         clearSavingError,
       }}
     >
       {children}
-      {captureModalConfig.isOpen && captureModalConfig.url ? (
-        <ContentCaptureModal
-          url={captureModalConfig.url}
-          onClose={() => {
-            setCaptureModalConfig({
-              isOpen: false,
-              url: null,
-              originalUrl: null,
-            });
-            if (savingItem) {
-              setSavingItem(null);
-              showToast("Save operation cancelled.", { duration: 3000 });
-            }
-          }}
-          onHtmlCaptured={handleHtmlCaptured}
-        />
-      ) : null}
     </BrowserMessageContext.Provider>
   );
 };

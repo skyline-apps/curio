@@ -3,14 +3,10 @@ import Button from "@app/components/ui/Button";
 import Icon from "@app/components/ui/Icon";
 import { SidebarKey, useAppLayout } from "@app/providers/AppLayout";
 import { useSidebarSwipe } from "@app/providers/AppLayout/useSidebarSwipe";
-import {
-  BrowserMessageContext,
-  EventType,
-} from "@app/providers/BrowserMessage";
 import { useSettings } from "@app/providers/Settings";
 import { useUser } from "@app/providers/User";
 import { cn } from "@app/utils/cn";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   HiChevronDoubleLeft,
   HiChevronDoubleRight,
@@ -30,20 +26,6 @@ const LeftSidebar: React.FC = () => {
   const [selectedKey, setSelectedKey] = useState<SidebarKey>(SidebarKey.NONE);
   const [showNewItemModal, setShowNewItemModal] = useState<boolean>(false);
   const { appLayout, updateAppLayout, updateRootPage } = useAppLayout();
-  const { addMessageListener, removeMessageListener } = useContext(
-    BrowserMessageContext,
-  );
-
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent): void => {
-      if (event.data.type === EventType.SAVE_SUCCESS) {
-        setShowNewItemModal(false);
-      }
-    };
-
-    addMessageListener(handleMessage);
-    return () => removeMessageListener(handleMessage);
-  }, [addMessageListener, removeMessageListener]);
 
   useEffect(() => {
     const newSelectedKey =
