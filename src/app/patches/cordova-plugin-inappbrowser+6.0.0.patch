@@ -1,0 +1,69 @@
+diff --git a/node_modules/cordova-plugin-inappbrowser/src/android/InAppBrowser.java b/node_modules/cordova-plugin-inappbrowser/src/android/InAppBrowser.java
+index eed5950..5662c8a 100644
+--- a/node_modules/cordova-plugin-inappbrowser/src/android/InAppBrowser.java
++++ b/node_modules/cordova-plugin-inappbrowser/src/android/InAppBrowser.java
+@@ -72,6 +72,7 @@ import org.apache.cordova.CordovaWebView;
+ import org.apache.cordova.LOG;
+ import org.apache.cordova.PluginManager;
+ import org.apache.cordova.PluginResult;
++import org.json.JSONArray;
+ import org.json.JSONException;
+ import org.json.JSONObject;
+ 
+@@ -295,13 +296,15 @@ public class InAppBrowser extends CordovaPlugin {
+             injectDeferredObject(args.getString(0), jsWrapper);
+         }
+         else if (action.equals("injectStyleCode")) {
+-            String jsWrapper;
+-            if (args.getBoolean(1)) {
+-                jsWrapper = String.format("(function(d) { var c = d.createElement('style'); c.innerHTML = %%s; d.body.appendChild(c); prompt('', 'gap-iab://%s');})(document)", callbackContext.getCallbackId());
++            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && args.getBoolean(1)) {
++                runJavascriptWithResult(args.getString(0), callbackContext);
+             } else {
+-                jsWrapper = "(function(d) { var c = d.createElement('style'); c.innerHTML = %s; d.body.appendChild(c); })(document)";
++                String jsWrapper = null;
++                if (args.getBoolean(1)) {
++                    jsWrapper = String.format("(function(){prompt(JSON.stringify([eval(%%s)]), 'gap-iab://%s')})()", callbackContext.getCallbackId());
++                }
++                injectDeferredObject(args.getString(0), jsWrapper);
+             }
+-            injectDeferredObject(args.getString(0), jsWrapper);
+         }
+         else if (action.equals("injectStyleFile")) {
+             String jsWrapper;
+@@ -421,6 +424,35 @@ public class InAppBrowser extends CordovaPlugin {
+         }
+     }
+     
++    private void runJavascriptWithResult(String scriptToInject, CallbackContext callbackContext) {
++        if (inAppWebView!=null) {
++            final String finalScriptToInject = scriptToInject;
++            final CallbackContext finalCallbackContext = callbackContext;
++            final String callbackId = callbackContext.getCallbackId();
++
++            this.cordova.getActivity().runOnUiThread(new Runnable() {
++                @SuppressLint("NewApi")
++                @Override
++                public void run() {
++                    inAppWebView.evaluateJavascript(finalScriptToInject, new ValueCallback<String>() {
++                        @Override
++                        public void onReceiveValue(String s) {
++                            PluginResult pluginResult;
++                            try {
++                                pluginResult = new PluginResult(PluginResult.Status.OK, new JSONArray("[" + s + "]"));
++                            } catch(JSONException e) {
++                                pluginResult = new PluginResult(PluginResult.Status.JSON_EXCEPTION, e.getMessage());
++                            }
++                            finalCallbackContext.sendPluginResult(pluginResult);
++                        }
++                    });
++                }
++            });
++        } else {
++            LOG.d(LOG_TAG, "Can't inject code into the system browser");
++        }
++    }
++
+     /**
+      * Put the list of features into a hash map
+      *

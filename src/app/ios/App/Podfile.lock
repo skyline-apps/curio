@@ -8,6 +8,8 @@ PODS:
   - CapacitorCordova (7.2.0)
   - CapacitorPreferences (7.0.1):
     - Capacitor
+  - CordovaPlugins (7.2.0):
+    - CapacitorCordova
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
@@ -15,6 +17,7 @@ DEPENDENCIES:
   - "CapacitorBrowser (from `../../node_modules/@capacitor/browser`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorPreferences (from `../../node_modules/@capacitor/preferences`)"
+  - CordovaPlugins (from `../capacitor-cordova-ios-plugins`)
 
 EXTERNAL SOURCES:
   Capacitor:
@@ -27,6 +30,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorPreferences:
     :path: "../../node_modules/@capacitor/preferences"
+  CordovaPlugins:
+    :path: "../capacitor-cordova-ios-plugins"
 
 SPEC CHECKSUMS:
   Capacitor: 03bc7cbdde6a629a8b910a9d7d78c3cc7ed09ea7
@@ -34,7 +39,8 @@ SPEC CHECKSUMS:
   CapacitorBrowser: 6299776d496e968505464884d565992faa20444a
   CapacitorCordova: 5967b9ba03915ef1d585469d6e31f31dc49be96f
   CapacitorPreferences: 6c98117d4d7508034a4af9db64d6b26fc75d7b94
+  CordovaPlugins: 09eaf3779c4d1fa6331773fcd29e29dcd8a7afd6
 
-PODFILE CHECKSUM: 0a153b8471e5a2d96cda8f99774e1ec2487d249f
+PODFILE CHECKSUM: 2129d96d0518fb22fe02157909c0f9d2589b7898
 
 COCOAPODS: 1.16.2

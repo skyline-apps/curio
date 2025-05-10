@@ -50,6 +50,7 @@ const NewItemModal: React.FC<NewItemModalProps> = ({
     event: React.FormEvent<HTMLFormElement> | PressEvent,
   ): Promise<void> => {
     setError(null);
+    clearSavingError();
     if ("preventDefault" in event) event.preventDefault();
     try {
       new URL(urlInput);
