@@ -123,7 +123,7 @@ const RightSidebar: React.FC = () => {
           "flex-none m-2 z-10 pointer-events-auto",
           rightSidebarOpen
             ? ""
-            : "fixed right-0 bottom-[env(safe-area-inset-bottom)] lg:relative lg:self-center",
+            : "fixed right-0 bottom-[env(safe-area-inset-bottom)] lg:bottom-0 lg:relative lg:self-center",
         )}
       >
         <Icon

@@ -125,7 +125,7 @@ const LeftSidebar: React.FC = () => {
                 "flex-none m-2 z-10",
                 sidebarOpen
                   ? ""
-                  : "fixed left-0 bottom-[env(safe-area-inset-bottom)] md:relative",
+                  : "fixed left-0 bottom-[env(safe-area-inset-bottom)] md:bottom-0 md:relative",
               )}
             >
               <Icon
