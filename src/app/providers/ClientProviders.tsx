@@ -1,10 +1,14 @@
 import AnalyticsPageView from "@app/components/AnalyticsPageView";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createPersister } from "@app/utils/storage";
+import { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import posthog from "posthog-js";
 import { PostHogProvider as PHProvider } from "posthog-js/react";
 import React, { PropsWithChildren, useEffect, useState } from "react";
 
 import { KeyboardShortcutProvider } from "./KeyboardShortcuts/provider";
+
+const asyncStoragePersister = createPersister();
 
 export const ClientProviders: React.FC<PropsWithChildren> = ({ children }) => {
   const posthogKey = import.meta.env.VITE_POSTHOG_KEY;
@@ -30,11 +34,14 @@ export const ClientProviders: React.FC<PropsWithChildren> = ({ children }) => {
   );
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister: asyncStoragePersister }}
+    >
       <PHProvider client={posthog}>
         <AnalyticsPageView />
         <KeyboardShortcutProvider>{children}</KeyboardShortcutProvider>
       </PHProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 };

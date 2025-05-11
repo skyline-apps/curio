@@ -1,7 +1,15 @@
 import { Preferences } from "@capacitor/preferences";
+import {
+  PersistedClient,
+  Persister,
+} from "@tanstack/react-query-persist-client";
+import { del, get, set } from "idb-keyval";
 
 import { isNativePlatform } from "./platform";
 
+/**
+ * Creates a Capacitor storage adapter
+ */
 export const storage = {
   getItem: async (key: string): Promise<string | null> => {
     if (isNativePlatform()) {
@@ -25,3 +33,22 @@ export const storage = {
     }
   },
 };
+
+/**
+ * Creates an Indexed DB persister
+ */
+export function createPersister(
+  idbValidKey: IDBValidKey = "reactQuery",
+): Persister {
+  return {
+    persistClient: async (client: PersistedClient) => {
+      await set(idbValidKey, client);
+    },
+    restoreClient: async () => {
+      return await get<PersistedClient>(idbValidKey);
+    },
+    removeClient: async () => {
+      await del(idbValidKey);
+    },
+  };
+}
