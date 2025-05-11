@@ -55,6 +55,7 @@ vi.mock("react-router-dom", () => ({
 // Mock API requests
 export const mockAuthenticatedFetch = vi.fn();
 vi.mock("@app/utils/api", async () => ({
+  getSupabaseProjectRef: vi.fn().mockReturnValue("test-project-ref"),
   handleAPIResponse: (await vi.importActual("@app/utils/api"))
     .handleAPIResponse,
   authenticatedFetch: mockAuthenticatedFetch,
