@@ -26,6 +26,18 @@
                 <data android:scheme="https" android:host="staging.curi.ooo" />
             </intent-filter>
         </activity>
+        
+        <activity
+                android:name="de.mindlib.sendIntent.SendIntentActivity"
+                android:label="@string/app_name"
+                android:exported="true"
+                android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
 
         <provider
             android:name="androidx.core.content.FileProvider"

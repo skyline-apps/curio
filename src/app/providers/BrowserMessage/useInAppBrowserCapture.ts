@@ -14,7 +14,7 @@ declare global {
 }
 
 const log = createLogger("use-in-app-browser-capture");
-const SCRIPT_EXECUTION_TIMEOUT_MS = 5000;
+const SCRIPT_EXECUTION_TIMEOUT_MS = 10000;
 
 export interface UseInAppBrowserCaptureOptions {
   onHtmlCaptured: (html: string | null, urlToSave: string | null) => void;
@@ -65,13 +65,13 @@ export const useInAppBrowserCapture = ({
         );
         return;
       }
-      log.info(
+      log.debug(
         `startCapture called. URL to open: ${urlToOpen}, URL to save: ${urlToSave}.`,
       );
       setCaptureError(null);
       setIsCapturing(true);
-      setUrlToOpen(urlToOpen);
       setUrlToSave(urlToSave);
+      setUrlToOpen(urlToOpen);
     },
     [isCapturing],
   );
@@ -85,65 +85,79 @@ export const useInAppBrowserCapture = ({
   }, [isCapturing, onHtmlCaptured, performFullClose, urlToSave]);
 
   useEffect(() => {
-    if (!urlToOpen || !isCapturing) {
-      return;
-    }
-
+    if (!urlToOpen || !urlToSave) return;
     const iabInstance = window.cordova.InAppBrowser.open(
       urlToOpen,
       "_blank",
-      "location=no,hidden=yes,clearcache=yes,clearsessioncache=yes,zoom=no",
+      "location=no,hidden=yes,zoom=no",
     );
     iabRef.current = iabInstance;
     const localIabRef = iabInstance;
 
     const handleLoadStartEvent = (): void => {
-      localIabRef.insertCSS(
-        {
-          code: `
-            #curio-overlay {
-              position: fixed;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              z-index: 9999999;
-              background-color: rgba(0, 0, 0, 0.7);
-              display: flex;
-              justify-content: center;
-              align-items: center;
-            }
-            #curio-spinner {
-              width: 50px;
-              height: 50px;
-              border: 5px solid rgba(255, 255, 255, 0.3);
-              border-top-color: #ffffff;
-              border-radius: 50%;
-              animation: curio-spin 1s linear infinite;
-            }
-            @keyframes curio-spin {
-              to { transform: rotate(360deg); }
-            }
-          `,
-        },
-        () => {},
-      );
-
       localIabRef.executeScript(
         {
           code: `
-            var existingOverlay = document.getElementById('curio-overlay');
-            if (existingOverlay) {
-              var existingSpinner = document.getElementById('curio-spinner');
-              if (existingSpinner) existingSpinner.remove();
-            } else {
-            var overlay = document.createElement('div');
-            overlay.id = 'curio-overlay';
-            document.body.appendChild(overlay);
-        }
-            var spinner = document.createElement('div');
-            spinner.id = 'curio-spinner';
-            overlay.appendChild(spinner);
+          (function() {
+            const overlayId = 'curio-overlay';
+            const spinnerId = 'curio-spinner';
+            const animationStyleId = 'curio-spin';
+
+            function initCurioOverlay() {
+              if (!document.body) {
+                // If document.body is not ready, try again on the next animation frame.
+                requestAnimationFrame(initCurioOverlay);
+                return;
+              }
+
+              if (document.head && !document.getElementById(animationStyleId)) {
+                  var styleSheet = document.createElement("style");
+                  styleSheet.id = animationStyleId;
+                  styleSheet.type = "text/css";
+                  styleSheet.innerText = '@keyframes curio-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+                  document.head.appendChild(styleSheet);
+              }
+
+              let overlay = document.getElementById(overlayId);
+              if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = overlayId;
+                overlay.style.position = "fixed";
+                overlay.style.top = "0";
+                overlay.style.left = "0";
+                overlay.style.width = "100%";
+                overlay.style.height = "100%";
+                overlay.style.zIndex = "9999999";
+                overlay.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+                overlay.style.display = "flex";
+                overlay.style.justifyContent = "center";
+                overlay.style.alignItems = "center";
+                document.body.appendChild(overlay);
+              }
+
+              let spinner = document.getElementById(spinnerId);
+              if (!spinner) {
+                spinner = document.createElement('div');
+                spinner.id = spinnerId;
+                spinner.style.width = "50px";
+                spinner.style.height = "50px";
+                spinner.style.border = "5px solid rgba(255, 255, 255, 0.3)";
+                spinner.style.borderTopColor = "#ffffff";
+                spinner.style.borderRadius = "50%";
+                spinner.style.animation = "curio-spin 1s linear infinite";
+              }
+
+              if (spinner.parentNode !== overlay) {
+                  while (overlay.firstChild) {
+                      overlay.removeChild(overlay.firstChild);
+                  }
+                  overlay.appendChild(spinner);
+                  return;
+              }
+            }
+
+            requestAnimationFrame(initCurioOverlay);
+          })();
           `,
         },
         () => {},
@@ -151,22 +165,9 @@ export const useInAppBrowserCapture = ({
     };
 
     const handleLoadStopEvent = (): void => {
-      if (scriptExecutionTimeoutIdRef.current) {
-        clearTimeout(scriptExecutionTimeoutIdRef.current);
-        scriptExecutionTimeoutIdRef.current = null;
-      }
-      scriptExecutionTimeoutIdRef.current = setTimeout(() => {
-        log.warn(
-          `Script execution timed out after ${SCRIPT_EXECUTION_TIMEOUT_MS}ms.`,
-        );
-        setCaptureError("Page content retrieval timed out.");
-        onHtmlCaptured(null, urlToSave);
-        performFullClose();
-      }, SCRIPT_EXECUTION_TIMEOUT_MS);
-
       localIabRef.executeScript(
         {
-          code: "webkit.messageHandlers.cordova_iab.postMessage(JSON.stringify({ html: document.documentElement.outerHTML }));",
+          code: `webkit.messageHandlers.cordova_iab.postMessage(JSON.stringify({ html: document.documentElement.outerHTML }));`,
         },
         (_values) => {
           if (scriptExecutionTimeoutIdRef.current) {
@@ -183,10 +184,9 @@ export const useInAppBrowserCapture = ({
     };
 
     const handleMessage = (event: MessageEvent): void => {
-      log.info("Message received:", JSON.stringify(event));
       try {
         const html = event.data.html;
-        log.info("HTML received:", html.length);
+        log.debug("HTML received from IAB:", html.length);
         onHtmlCaptured(html, urlToSave);
         performFullClose();
       } catch (error) {
@@ -219,7 +219,7 @@ export const useInAppBrowserCapture = ({
       if (scriptExecutionTimeoutIdRef.current) {
         clearTimeout(scriptExecutionTimeoutIdRef.current);
         scriptExecutionTimeoutIdRef.current = null;
-        log.info(
+        log.debug(
           "IAB exited before script completion/timeout. Capture considered cancelled/failed.",
         );
         setCaptureError("Page closed before content could be captured.");
@@ -239,6 +239,19 @@ export const useInAppBrowserCapture = ({
 
     localIabRef.show();
 
+    if (scriptExecutionTimeoutIdRef.current) {
+      clearTimeout(scriptExecutionTimeoutIdRef.current);
+      scriptExecutionTimeoutIdRef.current = null;
+    }
+    scriptExecutionTimeoutIdRef.current = setTimeout(() => {
+      log.warn(
+        `Script execution timed out after ${SCRIPT_EXECUTION_TIMEOUT_MS}ms.`,
+      );
+      setCaptureError("Page content retrieval timed out.");
+      onHtmlCaptured(null, urlToSave);
+      performFullClose();
+    }, SCRIPT_EXECUTION_TIMEOUT_MS);
+
     return () => {
       localIabRef.removeEventListener(
         "message",
@@ -253,14 +266,7 @@ export const useInAppBrowserCapture = ({
         performFullClose();
       }
     };
-  }, [
-    urlToOpen,
-    urlToSave,
-    isCapturing,
-    onHtmlCaptured,
-    onCaptureProcessClosed,
-    performFullClose,
-  ]);
+  }, [urlToOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     startCapture,

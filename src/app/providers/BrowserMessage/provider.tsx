@@ -9,6 +9,7 @@ import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import config from "@app/utils/config.json";
 import { createLogger } from "@app/utils/logger";
 import { isNativePlatform } from "@app/utils/platform";
+import { Toast } from "@capacitor/toast";
 import React, {
   useCallback,
   useContext,
@@ -18,6 +19,7 @@ import React, {
   useState,
 } from "react";
 import { Link } from "react-router-dom";
+import { SendIntent } from "send-intent";
 
 import { BrowserMessageContext, EventType } from ".";
 import { useInAppBrowserCapture } from "./useInAppBrowserCapture";
@@ -169,6 +171,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
         url: string,
       ): Promise<void> {
         try {
+          log.debug("Received HTML content:", htmlContent.length);
           const response = await authenticatedFetch("/api/v1/items/content", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -417,6 +420,65 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
     },
     [listeners],
   );
+
+  useEffect(() => {
+    if (!isNativePlatform()) {
+      return;
+    }
+    async function processShareIntent(): Promise<void> {
+      let intentUrlProcessed = false;
+      try {
+        const result = await SendIntent.checkSendIntentReceived();
+        if (result && result.url) {
+          const resultUrl = decodeURIComponent(result.url);
+          log.debug("Share intent URL received:", resultUrl);
+
+          intentUrlProcessed = true;
+
+          const toastListener = (type: EventType): void => {
+            if (type === EventType.SAVE_SUCCESS) {
+              Toast.show({
+                text: "Link saved successfully",
+              });
+            } else if (type === EventType.SAVE_ERROR) {
+              Toast.show({
+                text: "Failed to save link",
+              });
+            }
+            SendIntent.finish();
+            listeners.delete(toastListener);
+          };
+          listeners.add(toastListener);
+
+          await saveItemContent(resultUrl);
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message === "No processing needed") {
+            return;
+          }
+          log.error("Error processing share intent:", error.message);
+        } else {
+          log.error("Unknown error processing share intent:", error);
+        }
+        if (intentUrlProcessed) {
+          log.debug(
+            "Finishing SendIntent due to error during share processing after URL was received.",
+          );
+          Toast.show({ text: "Failed to process shared link." });
+          SendIntent.finish();
+        }
+      }
+    }
+
+    processShareIntent().catch((error) => {
+      log.error("Unhandled error from processShareIntent invocation:", error);
+      log.error(
+        "Finishing SendIntent due to unhandled error from processShareIntent.",
+      );
+      SendIntent.finish();
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <BrowserMessageContext.Provider
