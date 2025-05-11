@@ -42,10 +42,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({
         id: user.id,
         email: user.email,
       });
-    } else {
+    } else if (!currentUser.id && !currentUser.email) {
       clearUser();
     }
-  }, [clearUser]);
+  }, [clearUser, currentUser.id, currentUser.email]);
 
   const refreshUser = useCallback(async (): Promise<void> => {
     setIsLoading(true);
