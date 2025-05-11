@@ -68,7 +68,7 @@ const ItemPage: React.FC = () => {
         )}
       >
         <h1
-          className={cn("font-medium mb-2", headerSizeClass)}
+          className={cn("font-medium mb-2 select-text", headerSizeClass)}
           dir={metadata?.textDirection}
         >
           {metadata?.title}
