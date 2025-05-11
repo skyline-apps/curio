@@ -6,6 +6,7 @@ import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
+import { useDebouncedCallback } from "use-debounce";
 
 import { SelectionPopup } from "./SelectionPopup";
 import { useHighlightSelection } from "./useHighlightSelection";
@@ -23,15 +24,30 @@ interface MarkdownViewerProps {
 }
 
 const useSelectionListeners = (handleSelection: () => void): void => {
-  useEffect(() => {
-    window.addEventListener("mouseup", handleSelection);
-    window.addEventListener("touchend", handleSelection);
+  const debouncedSelectionChange = useDebouncedCallback(handleSelection, 300);
 
-    return () => {
-      window.removeEventListener("mouseup", handleSelection);
-      window.removeEventListener("touchend", handleSelection);
-    };
-  }, [handleSelection]);
+  useEffect(() => {
+    const isTouchDevice =
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0 ||
+      // @ts-expect-error msMaxTouchPoints is not a standard property
+      navigator.msMaxTouchPoints > 0;
+
+    if (isTouchDevice) {
+      document.addEventListener("selectionchange", debouncedSelectionChange);
+      return () => {
+        document.removeEventListener(
+          "selectionchange",
+          debouncedSelectionChange,
+        );
+      };
+    } else {
+      window.addEventListener("mouseup", handleSelection);
+      return () => {
+        window.removeEventListener("mouseup", handleSelection);
+      };
+    }
+  }, [handleSelection, debouncedSelectionChange]);
 };
 
 const MarkdownViewer: React.FC<MarkdownViewerProps> = memo(
