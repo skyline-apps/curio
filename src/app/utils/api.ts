@@ -75,21 +75,26 @@ export async function authenticatedFetch(
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(fullUrl, {
-    ...options,
-    headers,
-    credentials: "include",
-  });
+  try {
+    const response = await fetch(fullUrl, {
+      ...options,
+      headers,
+      credentials: "include",
+    });
 
-  if (response.status === 401) {
-    log.warn("Unauthorized, signing out");
-    try {
-      const supabase = getSupabaseClient();
-      await supabase.auth.signOut();
-    } catch (_) {}
-    forceLogout();
-    window.location.href = "/login";
+    if (response.status === 401) {
+      log.warn("Unauthorized, signing out");
+      try {
+        const supabase = getSupabaseClient();
+        await supabase.auth.signOut();
+      } catch (_) {}
+      forceLogout();
+      window.location.href = "/login";
+    }
+
+    return response;
+  } catch (error) {
+    log.error("Error during fetch:", fullUrl, error);
+    throw error;
   }
-
-  return response;
 }
