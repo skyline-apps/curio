@@ -2,7 +2,6 @@ import { getSupabaseProjectRef } from "@app/utils/api";
 import { clearTheme, initializeTheme } from "@app/utils/displayStorage";
 import { createLogger } from "@app/utils/logger";
 import { storage } from "@app/utils/storage";
-import { getSupabaseClient } from "@app/utils/supabase";
 import posthog from "posthog-js";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -13,6 +12,8 @@ const log = createLogger("User");
 interface UserProviderProps {
   children: React.ReactNode;
 }
+
+const projectRef = getSupabaseProjectRef();
 
 export const UserProvider: React.FC<UserProviderProps> = ({
   children,
@@ -33,12 +34,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({
   const refreshUser = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     try {
-      const supabase = getSupabaseClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (user?.id && user?.email) {
+      const token = localStorage.getItem(`sb-${projectRef}-auth-token`);
+      if (token) {
+        const user = JSON.parse(token).user;
         setCurrentUser({
           id: user.id,
           email: user.email,
@@ -74,7 +72,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({
       posthog.reset();
 
       try {
-        const projectRef = getSupabaseProjectRef();
         if (projectRef) {
           const key = `sb-${projectRef}-auth-token`;
           storage.removeItem(key);

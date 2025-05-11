@@ -1,4 +1,5 @@
 import AppUrlListener from "@app/components/AppUrlListener";
+import Spinner from "@app/components/ui/Spinner";
 import ProtectedLayout from "@app/layouts/ProtectedLayout";
 import PublicLayout from "@app/layouts/PublicLayout";
 import RootLayout from "@app/layouts/RootLayout";
@@ -63,9 +64,17 @@ const RootPageRedirect = (): React.ReactNode => {
 };
 
 export const App = (): React.ReactNode => {
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
 
   const isNative = isNativePlatform();
+
+  if (isLoading) {
+    return (
+      <div className="h-dvh">
+        <Spinner centered />
+      </div>
+    );
+  }
 
   return (
     <BrowserRouter>

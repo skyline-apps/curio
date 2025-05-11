@@ -1,4 +1,3 @@
-import Spinner from "@app/components/ui/Spinner";
 import { HeroUIProvider } from "@heroui/react"; // eslint-disable-line no-restricted-imports
 import React, { PropsWithChildren } from "react";
 
@@ -16,12 +15,8 @@ import { useUser } from "./User";
 const AuthenticatedProviders: React.FC<PropsWithChildren> = ({
   children,
 }: PropsWithChildren) => {
-  const { user, isLoading } = useUser();
-  return isLoading ? (
-    <div className="h-dvh">
-      <Spinner centered />
-    </div>
-  ) : user.id ? (
+  const { user } = useUser();
+  return user?.id ? (
     <SettingsProvider>
       <ItemsProvider>
         <CurrentItemProvider>

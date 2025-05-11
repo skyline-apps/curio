@@ -131,7 +131,7 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     totalItems: currentOptions?.search
       ? data?.pages.flatMap((p) => p.items).length || 0
       : data?.pages[0]?.total || 0,
-    isLoading,
+    isLoading: isLoading || !currentOptions,
     isFetching,
     isFetchingNextPage,
     loadingError: error ? error.message || "Error loading items." : null,
