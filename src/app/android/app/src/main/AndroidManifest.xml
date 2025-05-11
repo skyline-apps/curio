@@ -22,8 +22,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- TODO: Change to curi.ooo for production -->
-                <data android:scheme="https" android:host="staging.curi.ooo" />
+                <data android:scheme="https" android:host="curi.ooo" />
             </intent-filter>
         </activity>
         

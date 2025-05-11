@@ -31,6 +31,8 @@ $ npx cap run ios
 
 Follow [these instructions](https://capacitorjs.com/docs/guides/deep-links) to set up app deep links.
 
+To run the app against staging, change the `.env` values, then edit `AndroidManifest.xml`'s `android:host` to `staging.curi.ooo`.
+
 
 ### Browser extensions
 The Chrome extension is at `src/chrome`, and the Firefox extension is at `src/firefox`.
