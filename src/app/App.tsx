@@ -70,9 +70,19 @@ export const App = (): React.ReactNode => {
 
   if (isLoading) {
     return (
-      <div className="h-dvh">
-        <Spinner centered />
-      </div>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route
+            path="*"
+            element={
+              <div className="h-dvh">
+                <Spinner centered />
+              </div>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
     );
   }
 

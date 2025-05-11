@@ -32,6 +32,21 @@ export const UserProvider: React.FC<UserProviderProps> = ({
     });
   }, []);
 
+  const updateToken = useCallback(async (): Promise<void> => {
+    const supabase = getSupabaseClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user?.id && user?.email) {
+      setCurrentUser({
+        id: user.id,
+        email: user.email,
+      });
+    } else {
+      clearUser();
+    }
+  }, [clearUser]);
+
   const refreshUser = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     try {
@@ -43,26 +58,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({
           email: storedUser.email,
         });
       }
-
-      const supabase = getSupabaseClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user?.id && user?.email) {
-        setCurrentUser({
-          id: user.id,
-          email: user.email,
-        });
-      }
-      if (!token && !user?.id && !user?.email) {
-        clearUser();
-      }
     } catch (error) {
       log.error("Error refreshing user:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [clearUser]);
+    updateToken();
+  }, [updateToken]);
 
   useEffect(() => {
     refreshUser();
