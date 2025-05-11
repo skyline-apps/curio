@@ -38,14 +38,24 @@ export const UserProvider: React.FC<UserProviderProps> = ({
       data: { user },
     } = await supabase.auth.getUser();
     if (user?.id && user?.email) {
-      setCurrentUser({
-        id: user.id,
-        email: user.email,
+      setCurrentUser((prevUser) => {
+        if (
+          prevUser.id !== user.id ||
+          prevUser.email !== (user.email ?? null)
+        ) {
+          return { id: user.id, email: user.email ?? null };
+        }
+        return prevUser;
       });
-    } else if (!currentUser.id && !currentUser.email) {
-      clearUser();
+    } else {
+      setCurrentUser((prevUser) => {
+        if (prevUser.id !== null || prevUser.email !== null) {
+          return { id: null, email: null };
+        }
+        return prevUser;
+      });
     }
-  }, [clearUser, currentUser.id, currentUser.email]);
+  }, []);
 
   const refreshUser = useCallback(async (): Promise<void> => {
     setIsLoading(true);
