@@ -108,7 +108,7 @@ resource "google_container_cluster" "primary" {
   }
 
   monitoring_config {
-    enable_components = ["SYSTEM_COMPONENTS", "POD"]
+    enable_components = ["SYSTEM_COMPONENTS", "POD", "STORAGE"]
 
     managed_prometheus {
       enabled = var.enable_managed_prometheus
