@@ -12,7 +12,9 @@ import { type ApiKey, useApiKeys } from "@app/pages/settings/actions";
 import { useSettings } from "@app/providers/Settings";
 import { useToast } from "@app/providers/Toast";
 import { useUser } from "@app/providers/User";
+import { brown, green } from "@app/utils/colors";
 import { createLogger } from "@app/utils/logger";
+import { isNativePlatform } from "@app/utils/platform";
 import React, { useCallback, useEffect, useState } from "react";
 import { HiOutlineClipboard } from "react-icons/hi2";
 
@@ -38,6 +40,8 @@ const AccountSettings: React.FC = () => {
   const [apiKeyError, setApiKeyError] = useState<string>("");
   const [apiKeySuccess, setApiKeySuccess] = useState<string>("");
   const [isRefreshingKeys, setIsRefreshingKeys] = useState<boolean>(true);
+
+  const [browserUrl, setBrowserUrl] = useState<string>("");
 
   useEffect(() => {
     if (username) {
@@ -152,6 +156,19 @@ const AccountSettings: React.FC = () => {
         setUpdatingNewsletterEmail(false);
       }
     }
+  };
+
+  const launchIAB = (url: string): void => {
+    if (!isNativePlatform()) {
+      return;
+    }
+    const iabInstance = window.cordova.InAppBrowser.open(
+      url,
+      "_blank",
+      `location=yes,closebuttoncaption=Done,closebuttoncolor=${brown[50]},toolbarcolor=${green[700]},hidenavigationbuttons=yes,hideurlbar=yes,zoom=no,clearcache=no,clearsessioncache=no`,
+    );
+    iabInstance.show();
+    setBrowserUrl("");
   };
 
   if (!user?.id) {
@@ -293,6 +310,40 @@ const AccountSettings: React.FC = () => {
           </div>
         </div>
       </FormSection>
+      {isNativePlatform() && (
+        <FormSection
+          title="Paywall authentication"
+          description="Authenticate to access paywalled content on external sites"
+        >
+          <div className="w-full flex gap-4">
+            <Input
+              placeholder="URL"
+              validate={(value) => {
+                if (!value) {
+                  return "URL is required";
+                }
+                if (
+                  !value.startsWith("http://") &&
+                  !value.startsWith("https://")
+                ) {
+                  return "URL must start with http:// or https://";
+                }
+                return true;
+              }}
+              value={browserUrl}
+              onChange={(e) => setBrowserUrl(e.target.value)}
+              className="flex-1"
+            />
+            <Button
+              size="sm"
+              onPress={() => launchIAB(browserUrl)}
+              isDisabled={!browserUrl}
+            >
+              Launch
+            </Button>
+          </div>
+        </FormSection>
+      )}
     </div>
   );
 };

@@ -89,7 +89,7 @@ export const useInAppBrowserCapture = ({
     const iabInstance = window.cordova.InAppBrowser.open(
       urlToOpen,
       "_blank",
-      "location=no,hidden=yes,zoom=no",
+      "location=no,hidden=yes,zoom=no,clearcache=no,clearsessioncache=no",
     );
     iabRef.current = iabInstance;
     const localIabRef = iabInstance;
