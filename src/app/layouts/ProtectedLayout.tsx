@@ -17,10 +17,10 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { isFetching: isFetchingItems } = useContext(ItemsContext);
   const { isFetching: isFetchingHighlights } = useContext(HighlightsContext);
-  const { username, settings } = useSettings();
+  const { settings } = useSettings();
   const { pathname } = useLocation();
 
-  return username && settings ? (
+  return settings ? (
     <div className="flex flex-row h-full w-full">
       {(isFetchingItems || isFetchingHighlights) && (
         <Progress
