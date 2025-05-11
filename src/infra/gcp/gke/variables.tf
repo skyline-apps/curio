@@ -94,6 +94,12 @@ variable "wi_iam_roles_list" {
 variable "enable_private_endpoint" {
   description = "When true public access to cluster (master) endpoint is disabled.  When false, it can be accessed both publicly and privately."
   type        = bool
+  default     = true
+}
+
+variable "enable_iap_proxy" {
+  description = "When true, an IAP proxy VM is created to allow access to the cluster's master endpoint."
+  type        = bool
   default     = false
 }
 

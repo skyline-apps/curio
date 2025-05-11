@@ -1,7 +1,7 @@
 # the resources here are only created
 # if enable_private_endpoint = "true"
 resource "google_compute_subnetwork" "iap" {
-  count                    = var.enable_private_endpoint ? 1 : 0
+  count                    = var.enable_private_endpoint && var.enable_iap_proxy ? 1 : 0
   name                     = "${var.cluster_name}-iap-subnet"
   ip_cidr_range            = var.iap_proxy_ip_cidr
   network                  = google_compute_network.k8s.id
@@ -10,7 +10,7 @@ resource "google_compute_subnetwork" "iap" {
 }
 
 resource "google_compute_firewall" "iap_tcp_forwarding" {
-  count   = var.enable_private_endpoint ? 1 : 0
+  count   = var.enable_private_endpoint && var.enable_iap_proxy ? 1 : 0
   name    = "allow-ingress-from-iap"
   network = google_compute_network.k8s.name
 
@@ -28,7 +28,7 @@ resource "google_compute_firewall" "iap_tcp_forwarding" {
 
 
 resource "google_compute_instance" "iap-proxy" {
-  count        = var.enable_private_endpoint ? 1 : 0
+  count        = var.enable_private_endpoint && var.enable_iap_proxy ? 1 : 0
   name         = "gke-iap-proxy"
   machine_type = "e2-micro"
   zone         = var.zone
