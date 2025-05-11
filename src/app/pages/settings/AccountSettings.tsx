@@ -319,10 +319,8 @@ const AccountSettings: React.FC = () => {
             <Input
               placeholder="URL"
               validate={(value) => {
-                if (!value) {
-                  return "URL is required";
-                }
                 if (
+                  value &&
                   !value.startsWith("http://") &&
                   !value.startsWith("https://")
                 ) {
