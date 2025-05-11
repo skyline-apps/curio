@@ -47,8 +47,8 @@ export const SelectionPopup = ({
     const scrollLeft = containerRef.current.scrollLeft;
 
     // Calculate position relative to the container, accounting for container scroll
-    // Position roughly 50px above the top of the selection range
-    const top = rangeRect.top - containerRect.top + scrollTop - 50;
+    // Position roughly 10px below the bottom of the selection range
+    const top = rangeRect.bottom - containerRect.top + scrollTop + 10;
     // Center horizontally based on the range's bounding box
     const left =
       rangeRect.left - containerRect.left + scrollLeft + rangeRect.width / 2;
