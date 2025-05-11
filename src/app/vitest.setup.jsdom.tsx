@@ -9,6 +9,7 @@ global.React = React;
 
 // Set up global mocks
 vi.mock("@app/utils/logger");
+vi.mock("@app/utils/storage");
 
 // Mock user
 const DEFAULT_TEST_USER_ID = "123e4567-e89b-12d3-a456-426614174002";
