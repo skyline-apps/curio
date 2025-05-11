@@ -53,6 +53,16 @@ export const AppPageProvider: React.FC<{
     ({ axis, last, movement: [mx], velocity, direction: [dx] }) => {
       if (axis === "y") return;
       if (!last) return;
+
+      const selection = window.getSelection();
+      if (
+        selection &&
+        !selection.isCollapsed &&
+        selection.toString().length > 0
+      ) {
+        return;
+      }
+
       const isSwipeRight = dx > 0;
       const isSwipeLeft = dx < 0;
       const meetsThreshold =
