@@ -120,10 +120,10 @@ const RightSidebar: React.FC = () => {
         onPress={toggleSidebar}
         aria-label={rightSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
         className={cn(
-          "flex-none m-2 flex",
+          "flex-none m-2 z-10 pointer-events-auto",
           rightSidebarOpen
             ? ""
-            : "fixed right-0 bottom-[env(safe-area-inset-bottom)] lg:relative",
+            : "fixed right-0 bottom-[env(safe-area-inset-bottom)] lg:relative lg:self-center",
         )}
       >
         <Icon

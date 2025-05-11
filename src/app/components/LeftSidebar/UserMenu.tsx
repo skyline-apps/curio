@@ -78,7 +78,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
         </Dropdown>
       </div>
       <div
-        className={cn("flex flex-col items-center space-y-2 py-2", {
+        className={cn("flex flex-col items-center space-y-1 py-2", {
           "md:hidden": sidebarOpen,
           "hidden md:flex": !sidebarOpen,
         })}

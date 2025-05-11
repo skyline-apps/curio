@@ -89,7 +89,7 @@ const LeftSidebar: React.FC = () => {
             onNavigation={handleNavigation}
           />
         </div>
-        <div className="flex flex-col overflow-y-hidden">
+        <div className="flex flex-col overflow-hidden">
           <Button
             className={cn("m-2 shrink min-h-8 min-w-10", {
               "self-center": !sidebarOpen,
@@ -103,7 +103,7 @@ const LeftSidebar: React.FC = () => {
           </Button>
           <div
             className={cn(
-              "flex items-center min-h-12 justify-end overflow-y-hidden",
+              "flex items-center min-h-12 justify-end overflow-hidden",
               sidebarOpen ? "flex-col md:flex-row gap-2" : "flex-col",
             )}
           >

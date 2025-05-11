@@ -64,7 +64,7 @@ const NavigationMenu: React.FC<NavigationMenuProps> = ({
         </Tabs>
       </div>
       <div
-        className={cn("flex flex-col items-center space-y-4", {
+        className={cn("flex flex-col items-center space-y-2", {
           "md:hidden": sidebarOpen,
         })}
       >
