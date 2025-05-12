@@ -47,13 +47,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({
         }
         return prevUser;
       });
-    } else {
-      setCurrentUser((prevUser) => {
-        if (prevUser.id !== null || prevUser.email !== null) {
-          return { id: null, email: null };
-        }
-        return prevUser;
-      });
     }
   }, []);
 
