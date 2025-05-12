@@ -38,11 +38,9 @@ export function useRecommendations({}: UseRecommendationsOptions = {}): UseRecom
         recommendations: data.recommendations,
       };
     },
-    gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    retry: false,
   });
 
   const recommendations = data?.recommendations ?? [];
