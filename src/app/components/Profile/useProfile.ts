@@ -1,5 +1,5 @@
 import { GetProfileResponse } from "@app/schemas/v1/public/profile";
-import { authenticatedFetch } from "@app/utils/api";
+import { authenticatedFetch, isOfflineError } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
@@ -101,7 +101,7 @@ export function useProfile({
     favoriteItems,
     isLoading,
     isFetching,
-    error: error as Error | null,
+    error: !error || isOfflineError(error) ? null : error,
     hasNextPage: !!hasNextPage,
     fetchItems,
     isFetchingNextPage,

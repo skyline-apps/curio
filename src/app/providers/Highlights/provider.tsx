@@ -1,6 +1,10 @@
 import { useAppLayout } from "@app/providers/AppLayout";
 import { type GetHighlightsResponse } from "@app/schemas/v1/items/highlights";
-import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
+import {
+  authenticatedFetch,
+  handleAPIResponse,
+  isOfflineError,
+} from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import React, { useCallback, useMemo, useState } from "react";
@@ -149,7 +153,7 @@ export const HighlightsProvider: React.FC<HighlightsProviderProps> = ({
         isLoading,
         isFetching,
         isFetchingNextPage,
-        loadingError: error ? error.message : null,
+        loadingError: !error || isOfflineError(error) ? null : error.message,
         hasNextPage: hasNextPage ?? false,
         fetchHighlights,
         selectedHighlight,

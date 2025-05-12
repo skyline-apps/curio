@@ -3,7 +3,11 @@ import { Item, ItemsContext, PublicItem } from "@app/providers/Items";
 import { ItemState } from "@app/schemas/db";
 import { type Highlight } from "@app/schemas/v1/items/highlights";
 import { GetItemContentResponse } from "@app/schemas/v1/public/items/content";
-import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
+import {
+  authenticatedFetch,
+  handleAPIResponse,
+  isOfflineError,
+} from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
 import { useQuery } from "@tanstack/react-query";
 import React, {
@@ -239,7 +243,10 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         fetchContent,
         loading: isLoading || isPending,
         fetching: isLoading,
-        loadingError: error ? error.message || "Error loading items." : null,
+        loadingError:
+          !error || isOfflineError(error)
+            ? null
+            : error.message || "Error loading item.",
         lastSelectionIndex,
         setLastSelectionIndex,
         selectedHighlight,

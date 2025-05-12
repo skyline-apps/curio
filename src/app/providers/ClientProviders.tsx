@@ -40,6 +40,9 @@ export const ClientProviders: React.FC<PropsWithChildren> = ({ children }) => {
       persistOptions={{
         persister: asyncStoragePersister,
         maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+        dehydrateOptions: {
+          shouldDehydrateQuery: () => true, // https://github.com/TanStack/query/discussions/2207
+        },
       }}
     >
       <PHProvider client={posthog}>

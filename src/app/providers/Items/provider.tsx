@@ -2,7 +2,11 @@ import {
   type GetItemsRequest,
   type GetItemsResponse,
 } from "@app/schemas/v1/items";
-import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
+import {
+  authenticatedFetch,
+  handleAPIResponse,
+  isOfflineError,
+} from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import React, { useCallback, useMemo, useState } from "react";
@@ -134,7 +138,10 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
     isLoading: isLoading || !currentOptions,
     isFetching,
     isFetchingNextPage,
-    loadingError: error ? error.message || "Error loading items." : null,
+    loadingError:
+      !error || isOfflineError(error)
+        ? ""
+        : error?.message || "Error loading items.",
     hasNextPage,
     fetchItems,
     searchQuery,

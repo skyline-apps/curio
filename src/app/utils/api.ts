@@ -4,6 +4,22 @@ import { getSupabaseClient } from "@app/utils/supabase";
 
 const log = createLogger("api");
 
+const OFFLINE_ERROR_MESSAGE = "It looks like you're offline...";
+
+export const isOfflineError = (error: unknown): boolean => {
+  return (
+    error instanceof OfflineError ||
+    (error instanceof Error && error.message.includes(OFFLINE_ERROR_MESSAGE))
+  );
+};
+
+export class OfflineError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "OfflineError";
+  }
+}
+
 export const getSupabaseProjectRef = (): string | null => {
   const url = import.meta.env.VITE_SUPABASE_URL;
   if (!url) {
@@ -94,7 +110,15 @@ export async function authenticatedFetch(
 
     return response;
   } catch (error) {
-    log.error("Error during fetch:", fullUrl, error);
+    if (error instanceof Error) {
+      if (error.message.includes("Failed to fetch")) {
+        log.warn("Offline. Failed to fetch", fullUrl);
+        throw new OfflineError(OFFLINE_ERROR_MESSAGE);
+      }
+      log.error("Error during fetch:", fullUrl, error.message);
+    } else {
+      log.error("Unknown error during fetch:", fullUrl, error);
+    }
     throw error;
   }
 }

@@ -1,5 +1,5 @@
 import { GetRecommendationsResponse } from "@app/schemas/v1/items/recommended";
-import { authenticatedFetch } from "@app/utils/api";
+import { authenticatedFetch, isOfflineError } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
 import { useQuery } from "@tanstack/react-query";
 
@@ -62,7 +62,7 @@ export function useRecommendations({}: UseRecommendationsOptions = {}): UseRecom
     recommendations,
     isLoading,
     isFetching,
-    error: error as Error | null,
+    error: !error || isOfflineError(error) ? null : error,
     fetchItems,
   };
 }
