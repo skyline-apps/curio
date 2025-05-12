@@ -75,7 +75,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   const { showToast } = useToast();
 
   const { data: currentProfile, refetch: loadProfile } = useQuery({
-    queryKey: ["profile"],
+    queryKey: ["userProfile"],
     queryFn: fetchProfile,
     retry: 1,
     enabled: !!user.id,
