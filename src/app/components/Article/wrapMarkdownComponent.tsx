@@ -1,3 +1,5 @@
+import Button from "@app/components/ui/Button";
+import { ToastOptions } from "@app/providers/Toast";
 import { Highlight } from "@app/schemas/v1/items/highlights";
 import slugify from "limax";
 import React, {
@@ -6,6 +8,7 @@ import React, {
   type PropsWithChildren,
   useEffect,
 } from "react";
+import { HiMiniLink } from "react-icons/hi2";
 
 import ArticleHeading from "./ArticleHeading";
 import { HighlightSpan } from "./HighlightSpan";
@@ -147,6 +150,7 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
   highlights: Highlight[],
   selectedHighlight: Highlight | null,
   selectHighlight?: (highlight: Highlight) => void,
+  showToast?: (message: string, options?: ToastOptions) => void,
 ): React.FC<MarkdownProps<T>> => {
   const allHighlights: Highlight[] = highlights;
 
@@ -255,6 +259,21 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
             <ArticleHeading anchor={anchor}>{childrenText}</ArticleHeading>
           ) : null}
           {elementChildren}
+          {isHeading ? (
+            <Button
+              size="xs"
+              variant="ghost"
+              tooltip="Copy link to heading"
+              onPress={() => {
+                const url = new URL(window.location.href);
+                url.hash = `#${anchor}`;
+                navigator.clipboard.writeText(url.toString());
+                showToast?.("Link copied to clipboard", { disappearing: true });
+              }}
+            >
+              <HiMiniLink className="text-primary" />
+            </Button>
+          ) : null}
         </>,
       );
       if (isLink && href && isUrl) {
