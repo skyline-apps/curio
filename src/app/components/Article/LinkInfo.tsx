@@ -17,6 +17,7 @@ const LinkInfo: React.FC<LinkInfoProps> = ({
 
   return (
     <Tooltip
+      longPress={500}
       content={
         <span className="flex items-center gap-1 justify-between max-w-60 p-1 overflow-x-hidden select-none">
           <a
