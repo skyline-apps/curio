@@ -1,4 +1,5 @@
 import { TextDirection } from "@app/schemas/db";
+import { cleanHtmlEntities } from "@app/utils/string";
 import { Readability } from "@mozilla/readability";
 import { parseHTML } from "linkedom";
 import { NodeHtmlMarkdown, TranslatorConfigObject } from "node-html-markdown";
@@ -115,8 +116,8 @@ export class Extract {
         }
       }
       const metadata = {
-        title: article.title || null,
-        description: article.excerpt || null,
+        title: cleanHtmlEntities(article.title) || null,
+        description: cleanHtmlEntities(article.excerpt) || null,
         author: article.byline || null,
         publishedAt,
         textLanguage: article.lang || null,
