@@ -106,13 +106,19 @@ export class Extract {
       } else if (article.dir === "auto") {
         textDirection = TextDirection.AUTO;
       }
+
+      let publishedAt: Date | null = null;
+      if (article.publishedTime) {
+        const parsedDate = new Date(article.publishedTime);
+        if (!isNaN(parsedDate.getTime())) {
+          publishedAt = parsedDate;
+        }
+      }
       const metadata = {
         title: article.title || null,
         description: article.excerpt || null,
         author: article.byline || null,
-        publishedAt: article.publishedTime
-          ? new Date(article.publishedTime)
-          : null,
+        publishedAt,
         textLanguage: article.lang || null,
         textDirection,
         thumbnail: thumbnail,
