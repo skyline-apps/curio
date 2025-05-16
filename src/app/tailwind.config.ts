@@ -30,6 +30,20 @@ const config: Config = {
       mono: ["var(--font-mono-default)", "monospace"],
     },
     extend: {
+      typography: {
+        DEFAULT: {
+          css: {
+            "--tw-prose-quote-borders": gray[500],
+            "--tw-prose-bullets": gray[500],
+          },
+        },
+        invert: {
+          css: {
+            "--tw-prose-quote-borders": gray[500],
+            "--tw-prose-bullets": gray[500],
+          },
+        },
+      },
       animation: {
         "slide-in": "slide-in 0.3s forwards",
         "slide-out": "slide-out 0.3s forwards",
