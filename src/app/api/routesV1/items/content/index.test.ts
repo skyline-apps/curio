@@ -585,7 +585,7 @@ describe("/v1/items/content", () => {
         url: TEST_ITEM_URL_1,
         htmlContent: "<div>Invalid content</div>",
       });
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(400);
       const data: ErrorResponse = await response.json();
       expect(data.error).toBe("Failed to extract content");
       const profileItem = await testDb.db
