@@ -217,7 +217,7 @@ export const itemsContentRouter = new Hono<EnvBindings>().post(
           profileId,
           url,
         });
-        return c.json({ error: error.message }, 500);
+        return c.json({ error: error.message }, 400);
       } else if (error instanceof SearchError) {
         log.error(`Error indexing content`, {
           error,
