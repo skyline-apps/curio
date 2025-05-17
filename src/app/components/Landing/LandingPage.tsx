@@ -58,7 +58,7 @@ const LandingPage: React.FC = () => {
           <p className="self-end text-secondary">- Kim</p>
         </div>
       </div>
-      <div className="flex flex-col items-center w-full my-12 p-8 bg-background-400">
+      <div className="flex flex-col items-center w-full p-8 bg-background-400">
         <div className="grid grid-cols-1 gap-6 my-8 max-w-2xl">
           <LandingPageFeatures />
         </div>
