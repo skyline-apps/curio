@@ -23,6 +23,7 @@ export const EnvSchema = z.object({
   AXIOM_DATASET: z.string(),
   INSTAPAPER_OAUTH_CONSUMER_ID: z.string(),
   INSTAPAPER_OAUTH_CONSUMER_SECRET: z.string(),
+  REVENUECAT_WEBHOOK_SECRET: z.string(),
 });
 
 export type Env = z.infer<typeof EnvSchema> & {
