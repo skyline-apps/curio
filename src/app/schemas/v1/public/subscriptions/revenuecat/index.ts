@@ -16,6 +16,8 @@ export const RevenueCatEventType = z.enum([
   "TRANSFER",
 ]);
 
+export type RevenueCatEventTypeEnum = z.infer<typeof RevenueCatEventType>;
+
 export const RevenueCatPeriodType = z.enum(["NORMAL", "INTRO", "TRIAL"]);
 
 export const RevenueCatStore = z.enum([
@@ -96,6 +98,8 @@ export const RevenueCatEventSchema = z.object({
   event_timestamp_ms: z.number(),
 });
 
+export type RevenueCatEvent = z.infer<typeof RevenueCatEventSchema>;
+
 export const RevenueCatWebhookRequestSchema = z.object({
   event: RevenueCatEventSchema,
   api_version: z.string(),
@@ -109,7 +113,6 @@ export const RevenueCatWebhookRequestSchema = z.object({
 export type RevenueCatWebhookRequest = z.infer<
   typeof RevenueCatWebhookRequestSchema
 >;
-export type RevenueCatEvent = z.infer<typeof RevenueCatEventSchema>;
 
 export const RevenueCatWebhookResponseSchema = z.object({
   success: z.boolean(),
