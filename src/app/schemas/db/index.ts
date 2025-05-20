@@ -60,6 +60,14 @@ export enum JobType {
   IMPORT_POCKET = "import_pocket",
 }
 
+export enum SubscriptionStatus {
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  IN_GRACE_PERIOD = "in_grace_period",
+  PAUSED = "paused",
+  EXPIRED = "expired",
+}
+
 export const OAuth1TokenSchema = z.object({
   oauth_token: z.string().min(1),
   oauth_token_secret: z.string().min(1),
