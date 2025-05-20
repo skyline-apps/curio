@@ -62,9 +62,12 @@ export const revenuecatRouter = new Hono<EnvBindings>().post(
         return c.json(response, 401);
       }
     } else {
-      log.warn(
-        "RevenueCat webhook secret not configured, skipping signature verification",
-      );
+      log.error("RevenueCat webhook secret not configured");
+      const response = RevenueCatWebhookResponseSchema.parse({
+        success: false,
+        message: "RevenueCat webhook secret not configured",
+      });
+      return c.json(response, 500);
     }
 
     const { event } = c.req.valid("json");
@@ -103,38 +106,43 @@ async function verifyWebhookSignature(
   signature: string,
   secret: string,
 ): Promise<boolean> {
-  // RevenueCat signs the webhook payload using HMAC-SHA256
-  // The signature is in the format: t=timestamp,v1=signature
-  const [timestamp, signatureValue] = signature.split(",");
-  const [timestampPrefix, timestampValue] = timestamp.split("=");
-  const [signaturePrefix, signatureHash] = signatureValue.split("=");
+  try {
+    // The signature is in the format: t=timestamp,v1=signature
+    const [timestamp, signatureValue] = signature.split(",");
+    const [timestampPrefix, timestampValue] = timestamp.split("=", 2);
+    const [signaturePrefix, signatureHash] = signatureValue.split("=", 2);
 
-  if (timestampPrefix !== "t" || signaturePrefix !== "v1") {
+    if (timestampPrefix !== "t" || signaturePrefix !== "v1" || !signatureHash) {
+      return false;
+    }
+
+    // Verify the timestamp is recent (e.g., within 5 minutes)
+    const timestampMs = parseInt(timestampValue, 10) * 1000;
+    const now = Date.now();
+    if (isNaN(timestampMs) || Math.abs(now - timestampMs) > 5 * 60 * 1000) {
+      return false;
+    }
+
+    // Import the key
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(secret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["verify"],
+    );
+
+    // The signed data is in the format: t=timestamp.payload
+    const data = `${timestamp}.${payload}`;
+    const signatureBytes = hexToBytes(signatureHash);
+    const dataBytes = encoder.encode(data);
+
+    return await crypto.subtle.verify("HMAC", key, signatureBytes, dataBytes);
+  } catch (error) {
+    console.error('Error verifying webhook signature:', error);
     return false;
   }
-
-  // Verify the timestamp is recent (e.g., within 5 minutes)
-  const timestampMs = parseInt(timestampValue, 10) * 1000;
-  const now = Date.now();
-  if (Math.abs(now - timestampMs) > 5 * 60 * 1000) {
-    return false;
-  }
-
-  // Verify the signature
-  const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["verify"],
-  );
-
-  const data = `${timestamp}.${payload}`;
-  const signatureBytes = hexToBytes(signatureHash);
-  const dataBytes = encoder.encode(data);
-
-  return await crypto.subtle.verify("HMAC", key, signatureBytes, dataBytes);
 }
 
 function hexToBytes(hex: string): Uint8Array {
