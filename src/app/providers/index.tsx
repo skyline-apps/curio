@@ -11,6 +11,7 @@ import { ItemsProvider } from "./Items/provider";
 import { SettingsProvider } from "./Settings/provider";
 import { ToastProvider } from "./Toast/provider";
 import { useUser } from "./User";
+import { WalkthroughProvider } from "./Walkthrough/provider";
 
 const AuthenticatedProviders: React.FC<PropsWithChildren> = ({
   children,
@@ -22,7 +23,9 @@ const AuthenticatedProviders: React.FC<PropsWithChildren> = ({
         <CurrentItemProvider>
           <HighlightsProvider>
             <CacheProvider>
-              <BrowserMessageProvider>{children}</BrowserMessageProvider>
+              <BrowserMessageProvider>
+                <WalkthroughProvider>{children}</WalkthroughProvider>
+              </BrowserMessageProvider>
             </CacheProvider>
           </HighlightsProvider>
         </CurrentItemProvider>

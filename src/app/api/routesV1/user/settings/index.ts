@@ -48,6 +48,7 @@ export const userSettingsRouter = new Hono<EnvBindings>()
             displayFontSize: profiles.displayFontSize,
             analyticsTracking: profiles.analyticsTracking,
             public: profiles.public,
+            completedWalkthrough: profiles.completedWalkthrough,
           })
           .from(profiles)
           .where(and(eq(profiles.id, profileId!), eq(profiles.isEnabled, true)))

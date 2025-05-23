@@ -88,7 +88,7 @@ export const App = (): React.ReactNode => {
 
   return (
     <BrowserRouter>
-      <AppUrlListener></AppUrlListener>
+      <AppUrlListener />
       <Routes>
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route

@@ -1,0 +1,1 @@
+ALTER TABLE "profiles" ADD COLUMN "completed_walkthrough" boolean DEFAULT false NOT NULL;

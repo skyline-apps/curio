@@ -3,6 +3,7 @@ import "@fontsource/noto-sans";
 import "@fontsource/noto-serif";
 import "@fontsource/noto-sans-mono";
 
+import { Walkthrough } from "@app/components/Walkthrough";
 import Providers from "@app/providers";
 import { cn } from "@app/utils/cn";
 import { isNativePlatform } from "@app/utils/platform";
@@ -24,6 +25,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({
       >
         {children}
       </main>
+      <Walkthrough />
     </Providers>
   );
 };

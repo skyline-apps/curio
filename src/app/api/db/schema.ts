@@ -77,6 +77,9 @@ export const profiles = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    completedWalkthrough: boolean("completed_walkthrough")
+      .notNull()
+      .default(false),
     newsletterEmail: text("newsletter_email").unique(),
   },
   (table) => ({

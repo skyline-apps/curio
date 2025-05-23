@@ -11,15 +11,42 @@ interface CurioButtonProps extends Omit<ButtonProps, "size" | "spinner"> {
   href?: string;
   tooltip?: string;
   size?: "xs" | "sm" | "md" | "lg";
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
   "data-testid"?: string;
 }
 
 // Add forwardRef to ensure Dropdowns are properly positioned.
 const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
   (
-    { href, tooltip, size = "md", className, ...props }: CurioButtonProps,
+    {
+      href,
+      tooltip,
+      size = "md",
+      className,
+      onClick,
+      onPress,
+      ...props
+    }: CurioButtonProps,
     ref,
   ) => {
+    const createMockMouseEvent = (): React.MouseEvent<HTMLElement> => {
+      return {
+        preventDefault: () => {},
+        nativeEvent: {} as MouseEvent,
+        bubbles: false,
+        cancelable: true,
+        defaultPrevented: false,
+        eventPhase: 0,
+        isTrusted: false,
+        timeStamp: Date.now(),
+        type: "click",
+        isDefaultPrevented: () => false,
+        stopPropagation: () => {},
+        isPropagationStopped: () => false,
+        persist: () => {},
+      } as React.MouseEvent<HTMLElement>;
+    };
+
     const [pressed, setPressed] = useState<boolean>(false);
     let innerContent: React.ReactNode;
     const navigate = useNavigate();
@@ -43,6 +70,9 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
       size: size === "xs" ? undefined : size,
       isLoading: false,
       disabled: isLoading,
+      onPress:
+        onPress ||
+        (onClick ? () => onClick(createMockMouseEvent()) : undefined),
     };
     const spinner = isLoading ? (
       <Spinner

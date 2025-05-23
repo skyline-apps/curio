@@ -14,6 +14,9 @@ export const SettingsSchema = z.object({
   public: z
     .boolean()
     .describe("Whether your profile and favorited items are public."),
+  completedWalkthrough: z
+    .boolean()
+    .describe("Whether the user has completed the walkthrough."),
   analyticsTracking: z
     .boolean()
     .describe(

@@ -109,6 +109,7 @@ const InfiniteList = <T,>({
         ) : (
           <div
             ref={parentRef}
+            id="infinite-list"
             className="h-[calc(100dvh-4rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] overflow-y-auto overflow-x-hidden"
           >
             {loadingError ? (

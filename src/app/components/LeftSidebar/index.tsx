@@ -91,6 +91,7 @@ const LeftSidebar: React.FC = () => {
         </div>
         <div className="flex flex-col overflow-hidden">
           <Button
+            id="new-item"
             className={cn("m-2 shrink min-h-8 min-w-10", {
               "self-center": !sidebarOpen,
               "hidden md:flex": !sidebarOpen,

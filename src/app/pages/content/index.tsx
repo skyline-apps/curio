@@ -62,6 +62,7 @@ const ItemPage: React.FC = () => {
 
     return (
       <div
+        id="article-content"
         className={cn(
           "w-full lg:w-4xl max-w-4xl self-start pl-2 pt-4 mx-auto",
           fontClass,

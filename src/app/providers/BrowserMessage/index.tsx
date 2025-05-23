@@ -7,6 +7,7 @@ export enum EventType {
 }
 
 interface BrowserMessageContextType {
+  getExtensionLink: () => React.ReactElement | null;
   addMessageListener: (callback: (type: EventType) => void) => void;
   removeMessageListener: (callback: (type: EventType) => void) => void;
   checkSavingAvailable: () => void;
@@ -17,6 +18,7 @@ interface BrowserMessageContextType {
 }
 
 export const BrowserMessageContext = createContext<BrowserMessageContextType>({
+  getExtensionLink: () => null,
   addMessageListener: () => {},
   removeMessageListener: () => {},
   checkSavingAvailable: () => {},

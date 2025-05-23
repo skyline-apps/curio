@@ -31,6 +31,7 @@ describe("/v1/user/settings", () => {
           displayFont: DisplayFont.SANS,
           displayFontSize: DisplayFontSize.MD,
           public: false,
+          completedWalkthrough: false,
         })
         .where(eq(profiles.id, DEFAULT_TEST_PROFILE_ID));
     });
@@ -46,6 +47,7 @@ describe("/v1/user/settings", () => {
         displayFont: DisplayFont.SANS,
         displayFontSize: DisplayFontSize.MD,
         public: false,
+        completedWalkthrough: false,
       });
     });
   });

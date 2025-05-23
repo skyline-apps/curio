@@ -8,7 +8,11 @@ import { UpdateItemContentResponse } from "@app/schemas/v1/items/content";
 import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import config from "@app/utils/config.json";
 import { createLogger } from "@app/utils/logger";
-import { isNativePlatform } from "@app/utils/platform";
+import {
+  getBrowserType,
+  isMobileBrowser,
+  isNativePlatform,
+} from "@app/utils/platform";
 import { Toast } from "@capacitor/toast";
 import React, {
   useCallback,
@@ -25,28 +29,6 @@ import { BrowserMessageContext, EventType } from ".";
 import { useInAppBrowserCapture } from "./useInAppBrowserCapture";
 
 const log = createLogger("browser-message-provider");
-
-type BrowserType = "chrome" | "firefox" | "other";
-
-const getBrowserType = (): BrowserType => {
-  const userAgent = navigator.userAgent.toLowerCase();
-
-  if (userAgent.indexOf("firefox") > -1) {
-    return "firefox";
-  }
-  // Chrome detection using user agent and vendor
-  if (userAgent.indexOf("chrome") > -1 && navigator.vendor === "Google Inc.") {
-    return "chrome";
-  }
-  return "other";
-};
-
-const isMobileBrowser = (): boolean => {
-  const userAgent = navigator.userAgent.toLowerCase();
-  return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
-    userAgent,
-  );
-};
 
 interface BrowserMessageProviderProps {
   children: React.ReactNode;
@@ -483,6 +465,7 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
   return (
     <BrowserMessageContext.Provider
       value={{
+        getExtensionLink,
         addMessageListener,
         removeMessageListener,
         checkSavingAvailable,

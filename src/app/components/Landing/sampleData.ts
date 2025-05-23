@@ -13,6 +13,8 @@ const ITEM_METADATA = {
   textLanguage: "en",
 };
 
+export const sampleSlug = "oliverburkeman-com-river-575b74";
+
 export const sampleItems = [
   {
     id: "1",
