@@ -90,7 +90,7 @@ export const AppPageProvider: React.FC<{
 
   return (
     <AppPageContext.Provider value={{ containerRef, articleFixedInfoRef }}>
-      <div className="relative w-full h-full overflow-x-hidden">
+      <div id="app-page" className="relative w-full h-full overflow-x-hidden">
         <motion.div
           ref={containerRef}
           {...bind()}

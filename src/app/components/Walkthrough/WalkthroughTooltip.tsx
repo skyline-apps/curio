@@ -1,4 +1,3 @@
-import Button from "@app/components/ui/Button";
 import Icon from "@app/components/ui/Icon";
 import type { WalkthroughStep } from "@app/providers/Walkthrough";
 import type { Step, TooltipRenderProps } from "react-joyride";
@@ -31,28 +30,27 @@ export const WalkthroughTooltip = ({
       </div>
       <div className="text-sm mb-8 flex flex-col gap-2">{step.content}</div>
       <div className="flex gap-2 justify-between w-full">
-        <Button
-          size="sm"
-          variant="flat"
-          color="danger"
+        <button
+          className="z-0 group inline-flex items-center justify-center box-border appearance-none select-none whitespace-nowrap font-normal subpixel-antialiased overflow-hidden tap-highlight-transparent data-[pressed=true]:scale-[0.97] outline-none data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 px-3 min-w-16 h-8 text-tiny gap-2 rounded-small [&>svg]:max-w-[theme(spacing.8)] transition-transform-colors-opacity motion-reduce:transition-none bg-danger/20 text-danger-600 dark:text-danger-500 data-[hover=true]:opacity-hover relative"
           onClick={skipProps.onClick}
         >
           Skip intro
-        </Button>
+        </button>
         <div className="flex gap-2">
           {index > 0 && (
-            <Button size="sm" variant="ghost" onClick={backProps.onClick}>
+            <button
+              className="z-0 group inline-flex items-center justify-center box-border appearance-none select-none whitespace-nowrap font-normal subpixel-antialiased overflow-hidden tap-highlight-transparent data-[pressed=true]:scale-[0.97] outline-none data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 border-medium bg-transparent px-3 min-w-16 h-8 text-tiny gap-2 rounded-small [&>svg]:max-w-[theme(spacing.8)] transition-transform-colors-opacity motion-reduce:transition-none border-default text-default-foreground relative opacity-70 border-none data-[hover=true]:!bg-transparent data-[hover=true]:opacity-100 shadow-none"
+              onClick={backProps.onClick}
+            >
               Back
-            </Button>
+            </button>
           )}
-          <Button
-            size="sm"
-            variant="solid"
-            color="success"
+          <button
+            className="z-0 group inline-flex items-center justify-center box-border appearance-none select-none whitespace-nowrap font-normal subpixel-antialiased overflow-hidden tap-highlight-transparent data-[pressed=true]:scale-[0.97] outline-none data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 px-3 min-w-16 h-8 text-tiny gap-2 rounded-small [&>svg]:max-w-[theme(spacing.8)] transition-transform-colors-opacity motion-reduce:transition-none bg-success text-success-foreground data-[hover=true]:opacity-hover relative"
             onClick={primaryProps.onClick}
           >
             {isLastStep ? "Finish" : `Next (${index + 1}/${size})`}
-          </Button>
+          </button>
         </div>
       </div>
     </div>

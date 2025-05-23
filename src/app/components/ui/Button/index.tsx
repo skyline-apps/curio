@@ -11,54 +11,15 @@ interface CurioButtonProps extends Omit<ButtonProps, "size" | "spinner"> {
   href?: string;
   tooltip?: string;
   size?: "xs" | "sm" | "md" | "lg";
-  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
   "data-testid"?: string;
 }
 
 // Add forwardRef to ensure Dropdowns are properly positioned.
 const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
   (
-    {
-      href,
-      tooltip,
-      size = "md",
-      className,
-      onClick,
-      onPress,
-      ...props
-    }: CurioButtonProps,
+    { href, tooltip, size = "md", className, ...props }: CurioButtonProps,
     ref,
   ) => {
-    // For Joyride and similar libraries that require onClick to fire with a real event on mobile,
-    // we synthesize a React-like MouseEvent with the necessary methods and properties.
-    const createSyntheticClickEvent = (
-      target?: HTMLElement,
-    ): React.MouseEvent<HTMLElement> => {
-      let defaultPrevented = false;
-      let propagationStopped = false;
-      return {
-        preventDefault: () => {
-          defaultPrevented = true;
-        },
-        isDefaultPrevented: () => defaultPrevented,
-        stopPropagation: () => {
-          propagationStopped = true;
-        },
-        isPropagationStopped: () => propagationStopped,
-        persist: () => {},
-        bubbles: true,
-        cancelable: true,
-        defaultPrevented,
-        eventPhase: 3,
-        isTrusted: true,
-        timeStamp: Date.now(),
-        type: "click",
-        nativeEvent: {} as MouseEvent,
-        target: target || null,
-        currentTarget: target || null,
-      } as unknown as React.MouseEvent<HTMLElement>;
-    };
-
     const [pressed, setPressed] = useState<boolean>(false);
     let innerContent: React.ReactNode;
     const navigate = useNavigate();
@@ -82,23 +43,6 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
       size: size === "xs" ? undefined : size,
       isLoading: false,
       disabled: isLoading,
-      // On mobile/touch, HeroUI/Button only fires onPress. To support Joyride and similar libraries
-      // that require onClick with a real event, we call onClick with a synthetic event from onPress.
-      onPress: (e) => {
-        if (onPress) onPress(e);
-        if (onClick) {
-          // Only synthesize event if we're on a mobile platform
-          if (
-            typeof window !== "undefined" &&
-            ("ontouchstart" in window || navigator.maxTouchPoints > 0)
-          ) {
-            const target =
-              e?.target instanceof HTMLElement ? e.target : undefined;
-            onClick(createSyntheticClickEvent(target));
-          }
-        }
-      },
-      onClick,
     };
     const spinner = isLoading ? (
       <Spinner

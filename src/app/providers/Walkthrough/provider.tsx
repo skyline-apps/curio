@@ -76,7 +76,7 @@ export const WalkthroughProvider = ({
       disableBeacon: true,
     },
     {
-      target: "#article-content",
+      target: "#app-page",
       title: "A focused reading experience",
       content: (
         <>
