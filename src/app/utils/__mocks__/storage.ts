@@ -7,10 +7,12 @@ export const storage = {
   removeItem: vi.fn(),
 };
 
-export function createPersister(): Persister {
+function createPersister(): Persister {
   return {
     persistClient: vi.fn(),
     restoreClient: vi.fn(),
     removeClient: vi.fn(),
   };
 }
+
+export const asyncStoragePersister = createPersister();

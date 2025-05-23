@@ -34,9 +34,7 @@ export const storage = {
   },
 };
 
-export function createPersister(
-  idbValidKey: IDBValidKey = "reactQuery",
-): Persister {
+function createPersister(idbValidKey: IDBValidKey = "reactQuery"): Persister {
   return {
     persistClient: async (client: PersistedClient) => {
       await set(idbValidKey, client);
