@@ -125,7 +125,8 @@ export const WalkthroughProvider = ({
             ) : (
               <>
                 Curio saves pages directly from your browser, but currently only
-                Chrome and Firefox are supported.
+                Chrome and Firefox are supported. Android & iOS apps are coming
+                soon!
               </>
             )}
           </p>
