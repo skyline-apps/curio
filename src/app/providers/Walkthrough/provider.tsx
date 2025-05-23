@@ -200,6 +200,7 @@ export const WalkthroughProvider = ({
             retrySetRunTrue(nextStep?.target);
             updateAppLayout({
               leftSidebarOpen: true,
+              rightSidebarOpen: false,
             });
           }
         } else if (index === steps.length - 1) {
@@ -208,7 +209,7 @@ export const WalkthroughProvider = ({
         }
       }
     },
-    [navigate, handleComplete, steps.length, updateAppLayout],
+    [navigate, handleComplete, updateAppLayout, retrySetRunTrue, steps],
   );
 
   useEffect(() => {
