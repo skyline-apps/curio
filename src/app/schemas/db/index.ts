@@ -57,6 +57,7 @@ export enum JobStatus {
 export enum JobType {
   IMPORT_INSTAPAPER = "import_instapaper",
   IMPORT_OMNIVORE = "import_omnivore",
+  IMPORT_POCKET = "import_pocket",
 }
 
 export const OAuth1TokenSchema = z.object({

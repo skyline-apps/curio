@@ -6,6 +6,7 @@ import { HiMiniArrowPath } from "react-icons/hi2";
 
 import { InstapaperImportModal } from "./InstapaperImportModal";
 import { OmnivoreImportModal } from "./OmnivoreImportModal";
+import { PocketImportModal } from "./PocketImportModal";
 
 const statusStyles: Record<JobStatus, string> = {
   [JobStatus.PENDING]: "bg-secondary-300 dark:bg-secondary-600",
@@ -17,6 +18,7 @@ const statusStyles: Record<JobStatus, string> = {
 const jobTypeDisplay: Record<JobType, string> = {
   [JobType.IMPORT_INSTAPAPER]: "Instapaper import",
   [JobType.IMPORT_OMNIVORE]: "Omnivore import",
+  [JobType.IMPORT_POCKET]: "Pocket import",
 };
 
 type ImportJobsProps = Record<never, never>;
@@ -28,6 +30,7 @@ export const Import: React.FC<ImportJobsProps> = () => {
   const [showInstapaperModal, setShowInstapaperModal] =
     useState<boolean>(false);
   const [showOmnivoreModal, setShowOmnivoreModal] = useState<boolean>(false);
+  const [showPocketModal, setShowPocketModal] = useState<boolean>(false);
 
   useEffect(() => {
     loadImportJobs();
@@ -42,6 +45,8 @@ export const Import: React.FC<ImportJobsProps> = () => {
       setShowInstapaperModal(true);
     } else if (sourceId === "omnivore") {
       setShowOmnivoreModal(true);
+    } else if (sourceId === "pocket") {
+      setShowPocketModal(true);
     }
   };
 
@@ -61,6 +66,13 @@ export const Import: React.FC<ImportJobsProps> = () => {
           onPress={() => handleSourceClick("omnivore")}
         >
           Import from Omnivore
+        </Button>
+        <Button
+          size="sm"
+          color="primary"
+          onPress={() => handleSourceClick("pocket")}
+        >
+          Import from Pocket
         </Button>
       </div>
       {importJobs.length > 0 && (
@@ -120,6 +132,10 @@ export const Import: React.FC<ImportJobsProps> = () => {
       <OmnivoreImportModal
         isOpen={showOmnivoreModal}
         onClose={() => setShowOmnivoreModal(false)}
+      />
+      <PocketImportModal
+        isOpen={showPocketModal}
+        onClose={() => setShowPocketModal(false)}
       />
     </div>
   );
