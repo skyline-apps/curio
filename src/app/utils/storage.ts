@@ -34,9 +34,6 @@ export const storage = {
   },
 };
 
-/**
- * Creates an Indexed DB persister
- */
 export function createPersister(
   idbValidKey: IDBValidKey = "reactQuery",
 ): Persister {
@@ -52,3 +49,5 @@ export function createPersister(
     },
   };
 }
+
+export const asyncStoragePersister = createPersister();

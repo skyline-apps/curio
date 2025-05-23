@@ -1,7 +1,7 @@
 import { getSupabaseProjectRef } from "@app/utils/api";
 import { clearTheme, initializeTheme } from "@app/utils/displayStorage";
 import { createLogger } from "@app/utils/logger";
-import { storage } from "@app/utils/storage";
+import { asyncStoragePersister, storage } from "@app/utils/storage";
 import { getSupabaseClient } from "@app/utils/supabase";
 import posthog from "posthog-js";
 import React, { useCallback, useEffect, useState } from "react";
@@ -88,6 +88,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({
       clearTheme();
       initializeTheme();
       posthog.reset();
+
+      await asyncStoragePersister.removeClient();
 
       try {
         if (projectRef) {
