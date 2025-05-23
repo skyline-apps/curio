@@ -23,6 +23,7 @@ describe("SettingsContext", () => {
     displayFontSize: DisplayFontSize.MD,
     public: false,
     analyticsTracking: false,
+    completedWalkthrough: true,
   };
 
   const initialUser: GetUserResponse = {
