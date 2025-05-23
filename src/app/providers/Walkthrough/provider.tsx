@@ -2,7 +2,7 @@ import { sampleSlug } from "@app/components/Landing/sampleData";
 import { useAppLayout } from "@app/providers/AppLayout";
 import { BrowserMessageContext } from "@app/providers/BrowserMessage";
 import { useSettings } from "@app/providers/Settings";
-import { isNativePlatform } from "@app/utils/platform";
+import { isMobileBrowser, isNativePlatform } from "@app/utils/platform";
 import React, {
   useCallback,
   useContext,
@@ -113,20 +113,24 @@ export const WalkthroughProvider = ({
           <p>
             {isNativePlatform() ? (
               <>
-                Add items via this Curio app or by sharing links from any other
-                app.
+                Add links via this Curio app or by sharing links from your other
+                apps.
               </>
             ) : extensionLink ? (
               <>
-                Curio loads page contents directly from your browser, so you'll
+                Curio captures page contents from within your browser, so you'll
                 need to install the {extensionLink} before you can save any
-                pages.
+                links.
+              </>
+            ) : isMobileBrowser() ? (
+              <>
+                On mobile, you'll need to use our dedicated Android or iOS app
+                to save pages. They're coming soon!
               </>
             ) : (
               <>
-                Curio saves pages directly from your browser, but currently only
-                Chrome and Firefox are supported. Android & iOS apps are coming
-                soon!
+                Curio captures pages directly from your browser, but currently
+                only Chrome and Firefox are supported.
               </>
             )}
           </p>
