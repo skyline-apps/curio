@@ -99,7 +99,10 @@ const InfiniteList = <T,>({
         }}
       >
         {!isLoading && listData.length === 0 ? (
-          <div className="flex flex-col h-full gap-2 text-sm text-secondary-800 items-center justify-center p-4">
+          <div
+            id="infinite-list"
+            className="flex flex-col h-full gap-2 text-sm text-secondary-800 items-center justify-center p-4"
+          >
             <Icon
               className="animate-bounce text-secondary-800"
               icon={<LuBird />}
