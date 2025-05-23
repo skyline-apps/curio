@@ -395,6 +395,7 @@ export const jobStatusEnum = pgEnum("job_status", [
 export const jobTypeEnum = pgEnum("job_type", [
   JobType.IMPORT_INSTAPAPER,
   JobType.IMPORT_OMNIVORE,
+  JobType.IMPORT_POCKET,
 ]);
 
 export const jobs = pgTable("jobs", {

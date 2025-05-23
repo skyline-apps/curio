@@ -295,6 +295,13 @@
       "when": 1744781738146,
       "tag": "0041_add_rls_to_jobs",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1747966977662,
+      "tag": "0042_add_pocket_job_type",
+      "breakpoints": true
     }
   ]
 }
