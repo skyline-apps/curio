@@ -10,25 +10,22 @@ export const RevenueCatEventType = z.enum([
   "EXPIRATION",
   "BILLING_ISSUE",
   "PRODUCT_CHANGE",
-  "SUBSCRIPTION_EXTENDED",
-  "SUBSCRIPTION_EXTENSION",
-  "SUBSCRIPTION_REVOKED",
   "TRANSFER",
+  "SUBSCRIPTION_EXTENDED",
+  "REFUND_REVERSED",
 ]);
 
 export type RevenueCatEventTypeEnum = z.infer<typeof RevenueCatEventType>;
 
-export const RevenueCatPeriodType = z.enum(["NORMAL", "INTRO", "TRIAL"]);
-
-export const RevenueCatStore = z.enum([
-  "APP_STORE",
-  "PLAY_STORE",
-  "STRIPE",
-  "MAC_APP_STORE",
+export const RevenueCatPeriodType = z.enum([
+  "NORMAL",
+  "INTRO",
+  "TRIAL",
   "PROMOTIONAL",
-  "AMAZON",
-  "RC_BILLING",
+  "PREPAID",
 ]);
+
+export const RevenueCatStore = z.enum(["APP_STORE", "PLAY_STORE", "STRIPE"]);
 
 export const RevenueCatEnvironment = z.enum(["SANDBOX", "PRODUCTION"]);
 
@@ -40,62 +37,40 @@ export const RevenueCatSubscriberAttributesSchema = z.record(
 );
 
 export const RevenueCatEventSchema = z.object({
-  id: z.string(),
   type: RevenueCatEventType,
+  id: z.string(),
+  event_timestamp_ms: z.number(),
   app_user_id: z.string(),
+  original_app_user_id: z.string().optional(),
+  aliases: z.array(z.string()).optional(),
+  subscriber_attributes: RevenueCatSubscriberAttributesSchema.optional(),
+
   product_id: z.string().optional(),
-  price_in_purchased_currency: z.number().optional(),
-  currency: z.string().optional(),
-  price: z.number().optional(),
-  price_in_usd: z.number().optional(),
-  takehome_percentage: z.number().optional(),
-  commission_percentage: z.number().optional(),
-  presented_offering_identifier: z.string().optional(),
-  presented_offering_id: z.string().optional(),
-  presented_offering_context: z.record(z.unknown()).optional(),
-  store: RevenueCatStore.optional(),
-  environment: RevenueCatEnvironment.optional(),
+  entitlement_ids: z.array(z.string()).optional(),
   period_type: RevenueCatPeriodType.optional(),
   purchased_at_ms: z.number().optional(),
+  grace_period_expiration_at_ms: z.number().optional(),
   expiration_at_ms: z.number().optional(),
   auto_resume_at_ms: z.number().optional().nullable(),
+  store: RevenueCatStore.optional(),
+  environment: RevenueCatEnvironment.optional(),
   is_trial_conversion: z.boolean().optional(),
-  auto_renew_status: z
-    .union([
-      z.literal("will_renew"),
-      z.literal("will_not_renew"),
-      z.literal("will_change_product"),
-      z.literal("will_pause"),
-      z.literal("requires_price_increase_consent"),
-      z.literal("has_already_renewed"),
-    ])
-    .optional(),
-  subscriber_attributes: RevenueCatSubscriberAttributesSchema.optional(),
-  entitlement_ids: z.array(z.string()).optional(),
+  cancel_reason: z.string().optional(),
+  expiration_reason: z.string().optional(),
+  new_product_id: z.string().optional(),
+  presented_offering_id: z.string().optional(),
+  price: z.number().optional(),
+  currency: z.string().optional(),
+  price_in_purchased_currency: z.number().optional(),
+  tax_percentage: z.number().optional(),
+  commission_percentage: z.number().optional(),
   transaction_id: z.string().optional(),
   original_transaction_id: z.string().optional(),
-  is_upgraded_offer: z.boolean().optional(),
+  transferred_from: z.array(z.string()).optional(),
+  transferred_to: z.array(z.string()).optional(),
+  country_code: z.string().optional(),
   offer_code: z.string().optional(),
-  offer_identifier: z.string().optional(),
-  offer_type: z.number().optional(),
-  payment_mode: z.string().optional(),
-  cancel_reason: z.string().optional(),
-  price_in_purchased_currency_in_usd: z.number().optional(),
-  original_price_in_purchased_currency: z.number().optional(),
-  original_price_in_purchased_currency_in_usd: z.number().optional(),
-  store_transaction_id: z.string().optional(),
-  subscriber_attributes_updated: z.boolean().optional(),
-  new_product_id: z.string().optional(),
-  expiration_reason: z.string().optional(),
-  grace_period_expiration_date: z.string().optional(),
-  is_in_billing_retry_period: z.boolean().optional(),
-  offer_discount_type: z.string().optional(),
-  entitlement_id: z.string().optional(),
-  entitlement_ids_added: z.array(z.string()).optional(),
-  entitlement_ids_revoked: z.array(z.string()).optional(),
-  aliases: z.array(z.string()).optional(),
-  original_app_user_id: z.string().optional(),
-  event_timestamp_ms: z.number(),
+  renewal_number: z.number().optional(),
 });
 
 export type RevenueCatEvent = z.infer<typeof RevenueCatEventSchema>;

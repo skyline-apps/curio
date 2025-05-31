@@ -32,9 +32,7 @@ export async function handleRevenueCatEvent(
     log.error("Profile not found for RevenueCat app user ID", {
       appUserId: event.app_user_id,
     });
-    throw new SubscriptionError(
-      `Profile not found for app user ID: ${event.app_user_id}`,
-    );
+    throw new SubscriptionError(`Profile not found for app user ID`);
   }
 
   // Handle different event types
