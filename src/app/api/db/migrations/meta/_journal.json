@@ -309,6 +309,13 @@
       "when": 1747968306701,
       "tag": "0043_add_walkthrough_to_profile",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1748718953829,
+      "tag": "0044_add_subscriptions",
+      "breakpoints": true
     }
   ]
 }
