@@ -50,7 +50,8 @@ const ItemCard: React.FC<ItemCardProps> = ({
           >
             <p className="text-sm text-primary">Original page</p>
           </Link>
-        ) : !item.url.startsWith(`https://${FALLBACK_HOSTNAME}/`) ? (
+        ) : item.url &&
+          !item.url.startsWith(`https://${FALLBACK_HOSTNAME}/`) ? (
           <Link
             className="hover:underline w-full"
             to={item.url}
