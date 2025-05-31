@@ -27,10 +27,12 @@ const ItemRow: React.FC<ItemRowProps> = ({
   const { searchQuery } = useContext(ItemsContext);
   const { currentItem, selectedItems, lastSelectionIndex, selectItems } =
     useContext(CurrentItemContext);
-  const getHostname = (url: string): string =>
-    new URL(url).hostname
-      .replace(/www./, "")
-      .replace(FALLBACK_HOSTNAME, "newsletter");
+  const getHostname = (url: string | null): string =>
+    url
+      ? new URL(url).hostname
+          .replace(/www./, "")
+          .replace(FALLBACK_HOSTNAME, "newsletter")
+      : "";
   const timer = useRef<number | null>(null);
 
   const isRead = item.metadata.lastReadAt !== null;

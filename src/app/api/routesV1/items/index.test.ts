@@ -439,6 +439,27 @@ describe("/v1/items", () => {
       );
     });
 
+    it("should return 200 and set url to null for items with invalid URLs in the DB", async () => {
+      const invalidUrlItem = {
+        ...MOCK_ITEMS[0],
+        url: "not a url",
+        slug: "invalid-url-slug",
+      };
+      await testDb.db.insert(items).values([invalidUrlItem]);
+      await testDb.db.insert(profileItems).values([
+        {
+          ...MOCK_PROFILE_ITEMS[0],
+          itemId: invalidUrlItem.id,
+        },
+      ]);
+      const response = await getRequest(app, "v1/items");
+      expect(response.status).toBe(200);
+      const data: GetItemsResponse = await response.json();
+      const found = data.items.find((item) => item.id === invalidUrlItem.id);
+      expect(found).toBeDefined();
+      expect(found?.url).toBeNull();
+    });
+
     it("should return 200 when combining filters and search", async () => {
       vi.mocked(searchItemDocuments).mockResolvedValueOnce({
         hits: [

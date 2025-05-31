@@ -61,7 +61,7 @@ export const ItemDescription: React.FC<ItemDescriptionProps> = ({
 interface ItemUrlProps {
   title: string;
   textDirection?: TextDirection;
-  url: string;
+  url: string | null;
 }
 
 export const ItemUrl: React.FC<ItemUrlProps> = ({
@@ -73,7 +73,7 @@ export const ItemUrl: React.FC<ItemUrlProps> = ({
     <Link className="hover:underline" to={url} target="_blank">
       <p className="text-sm text-primary">Original page</p>
     </Link>
-  ) : !url.startsWith(`https://${FALLBACK_HOSTNAME}`) ? (
+  ) : url && !url.startsWith(`https://${FALLBACK_HOSTNAME}`) ? (
     <Link className="hover:underline" to={url} target="_blank">
       <p
         dir="ltr"

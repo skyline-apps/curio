@@ -6,6 +6,14 @@ import { LabelSchema } from "@app/schemas/v1/user/labels";
 import { z } from "zod";
 
 const UrlSchema = z.string().url().describe("Unique URL of the item.");
+const OptionalUrlSchema = z.preprocess((val) => {
+  if (typeof val !== "string" || !val) return null;
+  try {
+    return new URL(val).toString();
+  } catch {
+    return null;
+  }
+}, z.string().url().nullable());
 const SlugSchema = z
   .string()
   .describe("Unique slug for the item used to identify it in its URL.");
@@ -142,7 +150,7 @@ const ItemMetadataSchema = ItemMetadataBaseSchema.merge(ItemImagesSchema);
 export const ItemResultSchema = z.object({
   id: z.string(),
   profileItemId: z.string(),
-  url: UrlSchema,
+  url: OptionalUrlSchema,
   slug: SlugSchema,
   metadata: ItemMetadataSchema,
   createdAt: dateType,
