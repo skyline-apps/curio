@@ -139,8 +139,7 @@ async function verifyWebhookSignature(
     const dataBytes = encoder.encode(data);
 
     return await crypto.subtle.verify("HMAC", key, signatureBytes, dataBytes);
-  } catch (error) {
-    console.error('Error verifying webhook signature:', error);
+  } catch (_) {
     return false;
   }
 }
