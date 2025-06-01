@@ -4,9 +4,9 @@ import { HiMiniXMark } from "react-icons/hi2";
 import { useNavigate } from "react-router-dom";
 
 const UPGRADE_PROMPTS = [
-  "Support independent software. Upgrade to Curio Premium today.",
-  "Enjoying Curio? Support us by becoming a paid Curio supporter.",
-  "Become a Premium Curio supporter for as little as $1 / week.",
+  "Support independent software. Upgrade to Curio Premium today for $1 / week.",
+  "Enjoying Curio? Support us by becoming a paid Curio supporter for $1 / week.",
+  "Become a Premium Curio supporter for $1 / week.",
 ];
 
 function getUpgradePromptOfTheDay(): string {
@@ -33,7 +33,7 @@ const UpgradeBanner: React.FC<UpgradeBannerProps> = () => {
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 z-50 bg-warning-400 bg-opacity-70 backdrop-blur-md border-b border-warning/40 p-2 flex items-center shadow-xl cursor-pointer"
+      className="fixed top-0 left-0 right-0 z-50 bg-warning-400 dark:bg-warning-300 bg-opacity-70 backdrop-blur-md border-b border-warning/40 p-2 flex items-center shadow-xl cursor-pointer"
       onClick={goToUpgradePage}
     >
       <div className="flex flex-grow items-center justify-center">
