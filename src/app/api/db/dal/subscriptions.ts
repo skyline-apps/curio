@@ -1,8 +1,7 @@
-import { and, eq } from "@app/api/db";
-import { profiles, subscriptions } from "@app/api/db/schema";
+import { eq } from "@app/api/db";
+import { profiles } from "@app/api/db/schema";
 import type { Logger } from "@app/api/utils/logger";
 import type { ContentfulStatusCode } from "@app/api/utils/types";
-import { SubscriptionStatus } from "@app/schemas/db";
 import type { RevenueCatEvent } from "@app/schemas/v1/public/subscriptions/revenuecat";
 
 import type { TransactionDB } from "..";
@@ -38,144 +37,20 @@ export async function handleRevenueCatEvent(
   }
   const profile = profileResults[0];
 
+  if (!event.expiration_at_ms) {
+    log.error("Expiration date not found for RevenueCat event", {
+      appUserId: event.app_user_id,
+    });
+    throw new SubscriptionError(`Expiration date not found for app user ID`);
+  }
+
   // Handle different event types
   switch (event.type) {
     case "INITIAL_PURCHASE":
-    case "RENEWAL": {
-      // Create or update subscription
-      const subscriptionData = {
-        profileId: profile.id,
-        appUserId: event.app_user_id,
-        productId: event.product_id || "unknown",
-        originalTransactionId: event.original_transaction_id || null,
-        status:
-          event.period_type === "TRIAL"
-            ? SubscriptionStatus.ACTIVE
-            : SubscriptionStatus.ACTIVE,
-        purchaseDate: new Date(event.purchased_at_ms || Date.now()),
-        expirationDate: event.expiration_at_ms
-          ? new Date(event.expiration_at_ms)
-          : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Default to 30 days if no expiration
-        autoRenewStatus: event.is_trial_conversion || false, // Use is_trial_conversion as a proxy for auto-renewal
-        updatedAt: new Date(),
-      };
-
-      await tx
-        .insert(subscriptions)
-        .values(subscriptionData)
-        .onConflictDoUpdate({
-          target: [subscriptions.profileId],
-          set: {
-            ...subscriptionData,
-            updatedAt: new Date(),
-          },
-        });
-
-      // Update the profile to mark as premium
-      await tx
-        .update(profiles)
-        .set({
-          isPremium: true,
-          premiumExpiresAt: subscriptionData.expirationDate,
-          updatedAt: new Date(),
-        })
-        .where(eq(profiles.id, profile.id));
-      break;
-    }
-
-    case "CANCELLATION":
-      // Update subscription status to inactive
-      await tx
-        .update(subscriptions)
-        .set({
-          status: SubscriptionStatus.INACTIVE,
-          autoRenewStatus: false,
-          updatedAt: new Date(),
-        })
-        .where(
-          and(
-            eq(subscriptions.profileId, profile.id),
-            eq(subscriptions.appUserId, event.app_user_id),
-          ),
-        );
-
-      // Update the profile to mark as not premium
-      await tx
-        .update(profiles)
-        .set({
-          isPremium: false,
-          premiumExpiresAt: null,
-          updatedAt: new Date(),
-        })
-        .where(eq(profiles.id, profile.id));
-      break;
-
-    case "EXPIRATION":
-      // Update subscription status to expired
-      await tx
-        .update(subscriptions)
-        .set({
-          status: SubscriptionStatus.EXPIRED,
-          autoRenewStatus: false,
-          updatedAt: new Date(),
-        })
-        .where(
-          and(
-            eq(subscriptions.profileId, profile.id),
-            eq(subscriptions.appUserId, event.app_user_id),
-          ),
-        );
-
-      // Update the profile to mark as not premium
-      await tx
-        .update(profiles)
-        .set({
-          isPremium: false,
-          premiumExpiresAt: null,
-          updatedAt: new Date(),
-        })
-        .where(eq(profiles.id, profile.id));
-      break;
-
+    case "RENEWAL":
     case "UNCANCELLATION":
-      // Reactivate subscription
-      await tx
-        .update(subscriptions)
-        .set({
-          status: SubscriptionStatus.ACTIVE,
-          autoRenewStatus: true,
-          updatedAt: new Date(),
-        })
-        .where(
-          and(
-            eq(subscriptions.profileId, profile.id),
-            eq(subscriptions.appUserId, event.app_user_id),
-          ),
-        );
-      break;
-
-    case "NON_RENEWING_PURCHASE":
-      // Handle non-renewing purchase (one-time purchase)
-      const expirationDate = event.expiration_at_ms
-        ? new Date(event.expiration_at_ms)
-        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Default to 30 days if no expiration
-
-      await tx
-        .update(subscriptions)
-        .set({
-          status: SubscriptionStatus.ACTIVE,
-          autoRenewStatus: false,
-          expirationDate,
-          updatedAt: new Date(),
-        })
-        .where(
-          and(
-            eq(subscriptions.profileId, profile.id),
-            eq(subscriptions.appUserId, event.app_user_id),
-          ),
-        );
-
-      // Update the profile to mark as premium until expiration
+    case "PRODUCT_CHANGE": {
+      const expirationDate = new Date(event.expiration_at_ms);
       await tx
         .update(profiles)
         .set({
@@ -185,22 +60,25 @@ export async function handleRevenueCatEvent(
         })
         .where(eq(profiles.id, profile.id));
       break;
+    }
 
-    case "SUBSCRIPTION_PAUSED":
-      // Handle subscription paused
+    case "CANCELLATION":
+      // Do nothing, since the user stays premium until their subscription expires.
+      break;
+
+    case "EXPIRATION":
+      // Update profile to mark as not premium
       await tx
-        .update(subscriptions)
+        .update(profiles)
         .set({
-          status: SubscriptionStatus.PAUSED,
+          isPremium: false,
+          premiumExpiresAt: null,
           updatedAt: new Date(),
         })
-        .where(
-          and(
-            eq(subscriptions.profileId, profile.id),
-            eq(subscriptions.appUserId, event.app_user_id),
-          ),
-        );
+        .where(eq(profiles.id, profile.id));
+      break;
 
+    case "SUBSCRIPTION_PAUSED":
       // Update the profile to mark as not premium while paused
       await tx
         .update(profiles)
@@ -212,25 +90,6 @@ export async function handleRevenueCatEvent(
         .where(eq(profiles.id, profile.id));
       break;
 
-    case "PRODUCT_CHANGE":
-      // Handle product change (upgrade/downgrade)
-      if (event.new_product_id) {
-        await tx
-          .update(subscriptions)
-          .set({
-            productId: event.new_product_id,
-            updatedAt: new Date(),
-          })
-          .where(
-            and(
-              eq(subscriptions.profileId, profile.id),
-              eq(subscriptions.appUserId, event.app_user_id),
-            ),
-          );
-      }
-      break;
-
-    // Add more event types as needed
     default:
       log.info("Unhandled RevenueCat event type", { type: event.type });
   }
