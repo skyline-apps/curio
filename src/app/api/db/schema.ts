@@ -94,6 +94,11 @@ export const profiles = pgTable(
     newsletterEmail: text("newsletter_email").unique(),
     isPremium: boolean("is_premium").notNull().default(false),
     premiumExpiresAt: timestamp("premium_expires_at", { withTimezone: true }),
+    upgradeBannerLastShownAt: timestamp("upgrade_banner_last_shown_at", {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
   },
   (table) => ({
     usernameIndex: uniqueIndex("username_index").on(table.username),
