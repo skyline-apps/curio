@@ -12,8 +12,6 @@ import {
   TextDirection,
 } from "@app/schemas/db";
 // eslint-disable-next-line no-restricted-imports
-import { sql } from "drizzle-orm";
-// eslint-disable-next-line no-restricted-imports
 import {
   boolean,
   foreignKey,
@@ -106,42 +104,6 @@ export const profiles = pgTable(
       columns: [table.userId],
       foreignColumns: [authUsers.id],
     }),
-  }),
-).enableRLS();
-
-export const subscriptions = pgTable(
-  "subscriptions",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    profileId: uuid("profile_id")
-      .notNull()
-      .references(() => profiles.id, { onDelete: "cascade" }),
-    // RevenueCat customer identifier
-    appUserId: text("app_user_id").notNull(),
-    // Original transaction ID from app store (can be null for test/promo subscriptions)
-    originalTransactionId: text("original_transaction_id"),
-    status: subscriptionStatusEnum("status").notNull(),
-    productId: text("product_id").notNull(),
-    purchaseDate: timestamp("purchase_date", { withTimezone: true }).notNull(),
-    expirationDate: timestamp("expiration_date", {
-      withTimezone: true,
-    }).notNull(),
-    autoRenewStatus: boolean("auto_renew_status").notNull().default(false),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .notNull()
-      .defaultNow()
-      .$onUpdate(() => new Date()),
-  },
-  (table) => ({
-    uniqueProfile: uniqueIndex("unique_profile_subscription").on(
-      table.profileId,
-    ),
-    uniqueTransaction: uniqueIndex("unique_transaction_id")
-      .on(table.originalTransactionId)
-      .where(sql`${table.originalTransactionId} IS NOT NULL`),
-    activeStatusIndex: index("active_subscriptions_idx")
-      .on(table.status)
-      .where(sql`${table.status} = 'active'::subscription_status`),
   }),
 ).enableRLS();
 
