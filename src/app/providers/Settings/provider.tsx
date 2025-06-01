@@ -375,6 +375,20 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     );
   };
 
+  const isPremium =
+    currentProfile?.isPremium &&
+    currentProfile.premiumExpiresAt &&
+    new Date(currentProfile.premiumExpiresAt) > new Date();
+
+  const now = Date.now();
+  const lastShown = currentProfile?.upgradeBannerLastShownAt
+    ? new Date(currentProfile.upgradeBannerLastShownAt).getTime()
+    : null;
+
+  const shouldShowUpgradeBanner =
+    !isPremium &&
+    (lastShown === null || now - lastShown > 2 * 24 * 60 * 60 * 1000); // Show upgrade banner every 2 days
+
   return (
     <SettingsContext.Provider
       value={{
@@ -392,6 +406,8 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         createLabel,
         updateLabel,
         deleteLabel,
+        isPremium: !!isPremium,
+        shouldShowUpgradeBanner,
       }}
     >
       {children}
