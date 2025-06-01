@@ -24,6 +24,9 @@ const userRouter = new Hono<EnvBindings>().get(
       .select({
         username: profiles.username,
         newsletterEmail: profiles.newsletterEmail,
+        isPremium: profiles.isPremium,
+        premiumExpiresAt: profiles.premiumExpiresAt,
+        upgradeBannerLastShownAt: profiles.upgradeBannerLastShownAt,
       })
       .from(profiles)
       .where(eq(profiles.userId, sql`CAST(${userId} AS uuid)`))
@@ -37,6 +40,9 @@ const userRouter = new Hono<EnvBindings>().get(
     const response = GetUserResponseSchema.parse({
       username: profile[0].username,
       newsletterEmail: profile[0].newsletterEmail,
+      isPremium: profile[0].isPremium,
+      premiumExpiresAt: profile[0].premiumExpiresAt,
+      upgradeBannerLastShownAt: profile[0].upgradeBannerLastShownAt,
     });
 
     return c.json(response);

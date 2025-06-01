@@ -46,6 +46,9 @@ beforeAll(async () => {
     updatedAt: new Date("2025-01-10T12:52:56-08:00"),
     newsletterEmail: "test@testmail.curi.ooo",
     public: true,
+    isPremium: true,
+    premiumExpiresAt: new Date(Date.now() + 60 * 60 * 1000 * 24 * 30),
+    upgradeBannerLastShownAt: new Date("2025-01-10T12:52:56-08:00"),
   });
 
   await testDb.db.insert(profiles).values({
@@ -55,6 +58,8 @@ beforeAll(async () => {
     colorScheme: ColorScheme.AUTO,
     createdAt: new Date("2025-01-10T12:52:56-08:00"),
     updatedAt: new Date("2025-01-10T12:52:56-08:00"),
+    isPremium: false,
+    upgradeBannerLastShownAt: new Date("2025-01-10T12:52:56-08:00"),
   });
 });
 
