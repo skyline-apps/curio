@@ -29,6 +29,9 @@ describe("SettingsContext", () => {
   const initialUser: GetUserResponse = {
     username: "testusername",
     newsletterEmail: null,
+    isPremium: false,
+    premiumExpiresAt: null,
+    upgradeBannerLastShownAt: null,
   };
 
   const labelsResponse: GetLabelsResponse = { labels: [] };
@@ -203,6 +206,172 @@ describe("SettingsContext", () => {
           }),
         }),
       );
+    });
+  });
+
+  describe("isPremium and shouldShowUpgradeBanner logic", () => {
+    const future = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
+    const past = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+    const recent = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
+
+    function setupProfile(overrides: Partial<GetUserResponse>): void {
+      mockAuthenticatedFetch.mockImplementation((route: string) => {
+        if (route === "/api/v1/user/settings") {
+          return new Response(JSON.stringify(initialSettings), {
+            status: 200,
+            headers: new Headers({ "Content-Type": "application/json" }),
+          });
+        } else if (route === "/api/v1/user") {
+          return new Response(
+            JSON.stringify({ ...initialUser, ...overrides }),
+            {
+              status: 200,
+              headers: new Headers({ "Content-Type": "application/json" }),
+            },
+          );
+        } else if (route === "/api/v1/user/labels") {
+          return new Response(JSON.stringify(labelsResponse), {
+            status: 200,
+            headers: new Headers({ "Content-Type": "application/json" }),
+          });
+        }
+      });
+    }
+
+    it("isPremium is true and premium has not expired", async () => {
+      setupProfile({
+        isPremium: true,
+        premiumExpiresAt: future,
+        upgradeBannerLastShownAt: past,
+      });
+      render(
+        <SettingsProvider>
+          <SettingsContext.Consumer>
+            {({ isPremium, shouldShowUpgradeBanner }) => (
+              <div>
+                <div data-testid="isPremium">{String(isPremium)}</div>
+                <div data-testid="shouldShowUpgradeBanner">
+                  {String(shouldShowUpgradeBanner)}
+                </div>
+              </div>
+            )}
+          </SettingsContext.Consumer>
+        </SettingsProvider>,
+      );
+      await waitFor(() => {
+        expect(screen.getByTestId("isPremium")).toHaveTextContent("true");
+        expect(screen.getByTestId("shouldShowUpgradeBanner")).toHaveTextContent(
+          "false",
+        );
+      });
+    });
+
+    it("isPremium is true but premium has expired", async () => {
+      setupProfile({ isPremium: true, premiumExpiresAt: past });
+      render(
+        <SettingsProvider>
+          <SettingsContext.Consumer>
+            {({ isPremium, shouldShowUpgradeBanner }) => (
+              <div>
+                <div data-testid="isPremium">{String(isPremium)}</div>
+                <div data-testid="shouldShowUpgradeBanner">
+                  {String(shouldShowUpgradeBanner)}
+                </div>
+              </div>
+            )}
+          </SettingsContext.Consumer>
+        </SettingsProvider>,
+      );
+      await waitFor(() => {
+        expect(screen.getByTestId("isPremium")).toHaveTextContent("false");
+        expect(screen.getByTestId("shouldShowUpgradeBanner")).toHaveTextContent(
+          "true",
+        );
+      });
+    });
+
+    it("isPremium is false and upgrade banner was recently shown", async () => {
+      setupProfile({
+        isPremium: false,
+        premiumExpiresAt: null,
+        upgradeBannerLastShownAt: recent,
+      });
+      render(
+        <SettingsProvider>
+          <SettingsContext.Consumer>
+            {({ isPremium, shouldShowUpgradeBanner }) => (
+              <div>
+                <div data-testid="isPremium">{String(isPremium)}</div>
+                <div data-testid="shouldShowUpgradeBanner">
+                  {String(shouldShowUpgradeBanner)}
+                </div>
+              </div>
+            )}
+          </SettingsContext.Consumer>
+        </SettingsProvider>,
+      );
+      await waitFor(() => {
+        expect(screen.getByTestId("isPremium")).toHaveTextContent("false");
+        expect(screen.getByTestId("shouldShowUpgradeBanner")).toHaveTextContent(
+          "false",
+        );
+      });
+    });
+
+    it("isPremium is false and upgrade banner is null", async () => {
+      setupProfile({
+        isPremium: false,
+        premiumExpiresAt: null,
+        upgradeBannerLastShownAt: null,
+      });
+      render(
+        <SettingsProvider>
+          <SettingsContext.Consumer>
+            {({ isPremium, shouldShowUpgradeBanner }) => (
+              <div>
+                <div data-testid="isPremium">{String(isPremium)}</div>
+                <div data-testid="shouldShowUpgradeBanner">
+                  {String(shouldShowUpgradeBanner)}
+                </div>
+              </div>
+            )}
+          </SettingsContext.Consumer>
+        </SettingsProvider>,
+      );
+      await waitFor(() => {
+        expect(screen.getByTestId("isPremium")).toHaveTextContent("false");
+        expect(screen.getByTestId("shouldShowUpgradeBanner")).toHaveTextContent(
+          "true",
+        );
+      });
+    });
+
+    it("isPremium is false and upgrade banner was shown more than 2 days ago", async () => {
+      setupProfile({
+        isPremium: false,
+        premiumExpiresAt: null,
+        upgradeBannerLastShownAt: past,
+      });
+      render(
+        <SettingsProvider>
+          <SettingsContext.Consumer>
+            {({ isPremium, shouldShowUpgradeBanner }) => (
+              <div>
+                <div data-testid="isPremium">{String(isPremium)}</div>
+                <div data-testid="shouldShowUpgradeBanner">
+                  {String(shouldShowUpgradeBanner)}
+                </div>
+              </div>
+            )}
+          </SettingsContext.Consumer>
+        </SettingsProvider>,
+      );
+      await waitFor(() => {
+        expect(screen.getByTestId("isPremium")).toHaveTextContent("false");
+        expect(screen.getByTestId("shouldShowUpgradeBanner")).toHaveTextContent(
+          "true",
+        );
+      });
     });
   });
 });
