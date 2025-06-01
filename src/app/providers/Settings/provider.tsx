@@ -389,6 +389,29 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     !isPremium &&
     (lastShown === null || now - lastShown > 2 * 24 * 60 * 60 * 1000); // Show upgrade banner every 2 days
 
+  const dismissUpgradeBannerMutation = useMutation({
+    mutationFn: async () => {
+      queryClient.setQueryData<GetUserResponse>(
+        ["userProfile", user.id],
+        (oldData: GetUserResponse | undefined) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            upgradeBannerLastShownAt: new Date().toISOString(),
+          };
+        },
+      );
+      await authenticatedFetch("/api/v1/user/upgrade-banner", {
+        method: "POST",
+      });
+    },
+  });
+
+  const dismissUpgradeBanner = useCallback(
+    () => dismissUpgradeBannerMutation.mutateAsync(),
+    [dismissUpgradeBannerMutation],
+  );
+
   return (
     <SettingsContext.Provider
       value={{
@@ -408,6 +431,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         deleteLabel,
         isPremium: !!isPremium,
         shouldShowUpgradeBanner,
+        dismissUpgradeBanner,
       }}
     >
       {children}
