@@ -18,6 +18,12 @@ export const getPackages = async (): Promise<Package[]> => {
   return offerings.current?.availablePackages || [];
 };
 
-export const purchasePackage = async (rcPackage: Package): Promise<void> => {
-  await Purchases.getSharedInstance().purchase({ rcPackage });
+export const purchasePackage = async (
+  rcPackage: Package,
+  userEmail: string,
+): Promise<void> => {
+  await Purchases.getSharedInstance().purchase({
+    rcPackage,
+    customerEmail: userEmail,
+  });
 };
