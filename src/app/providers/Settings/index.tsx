@@ -33,6 +33,8 @@ export type SettingsContextType = {
     updates: { name?: string; color?: string },
   ) => Promise<boolean>;
   deleteLabel: (labelId: string) => Promise<void>;
+  isPremium: boolean;
+  shouldShowUpgradeBanner: boolean;
 };
 
 export const SettingsContext = createContext<SettingsContextType>({
@@ -47,6 +49,8 @@ export const SettingsContext = createContext<SettingsContextType>({
   createLabel: async () => {},
   updateLabel: async () => true,
   deleteLabel: async () => {},
+  isPremium: false,
+  shouldShowUpgradeBanner: false,
 });
 export const useSettings = (): SettingsContextType =>
   useContext(SettingsContext);
