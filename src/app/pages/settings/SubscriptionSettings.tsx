@@ -4,6 +4,7 @@ import Spinner from "@app/components/ui/Spinner";
 import { useSettings } from "@app/providers/Settings";
 import { useToast } from "@app/providers/Toast";
 import { useUser } from "@app/providers/User";
+import { cn } from "@app/utils/cn";
 import { createLogger } from "@app/utils/logger";
 import {
   type CustomerInfo,
@@ -31,17 +32,26 @@ const PackageOption: React.FC<PackageOptionProps> = ({
   const subscriptionOption =
     rcPackage.webBillingProduct.defaultSubscriptionOption?.base;
   const billingDescription = `${subscriptionOption?.price?.formattedPrice || "error"} / ${subscriptionOption?.period?.unit || "error"}`;
+  const period = subscriptionOption?.period?.unit;
   return (
     <Button
       onPress={() => handlePurchase(rcPackage)}
       color="success"
+      variant={period === "year" ? "shadow" : "flat"}
       isDisabled={!!purchaseLoading}
       isLoading={purchaseLoading === rcPackage.identifier}
       endContent={billingDescription}
     >
       <div className="flex flex-col">
         {rcPackage.webBillingProduct.title}
-        <p className="text-xs text-success-100">{billingDescription}</p>
+        <p
+          className={cn(
+            "text-xs",
+            period === "year" ? "text-success-100" : "text-success-600",
+          )}
+        >
+          {billingDescription}
+        </p>
       </div>
     </Button>
   );
@@ -170,7 +180,7 @@ const SubscriptionSettings: React.FC = () => {
           ) : error ? (
             <div className="text-danger text-sm">{error}</div>
           ) : customerInfo?.activeSubscriptions.size === 0 ? (
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-1 gap-3">
               {packageOptions.length === 0 && (
                 <div>No subscription plans available.</div>
               )}
