@@ -1,18 +1,30 @@
 import AppLinks from "@app/components/Landing/AppLinks";
 import { Accordion, AccordionItem } from "@app/components/ui/Accordion";
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import AccountSettings from "./AccountSettings";
 import LabelSettings from "./LabelSettings";
 import UpdateUserSettings from "./UpdateUserSettings";
 
+enum SettingsSectionKey {
+  Organization = "organization",
+  Preferences = "preferences",
+  Account = "account",
+}
+
 const SettingsForm: React.FC = () => {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const section =
+    (params.get("section") as SettingsSectionKey) ||
+    SettingsSectionKey.Organization;
+
   return (
     <>
-      <Accordion>
+      <Accordion defaultExpandedKeys={[section]}>
         <AccordionItem
-          key="organization"
+          key={SettingsSectionKey.Organization}
           title="Organization"
           subtitle="Manage labels"
           aria-label="Organization"
@@ -20,7 +32,7 @@ const SettingsForm: React.FC = () => {
           <LabelSettings />
         </AccordionItem>
         <AccordionItem
-          key="preferences"
+          key={SettingsSectionKey.Preferences}
           title="Preferences"
           subtitle="Display & privacy settings"
           aria-label="Preferences"
@@ -28,7 +40,7 @@ const SettingsForm: React.FC = () => {
           <UpdateUserSettings />
         </AccordionItem>
         <AccordionItem
-          key="account"
+          key={SettingsSectionKey.Account}
           title="Account settings"
           subtitle="Authentication & newsletter subscriptions"
           aria-label="Account settings"
