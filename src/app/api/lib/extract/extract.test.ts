@@ -40,6 +40,27 @@ describe("Extract", () => {
       expect(content).not.toContain("Footer content that should be ignored");
     });
 
+    it("should extract and convert simple HTML content to markdown when url is invalid", async () => {
+      const html = fs.readFileSync(
+        path.join(fixturesPath, "simple.html"),
+        "utf-8",
+      );
+      const { content } = await extract.extractFromHtml("invalid/url", html);
+      const lines = content.split("\n");
+      expect(lines[0]).toBe("## Main Content");
+      expect(lines[1]).toBe("");
+      expect(lines[2]).toBe(
+        "This is a simple paragraph with some **bold text**.",
+      );
+      expect(lines[3]).toBe("");
+      expect(lines[4]).toBe("![Test image](test.jpg) ");
+      expect(lines[5]).toBe("- List item 1");
+      expect(lines[6]).toBe("- List item 2");
+
+      expect(content).not.toContain("Menu items that should be ignored");
+      expect(content).not.toContain("Footer content that should be ignored");
+    });
+
     it("should handle complex HTML with nested elements and code blocks", async () => {
       const html = fs.readFileSync(
         path.join(fixturesPath, "complex.html"),
