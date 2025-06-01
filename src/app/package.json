@@ -38,6 +38,7 @@
     "@hono/node-server": "^1.8.2",
     "@hono/zod-validator": "^0.4.3",
     "@mozilla/readability": "^0.6.0",
+    "@revenuecat/purchases-js": "^1.4.3",
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.49.4",
     "@tanstack/query-async-storage-persister": "^5.75.7",

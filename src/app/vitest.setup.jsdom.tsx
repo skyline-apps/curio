@@ -9,6 +9,7 @@ global.React = React;
 
 // Set up global mocks
 vi.mock("@app/utils/logger");
+vi.mock("@app/utils/purchases");
 vi.mock("@app/utils/storage");
 
 // Mock user
