@@ -3,6 +3,7 @@ import "@fontsource/noto-sans";
 import "@fontsource/noto-serif";
 import "@fontsource/noto-sans-mono";
 
+import UpgradeBanner from "@app/components/UpgradeBanner";
 import { Walkthrough } from "@app/components/Walkthrough";
 import Providers from "@app/providers";
 import { cn } from "@app/utils/cn";
@@ -16,6 +17,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({
 }: RootLayoutProps) => {
   return (
     <Providers>
+      <UpgradeBanner />
       <main
         className={cn(
           "w-full h-dvh flex flex-col font-sans select-none",
