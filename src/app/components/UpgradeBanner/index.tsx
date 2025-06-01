@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 const UPGRADE_PROMPTS = [
   "Support independent software. Upgrade to Curio Premium today.",
   "Enjoying Curio? Support us by becoming a paid Curio supporter.",
+  "Become a Premium Curio supporter for as little as $1 / week.",
 ];
 
 function getUpgradePromptOfTheDay(): string {

@@ -24,16 +24,19 @@ export async function handleRevenueCatEvent(
   log: Logger,
 ): Promise<void> {
   // Find the profile by app_user_id
-  const profile = await tx.query.profiles.findFirst({
-    where: (profiles, { eq }) => eq(profiles.id, event.app_user_id),
-  });
+  const profileResults = await tx
+    .select()
+    .from(profiles)
+    .where(eq(profiles.userId, event.app_user_id))
+    .limit(1);
 
-  if (!profile) {
+  if (!profileResults?.length) {
     log.error("Profile not found for RevenueCat app user ID", {
       appUserId: event.app_user_id,
     });
     throw new SubscriptionError(`Profile not found for app user ID`);
   }
+  const profile = profileResults[0];
 
   // Handle different event types
   switch (event.type) {

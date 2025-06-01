@@ -32,7 +32,7 @@ describe("SettingsContext", () => {
     newsletterEmail: null,
     isPremium: false,
     premiumExpiresAt: null,
-    upgradeBannerLastShownAt: null,
+    upgradeBannerLastShownAt: recent,
   };
 
   const labelsResponse: GetLabelsResponse = { labels: [] };
@@ -267,7 +267,11 @@ describe("SettingsContext", () => {
     });
 
     it("isPremium is true but premium has expired", async () => {
-      setupProfile({ isPremium: true, premiumExpiresAt: past });
+      setupProfile({
+        isPremium: true,
+        premiumExpiresAt: past,
+        upgradeBannerLastShownAt: past,
+      });
       render(
         <SettingsProvider>
           <SettingsContext.Consumer>
