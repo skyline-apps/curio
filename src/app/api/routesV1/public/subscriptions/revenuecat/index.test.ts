@@ -273,7 +273,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
   it("should return 400 for invalid event payload", async () => {
     const response = await postAuthorizedRequest({
       invalid: "payload",
-    });
+    } as unknown as RevenueCatWebhookRequest);
 
     expect(response.status).toBe(400);
 
