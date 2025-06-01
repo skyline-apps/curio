@@ -6,6 +6,8 @@ import { useToast } from "@app/providers/Toast";
 import { useUser } from "@app/providers/User";
 import { createLogger } from "@app/utils/logger";
 import {
+  type CustomerInfo,
+  getCustomerInfo,
   getPackages,
   initializePurchasing,
   type Package,
@@ -39,7 +41,7 @@ const PackageOption: React.FC<PackageOptionProps> = ({
     >
       <div className="flex flex-col">
         {rcPackage.webBillingProduct.title}
-        <p className="text-xs text-secondary-50">{billingDescription}</p>
+        <p className="text-xs text-success-100">{billingDescription}</p>
       </div>
     </Button>
   );
@@ -49,6 +51,7 @@ const SubscriptionSettings: React.FC = () => {
   const { user } = useUser();
   const { isPremium } = useSettings();
   const [packageOptions, setPackageOptions] = useState<Package[]>([]);
+  const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [purchaseLoading, setPurchaseLoading] = useState<string | null>(null);
@@ -65,12 +68,10 @@ const SubscriptionSettings: React.FC = () => {
       }
       try {
         initializePurchasing(user.id);
+        const customerInfo = await getCustomerInfo();
+        setCustomerInfo(customerInfo);
         const currentPackages = await getPackages();
-        if (currentPackages) {
-          setPackageOptions(currentPackages);
-        } else {
-          setPackageOptions([]);
-        }
+        setPackageOptions(currentPackages);
       } catch (error) {
         log.error("Failed to load subscription packages", error);
         setError("Failed to load subscription packages.");
@@ -102,11 +103,13 @@ const SubscriptionSettings: React.FC = () => {
       if (error instanceof Error) {
         log.error("Failed to purchase subscription", error);
         setPurchaseError(error.message);
-        showToast(error.message, {
-          dismissable: true,
-          disappearing: false,
-          type: "error",
-        });
+        if (error.message) {
+          showToast(error.message, {
+            dismissable: true,
+            disappearing: false,
+            type: "error",
+          });
+        }
       } else {
         log.error("Failed to purchase subscription", error);
         setPurchaseError("Purchase failed.");
@@ -120,6 +123,28 @@ const SubscriptionSettings: React.FC = () => {
       setPurchaseLoading(null);
     }
   }
+
+  const currentSubscription = customerInfo?.activeSubscriptions
+    .values()
+    .next().value;
+
+  const willRenew = currentSubscription
+    ? customerInfo?.subscriptionsByProductIdentifier[currentSubscription]
+        ?.willRenew
+    : false;
+  const expiresAt = currentSubscription
+    ? customerInfo?.subscriptionsByProductIdentifier[currentSubscription]
+        ?.expiresDate
+    : null;
+
+  const currentPackage = packageOptions.find(
+    (p) => p.webBillingProduct.identifier === currentSubscription,
+  )?.webBillingProduct.defaultSubscriptionOption?.base;
+  const currentPackageDescription = willRenew
+    ? `${currentPackage?.price?.formattedPrice || "error"} billed every ${currentPackage?.period?.unit || "error"}`
+    : expiresAt
+      ? `Expires ${new Date(expiresAt).toLocaleDateString()}`
+      : currentSubscription;
 
   return (
     <div className="space-y-4">
@@ -142,7 +167,7 @@ const SubscriptionSettings: React.FC = () => {
             <Spinner centered />
           ) : error ? (
             <div className="text-danger text-sm">{error}</div>
-          ) : (
+          ) : customerInfo?.activeSubscriptions.size === 0 ? (
             <div className="grid grid-cols-1 gap-2">
               {packageOptions.length === 0 && (
                 <div>No subscription plans available.</div>
@@ -155,6 +180,29 @@ const SubscriptionSettings: React.FC = () => {
                   purchaseLoading={purchaseLoading}
                 />
               ))}
+            </div>
+          ) : customerInfo?.activeSubscriptions.size === 1 ? (
+            <div className="grid grid-cols-1 gap-2">
+              <Button
+                href={customerInfo?.managementURL || ""}
+                hrefNewTab
+                color="primary"
+                isDisabled={!!purchaseLoading}
+                isLoading={purchaseLoading === ""}
+              >
+                <div className="flex flex-col">
+                  Manage subscription
+                  <p className="text-xs text-primary-100">
+                    {currentPackageDescription}
+                  </p>
+                </div>
+              </Button>
+            </div>
+          ) : (
+            <div className="text-danger mt-4">
+              You seem to have an issue with your subscriptions. Please contact{" "}
+              <a href="mailto:support@curi.ooo">support@curi.ooo</a> for
+              assistance.
             </div>
           )}
           {purchaseError && (
