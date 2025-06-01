@@ -18,13 +18,11 @@ enum SettingsSectionKey {
 const SettingsForm: React.FC = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const section =
-    (params.get("section") as SettingsSectionKey) ||
-    SettingsSectionKey.Organization;
+  const section = (params.get("section") as SettingsSectionKey) || null;
 
   return (
     <>
-      <Accordion defaultExpandedKeys={[section]}>
+      <Accordion defaultExpandedKeys={section ? [section] : []}>
         <AccordionItem
           key={SettingsSectionKey.Subscription}
           title="Subscription"
