@@ -25,15 +25,15 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { publicProfileRouter } from "./index";
 
 const TEST_ITEM_ID = "123e4567-e89b-12d3-a456-426614174001";
-const TEST_ITEM_URL_1 = "https://example.com/";
+const TEST_ITEM_URL_1 = "https://example.com";
 const TEST_ITEM_ID_2 = "123e4567-e89b-12d3-a456-426614174002";
-const TEST_ITEM_URL_2 = "https://example2.com/";
+const TEST_ITEM_URL_2 = "https://example2.com";
 const TEST_ITEM_ID_3 = "123e4567-e89b-12d3-a456-426614174003";
-const TEST_ITEM_URL_3 = "https://example3.com/";
+const TEST_ITEM_URL_3 = "https://example3.com";
 const TEST_ITEM_ID_4 = "123e4567-e89b-12d3-a456-426614174004";
-const TEST_ITEM_URL_4 = "https://example4.com/";
+const TEST_ITEM_URL_4 = "https://example4.com";
 const TEST_ITEM_ID_5 = "123e4567-e89b-12d3-a456-426614174005";
-const TEST_ITEM_URL_5 = "https://example5.com/";
+const TEST_ITEM_URL_5 = "https://example5.com";
 const TEST_LABEL_ID_1 = "123e4567-e89b-12d3-a456-426614174005";
 const TEST_LABEL_ID_2 = "123e4567-e89b-12d3-a456-426614174006";
 
