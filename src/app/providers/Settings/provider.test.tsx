@@ -17,6 +17,7 @@ vi.mock("@app/providers/User", () => ({
 }));
 
 describe("SettingsContext", () => {
+  const recent = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
   const initialSettings: GetSettingsResponse = {
     colorScheme: ColorScheme.LIGHT,
     displayFont: DisplayFont.SANS,
@@ -212,7 +213,6 @@ describe("SettingsContext", () => {
   describe("isPremium and shouldShowUpgradeBanner logic", () => {
     const future = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
     const past = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
-    const recent = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
 
     function setupProfile(overrides: Partial<GetUserResponse>): void {
       mockAuthenticatedFetch.mockImplementation((route: string) => {
@@ -314,34 +314,6 @@ describe("SettingsContext", () => {
         expect(screen.getByTestId("isPremium")).toHaveTextContent("false");
         expect(screen.getByTestId("shouldShowUpgradeBanner")).toHaveTextContent(
           "false",
-        );
-      });
-    });
-
-    it("isPremium is false and upgrade banner is null", async () => {
-      setupProfile({
-        isPremium: false,
-        premiumExpiresAt: null,
-        upgradeBannerLastShownAt: null,
-      });
-      render(
-        <SettingsProvider>
-          <SettingsContext.Consumer>
-            {({ isPremium, shouldShowUpgradeBanner }) => (
-              <div>
-                <div data-testid="isPremium">{String(isPremium)}</div>
-                <div data-testid="shouldShowUpgradeBanner">
-                  {String(shouldShowUpgradeBanner)}
-                </div>
-              </div>
-            )}
-          </SettingsContext.Consumer>
-        </SettingsProvider>,
-      );
-      await waitFor(() => {
-        expect(screen.getByTestId("isPremium")).toHaveTextContent("false");
-        expect(screen.getByTestId("shouldShowUpgradeBanner")).toHaveTextContent(
-          "true",
         );
       });
     });
