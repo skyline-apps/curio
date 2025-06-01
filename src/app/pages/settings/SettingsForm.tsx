@@ -5,12 +5,14 @@ import { Link, useLocation } from "react-router-dom";
 
 import AccountSettings from "./AccountSettings";
 import LabelSettings from "./LabelSettings";
+import SubscriptionSettings from "./SubscriptionSettings";
 import UpdateUserSettings from "./UpdateUserSettings";
 
 enum SettingsSectionKey {
   Organization = "organization",
   Preferences = "preferences",
   Account = "account",
+  Subscription = "subscription",
 }
 
 const SettingsForm: React.FC = () => {
@@ -23,6 +25,14 @@ const SettingsForm: React.FC = () => {
   return (
     <>
       <Accordion defaultExpandedKeys={[section]}>
+        <AccordionItem
+          key={SettingsSectionKey.Subscription}
+          title="Subscription"
+          subtitle="Premium subscription settings"
+          aria-label="Subscription"
+        >
+          <SubscriptionSettings />
+        </AccordionItem>
         <AccordionItem
           key={SettingsSectionKey.Organization}
           title="Organization"
