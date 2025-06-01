@@ -1,6 +1,7 @@
 import Button from "@app/components/ui/Button";
 import { FormSection } from "@app/components/ui/Form";
 import Spinner from "@app/components/ui/Spinner";
+import { useSettings } from "@app/providers/Settings";
 import { useUser } from "@app/providers/User";
 import { createLogger } from "@app/utils/logger";
 import {
@@ -45,6 +46,7 @@ const PackageOption: React.FC<PackageOptionProps> = ({
 
 const SubscriptionSettings: React.FC = () => {
   const { user } = useUser();
+  const { isPremium } = useSettings();
   const [packageOptions, setPackageOptions] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -75,13 +77,18 @@ const SubscriptionSettings: React.FC = () => {
       }
     }
     fetchPackages();
-  }, []);
+  }, [user.id]);
 
   async function handlePurchase(rcPackage: Package): Promise<void> {
     setPurchaseLoading(rcPackage.identifier);
     setPurchaseError(null);
+    if (!user.email) {
+      log.error("User email is missing");
+      setError("User email is missing.");
+      return;
+    }
     try {
-      await purchasePackage(rcPackage);
+      await purchasePackage(rcPackage, user.email);
     } catch (error) {
       if (error instanceof Error) {
         log.error("Failed to purchase subscription", error);
@@ -100,8 +107,9 @@ const SubscriptionSettings: React.FC = () => {
       <FormSection title="Curio Premium">
         <div className="flex flex-col gap-2 w-full max-w-96">
           <p className="text-xs text-secondary">
-            Curio will always remain free to use. However, to support our
-            hosting costs, please consider becoming a paid supporter.
+            {isPremium
+              ? "Thank you for being a paid Curio supporter! Your subscription goes towards supporting our hosting costs."
+              : "Curio will always remain free to use. However, to support our hosting costs, please consider becoming a paid supporter."}
           </p>
           <p className="text-xs text-secondary">
             Paid supporters get access to the following:
