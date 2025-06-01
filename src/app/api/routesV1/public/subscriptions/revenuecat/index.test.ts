@@ -1,13 +1,16 @@
-import { subscriptions } from "@app/api/db/schema";
+import { eq } from "@app/api/db";
+import { profiles } from "@app/api/db/schema";
 import type { EnvBindings } from "@app/api/utils/env";
 import {
   DEFAULT_TEST_PROFILE_ID,
+  DEFAULT_TEST_PROFILE_ID_2,
+  DEFAULT_TEST_USER_ID,
+  DEFAULT_TEST_USER_ID_2,
   postRequest,
   setUpMockApp,
 } from "@app/api/utils/test/api";
 import { MOCK_ENV } from "@app/api/utils/test/env";
 import { testDb } from "@app/api/utils/test/provider";
-import { SubscriptionStatus } from "@app/schemas/db";
 import {
   RevenueCatEnvironment,
   RevenueCatEventType,
@@ -17,7 +20,7 @@ import {
   type RevenueCatWebhookResponse,
 } from "@app/schemas/v1/public/subscriptions/revenuecat";
 import type { Hono } from "hono";
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { revenuecatRouter } from "./index";
 
@@ -71,8 +74,6 @@ if (!globalThis.crypto) {
   };
 }
 
-type SubscriptionInsert = typeof subscriptions.$inferInsert;
-
 describe("/v1/public/subscriptions/revenuecat", () => {
   let app: Hono<EnvBindings>;
 
@@ -84,9 +85,27 @@ describe("/v1/public/subscriptions/revenuecat", () => {
     );
   });
 
+  beforeEach(async () => {
+    await testDb.db
+      .update(profiles)
+      .set({
+        isPremium: true,
+        premiumExpiresAt: new Date(Date.now() + 60 * 60 * 1000 * 24 * 30),
+      })
+      .where(eq(profiles.id, DEFAULT_TEST_PROFILE_ID));
+    await testDb.db
+      .update(profiles)
+      .set({
+        isPremium: false,
+        premiumExpiresAt: null,
+      })
+      .where(eq(profiles.id, DEFAULT_TEST_PROFILE_ID_2));
+  });
+
   const createTestWebhookEvent = (
     type: RevenueCatEventTypeEnum,
     eventOverrides: Partial<RevenueCatWebhookRequest["event"]> = {},
+    userId: string = DEFAULT_TEST_USER_ID,
   ): RevenueCatWebhookRequest => {
     const baseEvent: RevenueCatWebhookRequest = {
       api_version: "1.0",
@@ -94,22 +113,20 @@ describe("/v1/public/subscriptions/revenuecat", () => {
       environment: RevenueCatEnvironment.enum.PRODUCTION,
       user_id: "test-user-id",
       app_id: "com.example.app",
-      app_user_id: DEFAULT_TEST_PROFILE_ID,
+      app_user_id: userId,
       event: {
         id: `event_${Math.random().toString(36).substring(7)}`,
         type,
-        app_user_id: DEFAULT_TEST_PROFILE_ID,
+        app_user_id: userId,
         product_id: "premium_monthly",
         price: 9.99,
         currency: "USD",
-        price_in_usd: 9.99,
         store: RevenueCatStore.enum.APP_STORE,
         environment: RevenueCatEnvironment.enum.PRODUCTION,
         period_type: "NORMAL",
         purchased_at_ms: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
-        expiration_at_ms: Date.now() + 1000 * 60 * 60 * 24 * 30, // 30 days from now
+        expiration_at_ms: Date.now() + 1000 * 60 * 60 * 24 * 60, // 60 days from now
         is_trial_conversion: false,
-        auto_renew_status: "will_renew",
         original_transaction_id: `orig_${Math.random().toString(36).substring(7)}`,
         event_timestamp_ms: Date.now(),
         ...eventOverrides,
@@ -117,34 +134,6 @@ describe("/v1/public/subscriptions/revenuecat", () => {
     };
 
     return baseEvent;
-  };
-
-  const verifySubscription = async (
-    profileId: string,
-    expectedStatus: SubscriptionStatus,
-  ): Promise<SubscriptionInsert> => {
-    const subscription = await testDb.db.query.subscriptions.findFirst({
-      where: (subscriptions, { eq }) => eq(subscriptions.profileId, profileId),
-    });
-
-    if (!subscription) {
-      throw new Error(`No subscription found for profile ${profileId}`);
-    }
-
-    // Convert to SubscriptionInsert type
-    const subscriptionInsert: SubscriptionInsert = {
-      profileId: subscription.profileId,
-      appUserId: subscription.appUserId,
-      status: subscription.status as SubscriptionStatus,
-      productId: subscription.productId,
-      purchaseDate: subscription.purchaseDate,
-      expirationDate: subscription.expirationDate,
-      autoRenewStatus: subscription.autoRenewStatus,
-      originalTransactionId: subscription.originalTransactionId || undefined,
-    };
-
-    expect(subscriptionInsert.status).toBe(expectedStatus);
-    return subscriptionInsert;
   };
 
   // Helper function to sign a webhook payload matching RevenueCat's format
@@ -201,6 +190,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
         is_trial_conversion: true,
         original_transaction_id: "test_original_tx",
       },
+      DEFAULT_TEST_USER_ID_2,
     );
 
     const response = await postWithSignature(
@@ -212,25 +202,18 @@ describe("/v1/public/subscriptions/revenuecat", () => {
     const data: RevenueCatWebhookResponse = await response.json();
     expect(data.success).toBe(true);
 
-    await verifySubscription(
-      DEFAULT_TEST_PROFILE_ID,
-      SubscriptionStatus.ACTIVE,
-    );
+    const profile = await testDb.db.query.profiles.findFirst({
+      where: (profiles, { eq }) => eq(profiles.userId, event.app_user_id),
+    });
+    expect(profile).toBeDefined();
+    expect(profile?.isPremium).toBe(true);
+    expect(profile?.premiumExpiresAt).toBeDefined();
   });
 
   it("should handle RENEWAL event", async () => {
-    // First create a subscription
-    await testDb.db.insert(subscriptions).values({
-      profileId: DEFAULT_TEST_PROFILE_ID,
-      appUserId: DEFAULT_TEST_PROFILE_ID,
-      productId: "premium_monthly",
-      originalTransactionId: "test_original_tx",
-      status: SubscriptionStatus.ACTIVE,
-      purchaseDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 31), // 31 days ago
-      expirationDate: new Date(Date.now() - 1000 * 60 * 60 * 24), // expired 1 day ago
-      autoRenewStatus: true,
-    } as const);
-
+    const originalProfile = await testDb.db.query.profiles.findFirst({
+      where: (profiles, { eq }) => eq(profiles.userId, DEFAULT_TEST_USER_ID),
+    });
     const event = createTestWebhookEvent(RevenueCatEventType.enum.RENEWAL, {
       original_transaction_id: "test_original_tx",
     });
@@ -244,30 +227,24 @@ describe("/v1/public/subscriptions/revenuecat", () => {
     const data: RevenueCatWebhookResponse = await response.json();
     expect(data.success).toBe(true);
 
-    await verifySubscription(
-      DEFAULT_TEST_PROFILE_ID,
-      SubscriptionStatus.ACTIVE,
-    );
+    const profile = await testDb.db.query.profiles.findFirst({
+      where: (profiles, { eq }) => eq(profiles.userId, event.app_user_id),
+    });
+    expect(profile).toBeDefined();
+    expect(profile?.isPremium).toBe(true);
+    expect(profile?.premiumExpiresAt).toBeDefined();
+    expect(
+      profile?.premiumExpiresAt &&
+        (profile?.premiumExpiresAt as Date).getTime() >
+          (originalProfile?.premiumExpiresAt as Date).getTime(),
+    ).toBe(true);
   });
 
   it("should handle CANCELLATION event", async () => {
-    // First create an active subscription
-    await testDb.db.insert(subscriptions).values({
-      profileId: DEFAULT_TEST_PROFILE_ID,
-      appUserId: DEFAULT_TEST_PROFILE_ID,
-      productId: "premium_monthly",
-      originalTransactionId: "test_original_tx",
-      status: SubscriptionStatus.ACTIVE,
-      purchaseDate: new Date(),
-      expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-      autoRenewStatus: true,
-    } as const);
-
     const event = createTestWebhookEvent(
       RevenueCatEventType.enum.CANCELLATION,
       {
         original_transaction_id: "test_original_tx",
-        auto_renew_status: "will_not_renew",
       },
     );
 
@@ -280,29 +257,17 @@ describe("/v1/public/subscriptions/revenuecat", () => {
     const data: RevenueCatWebhookResponse = await response.json();
     expect(data.success).toBe(true);
 
-    const subscription = await verifySubscription(
-      DEFAULT_TEST_PROFILE_ID,
-      SubscriptionStatus.INACTIVE,
-    );
-    expect(subscription.autoRenewStatus).toBe(false);
+    const profile = await testDb.db.query.profiles.findFirst({
+      where: (profiles, { eq }) => eq(profiles.userId, event.app_user_id),
+    });
+    expect(profile).toBeDefined();
+    expect(profile?.isPremium).toBe(true);
+    expect(profile?.premiumExpiresAt).toBeDefined();
   });
 
   it("should handle EXPIRATION event", async () => {
-    // First create an active subscription
-    await testDb.db.insert(subscriptions).values({
-      profileId: DEFAULT_TEST_PROFILE_ID,
-      appUserId: DEFAULT_TEST_PROFILE_ID,
-      productId: "premium_monthly",
-      originalTransactionId: "test_original_tx",
-      status: SubscriptionStatus.ACTIVE,
-      purchaseDate: new Date(),
-      expirationDate: new Date(Date.now() - 1000 * 60 * 60 * 24), // expired 1 day ago
-      autoRenewStatus: false,
-    } as const);
-
     const event = createTestWebhookEvent(RevenueCatEventType.enum.EXPIRATION, {
       original_transaction_id: "test_original_tx",
-      auto_renew_status: "will_not_renew",
     });
 
     const response = await postWithSignature(
@@ -314,30 +279,22 @@ describe("/v1/public/subscriptions/revenuecat", () => {
     const data: RevenueCatWebhookResponse = await response.json();
     expect(data.success).toBe(true);
 
-    await verifySubscription(
-      DEFAULT_TEST_PROFILE_ID,
-      SubscriptionStatus.EXPIRED,
-    );
+    const profile = await testDb.db.query.profiles.findFirst({
+      where: (profiles, { eq }) => eq(profiles.userId, event.app_user_id),
+    });
+    expect(profile).toBeDefined();
+    expect(profile?.isPremium).toBe(false);
+    expect(profile?.premiumExpiresAt).toBeNull();
   });
 
   it("should handle UNCANCELLATION event", async () => {
-    // First create a cancelled subscription
-    await testDb.db.insert(subscriptions).values({
-      profileId: DEFAULT_TEST_PROFILE_ID,
-      appUserId: DEFAULT_TEST_PROFILE_ID,
-      status: SubscriptionStatus.ACTIVE,
-      productId: "premium_monthly",
-      originalTransactionId: "test_original_tx",
-      purchaseDate: new Date(),
-      expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-      autoRenewStatus: true,
+    const originalProfile = await testDb.db.query.profiles.findFirst({
+      where: (profiles, { eq }) => eq(profiles.userId, DEFAULT_TEST_USER_ID),
     });
-
     const event = createTestWebhookEvent(
       RevenueCatEventType.enum.UNCANCELLATION,
       {
         original_transaction_id: "test_original_tx",
-        auto_renew_status: "will_renew",
       },
     );
 
@@ -350,63 +307,20 @@ describe("/v1/public/subscriptions/revenuecat", () => {
     const data: RevenueCatWebhookResponse = await response.json();
     expect(data.success).toBe(true);
 
-    const subscription = await verifySubscription(
-      DEFAULT_TEST_PROFILE_ID,
-      SubscriptionStatus.ACTIVE,
-    );
-    expect(subscription.autoRenewStatus).toBe(true);
-  });
-
-  it("should handle NON_RENEWING_PURCHASE event", async () => {
-    // First create an active subscription
-    await testDb.db.insert(subscriptions).values({
-      profileId: DEFAULT_TEST_PROFILE_ID,
-      appUserId: DEFAULT_TEST_PROFILE_ID,
-      productId: "premium_monthly",
-      originalTransactionId: "test_original_tx",
-      status: SubscriptionStatus.ACTIVE,
-      purchaseDate: new Date(),
-      expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-      autoRenewStatus: true,
+    const profile = await testDb.db.query.profiles.findFirst({
+      where: (profiles, { eq }) => eq(profiles.userId, event.app_user_id),
     });
-
-    const event = createTestWebhookEvent(
-      RevenueCatEventType.enum.NON_RENEWING_PURCHASE,
-      {
-        auto_renew_status: "will_not_renew",
-        original_transaction_id: "test_original_tx",
-      },
-    );
-
-    const response = await postWithSignature(
-      "v1/public/subscriptions/revenuecat",
-      event,
-    );
-    expect(response.status).toBe(200);
-
-    const data: RevenueCatWebhookResponse = await response.json();
-    expect(data.success).toBe(true);
-
-    const subscription = await verifySubscription(
-      DEFAULT_TEST_PROFILE_ID,
-      SubscriptionStatus.ACTIVE,
-    );
-    expect(subscription.autoRenewStatus).toBe(false);
+    expect(profile).toBeDefined();
+    expect(profile?.isPremium).toBe(true);
+    expect(profile?.premiumExpiresAt).toBeDefined();
+    expect(
+      profile?.premiumExpiresAt &&
+        (profile?.premiumExpiresAt as Date).getTime() >
+          (originalProfile?.premiumExpiresAt as Date).getTime(),
+    ).toBe(true);
   });
 
   it("should handle SUBSCRIPTION_PAUSED event", async () => {
-    // First create an active subscription
-    await testDb.db.insert(subscriptions).values({
-      profileId: DEFAULT_TEST_PROFILE_ID,
-      appUserId: DEFAULT_TEST_PROFILE_ID,
-      productId: "premium_monthly",
-      originalTransactionId: "test_original_tx",
-      status: SubscriptionStatus.ACTIVE,
-      purchaseDate: new Date(),
-      expirationDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), // 30 days from now
-      autoRenewStatus: true,
-    });
-
     const event = createTestWebhookEvent(
       RevenueCatEventType.enum.SUBSCRIPTION_PAUSED,
       {
@@ -423,25 +337,18 @@ describe("/v1/public/subscriptions/revenuecat", () => {
     const data: RevenueCatWebhookResponse = await response.json();
     expect(data.success).toBe(true);
 
-    await verifySubscription(
-      DEFAULT_TEST_PROFILE_ID,
-      SubscriptionStatus.PAUSED,
-    );
+    const profile = await testDb.db.query.profiles.findFirst({
+      where: (profiles, { eq }) => eq(profiles.userId, DEFAULT_TEST_USER_ID),
+    });
+    expect(profile).toBeDefined();
+    expect(profile?.isPremium).toBe(false);
+    expect(profile?.premiumExpiresAt).toBeNull();
   });
 
   it("should handle PRODUCT_CHANGE event", async () => {
-    // First create an active subscription
-    await testDb.db.insert(subscriptions).values({
-      profileId: DEFAULT_TEST_PROFILE_ID,
-      appUserId: DEFAULT_TEST_PROFILE_ID,
-      productId: "premium_monthly",
-      originalTransactionId: "test_original_tx",
-      status: SubscriptionStatus.ACTIVE,
-      purchaseDate: new Date(),
-      expirationDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), // 30 days from now
-      autoRenewStatus: true,
+    const originalProfile = await testDb.db.query.profiles.findFirst({
+      where: (profiles, { eq }) => eq(profiles.userId, DEFAULT_TEST_USER_ID),
     });
-
     const newProductId = "premium_yearly";
     const event = createTestWebhookEvent(
       RevenueCatEventType.enum.PRODUCT_CHANGE,
@@ -460,11 +367,17 @@ describe("/v1/public/subscriptions/revenuecat", () => {
     const data: RevenueCatWebhookResponse = await response.json();
     expect(data.success).toBe(true);
 
-    const subscription = await verifySubscription(
-      DEFAULT_TEST_PROFILE_ID,
-      SubscriptionStatus.ACTIVE,
-    );
-    expect(subscription.productId).toBe(newProductId);
+    const profile = await testDb.db.query.profiles.findFirst({
+      where: (profiles, { eq }) => eq(profiles.userId, event.app_user_id),
+    });
+    expect(profile).toBeDefined();
+    expect(profile?.isPremium).toBe(true);
+    expect(profile?.premiumExpiresAt).toBeDefined();
+    expect(
+      profile?.premiumExpiresAt &&
+        (profile?.premiumExpiresAt as Date).getTime() >
+          (originalProfile?.premiumExpiresAt as Date).getTime(),
+    ).toBe(true);
   });
 
   it("should return 400 for invalid webhook payload", async () => {
