@@ -1,6 +1,7 @@
 import { showConfirm } from "@app/components/ui/Modal/actions";
 import { useToast } from "@app/providers/Toast";
 import { useUser } from "@app/providers/User";
+import { ColorScheme } from "@app/schemas/db";
 import type { ImportJobsResponse } from "@app/schemas/v1/jobs/import";
 import type { GetUserResponse } from "@app/schemas/v1/user";
 import { type UpdateEmailResponse } from "@app/schemas/v1/user/email";
@@ -31,6 +32,13 @@ import { SettingsContext } from ".";
 
 interface SettingsProviderProps {
   children: React.ReactNode;
+}
+
+enum SettingsQueryKeys {
+  USER = "userProfile",
+  SETTINGS = "settings",
+  LABELS = "labels",
+  IMPORT_JOBS = "importJobs",
 }
 
 const fetchProfile = async (): Promise<GetUserResponse> => {
@@ -75,14 +83,14 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   const { showToast } = useToast();
 
   const { data: currentProfile, refetch: loadProfile } = useQuery({
-    queryKey: ["userProfile"],
+    queryKey: [SettingsQueryKeys.USER],
     queryFn: fetchProfile,
     retry: 1,
     enabled: !!user.id,
   });
 
   const { data: currentSettings, refetch: loadSettings } = useQuery({
-    queryKey: ["settings"],
+    queryKey: [SettingsQueryKeys.SETTINGS],
     queryFn: fetchSettings,
     retry: 1,
     enabled: !!user.id,
@@ -93,7 +101,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     refetch: refetchImportJobs,
     isFetching: isLoadingImportJobs,
   } = useQuery({
-    queryKey: ["importJobs"],
+    queryKey: [SettingsQueryKeys.IMPORT_JOBS],
     queryFn: fetchImportJobs,
     retry: 1,
     enabled: false,
@@ -104,7 +112,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     isPending: loadingLabels,
     refetch: loadLabels,
   } = useQuery({
-    queryKey: ["labels"],
+    queryKey: [SettingsQueryKeys.LABELS],
     queryFn: fetchLabels,
     retry: 1,
     enabled: !!user.id,
@@ -138,7 +146,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       return handleAPIResponse<UpdateUsernameResponse>(response);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: [SettingsQueryKeys.USER] });
     },
     onError: () => {
       showToast("Failed to update username", { type: "error" });
@@ -153,7 +161,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       return handleAPIResponse<UpdateEmailResponse>(response);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: [SettingsQueryKeys.USER] });
     },
     onError: () => {
       showToast("Failed to update newsletter email", { type: "error" });
@@ -176,7 +184,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     },
     onSuccess: (result) => {
       queryClient.setQueryData<GetSettingsResponse>(
-        ["settings"],
+        [SettingsQueryKeys.SETTINGS],
         (oldData: GetSettingsResponse | undefined) => {
           return oldData ? { ...oldData, ...result } : undefined;
         },
@@ -241,7 +249,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["labels"] });
+      queryClient.invalidateQueries({ queryKey: [SettingsQueryKeys.LABELS] });
     },
   });
 
@@ -256,11 +264,11 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
 
   useEffect(() => {
     if (currentSettings?.colorScheme) {
-      if (currentSettings.colorScheme === "auto") {
+      if (currentSettings.colorScheme === ColorScheme.AUTO) {
         setSystemTheme();
-      } else if (currentSettings.colorScheme === "light") {
+      } else if (currentSettings.colorScheme === ColorScheme.LIGHT) {
         setLightTheme();
-      } else if (currentSettings.colorScheme === "dark") {
+      } else if (currentSettings.colorScheme === ColorScheme.DARK) {
         setDarkTheme();
       }
     }
@@ -393,7 +401,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   const dismissUpgradeBannerMutation = useMutation({
     mutationFn: async () => {
       queryClient.setQueryData<GetUserResponse>(
-        ["userProfile", user.id],
+        [SettingsQueryKeys.USER],
         (oldData: GetUserResponse | undefined) => {
           if (!oldData) return oldData;
           return {
@@ -405,6 +413,9 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       await authenticatedFetch("/api/v1/user/upgrade-banner", {
         method: "POST",
       });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [SettingsQueryKeys.USER] });
     },
   });
 
