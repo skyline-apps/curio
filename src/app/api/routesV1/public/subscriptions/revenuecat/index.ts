@@ -35,39 +35,13 @@ export const revenuecatRouter = new Hono<EnvBindings>().post(
   async (c): Promise<APIResponse<RevenueCatWebhookResponse>> => {
     const log = c.get("log");
     const db = c.get("db");
-    const req = c.req;
-    const revenuecatWebhookSecret = c.env.REVENUECAT_WEBHOOK_SECRET;
-    const signature = req.header("revenuecat-signature");
-
-    // Verify webhook signature if secret is configured
-    if (revenuecatWebhookSecret) {
-      if (!signature) {
-        log.warn("Missing RevenueCat signature header");
-        return c.json({ success: false, message: "Missing signature" }, 401);
-      }
-
-      const payload = await req.text();
-      const isValid = await verifyWebhookSignature(
-        payload,
-        signature,
-        revenuecatWebhookSecret,
-      );
-
-      if (!isValid) {
-        log.warn("Invalid RevenueCat webhook signature");
-        const response = RevenueCatWebhookResponseSchema.parse({
-          success: false,
-          message: "Invalid signature",
-        });
-        return c.json(response, 401);
-      }
-    } else {
-      log.error("RevenueCat webhook secret not configured");
-      const response = RevenueCatWebhookResponseSchema.parse({
-        success: false,
-        message: "RevenueCat webhook secret not configured",
-      });
-      return c.json(response, 500);
+    const appSecret = c.env.CURIO_APP_SECRET;
+    const authHeader = c.req.header("Authorization");
+    const requestSecret = authHeader?.startsWith("Bearer ")
+      ? authHeader.substring(7)
+      : undefined;
+    if (!appSecret || requestSecret !== appSecret) {
+      return c.json({ error: "Unauthorized" }, 401);
     }
 
     const { event } = c.req.valid("json");
@@ -100,54 +74,3 @@ export const revenuecatRouter = new Hono<EnvBindings>().post(
     }
   },
 );
-
-async function verifyWebhookSignature(
-  payload: string,
-  signature: string,
-  secret: string,
-): Promise<boolean> {
-  try {
-    // The signature is in the format: t=timestamp,v1=signature
-    const [timestamp, signatureValue] = signature.split(",");
-    const [timestampPrefix, timestampValue] = timestamp.split("=", 2);
-    const [signaturePrefix, signatureHash] = signatureValue.split("=", 2);
-
-    if (timestampPrefix !== "t" || signaturePrefix !== "v1" || !signatureHash) {
-      return false;
-    }
-
-    // Verify the timestamp is recent (e.g., within 5 minutes)
-    const timestampMs = parseInt(timestampValue, 10) * 1000;
-    const now = Date.now();
-    if (isNaN(timestampMs) || Math.abs(now - timestampMs) > 5 * 60 * 1000) {
-      return false;
-    }
-
-    // Import the key
-    const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      "raw",
-      encoder.encode(secret),
-      { name: "HMAC", hash: "SHA-256" },
-      false,
-      ["verify"],
-    );
-
-    // The signed data is in the format: t=timestamp.payload
-    const data = `${timestamp}.${payload}`;
-    const signatureBytes = hexToBytes(signatureHash);
-    const dataBytes = encoder.encode(data);
-
-    return await crypto.subtle.verify("HMAC", key, signatureBytes, dataBytes);
-  } catch (_) {
-    return false;
-  }
-}
-
-function hexToBytes(hex: string): Uint8Array {
-  const bytes = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < hex.length; i += 2) {
-    bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
-  }
-  return bytes;
-}
