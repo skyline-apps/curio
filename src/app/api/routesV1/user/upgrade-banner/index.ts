@@ -1,31 +1,17 @@
 import { eq } from "@app/api/db";
 import { profiles } from "@app/api/db/schema";
-import {
-  apiDoc,
-  APIResponse,
-  describeRoute,
-  parseError,
-  zValidator,
-} from "@app/api/utils/api";
+import { apiDoc, APIResponse, describeRoute } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
 import {
-  UpgradeBannerRequest,
-  UpgradeBannerRequestSchema,
   UpgradeBannerResponse,
   UpgradeBannerResponseSchema,
 } from "@app/schemas/v1/user/upgrade-banner";
 import { Hono } from "hono";
 
+// eslint-disable-next-line @local/eslint-local-rules/api-validation
 export const userUpgradeBannerRouter = new Hono<EnvBindings>().post(
   "/",
-  describeRoute(
-    apiDoc("post", UpgradeBannerRequestSchema, UpgradeBannerResponseSchema),
-  ),
-  zValidator(
-    "json",
-    UpgradeBannerRequestSchema,
-    parseError<UpgradeBannerRequest, UpgradeBannerResponse>,
-  ),
+  describeRoute(apiDoc("post", null, UpgradeBannerResponseSchema)),
   async (c): Promise<APIResponse<UpgradeBannerResponse>> => {
     const log = c.get("log");
     const profileId = c.get("profileId")!;
