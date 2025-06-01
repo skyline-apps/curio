@@ -153,7 +153,9 @@ const SubscriptionSettings: React.FC = () => {
           <p className="text-xs text-secondary">
             {isPremium
               ? "Thank you for being a paid Curio supporter! Your subscription goes towards supporting our hosting costs."
-              : "Curio will always remain free to use. However, to support our hosting costs, please consider becoming a paid supporter."}
+              : currentSubscription
+                ? "Please wait a few moments while your subscription status is updated to use Premium features."
+                : "Curio will always remain free to use. However, to support our hosting costs, please consider becoming a paid supporter."}
           </p>
           <p className="text-xs text-secondary">
             Paid supporters get access to the following:
