@@ -261,7 +261,12 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
   }, [getExtensionName, getExtensionLink]);
 
   const saveItemContent = useCallback(
-    async (url: string, overrideOpenUrl?: string) => {
+    async (url: string | null, overrideOpenUrl?: string) => {
+      if (!url) {
+        setSavingError("Invalid URL");
+        return;
+      }
+
       if (!isNativePlatform() && isMobileBrowser()) {
         setSavingError(<p>{MOBILE_BROWSER_ERROR}</p>);
         return;
