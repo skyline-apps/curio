@@ -9,7 +9,12 @@ const UrlSchema = z.string().url().describe("Unique URL of the item.");
 const OptionalUrlSchema = z.preprocess((val) => {
   if (typeof val !== "string" || !val) return null;
   try {
-    return new URL(val).toString();
+    const url = new URL(val);
+    let urlStr = url.toString();
+    if (urlStr.endsWith("/")) {
+      urlStr = urlStr.slice(0, -1);
+    }
+    return urlStr;
   } catch {
     return null;
   }
