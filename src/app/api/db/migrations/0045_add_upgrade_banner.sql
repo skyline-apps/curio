@@ -1,0 +1,1 @@
+ALTER TABLE "profiles" ADD COLUMN "upgrade_banner_last_shown_at" timestamp with time zone DEFAULT now() NOT NULL;
