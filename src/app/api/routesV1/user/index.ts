@@ -10,6 +10,7 @@ import { userApiKeysRevokeRouter } from "./api-keys/revoke";
 import { userEmailRouter } from "./email";
 import { userLabelsRouter } from "./labels";
 import { userSettingsRouter } from "./settings";
+import { userUpgradeBannerRouter } from "./upgrade-banner";
 import { userUsernameRouter } from "./username";
 
 // eslint-disable-next-line @local/eslint-local-rules/api-validation
@@ -54,6 +55,7 @@ userRouter.route("/api-keys/revoke", userApiKeysRevokeRouter);
 userRouter.route("/email", userEmailRouter);
 userRouter.route("/labels", userLabelsRouter);
 userRouter.route("/settings", userSettingsRouter);
+userRouter.route("/upgrade-banner", userUpgradeBannerRouter);
 userRouter.route("/username", userUsernameRouter);
 
 export { userRouter };
