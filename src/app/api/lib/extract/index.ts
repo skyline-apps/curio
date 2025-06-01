@@ -82,13 +82,13 @@ export class Extract {
         : `<!DOCTYPE html><html><body>${html}</body></html>`;
 
       // Pass the potentially wrapped HTML to parseHTML
-      let urlStr: string;
+      let urlObj: URL | null;
       try {
-        urlStr = new URL(url).toString();
+        urlObj = new URL(url);
       } catch (_) {
-        urlStr = "";
+        urlObj = null;
       }
-      const { document } = parseHTML(fullHtml, { location: urlStr });
+      const { document } = parseHTML(fullHtml, { location: urlObj });
 
       const reader = new Readability(document, {
         // @ts-expect-error: https://github.com/mozilla/readability/issues/966
