@@ -1,4 +1,5 @@
 import AppUrlListener from "@app/components/AppUrlListener";
+import ErrorBoundary from "@app/components/ui/ErrorBoundary";
 import Spinner from "@app/components/ui/Spinner";
 import ProtectedLayout from "@app/layouts/ProtectedLayout";
 import PublicLayout from "@app/layouts/PublicLayout";
@@ -87,75 +88,77 @@ export const App = (): React.ReactNode => {
   }
 
   return (
-    <BrowserRouter>
-      <AppUrlListener />
-      <Routes>
-        <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route
-          element={
-            <RootLayout>
-              <Outlet />
-            </RootLayout>
-          }
-        >
-          <Route
-            path="/"
-            element={
-              user?.id ? (
-                <RootPageRedirect />
-              ) : isNative ? (
-                <MobileLoginPage />
-              ) : (
-                <MainPage />
-              )
-            }
-          />
-          <Route
-            path="/login"
-            element={
-              user?.id ? (
-                <RootPageRedirect />
-              ) : isNative ? (
-                <MobileLoginPage />
-              ) : (
-                <LoginPage />
-              )
-            }
-          />
-          <Route
-            path="/login/redirect"
-            element={user?.id ? <RootPageRedirect /> : <RedirectPage />}
-          />
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/terms" element={<TermsPage />} />
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AppUrlListener />
+        <Routes>
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route
             element={
-              <RequireAuth>
-                <ProtectedLayout>
-                  <Outlet />
-                </ProtectedLayout>
-              </RequireAuth>
-            }
-          >
-            <Route path="/home" element={<HomePage />} />
-            <Route path="/inbox" element={<InboxPage />} />
-            <Route path="/notes" element={<NotesPage />} />
-            <Route path="/archive" element={<ArchivePage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-          </Route>
-          <Route
-            element={
-              <PublicLayout>
+              <RootLayout>
                 <Outlet />
-              </PublicLayout>
+              </RootLayout>
             }
           >
-            <Route path="/u/:username" element={<UserPage />} />
-            <Route path="/item/:slug" element={<ContentPage />} />
+            <Route
+              path="/"
+              element={
+                user?.id ? (
+                  <RootPageRedirect />
+                ) : isNative ? (
+                  <MobileLoginPage />
+                ) : (
+                  <MainPage />
+                )
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                user?.id ? (
+                  <RootPageRedirect />
+                ) : isNative ? (
+                  <MobileLoginPage />
+                ) : (
+                  <LoginPage />
+                )
+              }
+            />
+            <Route
+              path="/login/redirect"
+              element={user?.id ? <RootPageRedirect /> : <RedirectPage />}
+            />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route
+              element={
+                <RequireAuth>
+                  <ProtectedLayout>
+                    <Outlet />
+                  </ProtectedLayout>
+                </RequireAuth>
+              }
+            >
+              <Route path="/home" element={<HomePage />} />
+              <Route path="/inbox" element={<InboxPage />} />
+              <Route path="/notes" element={<NotesPage />} />
+              <Route path="/archive" element={<ArchivePage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+            </Route>
+            <Route
+              element={
+                <PublicLayout>
+                  <Outlet />
+                </PublicLayout>
+              }
+            >
+              <Route path="/u/:username" element={<UserPage />} />
+              <Route path="/item/:slug" element={<ContentPage />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
           </Route>
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 };
