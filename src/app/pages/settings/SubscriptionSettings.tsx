@@ -143,7 +143,7 @@ const SubscriptionSettings: React.FC = () => {
   const currentPackageDescription = willRenew
     ? `${currentPackage?.price?.formattedPrice || "error"} billed every ${currentPackage?.period?.unit || "error"}`
     : expiresAt
-      ? `Expires ${new Date(expiresAt).toLocaleDateString()}`
+      ? `Expires ${new Date(expiresAt).toLocaleDateString()} at ${new Date(expiresAt).toLocaleTimeString()}`
       : currentSubscription;
 
   return (
