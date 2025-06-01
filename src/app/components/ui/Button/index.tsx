@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 interface CurioButtonProps extends Omit<ButtonProps, "size" | "spinner"> {
   href?: string;
+  hrefNewTab?: boolean;
   tooltip?: string;
   size?: "xs" | "sm" | "md" | "lg";
   "data-testid"?: string;
@@ -17,7 +18,14 @@ interface CurioButtonProps extends Omit<ButtonProps, "size" | "spinner"> {
 // Add forwardRef to ensure Dropdowns are properly positioned.
 const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
   (
-    { href, tooltip, size = "md", className, ...props }: CurioButtonProps,
+    {
+      href,
+      hrefNewTab,
+      tooltip,
+      size = "md",
+      className,
+      ...props
+    }: CurioButtonProps,
     ref,
   ) => {
     const [pressed, setPressed] = useState<boolean>(false);
@@ -72,6 +80,8 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
         if (href.startsWith("http")) {
           if (isNativePlatform()) {
             Browser.open({ url: href });
+          } else if (hrefNewTab) {
+            window.open(href, "_blank");
           } else {
             window.location.href = href;
           }
