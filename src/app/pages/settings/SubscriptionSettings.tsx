@@ -2,6 +2,7 @@ import Button from "@app/components/ui/Button";
 import { FormSection } from "@app/components/ui/Form";
 import Spinner from "@app/components/ui/Spinner";
 import { useSettings } from "@app/providers/Settings";
+import { useToast } from "@app/providers/Toast";
 import { useUser } from "@app/providers/User";
 import { createLogger } from "@app/utils/logger";
 import {
@@ -52,6 +53,7 @@ const SubscriptionSettings: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [purchaseLoading, setPurchaseLoading] = useState<string | null>(null);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
     async function fetchPackages(): Promise<void> {
@@ -89,13 +91,30 @@ const SubscriptionSettings: React.FC = () => {
     }
     try {
       await purchasePackage(rcPackage, user.email);
+      showToast(
+        "Thank you for your purchase! It may take a few moments to update your access to Premium features.",
+        {
+          dismissable: true,
+          disappearing: false,
+        },
+      );
     } catch (error) {
       if (error instanceof Error) {
         log.error("Failed to purchase subscription", error);
         setPurchaseError(error.message);
+        showToast(error.message, {
+          dismissable: true,
+          disappearing: false,
+          type: "error",
+        });
       } else {
         log.error("Failed to purchase subscription", error);
         setPurchaseError("Purchase failed.");
+        showToast("Purchase failed.", {
+          dismissable: true,
+          disappearing: false,
+          type: "error",
+        });
       }
     } finally {
       setPurchaseLoading(null);
