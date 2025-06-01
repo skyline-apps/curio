@@ -387,7 +387,8 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
 
   const shouldShowUpgradeBanner =
     !isPremium &&
-    (lastShown === null || now - lastShown > 2 * 24 * 60 * 60 * 1000); // Show upgrade banner every 2 days
+    lastShown !== null &&
+    now - lastShown > 2 * 24 * 60 * 60 * 1000; // Show upgrade banner every 2 days
 
   const dismissUpgradeBannerMutation = useMutation({
     mutationFn: async () => {
