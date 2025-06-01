@@ -20,59 +20,9 @@ import {
   type RevenueCatWebhookResponse,
 } from "@app/schemas/v1/public/subscriptions/revenuecat";
 import type { Hono } from "hono";
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { revenuecatRouter } from "./index";
-
-// Mock the Web Crypto API for tests
-if (!globalThis.crypto) {
-  // Mock implementation of importKey that returns a simple key object
-  const mockImportKey = vi.fn().mockImplementation(async (_, keyData) => {
-    return {
-      algorithm: { name: "HMAC", hash: "SHA-256" },
-      keyData: keyData,
-    };
-  });
-
-  // Mock implementation of verify that always returns true for testing
-  const mockVerify = vi.fn().mockResolvedValue(true);
-
-  // Mock implementation of sign that generates a deterministic signature for testing
-  const mockSign = vi.fn().mockImplementation(async (_, key, data) => {
-    const keyBytes = new Uint8Array(key.keyData);
-    const dataBytes = new Uint8Array(data);
-
-    // Simple XOR-based hash for testing
-    const result = new Uint8Array(32); // SHA-256 produces 32 bytes
-    for (let i = 0; i < result.length; i++) {
-      result[i] =
-        keyBytes[i % keyBytes.length] ^ dataBytes[i % dataBytes.length];
-    }
-    return result.buffer;
-  });
-
-  globalThis.crypto = {
-    subtle: {
-      importKey: mockImportKey,
-      verify: mockVerify,
-      sign: mockSign,
-    } as unknown as Crypto["subtle"],
-    getRandomValues: <T extends ArrayBufferView | null>(array: T): T => {
-      if (!array) return array;
-      const buffer = new Uint8Array(
-        array.buffer,
-        array.byteOffset,
-        array.byteLength,
-      );
-      for (let i = 0; i < buffer.length; i++) {
-        buffer[i] = Math.floor(Math.random() * 256);
-      }
-      return array;
-    },
-    randomUUID: (): `${string}-${string}-${string}-${string}-${string}` =>
-      "123e4567-e89b-12d3-a456-426614174000",
-  };
-}
 
 describe("/v1/public/subscriptions/revenuecat", () => {
   let app: Hono<EnvBindings>;
@@ -136,50 +86,11 @@ describe("/v1/public/subscriptions/revenuecat", () => {
     return baseEvent;
   };
 
-  // Helper function to sign a webhook payload matching RevenueCat's format
-  const signWebhookPayload = async (
-    payload: unknown,
-    secret: string,
-  ): Promise<string> => {
-    const timestamp = Math.floor(Date.now() / 1000);
-    const payloadString = JSON.stringify(payload);
-    const data = `t=${timestamp}.${payloadString}`;
-
-    // Import the key
-    const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      "raw",
-      encoder.encode(secret),
-      { name: "HMAC", hash: "SHA-256" },
-      false,
-      ["sign"],
-    );
-
-    // Sign the data
-    const signature = await crypto.subtle.sign(
-      "HMAC",
-      key,
-      encoder.encode(data),
-    );
-
-    // Convert the signature to a hex string
-    const signatureArray = Array.from(new Uint8Array(signature));
-    const signatureHex = signatureArray
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-
-    return `t=${timestamp},v1=${signatureHex}`;
-  };
-
-  // Helper function to make requests with a properly signed payload
-  const postWithSignature = async (
-    path: string,
-    body: RevenueCatWebhookRequest,
-    secret: string = MOCK_ENV.REVENUECAT_WEBHOOK_SECRET,
+  const postAuthorizedRequest = (
+    event: RevenueCatWebhookRequest,
   ): Promise<Response> => {
-    const signature = await signWebhookPayload(body, secret);
-    return postRequest(app, path, body, {
-      "revenuecat-signature": signature,
+    return postRequest(app, "v1/public/subscriptions/revenuecat", event, {
+      Authorization: `Bearer ${MOCK_ENV.CURIO_APP_SECRET}`,
     });
   };
 
@@ -193,10 +104,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
       DEFAULT_TEST_USER_ID_2,
     );
 
-    const response = await postWithSignature(
-      "v1/public/subscriptions/revenuecat",
-      event,
-    );
+    const response = await postAuthorizedRequest(event);
     expect(response.status).toBe(200);
 
     const data: RevenueCatWebhookResponse = await response.json();
@@ -218,10 +126,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
       original_transaction_id: "test_original_tx",
     });
 
-    const response = await postWithSignature(
-      "v1/public/subscriptions/revenuecat",
-      event,
-    );
+    const response = await postAuthorizedRequest(event);
     expect(response.status).toBe(200);
 
     const data: RevenueCatWebhookResponse = await response.json();
@@ -248,10 +153,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
       },
     );
 
-    const response = await postWithSignature(
-      "v1/public/subscriptions/revenuecat",
-      event,
-    );
+    const response = await postAuthorizedRequest(event);
     expect(response.status).toBe(200);
 
     const data: RevenueCatWebhookResponse = await response.json();
@@ -270,10 +172,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
       original_transaction_id: "test_original_tx",
     });
 
-    const response = await postWithSignature(
-      "v1/public/subscriptions/revenuecat",
-      event,
-    );
+    const response = await postAuthorizedRequest(event);
     expect(response.status).toBe(200);
 
     const data: RevenueCatWebhookResponse = await response.json();
@@ -298,10 +197,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
       },
     );
 
-    const response = await postWithSignature(
-      "v1/public/subscriptions/revenuecat",
-      event,
-    );
+    const response = await postAuthorizedRequest(event);
     expect(response.status).toBe(200);
 
     const data: RevenueCatWebhookResponse = await response.json();
@@ -328,10 +224,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
       },
     );
 
-    const response = await postWithSignature(
-      "v1/public/subscriptions/revenuecat",
-      event,
-    );
+    const response = await postAuthorizedRequest(event);
     expect(response.status).toBe(200);
 
     const data: RevenueCatWebhookResponse = await response.json();
@@ -358,10 +251,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
       },
     );
 
-    const response = await postWithSignature(
-      "v1/public/subscriptions/revenuecat",
-      event,
-    );
+    const response = await postAuthorizedRequest(event);
     expect(response.status).toBe(200);
 
     const data: RevenueCatWebhookResponse = await response.json();
@@ -380,22 +270,10 @@ describe("/v1/public/subscriptions/revenuecat", () => {
     ).toBe(true);
   });
 
-  it("should return 400 for invalid webhook payload", async () => {
-    const signature = await signWebhookPayload(
-      { invalid: "payload" },
-      MOCK_ENV.REVENUECAT_WEBHOOK_SECRET,
-    );
-
-    const response = await postRequest(
-      app,
-      "v1/public/subscriptions/revenuecat",
-      {
-        invalid: "payload",
-      },
-      {
-        "revenuecat-signature": signature,
-      },
-    );
+  it("should return 400 for invalid event payload", async () => {
+    const response = await postAuthorizedRequest({
+      invalid: "payload",
+    });
 
     expect(response.status).toBe(400);
 
@@ -404,24 +282,26 @@ describe("/v1/public/subscriptions/revenuecat", () => {
     expect(data.error).toContain("Invalid request parameters");
   });
 
-  it("should return 401 for invalid signature", async () => {
+  it("should return 401 for invalid authorization", async () => {
     const event = createTestWebhookEvent(
       RevenueCatEventType.enum.INITIAL_PURCHASE,
     );
 
-    const invalidSecret = "invalid_secret" + Date.now();
-    const response = await postWithSignature(
+    const invalidSecret = "invalid_secret";
+    const response = await postRequest(
+      app,
       "v1/public/subscriptions/revenuecat",
       event,
-      invalidSecret,
+      {
+        Authorization: `Bearer ${invalidSecret}`,
+      },
     );
 
     expect(response.status).toBe(401);
 
     const data = await response.json();
     expect(data).toMatchObject({
-      success: false,
-      message: "Invalid signature",
+      error: "Unauthorized",
     });
   });
 });
