@@ -18,7 +18,7 @@ spec:
         from: Selector
         selector:
           matchLabels:
-            namespace: staging
+            name: infra
   - name: http-prod
     hostname: {{ .Values.prod_hostname }}
     port: 80
@@ -28,4 +28,4 @@ spec:
         from: Selector
         selector:
           matchLabels:
-            namespace: prod
+            name: infra
