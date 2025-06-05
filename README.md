@@ -106,6 +106,7 @@ Instead, to run logic for a specific consumer queue locally, set it as the `queu
 5. Set up a Meilisearch instance on GCP.
   - Use the dev environment: `docker exec -it dev zsh`.
   - Authenticate using `gcloud auth application-default login`.
+  - Temporarily edit the cluster to have a public API endpoint via the `enable_private_endpoint` variable in `src/infra/gcp/gke/variables.tf`.
   - Create an A (Address) DNS record for `terraform output`'s `gke.ip_address` under the subdomain of `SEARCH_EXTERNAL_ENDPOINT_URL`.
   - Set up `cert-manager` on the cluster using `script/deploy-certs.sh`.
   - Then run `script/deploy-volumes.sh [staging|prod]` to deploy a persistent volume to store the search index.
