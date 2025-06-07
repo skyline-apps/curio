@@ -15,7 +15,7 @@ interface RecommendedSectionProps {
 }
 
 const SECTION_HEADERS = {
-  [RecommendationType.POPULAR]: "Popular this week",
+  [RecommendationType.POPULAR]: "Featured this week",
   [PersonalRecommendationType.NEWSLETTER]: "From your newsletters",
   [PersonalRecommendationType.FAVORITE_AUTHOR]:
     "More from your favorite authors",
