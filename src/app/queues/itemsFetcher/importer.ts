@@ -50,7 +50,9 @@ export class Importer {
     if (originalMetadata.status === ImportStatus.NOT_STARTED) {
       totalItems = await this.fetchMetadata();
       if (totalItems === null) {
-        this.log.error("Failed to import metadata");
+        this.log.error("Failed to import metadata", {
+          jobId: this.job.id,
+        });
         throw new Error("Failed to import metadata");
       }
       this.log.info(`Successfully imported items`, {

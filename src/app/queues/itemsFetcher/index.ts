@@ -28,7 +28,7 @@ export const itemsFetcherQueue = async (
 
   for (const message of batch.messages) {
     const jobId = message.body.jobId;
-    log.info(`Processing job ID: ${jobId}`);
+    log.info(`Processing job`, { jobId });
 
     let job: Job | undefined;
     try {
@@ -38,14 +38,12 @@ export const itemsFetcherQueue = async (
       });
 
       if (!job) {
-        log.error(
-          `Job ${jobId} not found in the database. Acknowledging message.`,
-        );
+        log.error(`Job not found in the database. Acknowledging message.`, {
+          jobId,
+        });
         message.ack();
         continue;
       }
-
-      log.debug("Job details fetched", { job });
 
       // Check if job is already processed
       if (
@@ -54,7 +52,10 @@ export const itemsFetcherQueue = async (
         )
       ) {
         log.warn(
-          `Job ${jobId} already processed with status: ${job.status}. Skipping.`,
+          `Job already processed with status: ${job.status}. Skipping.`,
+          {
+            jobId,
+          },
         );
         message.ack();
         continue;
@@ -68,7 +69,9 @@ export const itemsFetcherQueue = async (
           errorMessage: null,
         })
         .where(eq(jobs.id, jobId));
-      log.info(`Job ${jobId} status updated to RUNNING.`);
+      log.info(`Job status updated to RUNNING.`, {
+        jobId,
+      });
 
       // Route to the appropriate handler based on job type
       switch (job.type) {
@@ -98,7 +101,9 @@ export const itemsFetcherQueue = async (
           metadata: finalMetadata,
         })
         .where(eq(jobs.id, jobId));
-      log.info(`Job ${jobId} completed successfully.`);
+      log.info(`Job completed successfully.`, {
+        jobId,
+      });
 
       message.ack();
     } catch (error) {
@@ -123,7 +128,7 @@ export const itemsFetcherQueue = async (
               metadata: finalMetadata,
             })
             .where(eq(jobs.id, jobId));
-          log.info(`Job status updated to FAILED.`, { jobId });
+          log.warn(`Job status updated to FAILED.`, { jobId });
         } catch (dbError) {
           log.error(`Failed to update job status to FAILED`, {
             jobId,
