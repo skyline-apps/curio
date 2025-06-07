@@ -2,6 +2,7 @@ import { eq, sql, TransactionDB } from "@app/api/db";
 import { fetchOwnItemResults } from "@app/api/db/dal/profileItems";
 import { items, profileItems } from "@app/api/db/schema";
 import { getItemMetadata } from "@app/api/lib/storage";
+import { StorageError } from "@app/api/lib/storage/types";
 import {
   apiDoc,
   APIResponse,
@@ -10,6 +11,7 @@ import {
   zValidator,
 } from "@app/api/utils/api";
 import { EnvBindings, EnvContext } from "@app/api/utils/env";
+import type { Logger } from "@app/api/utils/logger";
 import {
   PersonalRecommendationType,
   RecommendationType,
@@ -101,6 +103,7 @@ export const itemsRecommendedRouter = new Hono<EnvBindings>().get(
       const publicItemResults = await fetchPublicItemResults(
         c,
         db,
+        log,
         otherRecommendations.map((r) => r.itemId),
       );
 
@@ -166,6 +169,7 @@ async function fetchItemResults(
 async function fetchPublicItemResults(
   c: EnvContext,
   db: TransactionDB,
+  log: Logger,
   itemIds: string[],
 ): Promise<PublicItemResult[]> {
   if (itemIds.length === 0) return [];
@@ -184,26 +188,34 @@ async function fetchPublicItemResults(
   const results: PublicItemResult[] = [];
 
   for (const itemResult of itemResults) {
-    const metadata = await getItemMetadata(c.env, itemResult.slug);
-    results.push(
-      PublicItemResultSchema.parse({
-        id: itemResult.id,
-        slug: itemResult.slug,
-        url: itemResult.url,
-        createdAt: itemResult.createdAt,
-        profileItemId: null,
-        metadata: {
-          title: metadata.title,
-          description: metadata.description,
-          publishedAt: metadata.publishedAt,
-          thumbnail: metadata.thumbnail,
-          favicon: metadata.favicon,
-          savedAt: metadata.timestamp,
-          textDirection: metadata.textDirection,
-          textLanguage: metadata.textLanguage,
-        },
-      }),
-    );
+    try {
+      const metadata = await getItemMetadata(c.env, itemResult.slug);
+      results.push(
+        PublicItemResultSchema.parse({
+          id: itemResult.id,
+          slug: itemResult.slug,
+          url: itemResult.url,
+          createdAt: itemResult.createdAt,
+          profileItemId: null,
+          metadata: {
+            title: metadata.title,
+            description: metadata.description,
+            publishedAt: metadata.publishedAt,
+            thumbnail: metadata.thumbnail,
+            favicon: metadata.favicon,
+            savedAt: metadata.timestamp,
+            textDirection: metadata.textDirection,
+            textLanguage: metadata.textLanguage,
+          },
+        }),
+      );
+    } catch (error) {
+      if (error instanceof StorageError) {
+        log.warn(`Missing metadata for item`, { itemId: itemResult.id });
+        continue;
+      }
+      throw error;
+    }
   }
   return results;
 }

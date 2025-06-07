@@ -6,6 +6,8 @@ import {
   profileItems,
   profiles,
 } from "@app/api/db/schema";
+import { getItemMetadata } from "@app/api/lib/storage/__mocks__/index";
+import { StorageError } from "@app/api/lib/storage/types";
 import { EnvBindings } from "@app/api/utils/env";
 import {
   DEFAULT_TEST_PROFILE_ID,
@@ -385,6 +387,35 @@ describe("GET /v1/items/recommended", () => {
       );
       expect(newsletterSection?.items.length).toBe(1);
       expect(newsletterSection?.items[0].id).toBe(MOCK_ITEMS[0].id);
+    });
+
+    it("should return 200 when item metadata is missing", async () => {
+      getItemMetadata.mockRejectedValueOnce(
+        new StorageError("Missing metadata"),
+      );
+      await testDb.db.insert(itemRecommendations).values([
+        {
+          itemId: MOCK_ITEMS[3].id,
+          type: RecommendationType.POPULAR,
+          createdAt: new Date(),
+        },
+      ]);
+      app = setUpMockApp(
+        "/v1/items/recommended",
+        itemsRecommendedRouter,
+        DEFAULT_TEST_USER_ID_2,
+      );
+      const response = await getRequest(app, "v1/items/recommended");
+      expect(response.status).toBe(200);
+
+      const { recommendations }: GetRecommendationsResponse =
+        await response.json();
+
+      const popularSection = recommendations.find(
+        (r: RecommendationSection) =>
+          r.sectionType === RecommendationType.POPULAR,
+      );
+      expect(popularSection?.items.length).toBe(0);
     });
   });
 
