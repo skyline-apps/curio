@@ -12,6 +12,9 @@
         "enabled": true,
         "head_sampling_rate": 1
     },
+    "limits": {
+        "cpu_ms": 600000 // 10 minutes
+    },
     "env": {
         "staging": {
             "name": "curio-consumer-staging",
@@ -36,7 +39,7 @@
                 "consumers": [
                     {
                         "queue": "items-fetcher-prod",
-                        "max_batch_size": 1
+                        "max_batch_size": 1,
                     }
                 ]
             }
