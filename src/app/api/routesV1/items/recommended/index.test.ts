@@ -217,7 +217,7 @@ describe("GET /v1/items/recommended", () => {
       );
     });
 
-    it("should recompute global recommendations if they are over a week old", async () => {
+    it("should not recompute global recommendations if they are over a week old", async () => {
       const oldDate = new Date();
       oldDate.setDate(oldDate.getDate() - 8);
 
@@ -236,8 +236,8 @@ describe("GET /v1/items/recommended", () => {
         .select()
         .from(itemRecommendations);
       expect(globalRecommendations.length).toBe(1);
-      expect(globalRecommendations[0].itemId).toBe(MOCK_ITEMS[0].id);
-      expect(globalRecommendations[0].createdAt.getTime()).toBeGreaterThan(
+      expect(globalRecommendations[0].itemId).toBe(MOCK_ITEMS[3].id);
+      expect(globalRecommendations[0].createdAt.getTime()).toEqual(
         oldDate.getTime(),
       );
 
@@ -246,10 +246,8 @@ describe("GET /v1/items/recommended", () => {
           r.sectionType === RecommendationType.POPULAR,
       );
       expect(popularSection?.items.length).toBe(1);
-      expect(popularSection?.items[0].id).toBe(MOCK_ITEMS[0].id);
-      expect(popularSection?.items[0].profileItemId).toBe(
-        MOCK_PROFILE_ITEMS[0].id,
-      );
+      expect(popularSection?.items[0].id).toBe(MOCK_ITEMS[3].id);
+      expect(popularSection?.items[0].profileItemId).toBe(null);
     });
 
     it("should recompute personal recommendations if they are over a week old", async () => {

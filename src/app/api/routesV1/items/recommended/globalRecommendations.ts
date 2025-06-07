@@ -94,19 +94,6 @@ async function shouldRecomputeGlobalRecommendations(
   if (existingRecommendations.length === 0) {
     return true;
   }
-
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-  const oldestRecommendation = existingRecommendations.reduce(
-    (oldest, current) =>
-      current.createdAt < oldest ? current.createdAt : oldest,
-    existingRecommendations[0].createdAt,
-  );
-
-  if (oldestRecommendation < oneWeekAgo) {
-    return true;
-  }
   return false;
 }
 
