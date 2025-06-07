@@ -35,10 +35,14 @@ const LoginPage: React.FC<LoginPageProps> = ({}: LoginPageProps) => {
       <div className="flex-1">
         <div className="flex flex-col gap-4 my-16">
           <div className="flex flex-col items-center gap-2 w-64 mx-auto">
-            <div className="mb-8">
+            <div className="mb-4">
               <YarnLight className="w-24 h-24 mb-4 block dark:hidden" />
               <YarnDark className="w-24 h-24 mb-4 block hidden dark:block" />
             </div>
+            <p className="text-center text-xs text-secondary-700 mb-4">
+              New or existing user? Sign in to Curio using one of the methods
+              below.
+            </p>
             <GoogleSignIn nextUrl="/home" />
             <p className="text-secondary text-xs">or</p>
             <EmailSignIn />
