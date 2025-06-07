@@ -13,7 +13,7 @@
         "head_sampling_rate": 1
     },
     "limits": {
-        "cpu_ms": 600000 // 10 minutes
+        "cpu_ms": 300000 // 5 minutes
     },
     "env": {
         "staging": {
