@@ -45,6 +45,7 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
           "opacity-70 border-none shadow data-[hover=true]:!bg-transparent data-[hover=true]:opacity-100 shadow-none":
             props.variant === "ghost",
           "text-default-900": props.color === "secondary",
+          "cursor-default": props.disabled,
         },
         className,
       ),
