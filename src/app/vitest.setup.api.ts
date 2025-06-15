@@ -19,6 +19,7 @@ vi.mock("@app/api/lib/instapaper");
 vi.mock("@app/api/lib/storage");
 vi.mock("@app/api/lib/supabase/client");
 vi.mock("@app/api/utils/supabase/server");
+vi.mock("@app/api/lib/llm");
 
 type TableResult = {
   rows: Array<{ tablename: string }>;

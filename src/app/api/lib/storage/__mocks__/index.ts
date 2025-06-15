@@ -17,6 +17,7 @@ export const getItemContent = vi.fn().mockResolvedValue({
   version: null,
   versionName: MOCK_VERSION,
   content: "test content",
+  summary: null,
 });
 
 export const getItemMetadata = vi.fn().mockResolvedValue({
@@ -25,6 +26,8 @@ export const getItemMetadata = vi.fn().mockResolvedValue({
   hash: "contenthash",
   ...MOCK_METADATA,
 });
+
+export const uploadItemSummary = vi.fn().mockResolvedValue(undefined);
 
 export const uploadImportFile = vi.fn().mockResolvedValue({});
 
@@ -57,6 +60,15 @@ export class Storage {
     slug: string,
   ): Promise<VersionMetadata> {
     return getItemMetadata(env, slug);
+  }
+
+  async uploadItemSummary(
+    env: StorageEnv,
+    slug: string,
+    version: string | null,
+    summary: string,
+  ): Promise<void> {
+    return uploadItemSummary(env, slug, version, summary);
   }
 
   async uploadImportFile(
