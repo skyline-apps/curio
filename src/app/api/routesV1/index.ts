@@ -12,6 +12,7 @@ import { itemsRecommendedRouter } from "./items/recommended";
 import { itemsSaveRouter } from "./items/save";
 import { itemsStateRouter } from "./items/state";
 import { jobsRouter } from "./jobs";
+import { premiumRouter } from "./premium";
 import { publicRouter } from "./public";
 import { userRouter } from "./user";
 
@@ -39,6 +40,7 @@ v1Router.route("items/state", itemsStateRouter);
 v1Router.route("jobs", jobsRouter);
 v1Router.route("public", publicRouter);
 v1Router.route("user", userRouter);
+v1Router.route("premium", premiumRouter);
 v1Router.use("*", async (c: EnvContext) => {
   return c.json({ error: "Not found" }, 404);
 });

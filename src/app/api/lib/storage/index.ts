@@ -9,6 +9,7 @@ import { createHash } from "crypto";
 import { type VersionMetadata } from "./types";
 
 const DEFAULT_NAME = "default";
+const SUMMARY_NAME = "summary";
 const ITEMS_BUCKET = "items";
 const IMPORT_BUCKET = "imports";
 
@@ -164,18 +165,36 @@ export class Storage {
     env: StorageEnv,
     slug: string,
     version: string | null,
-  ): Promise<{ version: string | null; versionName: string; content: string }> {
+  ): Promise<{
+    version: string | null;
+    versionName: string;
+    content: string;
+    summary: string | null;
+  }> {
     const storage = await this.getStorageClient(env);
     const versionPath = version
       ? `${slug}/versions/${version}.md`
       : `${slug}/${DEFAULT_NAME}.md`;
+    const summaryPath = version
+      ? `${slug}/versions/${version}.summary.md`
+      : `${slug}/${SUMMARY_NAME}.md`;
 
     const { data: content, error } = await storage
       .from(ITEMS_BUCKET)
       .download(versionPath);
+    const { data: summary, error: summaryError } = await storage
+      .from(ITEMS_BUCKET)
+      .download(summaryPath);
     const { data: metadata, error: metadataError } = await storage
       .from(ITEMS_BUCKET)
       .info(versionPath);
+
+    let fallbackSummaryData;
+    if (summaryError && version !== null) {
+      fallbackSummaryData = await storage
+        .from(ITEMS_BUCKET)
+        .download(`${slug}/${SUMMARY_NAME}.md`);
+    }
 
     if (error || metadataError || !metadata.metadata) {
       if (version) {
@@ -189,6 +208,11 @@ export class Storage {
       version,
       versionName: metadata.metadata.timestamp,
       content: await content.text(),
+      summary: summary
+        ? await summary.text()
+        : fallbackSummaryData?.data
+          ? await fallbackSummaryData.data.text()
+          : null,
     };
   }
 
@@ -217,6 +241,27 @@ export class Storage {
       data.metadata.textLanguage = "";
     }
     return data.metadata as VersionMetadata;
+  }
+
+  async uploadItemSummary(
+    env: StorageEnv,
+    slug: string,
+    version: string | null,
+    summary: string,
+  ): Promise<void> {
+    const storage = await this.getStorageClient(env);
+    const summaryPath = version
+      ? `${slug}/versions/${version}.summary.md`
+      : `${slug}/summary.md`;
+    const { error } = await storage
+      .from(ITEMS_BUCKET)
+      .upload(summaryPath, summary, {
+        contentType: "text/markdown",
+        upsert: true,
+      });
+    if (error) {
+      throw new StorageError("Failed to upload summary");
+    }
   }
 
   async uploadImportFile(
@@ -261,10 +306,21 @@ export const getItemContent = (
   env: StorageEnv,
   slug: string,
   version: string | null,
-): Promise<{ version: string | null; versionName: string; content: string }> =>
-  storage.getItemContent(env, slug, version);
+): Promise<{
+  version: string | null;
+  versionName: string;
+  content: string;
+  summary: string | null;
+}> => storage.getItemContent(env, slug, version);
 
 export const getItemMetadata = (
   env: StorageEnv,
   slug: string,
 ): Promise<VersionMetadata> => storage.getItemMetadata(env, slug);
+
+export const uploadItemSummary = (
+  env: StorageEnv,
+  slug: string,
+  version: string | null,
+  summary: string,
+): Promise<void> => storage.uploadItemSummary(env, slug, version, summary);
