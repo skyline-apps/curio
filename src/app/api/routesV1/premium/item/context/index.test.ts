@@ -32,10 +32,28 @@ describe("POST /v1/premium/item/context", () => {
     const response = await postRequest(app, "/v1/premium/item/context", {
       slug: MOCK_ITEMS[0].slug,
       snippet: "test snippet",
+      versionName: null,
     });
     expect(response.status).toBe(200);
     const data = await response.json();
     expect(data.explanation).toBe("This is the explanation.");
+    expect(getItemContent).toHaveBeenCalledOnce();
+    expect(getItemContent.mock.calls[0][1]).toBe(MOCK_ITEMS[0].slug);
+    expect(getItemContent.mock.calls[0][2]).toBe(null);
+  });
+
+  it("should return an explanation for valid input on custom version", async () => {
+    const response = await postRequest(app, "/v1/premium/item/context", {
+      slug: MOCK_ITEMS[0].slug,
+      snippet: "test snippet",
+      versionName: "2020-01-01",
+    });
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data.explanation).toBe("This is the explanation.");
+    expect(getItemContent).toHaveBeenCalledOnce();
+    expect(getItemContent.mock.calls[0][1]).toBe(MOCK_ITEMS[0].slug);
+    expect(getItemContent.mock.calls[0][2]).toBe("2020-01-01");
   });
 
   it("should return 404 if item not found", async () => {
@@ -43,6 +61,7 @@ describe("POST /v1/premium/item/context", () => {
     const response = await postRequest(app, "/v1/premium/item/context", {
       slug: MOCK_ITEMS[0].slug,
       snippet: "test snippet",
+      versionName: null,
     });
     expect(response.status).toBe(404);
     const data = await response.json();
@@ -54,6 +73,7 @@ describe("POST /v1/premium/item/context", () => {
     const response = await postRequest(app, "/v1/premium/item/context", {
       slug: MOCK_ITEMS[0].slug,
       snippet: "test snippet",
+      versionName: null,
     });
     expect(response.status).toBe(500);
     const data = await response.json();

@@ -34,9 +34,9 @@ export const contextRouter = new Hono<EnvBindings>().post(
   async (c) => {
     const log = c.get("log");
     const profileId = c.get("profileId");
-    const { slug, snippet } = c.req.valid("json");
+    const { slug, snippet, versionName } = c.req.valid("json");
     try {
-      const { content } = await getItemContent(c.env, slug, null);
+      const { content } = await getItemContent(c.env, slug, versionName);
       const explanation = await explainInContext(c.env, snippet, content);
       return c.json(PremiumItemContextResponseSchema.parse({ explanation }));
     } catch (error) {
