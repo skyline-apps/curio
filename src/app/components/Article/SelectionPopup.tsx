@@ -1,8 +1,14 @@
 import Button from "@app/components/ui/Button";
 import Icon from "@app/components/ui/Icon";
+import { CurrentItemContext } from "@app/providers/CurrentItem";
+import { useSettings } from "@app/providers/Settings";
+import { createLogger } from "@app/utils/logger";
 import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { HiMiniSparkles } from "react-icons/hi2";
+import { Link } from "react-router-dom";
+
+const log = createLogger("selection-popup");
 
 interface SelectionPopupProps {
   selection: Selection | null;
@@ -17,6 +23,9 @@ export const SelectionPopup = ({
   isSaving,
   containerRef,
 }: SelectionPopupProps): React.ReactElement | null => {
+  const { isPremium } = useSettings();
+  const { explainHighlight } = useContext(CurrentItemContext);
+  const [isExplainLoading, setIsExplainLoading] = useState<boolean>(false);
   const [position, setPosition] = useState<{
     top: number;
     left: number;
@@ -102,6 +111,50 @@ export const SelectionPopup = ({
     };
   }, [containerRef, updatePosition]);
 
+  const onExplainClick = useCallback(() => {
+    if (selection) {
+      setIsExplainLoading(true);
+      explainHighlight(selection.toString())
+        .then(() => {
+          setIsExplainLoading(false);
+        })
+        .catch((error) => {
+          setIsExplainLoading(false);
+          log.error("Failed to explain highlight:", error);
+        });
+    }
+  }, [explainHighlight, selection]);
+
+  const explainButton = isPremium ? (
+    <Button
+      size="xs"
+      color="primary"
+      tooltip="Explain this snippet."
+      isLoading={isExplainLoading}
+      onPress={onExplainClick}
+    >
+      <Icon icon={<HiMiniSparkles />} className="text-primary-foreground" />
+      Explain
+    </Button>
+  ) : (
+    <Button
+      size="xs"
+      tooltip={
+        <p className="inline">
+          <Link to="/settings?section=subscription" className="underline">
+            Upgrade to Premium
+          </Link>{" "}
+          to use this feature.
+        </p>
+      }
+      disabled
+      onPress={() => {}}
+    >
+      <Icon icon={<HiMiniSparkles />} />
+      Explain
+    </Button>
+  );
+
   return (
     <AnimatePresence>
       {position && selection && (
@@ -128,15 +181,7 @@ export const SelectionPopup = ({
               Highlight
             </Button>
           )}
-          <Button
-            size="xs"
-            tooltip="Sorry, you don't have access to this feature."
-            disabled
-            onPress={() => {}}
-          >
-            <Icon icon={<HiMiniSparkles />} />
-            Explain
-          </Button>
+          {explainButton}
         </motion.div>
       )}
     </AnimatePresence>

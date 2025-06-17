@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 interface CurioButtonProps extends Omit<ButtonProps, "size" | "spinner"> {
   href?: string;
   hrefNewTab?: boolean;
-  tooltip?: string;
+  tooltip?: string | React.ReactNode;
   size?: "xs" | "sm" | "md" | "lg";
   "data-testid"?: string;
 }
