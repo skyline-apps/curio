@@ -15,6 +15,11 @@ exports.apiMiddlewareRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
         function checkRouteMethod(node) {
             if (node.callee.type !== "MemberExpression")
                 return;
+            // Skip ky HTTP client calls
+            if (node.callee.object &&
+                node.callee.object.type === "Identifier" &&
+                node.callee.object.name === "ky")
+                return;
             const calleeProperty = node.callee.property;
             if (calleeProperty.type !== "Identifier")
                 return;
@@ -45,11 +50,18 @@ exports.apiMiddlewareRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
         }
         return {
             CallExpression(node) {
-                checkRouteMethod(node);
-                // Handle chained routes
-                if (node.callee.type === "MemberExpression" &&
-                    node.callee.object.type === "CallExpression") {
-                    checkRouteMethod(node.callee.object);
+                let current = node;
+                while (current &&
+                    current.type === "CallExpression" &&
+                    current.callee.type === "MemberExpression") {
+                    checkRouteMethod(current);
+                    if (current.callee.object &&
+                        current.callee.object.type === "CallExpression") {
+                        current = current.callee.object;
+                    }
+                    else {
+                        break;
+                    }
                 }
             },
         };
@@ -67,6 +79,11 @@ exports.responseParseRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
     create(context) {
         function checkRouteMethod(node) {
             if (node.callee.type !== "MemberExpression")
+                return;
+            // Skip ky HTTP client calls
+            if (node.callee.object &&
+                node.callee.object.type === "Identifier" &&
+                node.callee.object.name === "ky")
                 return;
             const calleeProperty = node.callee.property;
             if (calleeProperty.type !== "Identifier")
@@ -98,11 +115,18 @@ exports.responseParseRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
         }
         return {
             CallExpression(node) {
-                checkRouteMethod(node);
-                // Handle chained routes
-                if (node.callee.type === "MemberExpression" &&
-                    node.callee.object.type === "CallExpression") {
-                    checkRouteMethod(node.callee.object);
+                let current = node;
+                while (current &&
+                    current.type === "CallExpression" &&
+                    current.callee.type === "MemberExpression") {
+                    checkRouteMethod(current);
+                    if (current.callee.object &&
+                        current.callee.object.type === "CallExpression") {
+                        current = current.callee.object;
+                    }
+                    else {
+                        break;
+                    }
                 }
             },
         };
@@ -121,6 +145,11 @@ exports.apiValidationRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
     create(context) {
         function checkRouteMethod(node) {
             if (node.callee.type !== "MemberExpression")
+                return;
+            // Skip ky HTTP client calls
+            if (node.callee.object &&
+                node.callee.object.type === "Identifier" &&
+                node.callee.object.name === "ky")
                 return;
             const calleeProperty = node.callee.property;
             if (calleeProperty.type !== "Identifier")
@@ -171,11 +200,18 @@ exports.apiValidationRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
         }
         return {
             CallExpression(node) {
-                checkRouteMethod(node);
-                // Handle chained routes
-                if (node.callee.type === "MemberExpression" &&
-                    node.callee.object.type === "CallExpression") {
-                    checkRouteMethod(node.callee.object);
+                let current = node;
+                while (current &&
+                    current.type === "CallExpression" &&
+                    current.callee.type === "MemberExpression") {
+                    checkRouteMethod(current);
+                    if (current.callee.object &&
+                        current.callee.object.type === "CallExpression") {
+                        current = current.callee.object;
+                    }
+                    else {
+                        break;
+                    }
                 }
             },
         };

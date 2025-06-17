@@ -13,6 +13,14 @@ export const apiMiddlewareRule = ESLintUtils.RuleCreator.withoutDocs({
     function checkRouteMethod(node: TSESTree.CallExpression): void {
       if (node.callee.type !== "MemberExpression") return;
 
+      // Skip ky HTTP client calls
+      if (
+        node.callee.object &&
+        node.callee.object.type === "Identifier" &&
+        node.callee.object.name === "ky"
+      )
+        return;
+
       const calleeProperty = node.callee.property;
       if (calleeProperty.type !== "Identifier") return;
 
@@ -47,14 +55,21 @@ export const apiMiddlewareRule = ESLintUtils.RuleCreator.withoutDocs({
 
     return {
       CallExpression(node) {
-        checkRouteMethod(node);
-
-        // Handle chained routes
-        if (
-          node.callee.type === "MemberExpression" &&
-          node.callee.object.type === "CallExpression"
+        let current = node;
+        while (
+          current &&
+          current.type === "CallExpression" &&
+          current.callee.type === "MemberExpression"
         ) {
-          checkRouteMethod(node.callee.object);
+          checkRouteMethod(current);
+          if (
+            current.callee.object &&
+            current.callee.object.type === "CallExpression"
+          ) {
+            current = current.callee.object;
+          } else {
+            break;
+          }
         }
       },
     };
@@ -74,6 +89,14 @@ export const responseParseRule = ESLintUtils.RuleCreator.withoutDocs({
   create(context) {
     function checkRouteMethod(node: TSESTree.CallExpression): void {
       if (node.callee.type !== "MemberExpression") return;
+
+      // Skip ky HTTP client calls
+      if (
+        node.callee.object &&
+        node.callee.object.type === "Identifier" &&
+        node.callee.object.name === "ky"
+      )
+        return;
 
       const calleeProperty = node.callee.property;
       if (calleeProperty.type !== "Identifier") return;
@@ -113,14 +136,21 @@ export const responseParseRule = ESLintUtils.RuleCreator.withoutDocs({
 
     return {
       CallExpression(node) {
-        checkRouteMethod(node);
-
-        // Handle chained routes
-        if (
-          node.callee.type === "MemberExpression" &&
-          node.callee.object.type === "CallExpression"
+        let current = node;
+        while (
+          current &&
+          current.type === "CallExpression" &&
+          current.callee.type === "MemberExpression"
         ) {
-          checkRouteMethod(node.callee.object);
+          checkRouteMethod(current);
+          if (
+            current.callee.object &&
+            current.callee.object.type === "CallExpression"
+          ) {
+            current = current.callee.object;
+          } else {
+            break;
+          }
         }
       },
     };
@@ -140,6 +170,14 @@ export const apiValidationRule = ESLintUtils.RuleCreator.withoutDocs({
   create(context) {
     function checkRouteMethod(node: TSESTree.CallExpression): void {
       if (node.callee.type !== "MemberExpression") return;
+
+      // Skip ky HTTP client calls
+      if (
+        node.callee.object &&
+        node.callee.object.type === "Identifier" &&
+        node.callee.object.name === "ky"
+      )
+        return;
 
       const calleeProperty = node.callee.property;
       if (calleeProperty.type !== "Identifier") return;
@@ -198,14 +236,21 @@ export const apiValidationRule = ESLintUtils.RuleCreator.withoutDocs({
 
     return {
       CallExpression(node) {
-        checkRouteMethod(node);
-
-        // Handle chained routes
-        if (
-          node.callee.type === "MemberExpression" &&
-          node.callee.object.type === "CallExpression"
+        let current = node;
+        while (
+          current &&
+          current.type === "CallExpression" &&
+          current.callee.type === "MemberExpression"
         ) {
-          checkRouteMethod(node.callee.object);
+          checkRouteMethod(current);
+          if (
+            current.callee.object &&
+            current.callee.object.type === "CallExpression"
+          ) {
+            current = current.callee.object;
+          } else {
+            break;
+          }
         }
       },
     };
