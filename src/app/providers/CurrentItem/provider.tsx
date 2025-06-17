@@ -20,6 +20,7 @@ import React, {
 import { useLocation } from "react-router-dom";
 
 import { CurrentItemContext, ITEM_CONTENT_QUERY_KEY, ItemWithContent } from ".";
+import { useCurrentItemActions } from "./actions";
 
 const log = createLogger("current-item-provider");
 
@@ -41,9 +42,9 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     Item | PublicItem | null
   >(null);
   const [inSelectionMode, setInSelectionMode] = useState<boolean>(false);
-  const [selectedHighlight, setSelectedHighlight] = useState<Highlight | null>(
-    null,
-  );
+  const [selectedHighlight, setSelectedHighlight] = useState<
+    (Highlight & { explanation?: string }) | null
+  >(null);
 
   const { updateAppLayout } = useAppLayout();
   // Note that this ItemsContext may not be available if CurrentItemProvider is being used for an
@@ -229,6 +230,32 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     return data || null;
   }, [data]);
 
+  const actions = useCurrentItemActions();
+
+  const explainHighlight = async (snippet: string): Promise<void> => {
+    if (!loadedItem || !("item" in loadedItem) || !loadedItem.item.slug) {
+      throw new Error("No item loaded for explanation");
+    }
+    const slug = loadedItem.item.slug;
+    let versionName: string | null = null;
+    if (isEditable(currentItem)) {
+      versionName = currentItem.metadata.versionName;
+    }
+
+    const result = await actions.explainHighlight.mutateAsync({
+      slug,
+      snippet,
+      versionName,
+    });
+
+    if (selectedHighlight) {
+      setSelectedHighlight({
+        ...selectedHighlight,
+        explanation: result.explanation,
+      });
+    }
+  };
+
   return (
     <CurrentItemContext.Provider
       value={{
@@ -252,6 +279,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         selectedHighlight,
         setSelectedHighlight,
         isEditable,
+        explainHighlight,
       }}
     >
       {children}
