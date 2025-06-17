@@ -40,7 +40,7 @@ export type CurrentItemContextType = {
   selectedHighlight: Highlight | null;
   setSelectedHighlight: (highlight: Highlight | null) => void;
   isEditable: (item: Item | PublicItem | null | undefined) => item is Item;
-  explainHighlight: (snippet: string) => Promise<void>;
+  explainHighlight: (snippet: string) => Promise<string | null>;
 };
 
 export const CurrentItemContext = createContext<CurrentItemContextType>({
@@ -63,5 +63,5 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
   isEditable: (item: Item | PublicItem | null | undefined): item is Item => {
     return item ? typeof item.profileItemId === "string" : false;
   },
-  explainHighlight: () => Promise.resolve(),
+  explainHighlight: () => Promise.resolve(null),
 });

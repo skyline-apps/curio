@@ -42,9 +42,9 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     Item | PublicItem | null
   >(null);
   const [inSelectionMode, setInSelectionMode] = useState<boolean>(false);
-  const [selectedHighlight, setSelectedHighlight] = useState<
-    (Highlight & { explanation?: string }) | null
-  >(null);
+  const [selectedHighlight, setSelectedHighlight] = useState<Highlight | null>(
+    null,
+  );
 
   const { updateAppLayout } = useAppLayout();
   // Note that this ItemsContext may not be available if CurrentItemProvider is being used for an
@@ -232,7 +232,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
 
   const actions = useCurrentItemActions();
 
-  const explainHighlight = async (snippet: string): Promise<void> => {
+  const explainHighlight = async (snippet: string): Promise<string | null> => {
     if (!loadedItem || !("item" in loadedItem) || !loadedItem.item.slug) {
       throw new Error("No item loaded for explanation");
     }
@@ -247,13 +247,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
       snippet,
       versionName,
     });
-
-    if (selectedHighlight) {
-      setSelectedHighlight({
-        ...selectedHighlight,
-        explanation: result.explanation,
-      });
-    }
+    return result.explanation;
   };
 
   return (

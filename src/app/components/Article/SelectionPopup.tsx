@@ -26,6 +26,7 @@ export const SelectionPopup = ({
   const { isPremium } = useSettings();
   const { explainHighlight } = useContext(CurrentItemContext);
   const [isExplainLoading, setIsExplainLoading] = useState<boolean>(false);
+  const [explanation, setExplanation] = useState<string | null>(null);
   const [position, setPosition] = useState<{
     top: number;
     left: number;
@@ -115,8 +116,9 @@ export const SelectionPopup = ({
     if (selection) {
       setIsExplainLoading(true);
       explainHighlight(selection.toString())
-        .then(() => {
+        .then((explanation) => {
           setIsExplainLoading(false);
+          setExplanation(explanation);
         })
         .catch((error) => {
           setIsExplainLoading(false);
@@ -163,25 +165,32 @@ export const SelectionPopup = ({
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
-          className="absolute z-50 bg-background-400 dark:bg-background-600 shadow-lg rounded p-2 flex gap-2 items-center"
+          className="absolute z-50 bg-background-400 dark:bg-background-600 shadow-lg rounded p-2 flex flex-col gap-2"
           style={{
             top: `${position.top}px`,
             left: `${position.left}px`,
             transformOrigin: "top center",
           }}
         >
-          {onHighlightSave && (
-            <Button
-              size="xs"
-              color="warning"
-              isLoading={isSaving}
-              onPress={onHighlightSave}
-              onMouseDown={(e) => e.preventDefault()}
-            >
-              Highlight
-            </Button>
+          <div className="flex gap-2">
+            {onHighlightSave && (
+              <Button
+                size="xs"
+                color="warning"
+                isLoading={isSaving}
+                onPress={onHighlightSave}
+                onMouseDown={(e) => e.preventDefault()}
+              >
+                Highlight
+              </Button>
+            )}
+            {explainButton}
+          </div>
+          {explanation && (
+            <p className="text-xs italic max-h-24 overflow-y-auto">
+              {explanation}
+            </p>
           )}
-          {explainButton}
         </motion.div>
       )}
     </AnimatePresence>
