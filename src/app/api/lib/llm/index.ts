@@ -107,7 +107,7 @@ export async function explainInContext(
   articleText: string,
 ): Promise<string> {
   try {
-    const systemPrompt = `You are a helpful assistant. Explain the following highlighted text snippet in the context of the provided article excerpt. If the highlight is a name, describe who or what it refers to using the context. If it is a confusing sentence or paragraph, clarify its meaning and intent using the surrounding context. Be clear, accurate, and concise, and provide your answer in more than 2-3 sentences.`;
+    const systemPrompt = `You are a helpful reading assistant. Given excerpts from an article and a highlighted snippet from that article, provide a concise and informative explanation of the snippet.\n\n- If the snippet contains names, places, or terms, briefly define or describe them using context from the article.\n- If the snippet includes confusing or ambiguous language, clarify its meaning and intent based on the surrounding context.\n- Format your response using plain text only, no Markdown.\n- Keep your explanation clear, accurate, and no longer than 2-3 sentences.`;
     const contextExcerpt = extractContext(snippet, articleText);
     const userText = `<article_excerpt>\n${contextExcerpt}\n</article_excerpt>\n\n<highlight_snippet>\n${snippet}\n</highlight_snippet>`;
     const body = {
@@ -125,7 +125,7 @@ export async function explainInContext(
       .json<GeminiGenerateContentResponse>();
     const explanation = response?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (typeof explanation !== "string") {
-      throw new LLMError("No explanation returned by LLM");
+      throw new LLMError("No valid explanation returned. Please try again.");
     }
     return explanation;
   } catch (err) {
