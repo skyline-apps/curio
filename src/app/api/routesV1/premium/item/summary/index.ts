@@ -1,4 +1,4 @@
-import { summarizeItem } from "@app/api/lib/llm";
+import { summarizeItem, summarizeItemStream } from "@app/api/lib/llm";
 import { LLMError } from "@app/api/lib/llm/types";
 import { getItemContent, uploadItemSummary } from "@app/api/lib/storage";
 import { StorageError } from "@app/api/lib/storage/types";
@@ -16,6 +16,7 @@ import {
   PremiumItemSummaryResponseSchema,
 } from "@app/schemas/v1/premium/item/summary";
 import { Hono } from "hono";
+import { streamText } from "hono/streaming";
 
 export const summaryRouter = new Hono<EnvBindings>().post(
   "/",
@@ -36,7 +37,8 @@ export const summaryRouter = new Hono<EnvBindings>().post(
     const profileId = c.get("profileId");
     const { slug, versionName } = c.req.valid("json");
     let fullContent: string | undefined;
-    let newSummary: string;
+
+    // Stream item summary in response if client allows
     try {
       const { content, summary } = await getItemContent(
         c.env,
@@ -48,6 +50,22 @@ export const summaryRouter = new Hono<EnvBindings>().post(
       }
 
       fullContent = content;
+
+      const accept = c.req.header("accept") || "";
+      if (
+        accept.includes("text/plain") ||
+        accept.includes("text/event-stream")
+      ) {
+        c.header("Content-Encoding", "Identity");
+        return streamText(c, async (stream) => {
+          let summary = "";
+          for await (const chunk of summarizeItemStream(c.env, fullContent!)) {
+            await stream.write(chunk);
+            summary += chunk;
+          }
+          await uploadItemSummary(c.env, slug, versionName, summary.trim());
+        });
+      }
     } catch (error) {
       if (error instanceof StorageError) {
         log.warn("Error fetching item content", {
@@ -73,12 +91,11 @@ export const summaryRouter = new Hono<EnvBindings>().post(
       );
     }
 
+    // Fall back to full summary if streaming fails
     try {
-      newSummary = await summarizeItem(c.env, fullContent);
-      await uploadItemSummary(c.env, slug, versionName, newSummary);
-      return c.json(
-        PremiumItemSummaryResponseSchema.parse({ summary: newSummary }),
-      );
+      const summary = await summarizeItem(c.env, fullContent);
+      await uploadItemSummary(c.env, slug, versionName, summary);
+      return c.json(PremiumItemSummaryResponseSchema.parse({ summary }));
     } catch (error) {
       if (error instanceof StorageError) {
         log.error("Storage error generating summary", {

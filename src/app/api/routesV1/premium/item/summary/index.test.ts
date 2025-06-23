@@ -11,6 +11,7 @@ import {
   DEFAULT_TEST_USER_ID,
   postRequest,
   setUpMockApp,
+  streamResponseLines,
 } from "@app/api/utils/test/api";
 import { MOCK_ITEMS, MOCK_PROFILE_ITEMS } from "@app/api/utils/test/data";
 import { testDb } from "@app/api/utils/test/provider";
@@ -32,10 +33,14 @@ describe("POST /v1/premium/item/summary", () => {
   });
 
   it("should return a summary for valid input (no existing summary)", async () => {
-    const response = await postRequest(app, "/v1/premium/item/summary", {
-      slug: MOCK_ITEMS[0].slug,
-      versionName: null,
-    });
+    const response: Response = await postRequest(
+      app,
+      "/v1/premium/item/summary",
+      {
+        slug: MOCK_ITEMS[0].slug,
+        versionName: null,
+      },
+    );
     expect(response.status).toBe(200);
     const data = await response.json();
     expect(data.summary).toBe("This is the summary.");
@@ -105,5 +110,69 @@ describe("POST /v1/premium/item/summary", () => {
     expect(response.status).toBe(500);
     const data = await response.json();
     expect(data.error).toBe("Failed to generate summary.");
+  });
+
+  it("should stream summary with Accept: text/plain", async () => {
+    const response = await postRequest(
+      app,
+      "/v1/premium/item/summary",
+      {
+        slug: MOCK_ITEMS[0].slug,
+        versionName: null,
+      },
+      { Accept: "text/plain" },
+    );
+    expect(response.status).toBe(200);
+    const expectedLines = [
+      "This is the summary.",
+      "Continued summary section.",
+      "Final summary section.",
+      "Done.",
+    ];
+    let i = 0;
+    for await (const line of streamResponseLines(response)) {
+      expect(line).toBe(expectedLines[i]);
+      i++;
+    }
+    expect(i).toBe(expectedLines.length);
+
+    expect(uploadItemSummary).toHaveBeenCalledWith(
+      expect.anything(),
+      MOCK_ITEMS[0].slug,
+      null,
+      "This is the summary.\nContinued summary section.\nFinal summary section.\nDone.",
+    );
+  });
+
+  it("should stream summary with Accept: text/event-stream", async () => {
+    const response = await postRequest(
+      app,
+      "/v1/premium/item/summary",
+      {
+        slug: MOCK_ITEMS[0].slug,
+        versionName: null,
+      },
+      { Accept: "text/event-stream" },
+    );
+    expect(response.status).toBe(200);
+    const expectedLines = [
+      "This is the summary.",
+      "Continued summary section.",
+      "Final summary section.",
+      "Done.",
+    ];
+    let i = 0;
+    for await (const line of streamResponseLines(response)) {
+      expect(line).toBe(expectedLines[i]);
+      i++;
+    }
+    expect(i).toBe(expectedLines.length);
+
+    expect(uploadItemSummary).toHaveBeenCalledWith(
+      expect.anything(),
+      MOCK_ITEMS[0].slug,
+      null,
+      "This is the summary.\nContinued summary section.\nFinal summary section.\nDone.",
+    );
   });
 });
