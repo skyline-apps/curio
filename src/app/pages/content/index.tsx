@@ -15,8 +15,14 @@ import React, { useContext, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 
 const ItemPage: React.FC = () => {
-  const { fetchContent, loading, loadingError, loadedItem } =
-    useContext(CurrentItemContext);
+  const {
+    fetchContent,
+    loading,
+    loadingError,
+    loadedItem,
+    itemSummary,
+    viewingSummary,
+  } = useContext(CurrentItemContext);
   const { slug } = useParams();
   const { settings } = useSettings();
   const { updateAppLayout } = useAppLayout();
@@ -73,7 +79,12 @@ const ItemPage: React.FC = () => {
         >
           {metadata?.title}
         </h1>
-        <Article content={loadedItem?.content} className={cn(proseSizeClass)} />
+        <Article
+          content={
+            viewingSummary && itemSummary ? itemSummary : loadedItem?.content
+          }
+          className={cn(proseSizeClass)}
+        />
         <hr className="border-secondary my-4" />
         <p
           className={cn(
@@ -94,6 +105,8 @@ const ItemPage: React.FC = () => {
     headerSizeClass,
     proseSizeClass,
     fontClass,
+    viewingSummary,
+    itemSummary,
   ]);
 
   return (
