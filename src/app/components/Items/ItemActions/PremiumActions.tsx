@@ -5,7 +5,7 @@ import type { Item, PublicItem } from "@app/providers/Items";
 import { useSettings } from "@app/providers/Settings";
 import React, { useCallback, useContext } from "react";
 import { HiMiniSparkles, HiOutlineDocumentText } from "react-icons/hi2";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface PremiumActionsProps {
   item?: Item | PublicItem;
@@ -19,11 +19,15 @@ const PremiumActions = ({ item }: PremiumActionsProps): React.ReactElement => {
     setViewingSummary,
   } = useContext(CurrentItemContext);
   const { isPremium } = useSettings();
+  const navigate = useNavigate();
 
   const fetchSummary = useCallback(async () => {
     if (!item) return;
+    if (!window.location.pathname.includes("/item/")) {
+      navigate(`/item/${item.slug}?summary=true`);
+    }
     await fetchItemSummary();
-  }, [item, fetchItemSummary]);
+  }, [item, fetchItemSummary, navigate]);
 
   const summaryButton = isPremium ? (
     viewingSummary ? (

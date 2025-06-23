@@ -68,6 +68,16 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     }
   }, [pathname, clearSelectedItems]);
 
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const summary = searchParams.get("summary");
+    if (summary) {
+      setViewingSummary(true);
+    } else {
+      setViewingSummary(false);
+    }
+  }, [itemLoadedSlug]);
+
   const maybeOpenSidebar = useCallback((): void => {
     if (typeof window !== "undefined") {
       if (window.innerWidth > 1048) {
@@ -257,7 +267,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   const {
     data: itemSummaryData,
     error: itemSummaryError,
-    isLoading: itemSummaryLoading,
+    isFetching: itemSummaryFetching,
     refetch: refetchItemSummary,
   } = useQuery<string | null>({
     enabled: !!viewingSummary,
@@ -311,7 +321,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         explainHighlight,
         fetchItemSummary,
         itemSummary: itemSummaryData,
-        itemSummaryLoading,
+        itemSummaryLoading: itemSummaryFetching,
         itemSummaryError,
         viewingSummary,
         setViewingSummary,
