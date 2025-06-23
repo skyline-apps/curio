@@ -1,3 +1,4 @@
+import Spinner from "@app/components/ui/Spinner";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { cn } from "@app/utils/cn";
 import React, { useContext, useMemo } from "react";
@@ -13,7 +14,8 @@ interface ArticleProps {
 
 const Article: React.FC<ArticleProps> = React.memo(
   ({ content, className }: ArticleProps) => {
-    const { loadedItem, isEditable } = useContext(CurrentItemContext);
+    const { loadedItem, isEditable, viewingSummary, itemSummaryLoading } =
+      useContext(CurrentItemContext);
 
     // Extract only the highlights and item ID to prevent re-renders from metadata changes
     const itemId = loadedItem?.item.id;
@@ -36,12 +38,12 @@ const Article: React.FC<ArticleProps> = React.memo(
         <MarkdownViewer
           highlights={highlights}
           className={cn("py-4", className)}
-          isEditable={isEditableValue}
+          isEditable={isEditableValue && !viewingSummary}
         >
           {content}
         </MarkdownViewer>
       ),
-      [highlights, className, isEditableValue, content],
+      [highlights, className, isEditableValue, content, viewingSummary],
     );
 
     return (
@@ -49,6 +51,11 @@ const Article: React.FC<ArticleProps> = React.memo(
         <ItemActionShortcuts />
         <ScrollProgressTracker />
         {viewer}
+        {itemSummaryLoading && (
+          <div className="w-full flex justify-center items-center mb-8">
+            <Spinner variant="wave" size="sm" />
+          </div>
+        )}
       </>
     );
   },
