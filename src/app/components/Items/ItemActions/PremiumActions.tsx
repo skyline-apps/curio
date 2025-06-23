@@ -4,7 +4,7 @@ import { CurrentItemContext } from "@app/providers/CurrentItem";
 import type { Item, PublicItem } from "@app/providers/Items";
 import { useSettings } from "@app/providers/Settings";
 import React, { useCallback, useContext, useState } from "react";
-import { HiMiniSparkles } from "react-icons/hi2";
+import { HiMiniSparkles, HiOutlineDocumentText } from "react-icons/hi2";
 import { Link } from "react-router-dom";
 
 interface PremiumActionsProps {
@@ -13,7 +13,8 @@ interface PremiumActionsProps {
 
 const PremiumActions = ({ item }: PremiumActionsProps): React.ReactElement => {
   const [isSummaryLoading, setIsSummaryLoading] = useState<boolean>(false);
-  const { isEditable, fetchItemSummary } = useContext(CurrentItemContext);
+  const { isEditable, fetchItemSummary, viewingSummary, setViewingSummary } =
+    useContext(CurrentItemContext);
   const { isPremium } = useSettings();
 
   const fetchSummary = useCallback(async () => {
@@ -32,17 +33,30 @@ const PremiumActions = ({ item }: PremiumActionsProps): React.ReactElement => {
   }, [item, fetchItemSummary, isEditable]);
 
   const summaryButton = isPremium ? (
-    <Button
-      size="sm"
-      variant="faded"
-      color="primary"
-      tooltip="Summarize this item."
-      isLoading={isSummaryLoading}
-      onPress={fetchSummary}
-    >
-      <Icon icon={<HiMiniSparkles />} className="text-primary" />
-      Summary
-    </Button>
+    viewingSummary ? (
+      <Button
+        size="sm"
+        variant="faded"
+        color="primary"
+        tooltip="View full article."
+        onPress={() => setViewingSummary(false)}
+      >
+        <Icon icon={<HiOutlineDocumentText />} className="text-primary" />
+        View full
+      </Button>
+    ) : (
+      <Button
+        size="sm"
+        variant="faded"
+        color="primary"
+        tooltip="Summarize this item."
+        isLoading={isSummaryLoading}
+        onPress={fetchSummary}
+      >
+        <Icon icon={<HiMiniSparkles />} className="text-primary" />
+        Summary
+      </Button>
+    )
   ) : (
     <Button
       size="sm"

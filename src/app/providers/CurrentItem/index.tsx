@@ -46,6 +46,8 @@ export type CurrentItemContextType = {
     versionName?: string | null,
   ) => Promise<void>;
   itemSummary: string | null;
+  viewingSummary: boolean;
+  setViewingSummary: (viewingSummary: boolean) => void;
 };
 
 export const CurrentItemContext = createContext<CurrentItemContextType>({
@@ -71,4 +73,6 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
   explainHighlight: () => Promise.resolve(null),
   fetchItemSummary: () => Promise.resolve(),
   itemSummary: null,
+  viewingSummary: false,
+  setViewingSummary: () => {},
 });

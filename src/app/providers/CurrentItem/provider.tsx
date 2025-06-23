@@ -46,6 +46,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     null,
   );
   const [itemSummary, setItemSummary] = useState<string | null>(null);
+  const [viewingSummary, setViewingSummary] = useState<boolean>(false);
 
   const { updateAppLayout } = useAppLayout();
   // Note that this ItemsContext may not be available if CurrentItemProvider is being used for an
@@ -259,7 +260,10 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
       slug,
       versionName: versionName ?? null,
     });
-    setItemSummary(result.summary);
+    if (result.summary) {
+      setItemSummary(result.summary);
+      setViewingSummary(true);
+    }
   };
 
   return (
@@ -288,6 +292,8 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         explainHighlight,
         fetchItemSummary,
         itemSummary,
+        viewingSummary,
+        setViewingSummary,
       }}
     >
       {children}
