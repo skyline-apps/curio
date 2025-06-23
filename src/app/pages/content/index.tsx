@@ -6,7 +6,6 @@ import {
 } from "@app/components/Article/displaySettings";
 import KeyboardShortcuts from "@app/components/KeyboardShortcuts";
 import { Progress } from "@app/components/ui/Progress";
-import Spinner from "@app/components/ui/Spinner";
 import { useAppLayout } from "@app/providers/AppLayout";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { useSettings } from "@app/providers/Settings";
@@ -83,15 +82,12 @@ const ItemPage: React.FC = () => {
         </h1>
         <Article
           content={
-            viewingSummary && itemSummary ? itemSummary : loadedItem?.content
+            viewingSummary && (itemSummary || itemSummaryLoading)
+              ? itemSummary || ""
+              : loadedItem?.content
           }
           className={cn(proseSizeClass)}
         />
-        {itemSummaryLoading && (
-          <div className="w-full flex justify-center items-center mb-8">
-            <Spinner variant="wave" size="sm" />
-          </div>
-        )}
         <hr className="border-secondary my-4" />
         <p
           className={cn(
