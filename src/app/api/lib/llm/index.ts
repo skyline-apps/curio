@@ -8,29 +8,47 @@ export type LLMEnv = {
   GEMINI_API_KEY: string;
 };
 
-const defaultConfig = {
-  temperature: 0.4,
-  maxOutputTokens: 1024,
-};
-
 export async function summarizeItem(
   env: LLMEnv,
   articleText: string,
 ): Promise<string> {
   // Initialize GoogleGenAI with the provided API key
   const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
-  // Helper to chunk by paragraphs with a max character limit
-  function chunkArticle(text: string, maxLines: number = 50): string[] {
+  // Helper to split the article into sections by Markdown-style headers
+  function splitBySections(
+    text: string,
+  ): { header: string; content: string }[] {
     const lines = text.split(/\r?\n/);
-    const chunks: string[] = [];
-    for (let i = 0; i < lines.length; i += maxLines) {
-      const chunkLines = lines.slice(i, i + maxLines);
-      const chunk = chunkLines.join("\n");
-      if (chunk.trim()) {
-        chunks.push(chunk.trim());
+    const sections: { header: string; content: string }[] = [];
+    let currentHeader = "";
+    let currentContent: string[] = [];
+    const headerRegex = /^(#{1,6})\s+(.*)$/;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const match = line.match(headerRegex);
+      if (match) {
+        if (currentHeader || currentContent.length > 0) {
+          // Push previous section
+          sections.push({
+            header: currentHeader,
+            content: currentContent.join("\n").trim(),
+          });
+        }
+        currentHeader = line.trim();
+        currentContent = [];
+      } else {
+        currentContent.push(line);
       }
     }
-    return chunks;
+    // Push the last section
+    if (currentHeader || currentContent.length > 0) {
+      sections.push({
+        header: currentHeader,
+        content: currentContent.join("\n").trim(),
+      });
+    }
+    // If the first section has no header (i.e., content before the first header), ensure its header is empty string
+    return sections.filter((sec) => sec.header || sec.content);
   }
 
   async function summarizeChunk(
@@ -38,14 +56,17 @@ export async function summarizeItem(
     retries = 3,
     backoffMs = 300,
   ): Promise<string> {
-    const systemPrompt = `You are a helpful reading assistant. Summarize the following article chunk as a clear, concise summary according to the following guidelines:\n\n- Return your summary in Markdown format.\n- Preserve section headers (if any) and capture all key points.\n- Do not omit important context or nuance.`;
+    const systemPrompt = `You are a helpful reading assistant. Summarize the following article section as a clear, concise summary according to the following guidelines:\n\n- Return your summary in Markdown format.\n- Capture all key points, and call out any memorable quotes in Markdown blockquotes.\n- Preserve the original writing style (journalistic, academic, creative, etc.), tone (informative, sensational, reflective, humorous, etc.), and voice (first-person, second-person, third-person, etc.).\n- Do not preface your summary with any additional text.`;
     const prompt = `${systemPrompt}\n\n${chunk}`;
     for (let attempt = 0; attempt < retries; attempt++) {
       try {
         const result = await ai.models.generateContent({
           model: MODEL,
           contents: [{ role: "user", parts: [{ text: prompt }] }],
-          config: defaultConfig,
+          config: {
+            temperature: 0.3,
+            maxOutputTokens: 1024 * 10,
+          },
         });
         const summary = (result && result.text) ?? "";
         if (typeof summary !== "string" || !summary.trim()) {
@@ -97,84 +118,32 @@ export async function summarizeItem(
     throw new LLMError("Unknown error in summarizeChunk retry loop");
   }
 
-  const chunks = chunkArticle(articleText);
-  const chunkSummaries: string[] = [];
-  for (let i = 0; i < chunks.length; i++) {
-    try {
-      const summary = await summarizeChunk(chunks[i]);
-      chunkSummaries.push(summary);
-    } catch (err) {
-      // Optionally: add logging or partial summary recovery here
-      throw new LLMError(
-        `Failed to summarize chunk ${i + 1}: ${err instanceof Error ? err.message : err}`,
-      );
-    }
-  }
-
-  // If only one chunk, return its summary directly
-  if (chunkSummaries.length === 1) {
-    return chunkSummaries[0];
-  }
-
-  // Hierarchical summarization: recursively combine chunk summaries in batches
-  async function combineSummaries(
-    summaries: string[],
-    batchSize = 3,
-    retries = 3,
-    backoffMs = 300,
-  ): Promise<string> {
-    if (summaries.length === 1) return summaries[0];
-    const batches: string[][] = [];
-    for (let i = 0; i < summaries.length; i += batchSize) {
-      batches.push(summaries.slice(i, i + batchSize));
-    }
-    const batchSummaries: string[] = [];
-    for (let i = 0; i < batches.length; i++) {
-      const batch = batches[i];
-      const systemPrompt = `You are a helpful assistant. Given the following summaries of an article, produce a single, clear, concise summary in Markdown format that can be read in 1-2 minutes. Preserve the article's original section headers (if any) and capture all key points. Do not omit important context or nuance.`;
-      const prompt = batch.map((s, j) => `Part ${j + 1}:\n${s}`).join("\n\n");
-      let lastErr;
-      for (let attempt = 0; attempt < retries; attempt++) {
-        try {
-          const result = await ai.models.generateContent({
-            model: MODEL,
-            contents: [
-              {
-                role: "user",
-                parts: [{ text: `${systemPrompt}\n\n${prompt}` }],
-              },
-            ],
-            config: defaultConfig,
-          });
-          const summary = (result && result.text) ?? "";
-          if (typeof summary !== "string" || !summary.trim()) {
-            throw new LLMError(
-              "No summary returned by LLM for combined summary",
-            );
-          }
-          batchSummaries.push(summary);
-          lastErr = undefined;
-          break;
-        } catch (err) {
-          lastErr = err;
-          if (attempt < retries - 1) {
-            await new Promise((res) =>
-              setTimeout(res, backoffMs * Math.pow(2, attempt)),
-            );
-          }
+  // Split article into sections by Markdown headers
+  const sections = splitBySections(articleText);
+  const sectionSummaries: string[] = [];
+  for (let i = 0; i < sections.length; i++) {
+    const { header, content } = sections[i];
+    // Only summarize non-empty content
+    if (content.trim()) {
+      try {
+        // Pass header and content together for context
+        const sectionText = header ? `${header}\n${content}` : content;
+        const summary = await summarizeChunk(sectionText);
+        // Prepend the header if it exists, and ensure separation
+        if (header) {
+          sectionSummaries.push(`${header}\n${summary.trim()}`);
+        } else {
+          sectionSummaries.push(summary.trim());
         }
-      }
-      if (lastErr) {
+      } catch (err) {
         throw new LLMError(
-          `LLM request failed for combined summary batch ${i + 1}: ${lastErr instanceof Error ? lastErr.message : lastErr}`,
+          `Failed to summarize section ${header || i + 1}: ${err instanceof Error ? err.message : err}`,
         );
       }
     }
-    // Recursively combine until 1 summary remains
-    return combineSummaries(batchSummaries, batchSize, retries, backoffMs);
   }
-
-  return combineSummaries(chunkSummaries);
+  // Combine all section summaries, preserving headers and order
+  return sectionSummaries.join("\n\n");
 }
 
 function extractContext(snippet: string, articleText: string): string {
@@ -241,7 +210,10 @@ export async function explainInContext(
     const result = await ai.models.generateContent({
       model: MODEL,
       contents: [{ role: "user", parts: [{ text: prompt }] }],
-      config: defaultConfig,
+      config: {
+        temperature: 0.3,
+        maxOutputTokens: 2048,
+      },
     });
     const explanation = (result && result.text) ?? "";
     if (typeof explanation !== "string" || !explanation.trim()) {
