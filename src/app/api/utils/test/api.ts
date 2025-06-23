@@ -129,3 +129,27 @@ export const postRequestFormData = async (
     MOCK_ENV,
   );
 };
+
+/**
+ * Async generator to yield lines incrementally from a streamed Response.
+ * Usage: for await (const line of streamResponseLines(response)) { ... }
+ */
+export async function* streamResponseLines(
+  response: Response,
+): AsyncGenerator<string> {
+  const decoder = new TextDecoder();
+  const reader = response.body!.getReader();
+  let buffer = "";
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop()!; // Save the last, possibly incomplete line
+    for (const line of lines) {
+      yield line;
+    }
+  }
+  buffer += decoder.decode(); // Flush any remaining bytes
+  if (buffer) yield buffer;
+}
