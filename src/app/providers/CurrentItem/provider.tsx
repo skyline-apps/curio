@@ -6,6 +6,7 @@ import { PremiumItemSummaryResponse } from "@app/schemas/v1/premium/item/summary
 import { GetItemContentResponse } from "@app/schemas/v1/public/items/content";
 import {
   authenticatedFetch,
+  authenticatedStreamFetch,
   handleAPIResponse,
   isOfflineError,
 } from "@app/utils/api";
@@ -47,6 +48,8 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     null,
   );
   const [viewingSummary, setViewingSummary] = useState<boolean>(false);
+  const [itemSummary, setItemSummary] = useState<string | null>(null);
+  const [itemSummaryLoading, setItemSummaryLoading] = useState(false);
 
   const { updateAppLayout } = useAppLayout();
   // Note that this ItemsContext may not be available if CurrentItemProvider is being used for an
@@ -69,6 +72,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   }, [pathname, clearSelectedItems]);
 
   useEffect(() => {
+    setItemSummary(null);
     const searchParams = new URLSearchParams(window.location.search);
     const summary = searchParams.get("summary");
     if (summary) {
@@ -264,36 +268,42 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     [versionName, itemLoadedSlug, actions.explainHighlight],
   );
 
-  const {
-    data: itemSummaryData,
-    error: itemSummaryError,
-    isFetching: itemSummaryFetching,
-    refetch: refetchItemSummary,
-  } = useQuery<string | null>({
-    enabled: !!viewingSummary,
-    queryKey: ["itemSummary", itemLoadedSlug, versionName],
-    queryFn: async () => {
-      if (!itemLoadedSlug) {
-        throw new Error("No item loaded for summary");
-      }
-      const result = await authenticatedFetch("/api/v1/premium/item/summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          slug: itemLoadedSlug,
-          versionName: versionName ?? null,
-        }),
-      }).then(handleAPIResponse<PremiumItemSummaryResponse>);
-      return result.summary;
-    },
-  });
-
   const fetchItemSummary = useCallback(async (): Promise<void> => {
-    refetchItemSummary();
-    if (itemSummaryData) {
-      setViewingSummary(true);
+    if (!itemLoadedSlug) {
+      log.warn("No item loaded for summary");
+      return;
     }
-  }, [itemSummaryData, refetchItemSummary]);
+    setItemSummaryLoading(true);
+    setViewingSummary(true);
+    try {
+      let summary = "";
+      for await (const chunk of authenticatedStreamFetch<PremiumItemSummaryResponse>(
+        "/api/v1/premium/item/summary",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            slug: itemLoadedSlug,
+            versionName: versionName ?? null,
+          }),
+        },
+      )) {
+        if (typeof chunk === "string") {
+          summary += chunk;
+          setItemSummary(summary);
+        } else if ("summary" in chunk) {
+          setItemSummary(chunk.summary);
+        } else {
+          log.error("Unexpected response from summary endpoint", chunk);
+        }
+      }
+      setItemSummaryLoading(false);
+    } catch (err) {
+      log.error("Failed to fetch item summary", err);
+      setItemSummaryLoading(false);
+      setViewingSummary(false);
+    }
+  }, [itemLoadedSlug, versionName]);
 
   return (
     <CurrentItemContext.Provider
@@ -320,9 +330,8 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         isEditable,
         explainHighlight,
         fetchItemSummary,
-        itemSummary: itemSummaryData,
-        itemSummaryLoading: itemSummaryFetching,
-        itemSummaryError,
+        itemSummary,
+        itemSummaryLoading,
         viewingSummary,
         setViewingSummary,
       }}
