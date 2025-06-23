@@ -54,12 +54,11 @@ export async function handleAPIResponse<T>(response: Response): Promise<T> {
   return result;
 }
 
-export async function authenticatedFetch(
+async function authenticatedRequest(
   relativePath: string,
   options: RequestInit = {},
 ): Promise<Response> {
   const headers = new Headers(options.headers);
-
   const baseUrl = import.meta.env.VITE_CURIO_URL;
   if (!baseUrl) {
     throw new Error("VITE_CURIO_URL is not defined in environment variables.");
@@ -121,4 +120,55 @@ export async function authenticatedFetch(
     }
     throw error;
   }
+}
+
+export async function* authenticatedStreamFetch<T = unknown>(
+  relativePath: string,
+  options: RequestInit = {},
+): AsyncGenerator<string | T, void, unknown> {
+  const response = await authenticatedRequest(relativePath, {
+    ...options,
+    headers: {
+      ...options.headers,
+      Accept: "text/event-stream",
+    },
+  });
+  if (response.status === 401) return;
+
+  const contentType = response.headers.get("content-type") || "";
+  if (
+    contentType.includes("event-stream") ||
+    contentType.includes("text/plain")
+  ) {
+    if (!response.body) {
+      throw new Error("No response body for streaming");
+    }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        if (value) {
+          yield decoder.decode(value, { stream: true });
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
+    return;
+  } else if (contentType.includes("application/json")) {
+    const data = await response.json();
+    yield data;
+  } else {
+    const text = await response.text();
+    yield text;
+  }
+}
+
+export async function authenticatedFetch(
+  relativePath: string,
+  options: RequestInit = {},
+): Promise<Response> {
+  return authenticatedRequest(relativePath, options);
 }

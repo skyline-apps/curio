@@ -44,7 +44,6 @@ export type CurrentItemContextType = {
   fetchItemSummary: () => Promise<void>;
   itemSummary: string | null | undefined;
   itemSummaryLoading: boolean;
-  itemSummaryError: Error | null;
   viewingSummary: boolean;
   setViewingSummary: (viewingSummary: boolean) => void;
 };
@@ -73,7 +72,6 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
   fetchItemSummary: () => Promise.resolve(),
   itemSummary: null,
   itemSummaryLoading: false,
-  itemSummaryError: null,
   viewingSummary: false,
   setViewingSummary: () => {},
 });

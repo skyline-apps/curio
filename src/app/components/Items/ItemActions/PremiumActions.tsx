@@ -30,7 +30,7 @@ const PremiumActions = ({ item }: PremiumActionsProps): React.ReactElement => {
   }, [item, fetchItemSummary, navigate]);
 
   const summaryButton = isPremium ? (
-    viewingSummary ? (
+    viewingSummary && !itemSummaryLoading ? (
       <Button
         size="sm"
         variant="faded"

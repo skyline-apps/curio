@@ -56,10 +56,12 @@ export const summaryRouter = new Hono<EnvBindings>().post(
         accept.includes("text/plain") ||
         accept.includes("text/event-stream")
       ) {
+        log.info("Generating summary iteratively");
         c.header("Content-Encoding", "Identity");
         return streamText(c, async (stream) => {
           let summary = "";
           for await (const chunk of summarizeItemStream(c.env, fullContent!)) {
+            log.info("Finished summarizing chunk");
             await stream.write(chunk);
             summary += chunk;
           }
@@ -93,6 +95,7 @@ export const summaryRouter = new Hono<EnvBindings>().post(
 
     // Fall back to full summary if streaming fails
     try {
+      log.info("Generating summary all at once");
       const summary = await summarizeItem(c.env, fullContent);
       await uploadItemSummary(c.env, slug, versionName, summary);
       return c.json(PremiumItemSummaryResponseSchema.parse({ summary }));
