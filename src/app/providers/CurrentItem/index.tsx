@@ -41,11 +41,10 @@ export type CurrentItemContextType = {
   setSelectedHighlight: (highlight: Highlight | null) => void;
   isEditable: (item: Item | PublicItem | null | undefined) => item is Item;
   explainHighlight: (snippet: string) => Promise<string | null>;
-  fetchItemSummary: (
-    slug: string,
-    versionName?: string | null,
-  ) => Promise<void>;
-  itemSummary: string | null;
+  fetchItemSummary: () => Promise<void>;
+  itemSummary: string | null | undefined;
+  itemSummaryLoading: boolean;
+  itemSummaryError: Error | null;
   viewingSummary: boolean;
   setViewingSummary: (viewingSummary: boolean) => void;
 };
@@ -73,6 +72,8 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
   explainHighlight: () => Promise.resolve(null),
   fetchItemSummary: () => Promise.resolve(),
   itemSummary: null,
+  itemSummaryLoading: false,
+  itemSummaryError: null,
   viewingSummary: false,
   setViewingSummary: () => {},
 });

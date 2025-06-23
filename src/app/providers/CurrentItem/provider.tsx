@@ -2,6 +2,7 @@ import { useAppLayout } from "@app/providers/AppLayout";
 import { Item, ItemsContext, PublicItem } from "@app/providers/Items";
 import { ItemState } from "@app/schemas/db";
 import { type Highlight } from "@app/schemas/v1/items/highlights";
+import { PremiumItemSummaryResponse } from "@app/schemas/v1/premium/item/summary";
 import { GetItemContentResponse } from "@app/schemas/v1/public/items/content";
 import {
   authenticatedFetch,
@@ -45,7 +46,6 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   const [selectedHighlight, setSelectedHighlight] = useState<Highlight | null>(
     null,
   );
-  const [itemSummary, setItemSummary] = useState<string | null>(null);
   const [viewingSummary, setViewingSummary] = useState<boolean>(false);
 
   const { updateAppLayout } = useAppLayout();
@@ -233,38 +233,57 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   }, [data]);
 
   const actions = useCurrentItemActions();
+  let versionName: string | null = null;
+  if (isEditable(currentItem)) {
+    versionName = currentItem.metadata.versionName;
+  }
 
-  const explainHighlight = async (snippet: string): Promise<string | null> => {
-    if (!loadedItem || !("item" in loadedItem) || !loadedItem.item.slug) {
-      throw new Error("No item loaded for explanation");
-    }
-    const slug = loadedItem.item.slug;
-    let versionName: string | null = null;
-    if (isEditable(currentItem)) {
-      versionName = currentItem.metadata.versionName;
-    }
+  const explainHighlight = useCallback(
+    async (snippet: string): Promise<string | null> => {
+      if (!itemLoadedSlug) {
+        throw new Error("No item loaded for explanation");
+      }
 
-    const result = await actions.explainHighlight.mutateAsync({
-      slug,
-      snippet,
-      versionName,
-    });
-    return result.explanation;
-  };
+      const result = await actions.explainHighlight.mutateAsync({
+        slug: itemLoadedSlug,
+        snippet,
+        versionName,
+      });
+      return result.explanation;
+    },
+    [versionName, itemLoadedSlug, actions.explainHighlight],
+  );
 
-  const fetchItemSummary = async (
-    slug: string,
-    versionName?: string | null,
-  ): Promise<void> => {
-    const result = await actions.fetchItemSummary.mutateAsync({
-      slug,
-      versionName: versionName ?? null,
-    });
-    if (result.summary) {
-      setItemSummary(result.summary);
+  const {
+    data: itemSummaryData,
+    error: itemSummaryError,
+    isLoading: itemSummaryLoading,
+    refetch: refetchItemSummary,
+  } = useQuery<string | null>({
+    enabled: !!viewingSummary,
+    queryKey: ["itemSummary", itemLoadedSlug, versionName],
+    queryFn: async () => {
+      if (!itemLoadedSlug) {
+        throw new Error("No item loaded for summary");
+      }
+      const result = await authenticatedFetch("/api/v1/premium/item/summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug: itemLoadedSlug,
+          versionName: versionName ?? null,
+        }),
+      }).then(handleAPIResponse<PremiumItemSummaryResponse>);
+      return result.summary;
+    },
+  });
+
+  const fetchItemSummary = useCallback(async (): Promise<void> => {
+    refetchItemSummary();
+    if (itemSummaryData) {
       setViewingSummary(true);
     }
-  };
+  }, [itemSummaryData, refetchItemSummary]);
 
   return (
     <CurrentItemContext.Provider
@@ -291,7 +310,9 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         isEditable,
         explainHighlight,
         fetchItemSummary,
-        itemSummary,
+        itemSummary: itemSummaryData,
+        itemSummaryLoading,
+        itemSummaryError,
         viewingSummary,
         setViewingSummary,
       }}

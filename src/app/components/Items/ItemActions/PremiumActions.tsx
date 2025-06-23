@@ -3,7 +3,7 @@ import Icon from "@app/components/ui/Icon";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import type { Item, PublicItem } from "@app/providers/Items";
 import { useSettings } from "@app/providers/Settings";
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext } from "react";
 import { HiMiniSparkles, HiOutlineDocumentText } from "react-icons/hi2";
 import { Link } from "react-router-dom";
 
@@ -12,25 +12,18 @@ interface PremiumActionsProps {
 }
 
 const PremiumActions = ({ item }: PremiumActionsProps): React.ReactElement => {
-  const [isSummaryLoading, setIsSummaryLoading] = useState<boolean>(false);
-  const { isEditable, fetchItemSummary, viewingSummary, setViewingSummary } =
-    useContext(CurrentItemContext);
+  const {
+    fetchItemSummary,
+    itemSummaryLoading,
+    viewingSummary,
+    setViewingSummary,
+  } = useContext(CurrentItemContext);
   const { isPremium } = useSettings();
 
   const fetchSummary = useCallback(async () => {
     if (!item) return;
-    setIsSummaryLoading(true);
-    await fetchItemSummary(
-      item.slug,
-      isEditable(item) ? item.metadata.versionName : undefined,
-    )
-      .then(() => {
-        setIsSummaryLoading(false);
-      })
-      .catch(() => {
-        setIsSummaryLoading(false);
-      });
-  }, [item, fetchItemSummary, isEditable]);
+    await fetchItemSummary();
+  }, [item, fetchItemSummary]);
 
   const summaryButton = isPremium ? (
     viewingSummary ? (
@@ -50,7 +43,7 @@ const PremiumActions = ({ item }: PremiumActionsProps): React.ReactElement => {
         variant="faded"
         color="primary"
         tooltip="Summarize this item."
-        isLoading={isSummaryLoading}
+        isLoading={itemSummaryLoading}
         onPress={fetchSummary}
       >
         <Icon icon={<HiMiniSparkles />} className="text-primary" />

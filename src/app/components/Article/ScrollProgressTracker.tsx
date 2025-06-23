@@ -10,7 +10,8 @@ type ScrollProgressTrackerProps = Record<never, never>;
 
 const ScrollProgressTracker: React.FC<ScrollProgressTrackerProps> = React.memo(
   () => {
-    const { loadedItem, isEditable } = useContext(CurrentItemContext);
+    const { loadedItem, isEditable, viewingSummary } =
+      useContext(CurrentItemContext);
     const { updateReadingProgress } = useArticleUpdate();
     const { containerRef } = useAppPage();
 
@@ -38,11 +39,11 @@ const ScrollProgressTracker: React.FC<ScrollProgressTrackerProps> = React.memo(
     const progressChangeHandler = React.useCallback(
       async (newProgress: number) => {
         const state = itemStateRef.current;
-        if (state.isEditable && state.item) {
+        if (state.isEditable && state.item && !viewingSummary) {
           await updateReadingProgress(newProgress);
         }
       },
-      [updateReadingProgress],
+      [updateReadingProgress, viewingSummary],
     );
 
     // Use the scroll hook with stable values
