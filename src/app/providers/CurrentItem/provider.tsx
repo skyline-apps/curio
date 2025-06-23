@@ -45,6 +45,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   const [selectedHighlight, setSelectedHighlight] = useState<Highlight | null>(
     null,
   );
+  const [itemSummary, setItemSummary] = useState<string | null>(null);
 
   const { updateAppLayout } = useAppLayout();
   // Note that this ItemsContext may not be available if CurrentItemProvider is being used for an
@@ -250,6 +251,17 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
     return result.explanation;
   };
 
+  const fetchItemSummary = async (
+    slug: string,
+    versionName?: string | null,
+  ): Promise<void> => {
+    const result = await actions.fetchItemSummary.mutateAsync({
+      slug,
+      versionName: versionName ?? null,
+    });
+    setItemSummary(result.summary);
+  };
+
   return (
     <CurrentItemContext.Provider
       value={{
@@ -274,6 +286,8 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
         setSelectedHighlight,
         isEditable,
         explainHighlight,
+        fetchItemSummary,
+        itemSummary,
       }}
     >
       {children}

@@ -3,6 +3,7 @@ import ItemActions from "@app/components/Items/ItemActions";
 import { useItemUpdate } from "@app/components/Items/ItemActions/actions";
 import AdvancedActions from "@app/components/Items/ItemActions/AdvancedActions";
 import OtherItemActions from "@app/components/Items/ItemActions/OtherItemActions";
+import PremiumActions from "@app/components/Items/ItemActions/PremiumActions";
 import Labels from "@app/components/Labels";
 import { useAppLayout } from "@app/providers/AppLayout";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
@@ -13,7 +14,7 @@ import { TextDirection } from "@app/schemas/db";
 import { FALLBACK_HOSTNAME } from "@app/schemas/types";
 import type { Label } from "@app/schemas/v1/user/labels";
 import { cn } from "@app/utils/cn";
-import { useCallback, useContext } from "react";
+import React, { useCallback, useContext } from "react";
 import { Link } from "react-router-dom";
 
 interface ItemMetadataProps {
@@ -164,11 +165,14 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
           {isEditable(item) ? (
             !readonly ? (
               <div className="flex justify-between">
-                <ItemActions
-                  item={item}
-                  showExpanded
-                  onItemActionSuccess={onItemActionSuccess}
-                />
+                <div className="flex gap-1">
+                  <ItemActions
+                    item={item}
+                    showExpanded
+                    onItemActionSuccess={onItemActionSuccess}
+                  />
+                  <PremiumActions item={item} />
+                </div>
                 <AdvancedActions
                   item={item}
                   onItemActionSuccess={onItemActionSuccess}
@@ -176,7 +180,10 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
               </div>
             ) : null
           ) : user.id ? (
-            <OtherItemActions item={item} />
+            <div className="flex gap-1">
+              <OtherItemActions item={item} />
+              <PremiumActions item={item} />
+            </div>
           ) : null}
         </div>
         <ItemDescription description={metadata.description} />

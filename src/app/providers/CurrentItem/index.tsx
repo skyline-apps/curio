@@ -41,6 +41,11 @@ export type CurrentItemContextType = {
   setSelectedHighlight: (highlight: Highlight | null) => void;
   isEditable: (item: Item | PublicItem | null | undefined) => item is Item;
   explainHighlight: (snippet: string) => Promise<string | null>;
+  fetchItemSummary: (
+    slug: string,
+    versionName?: string | null,
+  ) => Promise<void>;
+  itemSummary: string | null;
 };
 
 export const CurrentItemContext = createContext<CurrentItemContextType>({
@@ -64,4 +69,6 @@ export const CurrentItemContext = createContext<CurrentItemContextType>({
     return item ? typeof item.profileItemId === "string" : false;
   },
   explainHighlight: () => Promise.resolve(null),
+  fetchItemSummary: () => Promise.resolve(),
+  itemSummary: null,
 });
