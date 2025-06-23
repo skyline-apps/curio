@@ -1,9 +1,5 @@
 import { useToast } from "@app/providers/Toast";
 import { PremiumItemContextResponse } from "@app/schemas/v1/premium/item/context";
-import {
-  PremiumItemSummaryRequest,
-  PremiumItemSummaryResponse,
-} from "@app/schemas/v1/premium/item/summary";
 import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import { useMutation, UseMutationResult } from "@tanstack/react-query";
 
@@ -18,11 +14,6 @@ interface CurrentItemActions {
     PremiumItemContextResponse,
     Error,
     ExplainHighlightArgs
-  >;
-  fetchItemSummary: UseMutationResult<
-    PremiumItemSummaryResponse,
-    Error,
-    PremiumItemSummaryRequest
   >;
 }
 
@@ -55,34 +46,7 @@ export function useCurrentItemActions(): CurrentItemActions {
     },
   });
 
-  const fetchItemSummary = useMutation<
-    PremiumItemSummaryResponse,
-    Error,
-    PremiumItemSummaryRequest
-  >({
-    mutationFn: async ({ slug, versionName }) => {
-      const response = await authenticatedFetch(
-        "/api/v1/premium/item/summary",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            slug,
-            versionName: versionName ?? null,
-          }),
-        },
-      ).then(handleAPIResponse<PremiumItemSummaryResponse>);
-      return response;
-    },
-    onError: () => {
-      showToast("Failed to fetch item summary. Please try again.", {
-        type: "error",
-      });
-    },
-  });
-
   return {
     explainHighlight,
-    fetchItemSummary,
   };
 }
