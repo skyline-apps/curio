@@ -48,7 +48,7 @@ async function summarizeChunk(
   retries = 3,
   backoffMs = 300,
 ): Promise<string> {
-  const systemPrompt = `You are a helpful reading assistant. Summarize the following article section as a clear, concise summary according to the following guidelines:\n\n- Return your summary in Markdown format.\n- Capture all key points, and call out any memorable quotes in Markdown blockquotes.\n- Preserve the original writing style (journalistic, academic, creative, etc.), tone (informative, sensational, reflective, humorous, etc.), and voice (first-person, second-person, third-person, etc.).\n- Do not preface your summary with any additional text.`;
+  const systemPrompt = `You are a helpful reading assistant. Summarize the following article section as a clear, concise summary according to the following guidelines:\n\n- Return your summary in Markdown format.\n- Capture all key points, and call out any memorable quotes in Markdown blockquotes.\n- Preserve the original writing style (journalistic, academic, creative, etc.), tone (informative, sensational, reflective, humorous, etc.)\n- Preserve the original voice (first-person, second-person, third-person, etc.).\n- Do not preface your summary with any additional text.\n- Be concise and keep the summary under 4 paragraphs.`;
   const prompt = `${systemPrompt}\n\n${chunk}`;
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
