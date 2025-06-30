@@ -10,8 +10,12 @@ PODS:
     - Capacitor
   - CapacitorShare (7.0.1):
     - Capacitor
+  - CapacitorToast (7.0.1):
+    - Capacitor
   - CordovaPlugins (7.2.0):
     - CapacitorCordova
+  - SendIntent (7.0.0):
+    - Capacitor
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
@@ -20,7 +24,9 @@ DEPENDENCIES:
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorPreferences (from `../../node_modules/@capacitor/preferences`)"
   - "CapacitorShare (from `../../node_modules/@capacitor/share`)"
+  - "CapacitorToast (from `../../node_modules/@capacitor/toast`)"
   - CordovaPlugins (from `../capacitor-cordova-ios-plugins`)
+  - SendIntent (from `../../node_modules/send-intent`)
 
 EXTERNAL SOURCES:
   Capacitor:
@@ -35,8 +41,12 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/preferences"
   CapacitorShare:
     :path: "../../node_modules/@capacitor/share"
+  CapacitorToast:
+    :path: "../../node_modules/@capacitor/toast"
   CordovaPlugins:
     :path: "../capacitor-cordova-ios-plugins"
+  SendIntent:
+    :path: "../../node_modules/send-intent"
 
 SPEC CHECKSUMS:
   Capacitor: 03bc7cbdde6a629a8b910a9d7d78c3cc7ed09ea7
@@ -45,8 +55,10 @@ SPEC CHECKSUMS:
   CapacitorCordova: 5967b9ba03915ef1d585469d6e31f31dc49be96f
   CapacitorPreferences: 6c98117d4d7508034a4af9db64d6b26fc75d7b94
   CapacitorShare: e573823f511f260f598d0423c33b1e3d7bbe5fd1
+  CapacitorToast: ddfc4b36080dbe3634c9faf510b20f6ddcff9330
   CordovaPlugins: 09eaf3779c4d1fa6331773fcd29e29dcd8a7afd6
+  SendIntent: 8a6f646a4489f788d253ffbd1082a98ea388d870
 
-PODFILE CHECKSUM: d06bf1ee9c739b2ce81e7919fad7ac81b2c8ef1f
+PODFILE CHECKSUM: e260b3c9e1d844f2205e23e3a6046515780cb7a2
 
 COCOAPODS: 1.16.2
