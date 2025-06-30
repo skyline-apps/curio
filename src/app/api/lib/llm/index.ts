@@ -148,16 +148,41 @@ export async function* summarizeItemStream(
   for (let i = 0; i < sections.length; i++) {
     const { header, content } = sections[i];
     if (content.trim()) {
-      try {
-        const sectionText = header ? `${header}\n${content}` : content;
-        const summary = await summarizeChunk(ai, sectionText);
-        if (header) {
-          yield `${header}\n${summary.trim()}\n\n`;
-        } else {
-          yield `${summary.trim()}\n\n`;
+      const retries = 3;
+      let attempt = 0;
+      let lastError: unknown = null;
+      while (attempt < retries) {
+        try {
+          const sectionText = header ? `${header}\n${content}` : content;
+          const summary = await summarizeChunk(ai, sectionText);
+          if (header) {
+            yield `${header}\n${summary.trim()}\n\n`;
+          } else {
+            yield `${summary.trim()}\n\n`;
+          }
+          lastError = null;
+          break;
+        } catch (err) {
+          lastError = err;
+          const msg = err instanceof Error ? err.message : String(err);
+          if (msg.includes("429")) {
+            const delay = 1000 * Math.pow(2, attempt);
+            await new Promise((res) => setTimeout(res, delay));
+            attempt++;
+            continue;
+          } else {
+            throw new LLMError(
+              `Error summarizing section ${header || i + 1}: ${msg}\n\n`,
+            );
+          }
         }
-      } catch (err) {
-        yield `Error summarizing section ${header || i + 1}: ${err instanceof Error ? err.message : err}\n\n`;
+      }
+      if (lastError && attempt === retries) {
+        const msg =
+          lastError instanceof Error ? lastError.message : String(lastError);
+        throw new LLMError(
+          `Error summarizing section ${header || i + 1} after ${retries} retries: ${msg}\n\n`,
+        );
       }
     }
   }
