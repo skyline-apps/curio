@@ -15,6 +15,8 @@ def capacitor_pods
   pod 'CapacitorBrowser', :path => '../../node_modules/@capacitor/browser'
   pod 'CapacitorPreferences', :path => '../../node_modules/@capacitor/preferences'
   pod 'CapacitorShare', :path => '../../node_modules/@capacitor/share'
+  pod 'CapacitorToast', :path => '../../node_modules/@capacitor/toast'
+  pod 'SendIntent', :path => '../../node_modules/send-intent'
   pod 'CordovaPlugins', :path => '../capacitor-cordova-ios-plugins'
 end
 
