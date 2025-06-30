@@ -183,6 +183,7 @@ describe("/v1/public/items/content", () => {
           version: null,
           versionName: "default-version",
           content: "test content",
+          summary: null,
         });
         await testDb.db.insert(items).values(MOCK_ITEM);
 
@@ -253,6 +254,7 @@ describe("/v1/public/items/content", () => {
           version: "2010-04-04",
           versionName: "2010-04-04",
           content: "custom version content",
+          summary: null,
         });
         await testDb.db.insert(items).values(MOCK_ITEM);
         await testDb.db.insert(profileItems).values({
@@ -391,6 +393,7 @@ describe("/v1/public/items/content", () => {
           version: null,
           versionName: "blah-version",
           content: "test content",
+          summary: null,
         });
         await testDb.db.insert(items).values(MOCK_ITEM);
         await testDb.db.insert(profileItems).values({
@@ -541,6 +544,7 @@ describe("/v1/public/items/content", () => {
         version: null,
         versionName: "default-version",
         content: "test content",
+        summary: null,
       });
       await testDb.db.insert(items).values(MOCK_ITEM);
 

@@ -346,6 +346,7 @@ describe("/v1/items/content", () => {
         version: null,
         versionName: "2014-04-04",
         content: "new longer content",
+        summary: null,
       });
       await testDb.db.insert(items).values(MOCK_ITEMS);
       await testDb.db.insert(profileItems).values({
@@ -410,6 +411,7 @@ describe("/v1/items/content", () => {
         version: null,
         versionName: "2014-04-04",
         content: "new longer content",
+        summary: null,
       });
       await testDb.db.insert(items).values(MOCK_ITEMS);
       await testDb.db.insert(profileItems).values({

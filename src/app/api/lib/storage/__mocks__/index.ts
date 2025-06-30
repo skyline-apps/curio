@@ -51,7 +51,12 @@ export class Storage {
     env: StorageEnv,
     slug: string,
     version: string | null,
-  ): Promise<{ version: string | null; versionName: string; content: string }> {
+  ): Promise<{
+    version: string | null;
+    versionName: string;
+    content: string;
+    summary: string | null;
+  }> {
     return getItemContent(env, slug, version);
   }
 
