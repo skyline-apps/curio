@@ -1,6 +1,7 @@
 import { eq } from "@app/api/db";
 import { profiles } from "@app/api/db/schema";
 import { premiumMiddleware } from "@app/api/middleware/premium";
+import { ErrorResponse } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
 import {
   DEFAULT_TEST_PROFILE_ID,
@@ -29,7 +30,7 @@ describe("/api/v1/premium", () => {
     const app = setUpMockApp(DUMMY_ROUTE, dummyRouter, null);
     const response = await postRequest(app, DUMMY_ROUTE, {});
     expect(response.status).toBe(401);
-    const data = await response.json();
+    const data: ErrorResponse = await response.json();
     expect(data.error).toBe("Unauthorized");
   });
 
@@ -38,7 +39,7 @@ describe("/api/v1/premium", () => {
     const app = setUpMockApp(DUMMY_ROUTE, dummyRouter, "nonexistent-user-id");
     const response = await postRequest(app, DUMMY_ROUTE, {});
     expect(response.status).toBe(401);
-    const data = await response.json();
+    const data: ErrorResponse = await response.json();
     expect(data.error).toBe("Unauthorized");
   });
 
@@ -47,7 +48,7 @@ describe("/api/v1/premium", () => {
     const app = setUpMockApp(DUMMY_ROUTE, dummyRouter, DEFAULT_TEST_USER_ID_2);
     const response = await postRequest(app, DUMMY_ROUTE, {});
     expect(response.status).toBe(402);
-    const data = await response.json();
+    const data: ErrorResponse = await response.json();
     expect(data.error).toBe("Premium required");
   });
 
@@ -68,7 +69,7 @@ describe("/api/v1/premium", () => {
     const app = setUpMockApp(DUMMY_ROUTE, dummyRouter, DEFAULT_TEST_USER_ID);
     const response = await postRequest(app, DUMMY_ROUTE, {});
     expect(response.status).toBe(402);
-    const data = await response.json();
+    const data: ErrorResponse = await response.json();
     expect(data.error).toBe("Premium expired");
     // Restore original profile
     await testDb.db
@@ -90,6 +91,6 @@ describe("/api/v1/premium", () => {
     const response = await postRequest(app, DUMMY_ROUTE, {});
     expect(response.status).toBe(200);
     const data = await response.json();
-    expect(data.ok).toBe(true);
+    expect(data).toEqual({ ok: true });
   });
 });

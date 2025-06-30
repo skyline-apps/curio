@@ -27,7 +27,7 @@ describe("POST /v1/user/upgrade-banner", () => {
     const response = await postRequest(app, "v1/user/upgrade-banner", {});
     expect(response.status).toBe(200);
     const body = await response.json();
-    expect(body.success).toBe(true);
+    expect(body).toEqual({ success: true });
 
     const [profile] = await testDb.db
       .select({ upgradeBannerLastShownAt: profiles.upgradeBannerLastShownAt })

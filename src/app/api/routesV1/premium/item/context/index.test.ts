@@ -3,6 +3,7 @@ import { explainInContext } from "@app/api/lib/llm/__mocks__";
 import { LLMError } from "@app/api/lib/llm/types";
 import { getItemContent } from "@app/api/lib/storage/__mocks__/";
 import { StorageError } from "@app/api/lib/storage/types";
+import { ErrorResponse } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
 import {
   DEFAULT_TEST_USER_ID,
@@ -36,7 +37,7 @@ describe("POST /v1/premium/item/context", () => {
     });
     expect(response.status).toBe(200);
     const data = await response.json();
-    expect(data.explanation).toBe("This is the explanation.");
+    expect(data).toEqual({ explanation: "This is the explanation." });
     expect(getItemContent).toHaveBeenCalledOnce();
     expect(getItemContent.mock.calls[0][1]).toBe(MOCK_ITEMS[0].slug);
     expect(getItemContent.mock.calls[0][2]).toBe(null);
@@ -50,7 +51,7 @@ describe("POST /v1/premium/item/context", () => {
     });
     expect(response.status).toBe(200);
     const data = await response.json();
-    expect(data.explanation).toBe("This is the explanation.");
+    expect(data).toEqual({ explanation: "This is the explanation." });
     expect(getItemContent).toHaveBeenCalledOnce();
     expect(getItemContent.mock.calls[0][1]).toBe(MOCK_ITEMS[0].slug);
     expect(getItemContent.mock.calls[0][2]).toBe("2020-01-01");
@@ -64,7 +65,7 @@ describe("POST /v1/premium/item/context", () => {
       versionName: null,
     });
     expect(response.status).toBe(404);
-    const data = await response.json();
+    const data: ErrorResponse = await response.json();
     expect(data.error).toBe("Failed to generate context.");
   });
 
@@ -76,7 +77,7 @@ describe("POST /v1/premium/item/context", () => {
       versionName: null,
     });
     expect(response.status).toBe(500);
-    const data = await response.json();
+    const data: ErrorResponse = await response.json();
     expect(data.error).toBe("Failed to generate context.");
   });
 });

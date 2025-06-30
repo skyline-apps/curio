@@ -6,6 +6,7 @@ import {
   uploadItemSummary,
 } from "@app/api/lib/storage/__mocks__/index";
 import { StorageError } from "@app/api/lib/storage/types";
+import { ErrorResponse } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
 import {
   DEFAULT_TEST_USER_ID,
@@ -43,7 +44,7 @@ describe("POST /v1/premium/item/summary", () => {
     );
     expect(response.status).toBe(200);
     const data = await response.json();
-    expect(data.summary).toBe("This is the summary.");
+    expect(data).toEqual({ summary: "This is the summary." });
     expect(uploadItemSummary).toHaveBeenCalledOnce();
     expect(uploadItemSummary.mock.calls[0][1]).toBe(MOCK_ITEMS[0].slug);
     expect(uploadItemSummary.mock.calls[0][2]).toBe(null);
@@ -57,7 +58,7 @@ describe("POST /v1/premium/item/summary", () => {
     });
     expect(response.status).toBe(200);
     const data = await response.json();
-    expect(data.summary).toBe("This is the summary.");
+    expect(data).toEqual({ summary: "This is the summary." });
     expect(uploadItemSummary).toHaveBeenCalledOnce();
     expect(uploadItemSummary.mock.calls[0][1]).toBe(MOCK_ITEMS[0].slug);
     expect(uploadItemSummary.mock.calls[0][2]).toBe("2020-01-01");
@@ -75,7 +76,7 @@ describe("POST /v1/premium/item/summary", () => {
     });
     expect(response.status).toBe(200);
     const data = await response.json();
-    expect(data.summary).toBe("Existing summary");
+    expect(data).toEqual({ summary: "Existing summary" });
     expect(uploadItemSummary).not.toHaveBeenCalled();
   });
 
@@ -86,7 +87,7 @@ describe("POST /v1/premium/item/summary", () => {
       versionName: null,
     });
     expect(response.status).toBe(404);
-    const data = await response.json();
+    const data: ErrorResponse = await response.json();
     expect(data.error).toBe("Failed to generate summary.");
   });
 
@@ -97,7 +98,7 @@ describe("POST /v1/premium/item/summary", () => {
       versionName: null,
     });
     expect(response.status).toBe(500);
-    const data = await response.json();
+    const data: ErrorResponse = await response.json();
     expect(data.error).toBe("Failed to generate summary.");
   });
 
@@ -108,7 +109,7 @@ describe("POST /v1/premium/item/summary", () => {
       versionName: null,
     });
     expect(response.status).toBe(500);
-    const data = await response.json();
+    const data: ErrorResponse = await response.json();
     expect(data.error).toBe("Failed to generate summary.");
   });
 
