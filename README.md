@@ -33,6 +33,12 @@ Follow [these instructions](https://capacitorjs.com/docs/guides/deep-links) to s
 
 To run the app against staging, change the `.env` values, then edit `AndroidManifest.xml`'s `android:host` to `staging.curi.ooo`.
 
+#### Payments
+To configure payments, make sure the `VITE_REVENUECAT_API_KEY` is set.
+
+Then, configure a RevenueCat webhook endpoint for `https://<HOST>/api/v1/public/subscriptions/revenuecat`.
+The `Authorization` header should be set to `Bearer <CURIO_APP_SECRET>`.
+
 
 ### Browser extensions
 The Chrome extension is at `src/chrome`, and the Firefox extension is at `src/firefox`.
