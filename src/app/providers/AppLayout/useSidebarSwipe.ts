@@ -55,7 +55,7 @@ export const useSidebarSwipe = ({
     },
     {
       axis: "x", // Only track horizontal movement
-      filterTaps: true, // Prevents clicks from triggering drag
+      filterTaps: false, // Needed to preserve proper press behavior
       preventDefault: true, // Prevents default browser drag behavior
     },
   );
