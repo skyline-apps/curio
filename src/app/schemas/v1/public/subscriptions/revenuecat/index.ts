@@ -13,6 +13,7 @@ export const RevenueCatEventType = z.enum([
   "TRANSFER",
   "SUBSCRIPTION_EXTENDED",
   "REFUND_REVERSED",
+  "INVOICE_ISSUANCE",
 ]);
 
 export type RevenueCatEventTypeEnum = z.infer<typeof RevenueCatEventType>;
