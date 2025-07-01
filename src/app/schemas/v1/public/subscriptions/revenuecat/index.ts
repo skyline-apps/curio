@@ -25,7 +25,12 @@ export const RevenueCatPeriodType = z.enum([
   "PREPAID",
 ]);
 
-export const RevenueCatStore = z.enum(["APP_STORE", "PLAY_STORE", "STRIPE"]);
+export const RevenueCatStore = z.enum([
+  "APP_STORE",
+  "PLAY_STORE",
+  "STRIPE",
+  "RC_BILLING",
+]);
 
 export const RevenueCatEnvironment = z.enum(["SANDBOX", "PRODUCTION"]);
 
@@ -37,10 +42,11 @@ export const RevenueCatSubscriberAttributesSchema = z.record(
 );
 
 export const RevenueCatEventSchema = z.object({
+  app_id: z.string(),
+  app_user_id: z.string(),
   type: RevenueCatEventType,
   id: z.string(),
   event_timestamp_ms: z.number(),
-  app_user_id: z.string(),
   original_app_user_id: z.string().optional(),
   aliases: z.array(z.string()).optional(),
   subscriber_attributes: RevenueCatSubscriberAttributesSchema.optional(),
@@ -63,13 +69,13 @@ export const RevenueCatEventSchema = z.object({
   currency: z.string().optional(),
   price_in_purchased_currency: z.number().optional(),
   tax_percentage: z.number().optional(),
-  commission_percentage: z.number().optional(),
+  commission_percentage: z.number().optional().nullable(),
   transaction_id: z.string().optional(),
   original_transaction_id: z.string().optional(),
   transferred_from: z.array(z.string()).optional(),
   transferred_to: z.array(z.string()).optional(),
   country_code: z.string().optional(),
-  offer_code: z.string().optional(),
+  offer_code: z.string().optional().nullable(),
   renewal_number: z.number().optional(),
 });
 
@@ -78,11 +84,6 @@ export type RevenueCatEvent = z.infer<typeof RevenueCatEventSchema>;
 export const RevenueCatWebhookRequestSchema = z.object({
   event: RevenueCatEventSchema,
   api_version: z.string(),
-  event_timestamp_ms: z.number(),
-  environment: RevenueCatEnvironment,
-  user_id: z.string(),
-  app_id: z.string(),
-  app_user_id: z.string(),
 });
 
 export type RevenueCatWebhookRequest = z.infer<
