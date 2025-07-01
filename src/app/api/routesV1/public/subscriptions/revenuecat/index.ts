@@ -44,7 +44,11 @@ export const revenuecatRouter = new Hono<EnvBindings>().post(
       return c.json({ error: "Unauthorized" }, 401);
     }
 
-    const { event } = c.req.valid("json");
+    const { event, api_version } = c.req.valid("json");
+
+    if (!api_version.startsWith("1.")) {
+      return c.json({ error: "Unsupported API version" }, 400);
+    }
 
     try {
       await db.transaction(async (tx) => {
