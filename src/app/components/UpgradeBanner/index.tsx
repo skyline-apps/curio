@@ -1,6 +1,6 @@
 import Button from "@app/components/ui/Button";
 import { useSettings } from "@app/providers/Settings";
-import { cn } from "@app/utils/cn";
+import { clsx } from "@app/utils/cn";
 import { isNativePlatform } from "@app/utils/platform";
 import { HiMiniXMark } from "react-icons/hi2";
 import { useNavigate } from "react-router-dom";
@@ -35,7 +35,7 @@ const UpgradeBanner: React.FC<UpgradeBannerProps> = () => {
 
   return (
     <div
-      className={cn(
+      className={clsx(
         "fixed top-0 left-0 right-0 z-50 bg-warning-400 dark:bg-warning-300 bg-opacity-70 backdrop-blur-md border-b border-warning/40 p-2 flex items-center shadow-xl cursor-pointer",
         isNativePlatform() && "pt-[env(safe-area-inset-top)]",
       )}
