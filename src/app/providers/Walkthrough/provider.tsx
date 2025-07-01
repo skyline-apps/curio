@@ -218,7 +218,7 @@ export const WalkthroughProvider = ({
   );
 
   useEffect(() => {
-    if (run) return;
+    if (run || !settings || settings.completedWalkthrough) return;
 
     const currentStep = steps[stepIndex];
     const nextPath = currentStep?.data?.next;
@@ -239,7 +239,7 @@ export const WalkthroughProvider = ({
       setRun(true);
       setStepIndex(stepIndex - 1);
     }
-  }, [location.pathname, steps, stepIndex, run]);
+  }, [location.pathname, steps, stepIndex, run, settings]);
 
   const value = useMemo(
     () => ({
