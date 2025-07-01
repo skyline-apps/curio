@@ -1,17 +1,16 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import { StorageError, VersionMetadata } from '@web/lib/storage/types';
-import config from '@web/lib/config.json';
-import { createLogger } from '@web/utils/logger';
+import { StorageError, VersionMetadata } from '@app/api/lib/storage/types';
+import { createLogger } from '@app/utils/logger';
 
 const log = createLogger("script/storage");
-const ITEMS_BUCKET = config.storageItemsBucket;
+const ITEMS_BUCKET = "items";
 
 export class ScriptStorage {
   private storage;
 
   constructor() {
     const supabase = createSupabaseClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.VITE_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
     this.storage = supabase.storage;
