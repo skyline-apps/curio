@@ -14,7 +14,7 @@ import {
   type Package,
   purchasePackage,
 } from "@app/utils/purchases";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 const log = createLogger("SubscriptionSettings");
 
@@ -59,7 +59,7 @@ const PackageOption: React.FC<PackageOptionProps> = ({
 
 const SubscriptionSettings: React.FC = () => {
   const { user } = useUser();
-  const { isPremium } = useSettings();
+  const { isPremium, refreshProfile } = useSettings();
   const [packageOptions, setPackageOptions] = useState<Package[]>([]);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -68,29 +68,30 @@ const SubscriptionSettings: React.FC = () => {
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
   const { showToast } = useToast();
 
-  useEffect(() => {
-    async function fetchPackages(): Promise<void> {
-      setLoading(true);
-      setError(null);
-      if (!user.id) {
-        setTimeout(() => fetchPackages(), 100);
-        return;
-      }
-      try {
-        initializePurchasing(user.id);
-        const customerInfo = await getCustomerInfo();
-        setCustomerInfo(customerInfo);
-        const currentPackages = await getPackages();
-        setPackageOptions(currentPackages);
-      } catch (error) {
-        log.error("Failed to load subscription packages", error);
-        setError("Failed to load subscription packages.");
-      } finally {
-        setLoading(false);
-      }
+  const fetchPackages = useCallback(async (): Promise<void> => {
+    setLoading(true);
+    setError(null);
+    if (!user.id) {
+      setTimeout(() => fetchPackages(), 100);
+      return;
     }
-    fetchPackages();
+    try {
+      initializePurchasing(user.id);
+      const customerInfo = await getCustomerInfo();
+      setCustomerInfo(customerInfo);
+      const currentPackages = await getPackages();
+      setPackageOptions(currentPackages);
+    } catch (error) {
+      log.error("Failed to load subscription packages", error);
+      setError("Failed to load subscription packages.");
+    } finally {
+      setLoading(false);
+    }
   }, [user.id]);
+
+  useEffect(() => {
+    fetchPackages();
+  }, [fetchPackages]);
 
   async function handlePurchase(rcPackage: Package): Promise<void> {
     setPurchaseLoading(rcPackage.identifier);
@@ -102,6 +103,8 @@ const SubscriptionSettings: React.FC = () => {
     }
     try {
       await purchasePackage(rcPackage, user.email);
+      setTimeout(() => fetchPackages(), 100);
+      setTimeout(() => refreshProfile(), 1000);
       showToast(
         "Thank you for your purchase! It may take a few moments to update your access to Premium features.",
         {

@@ -11,6 +11,7 @@ import { createContext, useContext } from "react";
 
 export type SettingsContextType = {
   username: string;
+  refreshProfile: () => Promise<void>;
   newsletterEmail: string | null;
   changeUsername: (username: string) => Promise<UpdateUsernameResponse | void>;
   updateNewsletterEmail: () => Promise<UpdateEmailResponse | void>;
@@ -40,6 +41,7 @@ export type SettingsContextType = {
 
 export const SettingsContext = createContext<SettingsContextType>({
   username: "",
+  refreshProfile: () => Promise.resolve(),
   newsletterEmail: null,
   changeUsername: (_username: string) => Promise.resolve(),
   updateNewsletterEmail: () => Promise.resolve(),

@@ -383,6 +383,10 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     );
   };
 
+  const refreshProfile = async (): Promise<void> => {
+    await loadProfile();
+  };
+
   const isPremium =
     currentProfile?.isPremium &&
     currentProfile.premiumExpiresAt &&
@@ -428,6 +432,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     <SettingsContext.Provider
       value={{
         username: currentProfile?.username ?? "",
+        refreshProfile,
         newsletterEmail: currentProfile?.newsletterEmail ?? null,
         changeUsername,
         updateNewsletterEmail,
