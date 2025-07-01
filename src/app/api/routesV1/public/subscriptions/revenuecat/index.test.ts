@@ -59,14 +59,10 @@ describe("/v1/public/subscriptions/revenuecat", () => {
   ): RevenueCatWebhookRequest => {
     const baseEvent: RevenueCatWebhookRequest = {
       api_version: "1.0",
-      event_timestamp_ms: Date.now(),
-      environment: RevenueCatEnvironment.enum.PRODUCTION,
-      user_id: "test-user-id",
-      app_id: "com.example.app",
-      app_user_id: userId,
       event: {
         id: `event_${Math.random().toString(36).substring(7)}`,
         type,
+        app_id: "com.example.app",
         app_user_id: userId,
         product_id: "premium_monthly",
         price: 9.99,
@@ -95,7 +91,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
   };
 
   it("should handle INITIAL_PURCHASE event", async () => {
-    const event = createTestWebhookEvent(
+    const request = createTestWebhookEvent(
       RevenueCatEventType.enum.INITIAL_PURCHASE,
       {
         is_trial_conversion: true,
@@ -104,14 +100,15 @@ describe("/v1/public/subscriptions/revenuecat", () => {
       DEFAULT_TEST_USER_ID_2,
     );
 
-    const response = await postAuthorizedRequest(event);
+    const response = await postAuthorizedRequest(request);
     expect(response.status).toBe(200);
 
     const data: RevenueCatWebhookResponse = await response.json();
     expect(data.success).toBe(true);
 
     const profile = await testDb.db.query.profiles.findFirst({
-      where: (profiles, { eq }) => eq(profiles.userId, event.app_user_id),
+      where: (profiles, { eq }) =>
+        eq(profiles.userId, request.event.app_user_id),
     });
     expect(profile).toBeDefined();
     expect(profile?.isPremium).toBe(true);
@@ -122,18 +119,19 @@ describe("/v1/public/subscriptions/revenuecat", () => {
     const originalProfile = await testDb.db.query.profiles.findFirst({
       where: (profiles, { eq }) => eq(profiles.userId, DEFAULT_TEST_USER_ID),
     });
-    const event = createTestWebhookEvent(RevenueCatEventType.enum.RENEWAL, {
+    const request = createTestWebhookEvent(RevenueCatEventType.enum.RENEWAL, {
       original_transaction_id: "test_original_tx",
     });
 
-    const response = await postAuthorizedRequest(event);
+    const response = await postAuthorizedRequest(request);
     expect(response.status).toBe(200);
 
     const data: RevenueCatWebhookResponse = await response.json();
     expect(data.success).toBe(true);
 
     const profile = await testDb.db.query.profiles.findFirst({
-      where: (profiles, { eq }) => eq(profiles.userId, event.app_user_id),
+      where: (profiles, { eq }) =>
+        eq(profiles.userId, request.event.app_user_id),
     });
     expect(profile).toBeDefined();
     expect(profile?.isPremium).toBe(true);
@@ -146,21 +144,22 @@ describe("/v1/public/subscriptions/revenuecat", () => {
   });
 
   it("should handle CANCELLATION event", async () => {
-    const event = createTestWebhookEvent(
+    const request = createTestWebhookEvent(
       RevenueCatEventType.enum.CANCELLATION,
       {
         original_transaction_id: "test_original_tx",
       },
     );
 
-    const response = await postAuthorizedRequest(event);
+    const response = await postAuthorizedRequest(request);
     expect(response.status).toBe(200);
 
     const data: RevenueCatWebhookResponse = await response.json();
     expect(data.success).toBe(true);
 
     const profile = await testDb.db.query.profiles.findFirst({
-      where: (profiles, { eq }) => eq(profiles.userId, event.app_user_id),
+      where: (profiles, { eq }) =>
+        eq(profiles.userId, request.event.app_user_id),
     });
     expect(profile).toBeDefined();
     expect(profile?.isPremium).toBe(true);
@@ -168,18 +167,22 @@ describe("/v1/public/subscriptions/revenuecat", () => {
   });
 
   it("should handle EXPIRATION event", async () => {
-    const event = createTestWebhookEvent(RevenueCatEventType.enum.EXPIRATION, {
-      original_transaction_id: "test_original_tx",
-    });
+    const request = createTestWebhookEvent(
+      RevenueCatEventType.enum.EXPIRATION,
+      {
+        original_transaction_id: "test_original_tx",
+      },
+    );
 
-    const response = await postAuthorizedRequest(event);
+    const response = await postAuthorizedRequest(request);
     expect(response.status).toBe(200);
 
     const data: RevenueCatWebhookResponse = await response.json();
     expect(data.success).toBe(true);
 
     const profile = await testDb.db.query.profiles.findFirst({
-      where: (profiles, { eq }) => eq(profiles.userId, event.app_user_id),
+      where: (profiles, { eq }) =>
+        eq(profiles.userId, request.event.app_user_id),
     });
     expect(profile).toBeDefined();
     expect(profile?.isPremium).toBe(false);
@@ -190,21 +193,22 @@ describe("/v1/public/subscriptions/revenuecat", () => {
     const originalProfile = await testDb.db.query.profiles.findFirst({
       where: (profiles, { eq }) => eq(profiles.userId, DEFAULT_TEST_USER_ID),
     });
-    const event = createTestWebhookEvent(
+    const request = createTestWebhookEvent(
       RevenueCatEventType.enum.UNCANCELLATION,
       {
         original_transaction_id: "test_original_tx",
       },
     );
 
-    const response = await postAuthorizedRequest(event);
+    const response = await postAuthorizedRequest(request);
     expect(response.status).toBe(200);
 
     const data: RevenueCatWebhookResponse = await response.json();
     expect(data.success).toBe(true);
 
     const profile = await testDb.db.query.profiles.findFirst({
-      where: (profiles, { eq }) => eq(profiles.userId, event.app_user_id),
+      where: (profiles, { eq }) =>
+        eq(profiles.userId, request.event.app_user_id),
     });
     expect(profile).toBeDefined();
     expect(profile?.isPremium).toBe(true);
@@ -217,21 +221,22 @@ describe("/v1/public/subscriptions/revenuecat", () => {
   });
 
   it("should handle SUBSCRIPTION_PAUSED event", async () => {
-    const event = createTestWebhookEvent(
+    const request = createTestWebhookEvent(
       RevenueCatEventType.enum.SUBSCRIPTION_PAUSED,
       {
         original_transaction_id: "test_original_tx",
       },
     );
 
-    const response = await postAuthorizedRequest(event);
+    const response = await postAuthorizedRequest(request);
     expect(response.status).toBe(200);
 
     const data: RevenueCatWebhookResponse = await response.json();
     expect(data.success).toBe(true);
 
     const profile = await testDb.db.query.profiles.findFirst({
-      where: (profiles, { eq }) => eq(profiles.userId, DEFAULT_TEST_USER_ID),
+      where: (profiles, { eq }) =>
+        eq(profiles.userId, request.event.app_user_id),
     });
     expect(profile).toBeDefined();
     expect(profile?.isPremium).toBe(false);
@@ -243,7 +248,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
       where: (profiles, { eq }) => eq(profiles.userId, DEFAULT_TEST_USER_ID),
     });
     const newProductId = "premium_yearly";
-    const event = createTestWebhookEvent(
+    const request = createTestWebhookEvent(
       RevenueCatEventType.enum.PRODUCT_CHANGE,
       {
         original_transaction_id: "test_original_tx",
@@ -251,14 +256,15 @@ describe("/v1/public/subscriptions/revenuecat", () => {
       },
     );
 
-    const response = await postAuthorizedRequest(event);
+    const response = await postAuthorizedRequest(request);
     expect(response.status).toBe(200);
 
     const data: RevenueCatWebhookResponse = await response.json();
     expect(data.success).toBe(true);
 
     const profile = await testDb.db.query.profiles.findFirst({
-      where: (profiles, { eq }) => eq(profiles.userId, event.app_user_id),
+      where: (profiles, { eq }) =>
+        eq(profiles.userId, request.event.app_user_id),
     });
     expect(profile).toBeDefined();
     expect(profile?.isPremium).toBe(true);
@@ -283,7 +289,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
   });
 
   it("should return 401 for invalid authorization", async () => {
-    const event = createTestWebhookEvent(
+    const request = createTestWebhookEvent(
       RevenueCatEventType.enum.INITIAL_PURCHASE,
     );
 
@@ -291,7 +297,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
     const response = await postRequest(
       app,
       "v1/public/subscriptions/revenuecat",
-      event,
+      request,
       {
         Authorization: `Bearer ${invalidSecret}`,
       },
