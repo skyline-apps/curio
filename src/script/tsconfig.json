@@ -15,8 +15,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "paths": {
-      "@web/*": [
-        "web/*"
+      "@app/*": [
+        "app/*"
       ]
     }
   },

@@ -7,13 +7,13 @@ console.log('Loading .env from:', process.env.DOTENV_CONFIG_PATH);
 
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import { items, profileItems, profileItemHighlights } from '@web/db/schema';
+import { items, profileItems, profileItemHighlights } from '@app/api/db/schema';
 import { sql, eq, inArray } from 'drizzle-orm';
-import { ItemDocument, HighlightDocument } from '@web/lib/search/types';
+import { ItemDocument, HighlightDocument } from '@app/api/lib/search/types';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { readFileSync } from 'fs';
-import { ExtractedMetadata } from '@web/lib/extract/types';
+import { ExtractedMetadata } from '@app/api/lib/extract/types';
 import { ScriptStorage } from './storage';
 
 // Verify required environment variables
@@ -21,7 +21,7 @@ const requiredEnvVars = [
   'POSTGRES_URL',
   'SEARCH_EXTERNAL_ENDPOINT_URL',
   'SEARCH_APPLICATION_API_KEY',
-  'NEXT_PUBLIC_SUPABASE_URL',
+  'VITE_SUPABASE_URL',
   'SUPABASE_SERVICE_ROLE_KEY',
 ];
 
