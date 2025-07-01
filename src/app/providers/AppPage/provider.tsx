@@ -85,7 +85,7 @@ export const AppPageProvider: React.FC<{
         }
       }
     },
-    { axis: "x", filterTaps: true, preventDefault: true },
+    { axis: "x", filterTaps: false, preventDefault: true },
   );
 
   return (
