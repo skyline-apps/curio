@@ -1,8 +1,10 @@
 # curio
-## Welcome!
-Curio is designed to be an open-source, self-hostable read-it-later bookmarking app.
+Welcome! Curio is designed to be an open-source, self-hostable read-it-later bookmarking app.
 
-![Curio inbox](https://github.com/skyline-apps/curio/blob/main/src/app/public/assets/curio_inbox.png) ![Curio article](https://github.com/skyline-apps/curio/blob/main/src/app/public/assets/curio_item.png)
+<p align="center">
+<img src="https://github.com/skyline-apps/curio/blob/main/src/app/public/assets/curio_inbox.png" alt="Curio inbox">
+<img src="https://github.com/skyline-apps/curio/blob/main/src/app/public/assets/curio_item.png" alt="Curio article">
+</p>
 
 If you're looking to get started using Curio, the hosted version will always be free to use at [https://curi.ooo](https://curi.ooo).
 
