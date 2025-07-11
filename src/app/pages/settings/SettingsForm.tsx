@@ -1,3 +1,4 @@
+import AppLinks from "@app/components/Landing/AppLinks";
 import { Accordion, AccordionItem } from "@app/components/ui/Accordion";
 import React from "react";
 import { Link } from "react-router-dom";
@@ -36,6 +37,7 @@ const SettingsForm: React.FC = () => {
         </AccordionItem>
       </Accordion>
       <div className="flex flex-col h-full justify-end items-center text-xs text-secondary py-4">
+        <AppLinks size={20} />
         <p>
           Having issues? Check the{" "}
           <Link to="https://status.curi.ooo" target="_blank">
