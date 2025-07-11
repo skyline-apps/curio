@@ -1,7 +1,7 @@
 # curio
 Welcome! Curio is designed to be an open-source, self-hostable read-it-later bookmarking app.
 
-To get started using Curio, use the hosted app at [https://curi.ooo](https://curi.ooo).
+To get started using Curio, you can use the hosted app at [curi.ooo](https://curi.ooo).
 Essential features of the hosted app will always be free to use, including:
 - Saving links via browser extension
 - Adding notes, highlights, and labels to saved pages
