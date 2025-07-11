@@ -1,6 +1,6 @@
 # Curio development
 
-## Tips for local development
+## Set up local development
 First, set up environment variables and secrets.
 1. Copy `.env.template` to `.env` and populate values. Make sure to use the instructions [here](https://supabase.com/docs/guides/self-hosting/docker#generate-api-keys) to generate the `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY`.
 2. The `search` container's init script will create an application API key. Retrieve this value by using `curl`, then populate it for `SEARCH_APPLICATION_API_KEY` in `.env`:
@@ -33,7 +33,7 @@ Follow [these instructions](https://capacitorjs.com/docs/guides/deep-links) to s
 
 To run the app against staging, change the `.env` values, then edit `AndroidManifest.xml`'s `android:host` to `staging.curi.ooo`.
 
-#### Payments
+### Payments
 To configure payments, make sure the `VITE_REVENUECAT_API_KEY` is set.
 
 Then, configure a RevenueCat webhook endpoint for `https://<HOST>/api/v1/public/subscriptions/revenuecat`.
@@ -128,7 +128,7 @@ Instead, to run logic for a specific consumer queue locally, set it as the `queu
 2. Configure the "URL Configuration" site URL and redirect settings in Supabase Auth with the app URL.
   - Site URL should be `$HOSTNAME`.
   - Redirect URLs should include `$HOSTNAME/*`.
-3. For local development, populate these variables in `.env` and view emails at `http://localhost:9000`.
+3. For email authentication in local development, populate these variables in `.env` and view emails at `http://localhost:9000`.
   - `ENABLE_EMAIL_SIGNUP=true`
   - `ENABLE_EMAIL_AUTOCONFIRM=false`
   - `SMTP_ADMIN_EMAIL=admin@example.com`
@@ -138,7 +138,7 @@ Instead, to run logic for a specific consumer queue locally, set it as the `queu
   - `SMTP_PASS=password`
   - `SMTP_SENDER_EMAIL=admin@example.com`
   - `SMTP_SENDER_NAME=Curio`
-4. Set up a production SMTP server.
+4. For email authentication in production, set up a production SMTP server.
   - Set up DNS records for the email sending domain. Populate the values from `terraform output` (should be 3 CNAME, 2 MX, and 4 TXT records).
   - Verify the sending email address by uncommenting `src/infra/aws/email_verification_forward.tf` and running `terraform apply`.
     - You'll have to create a new MX and TXT DNS record to allow receiving email at this domain.
