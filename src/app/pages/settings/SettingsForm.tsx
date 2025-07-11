@@ -67,7 +67,11 @@ const SettingsForm: React.FC = () => {
         </p>
         <p>
           Having issues? Check the{" "}
-          <Link to="https://status.curi.ooo" target="_blank">
+          <Link
+            className="hover:underline"
+            to="https://status.curi.ooo"
+            target="_blank"
+          >
             status page
           </Link>
           .

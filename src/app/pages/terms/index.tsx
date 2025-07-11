@@ -334,9 +334,9 @@ const TermsOfService: React.FC = () => {
               <h2 className="font-semibold">13. Governing Law</h2>
               <p>
                 These Terms shall be governed by and construed in accordance
-                with the laws of [Your State/Country], without regard to
+                with the laws of the State of California, without regard to
                 conflict of law principles. Any legal action shall be brought in
-                the courts of [Your Jurisdiction].
+                the courts of San Francisco County, California.
               </p>
             </section>
 
