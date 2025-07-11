@@ -16,4 +16,4 @@ Essential features of the hosted app will always be free to use, including:
 If you want to self-host Curio, you can follow the instructions in [src/README.md](src/README.md).
 
 ## Feature requests and bug reports
-Feel free to file feature requests and bug reports on [GitHub](https://github.com/skyline-apps/curio/issues).
+Feel free to file feature requests and bug reports on [GitHub](https://github.com/skyline-apps/curio/issues) by clicking "New issue".
