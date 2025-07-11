@@ -17,7 +17,7 @@ export type GlobalRecommendation = {
   profileItemId: string | null;
   itemId: string;
   type: RecommendationType;
-  createdAt: Date;
+  updatedAt: Date;
 };
 
 // Returns items with profileItemId if they are already in the user's library.
@@ -70,7 +70,7 @@ async function fetchGlobalRecommendations(db: TransactionDB): Promise<
     id: string;
     itemId: string;
     type: RecommendationType;
-    createdAt: Date;
+    updatedAt: Date;
   }[]
 > {
   return await db
@@ -78,17 +78,17 @@ async function fetchGlobalRecommendations(db: TransactionDB): Promise<
       id: itemRecommendations.id,
       itemId: itemRecommendations.itemId,
       type: itemRecommendations.type,
-      createdAt: itemRecommendations.createdAt,
+      updatedAt: itemRecommendations.updatedAt,
     })
     .from(itemRecommendations)
-    .orderBy(desc(itemRecommendations.createdAt));
+    .orderBy(desc(itemRecommendations.updatedAt));
 }
 
 async function shouldRecomputeGlobalRecommendations(
   _db: TransactionDB,
   existingRecommendations: Array<{
     itemId: string;
-    createdAt: Date;
+    updatedAt: Date;
   }>,
 ): Promise<boolean> {
   if (existingRecommendations.length === 0) {

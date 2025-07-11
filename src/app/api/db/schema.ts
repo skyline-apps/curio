@@ -334,9 +334,10 @@ export const itemRecommendations = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     itemId: uuid("item_id").notNull(),
     type: recommendationType("type").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
       .notNull()
-      .defaultNow(),
+      .$onUpdate(() => new Date()),
   },
   (table) => ({
     itemForeignKey: foreignKey({
@@ -370,9 +371,10 @@ export const profileItemRecommendations = pgTable(
     itemId: uuid("item_id").notNull(),
     profileItemId: uuid("profile_item_id"),
     type: personalRecommendationType("type").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
-      .defaultNow(),
+      .defaultNow()
+      .$onUpdate(() => new Date()),
   },
   (table) => ({
     profileForeignKey: foreignKey({
