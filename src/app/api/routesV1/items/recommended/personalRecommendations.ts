@@ -25,7 +25,7 @@ export type PersonalRecommendation = {
   profileItemId: string | null;
   itemId: string;
   type: PersonalRecommendationType;
-  createdAt: Date;
+  updatedAt: Date;
 };
 
 export async function maybeUpdateAndGetPersonalRecommendations(
@@ -70,11 +70,11 @@ async function fetchPersonalRecommendations(
       itemId: profileItemRecommendations.itemId,
       profileItemId: profileItemRecommendations.profileItemId,
       type: profileItemRecommendations.type,
-      createdAt: profileItemRecommendations.createdAt,
+      updatedAt: profileItemRecommendations.updatedAt,
     })
     .from(profileItemRecommendations)
     .where(eq(profileItemRecommendations.profileId, profileId))
-    .orderBy(desc(profileItemRecommendations.createdAt));
+    .orderBy(desc(profileItemRecommendations.updatedAt));
   return recommendations;
 }
 
@@ -83,7 +83,7 @@ async function shouldRecomputePersonalRecommendations(
   existingRecommendations: Array<{
     itemId: string;
     profileItemId: string | null;
-    createdAt: Date;
+    updatedAt: Date;
   }>,
 ): Promise<boolean> {
   if (existingRecommendations.length === 0) {
@@ -95,8 +95,8 @@ async function shouldRecomputePersonalRecommendations(
 
   const oldestRecommendation = existingRecommendations.reduce(
     (oldest, current) =>
-      current.createdAt < oldest ? current.createdAt : oldest,
-    existingRecommendations[0].createdAt,
+      current.updatedAt < oldest ? current.updatedAt : oldest,
+    existingRecommendations[0].updatedAt,
   );
 
   if (oldestRecommendation < oneWeekAgo) {

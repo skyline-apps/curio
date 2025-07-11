@@ -60,7 +60,7 @@ describe("GET /v1/items/recommended", () => {
         {
           itemId: MOCK_ITEMS[0].id,
           type: RecommendationType.POPULAR,
-          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       ]);
       await testDb.db.insert(profileItemRecommendations).values([
@@ -69,14 +69,14 @@ describe("GET /v1/items/recommended", () => {
           itemId: MOCK_ITEMS[1].id,
           profileItemId: MOCK_PROFILE_ITEMS[1].id,
           type: PersonalRecommendationType.FAVORITES,
-          createdAt: new Date(),
+          updatedAt: new Date(),
         },
         {
           profileId: DEFAULT_TEST_PROFILE_ID,
           itemId: MOCK_ITEMS[3].id,
           profileItemId: MOCK_PROFILE_ITEMS[3].id,
           type: PersonalRecommendationType.FAVORITE_AUTHOR,
-          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       ]);
 
@@ -145,7 +145,7 @@ describe("GET /v1/items/recommended", () => {
         {
           itemId: MOCK_ITEMS[3].id,
           type: RecommendationType.POPULAR,
-          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       ]);
 
@@ -225,7 +225,7 @@ describe("GET /v1/items/recommended", () => {
       await testDb.db.insert(itemRecommendations).values({
         itemId: MOCK_ITEMS[3].id,
         type: RecommendationType.POPULAR,
-        createdAt: oldDate,
+        updatedAt: oldDate,
       });
 
       const response = await getRequest(app, "v1/items/recommended");
@@ -237,7 +237,7 @@ describe("GET /v1/items/recommended", () => {
         .from(itemRecommendations);
       expect(globalRecommendations.length).toBe(1);
       expect(globalRecommendations[0].itemId).toBe(MOCK_ITEMS[3].id);
-      expect(globalRecommendations[0].createdAt.getTime()).toEqual(
+      expect(globalRecommendations[0].updatedAt.getTime()).toEqual(
         oldDate.getTime(),
       );
 
@@ -257,7 +257,7 @@ describe("GET /v1/items/recommended", () => {
       await testDb.db.insert(itemRecommendations).values({
         itemId: MOCK_ITEMS[0].id,
         type: RecommendationType.POPULAR,
-        createdAt: new Date(),
+        updatedAt: new Date(),
       });
 
       await testDb.db.insert(profileItemRecommendations).values({
@@ -265,7 +265,7 @@ describe("GET /v1/items/recommended", () => {
         itemId: MOCK_ITEMS[1].id,
         profileItemId: MOCK_PROFILE_ITEMS[1].id,
         type: PersonalRecommendationType.FAVORITES,
-        createdAt: oldDate,
+        updatedAt: oldDate,
       });
 
       const response = await getRequest(app, "v1/items/recommended");
@@ -291,12 +291,12 @@ describe("GET /v1/items/recommended", () => {
 
       const oldestRecommendation = storedRecommendations.reduce(
         (oldest, current) =>
-          current.createdAt < oldest.createdAt ? current : oldest,
+          current.updatedAt < oldest.updatedAt ? current : oldest,
         storedRecommendations[0],
       );
 
       // Should have been created recently, not using the old date
-      expect(oldestRecommendation.createdAt.getTime()).toBeGreaterThan(
+      expect(oldestRecommendation.updatedAt.getTime()).toBeGreaterThan(
         oldDate.getTime(),
       );
 
@@ -311,7 +311,7 @@ describe("GET /v1/items/recommended", () => {
         itemId: MOCK_ITEMS[1].id,
         profileItemId: MOCK_PROFILE_ITEMS[1].id,
         type: PersonalRecommendationType.FAVORITES,
-        createdAt: new Date(),
+        updatedAt: new Date(),
       });
 
       // Mark the item as read
@@ -395,7 +395,7 @@ describe("GET /v1/items/recommended", () => {
         {
           itemId: MOCK_ITEMS[3].id,
           type: RecommendationType.POPULAR,
-          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       ]);
       app = setUpMockApp(

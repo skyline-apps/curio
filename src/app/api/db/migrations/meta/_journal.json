@@ -330,6 +330,13 @@
       "when": 1748760067836,
       "tag": "0046_drop_unneeded_subscriptions_table",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1752245995348,
+      "tag": "0047_change_to_updated_at_for_recommendations",
+      "breakpoints": true
     }
   ]
 }
