@@ -90,7 +90,12 @@ const LandingPage: React.FC = () => {
             </ul>
           </div>
         </div>
-        <AppLinks />
+        <div>
+          <h3 className="text-lg font-medium text-center">
+            Supported platforms
+          </h3>
+          <AppLinks />
+        </div>
         <Button href="/login" color="success" size="lg">
           Get started now
         </Button>

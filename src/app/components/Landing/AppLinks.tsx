@@ -1,4 +1,5 @@
 import Icon from "@app/components/ui/Icon";
+import { cn } from "@app/utils/cn";
 import config from "@app/utils/config.json";
 import {
   FaAndroid,
@@ -18,7 +19,7 @@ const ICON_SIZE = 40;
 
 const AppLink: React.FC<AppLinkProps> = ({ href, icon }: AppLinkProps) => {
   return (
-    <div className="opacity-80 hover:opacity-100">
+    <div className={cn(!!href ? "opacity-80 hover:opacity-100" : "opacity-50")}>
       {!!href ? (
         <Link
           to={href}
@@ -34,30 +35,44 @@ const AppLink: React.FC<AppLinkProps> = ({ href, icon }: AppLinkProps) => {
   );
 };
 
-const AppLinks: React.FC = () => {
+interface AppLinksProps {
+  size?: number;
+  className?: string;
+}
+
+const AppLinks: React.FC<AppLinksProps> = ({
+  size = ICON_SIZE,
+  className,
+}: AppLinksProps) => {
   return (
-    <div className="flex gap-8">
+    <div
+      className={cn(
+        "flex py-4",
+        size >= ICON_SIZE ? "gap-8" : "gap-4",
+        className,
+      )}
+    >
       <AppLink
         key="web"
         href={import.meta.env.VITE_CURIO_URL || "/"}
-        icon={<FaDesktop size={ICON_SIZE} />}
+        icon={<FaDesktop size={size} />}
       />
       {config.chromeExtensionLink && (
         <AppLink
           key="chrome"
           href={config.chromeExtensionLink}
-          icon={<FaChrome size={ICON_SIZE} />}
+          icon={<FaChrome size={size} />}
         />
       )}
       {config.firefoxExtensionLink && (
         <AppLink
           key="firefox"
           href={config.firefoxExtensionLink}
-          icon={<FaFirefoxBrowser size={ICON_SIZE} />}
+          icon={<FaFirefoxBrowser size={size} />}
         />
       )}
-      <AppLink key="android" icon={<FaAndroid size={ICON_SIZE} />} />
-      <AppLink key="ios" icon={<FaApple size={ICON_SIZE} />} />
+      <AppLink key="android" icon={<FaAndroid size={size} />} />
+      <AppLink key="ios" icon={<FaApple size={size} />} />
     </div>
   );
 };
