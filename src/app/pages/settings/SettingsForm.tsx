@@ -60,7 +60,11 @@ const SettingsForm: React.FC = () => {
         <AppLinks size={20} />
         <p>
           Having issues? Check the{" "}
-          <Link to="https://status.curi.ooo" target="_blank">
+          <Link
+            className="hover:underline"
+            to="https://status.curi.ooo"
+            target="_blank"
+          >
             status page
           </Link>
           .
@@ -71,6 +75,15 @@ const SettingsForm: React.FC = () => {
             team@curi.ooo
           </Link>
           .
+        </p>
+        <p>
+          <Link className="hover:underline" to="/terms" target="_blank">
+            Terms of Service
+          </Link>
+          {" • "}
+          <Link className="hover:underline" to="/privacy" target="_blank">
+            Privacy Policy
+          </Link>
         </p>
         {import.meta.env.VITE_BUILD_HASH && (
           <p>Build number: {import.meta.env.VITE_BUILD_HASH.substring(0, 7)}</p>
