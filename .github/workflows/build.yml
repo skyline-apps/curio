@@ -67,6 +67,7 @@ jobs:
           VITE_POSTHOG_KEY: ${{ vars.VITE_POSTHOG_KEY }}
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_REVENUECAT_API_KEY: ${{ vars.VITE_REVENUECAT_API_KEY }}
           VITE_BUILD_HASH: ${{ github.sha }}
 
       - name: Run database migrations
@@ -126,6 +127,7 @@ jobs:
           VITE_POSTHOG_KEY: ${{ vars.VITE_POSTHOG_KEY }}
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_REVENUECAT_API_KEY: ${{ vars.VITE_REVENUECAT_API_KEY }}
           VITE_BUILD_HASH: ${{ github.sha }}
 
       - name: Run database migrations
