@@ -9,8 +9,8 @@ Essential features of the hosted app will always be free to use, including:
 - Searching over your article library
 
 <p align="middle">
-<img src="https://github.com/skyline-apps/curio/blob/main/src/app/public/assets/curio_inbox.png" alt="Curio inbox">
-<img src="https://github.com/skyline-apps/curio/blob/main/src/app/public/assets/curio_item.png" alt="Curio article">
+  <img src="https://github.com/skyline-apps/curio/blob/main/src/app/public/assets/curio_inbox.png" alt="Curio inbox" width="400"/>
+  <img src="https://github.com/skyline-apps/curio/blob/main/src/app/public/assets/curio_item.png" alt="Curio article" width="400"/>
 </p>
 
 If you want to self-host Curio, you can follow the instructions in [src/README.md](src/README.md).
