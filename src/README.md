@@ -119,6 +119,20 @@ Instead, to run logic for a specific consumer queue locally, set it as the `queu
   - It may take a while for the certificate to be issued. You can check the status of the `gateway`, `certificate`,  and `challenge` resources as well as logs of the `cert-manager` pod to check progress.
   - Run `/data/search/init.sh [staging|prod]` to initialize the search application.
   - Populate the `SEARCH_APPLICATION_API_KEY` after using the master API key to retrieve its value.
+6. Set up Meilisearch deployments on Railway for staging and prod.
+  - TODO: Use the terraform provider when it's more mature.
+  - Create a project called `search` and environments called `staging` and `production`.
+  - Add a new service to staging called `search` using the image `getmeili/meilisearch:v1.12`.
+  - Under the service variables, set `MEILI_MASTER_KEY` to be `.env.staging`'s `SEARCH_MASTER_API_KEY`.
+  - Under the service variables, set `MEILI_ENV` to be `production`.
+  - Under the service variables, set `MEILI_MAX_INDEXING_MEMORY` to be `7500Mb` (assuming you're on the paid plan and the max service memory is 8 GB).
+  - Right-click and attach a new volume to the service at the mount path `/meili_data`.
+  - Add a custom domain that points to the search endpoint (e.g. `search-staging.curi.ooo`) at port 7700.
+  - To bootstrap the search instance with a dump from a previous instance:
+    - Upload the search dump to Supabase public object storage and grab its URL.
+    - Under the service variables, set `MEILI_IMPORT_DUMP` to be `/meili_data/import.dump`.
+    - Add a custom start command to download the dump from Supabase public object storage and place it in `/meili_data/import.dump`: `curl https://<SUPABASE_PROJECT>.supabase.co/storage/v1/object/public/dumps//<DUMP_NAME>.dump --output /meili_data/import.dump`
+    - Deploy the service. After it succeeds, remove the custom start command and the `MEILI_IMPORT_DUMP` variable, and redeploy.
 
 ### Apps
 1. Publish the browser extensions and update the values in `src/app/utils/config.json`.
