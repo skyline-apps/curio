@@ -23,6 +23,7 @@ services:
     environment:
       - KUBECONFIG=/root/.kube/config
       - USE_GKE_GCLOUD_AUTH_PLUGIN=True
+      - RAILWAY_TOKEN=${RAILWAY_API_KEY}
   app:
     build:
       context: ./

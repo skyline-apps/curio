@@ -1,0 +1,6 @@
+[deploy]
+# Uncomment this to import a dump. Also uncomment the MEILI_IMPORT_DUMP variable in main.tf
+preDeployCommand = ["curl https://gkuwjkotdnmsjtdjkpvd.supabase.co/storage/v1/object/public/dumps//20250725-171442555.dump --output /meili_data/import.dump"]
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "never"

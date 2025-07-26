@@ -43,3 +43,7 @@ module "gke" {
   namespaces                     = ["staging", "prod"]
   persistent_volume_disk_size_gb = var.persistent_volume_disk_size_gb
 }
+
+module "railway" {
+  source = "./railway"
+}
