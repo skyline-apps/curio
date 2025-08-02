@@ -125,7 +125,7 @@ Instead, to run logic for a specific consumer queue locally, set it as the `queu
   - Add a new service to staging called `search` using the image `getmeili/meilisearch:v1.12`.
   - Under the service variables, set `MEILI_MASTER_KEY` to be `.env.staging`'s `SEARCH_MASTER_API_KEY`.
   - Under the service variables, set `MEILI_ENV` to be `production`.
-  - Under the service variables, set `MEILI_MAX_INDEXING_MEMORY` to be `4000Mb` (assuming you're on the paid plan and the max service memory is 8 GB).
+  - Under the service variables, set `MEILI_MAX_INDEXING_MEMORY` to be `2000Mb` (assuming you're on the paid plan and the max service memory is 8 GB).
   - Right-click and attach a new volume to the service at the mount path `/meili_data`.
   - Add a custom domain that points to the search endpoint (e.g. `search-staging.curi.ooo`) at port 7700.
   - Run `/data/search/init.sh [staging|prod]` to initialize the search application.
