@@ -92,6 +92,12 @@ resource "aws_iam_policy" "ses_sender" {
 # IAM user for SMTP credentials
 resource "aws_iam_user" "smtp_user" {
   name = "ses-smtp-user"
+  lifecycle {
+    ignore_changes = [
+      tags,
+      tags_all,
+    ]
+  }
 }
 
 resource "aws_iam_user_policy_attachment" "smtp_policy" {
