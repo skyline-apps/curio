@@ -1,5 +1,0 @@
-apiVersion: v2
-name: search
-description: Helm chart for Meilisearch search container
-version: 0.1.0
-appVersion: "1.12.0"
