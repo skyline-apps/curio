@@ -2,7 +2,6 @@ import YarnDark from "@app/assets/yarn_dark.svg";
 import YarnLight from "@app/assets/yarn_light.svg";
 import EmailSignIn from "@app/components/Auth/EmailSignIn";
 import GoogleSignIn from "@app/components/Auth/GoogleSignIn";
-import PasswordSignIn from "@app/components/Auth/PasswordSignIn";
 import Footer from "@app/components/Landing/Footer";
 import Navbar from "@app/components/Navbar";
 import Spinner from "@app/components/ui/Spinner";
@@ -46,11 +45,7 @@ const LoginPage: React.FC<LoginPageProps> = ({}: LoginPageProps) => {
             </p>
             <GoogleSignIn nextUrl="/home" />
             <p className="text-secondary text-xs">or</p>
-            {import.meta.env.VITE_DEMO_BUILD === "true" ? (
-              <PasswordSignIn />
-            ) : (
-              <EmailSignIn />
-            )}
+            <EmailSignIn />
             {errorMessage && (
               <p className="text-danger text-sm text-center mt-2">
                 {errorMessage}

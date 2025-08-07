@@ -2,6 +2,7 @@ import YarnDark from "@app/assets/yarn_dark.svg";
 import YarnLight from "@app/assets/yarn_light.svg";
 import EmailSignIn from "@app/components/Auth/EmailSignIn";
 import GoogleSignIn from "@app/components/Auth/GoogleSignIn";
+import PasswordSignIn from "@app/components/Auth/PasswordSignIn";
 import { CurioBrand } from "@app/components/CurioBrand";
 import Spinner from "@app/components/ui/Spinner";
 import { useUser } from "@app/providers/User";
@@ -39,7 +40,11 @@ const MobileLoginPage: React.FC<
           </div>
           <GoogleSignIn nextUrl="/home" />
           <p className="text-secondary text-xs">or</p>
-          <EmailSignIn />
+          {import.meta.env.VITE_DEMO_BUILD === "true" ? (
+            <PasswordSignIn />
+          ) : (
+            <EmailSignIn />
+          )}
           {errorMessage && (
             <p className="text-danger text-sm text-center mt-2">
               {errorMessage}
