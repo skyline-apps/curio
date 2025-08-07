@@ -61,7 +61,7 @@ const PasswordSignIn: React.FC<
       className="flex flex-col gap-2 items-center w-full"
     >
       <form
-        className="flex gap-2 w-full"
+        className="flex flex-col gap-2 w-full"
         onSubmit={(e) => {
           e.preventDefault();
           handleSignInWithEmail();
