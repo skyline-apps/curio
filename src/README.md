@@ -136,8 +136,15 @@ Instead, to run logic for a specific consumer queue locally, set it as the `queu
     - Deploy the service. After it succeeds, remove the custom start command and redeploy to load the dump from the downloaded path.
     - After that succeeds, remove the `MEILI_IMPORT_DUMP` variable and redeploy.
 
-### Apps
+### Extensions
 1. Publish the browser extensions and update the values in `src/app/utils/config.json`.
+
+### Android app
+1. Ensure the `versionCode` and `versionName` are updated in `src/app/android/app/build.gradle`.
+2. Open the application in Android Studio by running `npx cap open android` from `src/app`.
+3. Build a signed APK using the Build > Generate Signed App Bundle option.
+4. Select "Android App Bundle" and follow the instructions. You should build a `release` app in the `src/app/android/app` folder.
+5. Follow the [launch checklist](https://play.google.com/console/about/guides/releasewithconfidence/) and upload the app bundle to the Play Console.
 
 ### Authentication
 1. Set up a Google Cloud project with Google Auth Platform configured for a web application. Copy in the generated client ID and client secret into Supabase's Google auth provider, then copy the Supabase auth callback URL into the "Auhorized redirect URIs" field.
