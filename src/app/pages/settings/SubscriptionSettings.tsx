@@ -185,7 +185,9 @@ const SubscriptionSettings: React.FC = () => {
           ) : customerInfo?.activeSubscriptions.size === 0 ? (
             <div className="grid grid-cols-1 gap-3">
               {packageOptions.length === 0 && (
-                <div>No subscription plans available.</div>
+                <div className="text-sm text-danger">
+                  No subscription plans available.
+                </div>
               )}
               {packageOptions.map((packageOption) => (
                 <PackageOption
