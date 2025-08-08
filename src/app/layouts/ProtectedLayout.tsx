@@ -1,7 +1,7 @@
 import AppPage from "@app/components/AppPage";
 import KeyboardShortcuts from "@app/components/KeyboardShortcuts";
-import LeftSidebar from "@app/components/LeftSidebar";
-import RightSidebar from "@app/components/RightSidebar";
+import AppLeftSidebar from "@app/components/LeftSidebar/AppLeftSidebar";
+import AppRightSidebar from "@app/components/RightSidebar/AppRightSidebar";
 import { Progress } from "@app/components/ui/Progress";
 import Spinner from "@app/components/ui/Spinner";
 import { HighlightsContext } from "@app/providers/Highlights";
@@ -34,11 +34,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           }}
         />
       )}
-      <LeftSidebar />
+      <AppLeftSidebar />
       <div className="flex-1 overflow-y-auto">
         <AppPage enforceAuth={true}>{children}</AppPage>
       </div>
-      {pathname !== "/settings" && <RightSidebar />}
+      {pathname !== "/settings" && <AppRightSidebar />}
       <KeyboardShortcuts />
     </div>
   ) : (

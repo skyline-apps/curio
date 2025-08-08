@@ -1,7 +1,7 @@
 import AppPage from "@app/components/AppPage";
-import LeftSidebar from "@app/components/LeftSidebar";
+import AppLeftSidebar from "@app/components/LeftSidebar/AppLeftSidebar";
 import Navbar from "@app/components/Navbar";
-import RightSidebar from "@app/components/RightSidebar";
+import AppRightSidebar from "@app/components/RightSidebar/AppRightSidebar";
 import { useUser } from "@app/providers/User";
 import React from "react";
 
@@ -17,11 +17,11 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
     <div className="flex flex-col w-full h-dvh overflow-hidden">
       {!isAuthenticated && <Navbar />}
       <div className="flex flex-row flex-1 relative overflow-y-auto">
-        {isAuthenticated && <LeftSidebar />}
+        {isAuthenticated && <AppLeftSidebar />}
         <div className="flex-1 overflow-y-auto">
           <AppPage enforceAuth={false}>{children}</AppPage>
         </div>
-        <RightSidebar />
+        <AppRightSidebar />
       </div>
     </div>
   );
