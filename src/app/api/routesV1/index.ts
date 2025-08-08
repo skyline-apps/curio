@@ -40,5 +40,8 @@ v1Router.route("items/state", itemsStateRouter);
 v1Router.route("jobs", jobsRouter);
 v1Router.route("public", publicRouter);
 v1Router.route("user", userRouter);
+v1Router.use("*", async (c: EnvContext) => {
+  return c.json({ error: "Not found" }, 404);
+});
 
 export { v1Router };
