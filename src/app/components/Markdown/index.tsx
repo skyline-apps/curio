@@ -1,26 +1,62 @@
 import { cn } from "@app/utils/cn";
-import React from "react";
+import React, { useMemo } from "react";
 import ReactMarkdown, { Options } from "react-markdown";
 
 import MarkdownErrorBoundary from "./error-boundary";
+import HeadingAnchorElement from "./HeadingAnchorElement";
+import { childrenToText, getHeadingAnchor } from "./utils";
 
 interface MarkdownProps extends Options {
   className?: string;
+  headingPortalRef?: React.RefObject<HTMLElement | null>;
 }
+
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
 
 const Markdown: React.FC<MarkdownProps> = ({
   children,
   className,
-  components,
+  headingPortalRef,
+  ...otherProps
 }: MarkdownProps) => {
+  const mergedComponents = useMemo(() => {
+    if (children === undefined || children === null)
+      return otherProps.components || {};
+
+    const headingComponents = headingPortalRef
+      ? Object.fromEntries(
+          HEADING_TAGS.map((tag) => [
+            tag,
+            (props: { children: React.ReactNode }) => (
+              <HeadingAnchorElement
+                tag={tag}
+                anchor={getHeadingAnchor(childrenToText(props.children))}
+                portalRef={headingPortalRef}
+                {...props}
+              >
+                {props.children}
+              </HeadingAnchorElement>
+            ),
+          ]),
+        )
+      : {};
+
+    return {
+      ...headingComponents,
+      ...otherProps.components,
+    };
+  }, [headingPortalRef, otherProps.components, children]);
+
   if (children === undefined || children === null) return null;
+
   return (
     <ReactMarkdown
       className={cn(
         "prose max-w-none overflow-y-hidden [&_*]:text-default-foreground hover:prose-a:!text-primary dark:prose-invert",
         className,
       )}
-      components={components}
+      components={mergedComponents}
+      {...otherProps}
     >
       {children.toString()}
     </ReactMarkdown>

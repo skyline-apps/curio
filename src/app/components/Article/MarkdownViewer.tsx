@@ -1,5 +1,5 @@
 import MarkdownErrorBoundary from "@app/components/Markdown/error-boundary";
-import { useToast } from "@app/providers/Toast";
+import { useAppPage } from "@app/providers/AppPage";
 import { Highlight } from "@app/schemas/v1/items/highlights";
 import { cn } from "@app/utils/cn";
 import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
@@ -53,8 +53,8 @@ const useSelectionListeners = (handleSelection: () => void): void => {
 
 const MarkdownViewer: React.FC<MarkdownViewerProps> = memo(
   ({ highlights, className, children, isEditable }: MarkdownViewerProps) => {
+    const { articleFixedInfoRef } = useAppPage();
     const contentRef = useRef<HTMLDivElement>(null);
-    const { showToast } = useToast();
 
     const {
       currentSelectionInfo,
@@ -85,7 +85,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = memo(
               nonOverlappingHighlights,
               selectedHighlight,
               updateSelectedHighlight,
-              showToast,
+              articleFixedInfoRef,
             ),
           ]),
         ),
@@ -93,7 +93,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = memo(
         nonOverlappingHighlights,
         selectedHighlight,
         updateSelectedHighlight,
-        showToast,
+        articleFixedInfoRef,
       ],
     );
 

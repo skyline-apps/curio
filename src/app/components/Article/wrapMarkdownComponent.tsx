@@ -1,16 +1,16 @@
-import Button from "@app/components/ui/Button";
-import { ToastOptions } from "@app/providers/Toast";
+import HeadingAnchorElement from "@app/components/Markdown/HeadingAnchorElement";
+import {
+  childrenToText,
+  getHeadingAnchor,
+} from "@app/components/Markdown/utils";
 import { Highlight } from "@app/schemas/v1/items/highlights";
-import slugify from "limax";
 import React, {
   type ComponentPropsWithoutRef,
   type JSX,
   type PropsWithChildren,
   useEffect,
 } from "react";
-import { HiMiniLink } from "react-icons/hi2";
 
-import ArticleHeading from "./ArticleHeading";
 import { HighlightSpan } from "./HighlightSpan";
 import LinkInfo from "./LinkInfo";
 
@@ -117,24 +117,6 @@ export function removeHighlightsOverlap(highlights: Highlight[]): Highlight[] {
   return resultHighlights;
 }
 
-function childrenToText(children: React.ReactNode): string {
-  if (Array.isArray(children)) {
-    return children.reduce((acc, child) => acc + childrenToText(child), "");
-  } else if (
-    children !== null &&
-    typeof children === "object" &&
-    "props" in children &&
-    (children as { props?: { children?: React.ReactNode } }).props?.children
-  ) {
-    return childrenToText(
-      (children as { props: { children: React.ReactNode } }).props.children,
-    );
-  } else if (typeof children === "string") {
-    return children;
-  }
-  return "";
-}
-
 // Clear failed image cache on initial load
 if (typeof window !== "undefined") {
   const keys = Object.keys(sessionStorage);
@@ -150,7 +132,7 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
   highlights: Highlight[],
   selectedHighlight: Highlight | null,
   selectHighlight?: (highlight: Highlight) => void,
-  showToast?: (message: string, options?: ToastOptions) => void,
+  headingPortalRef?: React.RefObject<HTMLElement | null>,
 ): React.FC<MarkdownProps<T>> => {
   const allHighlights: Highlight[] = highlights;
 
@@ -238,7 +220,22 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
         isUrl = false;
       }
 
-      const anchor = isHeading ? slugify(childrenText) : "";
+      if (isHeading) {
+        const anchor = getHeadingAnchor(childrenText);
+        return (
+          <HeadingAnchorElement
+            tag={tag as "h1" | "h2" | "h3" | "h4"}
+            anchor={anchor}
+            portalRef={headingPortalRef}
+            data-start-offset={startOffset}
+            data-end-offset={endOffset}
+            ref={selfRef}
+            {...rest}
+          >
+            {elementChildren}
+          </HeadingAnchorElement>
+        );
+      }
 
       const element = React.createElement(
         tag,
@@ -249,32 +246,10 @@ export const wrapMarkdownComponent = <T extends keyof JSX.IntrinsicElements>(
           ...rest,
           // Open links in new tab
           ...(isUrl ? { target: "_blank" } : {}),
-          // Add anchors to headings
-          ...(isHeading ? { id: anchor } : {}),
           // Ignore existing anchor links
           ...(href?.startsWith("#") ? { href: undefined } : { href }),
         },
-        <>
-          {isHeading ? (
-            <ArticleHeading anchor={anchor}>{childrenText}</ArticleHeading>
-          ) : null}
-          {elementChildren}
-          {isHeading ? (
-            <Button
-              size="xs"
-              variant="ghost"
-              tooltip="Copy link to heading"
-              onPress={() => {
-                const url = new URL(window.location.href);
-                url.hash = `#${anchor}`;
-                navigator.clipboard.writeText(url.toString());
-                showToast?.("Link copied to clipboard", { disappearing: true });
-              }}
-            >
-              <HiMiniLink className="text-primary" />
-            </Button>
-          ) : null}
-        </>,
+        elementChildren,
       );
       if (isLink && href && isUrl) {
         return <LinkInfo href={href}>{element}</LinkInfo>;
