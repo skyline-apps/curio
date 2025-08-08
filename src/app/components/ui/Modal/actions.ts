@@ -18,8 +18,12 @@ interface DialogStore {
   cancelLabel?: string;
   onConfirm?: () => void;
   onCancel?: () => void;
-  type: "alert" | "confirm";
-  showDialog: (params: DialogParams & { type: "alert" | "confirm" }) => void;
+  type: "alert" | "confirm" | "destructive-confirm";
+  showDialog: (
+    params: DialogParams & {
+      type: "alert" | "confirm" | "destructive-confirm";
+    },
+  ) => void;
   hideDialog: () => void;
 }
 
@@ -68,6 +72,19 @@ export function showConfirm(
 ): void {
   useDialog.getState().showDialog({
     type: "confirm",
+    message,
+    title,
+    onConfirm,
+  });
+}
+
+export function showDestructiveConfirm(
+  message: string | React.ReactNode,
+  onConfirm: () => void,
+  title?: string,
+): void {
+  useDialog.getState().showDialog({
+    type: "destructive-confirm",
     message,
     title,
     onConfirm,

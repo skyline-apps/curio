@@ -29,17 +29,24 @@ export const Dialog = (): React.ReactElement => {
         {dialog.title && <ModalHeader>{dialog.title}</ModalHeader>}
         <ModalBody className="text-sm">{dialog.message}</ModalBody>
         <ModalFooter>
-          {dialog.type === "confirm" && (
+          {(dialog.type === "confirm" ||
+            dialog.type === "destructive-confirm") && (
             <Button
               size="sm"
-              color="danger"
+              color={
+                dialog.type === "destructive-confirm" ? "default" : "danger"
+              }
               variant="light"
               onPress={handleCancel}
             >
               {dialog.cancelLabel || "Cancel"}
             </Button>
           )}
-          <Button size="sm" onPress={handleConfirm}>
+          <Button
+            size="sm"
+            color={dialog.type === "destructive-confirm" ? "danger" : "default"}
+            onPress={handleConfirm}
+          >
             {dialog.confirmLabel || "OK"}
           </Button>
         </ModalFooter>
