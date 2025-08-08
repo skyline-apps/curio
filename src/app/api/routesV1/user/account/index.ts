@@ -1,5 +1,6 @@
 import { eq } from "@app/api/db";
 import { profiles } from "@app/api/db/schema";
+import { createClient } from "@app/api/lib/supabase/client";
 import {
   apiDoc,
   APIResponse,
@@ -34,14 +35,31 @@ export const userAccountRouter = new Hono<EnvBindings>().delete(
     }
     try {
       const db = c.get("db");
-      const result = await db
-        .delete(profiles)
-        .where(eq(profiles.id, profileId))
-        .returning({ id: profiles.id });
-      if (result.length > 0) {
-        return c.json(DeleteAccountResponseSchema.parse({ success: true }));
+      // Fetch profile to get userId
+      const profile = await db.query.profiles.findFirst({
+        where: (p, { eq }) => eq(p.id, profileId),
+      });
+      if (!profile) {
+        return c.json({ error: "Profile not found" }, 404);
       }
-      return c.json({ error: "Profile not found" }, 404);
+      // Delete profile
+      await db.delete(profiles).where(eq(profiles.id, profileId));
+      // Delete user from Supabase Auth
+      try {
+        const supabase = await createClient(c, true); // admin
+        const { error: authError } = await supabase.auth.admin.deleteUser(
+          profile.userId,
+          true,
+        );
+        if (authError) {
+          log.error("Failed to delete user from Supabase Auth", { authError });
+          return c.json({ error: "Failed to delete user from auth" }, 500);
+        }
+      } catch (err) {
+        log.error("Supabase admin error", { err });
+        return c.json({ error: "Failed to delete user from auth" }, 500);
+      }
+      return c.json(DeleteAccountResponseSchema.parse({ success: true }));
     } catch (error) {
       log.error(`Error deleting user account`, { profileId, error });
       return c.json({ error: "Failed to delete account" }, 500);

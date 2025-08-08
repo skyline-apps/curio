@@ -7,6 +7,9 @@ const signOutMock = vi.fn().mockResolvedValue({ error: null });
 
 export const supabaseMock = {
   auth: {
+    admin: {
+      deleteUser: vi.fn().mockResolvedValue({ error: null }),
+    },
     getUser: vi.fn().mockResolvedValue({
       data: {
         user: null,
