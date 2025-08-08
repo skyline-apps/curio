@@ -8,6 +8,7 @@ import MainPage from "@app/pages";
 import ArchivePage from "@app/pages/archive";
 import AuthCallback from "@app/pages/auth/callback";
 import ContentPage from "@app/pages/content";
+import DocsPage from "@app/pages/docs";
 import HomePage from "@app/pages/home";
 import InboxPage from "@app/pages/inbox";
 import LoginPage from "@app/pages/login";
@@ -130,6 +131,7 @@ export const App = (): React.ReactNode => {
             />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/docs" element={<DocsPage />} />
             <Route
               element={
                 <RequireAuth>
