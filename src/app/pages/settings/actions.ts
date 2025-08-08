@@ -77,3 +77,29 @@ export const useApiKeys = (): UseApiKeys => {
     listApiKeys,
   };
 };
+
+interface UseDeleteAccount {
+  deleteAccount: () => Promise<void>;
+  isDeletingAccount: boolean;
+}
+
+export const useDeleteAccount = (): UseDeleteAccount => {
+  const deleteAccountMutationOptions: UseMutationOptions<void, Error> = {
+    mutationFn: async () => {
+      const res = await authenticatedFetch("/api/v1/user/account", {
+        method: "DELETE",
+      });
+      return handleAPIResponse(res);
+    },
+    onSuccess: () => {},
+    onError: () => {},
+  };
+
+  const deleteAccountMutation = useMutation(deleteAccountMutationOptions);
+  return {
+    deleteAccount: () => {
+      return deleteAccountMutation.mutateAsync();
+    },
+    isDeletingAccount: deleteAccountMutation.isPending,
+  };
+};
