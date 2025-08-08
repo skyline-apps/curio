@@ -23,6 +23,7 @@ build
 .vscode
 .cursorrules
 .windsurfrules
+CLAUDE.md
 .DS_Store
 *.pem
 
