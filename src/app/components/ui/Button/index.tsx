@@ -82,7 +82,6 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
       };
       innerContent = (
         <Button
-          ref={ref}
           {...buttonProps}
           isLoading={buttonProps.isLoading}
           onPress={handlePress}
@@ -92,20 +91,21 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
     } else {
       innerContent = (
         <Button
-          ref={ref}
           {...buttonProps}
           data-testid={props["data-testid"] || "button"}
         />
       );
     }
 
-    return tooltip ? (
-      <Tooltip delay={1000} closeDelay={0} content={tooltip}>
-        {innerContent}
-      </Tooltip>
-    ) : (
-      innerContent
-    );
+    if (tooltip) {
+      return (
+        <Tooltip delay={1000} closeDelay={0} content={tooltip}>
+          {React.cloneElement(innerContent as React.ReactElement, { ref })}
+        </Tooltip>
+      );
+    }
+
+    return React.cloneElement(innerContent as React.ReactElement, { ref });
   },
 );
 CurioButton.displayName = "CurioButton";

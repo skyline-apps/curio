@@ -6,19 +6,17 @@ import { HiMiniLink } from "react-icons/hi2";
 
 import { childrenToText } from "./utils";
 
-interface HeadingAnchorElementProps {
+interface HeadingAnchorElementProps extends React.HTMLAttributes<HTMLElement> {
   tag: keyof JSX.IntrinsicElements;
   children: React.ReactNode;
   anchor: string;
   portalRef?: React.RefObject<HTMLElement | null>;
 }
 
-const HeadingAnchorElement: React.FC<HeadingAnchorElementProps> = ({
-  tag,
-  children,
-  anchor,
-  portalRef,
-}) => {
+const HeadingAnchorElement = React.forwardRef<
+  HTMLElement,
+  HeadingAnchorElementProps
+>(({ tag, children, anchor, portalRef, ...props }, ref) => {
   const { showToast } = useToast();
   const HeadingTag = tag;
   const childrenText = childrenToText(children);
@@ -33,7 +31,7 @@ const HeadingAnchorElement: React.FC<HeadingAnchorElementProps> = ({
 
   return (
     <>
-      <HeadingTag id={anchor}>
+      <HeadingTag id={anchor} ref={ref} {...props}>
         {children}
         <Button
           size="xs"
@@ -65,6 +63,8 @@ const HeadingAnchorElement: React.FC<HeadingAnchorElementProps> = ({
         )}
     </>
   );
-};
+});
+
+HeadingAnchorElement.displayName = "HeadingAnchorElement";
 
 export default HeadingAnchorElement;
