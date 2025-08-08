@@ -5,6 +5,7 @@ import { EnvBindings } from "@app/api/utils/env";
 import { GetUserResponseSchema } from "@app/schemas/v1/user";
 import { Hono } from "hono";
 
+import { userAccountRouter } from "./account";
 import { userApiKeysRouter } from "./api-keys";
 import { userApiKeysRevokeRouter } from "./api-keys/revoke";
 import { userEmailRouter } from "./email";
@@ -43,6 +44,7 @@ const userRouter = new Hono<EnvBindings>().get(
   },
 );
 
+userRouter.route("/account", userAccountRouter);
 userRouter.route("/api-keys", userApiKeysRouter);
 userRouter.route("/api-keys/revoke", userApiKeysRevokeRouter);
 userRouter.route("/email", userEmailRouter);
