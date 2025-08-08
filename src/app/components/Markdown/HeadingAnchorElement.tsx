@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { HiMiniLink } from "react-icons/hi2";
 
-import { childrenToText } from "./utils";
+import { childrenToText, HeadingTag } from "./utils";
 
 interface HeadingAnchorElementProps {
   tag: HeadingTag;
