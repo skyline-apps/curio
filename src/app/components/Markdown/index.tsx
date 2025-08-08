@@ -4,14 +4,12 @@ import ReactMarkdown, { Options } from "react-markdown";
 
 import MarkdownErrorBoundary from "./error-boundary";
 import HeadingAnchorElement from "./HeadingAnchorElement";
-import { childrenToText, getHeadingAnchor } from "./utils";
+import { childrenToText, getHeadingAnchor, HEADING_TAGS } from "./utils";
 
 interface MarkdownProps extends Options {
   className?: string;
   headingPortalRef?: React.RefObject<HTMLElement | null>;
 }
-
-const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
 
 const Markdown: React.FC<MarkdownProps> = ({
   children,
