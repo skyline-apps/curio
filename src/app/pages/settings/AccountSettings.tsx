@@ -4,19 +4,12 @@ import Card from "@app/components/ui/Card";
 import { FormSection } from "@app/components/ui/Form";
 import Icon from "@app/components/ui/Icon";
 import Input from "@app/components/ui/Input";
-import {
-  showAlert,
-  showConfirm,
-  showDestructiveConfirm,
-} from "@app/components/ui/Modal/actions";
+import { showAlert, showConfirm } from "@app/components/ui/Modal/actions";
 import { Dialog } from "@app/components/ui/Modal/Dialog";
 import Snippet from "@app/components/ui/Snippet";
 import Spinner from "@app/components/ui/Spinner";
-import {
-  type ApiKey,
-  useApiKeys,
-  useDeleteAccount,
-} from "@app/pages/settings/actions";
+import { type ApiKey, useApiKeys } from "@app/pages/settings/actions";
+import DeleteAccount from "@app/pages/settings/DeleteAccount";
 import { useSettings } from "@app/providers/Settings";
 import { useToast } from "@app/providers/Toast";
 import { useUser } from "@app/providers/User";
@@ -25,14 +18,13 @@ import { createLogger } from "@app/utils/logger";
 import { isNativePlatform } from "@app/utils/platform";
 import React, { useCallback, useEffect, useState } from "react";
 import { HiOutlineClipboard } from "react-icons/hi2";
-import { useNavigate } from "react-router-dom";
 
 const log = createLogger("AccountSettings");
 
 const AccountSettings: React.FC = () => {
   const { listApiKeys, createApiKey, revokeApiKey } = useApiKeys();
   const { showToast } = useToast();
-  const { user, refreshUser } = useUser();
+  const { user } = useUser();
   const { username, newsletterEmail, changeUsername, updateNewsletterEmail } =
     useSettings();
   const [newUsername, setNewUsername] = useState<string>(username || "");
@@ -51,9 +43,6 @@ const AccountSettings: React.FC = () => {
   const [isRefreshingKeys, setIsRefreshingKeys] = useState<boolean>(true);
 
   const [browserUrl, setBrowserUrl] = useState<string>("");
-  const { deleteAccount, isDeletingAccount } = useDeleteAccount();
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (username) {
@@ -354,37 +343,7 @@ const AccountSettings: React.FC = () => {
           </div>
         </FormSection>
       )}
-      <FormSection
-        title="Delete Account"
-        description="Permanently delete your account and all associated data. This action cannot be undone."
-      >
-        <Button
-          size="sm"
-          color="danger"
-          isLoading={isDeletingAccount}
-          onPress={() => {
-            showDestructiveConfirm(
-              "Are you sure you want to permanently delete your account? This action cannot be undone.",
-              async () => {
-                try {
-                  await deleteAccount();
-                  showToast("Your account has been deleted.", {
-                    disappearing: true,
-                  });
-                  refreshUser();
-                  navigate("/");
-                } catch (error) {
-                  log.error("Failed to delete account", { error });
-                  showToast("Failed to delete account.", { type: "error" });
-                }
-              },
-              "Delete Account",
-            );
-          }}
-        >
-          Delete Account
-        </Button>
-      </FormSection>
+      <DeleteAccount />
     </div>
   );
 };
