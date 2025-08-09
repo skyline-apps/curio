@@ -105,6 +105,8 @@ Paid supporters get access to the following:
 
 ${PREMIUM_FEATURES.map((feature) => `- ${feature}`).join("\n")}
 
+To purchase or manage your subscription, head to your [subscription settings](${curioUrl}/settings?section=subscription).
+
 ## API access
 
 For power users, Curio provides API access to programmatically manage your content.
@@ -119,11 +121,12 @@ $ curl ${curioUrl}/api/openapi
 
 If you have any feature requests or bug reports, please open an issue on our [GitHub repository](https://github.com/skyline-apps/curio/issues).
 
-We appreciate your feedback!
+We appreciate your feedback.
 
 ## Contact us
 
 If you need additional help, you can reach out to us via email at [team@curi.ooo](mailto:team@curi.ooo).
+We'd love to hear from you!
 `;
 
 export default docs;
