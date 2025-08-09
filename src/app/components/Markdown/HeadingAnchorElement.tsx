@@ -77,7 +77,7 @@ const HeadingAnchorElement = React.forwardRef<
           portalMounted &&
           createPortal(
             <a
-              className="truncate"
+              className="truncate hover:text-secondary"
               role="button"
               style={{ cursor: "pointer" }}
               href={`#${anchor}`}

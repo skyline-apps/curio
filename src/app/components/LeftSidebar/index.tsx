@@ -10,12 +10,14 @@ interface LeftSidebarProps {
   content?: React.ReactNode; // Top of the sidebar
   endContent?: React.ReactNode; // Pushed to the bottom of the sidebar
   bottomContent?: React.ReactNode; // Adjacent to toggle button
+  hideContentWhenClosed?: boolean; // Hide content when sidebar is closed
 }
 
 const LeftSidebar: React.FC<LeftSidebarProps> = ({
   content,
   endContent,
   bottomContent,
+  hideContentWhenClosed = false,
 }) => {
   const { appLayout, updateAppLayout } = useAppLayout();
 
@@ -43,7 +45,14 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({
         { "overflow-hidden w-0 md:w-16": !sidebarOpen },
       )}
     >
-      {content}
+      <div
+        className={cn(
+          "flex-1 overflow-hidden relative",
+          hideContentWhenClosed && !sidebarOpen && "invisible",
+        )}
+      >
+        {content}
+      </div>
       <div className="flex flex-col overflow-hidden">
         {endContent}
         <div

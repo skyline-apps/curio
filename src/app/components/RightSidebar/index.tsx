@@ -48,10 +48,10 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ content, endContent }) => {
             "h-full w-80 max-w-full transition-all duration-300 ease-in-out transform",
             rightSidebarOpen
               ? "translate-x-0 opacity-100"
-              : "translate-x-full opacity-0",
+              : "translate-x-full opacity-0 invisible",
           )}
         >
-          {rightSidebarOpen && content}
+          {content}
         </div>
       </div>
       {endContent}
