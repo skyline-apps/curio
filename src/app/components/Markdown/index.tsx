@@ -41,6 +41,9 @@ const Markdown: React.FC<MarkdownProps> = ({
 
     return {
       ...headingComponents,
+      a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+        <a {...props} target="_blank" rel="noopener noreferrer" />
+      ),
       ...otherProps.components,
     };
   }, [headingPortalRef, otherProps.components, children]);
