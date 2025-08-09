@@ -18,7 +18,7 @@ const log = createLogger("DeleteAccount");
 const DeleteAccount: React.FC = () => {
   const { deleteAccount, isDeletingAccount } = useDeleteAccount();
   const { showToast } = useToast();
-  const { refreshUser } = useUser();
+  const { clearUser } = useUser();
   const navigate = useNavigate();
   const [showGoodbyeModal, setShowGoodbyeModal] = useState(false);
 
@@ -56,7 +56,7 @@ const DeleteAccount: React.FC = () => {
                       disappearing: true,
                     });
                     setShowGoodbyeModal(false);
-                    refreshUser();
+                    clearUser();
                     navigate("/");
                   } catch (error) {
                     log.error("Failed to delete account", { error });

@@ -25,11 +25,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({
     email: null,
   });
 
-  const clearUser = useCallback((): void => {
+  const clearUser = useCallback(async (): Promise<void> => {
     setCurrentUser({
       id: null,
       email: null,
     });
+
+    await asyncStoragePersister.removeClient();
   }, []);
 
   const updateToken = useCallback(async (): Promise<void> => {
@@ -88,8 +90,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({
       clearTheme();
       initializeTheme();
       posthog.reset();
-
-      await asyncStoragePersister.removeClient();
 
       try {
         if (projectRef) {
