@@ -24,7 +24,7 @@ const DeleteAccount: React.FC = () => {
 
   return (
     <FormSection
-      title="Delete Account"
+      title="Delete account"
       description="Permanently delete your account and all associated data. This action cannot be undone."
     >
       <Button
@@ -33,7 +33,7 @@ const DeleteAccount: React.FC = () => {
         isLoading={isDeletingAccount}
         onPress={() => setShowGoodbyeModal(true)}
       >
-        Delete Account
+        Delete account
       </Button>
       {showGoodbyeModal && (
         <Modal
