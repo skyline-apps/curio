@@ -39,6 +39,13 @@ const SettingsForm: React.FC = () => {
       <div className="flex flex-col h-full justify-end items-center text-xs text-secondary py-4">
         <AppLinks size={20} />
         <p>
+          Need help? View our{" "}
+          <Link className="hover:underline" to="/docs" target="_blank">
+            documentation
+          </Link>
+          .
+        </p>
+        <p>
           Having issues? Check the{" "}
           <Link to="https://status.curi.ooo" target="_blank">
             status page
@@ -46,11 +53,13 @@ const SettingsForm: React.FC = () => {
           .
         </p>
         <p>
-          Questions? Contact us at{" "}
-          <Link className="hover:underline" to="mailto:team@curi.ooo">
-            team@curi.ooo
+          <Link className="hover:underline" to="/terms" target="_blank">
+            Terms of Service
           </Link>
-          .
+          {" • "}
+          <Link className="hover:underline" to="/privacy" target="_blank">
+            Privacy Policy
+          </Link>
         </p>
         {import.meta.env.VITE_BUILD_HASH && (
           <p>Build number: {import.meta.env.VITE_BUILD_HASH.substring(0, 7)}</p>
