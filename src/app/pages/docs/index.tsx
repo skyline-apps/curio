@@ -54,6 +54,7 @@ const DocsPage: React.FC = () => {
           </div>
         </AppPage>
         <RightSidebar
+          className="bg-background"
           content={
             // Account for navbar and fixed sidebar position on smaller screens
             <div className="flex flex-col gap p-2 overflow-y-auto h-full mt-16 lg:mt-2">

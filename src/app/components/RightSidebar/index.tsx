@@ -9,9 +9,14 @@ import { HiChevronDoubleLeft, HiChevronDoubleRight } from "react-icons/hi2";
 interface RightSidebarProps {
   content?: React.ReactNode;
   endContent?: React.ReactNode;
+  className?: string;
 }
 
-const RightSidebar: React.FC<RightSidebarProps> = ({ content, endContent }) => {
+const RightSidebar: React.FC<RightSidebarProps> = ({
+  content,
+  endContent,
+  className,
+}) => {
   const {
     appLayout: { rightSidebarOpen },
     updateAppLayout,
@@ -37,6 +42,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ content, endContent }) => {
       className={cn(
         "flex flex-col justify-between border-l-1 border-divider transition-all duration-300 ease-in-out fixed right-0 top-0 bottom-0 lg:relative bg-background-400 shadow-lg z-20",
         "pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] h-full",
+        className,
         rightSidebarOpen
           ? "w-80 max-w-full pointer-events-auto"
           : "w-0 pointer-events-none lg:w-16",
