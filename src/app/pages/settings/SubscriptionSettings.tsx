@@ -1,6 +1,7 @@
 import Button from "@app/components/ui/Button";
 import { FormSection } from "@app/components/ui/Form";
 import Spinner from "@app/components/ui/Spinner";
+import { PREMIUM_FEATURES } from "@app/pages/docs/docs";
 import { useSettings } from "@app/providers/Settings";
 import { useToast } from "@app/providers/Toast";
 import { useUser } from "@app/providers/User";
@@ -174,9 +175,9 @@ const SubscriptionSettings: React.FC = () => {
             Paid supporters get access to the following:
           </p>
           <ul className="list-disc list-inside text-xs text-secondary">
-            <li>AI-powered article summaries</li>
-            <li>In-context snippet explanations</li>
-            <li>And more to come!</li>
+            {PREMIUM_FEATURES.map((feature) => (
+              <li key={feature}>{feature}</li>
+            ))}
           </ul>
           {loading ? (
             <Spinner centered />
