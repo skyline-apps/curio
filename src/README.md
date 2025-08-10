@@ -99,27 +99,16 @@ Instead, to run logic for a specific consumer queue locally, set it as the `queu
   - `items-fetcher-prod`
 
 ### Cloud services
-1. Set up a GCP account.
-2. Set up an AWS account, along with an IAM user with programmatic access.
-3. Provision cloud resources on GCP and AWS.
+1. Set up an AWS account, along with an IAM user with programmatic access.
+2. Provision cloud resources on AWS.
   - Use the dev environment: `docker exec -it dev zsh`.
   - Authenticate using `gcloud auth application-default login`.
   - Authenticate using `aws configure`.
   - Populate `src/infra/terraform.tfvars` based on `src/infra/terraform.tfvars.sample`.
   - Run `terraform apply`
-4. Set up the email newsletter service on AWS.
+3. Set up the email newsletter service on AWS.
   - From `terraform output`, create the listed records (should be 3 CNAME, 2 MX, and 4 TXT) on your DNS provider. Note the 10 on the MX record is for priority.
-5. Set up a Meilisearch instance on GCP.
-  - Use the dev environment: `docker exec -it dev zsh`.
-  - Authenticate using `gcloud auth application-default login`.
-  - Create an A (Address) DNS record for `terraform output`'s `gke.ip_address` under the subdomain of `SEARCH_EXTERNAL_ENDPOINT_URL`.
-  - Set up `cert-manager` on the cluster using `script/deploy-certs.sh`.
-  - Then run `script/deploy-volumes.sh [staging|prod]` to deploy a persistent volume to store the search index.
-  - Then run `script/deploy.sh [staging|prod]` to deploy the search application.
-  - It may take a while for the certificate to be issued. You can check the status of the `gateway`, `certificate`,  and `challenge` resources as well as logs of the `cert-manager` pod to check progress.
-  - Run `/data/search/init.sh [staging|prod]` to initialize the search application.
-  - Populate the `SEARCH_APPLICATION_API_KEY` after using the master API key to retrieve its value.
-6. Set up Meilisearch deployments on Railway for staging and prod.
+4. Set up Meilisearch deployments on Railway for staging and prod.
   - TODO: Use the terraform provider when it's more mature.
   - Create a project called `search` and environments called `staging` and `production`.
   - Add a new service to staging called `search` using the image `getmeili/meilisearch:v1.12`.
@@ -152,15 +141,17 @@ Instead, to run logic for a specific consumer queue locally, set it as the `queu
   - Site URL should be `$HOSTNAME`.
   - Redirect URLs should include `$HOSTNAME/*`.
 3. For email authentication in local development, populate these variables in `.env` and view emails at `http://localhost:9000`.
-  - `ENABLE_EMAIL_SIGNUP=true`
-  - `ENABLE_EMAIL_AUTOCONFIRM=false`
-  - `SMTP_ADMIN_EMAIL=admin@example.com`
-  - `SMTP_HOST=supabase-mail`
-  - `SMTP_PORT=2500`
-  - `SMTP_USER=admin`
-  - `SMTP_PASS=password`
-  - `SMTP_SENDER_EMAIL=admin@example.com`
-  - `SMTP_SENDER_NAME=Curio`
+```
+ENABLE_EMAIL_SIGNUP=true
+ENABLE_EMAIL_AUTOCONFIRM=false
+SMTP_ADMIN_EMAIL=admin@example.com
+SMTP_HOST=supabase-mail
+SMTP_PORT=2500
+SMTP_USER=admin
+SMTP_PASS=password
+SMTP_SENDER_EMAIL=admin@example.com
+SMTP_SENDER_NAME=Curio
+```
 4. For email authentication in production, set up a production SMTP server.
   - Set up DNS records for the email sending domain. Populate the values from `terraform output` (should be 3 CNAME, 2 MX, and 4 TXT records).
   - Verify the sending email address by uncommenting `src/infra/aws/email_verification_forward.tf` and running `terraform apply`.
