@@ -90,7 +90,9 @@ describe("/api", () => {
         if (hasIndex && !hasSubdirsWithIndex) {
           const relativePath = path.relative("./api/routesV1", dir);
           const routePath = "/" + relativePath.replace(/\\/g, "/");
-          routes.push(routePath);
+          if (!relativePath.startsWith("static")) {
+            routes.push(routePath);
+          }
         }
 
         // Continue crawling subdirectories
