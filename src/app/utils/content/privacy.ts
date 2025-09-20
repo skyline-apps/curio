@@ -1,6 +1,6 @@
 export const privacyPolicyData = {
   title: "Privacy Policy",
-  lastUpdated: "May 31, 2025",
+  lastUpdated: "January 27, 2026",
   contactEmail: "privacy@curi.ooo",
 
   sections: {
