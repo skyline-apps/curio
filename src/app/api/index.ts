@@ -6,6 +6,7 @@ import sessionRoutes from "@app/api/auth/session";
 import { getDb } from "@app/api/db";
 import { requestLogger } from "@app/api/middleware/logger";
 import { v1Router } from "@app/api/routesV1";
+import { staticRouter } from "@app/api/routesV1/static";
 import { EnvBindings } from "@app/api/utils/env";
 // Uncommment the below to run import locally
 // import {
@@ -64,6 +65,9 @@ api.get("/api/health", (c) => c.json({ status: "ok" }));
 // API routes
 api.route("/api/v1", v1Router);
 
+// Static routes
+api.route("/static", staticRouter);
+
 // OpenAPI documentation
 api.get(
   "/api/openapi",
@@ -86,8 +90,8 @@ export default {
   ): Promise<Response> {
     const url = new URL(request.url);
 
-    // Handle /api/* routes with the Hono app
-    if (url.pathname.startsWith("/api")) {
+    // Handle /api/* and /static/* routes with the Hono app
+    if (url.pathname.startsWith("/api") || url.pathname.startsWith("/static")) {
       return api.fetch(request, env, ctx);
     }
 
