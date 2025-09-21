@@ -1,31 +1,45 @@
 import Footer from "@app/components/Landing/Footer";
 import Navbar from "@app/components/Navbar";
+import {
+  privacyPolicyData,
+  renderMarkdownText,
+} from "@app/utils/content/privacy";
 import React from "react";
 
 const Privacy: React.FC = () => {
+  const renderContent = (content: string | string[]): React.ReactNode => {
+    if (Array.isArray(content)) {
+      return content.map((item, index) => (
+        <p
+          key={index}
+          dangerouslySetInnerHTML={{ __html: renderMarkdownText(item) }}
+        />
+      ));
+    }
+    return (
+      <p dangerouslySetInnerHTML={{ __html: renderMarkdownText(content) }} />
+    );
+  };
+
   return (
     <>
       <Navbar />
       <div className="w-full p-4 md:p-8">
         <div className="flex flex-col justify-center items-start max-w-2xl mx-auto select-text">
-          <h1 className="text-lg font-medium text-center">Privacy Policy</h1>
-          <p className="text-secondary text-sm">Last updated: May 31, 2025</p>
+          <h1 className="text-lg font-medium text-center">
+            {privacyPolicyData.title}
+          </h1>
+          <p className="text-secondary text-sm">
+            Last updated: {privacyPolicyData.lastUpdated}
+          </p>
 
           <div className="text-sm my-4 space-y-2">
+            {/* Introduction */}
             <section className="space-y-2">
-              <h2 className="font-semibold">1. Introduction</h2>
-              <p>
-                This Privacy Policy ("Policy") describes how Curio ("we", "us",
-                or "our") collects, uses, and protects your personal information
-                when you use our content organization service (the "Service").
-                By using our Service, you consent to the data practices
-                described in this Policy.
-              </p>
-              <p>
-                We are committed to protecting your privacy and handling your
-                personal information responsibly and in accordance with
-                applicable data protection laws.
-              </p>
+              <h2 className="font-semibold">
+                {privacyPolicyData.sections.introduction.title}
+              </h2>
+              {renderContent(privacyPolicyData.sections.introduction.content)}
             </section>
 
             <section className="space-y-2">
