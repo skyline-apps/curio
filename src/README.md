@@ -31,7 +31,11 @@ $ npx cap run ios
 
 Follow [these instructions](https://capacitorjs.com/docs/guides/deep-links) to set up app deep links.
 
-To run the app against staging, change the `.env` values, then edit `AndroidManifest.xml`'s `android:host` to `staging.curi.ooo`.
+To run the app against staging:
+1. Change the `.env` values to use staging values.
+2. Edit `AndroidManifest.xml`'s `android:host` to `staging.curi.ooo`.
+3. Edit `src/app/ios/App/send-to-curio/Info.plist`'s `CURIO_URL` to `https://staging.curi.ooo`.
+4. Edit `src/app/ios/App/App/Info.plist`'s `CURIO_URL` to `https://staging.curi.ooo`.
 
 ### Payments
 To configure payments, make sure the `VITE_REVENUECAT_API_KEY` is set.
@@ -141,6 +145,7 @@ Instead, to run logic for a specific consumer queue locally, set it as the `queu
 ### iOS app
 1. Follow instructions [here](https://github.com/Cap-go/capacitor-social-login/blob/main/docs/setup_apple.md) to set up Apple sign in.
 2. For each Supabase auth deployment, enable Apple sign-in with the client ID from `PRODUCT_BUNDLE_IDENTIFIER` in `src/app/ios/App/App.xcodeproj/project.pbxproj`.
+3. Follow [these instructions](https://github.com/carsten-klaffke/send-intent?tab=readme-ov-file#ios) to allow the app to handle share intents.
 
 ### Authentication
 1. Set up a Google Cloud project with Google Auth Platform configured for a web application. Copy in the generated client ID and client secret into Supabase's Google auth provider, then copy the Supabase auth callback URL into the "Auhorized redirect URIs" field.

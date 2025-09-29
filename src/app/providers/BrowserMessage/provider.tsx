@@ -13,6 +13,8 @@ import {
   isMobileBrowser,
   isNativePlatform,
 } from "@app/utils/platform";
+import { App as CapacitorApp } from "@capacitor/app";
+import type { PluginListenerHandle } from "@capacitor/core";
 import { Toast } from "@capacitor/toast";
 import React, {
   useCallback,
@@ -412,6 +414,67 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
     if (!isNativePlatform()) {
       return;
     }
+    // Shared helpers for DRY universal-link handling
+    const addToastAndSave = (decoded: string): void => {
+      const toastListener = (type: EventType): void => {
+        if (type === EventType.SAVE_SUCCESS) {
+          Toast.show({ text: "Link saved successfully" });
+        } else if (type === EventType.SAVE_ERROR) {
+          Toast.show({ text: "Failed to save link" });
+        }
+        SendIntent.finish();
+        listeners.delete(toastListener);
+      };
+      listeners.add(toastListener);
+      void saveItemContent(decoded);
+    };
+
+    const tryHandleUrl = (
+      incoming: URL,
+      cleanWindowLocation = false,
+    ): boolean => {
+      try {
+        const urlParam = incoming.searchParams.get("url");
+        if (urlParam) {
+          const decoded = decodeURIComponent(urlParam);
+          addToastAndSave(decoded);
+          if (cleanWindowLocation) {
+            const cleanUrl = new URL(window.location.href);
+            cleanUrl.pathname = "/";
+            cleanUrl.search = "";
+            window.history.replaceState({}, "", cleanUrl.toString());
+          }
+          return true;
+        }
+      } catch (e) {
+        log.error("Failed to process url:", e);
+      }
+      return false;
+    };
+
+    // Handle Universal Link path on initial load
+    try {
+      const handled = tryHandleUrl(new URL(window.location.href), true);
+      if (handled) return; // avoid falling through to plugin path in same tick
+    } catch (e) {
+      log.error("Failed to handle universal link:", e);
+    }
+
+    // Capacitor-native Universal Link handler (preferred on iOS)
+    let appUrlOpenHandle: PluginListenerHandle | undefined;
+    const appUrlOpenPromise = CapacitorApp.addListener("appUrlOpen", (data) => {
+      try {
+        void tryHandleUrl(new URL(data.url));
+      } catch (e) {
+        log.error("Failed to process url on appUrlOpen:", e);
+      }
+    });
+    // Fallback: listen for the SendIntent plugin's custom event if it emits one
+    const onSendIntentReceived = (): void => {
+      void processShareIntent();
+    };
+    window.addEventListener("sendIntentReceived", onSendIntentReceived);
+
     async function processShareIntent(): Promise<void> {
       let intentUrlProcessed = false;
       try {
@@ -465,6 +528,20 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
       );
       SendIntent.finish();
     });
+
+    // capture handle when ready
+    appUrlOpenPromise
+      .then((h) => {
+        appUrlOpenHandle = h;
+      })
+      .catch((e) => {
+        log.error("Failed to attach listener for appUrlOpen:", e);
+      });
+
+    return () => {
+      void appUrlOpenHandle?.remove();
+      window.removeEventListener("sendIntentReceived", onSendIntentReceived);
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (

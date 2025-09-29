@@ -1,10 +1,20 @@
 import UIKit
 import Capacitor
 
+// Minimal store used to shuttle shared items into the web layer
+class ShareStore {
+    static let store = ShareStore()
+    var shareItems: [JSObject] = []
+    var processed: Bool = true
+    private init() {}
+}
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    
+    let store = ShareStore.store
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -33,17 +43,83 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        // Called when the app was launched with a url. Feel free to add additional processing here,
-        // but if you want the App API to support tracking app url opens, make sure to keep this call
-        return ApplicationDelegateProxy.shared.application(app, open: url, options: options)
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+                
+        var success = true
+        if CAPBridge.handleOpenUrl(url, options) {
+            success = ApplicationDelegateProxy.shared.application(app, open: url, options: options)
+        }
+        
+        guard let components = NSURLComponents(url: url, resolvingAgainstBaseURL: true),
+              let params = components.queryItems else {
+                  return false
+              }
+        let titles = params.filter { $0.name == "title" }
+        let descriptions = params.filter { $0.name == "description" }
+        let types = params.filter { $0.name == "type" }
+        let urls = params.filter { $0.name == "url" }
+
+        store.shareItems.removeAll()
+        if titles.count > 0 {
+            for index in 0...titles.count-1 {
+                var shareItem: JSObject = JSObject()
+                shareItem["title"] = titles[index].value ?? ""
+                shareItem["description"] = index < descriptions.count ? (descriptions[index].value ?? "") : ""
+                shareItem["type"] = index < types.count ? (types[index].value ?? "") : ""
+                shareItem["url"] = index < urls.count ? (urls[index].value ?? "") : ""
+                store.shareItems.append(shareItem)
+            }
+        } else if urls.count > 0 {
+            // Support only 'url' param present
+            var shareItem: JSObject = JSObject()
+            shareItem["url"] = urls[0].value ?? ""
+            store.shareItems.append(shareItem)
+        }
+        
+        store.processed = false
+        let nc = NotificationCenter.default
+        nc.post(name: Notification.Name("triggerSendIntent"), object: nil )
+        
+        return success
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        // Called when the app was launched with an activity, including Universal Links.
-        // Feel free to add additional processing here, but if you want the App API to support
-        // tracking app url opens, make sure to keep this call
-        return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
+        // Handle Universal Links by extracting the share payload from the query
+        var handled = ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
+        if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+           let url = userActivity.webpageURL,
+           let components = NSURLComponents(url: url, resolvingAgainstBaseURL: true),
+           let params = components.queryItems {
+
+            // Accept any path as long as it contains a 'url' query item (or legacy title/text params)
+            let titles = params.filter { $0.name == "title" }
+            let descriptions = params.filter { $0.name == "description" }
+            let types = params.filter { $0.name == "type" }
+            let urls = params.filter { $0.name == "url" }
+
+            store.shareItems.removeAll()
+            if urls.count > 0 {
+                var shareItem: JSObject = JSObject()
+                shareItem["url"] = urls[0].value ?? ""
+                store.shareItems.append(shareItem)
+                store.processed = false
+                NotificationCenter.default.post(name: Notification.Name("triggerSendIntent"), object: nil)
+                handled = true
+            } else if titles.count > 0 {
+                for index in 0...titles.count-1 {
+                    var shareItem: JSObject = JSObject()
+                    shareItem["title"] = titles[index].value ?? ""
+                    shareItem["description"] = index < descriptions.count ? (descriptions[index].value ?? "") : ""
+                    shareItem["type"] = index < types.count ? (types[index].value ?? "") : ""
+                    shareItem["url"] = index < urls.count ? (urls[index].value ?? "") : ""
+                    store.shareItems.append(shareItem)
+                }
+                store.processed = false
+                NotificationCenter.default.post(name: Notification.Name("triggerSendIntent"), object: nil)
+                handled = true
+            }
+        }
+        return handled
     }
 
 }
