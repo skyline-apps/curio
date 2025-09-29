@@ -119,7 +119,9 @@ const GoogleOAuthButton: React.FC<GoogleOAuthButtonProps> = ({
       >
         <FaGoogle className="mr-2" /> Sign in with Google
       </Button>
-      {errorMessage && <p className="text-danger text-sm">{errorMessage}</p>}
+      {errorMessage && (
+        <p className="text-danger text-xs wrap-normal">{errorMessage}</p>
+      )}
     </div>
   );
 };

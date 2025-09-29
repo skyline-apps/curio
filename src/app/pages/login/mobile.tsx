@@ -1,5 +1,6 @@
 import YarnDark from "@app/assets/yarn_dark.svg";
 import YarnLight from "@app/assets/yarn_light.svg";
+import AppleSignIn from "@app/components/Auth/AppleSignIn";
 import EmailSignIn from "@app/components/Auth/EmailSignIn";
 import GoogleSignIn from "@app/components/Auth/GoogleSignIn";
 import PasswordSignIn from "@app/components/Auth/PasswordSignIn";
@@ -39,6 +40,7 @@ const MobileLoginPage: React.FC<
             <CurioBrand />
           </div>
           <GoogleSignIn nextUrl="/home" />
+          <AppleSignIn nextUrl="/home" />
           <p className="text-secondary text-xs">or</p>
           {import.meta.env.VITE_DEMO_BUILD === "true" ? (
             <PasswordSignIn />
