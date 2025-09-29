@@ -16,6 +16,7 @@ def capacitor_pods
   pod 'CapacitorPreferences', :path => '../../node_modules/@capacitor/preferences'
   pod 'CapacitorShare', :path => '../../node_modules/@capacitor/share'
   pod 'CapacitorToast', :path => '../../node_modules/@capacitor/toast'
+  pod 'CapacitorNativeGoogleOneTapSignin', :path => '../../node_modules/capacitor-native-google-one-tap-signin'
   pod 'SendIntent', :path => '../../node_modules/send-intent'
   pod 'CordovaPlugins', :path => '../capacitor-cordova-ios-plugins'
 end

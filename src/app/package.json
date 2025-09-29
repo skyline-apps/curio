@@ -48,6 +48,7 @@
     "@tanstack/react-virtual": "^3.11.0",
     "axios": "^1.7.9",
     "bcp-47-match": "^2.0.3",
+    "capacitor-native-google-one-tap-signin": "^7.0.3",
     "cordova-plugin-inappbrowser": "^6.0.0",
     "crypto-random-string": "^5.0.0",
     "drizzle-orm": "^0.38.4",

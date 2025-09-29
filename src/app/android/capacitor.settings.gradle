@@ -17,5 +17,8 @@ project(':capacitor-share').projectDir = new File('../node_modules/@capacitor/sh
 include ':capacitor-toast'
 project(':capacitor-toast').projectDir = new File('../node_modules/@capacitor/toast/android')
 
+include ':capacitor-native-google-one-tap-signin'
+project(':capacitor-native-google-one-tap-signin').projectDir = new File('../node_modules/capacitor-native-google-one-tap-signin/android/googleauth-plugin')
+
 include ':send-intent'
 project(':send-intent').projectDir = new File('../node_modules/send-intent/android')

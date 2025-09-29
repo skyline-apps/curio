@@ -134,9 +134,19 @@ Instead, to run logic for a specific consumer queue locally, set it as the `queu
 3. Build a signed APK using the Build > Generate Signed App Bundle option.
 4. Select "Android App Bundle" and follow the instructions. You should build a `release` app in the `src/app/android/app` folder.
 5. Follow the [launch checklist](https://play.google.com/console/about/guides/releasewithconfidence/) and upload the app bundle to the Play Console.
+6. In the Google Auth Platform Cloud Console, create a new app of type "Android", populating its package name from the `src/app/android/app/build.gradle` file and the SHA-1 fingerprint from the debug keystore by running `keytool -keystore ~/.android/debug.keystore -list -v` (see [here](https://support.google.com/cloud/answer/15549257?visit_id=638947171547368371-732663243&rd=1#installedapplications&android&zippy=%2Cnative-applications-android-ios-desktop-uwp-chrome-extensions-tv-and-limited-input%2Candroid)).
+7. In the Google Play Console, navigate to "Test and release" > "App integrity" > "App signing" and copy the SHA-1 fingerprint.
+8. In the Google Auth Platform Cloud Console, create a new app of type "Android", populating its package name from the `src/app/android/app/build.gradle` file and the SHA-1 fingerprint from the step above.
+
+### iOS app
+1. Ensure the Google Auth Platform's iOS app has its client ID set in `src/app/ios/App/App/Info.plist` as `GIDClientID`.
+2. Ensure the Google Auth Platform's iOS app has its iOS URL scheme set in `src/app/ios/App/App/Info.plist` as `CFBundleURLSchemes`.
 
 ### Authentication
 1. Set up a Google Cloud project with Google Auth Platform configured for a web application. Copy in the generated client ID and client secret into Supabase's Google auth provider, then copy the Supabase auth callback URL into the "Auhorized redirect URIs" field.
+  * For iOS, also create a new iOS app in the Google Auth Platform Cloud Console configuration and include its client ID after the web client ID in the Supabase Google auth provider (separated by a comma).
+  * Set both client IDs as `VITE_GOOGLE_WEB_CLIENT_ID` and `VITE_GOOGLE_IOS_CLIENT_ID`.
+  * Navigate to "Auth Platform" > "Audience" and make sure to publish the app.
 2. Configure the "URL Configuration" site URL and redirect settings in Supabase Auth with the app URL.
   - Site URL should be `$HOSTNAME`.
   - Redirect URLs should include `$HOSTNAME/*`.
