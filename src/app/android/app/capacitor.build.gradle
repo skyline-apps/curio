@@ -14,7 +14,7 @@ dependencies {
     implementation project(':capacitor-preferences')
     implementation project(':capacitor-share')
     implementation project(':capacitor-toast')
-    implementation project(':capacitor-native-google-one-tap-signin')
+    implementation project(':capgo-capacitor-social-login')
     implementation project(':send-intent')
 
 }

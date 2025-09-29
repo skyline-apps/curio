@@ -3,7 +3,10 @@ import { createLogger } from "@app/utils/logger";
 import { isNativePlatform } from "@app/utils/platform";
 import { getSupabaseClient } from "@app/utils/supabase";
 import { Capacitor } from "@capacitor/core";
-import { GoogleOneTapAuth } from "capacitor-native-google-one-tap-signin";
+import {
+  GoogleLoginResponseOnline,
+  SocialLogin,
+} from "@capgo/capacitor-social-login";
 import { useState } from "react";
 import { FaGoogle } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
@@ -29,57 +32,49 @@ const GoogleOAuthButton: React.FC<GoogleOAuthButtonProps> = ({
     const isNative = isNativePlatform();
 
     try {
-      // Native (iOS/Android): Use Google One Tap plugin, then exchange id_token with Supabase
+      // Native (iOS/Android): Use capacitor-social-login to get Google id_token, then exchange with Supabase
       if (isNative) {
+        // Initialize plugin with platform-specific client IDs
         const platform = Capacitor.getPlatform();
-        const googleClientId =
-          platform === "ios"
-            ? import.meta.env.VITE_GOOGLE_IOS_CLIENT_ID
-            : import.meta.env.VITE_GOOGLE_WEB_CLIENT_ID;
-        if (!googleClientId) {
-          throw new Error(
-            "Missing VITE_GOOGLE_CLIENT_ID. Set your Google Web or iOS client ID in env.",
-          );
-        }
-
-        // Initialize plugin (safe to call multiple times)
-        void GoogleOneTapAuth.initialize({ clientId: googleClientId });
-
-        // Try auto sign-in, then fall back to button-style flow
-        let result = await GoogleOneTapAuth.tryAutoOrOneTapSignIn();
-        if (result.isSuccess === false) {
-          result =
-            await GoogleOneTapAuth.signInWithGoogleButtonFlowForNativePlatform();
-        }
-
-        if (result.isSuccess) {
-          const success = result.success;
-          const idToken = success?.idToken;
-
-          if (!idToken) {
-            throw new Error("Google sign-in did not return an id_token");
-          }
-
-          const { error: supaError } = await supabase.auth.signInWithIdToken({
-            provider: "google",
-            token: idToken,
+        const webClientId = import.meta.env.VITE_GOOGLE_WEB_CLIENT_ID;
+        const iosClientId = import.meta.env.VITE_GOOGLE_IOS_CLIENT_ID;
+        if (platform === "android") {
+          if (!webClientId)
+            throw new Error("Missing VITE_GOOGLE_WEB_CLIENT_ID");
+          await SocialLogin.initialize({ google: { webClientId } });
+        } else if (platform === "ios") {
+          if (!iosClientId || !webClientId)
+            throw new Error(
+              "Missing VITE_GOOGLE_IOS_CLIENT_ID or VITE_GOOGLE_WEB_CLIENT_ID",
+            );
+          await SocialLogin.initialize({
+            google: {
+              iOSClientId: iosClientId,
+              iOSServerClientId: webClientId,
+              mode: "online",
+            },
           });
-          if (supaError) throw supaError;
+        }
 
-          // Route through your existing callback path to preserve behavior
-          navigate(`/auth/callback?next=${nextUrl || ""}`, { replace: true });
-          return;
+        // Trigger native Google login
+        const { result } = await SocialLogin.login({
+          provider: "google",
+          options: {},
+        });
+        const idToken = (result as GoogleLoginResponseOnline)?.idToken;
+        if (!idToken) {
+          throw new Error("Google sign-in did not return an id_token");
         }
-        const errorCode = result.noSuccess?.noSuccessReasonCode;
-        if (errorCode === "NO_CREDENTIAL") {
-          throw new Error(
-            "No Google account was found on this device. Please add a Google account or sign in a different way.",
-          );
-        }
-        // If we reach here, native sign-in failed without success details
-        throw new Error(
-          `Native Google sign-in was not successful: ${result.noSuccess?.noSuccessReasonCode}`,
-        );
+
+        const { error: supaError } = await supabase.auth.signInWithIdToken({
+          provider: "google",
+          token: idToken,
+        });
+        if (supaError) throw supaError;
+
+        // Route through your existing callback path to preserve behavior
+        navigate(`/auth/callback?next=${nextUrl || ""}`, { replace: true });
+        return;
       }
 
       // Web: keep existing Supabase-hosted redirect flow

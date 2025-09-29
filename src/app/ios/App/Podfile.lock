@@ -1,4 +1,5 @@
 PODS:
+  - Alamofire (5.10.2)
   - AppAuth (2.0.0):
     - AppAuth/Core (= 2.0.0)
     - AppAuth/ExternalUserAgent (= 2.0.0)
@@ -16,17 +17,28 @@ PODS:
   - CapacitorBrowser (7.0.1):
     - Capacitor
   - CapacitorCordova (7.2.0)
-  - CapacitorNativeGoogleOneTapSignin (7.0.3):
-    - Capacitor
-    - GoogleSignIn
   - CapacitorPreferences (7.0.1):
     - Capacitor
   - CapacitorShare (7.0.1):
     - Capacitor
   - CapacitorToast (7.0.1):
     - Capacitor
+  - CapgoCapacitorSocialLogin (7.11.8):
+    - Alamofire (~> 5.10.2)
+    - Capacitor
+    - FBSDKCoreKit (= 18.0.0)
+    - FBSDKLoginKit (= 18.0.0)
+    - GoogleSignIn (~> 9.0.0)
   - CordovaPlugins (7.2.0):
     - CapacitorCordova
+  - FBAEMKit (18.0.0):
+    - FBSDKCoreKit_Basics (= 18.0.0)
+  - FBSDKCoreKit (18.0.0):
+    - FBAEMKit (= 18.0.0)
+    - FBSDKCoreKit_Basics (= 18.0.0)
+  - FBSDKCoreKit_Basics (18.0.0)
+  - FBSDKLoginKit (18.0.0):
+    - FBSDKCoreKit (= 18.0.0)
   - GoogleSignIn (9.0.0):
     - AppAuth (~> 2.0)
     - AppCheckCore (~> 11.0)
@@ -54,17 +66,22 @@ DEPENDENCIES:
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorBrowser (from `../../node_modules/@capacitor/browser`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
-  - CapacitorNativeGoogleOneTapSignin (from `../../node_modules/capacitor-native-google-one-tap-signin`)
   - "CapacitorPreferences (from `../../node_modules/@capacitor/preferences`)"
   - "CapacitorShare (from `../../node_modules/@capacitor/share`)"
   - "CapacitorToast (from `../../node_modules/@capacitor/toast`)"
+  - "CapgoCapacitorSocialLogin (from `../../node_modules/@capgo/capacitor-social-login`)"
   - CordovaPlugins (from `../capacitor-cordova-ios-plugins`)
   - SendIntent (from `../../node_modules/send-intent`)
 
 SPEC REPOS:
   trunk:
+    - Alamofire
     - AppAuth
     - AppCheckCore
+    - FBAEMKit
+    - FBSDKCoreKit
+    - FBSDKCoreKit_Basics
+    - FBSDKLoginKit
     - GoogleSignIn
     - GoogleUtilities
     - GTMAppAuth
@@ -80,31 +97,36 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/browser"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
-  CapacitorNativeGoogleOneTapSignin:
-    :path: "../../node_modules/capacitor-native-google-one-tap-signin"
   CapacitorPreferences:
     :path: "../../node_modules/@capacitor/preferences"
   CapacitorShare:
     :path: "../../node_modules/@capacitor/share"
   CapacitorToast:
     :path: "../../node_modules/@capacitor/toast"
+  CapgoCapacitorSocialLogin:
+    :path: "../../node_modules/@capgo/capacitor-social-login"
   CordovaPlugins:
     :path: "../capacitor-cordova-ios-plugins"
   SendIntent:
     :path: "../../node_modules/send-intent"
 
 SPEC CHECKSUMS:
+  Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
   AppAuth: 1c1a8afa7e12f2ec3a294d9882dfa5ab7d3cb063
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
   Capacitor: 03bc7cbdde6a629a8b910a9d7d78c3cc7ed09ea7
   CapacitorApp: febecbb9582cb353aed037e18ec765141f880fe9
   CapacitorBrowser: 6299776d496e968505464884d565992faa20444a
   CapacitorCordova: 5967b9ba03915ef1d585469d6e31f31dc49be96f
-  CapacitorNativeGoogleOneTapSignin: cf622faf1f72c7532cb2fd975a4e2cc35b66a176
   CapacitorPreferences: 6c98117d4d7508034a4af9db64d6b26fc75d7b94
   CapacitorShare: e573823f511f260f598d0423c33b1e3d7bbe5fd1
   CapacitorToast: ddfc4b36080dbe3634c9faf510b20f6ddcff9330
+  CapgoCapacitorSocialLogin: 7b115bc6aaa627b012175956410ed3e99a23a5f8
   CordovaPlugins: 09eaf3779c4d1fa6331773fcd29e29dcd8a7afd6
+  FBAEMKit: e34530df538b8eb8aeb53c35867715ba6c63ef0c
+  FBSDKCoreKit: d3f479a69127acebb1c6aad91c1a33907bcf6c2f
+  FBSDKCoreKit_Basics: 017b6dc2a1862024815a8229e75661e627ac1e29
+  FBSDKLoginKit: 5875762d1fe09ddcb05d03365d4f5dc34413843d
   GoogleSignIn: c7f09cfbc85a1abf69187be091997c317cc33b77
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   GTMAppAuth: 217a876b249c3c585a54fd6f73e6b58c4f5c4238
@@ -112,6 +134,6 @@ SPEC CHECKSUMS:
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   SendIntent: 8a6f646a4489f788d253ffbd1082a98ea388d870
 
-PODFILE CHECKSUM: 4cd134f42c40a68c0a7a04f3fd7c74069f6d0b3e
+PODFILE CHECKSUM: 1a63f5c97469d00b110067b4e76a0d7c16310cbc
 
 COCOAPODS: 1.16.2
