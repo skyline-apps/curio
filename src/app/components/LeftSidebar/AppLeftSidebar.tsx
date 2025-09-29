@@ -21,7 +21,7 @@ const AppLeftSidebar: React.FC = () => {
   const navigate = useNavigate();
   const [selectedKey, setSelectedKey] = useState<SidebarKey>(SidebarKey.NONE);
   const [showNewItemModal, setShowNewItemModal] = useState<boolean>(false);
-  const { appLayout } = useAppLayout();
+  const { appLayout, updateRootPage } = useAppLayout();
 
   useEffect(() => {
     const newSelectedKey =
@@ -29,7 +29,10 @@ const AppLeftSidebar: React.FC = () => {
         (key) => !!key && pathname.startsWith(key),
       ) ?? SidebarKey.NONE;
     setSelectedKey(newSelectedKey);
-  }, [pathname]);
+    if (!!newSelectedKey) {
+      updateRootPage(toNavigationKey(newSelectedKey));
+    }
+  }, [pathname, updateRootPage]);
 
   const sidebarOpen = appLayout.leftSidebarOpen;
 
