@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiValidationRule = exports.responseParseRule = exports.apiMiddlewareRule = void 0;
 const utils_1 = require("@typescript-eslint/utils");
 exports.apiMiddlewareRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
+    name: "api-middleware",
     meta: {
         type: "problem",
         messages: {
@@ -68,6 +69,7 @@ exports.apiMiddlewareRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
     },
 });
 exports.responseParseRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
+    name: "api-response-parse",
     meta: {
         type: "problem",
         messages: {
@@ -133,6 +135,7 @@ exports.responseParseRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
     },
 });
 exports.apiValidationRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
+    name: "api-validation",
     meta: {
         type: "problem",
         messages: {
