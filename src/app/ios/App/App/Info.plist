@@ -47,5 +47,23 @@
 	<true/>
 	<key>CURIO_URL</key>
 	<string>https://curi.ooo</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.googleusercontent.apps</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.633234629488-4f4unvth067ekhemk2hn8itkrr7edl1u</string>
+			</array>
+		</dict>
+	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>google</string>
+		<string>com.googleusercontent.apps.633234629488-4f4unvth067ekhemk2hn8itkrr7edl1u</string>
+	</array>
 </dict>
 </plist>
