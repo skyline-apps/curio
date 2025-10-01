@@ -111,7 +111,7 @@ export const AppPageProvider: React.FC<{
             size="sm"
             variant="flat"
             className="absolute top-2 right-3"
-            onPress={() => setShowArticleFixedInfo((v) => !v)}
+            onPress={() => setShowArticleFixedInfo(true)}
             onMouseEnter={() => setShowArticleFixedInfo(true)}
           >
             <HiMiniBars4 />
