@@ -65,6 +65,10 @@ const HeadingAnchorElement = React.forwardRef<
             onPress={() => {
               const url = new URL(window.location.href);
               url.hash = `#${anchor}`;
+              url.hostname = import.meta.env.VITE_CURIO_URL.replace(
+                "https://",
+                "",
+              );
               navigator.clipboard.writeText(url.toString());
               showToast("Link copied to clipboard", { disappearing: true });
             }}
