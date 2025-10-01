@@ -17,6 +17,24 @@ interface GoogleOAuthButtonProps {
   nextUrl?: string;
 }
 
+function extractNonceFromIdToken(idToken: string): string | undefined {
+  try {
+    const payload = JSON.parse(atob(idToken.split(".")[1]));
+    return payload.nonce;
+  } catch {
+    return undefined;
+  }
+}
+
+async function sha256(text: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 const GoogleOAuthButton: React.FC<GoogleOAuthButtonProps> = ({
   nextUrl,
 }: GoogleOAuthButtonProps) => {
@@ -55,7 +73,6 @@ const GoogleOAuthButton: React.FC<GoogleOAuthButtonProps> = ({
             },
           });
         }
-
         // Trigger native Google login
         const { result } = await SocialLogin.login({
           provider: "google",
@@ -65,10 +82,15 @@ const GoogleOAuthButton: React.FC<GoogleOAuthButtonProps> = ({
         if (!idToken) {
           throw new Error("Google sign-in did not return an id_token");
         }
+        const extractedNonce = extractNonceFromIdToken(idToken);
+        const nonce = !!extractedNonce
+          ? await sha256(extractedNonce)
+          : undefined;
 
         const { error: supaError } = await supabase.auth.signInWithIdToken({
           provider: "google",
           token: idToken,
+          ...(nonce ? { nonce } : {}),
         });
         if (supaError) throw supaError;
 
