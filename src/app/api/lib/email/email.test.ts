@@ -237,6 +237,26 @@ https://substack.com/tech-weekly/ai-revolution
       expect(result).toBe("https://substack.com/tech-weekly/ai-revolution");
     });
 
+    it("should ignore links that have too few matching words", () => {
+      const result = extractUrlFromEmail(
+        makeTestEmail(
+          "no-reply@news.bloomberg.com",
+          "Matt Levine",
+          "Money Stuff: AI Revolution",
+          `Check these out:
+https://www.bloomberg.com/account/newsletters/money-stuff
+https://other-site.com
+`,
+        ),
+      );
+      expect(result).not.toBe(
+        "https://www.bloomberg.com/account/newsletters/money-stuff",
+      );
+      expect(result).toBe(
+        "https://curio-newsletter/news-bloomberg-com/money-stuff-ai-revolution",
+      );
+    });
+
     it("should ignore matching words in query parameters", () => {
       const result = extractUrlFromEmail(
         makeTestEmail(
