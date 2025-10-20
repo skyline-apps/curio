@@ -249,9 +249,6 @@ https://other-site.com
 `,
         ),
       );
-      expect(result).not.toBe(
-        "https://www.bloomberg.com/account/newsletters/money-stuff",
-      );
       expect(result).toBe(
         "https://curio-newsletter/news-bloomberg-com/money-stuff-ai-revolution",
       );
@@ -262,17 +259,17 @@ https://other-site.com
         makeTestEmail(
           "news@substack.com",
           "Sender Name",
-          "Weekly Tech Update: AI Revolution",
+          "Another Post Tech Weekly: AI Revolution",
           `Check these out:
 https://substack.com/unrelated-post-update
-https://substack.com/another-post-weekly
+https://substack.com/another-post-tech-weekly
 https://other-site.com
 Read this article at:
-https://substack.com?newsletter=tech-weekly&post=ai-revolution
+https://substack.com?newsletter=another-post-tech-weekly&post=ai-revolution
 `,
         ),
       );
-      expect(result).toBe("https://substack.com/another-post-weekly");
+      expect(result).toBe("https://substack.com/another-post-tech-weekly");
     });
 
     it("should find URL with most matching words even if not in order", () => {

@@ -196,7 +196,7 @@ export function extractUrlFromEmail({
     // Score URLs based on matching words from subject
 
     let bestUrl = null;
-    let bestScore = 3;
+    let bestScore = 2;
 
     for (const url of matches) {
       try {
