@@ -22,3 +22,6 @@ project(':capgo-capacitor-social-login').projectDir = new File('../node_modules/
 
 include ':mindlib-capacitor-send-intent'
 project(':mindlib-capacitor-send-intent').projectDir = new File('../node_modules/@mindlib-capacitor/send-intent/android')
+
+include ':revenuecat-purchases-capacitor'
+project(':revenuecat-purchases-capacitor').projectDir = new File('../node_modules/@revenuecat/purchases-capacitor/android')

@@ -8,20 +8,21 @@ import { useUser } from "@app/providers/User";
 import { cn } from "@app/utils/cn";
 import { createLogger } from "@app/utils/logger";
 import {
-  type CustomerInfo,
+  type CustomerInfoNative,
+  type CustomerInfoWeb,
   getCustomerInfo,
   getPackages,
   initializePurchasing,
-  type Package,
   purchasePackage,
+  type UnifiedPackage,
 } from "@app/utils/purchases";
 import React, { useCallback, useEffect, useState } from "react";
 
 const log = createLogger("SubscriptionSettings");
 
 interface PackageOptionProps {
-  rcPackage: Package;
-  handlePurchase: (rcPackage: Package) => Promise<void>;
+  rcPackage: UnifiedPackage;
+  handlePurchase: (rcPackage: UnifiedPackage) => Promise<void>;
   purchaseLoading: string | null;
 }
 
@@ -30,25 +31,25 @@ const PackageOption: React.FC<PackageOptionProps> = ({
   handlePurchase,
   purchaseLoading,
 }) => {
-  const subscriptionOption =
-    rcPackage.webBillingProduct.defaultSubscriptionOption?.base;
-  const billingDescription = `${subscriptionOption?.price?.formattedPrice || "error"} / ${subscriptionOption?.period?.unit || "error"}`;
-  const period = subscriptionOption?.period?.unit;
+  const { title, priceString, billingPeriod } = rcPackage.product;
+  const billingDescription = `${priceString} / ${billingPeriod}`;
+  const isYearly = billingPeriod === "year" || billingPeriod === "yr";
+
   return (
     <Button
       onPress={() => handlePurchase(rcPackage)}
       color="success"
-      variant={period === "year" ? "shadow" : "flat"}
+      variant={isYearly ? "shadow" : "flat"}
       isDisabled={!!purchaseLoading}
       isLoading={purchaseLoading === rcPackage.identifier}
       endContent={billingDescription}
     >
       <div className="flex flex-col">
-        {rcPackage.webBillingProduct.title}
+        {title}
         <p
           className={cn(
             "text-xs",
-            period === "year" ? "text-success-100" : "text-success-600",
+            isYearly ? "text-success-100" : "text-success-600",
           )}
         >
           {billingDescription}
@@ -61,8 +62,10 @@ const PackageOption: React.FC<PackageOptionProps> = ({
 const SubscriptionSettings: React.FC = () => {
   const { user } = useUser();
   const { isPremium, refreshProfile } = useSettings();
-  const [packageOptions, setPackageOptions] = useState<Package[]>([]);
-  const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
+  const [packageOptions, setPackageOptions] = useState<UnifiedPackage[]>([]);
+  const [customerInfo, setCustomerInfo] = useState<
+    CustomerInfoNative | CustomerInfoWeb | null
+  >(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [purchaseLoading, setPurchaseLoading] = useState<string | null>(null);
@@ -94,7 +97,7 @@ const SubscriptionSettings: React.FC = () => {
     fetchPackages();
   }, [fetchPackages]);
 
-  async function handlePurchase(rcPackage: Package): Promise<void> {
+  async function handlePurchase(rcPackage: UnifiedPackage): Promise<void> {
     setPurchaseLoading(rcPackage.identifier);
     setPurchaseError(null);
     if (!user.email) {
@@ -138,24 +141,57 @@ const SubscriptionSettings: React.FC = () => {
     }
   }
 
-  const currentSubscription = customerInfo?.activeSubscriptions
-    .values()
-    .next().value;
+  // Helper to get active subs safely from either Web or Native object
+  const getActiveSubscriptions = (): Set<string> => {
+    if (!customerInfo) return new Set<string>();
+    // Check if it's the Native object (has activeSubscriptions as array of strings in some versions, or Set)
+    // The capacitor plugin types usually say activeSubscriptions is string[] but purchases-js says Set<string>.
+    // Let's check safely.
+    if (Array.isArray(customerInfo.activeSubscriptions)) {
+      return new Set(customerInfo.activeSubscriptions);
+    }
+    return customerInfo.activeSubscriptions as Set<string>;
+  };
 
-  const willRenew = currentSubscription
-    ? customerInfo?.subscriptionsByProductIdentifier[currentSubscription]
-        ?.willRenew
-    : false;
-  const expiresAt = currentSubscription
-    ? customerInfo?.subscriptionsByProductIdentifier[currentSubscription]
-        ?.expiresDate
-    : null;
+  const activeSubs = getActiveSubscriptions();
+  const currentSubscription = activeSubs.values().next().value;
 
+  // Helper to get expiration logic
+  let willRenew = false;
+  let expiresAt: string | number | Date | null = null;
+
+  if (currentSubscription && customerInfo) {
+    // Both SDKs have a similar structure for this map
+    const ent =
+      customerInfo.subscriptionsByProductIdentifier?.[currentSubscription];
+    // OR customerInfo.allExpirationDates etc. but subscriptionsByProductIdentifier is most detailed usually.
+
+    // Let's stick to subscription ID lookups if possible, but the types diverge.
+    // Safest:
+    if (ent) {
+      willRenew = ent.willRenew;
+      // @ts-expect-error - expirationDate property name divergence between web/native
+      expiresAt = ent.expirationDate || ent.expiresDate;
+    } else {
+      const entitlement = customerInfo.entitlements?.active?.["premium"]; // Assuming 'premium' is entitlement ID? Or just check product ID.
+      if (entitlement) {
+        willRenew = entitlement.willRenew;
+        // @ts-expect-error - expirationDate property name divergence
+        expiresAt = entitlement.expirationDate || entitlement.expiresDate;
+      }
+    }
+  }
+
+  // Find the package that matches the current subscription ID
+  // Note: on Web, the sub ID matches the stripe product ID.
+  // On Native, it matches the store product ID.
+  // Our UnifiedPackage has the product.identifier.
   const currentPackage = packageOptions.find(
-    (p) => p.webBillingProduct.identifier === currentSubscription,
-  )?.webBillingProduct.defaultSubscriptionOption?.base;
+    (p) => p.product.identifier === currentSubscription,
+  );
+
   const currentPackageDescription = willRenew
-    ? `${currentPackage?.price?.formattedPrice || "error"} billed every ${currentPackage?.period?.unit || "error"}`
+    ? `${currentPackage?.product.priceString || "error"} billed every ${currentPackage?.product.billingPeriod || "error"}`
     : expiresAt
       ? `Expires ${new Date(expiresAt).toLocaleDateString()} at ${new Date(expiresAt).toLocaleTimeString()}`
       : currentSubscription;
@@ -183,7 +219,7 @@ const SubscriptionSettings: React.FC = () => {
             <Spinner centered />
           ) : error ? (
             <div className="text-danger text-sm">{error}</div>
-          ) : customerInfo?.activeSubscriptions.size === 0 ? (
+          ) : activeSubs.size === 0 ? (
             <div className="grid grid-cols-1 gap-3">
               {packageOptions.length === 0 && (
                 <div className="text-sm text-danger">
@@ -199,7 +235,7 @@ const SubscriptionSettings: React.FC = () => {
                 />
               ))}
             </div>
-          ) : customerInfo?.activeSubscriptions.size === 1 ? (
+          ) : activeSubs.size >= 1 ? (
             <div className="grid grid-cols-1 gap-2">
               <Button
                 href={customerInfo?.managementURL || ""}
