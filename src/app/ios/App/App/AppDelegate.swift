@@ -1,6 +1,6 @@
 import UIKit
 import Capacitor
-import SendIntent
+import MindlibCapacitorSendIntent
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {

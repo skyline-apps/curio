@@ -20,5 +20,5 @@ project(':capacitor-toast').projectDir = new File('../node_modules/@capacitor/to
 include ':capgo-capacitor-social-login'
 project(':capgo-capacitor-social-login').projectDir = new File('../node_modules/@capgo/capacitor-social-login/android')
 
-include ':send-intent'
-project(':send-intent').projectDir = new File('../node_modules/send-intent/android')
+include ':mindlib-capacitor-send-intent'
+project(':mindlib-capacitor-send-intent').projectDir = new File('../node_modules/@mindlib-capacitor/send-intent/android')

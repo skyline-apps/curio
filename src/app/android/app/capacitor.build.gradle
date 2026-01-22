@@ -15,7 +15,7 @@ dependencies {
     implementation project(':capacitor-share')
     implementation project(':capacitor-toast')
     implementation project(':capgo-capacitor-social-login')
-    implementation project(':send-intent')
+    implementation project(':mindlib-capacitor-send-intent')
 
 }
 

@@ -16,6 +16,7 @@ import {
 import { App as CapacitorApp } from "@capacitor/app";
 import type { PluginListenerHandle } from "@capacitor/core";
 import { Toast } from "@capacitor/toast";
+import { SendIntent } from "@mindlib-capacitor/send-intent";
 import React, {
   useCallback,
   useContext,
@@ -25,7 +26,6 @@ import React, {
   useState,
 } from "react";
 import { Link } from "react-router-dom";
-import { SendIntent } from "send-intent";
 
 import { BrowserMessageContext, EventType } from ".";
 import { useInAppBrowserCapture } from "./useInAppBrowserCapture";
