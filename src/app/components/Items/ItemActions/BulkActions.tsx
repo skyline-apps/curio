@@ -48,7 +48,7 @@ const BulkActionButton = <T,>({
 
 const BulkActions = (): React.ReactNode => {
   const { updateItemsState } = useItemUpdate();
-  const { selectedItems } = useContext(CurrentItemContext);
+  const { selectedItems, clearSelectedItems } = useContext(CurrentItemContext);
   const { items } = useContext(ItemsContext);
 
   const itemStates = (items || [])
@@ -63,12 +63,13 @@ const BulkActions = (): React.ReactNode => {
   return (
     <div className="flex flex-col gap-2 mx-4">
       <BulkActionButton
-        action={() =>
-          updateItemsState(
+        action={() => {
+          clearSelectedItems();
+          return updateItemsState(
             itemsToUpdate,
             allArchived ? ItemState.ACTIVE : ItemState.ARCHIVED,
-          )
-        }
+          );
+        }}
         text="Archive all"
         icon={<HiOutlineArchiveBox />}
         activeText="Unarchive all"
@@ -76,12 +77,13 @@ const BulkActions = (): React.ReactNode => {
         isActive={allArchived}
       />
       <BulkActionButton
-        action={() =>
-          updateItemsState(
+        action={() => {
+          clearSelectedItems();
+          return updateItemsState(
             itemsToUpdate,
             allDeleted ? ItemState.ACTIVE : ItemState.DELETED,
-          )
-        }
+          );
+        }}
         text="Delete all"
         icon={<HiOutlineTrash />}
         activeText="Restore all"

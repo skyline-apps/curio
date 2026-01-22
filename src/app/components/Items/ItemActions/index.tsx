@@ -1,8 +1,9 @@
 import Button from "@app/components/ui/Button";
+import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { Item } from "@app/providers/Items";
 import { ItemState } from "@app/schemas/db";
 import { cn } from "@app/utils/cn";
-import { useCallback } from "react";
+import { useCallback, useContext } from "react";
 import {
   HiArchiveBox,
   HiOutlineArchiveBox,
@@ -72,6 +73,7 @@ const ItemActions = ({
   onItemActionSuccess,
 }: ItemActionsProps): React.ReactElement => {
   const { updateItemsState, updateItemsFavorite, shareItem } = useItemUpdate();
+  const { clearSelectedItems } = useContext(CurrentItemContext);
 
   if (!item) {
     return <></>;
@@ -88,14 +90,15 @@ const ItemActions = ({
         isActive={item.metadata.isFavorite}
       />
       <ActionButton
-        action={async () =>
-          updateItemsState(
+        action={async () => {
+          clearSelectedItems();
+          return updateItemsState(
             [item.slug],
             item.metadata.state === ItemState.ARCHIVED
               ? ItemState.ACTIVE
               : ItemState.ARCHIVED,
-          )
-        }
+          );
+        }}
         defaultDisplay={{ text: "Archive", icon: <HiOutlineArchiveBox /> }}
         activeDisplay={{ text: "Unarchive", icon: <HiArchiveBox /> }}
         isActive={item.metadata.state === ItemState.ARCHIVED}
@@ -104,14 +107,15 @@ const ItemActions = ({
       {showExpanded && (
         <>
           <ActionButton
-            action={async () =>
-              updateItemsState(
+            action={async () => {
+              clearSelectedItems();
+              return updateItemsState(
                 [item.slug],
                 item.metadata.state === ItemState.DELETED
                   ? ItemState.ACTIVE
                   : ItemState.DELETED,
-              )
-            }
+              );
+            }}
             defaultDisplay={{ text: "Delete", icon: <HiOutlineTrash /> }}
             activeDisplay={{ text: "Restore", icon: <HiTrash /> }}
             isActive={item.metadata.state === ItemState.DELETED}
