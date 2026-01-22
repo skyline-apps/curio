@@ -1,13 +1,6 @@
 import UIKit
 import Capacitor
-
-// Minimal store used to shuttle shared items into the web layer
-class ShareStore {
-    static let store = ShareStore()
-    var shareItems: [JSObject] = []
-    var processed: Bool = true
-    private init() {}
-}
+import SendIntent
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {

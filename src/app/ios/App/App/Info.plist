@@ -57,6 +57,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>com.googleusercontent.apps.633234629488-4f4unvth067ekhemk2hn8itkrr7edl1u</string>
+				<string>ooo.curi.app</string>
 			</array>
 		</dict>
 	</array>
