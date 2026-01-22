@@ -1,8 +1,8 @@
 import Button from "@app/components/ui/Button";
-import { Item, ItemsContext } from "@app/providers/Items";
+import { Item } from "@app/providers/Items";
 import { ItemState } from "@app/schemas/db";
 import { cn } from "@app/utils/cn";
-import { useCallback, useContext } from "react";
+import { useCallback } from "react";
 import {
   HiArchiveBox,
   HiOutlineArchiveBox,
@@ -36,14 +36,11 @@ const ActionButton = <T,>({
   isLoading,
   onActionSuccess,
 }: ActionButtonProps<T>): React.ReactNode => {
-  const { fetchItems } = useContext(ItemsContext);
-
   const onPress = useCallback(async () => {
     await action().then(async () => {
       onActionSuccess?.();
-      await fetchItems(true);
     });
-  }, [fetchItems, action, onActionSuccess]);
+  }, [action, onActionSuccess]);
 
   return (
     <Button

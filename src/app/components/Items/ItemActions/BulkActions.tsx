@@ -30,15 +30,13 @@ const BulkActionButton = <T,>({
   isActive,
 }: BulkActionButtonProps<T>): React.ReactNode => {
   const [pending, setPending] = useState<boolean>(false);
-  const { fetchItems } = useContext(ItemsContext);
 
   const onPress = useCallback(async () => {
     setPending(true);
     await action().then(async () => {
-      await fetchItems(true);
       setPending(false);
     });
-  }, [fetchItems, action]);
+  }, [action]);
 
   return (
     <Button variant="faded" size="sm" onPress={onPress} isLoading={pending}>

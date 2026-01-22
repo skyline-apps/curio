@@ -338,9 +338,12 @@ export const useItemUpdate = (): UseItemUpdate => {
     itemSlugs: string[],
     state: ItemState,
   ): Promise<UpdateStateResponse> => {
-    return await updateItemsStateMutation.mutateAsync({
+    updateItemsStateMutation.mutate({
       itemSlugs,
       state,
+    });
+    return Promise.resolve({
+      updated: itemSlugs.map((slug) => ({ slug })),
     });
   };
 
