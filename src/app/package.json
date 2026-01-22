@@ -41,6 +41,7 @@
     "@hono/zod-validator": "^0.4.3",
     "@mindlib-capacitor/send-intent": "^8.0.5",
     "@mozilla/readability": "^0.6.0",
+    "@revenuecat/purchases-capacitor": "^12.0.4",
     "@revenuecat/purchases-js": "^1.4.3",
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.49.4",
