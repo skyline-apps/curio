@@ -15,7 +15,7 @@ resource "aws_lambda_function" "email_processor" {
   function_name    = "${var.project_prefix}-${var.environment}-email-processor"
   role             = aws_iam_role.lambda_role.arn
   handler          = "index.handler"
-  runtime          = "nodejs20.x"
+  runtime          = "nodejs22.x"
   timeout          = 30
 
   environment {
