@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 
 import { LLMError } from "./types";
 
-const MODEL = "gemini-2.5-flash-preview-04-17";
+const MODEL = "gemini-2.5-flash";
 
 export type LLMEnv = {
   GEMINI_API_KEY: string;
