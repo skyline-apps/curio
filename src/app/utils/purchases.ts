@@ -80,12 +80,6 @@ export const getPackages = async (): Promise<UnifiedPackage[]> => {
   if (isNative) {
     try {
       const offerings = await PurchasesNative.getOfferings();
-      log.info("Native Offerings RAW:", JSON.stringify(offerings)); // Debug log
-
-      // On some versions of the plugin, offerings.current is directly a PurchasesOffering object,
-      // but the type definition says it returns { offerings: PurchasesOfferings }.
-      // The error says "Property 'offerings' does not exist on type 'PurchasesOfferings'",
-      // which means 'offerings' variable IS the PurchasesOfferings object already.
       const current = offerings.current;
 
       if (!current) {
@@ -127,17 +121,12 @@ export const getPackages = async (): Promise<UnifiedPackage[]> => {
   } else {
     try {
       const offerings = await PurchasesWeb.getSharedInstance().getOfferings();
-      // console.log("Web Offerings:", offerings); // Optional debug
       const available = offerings.current?.availablePackages || [];
 
       return available.map((p) => {
         const product = p.webBillingProduct;
-        // webBillingProduct structure might differ slightly, need to check standard RC Web object
-        // Based on previous code: product.defaultSubscriptionOption.base.period.unit
         const subOption = product.defaultSubscriptionOption?.base;
 
-        // Map Web PackageTypes to our unified string types
-        // The Web SDK uses PascalCase for enum values (Annual, Monthly, etc.)
         let mappedType: UnifiedPackage["type"] = "UNKNOWN";
         if (p.packageType === PackageTypeWeb.Annual) mappedType = "ANNUAL";
         else if (p.packageType === PackageTypeWeb.Monthly)
