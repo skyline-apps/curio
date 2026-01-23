@@ -3,13 +3,10 @@ import Icon from "@app/components/ui/Icon";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { useSettings } from "@app/providers/Settings";
 import { useToast } from "@app/providers/Toast";
-import { createLogger } from "@app/utils/logger";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { HiMiniSparkles } from "react-icons/hi2";
 import { Link } from "react-router-dom";
-
-const log = createLogger("selection-popup");
 
 interface SelectionPopupProps {
   selection: Selection | null;
@@ -122,9 +119,8 @@ export const SelectionPopup = ({
           setIsExplainLoading(false);
           setExplanation(explanation);
         })
-        .catch((error) => {
+        .catch(() => {
           setIsExplainLoading(false);
-          log.error("Failed to explain highlight:", error);
         });
     }
   }, [explainHighlight, selection]);
@@ -149,6 +145,8 @@ export const SelectionPopup = ({
         }
         onExplainClick();
       }}
+      onMouseDown={(e) => e.preventDefault()}
+      onTouchStart={(e) => e.preventDefault()}
     >
       <Icon
         icon={<HiMiniSparkles />}

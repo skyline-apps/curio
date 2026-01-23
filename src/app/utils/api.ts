@@ -46,9 +46,29 @@ const forceLogout = (): void => {
 };
 
 export async function handleAPIResponse<T>(response: Response): Promise<T> {
-  if (response.status < 200 || response.status >= 300) {
-    const error = await response.json();
-    throw new Error(error.error);
+  if (!response.ok) {
+    let errorMessage = `Failed to fetch: ${response.status} ${response.statusText}`;
+    try {
+      const text = await response.text();
+      // Try to parse as JSON if it looks like JSON
+      if (text.startsWith("{") || text.startsWith("[")) {
+        try {
+          const json = JSON.parse(text);
+          if (json.error) {
+            errorMessage = json.error;
+          } else {
+            errorMessage = `${errorMessage} - ${text}`;
+          }
+        } catch {
+          errorMessage = `${errorMessage} - ${text}`;
+        }
+      } else {
+        errorMessage = `${errorMessage} - ${text}`;
+      }
+    } catch {
+      // Ignore text reading error
+    }
+    throw new Error(errorMessage);
   }
   const result = await response.json();
   return result;

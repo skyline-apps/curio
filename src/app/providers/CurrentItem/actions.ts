@@ -1,7 +1,10 @@
 import { useToast } from "@app/providers/Toast";
 import { PremiumItemContextResponse } from "@app/schemas/v1/premium/item/context";
 import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
+import { createLogger } from "@app/utils/logger";
 import { useMutation, UseMutationResult } from "@tanstack/react-query";
+
+const log = createLogger("current-item-actions");
 
 export interface ExplainHighlightArgs {
   slug: string;
@@ -39,7 +42,8 @@ export function useCurrentItemActions(): CurrentItemActions {
       ).then(handleAPIResponse<PremiumItemContextResponse>);
       return response;
     },
-    onError: () => {
+    onError: (error) => {
+      log.error("Failed to explain highlight:", error.message);
       showToast("Failed to explain highlight. Please try again.", {
         type: "error",
       });
