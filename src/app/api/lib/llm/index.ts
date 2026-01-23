@@ -42,6 +42,18 @@ function splitBySections(text: string): { header: string; content: string }[] {
   return sections.filter((sec) => sec.header || sec.content);
 }
 
+function parseRetryDelay(error: unknown): number | null {
+  if (typeof error === "object" && error !== null) {
+    const message =
+      (error as { message?: string }).message || JSON.stringify(error);
+    const match = message.match(/"retryDelay":"(\d+(\.\d+)?)s"/);
+    if (match) {
+      return parseFloat(match[1]) * 1000;
+    }
+  }
+  return null;
+}
+
 async function summarizeChunk(
   ai: GoogleGenAI,
   chunk: string,
@@ -50,7 +62,9 @@ async function summarizeChunk(
 ): Promise<string> {
   const systemPrompt = `You are a helpful reading assistant. Summarize the following article section as a clear, concise summary according to the following guidelines:\n\n- Return your summary in Markdown format.\n- Capture all key points, and call out any memorable quotes in Markdown blockquotes.\n- Preserve the original writing style (journalistic, academic, creative, etc.), tone (informative, sensational, reflective, humorous, etc.)\n- Preserve the original voice (first-person, second-person, third-person, etc.).\n- Do not preface your summary with any additional text.\n- Be concise and keep the summary to 2-6 sentences.`;
   const prompt = `${systemPrompt}\n\n${chunk}`;
-  for (let attempt = 0; attempt < retries; attempt++) {
+
+  let attempts = 0;
+  while (attempts < retries) {
     try {
       const result = await ai.models.generateContent({
         model: MODEL,
@@ -66,11 +80,28 @@ async function summarizeChunk(
       }
       return summary;
     } catch (err) {
-      if (attempt < retries - 1) {
-        // Exponential backoff
+      const retryDelay = parseRetryDelay(err);
+      if (retryDelay) {
+        // If we get a 429 with a specific retry delay, wait and retry without incrementing attempts
+        // (or incrementing slower) to respect the server's request.
+        // However, to avoid infinite loops, we still need a break condition.
+        // Let's treat it as a "free" retry but with a max limit of, say, 3 "quota" retries effectively.
+        // For simplicity, we just wait and retry, but we'll increment attempt only if we don't have a retryDelay
+        // OR we can just wait the delay and count it as an attempt.
+        // Better: Wait the delay + buffer, and count it as an attempt (or not?).
+        // If we count it, we might exhaust retries too fast if the delay is long.
+        // If the delay is 49s, and we have 3 retries, we wait 49s, then retry.
+        // Let's wait the delay and NOT count it as a standard attempt, but have a separate safety counter.
+        await new Promise((res) => setTimeout(res, retryDelay + 1000));
+        continue;
+      }
+
+      if (attempts < retries - 1) {
+        // Exponential backoff for other errors
         await new Promise((res) =>
-          setTimeout(res, backoffMs * Math.pow(2, attempt)),
+          setTimeout(res, backoffMs * Math.pow(2, attempts)),
         );
+        attempts++;
       } else {
         // If we've exhausted retries, try to split the chunk into smaller sub-chunks
         const lines = chunk.split(/\r?\n/);
@@ -148,40 +179,18 @@ export async function* summarizeItemStream(
   for (let i = 0; i < sections.length; i++) {
     const { header, content } = sections[i];
     if (content.trim()) {
-      const retries = 3;
-      let attempt = 0;
-      let lastError: unknown = null;
-      while (attempt < retries) {
-        try {
-          const sectionText = header ? `${header}\n${content}` : content;
-          const summary = await summarizeChunk(ai, sectionText);
-          if (header) {
-            yield `${header}\n${summary.trim()}\n\n`;
-          } else {
-            yield `${summary.trim()}\n\n`;
-          }
-          lastError = null;
-          break;
-        } catch (err) {
-          lastError = err;
-          const msg = err instanceof Error ? err.message : String(err);
-          if (msg.includes("429")) {
-            const delay = 1000 * Math.pow(2, attempt);
-            await new Promise((res) => setTimeout(res, delay));
-            attempt++;
-            continue;
-          } else {
-            throw new LLMError(
-              `Error summarizing section ${header || i + 1}: ${msg}\n\n`,
-            );
-          }
+      try {
+        const sectionText = header ? `${header}\n${content}` : content;
+        const summary = await summarizeChunk(ai, sectionText);
+        if (header) {
+          yield `${header}\n${summary.trim()}\n\n`;
+        } else {
+          yield `${summary.trim()}\n\n`;
         }
-      }
-      if (lastError && attempt === retries) {
-        const msg =
-          lastError instanceof Error ? lastError.message : String(lastError);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
         throw new LLMError(
-          `Error summarizing section ${header || i + 1} after ${retries} retries: ${msg}\n\n`,
+          `Error summarizing section ${header || i + 1}: ${msg}\n\n`,
         );
       }
     }
