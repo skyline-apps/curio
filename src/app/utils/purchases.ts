@@ -1,3 +1,4 @@
+import { createLogger } from "@app/utils/logger";
 import { Capacitor } from "@capacitor/core";
 import {
   PACKAGE_TYPE,
@@ -19,6 +20,8 @@ export type { CustomerInfo as CustomerInfoWeb } from "@revenuecat/purchases-js";
 export type RCPackageNative = PurchasesPackage;
 export type RCPackageWeb = PackageWeb;
 
+const log = createLogger("Purchases");
+
 export interface UnifiedProduct {
   title: string;
   description: string;
@@ -39,13 +42,10 @@ export interface UnifiedPackage {
 
 const isNative = Capacitor.isNativePlatform();
 
-// eslint-disable-next-line no-console
-const consoleError = console.error;
-
 export const initializePurchasing = (userId: string): void => {
   const apiKey = import.meta.env.VITE_REVENUECAT_API_KEY;
   if (!apiKey) {
-    consoleError("Missing configuration for RevenueCat");
+    log.error("Missing configuration for RevenueCat");
     return;
   }
 
@@ -77,11 +77,22 @@ export const getPackages = async (): Promise<UnifiedPackage[]> => {
   if (isNative) {
     try {
       const offerings = await PurchasesNative.getOfferings();
+      log.info("Native Offerings RAW:", JSON.stringify(offerings)); // Debug log
+
       // On some versions of the plugin, offerings.current is directly a PurchasesOffering object,
       // but the type definition says it returns { offerings: PurchasesOfferings }.
       // The error says "Property 'offerings' does not exist on type 'PurchasesOfferings'",
       // which means 'offerings' variable IS the PurchasesOfferings object already.
       const current = offerings.current;
+
+      if (!current) {
+        log.warn("No 'current' offering found in RevenueCat response.");
+      } else if (
+        !current.availablePackages ||
+        current.availablePackages.length === 0
+      ) {
+        log.warn("Current offering has no available packages.", current);
+      }
 
       if (!current || !current.availablePackages) return [];
 
@@ -107,43 +118,50 @@ export const getPackages = async (): Promise<UnifiedPackage[]> => {
         } as UnifiedPackage;
       });
     } catch (e) {
-      consoleError("Error fetching native offerings", e);
+      log.error("Error fetching native offerings", e);
       return [];
     }
   } else {
-    const offerings = await PurchasesWeb.getSharedInstance().getOfferings();
-    const available = offerings.current?.availablePackages || [];
+    try {
+      const offerings = await PurchasesWeb.getSharedInstance().getOfferings();
+      // console.log("Web Offerings:", offerings); // Optional debug
+      const available = offerings.current?.availablePackages || [];
 
-    return available.map((p) => {
-      const product = p.webBillingProduct;
-      // webBillingProduct structure might differ slightly, need to check standard RC Web object
-      // Based on previous code: product.defaultSubscriptionOption.base.period.unit
-      const subOption = product.defaultSubscriptionOption?.base;
+      return available.map((p) => {
+        const product = p.webBillingProduct;
+        // webBillingProduct structure might differ slightly, need to check standard RC Web object
+        // Based on previous code: product.defaultSubscriptionOption.base.period.unit
+        const subOption = product.defaultSubscriptionOption?.base;
 
-      // Map Web PackageTypes to our unified string types
-      // The Web SDK uses PascalCase for enum values (Annual, Monthly, etc.)
-      let mappedType: UnifiedPackage["type"] = "UNKNOWN";
-      if (p.packageType === PackageTypeWeb.Annual) mappedType = "ANNUAL";
-      else if (p.packageType === PackageTypeWeb.Monthly) mappedType = "MONTHLY";
-      else if (p.packageType === PackageTypeWeb.Weekly) mappedType = "WEEKLY";
-      else if (p.packageType === PackageTypeWeb.Lifetime)
-        mappedType = "LIFETIME";
-      else if (p.packageType === PackageTypeWeb.Custom) mappedType = "CUSTOM";
+        // Map Web PackageTypes to our unified string types
+        // The Web SDK uses PascalCase for enum values (Annual, Monthly, etc.)
+        let mappedType: UnifiedPackage["type"] = "UNKNOWN";
+        if (p.packageType === PackageTypeWeb.Annual) mappedType = "ANNUAL";
+        else if (p.packageType === PackageTypeWeb.Monthly)
+          mappedType = "MONTHLY";
+        else if (p.packageType === PackageTypeWeb.Weekly) mappedType = "WEEKLY";
+        else if (p.packageType === PackageTypeWeb.Lifetime)
+          mappedType = "LIFETIME";
+        else if (p.packageType === PackageTypeWeb.Custom) mappedType = "CUSTOM";
 
-      return {
-        identifier: p.identifier,
-        type: mappedType,
-        product: {
-          title: product.displayName || product.title,
-          description: product.description || "",
-          priceString: subOption?.price?.formattedPrice || "$0.00",
-          currencyCode: subOption?.price?.currency || "USD",
-          identifier: product.identifier,
-          billingPeriod: subOption?.period?.unit || "unknown",
-        },
-        rcPackageWeb: p,
-      } as UnifiedPackage;
-    });
+        return {
+          identifier: p.identifier,
+          type: mappedType,
+          product: {
+            title: product.displayName || product.title,
+            description: product.description || "",
+            priceString: subOption?.price?.formattedPrice || "$0.00",
+            currencyCode: subOption?.price?.currency || "USD",
+            identifier: product.identifier,
+            billingPeriod: subOption?.period?.unit || "unknown",
+          },
+          rcPackageWeb: p,
+        } as UnifiedPackage;
+      });
+    } catch (e) {
+      log.error("Error fetching web offerings", e);
+      return [];
+    }
   }
 };
 
