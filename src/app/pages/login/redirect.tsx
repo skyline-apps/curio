@@ -28,6 +28,33 @@ const RedirectPage: React.FC = () => {
     );
   }
 
+  const handleContinue = (): void => {
+    if (!redirectTo) return;
+
+    try {
+      const url = new URL(redirectTo);
+      const allowedOrigins = [
+        window.location.origin,
+        "https://curi.ooo",
+        "https://staging.curi.ooo",
+      ];
+
+      if (allowedOrigins.some((origin) => url.origin === origin)) {
+        const path = url.pathname + url.search + url.hash;
+        navigate(path);
+      } else {
+        window.location.href = redirectTo;
+      }
+    } catch {
+      // If relative path or invalid URL, try direct navigation or fallback
+      if (redirectTo.startsWith("/")) {
+        navigate(redirectTo);
+      } else {
+        window.location.href = redirectTo;
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col w-full h-dvh">
       {!isNative && <Navbar />}
@@ -36,7 +63,7 @@ const RedirectPage: React.FC = () => {
           <div className="w-full flex flex-col items-center gap-4 py-16">
             <h1>Log in</h1>
             <p className="text-xs text-secondary">Sign in as {email}?</p>
-            <Button color="primary" href={redirectTo}>
+            <Button color="primary" onPress={handleContinue}>
               Continue
             </Button>
           </div>
