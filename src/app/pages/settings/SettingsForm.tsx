@@ -1,5 +1,6 @@
 import AppLinks from "@app/components/Landing/AppLinks";
 import { Accordion, AccordionItem } from "@app/components/ui/Accordion";
+import { useUser } from "@app/providers/User";
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -17,6 +18,7 @@ enum SettingsSectionKey {
 
 const SettingsForm: React.FC = () => {
   const location = useLocation();
+  const { user } = useUser();
   const params = new URLSearchParams(location.search);
   const section = (params.get("section") as SettingsSectionKey) || null;
 
@@ -58,6 +60,7 @@ const SettingsForm: React.FC = () => {
       </Accordion>
       <div className="flex flex-col h-full justify-end items-center text-xs text-secondary py-4">
         <AppLinks size={20} />
+        <p>Signed in as {user.email}.</p>
         <p>
           Need help? View our{" "}
           <Link className="hover:underline" to="/docs" target="_blank">
