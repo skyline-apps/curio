@@ -143,9 +143,10 @@ Instead, to run logic for a specific consumer queue locally, set it as the `queu
 8. In the Google Auth Platform Cloud Console, create a new app of type "Android", populating its package name from the `src/app/android/app/build.gradle` file and the SHA-1 fingerprint from the step above.
 
 ### iOS app
-1. Follow instructions [here](https://github.com/Cap-go/capacitor-social-login/blob/main/docs/setup_apple.md) to set up Apple sign in.
-2. For each Supabase auth deployment, enable Apple sign-in with the client ID from `PRODUCT_BUNDLE_IDENTIFIER` in `src/app/ios/App/App.xcodeproj/project.pbxproj`.
-3. Follow [these instructions](https://github.com/carsten-klaffke/send-intent?tab=readme-ov-file#ios) to allow the app to handle share intents.
+1. Ensure the `MARKETING_VERSION` is set to the same value as the `versionName` in `src/app/android/app/build.gradle`.
+2. Follow instructions [here](https://github.com/Cap-go/capacitor-social-login/blob/main/docs/setup_apple.md) to set up Apple sign in.
+3. For each Supabase auth deployment, enable Apple sign-in with the client ID from `PRODUCT_BUNDLE_IDENTIFIER` in `src/app/ios/App/App.xcodeproj/project.pbxproj`.
+4. Follow [these instructions](https://github.com/carsten-klaffke/send-intent?tab=readme-ov-file#ios) to allow the app to handle share intents.
 
 ### Authentication
 1. Set up a Google Cloud project with Google Auth Platform configured for a web application. Copy in the generated client ID and client secret into Supabase's Google auth provider, then copy the Supabase auth callback URL into the "Auhorized redirect URIs" field.
