@@ -66,7 +66,7 @@ const SubscriptionSettings: React.FC = () => {
   const [customerInfo, setCustomerInfo] = useState<
     CustomerInfoNative | CustomerInfoWeb | null
   >(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [purchaseLoading, setPurchaseLoading] = useState<string | null>(null);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
@@ -119,18 +119,18 @@ const SubscriptionSettings: React.FC = () => {
     } catch (error) {
       if (error instanceof Error) {
         log.error("Failed to purchase subscription", error);
-        setPurchaseError(error.message);
+        setPurchaseError(`Failed to purchase subscription: ${error.message}`);
         if (error.message) {
-          showToast(error.message, {
+          showToast("Failed to purchase subscription", {
             dismissable: true,
             disappearing: false,
             type: "error",
           });
         }
       } else {
-        log.error("Failed to purchase subscription", error);
-        setPurchaseError("Purchase failed.");
-        showToast("Purchase failed.", {
+        log.error("Subscription purchase failed", error);
+        setPurchaseError("Subscription purchase failed.");
+        showToast("Subscription purchase failed.", {
           dismissable: true,
           disappearing: false,
           type: "error",
