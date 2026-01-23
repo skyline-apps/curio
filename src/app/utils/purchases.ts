@@ -43,20 +43,23 @@ export interface UnifiedPackage {
 const isNative = Capacitor.isNativePlatform();
 
 export const initializePurchasing = (userId: string): void => {
-  const apiKey = import.meta.env.VITE_REVENUECAT_API_KEY;
+  let apiKey = import.meta.env.VITE_REVENUECAT_API_KEY;
+
+  if (isNative) {
+    if (Capacitor.getPlatform() === "android") {
+      apiKey = import.meta.env.VITE_REVENUECAT_API_KEY_ANDROID || apiKey;
+    } else if (Capacitor.getPlatform() === "ios") {
+      apiKey = import.meta.env.VITE_REVENUECAT_API_KEY_IOS || apiKey;
+    }
+  }
+
   if (!apiKey) {
     log.error("Missing configuration for RevenueCat");
     return;
   }
 
   if (isNative) {
-    if (Capacitor.getPlatform() === "ios") {
-      PurchasesNative.configure({ apiKey: apiKey, appUserID: userId });
-    } else if (Capacitor.getPlatform() === "android") {
-      // Android might have a different key if you separated them, but usually they are the same in RC if "Public SDK Key" is used?
-      // Actually RC recommends one public key for all.
-      PurchasesNative.configure({ apiKey: apiKey, appUserID: userId });
-    }
+    PurchasesNative.configure({ apiKey, appUserID: userId });
   } else {
     PurchasesWeb.configure(apiKey, userId);
   }

@@ -38,7 +38,7 @@ To run the app against staging:
 4. Edit `src/app/ios/App/App/Info.plist`'s `CURIO_URL` to `https://staging.curi.ooo`.
 
 ### Payments
-To configure payments, make sure the `VITE_REVENUECAT_API_KEY` is set.
+To configure payments, make sure the `VITE_REVENUECAT_API_KEY` and the related iOS and Android keys are set.
 
 Then, configure a RevenueCat webhook endpoint for `https://<HOST>/api/v1/public/subscriptions/revenuecat`.
 The `Authorization` header should be set to `Bearer <CURIO_APP_SECRET>`.
