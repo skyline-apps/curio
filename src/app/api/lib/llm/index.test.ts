@@ -1,4 +1,5 @@
 import { type EnvContext } from "@app/api/utils/env";
+import { createLogger } from "@app/api/utils/logger";
 import { describe, expect, it, vi } from "vitest";
 
 import { explainInContext, summarizeItem } from "./index";
@@ -17,17 +18,13 @@ vi.mock("@google/genai", () => {
 });
 
 describe("@app/api/lib/llm", () => {
-  const mockLog = {
-    warn: vi.fn(),
-    error: vi.fn(),
-    info: vi.fn(),
-    debug: vi.fn(),
-  };
+  const logger = createLogger({});
+  const loggerWarnSpy = vi.spyOn(logger, "warn");
 
   const mockContext = {
     env: { GEMINI_API_KEY: "test-key" },
     get: (key: string) => {
-      if (key === "log") return mockLog;
+      if (key === "log") return logger;
       return null;
     },
   } as unknown as EnvContext;
@@ -55,7 +52,7 @@ describe("@app/api/lib/llm", () => {
       const result = await summarizeItem(mockContext, "Simple text.");
       expect(result).toBe("Summary after retry.");
       expect(mockGenerateContent).toHaveBeenCalledTimes(2);
-      expect(mockLog.warn).toHaveBeenCalledWith(
+      expect(loggerWarnSpy).toHaveBeenCalledWith(
         "LLM rate limit hit",
         expect.any(Object),
       );
@@ -69,18 +66,21 @@ describe("@app/api/lib/llm", () => {
 
       const promise = summarizeItem(mockContext, "Text");
 
-      // Advance timers enough times to cover the retries
-      // Logic: 5 retries * (1ms + 1000ms) = ~5005ms
-      // We need to advance time asynchronously for the loop to progress
-      for (let i = 0; i < 6; i++) {
-        await vi.advanceTimersByTimeAsync(2000);
-      }
+      // Advance timers concurrently to allow the retries to proceed while we await the result
+      const advanceTimers = async (): Promise<void> => {
+        // Logic: 5 retries * (1ms + 1000ms) = ~5005ms
+        for (let i = 0; i < 6; i++) {
+          await vi.advanceTimersByTimeAsync(2000);
+        }
+      };
 
-      await expect(promise).rejects.toThrow(
-        "Max rate limit retries (3) exceeded.",
-      );
+      await Promise.all([
+        expect(promise).rejects.toThrow("Max rate limit retries (3) exceeded."),
+        advanceTimers(),
+      ]);
+
       vi.useRealTimers();
-      expect(mockLog.warn).toHaveBeenCalledWith(
+      expect(loggerWarnSpy).toHaveBeenCalledWith(
         "LLM rate limit hit",
         expect.any(Object),
       );
