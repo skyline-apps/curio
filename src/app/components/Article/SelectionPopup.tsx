@@ -2,6 +2,7 @@ import Button from "@app/components/ui/Button";
 import Icon from "@app/components/ui/Icon";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { useSettings } from "@app/providers/Settings";
+import { useToast } from "@app/providers/Toast";
 import { createLogger } from "@app/utils/logger";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useContext, useEffect, useState } from "react";
@@ -24,6 +25,7 @@ export const SelectionPopup = ({
   containerRef,
 }: SelectionPopupProps): React.ReactElement | null => {
   const { isPremium } = useSettings();
+  const { showToast } = useToast();
   const { explainHighlight } = useContext(CurrentItemContext);
   const [isExplainLoading, setIsExplainLoading] = useState<boolean>(false);
   const [explanation, setExplanation] = useState<string | null>(null);
@@ -127,32 +129,31 @@ export const SelectionPopup = ({
     }
   }, [explainHighlight, selection]);
 
-  const explainButton = isPremium ? (
+  const explainButton = (
     <Button
       size="xs"
-      color="primary"
-      tooltip="Explain this snippet."
-      isLoading={isExplainLoading}
-      onPress={onExplainClick}
+      color={isPremium ? "primary" : "secondary"}
+      tooltip={!isPremium ? "Premium feature" : "Explain this snippet."}
+      isLoading={isPremium && isExplainLoading}
+      onPress={() => {
+        if (!isPremium) {
+          showToast(
+            <p className="inline">
+              <Link to="/settings?section=subscription" className="underline">
+                Upgrade to Premium
+              </Link>{" "}
+              to use this feature.
+            </p>,
+          );
+          return;
+        }
+        onExplainClick();
+      }}
     >
-      <Icon icon={<HiMiniSparkles />} className="text-primary-foreground" />
-      Explain
-    </Button>
-  ) : (
-    <Button
-      size="xs"
-      tooltip={
-        <p className="inline">
-          <Link to="/settings?section=subscription" className="underline">
-            Upgrade to Premium
-          </Link>{" "}
-          to use this feature.
-        </p>
-      }
-      disabled
-      onPress={() => {}}
-    >
-      <Icon icon={<HiMiniSparkles />} />
+      <Icon
+        icon={<HiMiniSparkles />}
+        className={isPremium ? "text-primary-foreground" : "text-default"}
+      />
       Explain
     </Button>
   );

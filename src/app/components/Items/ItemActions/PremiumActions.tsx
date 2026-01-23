@@ -3,6 +3,7 @@ import Icon from "@app/components/ui/Icon";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import type { Item, PublicItem } from "@app/providers/Items";
 import { useSettings } from "@app/providers/Settings";
+import { useToast } from "@app/providers/Toast";
 import React, { useCallback, useContext } from "react";
 import { HiMiniSparkles, HiOutlineDocumentText } from "react-icons/hi2";
 import { Link, useNavigate } from "react-router-dom";
@@ -29,49 +30,54 @@ const PremiumActions = ({ item }: PremiumActionsProps): React.ReactElement => {
     await fetchItemSummary();
   }, [item, fetchItemSummary, navigate]);
 
-  const summaryButton = isPremium ? (
-    viewingSummary && !itemSummaryLoading ? (
-      <Button
-        size="sm"
-        variant="faded"
-        color="primary"
-        tooltip="View full article."
-        onPress={() => setViewingSummary(false)}
-      >
-        <Icon icon={<HiOutlineDocumentText />} className="text-primary" />
-        View full
-      </Button>
-    ) : (
-      <Button
-        size="sm"
-        variant="faded"
-        color="primary"
-        tooltip="Summarize this item."
-        isLoading={itemSummaryLoading}
-        onPress={fetchSummary}
-      >
-        <Icon icon={<HiMiniSparkles />} className="text-primary" />
-        Summary
-      </Button>
-    )
-  ) : (
-    <Button
-      size="sm"
-      variant="faded"
-      color="secondary"
-      tooltip={
+  const { showToast } = useToast();
+
+  const handlePress = (): void => {
+    if (!isPremium) {
+      showToast(
         <p className="inline">
           <Link to="/settings?section=subscription" className="underline">
             Upgrade to Premium
           </Link>{" "}
           to use this feature.
-        </p>
-      }
-      disabled
-      onPress={() => {}}
+        </p>,
+      );
+      return;
+    }
+
+    if (viewingSummary && !itemSummaryLoading) {
+      setViewingSummary(false);
+    } else {
+      fetchSummary();
+    }
+  };
+
+  const buttonIcon =
+    isPremium && viewingSummary && !itemSummaryLoading ? (
+      <HiOutlineDocumentText />
+    ) : (
+      <HiMiniSparkles />
+    );
+  const buttonText =
+    isPremium && viewingSummary && !itemSummaryLoading
+      ? "View full"
+      : "Summary";
+  const buttonColor = !isPremium ? "secondary" : "primary";
+
+  const summaryButton = (
+    <Button
+      size="sm"
+      variant="faded"
+      color={buttonColor}
+      tooltip={!isPremium ? "Premium feature" : "Summarize this item."}
+      isLoading={isPremium && itemSummaryLoading}
+      onPress={handlePress}
     >
-      <Icon icon={<HiMiniSparkles />} className="text-default" />
-      Summary
+      <Icon
+        icon={buttonIcon}
+        className={isPremium ? `text-primary` : `text-default`}
+      />
+      {buttonText}
     </Button>
   );
 
