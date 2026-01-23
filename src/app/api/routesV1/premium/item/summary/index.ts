@@ -64,7 +64,7 @@ export const summaryRouter = new Hono<EnvBindings>().post(
         c.header("Content-Encoding", "Identity");
         return streamText(c, async (stream) => {
           let summary = "";
-          for await (const chunk of summarizeItemStream(c.env, fullContent!)) {
+          for await (const chunk of summarizeItemStream(c, fullContent!)) {
             await stream.write(chunk);
             summary += chunk;
           }
@@ -85,6 +85,19 @@ export const summaryRouter = new Hono<EnvBindings>().post(
           },
           404,
         );
+      } else if (error instanceof LLMError) {
+        log.error("LLM error generating summary", {
+          profileId,
+          slug,
+          versionName,
+          error,
+        });
+        return c.json(
+          {
+            error: "Failed to generate summary.",
+          },
+          500,
+        );
       }
     }
     if (!fullContent) {
@@ -103,7 +116,7 @@ export const summaryRouter = new Hono<EnvBindings>().post(
         versionName,
         profileId,
       });
-      const summary = await summarizeItem(c.env, fullContent);
+      const summary = await summarizeItem(c, fullContent);
       await uploadItemSummary(c.env, slug, versionName, summary);
       return c.json(PremiumItemSummaryResponseSchema.parse({ summary }));
     } catch (error) {

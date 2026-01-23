@@ -1,3 +1,5 @@
+import { type EnvContext } from "@app/api/utils/env";
+import { type Logger } from "@app/api/utils/logger";
 import { GoogleGenAI } from "@google/genai";
 
 import { LLMError } from "./types";
@@ -57,19 +59,24 @@ function parseRetryDelay(error: unknown): number | null {
 async function summarizeChunk(
   ai: GoogleGenAI,
   chunk: string,
+  log: Logger,
   retries = 3,
   backoffMs = 300,
 ): Promise<string> {
   const systemPrompt = `You are a helpful reading assistant. Summarize the following article section as a clear, concise summary according to the following guidelines:\n\n- Return your summary in Markdown format.\n- Capture all key points, and call out any memorable quotes in Markdown blockquotes.\n- Preserve the original writing style (journalistic, academic, creative, etc.), tone (informative, sensational, reflective, humorous, etc.)\n- Preserve the original voice (first-person, second-person, third-person, etc.).\n- Do not preface your summary with any additional text.\n- Be concise and keep the summary to 2-6 sentences.`;
-  const prompt = `${systemPrompt}\n\n${chunk}`;
+  const prompt = `<article_section>\n${chunk}\n</article_section>`;
 
   let attempts = 0;
+  let rateLimitAttempts = 0;
+  const maxRateLimitRetries = 3;
+
   while (attempts < retries) {
     try {
       const result = await ai.models.generateContent({
         model: MODEL,
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         config: {
+          systemInstruction: { parts: [{ text: systemPrompt }] },
           temperature: 0.3,
           maxOutputTokens: 1024 * 10,
         },
@@ -82,20 +89,22 @@ async function summarizeChunk(
     } catch (err) {
       const retryDelay = parseRetryDelay(err);
       if (retryDelay) {
-        // If we get a 429 with a specific retry delay, wait and retry without incrementing attempts
-        // (or incrementing slower) to respect the server's request.
-        // However, to avoid infinite loops, we still need a break condition.
-        // Let's treat it as a "free" retry but with a max limit of, say, 3 "quota" retries effectively.
-        // For simplicity, we just wait and retry, but we'll increment attempt only if we don't have a retryDelay
-        // OR we can just wait the delay and count it as an attempt.
-        // Better: Wait the delay + buffer, and count it as an attempt (or not?).
-        // If we count it, we might exhaust retries too fast if the delay is long.
-        // If the delay is 49s, and we have 3 retries, we wait 49s, then retry.
-        // Let's wait the delay and NOT count it as a standard attempt, but have a separate safety counter.
-        await new Promise((res) => setTimeout(res, retryDelay + 1000));
-        continue;
+        log.warn("LLM rate limit hit", {
+          retryDelay: String(retryDelay),
+          attempts: String(attempts),
+          rateLimitAttempts: String(rateLimitAttempts),
+        });
+        if (rateLimitAttempts < maxRateLimitRetries) {
+          await new Promise((res) => setTimeout(res, retryDelay + 1000));
+          rateLimitAttempts++;
+          continue;
+        }
+        throw new LLMError(
+          `Max rate limit retries (${maxRateLimitRetries}) exceeded.`,
+        );
       }
 
+      // Standard error or exhausted rate limit retries
       if (attempts < retries - 1) {
         // Exponential backoff for other errors
         await new Promise((res) =>
@@ -119,6 +128,7 @@ async function summarizeChunk(
               const subSummary = await summarizeChunk(
                 ai,
                 subChunks[j],
+                log,
                 retries,
                 backoffMs,
               );
@@ -143,10 +153,11 @@ async function summarizeChunk(
 }
 
 export async function summarizeItem(
-  env: LLMEnv,
+  c: EnvContext,
   articleText: string,
 ): Promise<string> {
-  const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
+  const ai = new GoogleGenAI({ apiKey: c.env.GEMINI_API_KEY });
+  const log = c.get("log");
   const sections = splitBySections(articleText);
   const sectionSummaries: string[] = [];
   for (let i = 0; i < sections.length; i++) {
@@ -154,7 +165,7 @@ export async function summarizeItem(
     if (content.trim()) {
       try {
         const sectionText = header ? `${header}\n${content}` : content;
-        const summary = await summarizeChunk(ai, sectionText);
+        const summary = await summarizeChunk(ai, sectionText, log);
         if (header) {
           sectionSummaries.push(`${header}\n${summary.trim()}`);
         } else {
@@ -171,17 +182,18 @@ export async function summarizeItem(
 }
 
 export async function* summarizeItemStream(
-  env: LLMEnv,
+  c: EnvContext,
   articleText: string,
 ): AsyncGenerator<string, void, unknown> {
-  const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
+  const ai = new GoogleGenAI({ apiKey: c.env.GEMINI_API_KEY });
+  const log = c.get("log");
   const sections = splitBySections(articleText);
   for (let i = 0; i < sections.length; i++) {
     const { header, content } = sections[i];
     if (content.trim()) {
       try {
         const sectionText = header ? `${header}\n${content}` : content;
-        const summary = await summarizeChunk(ai, sectionText);
+        const summary = await summarizeChunk(ai, sectionText, log);
         if (header) {
           yield `${header}\n${summary.trim()}\n\n`;
         } else {
@@ -247,21 +259,22 @@ function extractContext(snippet: string, articleText: string): string {
 }
 
 export async function explainInContext(
-  env: LLMEnv,
+  c: EnvContext,
   snippet: string,
   articleText: string,
 ): Promise<string> {
   // Use the same ai instance as summarizeItem
-  const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
+  const ai = new GoogleGenAI({ apiKey: c.env.GEMINI_API_KEY });
+  const log = c.get("log");
   try {
     const systemPrompt = `You are a helpful reading assistant. Given excerpts from an article and a highlighted snippet from that article, provide a concise and informative explanation of the snippet.\n\n- If the snippet contains names, places, or terms, briefly define or describe them using context from the article.\n- If the snippet includes confusing or ambiguous language, clarify its meaning and intent based on the surrounding context.\n- Format your response using plain text only, no Markdown.\n- Keep your explanation clear, accurate, and no longer than 2-3 sentences.`;
     const contextExcerpt = extractContext(snippet, articleText);
     const userText = `<article_excerpt>\n${contextExcerpt}\n</article_excerpt>\n\n<highlight_snippet>\n${snippet}\n</highlight_snippet>`;
-    const prompt = `${systemPrompt}\n\n${userText}`;
     const result = await ai.models.generateContent({
       model: MODEL,
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      contents: [{ role: "user", parts: [{ text: userText }] }],
       config: {
+        systemInstruction: { parts: [{ text: systemPrompt }] },
         temperature: 0.3,
         maxOutputTokens: 2048,
       },
@@ -272,6 +285,14 @@ export async function explainInContext(
     }
     return explanation;
   } catch (err) {
+    const retryDelay = parseRetryDelay(err);
+    if (retryDelay) {
+      log.warn("LLM rate limit hit in explainInContext", {
+        retryDelay: String(retryDelay),
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+
     if (err instanceof Error) {
       throw new LLMError(`LLM request failed: ${err.message}`);
     }

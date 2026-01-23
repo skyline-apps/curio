@@ -135,6 +135,17 @@ export async function* authenticatedStreamFetch<T = unknown>(
   });
   if (response.status === 401) return;
 
+  if (!response.ok) {
+    let errorMessage = "Stream request failed";
+    try {
+      const errorBody = await response.json();
+      errorMessage = errorBody.error || errorMessage;
+    } catch {
+      errorMessage = response.statusText || errorMessage;
+    }
+    throw new Error(errorMessage);
+  }
+
   const contentType = response.headers.get("content-type") || "";
   if (
     contentType.includes("event-stream") ||

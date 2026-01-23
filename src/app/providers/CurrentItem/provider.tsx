@@ -1,5 +1,6 @@
 import { useAppLayout } from "@app/providers/AppLayout";
 import { Item, ItemsContext, PublicItem } from "@app/providers/Items";
+import { useToast } from "@app/providers/Toast";
 import { ItemState } from "@app/schemas/db";
 import { type Highlight } from "@app/schemas/v1/items/highlights";
 import { PremiumItemSummaryResponse } from "@app/schemas/v1/premium/item/summary";
@@ -52,6 +53,7 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
   const [itemSummaryLoading, setItemSummaryLoading] = useState(false);
 
   const { updateAppLayout } = useAppLayout();
+  const { showToast } = useToast();
   // Note that this ItemsContext may not be available if CurrentItemProvider is being used for an
   // unauthenticated user. The core functionality of getting current item content should still work.
   const { items } = useContext(ItemsContext);
@@ -293,17 +295,24 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
           setItemSummary(summary);
         } else if ("summary" in chunk) {
           setItemSummary(chunk.summary);
+          summary = chunk.summary;
         } else {
           log.error("Unexpected response from summary endpoint", chunk);
         }
       }
+      if (!summary) {
+        throw new Error("Received empty summary response");
+      }
       setItemSummaryLoading(false);
     } catch (err) {
       log.error("Failed to fetch item summary", err);
+      showToast("Failed to generate summary. Please try again.", {
+        type: "error",
+      });
       setItemSummaryLoading(false);
       setViewingSummary(false);
     }
-  }, [itemLoadedSlug, versionName]);
+  }, [itemLoadedSlug, versionName, showToast]);
 
   return (
     <CurrentItemContext.Provider

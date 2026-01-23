@@ -37,7 +37,7 @@ export const contextRouter = new Hono<EnvBindings>().post(
     const { slug, snippet, versionName } = c.req.valid("json");
     try {
       const { content } = await getItemContent(c.env, slug, versionName);
-      const explanation = await explainInContext(c.env, snippet, content);
+      const explanation = await explainInContext(c, snippet, content);
       return c.json(PremiumItemContextResponseSchema.parse({ explanation }));
     } catch (error) {
       if (error instanceof StorageError) {
