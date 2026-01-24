@@ -22,6 +22,7 @@ interface ItemGridProps {
 // Keep in sync with dimensions of ItemCard/index.tsx
 const CARD_WIDTH = 288; // w-80
 const CARD_HEIGHT = 384; // h-96
+const MOBILE_CARD_HEIGHT = 120; // h-28
 const GAP = 16; // gap-4
 
 const ItemGrid: React.FC<ItemGridProps> = ({
@@ -36,21 +37,41 @@ const ItemGrid: React.FC<ItemGridProps> = ({
   const [containerWidth, setContainerWidth] = useState(0);
   const { previewItem } = useContext(CurrentItemContext);
 
+  const [isSm, setIsSm] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.matchMedia("(min-width: 640px)").matches;
+  });
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 640px)");
+    const listener = (): void => setIsSm(media.matches);
+    setIsSm(media.matches);
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, []);
+
   // Calculate number of columns based on container width
   const columnCount = useMemo(() => {
+    if (!isSm) return 1;
     if (containerWidth === 0) return 1;
     return Math.max(1, Math.floor(containerWidth / (CARD_WIDTH + GAP)));
-  }, [containerWidth]);
+  }, [containerWidth, isSm]);
 
   // Calculate number of rows needed
   const rowCount = Math.ceil(items.length / columnCount) + (hasMore ? 1 : 0);
 
+  const itemHeight = isSm ? CARD_HEIGHT : MOBILE_CARD_HEIGHT;
+
   const rowVirtualizer = useVirtualizer({
     count: rowCount,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => CARD_HEIGHT + GAP,
+    estimateSize: () => itemHeight + GAP,
     overscan: 5,
   });
+
+  useEffect(() => {
+    rowVirtualizer.measure();
+  }, [rowVirtualizer, itemHeight, containerWidth]);
 
   const handleScroll = useCallback(() => {
     const scrollElement = parentRef.current;
@@ -115,7 +136,7 @@ const ItemGrid: React.FC<ItemGridProps> = ({
   return (
     <div
       ref={parentRef}
-      className="w-full h-full overflow-auto"
+      className="w-full h-full px-4 overflow-auto"
       style={{
         contain: "strict",
       }}

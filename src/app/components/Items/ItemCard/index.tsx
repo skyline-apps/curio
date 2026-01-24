@@ -20,7 +20,10 @@ const ItemCard: React.FC<ItemCardProps> = ({
   // Keep card dimensions in sync with ItemGrid/index.tsx
   return (
     <Card
-      className={cn("shrink-0 w-72 p-2", hideThumbnail ? "h-48" : "h-96")}
+      className={cn(
+        "flex-row items-start justify-center sm:items-center sm:justify-start sm:flex-col shrink-0 w-full sm:w-72 p-2 h-28",
+        hideThumbnail ? "sm:h-48" : "sm:h-96",
+      )}
       isPressable
       onPress={onPress}
       dir={item.metadata.textDirection}
@@ -31,6 +34,7 @@ const ItemCard: React.FC<ItemCardProps> = ({
           thumbnail={
             item.metadata.thumbnail ? item.metadata.thumbnail : undefined
           }
+          size="sm"
         />
       )}
       <div className="flex flex-col items-start text-left w-full p-1 overflow-hidden">
@@ -70,23 +74,25 @@ const ItemCard: React.FC<ItemCardProps> = ({
             </p>
           </Link>
         ) : null}
-        <div className="flex flex-col gap-2 py-2">
-          <div className="flex flex-row gap-2 items-start">
-            {item.metadata.author && (
-              <p className="text-xs overflow-hidden truncate text-secondary-300 dark:text-secondary-600">
-                {item.metadata.author}
-              </p>
-            )}
+        {item.metadata.author || item.metadata.publishedAt ? (
+          <div className="hidden sm:flex flex-col gap-2 py-1">
+            <div className="flex flex-row gap-2 items-start">
+              {item.metadata.author && (
+                <p className="text-xs overflow-hidden truncate text-secondary-300 dark:text-secondary-600">
+                  {item.metadata.author}
+                </p>
+              )}
 
-            {item.metadata.publishedAt && (
-              <p className="text-xs text-secondary-300 dark:text-secondary-600">
-                {new Date(item.metadata.publishedAt).toLocaleDateString()}
-              </p>
-            )}
+              {item.metadata.publishedAt && (
+                <p className="text-xs text-secondary-300 dark:text-secondary-600">
+                  {new Date(item.metadata.publishedAt).toLocaleDateString()}
+                </p>
+              )}
+            </div>
           </div>
-        </div>
+        ) : null}
         {item.metadata.description && (
-          <p className="text-sm text-secondary max-h-20 overflow-hidden">
+          <p className="text-sm text-secondary line-clamp-2 sm:line-clamp-5">
             {item.metadata.description}
           </p>
         )}
