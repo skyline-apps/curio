@@ -83,7 +83,12 @@ class ShareViewController: UIViewController {
             })
 
         guard let firstWebUrl else {
-            NSLog("[SendIntent][Debug] No valid http/https URL found in shareItems: %@", shareItems.map { $0.url ?? "" })
+            DispatchQueue.main.async {
+                self.statusLabel.text = "No valid URL found"
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    self.extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
+                }
+            }
             return
         }
 
@@ -153,36 +158,86 @@ class ShareViewController: UIViewController {
         return shareItem
     }
     
+    private let statusLabel = UILabel()
+
     override public func viewDidLoad() {
         super.viewDidLoad()
+        
+        // Add visual feedback (Spinner & Status Label)
+        let spinner = UIActivityIndicatorView(style: .large)
+        spinner.color = .white
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        spinner.startAnimating()
+        
+        statusLabel.textColor = .white
+        statusLabel.textAlignment = .center
+        statusLabel.numberOfLines = 0
+        statusLabel.font = UIFont.systemFont(ofSize: 14)
+        statusLabel.translatesAutoresizingMaskIntoConstraints = false
+        statusLabel.text = "Initializing..."
+        
+        view.addSubview(spinner)
+        view.addSubview(statusLabel)
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.8)
+        
+        NSLayoutConstraint.activate([
+            spinner.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            spinner.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -20),
+            statusLabel.topAnchor.constraint(equalTo: spinner.bottomAnchor, constant: 20),
+            statusLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            statusLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+        ])
+        
+        func updateStatus(_ msg: String, _ userFacing: String? = nil) {
+            DispatchQueue.main.async {
+                if let userMsg = userFacing {
+                    self.statusLabel.text = userMsg
+                }
+                NSLog("[SendIntent] %@", msg)
+            }
+        }
+        
+        updateStatus("Starting Watchdog (4s)...", nil)
+        // Watchdog: If nothing happens in 4 seconds, force close to prevent freeze
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
+            updateStatus("Watchdog timeout! Closing...", "Request timed out")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
+            }
+        }
         
         shareItems.removeAll()
         
         guard let extensionItem = extensionContext?.inputItems.first as? NSExtensionItem else {
-            NSLog("[SendIntent][Debug] No input items found")
+            updateStatus("Error: No input items", "No content found")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
+            }
             return
         }
 
         Task { @MainActor in
+            updateStatus("Processing attachments...", "Processing...")
             self.shareItems.removeAll()
             if let attachments = extensionItem.attachments {
                 for attachment in attachments {
-                    NSLog("[SendIntent][Debug] Attachment registeredTypeIdentifiers: %@", attachment.registeredTypeIdentifiers)
-                    NSLog("[SendIntent][Debug] canLoad NSURL: %d canLoad NSString: %d", attachment.canLoadObject(ofClass: NSURL.self) ? 1 : 0, attachment.canLoadObject(ofClass: NSString.self) ? 1 : 0)
+                    // ... (existing logic)
                     if attachment.canLoadObject(ofClass: NSURL.self) || attachment.hasItemConformingToTypeIdentifier(UTType.url.identifier) {
+                        updateStatus("Found URL item...", nil)
                         if let item = try? await self.handleTypeUrl(attachment) {
                             if let s = item.url, let u = URL(string: s), let scheme = u.scheme?.lowercased(), (scheme == "http" || scheme == "https") {
-                                NSLog("[SendIntent][Debug] URL path chosen, accepted: %@", s)
+                                updateStatus("Accepted URL: \(s)", "Found link")
                                 self.shareItems.append(item)
                                 break
                             }
                         }
                     } else if attachment.canLoadObject(ofClass: NSString.self) || attachment.hasItemConformingToTypeIdentifier(UTType.text.identifier) {
+                        updateStatus("Found Text item...", nil)
                         if let item = try? await self.handleTypeText(attachment) {
                             if let s = item.title, let u = URL(string: s), let scheme = u.scheme?.lowercased(), (scheme == "http" || scheme == "https") {
                                 let onlyUrl = ShareItem()
                                 onlyUrl.url = s
-                                NSLog("[SendIntent][Debug] Text path chosen, accepted URL: %@", s)
+                                updateStatus("Accepted Text URL: \(s)", "Found link")
                                 self.shareItems.append(onlyUrl)
                                 break
                             }
@@ -190,27 +245,49 @@ class ShareViewController: UIViewController {
                     }
                 }
             }
+            updateStatus("Sending data...", "Opening...")
             self.sendData()
         }
     }
 
     @objc func openURL(_ url: URL) {
-        // Use responder chain to find an object that can open the URL (recommended for extensions)
+        DispatchQueue.main.async {
+            self.statusLabel.text = "Opening Curio..."
+            NSLog("[SendIntent] Opening URL: %@", url.absoluteString)
+        }
+        
+        // 1. Try Responder Chain (UIApplication)
         var responder: UIResponder? = self
         while responder != nil {
             if let application = responder as? UIApplication {
-                application.open(url, options: [:], completionHandler: { _ in
-                    self.extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
+                DispatchQueue.main.async {
+                    NSLog("[SendIntent] Found UIApplication. Opening...")
+                }
+                application.open(url, options: [:], completionHandler: { success in
+                    DispatchQueue.main.async {
+                        self.statusLabel.text = success ? "Success" : "Failed to open"
+                        NSLog("[SendIntent] App open result: %d", success)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                            self.extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
+                        }
+                    }
                 })
                 return
             }
             responder = responder?.next
         }
         
-        // Fallback to extensionContext.open if responder chain fails
-        self.extensionContext?.open(url, completionHandler: { _ in
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                self.extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
+        // 2. Fallback to ExtensionContext
+        DispatchQueue.main.async {
+            NSLog("[SendIntent] No UIApplication found. Using ExtensionContext...")
+        }
+        self.extensionContext?.open(url, completionHandler: { success in
+            DispatchQueue.main.async {
+                self.statusLabel.text = success ? "Success" : "Failed to open"
+                NSLog("[SendIntent] Context open result: %d", success)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    self.extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
+                }
             }
         })
     }
