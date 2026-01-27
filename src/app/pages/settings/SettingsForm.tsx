@@ -1,6 +1,7 @@
 import AppLinks from "@app/components/Landing/AppLinks";
 import { Accordion, AccordionItem } from "@app/components/ui/Accordion";
 import { useUser } from "@app/providers/User";
+import { isNativePlatform } from "@app/utils/platform";
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -63,7 +64,11 @@ const SettingsForm: React.FC = () => {
         <p>Signed in as {user.email}.</p>
         <p>
           Need help? View our{" "}
-          <Link className="hover:underline" to="/docs" target="_blank">
+          <Link
+            className="hover:underline"
+            to="/docs"
+            target={isNativePlatform() ? undefined : "_blank"}
+          >
             documentation
           </Link>
           .
@@ -80,11 +85,19 @@ const SettingsForm: React.FC = () => {
           .
         </p>
         <p>
-          <Link className="hover:underline" to="/terms" target="_blank">
+          <Link
+            className="hover:underline"
+            to="/terms"
+            target={isNativePlatform() ? undefined : "_blank"}
+          >
             Terms of Service
           </Link>
           {" • "}
-          <Link className="hover:underline" to="/privacy" target="_blank">
+          <Link
+            className="hover:underline"
+            to="/privacy"
+            target={isNativePlatform() ? undefined : "_blank"}
+          >
             Privacy Policy
           </Link>
         </p>
