@@ -1,6 +1,6 @@
 import { EnvBindings } from "@app/api/utils/env";
+import { getStaticPageHtml, renderMarkdown } from "@app/api/utils/static";
 import docs from "@app/utils/content/docs";
-import { getStaticPageHtml, renderMarkdown } from "api/routesV1/static/utils";
 import { Hono } from "hono";
 
 const staticDocsRouter = new Hono<EnvBindings>();

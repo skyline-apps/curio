@@ -1,7 +1,6 @@
 import { ESLintUtils, TSESTree } from "@typescript-eslint/utils";
 
 export const apiMiddlewareRule = ESLintUtils.RuleCreator.withoutDocs({
-  name: "api-middleware",
   meta: {
     type: "problem",
     messages: {
@@ -78,7 +77,6 @@ export const apiMiddlewareRule = ESLintUtils.RuleCreator.withoutDocs({
 });
 
 export const responseParseRule = ESLintUtils.RuleCreator.withoutDocs({
-  name: "api-response-parse",
   meta: {
     type: "problem",
     messages: {
@@ -160,7 +158,6 @@ export const responseParseRule = ESLintUtils.RuleCreator.withoutDocs({
 });
 
 export const apiValidationRule = ESLintUtils.RuleCreator.withoutDocs({
-  name: "api-validation",
   meta: {
     type: "problem",
     messages: {

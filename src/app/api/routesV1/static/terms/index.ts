@@ -1,10 +1,10 @@
 import { EnvBindings } from "@app/api/utils/env";
+import { getStaticPageHtml, renderMarkdown } from "@app/api/utils/static";
 import {
   termsOfServiceData,
   TermsSection,
   TermsSubsection,
 } from "@app/utils/content/terms";
-import { getStaticPageHtml, renderMarkdown } from "api/routesV1/static/utils";
 import { Hono } from "hono";
 
 const staticTermsRouter = new Hono<EnvBindings>();
