@@ -133,7 +133,7 @@ Instead, to run logic for a specific consumer queue locally, set it as the `queu
 1. Publish the browser extensions and update the values in `src/app/utils/config.json`.
 
 ### Android app
-1. Ensure the `versionCode` and `versionName` are updated in `src/app/android/app/build.gradle`.
+1. From `src/script`, run `npm run version:bump` to update the app version.
 2. Open the application in Android Studio by running `npx cap open android` from `src/app`.
 3. Build a signed APK using the Build > Generate Signed App Bundle option.
 4. Select "Android App Bundle" and follow the instructions. You should build a `release` app in the `src/app/android/app` folder.
@@ -143,7 +143,7 @@ Instead, to run logic for a specific consumer queue locally, set it as the `queu
 8. In the Google Auth Platform Cloud Console, create a new app of type "Android", populating its package name from the `src/app/android/app/build.gradle` file and the SHA-1 fingerprint from the step above.
 
 ### iOS app
-1. Ensure the `MARKETING_VERSION` in `src/app/ios/App/App.xcodeproj/project.pbxproj` is set to the same value as the `versionName` in `src/app/android/app/build.gradle`.
+1. From `src/script`, run `npm run version:bump` to update the app version.
 2. Follow instructions [here](https://github.com/Cap-go/capacitor-social-login/blob/main/docs/setup_apple.md) to set up Apple sign in.
 3. For each Supabase auth deployment, enable Apple sign-in with the client ID from `PRODUCT_BUNDLE_IDENTIFIER` in `src/app/ios/App/App.xcodeproj/project.pbxproj`.
 4. Follow [these instructions](https://github.com/carsten-klaffke/send-intent?tab=readme-ov-file#ios) to allow the app to handle share intents.

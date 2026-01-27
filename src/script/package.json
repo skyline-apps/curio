@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "index:backfill": "tsx backfillIndex.ts",
     "import:omnivore": "tsx importOmnivore.ts",
-    "update": "tsx updateItemContent.ts"
+    "update": "tsx updateItemContent.ts",
+    "version:bump": "tsx bumpVersion.ts"
   },
   "author": "",
   "license": "MIT",
