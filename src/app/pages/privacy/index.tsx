@@ -1,9 +1,7 @@
 import Footer from "@app/components/Landing/Footer";
 import Navbar from "@app/components/Navbar";
-import {
-  privacyPolicyData,
-  renderMarkdownText,
-} from "@app/utils/content/privacy";
+import { privacyPolicyData } from "@app/utils/content/privacy";
+import { renderInlineMarkdown } from "@app/utils/markdown";
 import React from "react";
 
 const Privacy: React.FC = () => {
@@ -12,12 +10,12 @@ const Privacy: React.FC = () => {
       return content.map((item, index) => (
         <p
           key={index}
-          dangerouslySetInnerHTML={{ __html: renderMarkdownText(item) }}
+          dangerouslySetInnerHTML={{ __html: renderInlineMarkdown(item) }}
         />
       ));
     }
     return (
-      <p dangerouslySetInnerHTML={{ __html: renderMarkdownText(content) }} />
+      <p dangerouslySetInnerHTML={{ __html: renderInlineMarkdown(content) }} />
     );
   };
 

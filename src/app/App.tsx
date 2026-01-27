@@ -30,6 +30,7 @@ import {
   Outlet,
   Route,
   Routes,
+  useLocation,
   useNavigate,
 } from "react-router-dom";
 
@@ -65,6 +66,19 @@ const RootPageRedirect = (): React.ReactNode => {
   return null;
 };
 
+const StaticRedirect = (): React.ReactNode => {
+  const { pathname, search, hash } = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Strip '/static' from the start of the path
+    const newPath = pathname.replace(/^\/static/, "") || "/";
+    navigate(`${newPath}${search}${hash}`, { replace: true });
+  }, [pathname, search, hash, navigate]);
+
+  return null;
+};
+
 export const App = (): React.ReactNode => {
   const { user, isLoading } = useUser();
 
@@ -94,6 +108,7 @@ export const App = (): React.ReactNode => {
         <AppUrlListener />
         <Routes>
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/static/*" element={<StaticRedirect />} />
           <Route
             element={
               <RootLayout>

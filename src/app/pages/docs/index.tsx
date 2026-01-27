@@ -3,10 +3,9 @@ import AppLinks from "@app/components/Landing/AppLinks";
 import Markdown from "@app/components/Markdown";
 import Navbar from "@app/components/Navbar";
 import RightSidebar from "@app/components/RightSidebar";
+import docs from "@app/utils/content/docs";
 import React, { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-
-import docs from "./docs";
 
 const DocsPage: React.FC = () => {
   const headingLinksRef = useRef<HTMLDivElement>(null);

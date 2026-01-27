@@ -259,10 +259,3 @@ export const privacyPolicyData = {
     },
   },
 };
-
-// Helper function to render markdown-style text to HTML
-export const renderMarkdownText = (text: string): string => {
-  return text
-    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*(.*?)\*/g, "<em>$1</em>");
-};
