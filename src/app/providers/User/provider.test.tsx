@@ -33,6 +33,9 @@ describe("UserContext", () => {
               },
             },
           }),
+          onAuthStateChange: vi.fn().mockReturnValue({
+            data: { subscription: { unsubscribe: vi.fn() } },
+          }),
         },
       }),
     }));
