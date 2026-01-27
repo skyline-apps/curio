@@ -75,6 +75,39 @@ export const UserProvider: React.FC<UserProviderProps> = ({
     refreshUser();
   }, [refreshUser]);
 
+  useEffect(() => {
+    const supabase = getSupabaseClient();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        if (session) {
+          try {
+            await fetch("/api/auth/session", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                accessToken: session.access_token,
+                refreshToken: session.refresh_token,
+              }),
+            });
+          } catch (error) {
+            log.error("Error syncing session:", error);
+          }
+        }
+      } else if (event === "SIGNED_OUT") {
+        // Optional: Ensure strict logout sync if needed
+        // But handleLogout usually covers this
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   const handleLogout = useCallback(async (): Promise<void> => {
     try {
       const backendResponse = await fetch("/api/auth/logout", {

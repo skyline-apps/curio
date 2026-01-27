@@ -118,6 +118,45 @@ async function authenticatedRequest(
     });
 
     if (response.status === 401) {
+      const currentHeaders = new Headers(options.headers);
+      if (!currentHeaders.has("X-Retry-Auth")) {
+        log.warn("401 received. Attempting session refresh...");
+        try {
+          const supabase = getSupabaseClient();
+          const {
+            data: { session },
+            error,
+          } = await supabase.auth.getSession();
+
+          if (!error && session) {
+            // Explicitly sync session to server to ensure cookies are updated
+            try {
+              await fetch("/api/auth/session", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  accessToken: session.access_token,
+                  refreshToken: session.refresh_token,
+                }),
+              });
+            } catch (e) {
+              log.error("Failed to sync session on 401 retry", e);
+            }
+
+            // Retry the request with the new session (cookies should be set now)
+            currentHeaders.set("X-Retry-Auth", "true");
+            return authenticatedRequest(relativePath, {
+              ...options,
+              headers: currentHeaders,
+            });
+          }
+        } catch (e) {
+          log.error("Error refreshing session on 401", e);
+        }
+      }
+
       log.warn("Unauthorized, signing out");
       try {
         const supabase = getSupabaseClient();
