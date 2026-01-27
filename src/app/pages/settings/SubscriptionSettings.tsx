@@ -7,6 +7,7 @@ import { useToast } from "@app/providers/Toast";
 import { useUser } from "@app/providers/User";
 import { cn } from "@app/utils/cn";
 import { createLogger } from "@app/utils/logger";
+import { isNativePlatform } from "@app/utils/platform";
 import {
   type CustomerInfoNative,
   type CustomerInfoWeb,
@@ -190,11 +191,26 @@ const SubscriptionSettings: React.FC = () => {
     (p) => p.product.identifier === currentSubscription,
   );
 
-  const currentPackageDescription = willRenew
-    ? `${currentPackage?.product.priceString || "error"} billed every ${currentPackage?.product.billingPeriod || "error"}`
-    : expiresAt
+  let currentPackageDescription = "";
+  if (currentPackage) {
+    currentPackageDescription = willRenew
+      ? `${currentPackage.product.priceString} billed every ${currentPackage.product.billingPeriod}`
+      : expiresAt
+        ? `Expires ${new Date(expiresAt).toLocaleDateString()} at ${new Date(expiresAt).toLocaleTimeString()}`
+        : `${currentPackage.product.priceString} billed every ${currentPackage.product.billingPeriod}`;
+  } else {
+    // Fallback if we can't find the package (e.g. cross-platform subscription)
+    const platformSource = isNativePlatform() ? "web" : "mobile";
+    const fallbackText = `Subscription purchased via ${platformSource}`;
+
+    currentPackageDescription = expiresAt
       ? `Expires ${new Date(expiresAt).toLocaleDateString()} at ${new Date(expiresAt).toLocaleTimeString()}`
-      : currentSubscription;
+      : fallbackText;
+
+    if (willRenew) {
+      currentPackageDescription = fallbackText;
+    }
+  }
 
   return (
     <div className="space-y-4">
