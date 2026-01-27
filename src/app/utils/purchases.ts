@@ -1,6 +1,7 @@
 import { createLogger } from "@app/utils/logger";
 import { Capacitor } from "@capacitor/core";
 import {
+  CustomerInfo as CustomerInfoNative,
   PACKAGE_TYPE,
   Purchases as PurchasesNative,
   PurchasesPackage,
@@ -170,5 +171,23 @@ export const purchasePackage = async (
       rcPackage: pkg.rcPackageWeb,
       customerEmail: userEmail,
     });
+  }
+};
+
+export const restorePurchases = async (): Promise<
+  CustomerInfoNative | CustomerInfoWeb
+> => {
+  if (isNative) {
+    const result = await PurchasesNative.restorePurchases();
+    return result.customerInfo;
+  } else {
+    // On web, restore typically just means syncing if the session is active,
+    // or you might not support "restore" in the same way (users just log in).
+    // But we can call restorePurchases on the SDK if supported, or just getInfo.
+    // For now, let's just return getCustomerInfo to be safe, as "restore" implies
+    // checking the store receipt which doesn't exist on Stripe-only web.
+    // Actually, RevenueCat Web SDK doesn't always have "restorePurchases"
+    // unless you are using the specific flow.
+    return PurchasesWeb.getSharedInstance().getCustomerInfo();
   }
 };

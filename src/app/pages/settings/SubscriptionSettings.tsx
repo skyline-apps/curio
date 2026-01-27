@@ -15,6 +15,7 @@ import {
   getPackages,
   initializePurchasing,
   purchasePackage,
+  restorePurchases,
   type UnifiedPackage,
 } from "@app/utils/purchases";
 import React, { useCallback, useEffect, useState } from "react";
@@ -71,6 +72,7 @@ const SubscriptionSettings: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [purchaseLoading, setPurchaseLoading] = useState<string | null>(null);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  const [isRestoring, setIsRestoring] = useState<boolean>(false);
   const { showToast } = useToast();
 
   const fetchPackages = useCallback(async (): Promise<void> => {
@@ -139,6 +141,28 @@ const SubscriptionSettings: React.FC = () => {
       }
     } finally {
       setPurchaseLoading(null);
+    }
+  }
+
+  async function handleRestore(): Promise<void> {
+    setIsRestoring(true);
+    try {
+      await restorePurchases();
+      setTimeout(() => fetchPackages(), 100);
+      setTimeout(() => refreshProfile(), 1000);
+      showToast("Purchases restored successfully.", {
+        dismissable: true,
+        disappearing: true,
+      });
+    } catch (error) {
+      log.error("Failed to restore purchases", error);
+      showToast("Failed to restore purchases.", {
+        dismissable: true,
+        disappearing: false,
+        type: "error",
+      });
+    } finally {
+      setIsRestoring(false);
     }
   }
 
@@ -273,6 +297,19 @@ const SubscriptionSettings: React.FC = () => {
               You seem to have an issue with your subscriptions. Please contact{" "}
               <a href="mailto:support@curi.ooo">support@curi.ooo</a> for
               assistance.
+            </div>
+          )}
+          {isNativePlatform() && (
+            <div className="grid grid-cols-1 gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onPress={handleRestore}
+                isLoading={isRestoring}
+                isDisabled={!!purchaseLoading || loading}
+              >
+                Restore purchases
+              </Button>
             </div>
           )}
           {purchaseError && (

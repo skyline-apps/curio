@@ -1,6 +1,7 @@
 import Button from "@app/components/ui/Button";
 import { SettingsContext } from "@app/providers/Settings";
 import { JobStatus, JobType } from "@app/schemas/db";
+import { isNativePlatform } from "@app/utils/platform";
 import { useContext, useEffect, useState } from "react";
 import { HiMiniArrowPath } from "react-icons/hi2";
 
@@ -60,13 +61,15 @@ export const Import: React.FC<ImportJobsProps> = () => {
         >
           Import from Instapaper
         </Button>
-        <Button
-          size="sm"
-          color="primary"
-          onPress={() => handleSourceClick("omnivore")}
-        >
-          Import from Omnivore
-        </Button>
+        {!isNativePlatform() && (
+          <Button
+            size="sm"
+            color="primary"
+            onPress={() => handleSourceClick("omnivore")}
+          >
+            Import from Omnivore
+          </Button>
+        )}
         <Button
           size="sm"
           color="primary"

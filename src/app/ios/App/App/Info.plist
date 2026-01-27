@@ -66,5 +66,7 @@
 		<string>google</string>
 		<string>com.googleusercontent.apps.633234629488-4f4unvth067ekhemk2hn8itkrr7edl1u</string>
 	</array>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>

@@ -10,6 +10,7 @@
 		05A136BFCFF43C0907FFA1EB /* Pods_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37C80E103B9B46EE847C6C32 /* Pods_App.framework */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		3B5119962F285DFD004FFE26 /* Curio (curi.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 3B5119952F285DFD004FFE26 /* Curio (curi.storekit */; };
+		3B511A502F287E0D004FFE26 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 3B511A4F2F287E0D004FFE26 /* PrivacyInfo.xcprivacy */; };
 		3B56EFAF2E8A622700724368 /* send-to-curio.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3B56EFA52E8A622700724368 /* send-to-curio.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
@@ -48,6 +49,7 @@
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		37C80E103B9B46EE847C6C32 /* Pods_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B5119952F285DFD004FFE26 /* Curio (curi.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Curio (curi.storekit"; sourceTree = "<group>"; };
+		3B511A4F2F287E0D004FFE26 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		3B56EFA52E8A622700724368 /* send-to-curio.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "send-to-curio.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B9DB44D2E4EF41700CD1072 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
@@ -126,6 +128,7 @@
 		504EC3061FED79650016851F /* App */ = {
 			isa = PBXGroup;
 			children = (
+				3B511A4F2F287E0D004FFE26 /* PrivacyInfo.xcprivacy */,
 				3B9DB44D2E4EF41700CD1072 /* App.entitlements */,
 				3B5119952F285DFD004FFE26 /* Curio (curi.storekit */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
@@ -248,6 +251,7 @@
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
 				3B5119962F285DFD004FFE26 /* Curio (curi.storekit in Resources */,
+				3B511A502F287E0D004FFE26 /* PrivacyInfo.xcprivacy in Resources */,
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
