@@ -18,6 +18,8 @@ const MobileLoginPage: React.FC<
   const { user } = useUser();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [demoEmail, setDemoEmail] = React.useState<string | null>(null);
+
   if (user && user.id) {
     // Already signed in; redirect to home
     navigate("/home");
@@ -42,10 +44,10 @@ const MobileLoginPage: React.FC<
           <GoogleSignIn nextUrl="/home" />
           <AppleSignIn nextUrl="/home" />
           <p className="text-secondary text-xs">or</p>
-          {import.meta.env.VITE_DEMO_BUILD === "true" ? (
-            <PasswordSignIn />
+          {demoEmail ? (
+            <PasswordSignIn initialEmail={demoEmail} />
           ) : (
-            <EmailSignIn />
+            <EmailSignIn onDemoLogin={(email) => setDemoEmail(email)} />
           )}
           {errorMessage && (
             <p className="text-danger text-sm text-center mt-2">

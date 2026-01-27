@@ -3,9 +3,13 @@ import Input from "@app/components/ui/Input";
 import { getSupabaseClient } from "@app/utils/supabase";
 import { useState } from "react";
 
-type EmailSignInProps = Record<never, never>;
+type EmailSignInProps = {
+  onDemoLogin?: (email: string) => void;
+};
 
-const EmailSignIn: React.FC<EmailSignInProps> = ({}: EmailSignInProps) => {
+const EmailSignIn: React.FC<EmailSignInProps> = ({
+  onDemoLogin,
+}: EmailSignInProps) => {
   const [email, setEmail] = useState<string>("");
   const [isSigningIn, setIsSigningIn] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -13,6 +17,14 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({}: EmailSignInProps) => {
   const redirectTo = import.meta.env.VITE_CURIO_URL || location.origin;
 
   const handleSignInWithEmail = async (): Promise<void> => {
+    if (
+      import.meta.env.VITE_DEMO_ACCOUNT_EMAIL &&
+      email === import.meta.env.VITE_DEMO_ACCOUNT_EMAIL &&
+      onDemoLogin
+    ) {
+      onDemoLogin(email);
+      return;
+    }
     setErrorMessage(null);
     setSuccessMessage(null);
     setIsSigningIn(true);

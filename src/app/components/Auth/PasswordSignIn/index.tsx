@@ -5,12 +5,14 @@ import { getSupabaseClient } from "@app/utils/supabase";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-type PasswordSignInProps = Record<never, never>;
+type PasswordSignInProps = {
+  initialEmail?: string;
+};
 
-const PasswordSignIn: React.FC<
-  PasswordSignInProps
-> = ({}: PasswordSignInProps) => {
-  const [email, setEmail] = useState<string>("");
+const PasswordSignIn: React.FC<PasswordSignInProps> = ({
+  initialEmail,
+}: PasswordSignInProps) => {
+  const [email, setEmail] = useState<string>(initialEmail || "");
   const [password, setPassword] = useState<string>("");
   const [isSigningIn, setIsSigningIn] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
