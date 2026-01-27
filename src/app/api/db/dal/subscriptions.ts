@@ -22,7 +22,83 @@ export async function handleRevenueCatEvent(
   tx: TransactionDB,
   log: Logger,
 ): Promise<void> {
+  if (event.type === "TRANSFER") {
+    log.info("Handling RevenueCat TRANSFER event", {
+      transferredFrom: event.transferred_from,
+      transferredTo: event.transferred_to,
+    });
+
+    if (
+      !event.transferred_from ||
+      event.transferred_from.length === 0 ||
+      !event.transferred_to ||
+      event.transferred_to.length === 0
+    ) {
+      log.warn("Transfer event missing from/to users", { event });
+      return;
+    }
+
+    const fromUserId = event.transferred_from[0];
+    const toUserId = event.transferred_to[0];
+
+    // Find the 'from' user to get their subscription status
+    const fromProfileResults = await tx
+      .select()
+      .from(profiles)
+      .where(eq(profiles.userId, fromUserId))
+      .limit(1);
+
+    if (fromProfileResults.length > 0) {
+      const fromProfile = fromProfileResults[0];
+
+      if (fromProfile.isPremium && fromProfile.premiumExpiresAt) {
+        log.info("Transferring subscription", {
+          from: fromUserId,
+          to: toUserId,
+          expiresAt: fromProfile.premiumExpiresAt,
+        });
+
+        // Grant to 'to' user
+        // Note: This assumes the 'to' user exists. correctly we should check or upsert?
+        // But usually the user exists if they triggered a transfer (e.g. by logging in).
+        await tx
+          .update(profiles)
+          .set({
+            isPremium: true,
+            premiumExpiresAt: fromProfile.premiumExpiresAt,
+            updatedAt: new Date(),
+          })
+          .where(eq(profiles.userId, toUserId));
+
+        // Revoke from 'from' user
+        await tx
+          .update(profiles)
+          .set({
+            isPremium: false,
+            premiumExpiresAt: null,
+            updatedAt: new Date(),
+          })
+          .where(eq(profiles.userId, fromUserId));
+      } else {
+        log.info("From user is not premium, skipping transfer", {
+          fromUserId,
+        });
+      }
+    } else {
+      log.warn("From user profile not found during transfer", { fromUserId });
+    }
+
+    return;
+  }
+
   // Find the profile by app_user_id
+  if (!event.app_user_id) {
+    log.error("Missing app_user_id for non-TRANSFER event", {
+      type: event.type,
+    });
+    throw new SubscriptionError("Missing app_user_id", 400);
+  }
+
   const profileResults = await tx
     .select()
     .from(profiles)

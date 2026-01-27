@@ -44,7 +44,7 @@ export const RevenueCatSubscriberAttributesSchema = z.record(
 
 export const RevenueCatEventSchema = z.object({
   app_id: z.string(),
-  app_user_id: z.string(),
+  app_user_id: z.string().optional().nullable(),
   type: RevenueCatEventType,
   id: z.string(),
   event_timestamp_ms: z.number(),

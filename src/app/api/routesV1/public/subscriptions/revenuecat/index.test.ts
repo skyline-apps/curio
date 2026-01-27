@@ -108,7 +108,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
 
     const profile = await testDb.db.query.profiles.findFirst({
       where: (profiles, { eq }) =>
-        eq(profiles.userId, request.event.app_user_id),
+        eq(profiles.userId, request.event.app_user_id!),
     });
     expect(profile).toBeDefined();
     expect(profile?.isPremium).toBe(true);
@@ -131,7 +131,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
 
     const profile = await testDb.db.query.profiles.findFirst({
       where: (profiles, { eq }) =>
-        eq(profiles.userId, request.event.app_user_id),
+        eq(profiles.userId, request.event.app_user_id!),
     });
     expect(profile).toBeDefined();
     expect(profile?.isPremium).toBe(true);
@@ -159,7 +159,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
 
     const profile = await testDb.db.query.profiles.findFirst({
       where: (profiles, { eq }) =>
-        eq(profiles.userId, request.event.app_user_id),
+        eq(profiles.userId, request.event.app_user_id!),
     });
     expect(profile).toBeDefined();
     expect(profile?.isPremium).toBe(true);
@@ -182,7 +182,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
 
     const profile = await testDb.db.query.profiles.findFirst({
       where: (profiles, { eq }) =>
-        eq(profiles.userId, request.event.app_user_id),
+        eq(profiles.userId, request.event.app_user_id!),
     });
     expect(profile).toBeDefined();
     expect(profile?.isPremium).toBe(false);
@@ -208,7 +208,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
 
     const profile = await testDb.db.query.profiles.findFirst({
       where: (profiles, { eq }) =>
-        eq(profiles.userId, request.event.app_user_id),
+        eq(profiles.userId, request.event.app_user_id!),
     });
     expect(profile).toBeDefined();
     expect(profile?.isPremium).toBe(true);
@@ -236,7 +236,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
 
     const profile = await testDb.db.query.profiles.findFirst({
       where: (profiles, { eq }) =>
-        eq(profiles.userId, request.event.app_user_id),
+        eq(profiles.userId, request.event.app_user_id!),
     });
     expect(profile).toBeDefined();
     expect(profile?.isPremium).toBe(false);
@@ -264,7 +264,7 @@ describe("/v1/public/subscriptions/revenuecat", () => {
 
     const profile = await testDb.db.query.profiles.findFirst({
       where: (profiles, { eq }) =>
-        eq(profiles.userId, request.event.app_user_id),
+        eq(profiles.userId, request.event.app_user_id!),
     });
     expect(profile).toBeDefined();
     expect(profile?.isPremium).toBe(true);
@@ -309,5 +309,80 @@ describe("/v1/public/subscriptions/revenuecat", () => {
     expect(data).toMatchObject({
       error: "Unauthorized",
     });
+  });
+
+  it("should handle TRANSFER event by returning 200 and transferring status", async () => {
+    // Setup initial state: user_1 is premium, user_2 is not.
+    // Use existing constants which should be valid in the auth table
+    const user1Id = DEFAULT_TEST_USER_ID;
+    const user2Id = DEFAULT_TEST_USER_ID_2;
+    const profile1Id = DEFAULT_TEST_PROFILE_ID;
+    const profile2Id = DEFAULT_TEST_PROFILE_ID_2;
+
+    // Insert user_1 if not exists (or update)
+    await testDb.db
+      .insert(profiles)
+      .values({
+        id: profile1Id,
+        userId: user1Id,
+        username: "user_1",
+        isPremium: true,
+        premiumExpiresAt: new Date(Date.now() + 100000),
+      })
+      .onConflictDoUpdate({
+        target: profiles.userId,
+        set: {
+          isPremium: true,
+          premiumExpiresAt: new Date(Date.now() + 100000),
+        },
+      });
+
+    // Insert user_2
+    await testDb.db
+      .insert(profiles)
+      .values({
+        id: profile2Id,
+        userId: user2Id,
+        username: "user_2",
+        isPremium: false,
+        premiumExpiresAt: null,
+      })
+      .onConflictDoUpdate({
+        target: profiles.userId,
+        set: {
+          isPremium: false,
+          premiumExpiresAt: null,
+        },
+      });
+
+    const request = createTestWebhookEvent(RevenueCatEventType.enum.TRANSFER, {
+      transferred_from: [user1Id],
+      transferred_to: [user2Id],
+    });
+
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    delete (request.event as any).app_user_id;
+    delete (request.event as any).expiration_at_ms;
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+
+    const response = await postAuthorizedRequest(request);
+    expect(response.status).toBe(200);
+
+    const data: RevenueCatWebhookResponse = await response.json();
+    expect(data.success).toBe(true);
+
+    // Verify user_1 lost premium
+    const profile1 = await testDb.db.query.profiles.findFirst({
+      where: (profiles, { eq }) => eq(profiles.userId, user1Id),
+    });
+    expect(profile1?.isPremium).toBe(false);
+    expect(profile1?.premiumExpiresAt).toBeNull();
+
+    // Verify user_2 gained premium
+    const profile2 = await testDb.db.query.profiles.findFirst({
+      where: (profiles, { eq }) => eq(profiles.userId, user2Id),
+    });
+    expect(profile2?.isPremium).toBe(true);
+    expect(profile2?.premiumExpiresAt).not.toBeNull();
   });
 });
