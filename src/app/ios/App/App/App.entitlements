@@ -15,7 +15,5 @@
 	<array>
 		<string>group.ooo.curi.app</string>
 	</array>
-	<key>com.apple.developer.in-app-purchase</key>
-	<true/>
 </dict>
 </plist>
