@@ -65,6 +65,29 @@ You can also save pages that are linked to from other pages.
 1. In Curio, hover over any link and click the "Save to Curio" button that appears. This will open the page in a new tab and save its contents to Curio in the background.
 2. From any page in your browser, right click on a specific link and select "Save to Curio". This will open the page in a new tab and save its contents to Curio in the background.
 
+### Saving articles from mobile
+
+To save articles from your mobile device, you must have the Curio app installed.
+
+From the app, click the "+" button in the left sidebar and paste in your page's URL. This will open the page briefly in the app and save its contents to Curio.
+
+![Curio mobile view](https://raw.githubusercontent.com/skyline-apps/curio/refs/heads/main/src/app/public/assets/android_curio_inbox.png)
+
+Alternatively, you can save pages by clicking on your device's "share" button from within a browser and selecting "Curio" as the share target.
+
+| | |
+| :---: | :---: |
+| ![Curio Android share](https://raw.githubusercontent.com/skyline-apps/curio/refs/heads/main/src/app/public/assets/android_curio_share.png) | ![Curio iOS share](https://raw.githubusercontent.com/skyline-apps/curio/refs/heads/main/src/app/public/assets/ios_curio_share.png) |
+
+#### Configuring paywalled article access
+The mobile app uses the in-app browser to fetch webpage content.
+This means that, in order to save content behind a paywall, you must authenticate to the paywall in the in-app browser.
+
+To configure paywalled article access, navigate to your [account settings](${curioUrl}/settings?section=account) page in the mobile app.
+Then under "Paywall authentication", enter the URL of the paywalled website and click "Launch".
+Use the in-app browser to authenticate to the paywall.
+Future articles saved from the app should now be able to access content behind the paywall.
+
 ### Subscribing to newsletters
 
 Curio can also serve as an email newsletter reader.

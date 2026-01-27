@@ -1,6 +1,7 @@
 import { cn } from "@app/utils/cn";
 import React, { useMemo } from "react";
 import ReactMarkdown, { Options } from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 import MarkdownErrorBoundary from "./error-boundary";
 import HeadingAnchorElement from "./HeadingAnchorElement";
@@ -57,6 +58,7 @@ const Markdown: React.FC<MarkdownProps> = ({
         className,
       )}
       components={mergedComponents}
+      remarkPlugins={[remarkGfm, ...(otherProps.remarkPlugins || [])]}
       {...otherProps}
     >
       {children.toString()}
