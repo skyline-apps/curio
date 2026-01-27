@@ -14,7 +14,7 @@ describe("Static Privacy Router", () => {
     expect(html).toContain("<!DOCTYPE html>");
     expect(html).toContain("<title>Privacy Policy - Curio</title>");
     expect(html).toContain("Privacy Policy");
-    expect(html).toContain("Last updated: May 31, 2025");
+    expect(html).toContain("Last updated: January 27, 2026");
     expect(html).toContain("privacy@curi.ooo");
   });
 
