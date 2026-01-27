@@ -1,0 +1,77 @@
+{
+  "identifier" : "E00AC154",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21456254",
+      "localizations" : [
+
+      ],
+      "name" : "Curio Premium",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "39.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "64456565",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Unlock all premium features",
+              "displayName" : "Curio Premium Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "curio_ios_annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Curio Premium Annual",
+          "subscriptionGroupID" : "21456254",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "4.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "64456566",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Unlock all premium features",
+              "displayName" : "Curio Premium Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "curio_ios_monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Curio Premium Monthly",
+          "subscriptionGroupID" : "21456254",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

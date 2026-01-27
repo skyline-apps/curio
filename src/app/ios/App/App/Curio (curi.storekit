@@ -1,0 +1,107 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "3C9B901D",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6753160006",
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_developerTeamID" : "YP6937U922",
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 791174665.37121296,
+    "_locale" : "en_US",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21901278",
+      "localizations" : [
+
+      ],
+      "name" : "Curio Premium",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "49.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6758127505",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Annual subscription to Curio Premium",
+              "displayName" : "Curio Premium Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "curio_ios_annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Curio Premium Annual",
+          "subscriptionGroupID" : "21901278",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "5.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "6758127537",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Monthly subscription to Curio Premium",
+              "displayName" : "Curio Premium Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "curio_ios_monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Curio Premium Monthly",
+          "subscriptionGroupID" : "21901278",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

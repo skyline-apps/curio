@@ -3,12 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		05A136BFCFF43C0907FFA1EB /* Pods_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37C80E103B9B46EE847C6C32 /* Pods_App.framework */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
+		3B5119962F285DFD004FFE26 /* Curio (curi.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 3B5119952F285DFD004FFE26 /* Curio (curi.storekit */; };
 		3B56EFAF2E8A622700724368 /* send-to-curio.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3B56EFA52E8A622700724368 /* send-to-curio.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
@@ -46,6 +47,7 @@
 		1F83ED017C002A26662CDC63 /* Pods-App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.debug.xcconfig"; path = "Target Support Files/Pods-App/Pods-App.debug.xcconfig"; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		37C80E103B9B46EE847C6C32 /* Pods_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3B5119952F285DFD004FFE26 /* Curio (curi.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Curio (curi.storekit"; sourceTree = "<group>"; };
 		3B56EFA52E8A622700724368 /* send-to-curio.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "send-to-curio.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B9DB44D2E4EF41700CD1072 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
@@ -60,7 +62,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		3B56EFB32E8A622700724368 /* Exceptions for "send-to-curio" folder in "send-to-curio" target */ = {
+		3B56EFB32E8A622700724368 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -70,18 +72,7 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		3B56EFA62E8A622700724368 /* send-to-curio */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				3B56EFB32E8A622700724368 /* Exceptions for "send-to-curio" folder in "send-to-curio" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = "send-to-curio";
-			sourceTree = "<group>";
-		};
+		3B56EFA62E8A622700724368 /* send-to-curio */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (3B56EFB32E8A622700724368 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = "send-to-curio"; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,7 +100,6 @@
 				1F83ED017C002A26662CDC63 /* Pods-App.debug.xcconfig */,
 				7435CEAFB9281EF434147585 /* Pods-App.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -137,6 +127,7 @@
 			isa = PBXGroup;
 			children = (
 				3B9DB44D2E4EF41700CD1072 /* App.entitlements */,
+				3B5119952F285DFD004FFE26 /* Curio (curi.storekit */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
@@ -256,6 +247,7 @@
 				504EC30F1FED79650016851F /* Assets.xcassets in Resources */,
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
+				3B5119962F285DFD004FFE26 /* Curio (curi.storekit in Resources */,
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
