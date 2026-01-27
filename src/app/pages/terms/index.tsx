@@ -9,7 +9,9 @@ const TermsOfService: React.FC = () => {
       <div className="w-full p-4 md:p-8">
         <div className="flex flex-col justify-center items-start max-w-2xl mx-auto select-text">
           <h1 className="text-lg font-medium text-center">Terms of service</h1>
-          <p className="text-secondary text-sm">Last updated: May 31, 2025</p>
+          <p className="text-secondary text-sm">
+            Last updated: January 27, 2026
+          </p>
 
           <div className="text-sm my-4 space-y-2">
             <section className="space-y-2">
