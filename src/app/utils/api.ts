@@ -242,3 +242,32 @@ export async function authenticatedFetch(
 ): Promise<Response> {
   return authenticatedRequest(relativePath, options);
 }
+
+export async function publicFetch(
+  relativePath: string,
+  options: RequestInit = {},
+): Promise<Response> {
+  const baseUrl = import.meta.env.VITE_CURIO_URL;
+  if (!baseUrl) {
+    throw new Error("VITE_CURIO_URL is not defined in environment variables.");
+  }
+  const cleanBaseUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+  const cleanRelativePath = relativePath.startsWith("/")
+    ? relativePath
+    : `/${relativePath}`;
+  const fullUrl = `${cleanBaseUrl}${cleanRelativePath}`;
+
+  const headers = new Headers(options.headers);
+  if (
+    options.method !== "GET" &&
+    !headers.has("Content-Type") &&
+    !(options.body instanceof FormData)
+  ) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  return fetch(fullUrl, {
+    ...options,
+    headers,
+  });
+}

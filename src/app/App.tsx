@@ -19,6 +19,7 @@ import NotesPage from "@app/pages/notes";
 import PrivacyPage from "@app/pages/privacy";
 import SettingsPage from "@app/pages/settings";
 import TermsPage from "@app/pages/terms";
+import UnsubscribePage from "@app/pages/unsubscribe";
 import UserPage from "@app/pages/user";
 import { SidebarKey } from "@app/providers/AppLayout";
 import { useUser } from "@app/providers/User";
@@ -171,6 +172,10 @@ export const App = (): React.ReactNode => {
             >
               <Route path="/u/:username" element={<UserPage />} />
               <Route path="/item/:slug" element={<ContentPage />} />
+              <Route
+                path="/unsubscribe/:profileId"
+                element={<UnsubscribePage />}
+              />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Route>

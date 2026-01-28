@@ -4,6 +4,7 @@ import { publicItemsContentRouter } from "./items/content";
 import { publicItemsEmailRouter } from "./items/email";
 import { publicProfileRouter } from "./profile";
 import { revenuecatRouter } from "./subscriptions/revenuecat";
+import { publicUnsubscribeRouter } from "./user/unsubscribe";
 import { publicWebhooksEmailRouter } from "./webhooks/email";
 
 const publicRouter = new Hono();
@@ -13,5 +14,6 @@ publicRouter.route("/items/email", publicItemsEmailRouter);
 publicRouter.route("/profile", publicProfileRouter);
 publicRouter.route("/subscriptions/revenuecat", revenuecatRouter);
 publicRouter.route("/webhooks/email", publicWebhooksEmailRouter);
+publicRouter.route("/user/unsubscribe", publicUnsubscribeRouter);
 
 export { publicRouter };
