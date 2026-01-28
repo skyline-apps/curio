@@ -98,6 +98,7 @@ export const profiles = pgTable(
     })
       .notNull()
       .defaultNow(),
+    marketingEmails: boolean("marketing_emails").notNull().default(true),
   },
   (table) => ({
     usernameIndex: uniqueIndex("username_index").on(table.username),
