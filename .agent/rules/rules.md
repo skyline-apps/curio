@@ -21,3 +21,4 @@ This means you should, whenever you're unsure of how to make a change, check the
 4. The mobile apps are generated from the web app in src/app using Capacitor. You can detect if the user is in a mobile app or not using `import { isNativePlatform } from @app/utils/platform`.
 5. Browser extensions are in src/chrome and src/firefox and both have the same functionality.
 6. Never use the `any` type or `require`.
+7. Pretty much all actions for the app should be run from the `src/app` folder (see `src/app/package.json`).
