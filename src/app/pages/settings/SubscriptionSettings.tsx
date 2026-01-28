@@ -1,11 +1,11 @@
 import Button from "@app/components/ui/Button";
 import { FormSection } from "@app/components/ui/Form";
 import Spinner from "@app/components/ui/Spinner";
-import { PREMIUM_FEATURES } from "@app/pages/docs/docs";
 import { useSettings } from "@app/providers/Settings";
 import { useToast } from "@app/providers/Toast";
 import { useUser } from "@app/providers/User";
 import { cn } from "@app/utils/cn";
+import { PREMIUM_FEATURES } from "@app/utils/content/docs";
 import { createLogger } from "@app/utils/logger";
 import { isNativePlatform } from "@app/utils/platform";
 import {
