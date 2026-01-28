@@ -8,7 +8,8 @@
     "index:backfill": "tsx backfillIndex.ts",
     "import:omnivore": "tsx importOmnivore.ts",
     "update": "tsx updateItemContent.ts",
-    "version:bump": "tsx bumpVersion.ts"
+    "version:bump": "tsx bumpVersion.ts",
+    "send:email": "tsx sendEmail.ts"
   },
   "author": "",
   "license": "MIT",
