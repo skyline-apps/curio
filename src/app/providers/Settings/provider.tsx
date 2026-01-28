@@ -87,6 +87,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     queryFn: fetchProfile,
     retry: 1,
     enabled: !!user.id,
+    refetchInterval: 60 * 60 * 1000,
   });
 
   const { data: currentSettings, refetch: loadSettings } = useQuery({

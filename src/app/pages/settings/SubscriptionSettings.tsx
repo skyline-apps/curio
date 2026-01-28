@@ -145,7 +145,8 @@ const SubscriptionSettings: React.FC = () => {
 
   useEffect(() => {
     fetchPackages();
-  }, [fetchPackages]);
+    refreshProfile();
+  }, [fetchPackages, refreshProfile]);
 
   async function handlePurchase(rcPackage: UnifiedPackage): Promise<void> {
     setPurchaseLoading(rcPackage.identifier);
