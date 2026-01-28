@@ -37,11 +37,7 @@ const CurioButton = forwardRef<HTMLButtonElement, CurioButtonProps>(
       ...props,
       className: cn(
         "relative",
-        props.color === "secondary"
-          ? props.variant === "faded"
-            ? "text-default"
-            : "text-default-900"
-          : "",
+        props.color === "secondary" ? "text-default" : "",
         {
           "text-xs px-1 py-1 min-w-6 h-6": size === "xs",
           [props.isIconOnly ? "w-6" : ""]: size === "xs",
