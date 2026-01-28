@@ -90,6 +90,25 @@ describe("LandingPage", () => {
       expect(
         screen.getByText("Add notes, highlights, and labels to your items"),
       ).toBeInTheDocument();
+      expect(
+        screen.getByText("Send email newsletters to your Curio inbox"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Search over your entire article library"),
+      ).toBeInTheDocument();
+      expect(screen.getByText("Android & iOS apps (beta)")).toBeInTheDocument();
+    });
+  });
+
+  describe("Premium Features Section", () => {
+    it("renders the premium features list", () => {
+      expect(screen.getByText("For Premium supporters")).toBeInTheDocument();
+      expect(
+        screen.getByText("Skim AI-powered summaries and memorable quotes"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Explain highlighted snippets in context"),
+      ).toBeInTheDocument();
     });
   });
 
@@ -97,18 +116,9 @@ describe("LandingPage", () => {
     it("renders the upcoming features list", () => {
       expect(screen.getByText("Coming soon")).toBeInTheDocument();
       expect(
-        screen.getByText("Send email newsletters to your Curio inbox"),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText("Skim AI-powered summaries and memorable quotes"),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText("Android & iOS apps with offline reading support"),
+        screen.getByText("Automatic offline reading support"),
       ).toBeInTheDocument();
       expect(screen.getByText("PDF content extraction")).toBeInTheDocument();
-      expect(
-        screen.getByText("Additional integrations and webhooks"),
-      ).toBeInTheDocument();
     });
   });
 
