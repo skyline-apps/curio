@@ -71,8 +71,20 @@ const AppLinks: React.FC<AppLinksProps> = ({
           icon={<FaFirefoxBrowser size={size} />}
         />
       )}
-      <AppLink key="android" icon={<FaAndroid size={size} />} />
-      <AppLink key="ios" icon={<FaApple size={size} />} />
+      {config.androidLink && (
+        <AppLink
+          key="android"
+          href={config.androidLink}
+          icon={<FaAndroid size={size} />}
+        />
+      )}
+      {config.iosLink && (
+        <AppLink
+          key="ios"
+          href={config.iosLink}
+          icon={<FaApple size={size} />}
+        />
+      )}
     </div>
   );
 };

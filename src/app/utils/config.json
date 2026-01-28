@@ -1,5 +1,7 @@
 {
     "archiveLinkTemplate": "https://archive.is/newest/",
     "chromeExtensionLink": "https://chromewebstore.google.com/detail/curio-saver/loppnljeflohkmeimcijopapbnmjbcgp",
-    "firefoxExtensionLink": "https://addons.mozilla.org/en-US/firefox/addon/curio-saver/"
+    "firefoxExtensionLink": "https://addons.mozilla.org/en-US/firefox/addon/curio-saver/",
+    "androidLink": "https://play.google.com/apps/testing/ooo.curi.app",
+    "iosLink": "https://testflight.apple.com/join/qRkrSRsD"
 }

@@ -27,7 +27,9 @@ This guide will help you get the most out of your Curio experience.
 ## Getting started
 
 Access Curio on the web at [${curioUrl}](${curioUrl}).
-Android and iOS applications are coming soon.
+Android and iOS applications are available for beta testing:
+- [Android](${config.androidLink})
+- [iOS](${config.iosLink})
 
 Create an account by logging in via your Google account or email address.
 
