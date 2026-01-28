@@ -12,7 +12,7 @@ logoutRoutes.post("/", async (c: EnvContext) => {
   try {
     const supabase = await createClient(c);
 
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut({ scope: "local" });
     if (error) {
       log.warn("Server-side supabase.auth.signOut() failed", { error });
     }
