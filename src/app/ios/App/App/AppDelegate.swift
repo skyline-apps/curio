@@ -115,4 +115,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return handled
     }
 
+    override func buildMenu(with builder: UIMenuBuilder) {
+        if builder.system == UIMenuSystem.context {
+            let explain = UICommand(title: "Explain", action: #selector(explainText))
+            let explainMenu = UIMenu(title: "", options: .displayInline, children: [explain])
+            builder.insertChild(explainMenu, atStartOfMenu: .root)
+            
+            let canHighlight = UserDefaults.standard.string(forKey: "CapacitorStorage.canHighlight")
+            if canHighlight == "true" {
+                let highlight = UICommand(title: "Highlight", action: #selector(highlightText))
+                let highlightMenu = UIMenu(title: "", options: .displayInline, children: [highlight])
+                builder.insertChild(highlightMenu, atStartOfMenu: .root)
+            }
+        }
+        super.buildMenu(with: builder)
+    }
+
+    @objc func explainText() {
+        if let bridgeVC = self.window?.rootViewController as? CAPBridgeViewController {
+            bridgeVC.webView?.evaluateJavaScript("window.dispatchEvent(new CustomEvent('native-action-explain'))")
+        }
+    }
+
+    @objc func highlightText() {
+        if let bridgeVC = self.window?.rootViewController as? CAPBridgeViewController {
+            bridgeVC.webView?.evaluateJavaScript("window.dispatchEvent(new CustomEvent('native-action-highlight'))")
+        }
+    }
+
 }

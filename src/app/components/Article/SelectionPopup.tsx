@@ -3,10 +3,13 @@ import Icon from "@app/components/ui/Icon";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { useSettings } from "@app/providers/Settings";
 import { useToast } from "@app/providers/Toast";
+import { isNativePlatform } from "@app/utils/platform";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { HiMiniSparkles } from "react-icons/hi2";
 import { Link } from "react-router-dom";
+
+export const HIGHLIGHT_PREFERENCE_KEY = "canHighlight"; // keep in sync with MainActivity.java and AppDelegate.swift
 
 interface SelectionPopupProps {
   selection: Selection | null;
@@ -33,6 +36,7 @@ export const SelectionPopup = ({
   } | null>(null);
 
   const updatePosition = useCallback(() => {
+    if (isNativePlatform()) return null;
     if (!selection || !containerRef.current) return null;
     if (selection.rangeCount === 0) return null; // Check rangeCount first
 
@@ -95,6 +99,7 @@ export const SelectionPopup = ({
 
   // Handle scroll and window resize
   useEffect(() => {
+    if (isNativePlatform()) return;
     const container = containerRef.current;
     if (!container) return;
 
@@ -112,6 +117,18 @@ export const SelectionPopup = ({
   }, [containerRef, updatePosition]);
 
   const onExplainClick = useCallback(() => {
+    if (!isPremium) {
+      showToast(
+        <p className="inline">
+          <Link to="/settings?section=subscription" className="underline">
+            Upgrade to Premium
+          </Link>{" "}
+          to use this feature.
+        </p>,
+      );
+      return;
+    }
+
     if (selection) {
       setIsExplainLoading(true);
       explainHighlight(selection.toString())
@@ -123,7 +140,30 @@ export const SelectionPopup = ({
           setIsExplainLoading(false);
         });
     }
-  }, [explainHighlight, selection]);
+  }, [explainHighlight, selection, isPremium, showToast]);
+
+  useEffect(() => {
+    if (!isNativePlatform()) return;
+
+    const handleNativeExplain = (): void => {
+      onExplainClick();
+    };
+
+    const handleNativeHighlight = (): void => {
+      onHighlightSave?.();
+    };
+
+    window.addEventListener("native-action-explain", handleNativeExplain);
+    window.addEventListener("native-action-highlight", handleNativeHighlight);
+
+    return () => {
+      window.removeEventListener("native-action-explain", handleNativeExplain);
+      window.removeEventListener(
+        "native-action-highlight",
+        handleNativeHighlight,
+      );
+    };
+  }, [onExplainClick, onHighlightSave]);
 
   const explainButton = (
     <Button
@@ -131,20 +171,7 @@ export const SelectionPopup = ({
       color={isPremium ? "primary" : "secondary"}
       tooltip={!isPremium ? "Premium feature" : "Explain this snippet."}
       isLoading={isPremium && isExplainLoading}
-      onPress={() => {
-        if (!isPremium) {
-          showToast(
-            <p className="inline">
-              <Link to="/settings?section=subscription" className="underline">
-                Upgrade to Premium
-              </Link>{" "}
-              to use this feature.
-            </p>,
-          );
-          return;
-        }
-        onExplainClick();
-      }}
+      onPress={onExplainClick}
       onMouseDown={(e) => e.preventDefault()}
       onTouchStart={(e) => e.preventDefault()}
     >
@@ -155,6 +182,10 @@ export const SelectionPopup = ({
       Explain
     </Button>
   );
+
+  if (isNativePlatform()) {
+    return null;
+  }
 
   return (
     <AnimatePresence>

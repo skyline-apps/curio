@@ -2,6 +2,7 @@ import MarkdownErrorBoundary from "@app/components/Markdown/error-boundary";
 import { useAppPage } from "@app/providers/AppPage";
 import { Highlight } from "@app/schemas/v1/items/highlights";
 import { cn } from "@app/utils/cn";
+import { Preferences } from "@capacitor/preferences";
 import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
@@ -9,7 +10,7 @@ import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import { useDebouncedCallback } from "use-debounce";
 
-import { SelectionPopup } from "./SelectionPopup";
+import { HIGHLIGHT_PREFERENCE_KEY, SelectionPopup } from "./SelectionPopup";
 import { useHighlightSelection } from "./useHighlightSelection";
 import {
   ALL_COMPONENTS,
@@ -103,6 +104,14 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = memo(
     }, [clearSelection, clearSelectedHighlight]);
 
     useSelectionListeners(handleSelection);
+
+    useEffect(() => {
+      const val = isEditable ? "true" : "false";
+      Preferences.set({
+        key: HIGHLIGHT_PREFERENCE_KEY,
+        value: val,
+      });
+    }, [isEditable]);
 
     return (
       <div className="relative flex gap-4">
