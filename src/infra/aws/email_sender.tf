@@ -18,10 +18,6 @@ resource "aws_ses_email_identity" "auth" {
   email = "auth@${var.ses_email_identity_sender}"
 }
 
-resource "aws_ses_email_identity" "curio" {
-  email = "curio@${var.ses_email_identity_sender}"
-}
-
 # Using the main receipt rule set from email_receiver.tf
 
 resource "aws_ses_receipt_rule" "forward" {
@@ -78,7 +74,6 @@ data "aws_iam_policy_document" "ses_sender" {
     resources = [
       aws_ses_domain_identity.auth.arn,
       aws_ses_email_identity.auth.arn,
-      aws_ses_email_identity.curio.arn
     ]
   }
 }
