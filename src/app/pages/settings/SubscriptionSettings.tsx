@@ -247,7 +247,7 @@ const SubscriptionSettings: React.FC = () => {
     willRenew = entitlement.willRenew;
     expiresAt = entitlement.expirationDate || null;
   }
-
+  const isSandbox = entitlement?.isSandbox;
   // Find the package that matches the current subscription ID
   const currentPackage = packageOptions.find(
     (p) => p.product.identifier === currentSubscription,
@@ -316,7 +316,9 @@ const SubscriptionSettings: React.FC = () => {
             {isPremium
               ? "Thank you for being a paid Curio supporter! Your subscription goes towards supporting our hosting costs."
               : currentSubscription
-                ? "Please wait a few moments while your subscription status is updated to use Premium features."
+                ? isSandbox
+                  ? "We've detected that you have a sandboxed Premium subscription activated through a test app. To prevent abuse, Premium features will not be available."
+                  : "Please wait a few moments while your subscription status is updated to use Premium features."
                 : "Curio will always remain free to use. However, to support our hosting costs, please consider becoming a paid supporter."}
           </p>
           <p className="text-xs text-secondary">
@@ -358,7 +360,9 @@ const SubscriptionSettings: React.FC = () => {
                 <div className="flex flex-col">
                   Manage subscription
                   <p className="text-xs text-primary-100">
-                    {currentPackageDescription}
+                    {isSandbox
+                      ? "Sandbox subscription"
+                      : currentPackageDescription}
                   </p>
                 </div>
               </Button>
