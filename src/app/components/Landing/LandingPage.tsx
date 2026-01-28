@@ -65,9 +65,10 @@ const LandingPage: React.FC = () => {
       </div>
       <div className="flex flex-col justify-center items-center gap-8 w-full my-12 p-8">
         <p className="max-w-2xl text-center">
-          Curio is currently in open beta, and I&rsquo;d love to hear your
-          feedback. It&rsquo;s free to use, though future features may come with
-          a small monthly subscription to cover hosting costs.
+          Curio will always be free to use with the core features you need to
+          have a delightful reading experience. Premium supporters get access to
+          additional features and help cover the costs of keeping Curio running
+          (thank you!).
         </p>
         <div className="flex flex-col gap-4 max-w-2xl">
           <div>
@@ -78,15 +79,23 @@ const LandingPage: React.FC = () => {
               <li>Add notes, highlights, and labels to your items</li>
               <li>Send email newsletters to your Curio inbox</li>
               <li>Search over your entire article library</li>
+              <li>Android & iOS apps (beta)</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-lg font-medium text-center">
+              For Premium supporters
+            </h3>
+            <ul className="list-disc ml-4 text-sm">
+              <li>Skim AI-powered summaries and memorable quotes</li>
+              <li>Explain highlighted snippets in context</li>
             </ul>
           </div>
           <div>
             <h3 className="text-lg font-medium text-center">Coming soon</h3>
             <ul className="list-disc ml-4 text-sm">
-              <li>Skim AI-powered summaries and memorable quotes</li>
-              <li>Android & iOS apps with offline reading support</li>
+              <li>Automatic offline reading support</li>
               <li>PDF content extraction</li>
-              <li>Additional integrations and webhooks</li>
             </ul>
           </div>
         </div>
