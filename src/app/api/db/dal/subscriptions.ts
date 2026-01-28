@@ -138,6 +138,12 @@ export async function handleRevenueCatEvent(
     .limit(1);
 
   if (!profileResults?.length) {
+    if (event.environment === "SANDBOX") {
+      log.info("Profile not found for RevenueCat app user ID (sandbox)", {
+        appUserId: event.app_user_id,
+      });
+      return;
+    }
     log.error("Profile not found for RevenueCat app user ID", {
       appUserId: event.app_user_id,
     });
