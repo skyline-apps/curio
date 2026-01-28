@@ -70,7 +70,7 @@ async function main() {
       })
       .from(profiles)
       .innerJoin(authUsers, eq(profiles.userId, authUsers.id))
-      .where(eq(profiles.emailBounced, false)); // Only send to non-bounced emails
+      .where(and(eq(profiles.emailBounced, false), eq(profiles.marketingEmails, true)));
 
     console.log(`Found ${users.length} active users.`);
 
@@ -84,6 +84,8 @@ async function main() {
 
       console.log(`Sending to: ${user.email}`);
 
+      const htmlBody = htmlTemplate.replace(/{{profileId}}/g, user.profileId);
+
       const command = new SendEmailCommand({
         Source: argv.sender,
         Destination: {
@@ -96,7 +98,7 @@ async function main() {
           },
           Body: {
             Html: {
-              Data: htmlTemplate,
+              Data: htmlBody,
               Charset: 'UTF-8',
             },
           },
