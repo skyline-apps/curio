@@ -11,16 +11,63 @@ import { isNativePlatform } from "@app/utils/platform";
 import {
   type CustomerInfoNative,
   type CustomerInfoWeb,
+  EntitlementInfo,
   getCustomerInfo,
   getPackages,
   initializePurchasing,
   purchasePackage,
   restorePurchases,
+  Store,
   type UnifiedPackage,
 } from "@app/utils/purchases";
 import React, { useCallback, useEffect, useState } from "react";
 
 const log = createLogger("SubscriptionSettings");
+
+// Helper to determine the best entitlement to display
+const getBestEntitlement = (
+  customerInfo: CustomerInfoNative | CustomerInfoWeb | null,
+): EntitlementInfo | undefined => {
+  log.info("CUSTOMER INFO", JSON.stringify(customerInfo, null, 2));
+  if (!customerInfo?.entitlements) return undefined;
+
+  // We look at all entitlements to find the most relevant one
+  const all = Object.values(customerInfo.entitlements.all || {});
+  const candidates = [...all];
+
+  if (candidates.length === 0) return undefined;
+
+  // Sort candidates to find the "best" one:
+  // 1. Active/Renewing
+  // 2. Active (isActive)
+  // 3. Latest expiration
+  return candidates.sort((a, b) => {
+    if (a.willRenew && !b.willRenew) return -1;
+    if (!a.willRenew && b.willRenew) return 1;
+
+    if (a.isActive && !b.isActive) return -1;
+    if (!a.isActive && b.isActive) return 1;
+
+    const dateA = a.expirationDate ? new Date(a.expirationDate).getTime() : 0;
+    const dateB = b.expirationDate ? new Date(b.expirationDate).getTime() : 0;
+    return dateB - dateA;
+  })[0];
+};
+
+const getEntitlementSource = (store: Store | undefined): string => {
+  switch (store?.toLowerCase()) {
+    case "app_store":
+    case "mac_app_store":
+      return "the App Store";
+    case "play_store":
+      return "Google Play";
+    case "stripe":
+    case "promotional":
+      return "Web";
+    default:
+      return "another platform";
+  }
+};
 
 interface PackageOptionProps {
   rcPackage: UnifiedPackage;
@@ -181,60 +228,84 @@ const SubscriptionSettings: React.FC = () => {
   const activeSubs = getActiveSubscriptions();
   const currentSubscription = activeSubs.values().next().value;
 
-  // Helper to get expiration logic
+  // Find best entitlement to display
+  const entitlement = getBestEntitlement(customerInfo);
+
+  // Consider entitlement active if it's explicitly active OR renewing OR (valid check) expiring in future
+  const isEntitlementActive =
+    !!entitlement &&
+    (entitlement.isActive ||
+      entitlement.willRenew ||
+      (entitlement.expirationDate &&
+        new Date(entitlement.expirationDate) > new Date()));
+
   let willRenew = false;
   let expiresAt: string | number | Date | null = null;
 
-  if (currentSubscription && customerInfo) {
-    // Both SDKs have a similar structure for this map
-    const ent =
-      customerInfo.subscriptionsByProductIdentifier?.[currentSubscription];
-    // OR customerInfo.allExpirationDates etc. but subscriptionsByProductIdentifier is most detailed usually.
-
-    // Let's stick to subscription ID lookups if possible, but the types diverge.
-    // Safest:
-    if (ent) {
-      willRenew = ent.willRenew;
-      // @ts-expect-error - expirationDate property name divergence between web/native
-      expiresAt = ent.expirationDate || ent.expiresDate;
-    } else {
-      const entitlement = customerInfo.entitlements?.active?.["premium"]; // Assuming 'premium' is entitlement ID? Or just check product ID.
-      if (entitlement) {
-        willRenew = entitlement.willRenew;
-        // @ts-expect-error - expirationDate property name divergence
-        expiresAt = entitlement.expirationDate || entitlement.expiresDate;
-      }
-    }
+  if (entitlement) {
+    willRenew = entitlement.willRenew;
+    expiresAt = entitlement.expirationDate || null;
   }
 
   // Find the package that matches the current subscription ID
-  // Note: on Web, the sub ID matches the stripe product ID.
-  // On Native, it matches the store product ID.
-  // Our UnifiedPackage has the product.identifier.
   const currentPackage = packageOptions.find(
     (p) => p.product.identifier === currentSubscription,
   );
 
   let currentPackageDescription = "";
-  if (currentPackage) {
+
+  if (currentPackage && isEntitlementActive) {
+    // Normal case: active subscription for known package
     currentPackageDescription = willRenew
       ? `${currentPackage.product.priceString} billed every ${currentPackage.product.billingPeriod}`
       : expiresAt
         ? `Expires ${new Date(expiresAt).toLocaleDateString()} at ${new Date(expiresAt).toLocaleTimeString()}`
         : `${currentPackage.product.priceString} billed every ${currentPackage.product.billingPeriod}`;
+  } else if (isPremium && !isEntitlementActive) {
+    // Ghost State: Premium in DB, but no active entitlement locally
+    // This happens when subscription is managed on another platform and not fully synced or expired locally but grace period/server logic allows access
+    currentPackageDescription = "Subscription active";
   } else {
-    // Fallback if we can't find the package (e.g. cross-platform subscription)
-    const platformSource = isNativePlatform() ? "web" : "mobile";
+    // Fallback: Entitlement exists (possibly expired) or cross-platform
+    const platformSource = getEntitlementSource(entitlement?.store);
     const fallbackText = `Subscription purchased via ${platformSource}`;
 
     currentPackageDescription = expiresAt
       ? `Expires ${new Date(expiresAt).toLocaleDateString()} at ${new Date(expiresAt).toLocaleTimeString()}`
       : fallbackText;
-
-    if (willRenew) {
-      currentPackageDescription = fallbackText;
-    }
   }
+
+  const handleManage = (): void => {
+    if (customerInfo?.managementURL) {
+      window.open(customerInfo.managementURL, "_blank");
+      return;
+    }
+
+    // Ghost State handling
+    if (isPremium && !isEntitlementActive) {
+      showToast(
+        "Please manage your subscription on the platform you purchased it on.",
+        { dismissable: true },
+      );
+      return;
+    }
+
+    const store = entitlement?.store?.toLowerCase();
+    if (store === "app_store" || store === "mac_app_store") {
+      showToast("Please manage your subscription in your Apple ID settings.", {
+        dismissable: true,
+      });
+    } else if (store === "play_store") {
+      showToast("Please manage your subscription in the Google Play Store.", {
+        dismissable: true,
+      });
+    } else {
+      showToast(
+        "Please manage your subscription on the platform you purchased it on.",
+        { dismissable: true },
+      );
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -259,7 +330,7 @@ const SubscriptionSettings: React.FC = () => {
             <Spinner centered />
           ) : error ? (
             <div className="text-danger text-sm">{error}</div>
-          ) : activeSubs.size === 0 ? (
+          ) : !isPremium && activeSubs.size === 0 ? (
             <div className="grid grid-cols-1 gap-3">
               {packageOptions.length === 0 && (
                 <div className="text-sm text-danger">
@@ -275,11 +346,10 @@ const SubscriptionSettings: React.FC = () => {
                 />
               ))}
             </div>
-          ) : activeSubs.size >= 1 ? (
+          ) : isPremium || activeSubs.size >= 1 ? (
             <div className="grid grid-cols-1 gap-2">
               <Button
-                href={customerInfo?.managementURL || ""}
-                hrefNewTab
+                onPress={handleManage}
                 color="primary"
                 isDisabled={!!purchaseLoading}
                 isLoading={purchaseLoading === ""}

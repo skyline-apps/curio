@@ -15,7 +15,11 @@ import {
 
 // Export the Native types as the default "types" for external consumers where possible
 export type { CustomerInfo as CustomerInfoNative } from "@revenuecat/purchases-capacitor";
-export type { CustomerInfo as CustomerInfoWeb } from "@revenuecat/purchases-js";
+export type {
+  CustomerInfo as CustomerInfoWeb,
+  EntitlementInfo,
+  Store,
+} from "@revenuecat/purchases-js";
 
 // We alias this because we are creating a specific UnifiedPackage
 export type RCPackageNative = PurchasesPackage;
