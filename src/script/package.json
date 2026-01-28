@@ -13,6 +13,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-ses": "^3.975.0",
     "@supabase/supabase-js": "^2.49.1",
     "@types/yargs": "^17.0.33",
     "dotenv": "^16.4.7",
