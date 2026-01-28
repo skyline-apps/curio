@@ -384,5 +384,79 @@ describe("/v1/public/subscriptions/revenuecat", () => {
     });
     expect(profile2?.isPremium).toBe(true);
     expect(profile2?.premiumExpiresAt).not.toBeNull();
+    expect(profile2?.isPremium).toBe(true);
+    expect(profile2?.premiumExpiresAt).not.toBeNull();
+  });
+
+  describe("Sandbox Environment", () => {
+    beforeEach(async () => {
+      await testDb.db.update(profiles).set({
+        isPremium: false,
+        premiumExpiresAt: null,
+      });
+    });
+
+    it("should process SANDBOX event for demo emails", async () => {
+      const request = createTestWebhookEvent(
+        RevenueCatEventType.enum.INITIAL_PURCHASE,
+        {
+          environment: RevenueCatEnvironment.enum.SANDBOX,
+        },
+        DEFAULT_TEST_USER_ID_2,
+      );
+
+      const response = await postAuthorizedRequest(request);
+      expect(response.status).toBe(200);
+
+      const data: RevenueCatWebhookResponse = await response.json();
+      expect(data.success).toBe(true);
+
+      const profile = await testDb.db.query.profiles.findFirst({
+        where: (profiles, { eq }) =>
+          eq(profiles.userId, DEFAULT_TEST_USER_ID_2),
+      });
+      expect(profile?.isPremium).toBe(true);
+    });
+
+    it("should ignore SANDBOX event for other users", async () => {
+      const request = createTestWebhookEvent(
+        RevenueCatEventType.enum.INITIAL_PURCHASE,
+        {
+          environment: RevenueCatEnvironment.enum.SANDBOX,
+        },
+      );
+
+      const response = await postAuthorizedRequest(request);
+      expect(response.status).toBe(200); // Should still return 200
+
+      const data: RevenueCatWebhookResponse = await response.json();
+      expect(data.success).toBe(true);
+
+      const profile2 = await testDb.db.query.profiles.findFirst({
+        where: (profiles, { eq }) => eq(profiles.userId, DEFAULT_TEST_USER_ID),
+      });
+      expect(profile2?.isPremium).toBe(false); // Should NOT be upgraded
+    });
+
+    it("should process PRODUCTION event for other users", async () => {
+      const request = createTestWebhookEvent(
+        RevenueCatEventType.enum.INITIAL_PURCHASE,
+        {
+          environment: RevenueCatEnvironment.enum.PRODUCTION,
+        },
+        DEFAULT_TEST_USER_ID,
+      );
+
+      const response = await postAuthorizedRequest(request);
+      expect(response.status).toBe(200);
+
+      const data: RevenueCatWebhookResponse = await response.json();
+      expect(data.success).toBe(true);
+
+      const profile = await testDb.db.query.profiles.findFirst({
+        where: (profiles, { eq }) => eq(profiles.userId, DEFAULT_TEST_USER_ID),
+      });
+      expect(profile?.isPremium).toBe(true);
+    });
   });
 });

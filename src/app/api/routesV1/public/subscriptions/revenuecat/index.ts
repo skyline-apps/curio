@@ -49,10 +49,14 @@ export const revenuecatRouter = new Hono<EnvBindings>().post(
     if (!api_version.startsWith("1.")) {
       return c.json({ error: "Unsupported API version" }, 400);
     }
+    const sandboxEmails: string[] = [];
+    if (c.env.VITE_DEMO_ACCOUNT_EMAIL) {
+      sandboxEmails.push(c.env.VITE_DEMO_ACCOUNT_EMAIL);
+    }
 
     try {
       await db.transaction(async (tx) => {
-        await handleRevenueCatEvent(event, tx, log);
+        await handleRevenueCatEvent(event, tx, log, sandboxEmails);
       });
 
       const response = RevenueCatWebhookResponseSchema.parse({

@@ -24,6 +24,7 @@ export const EnvSchema = z.object({
   INSTAPAPER_OAUTH_CONSUMER_ID: z.string(),
   INSTAPAPER_OAUTH_CONSUMER_SECRET: z.string(),
   GEMINI_API_KEY: z.string(),
+  VITE_DEMO_ACCOUNT_EMAIL: z.string().optional(),
 });
 
 export type Env = z.infer<typeof EnvSchema> & {

@@ -4,4 +4,5 @@ export const MOCK_ENV = {
   CURIO_APP_SECRET: "MOCKSECRET",
   REVENUECAT_WEBHOOK_SECRET: "test_secret",
   GEMINI_API_KEY: "test_key",
+  VITE_DEMO_ACCOUNT_EMAIL: "test2@curi.ooo",
 };

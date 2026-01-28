@@ -1,5 +1,5 @@
 import { eq } from "@app/api/db";
-import { profiles } from "@app/api/db/schema";
+import { authUsers, profiles } from "@app/api/db/schema";
 import type { Logger } from "@app/api/utils/logger";
 import type { ContentfulStatusCode } from "@app/api/utils/types";
 import type { RevenueCatEvent } from "@app/schemas/v1/public/subscriptions/revenuecat";
@@ -21,7 +21,39 @@ export async function handleRevenueCatEvent(
   event: RevenueCatEvent,
   tx: TransactionDB,
   log: Logger,
+  sandboxEmails?: string[],
 ): Promise<void> {
+  // Filter SANDBOX events
+  if (event.environment === "SANDBOX") {
+    const appUserId = event.app_user_id;
+
+    if (!appUserId) {
+      log.warn("Sandbox event missing user identification, ignoring", {
+        event,
+      });
+      return;
+    }
+
+    const userResults = await tx
+      .select({ email: authUsers.email })
+      .from(authUsers)
+      .where(eq(authUsers.id, appUserId))
+      .limit(1);
+
+    const userEmail = userResults[0]?.email;
+
+    if (userEmail && !sandboxEmails?.includes(userEmail)) {
+      log.info("Ignoring sandbox event", {
+        appUserId,
+        email: userEmail,
+      });
+      return;
+    }
+    log.info("Processing sandbox event for demo user", {
+      appUserId,
+    });
+  }
+
   if (event.type === "TRANSFER") {
     log.info("Handling RevenueCat TRANSFER event", {
       transferredFrom: event.transferred_from,
