@@ -50,3 +50,8 @@ variable "project_forwarding_email_address" {
   description = "Email address to forward sender domain emails to"
   type        = string
 }
+
+variable "bounce_webhook_url" {
+  description = "Webhook URL to receive SES bounce notifications"
+  type        = string
+}

@@ -14,6 +14,7 @@ module "aws" {
   email_healthcheck_token          = var.email_healthcheck_token
 
   project_forwarding_email_address = var.project_forwarding_email_address
+  bounce_webhook_url               = var.bounce_webhook_url
 }
 
 # GCP Module

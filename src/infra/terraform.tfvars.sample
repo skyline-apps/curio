@@ -7,3 +7,4 @@ email_healthcheck_error_endpoint = "xxxxxx"  # Should take query params ?success
 email_healthcheck_warn_endpoint = "xxxxxx"  # Should take query params ?success={success}&error={error}
 email_healthcheck_token = "xxxxxx"  # Passed in Authorization: Bearer header
 project_forwarding_email_address = "your-email@example.com"  # Address to forward sender domain emails to
+bounce_webhook_url = "xxxxxx"

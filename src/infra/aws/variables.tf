@@ -56,3 +56,8 @@ variable "email_healthcheck_token" {
   type        = string
   sensitive   = true
 }
+
+variable "bounce_webhook_url" {
+  description = "Webhook URL to receive SES bounce notifications"
+  type        = string
+}

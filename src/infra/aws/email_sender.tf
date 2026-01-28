@@ -100,6 +100,59 @@ resource "aws_iam_user_policy_attachment" "smtp_policy" {
   policy_arn = aws_iam_policy.ses_sender.arn
 }
 
+# Bounce Handling
+resource "aws_sns_topic" "email_bounces" {
+  name = "${var.project_prefix}-${var.environment}-email-bounces"
+}
+
+resource "aws_sns_topic_policy" "email_bounces" {
+  arn = aws_sns_topic.email_bounces.arn
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowSESPublish"
+        Effect = "Allow"
+        Principal = {
+          Service = "ses.amazonaws.com"
+        }
+        Action   = "SNS:Publish"
+        Resource = aws_sns_topic.email_bounces.arn
+      }
+    ]
+  })
+}
+
+resource "aws_sns_topic_subscription" "email_bounces_webhook" {
+  topic_arn = aws_sns_topic.email_bounces.arn
+  protocol  = split(":", var.bounce_webhook_url)[0]
+  endpoint  = var.bounce_webhook_url
+  delivery_policy = jsonencode({
+    "healthyRetryPolicy" : {
+      "minDelayTarget" : 20,
+      "maxDelayTarget" : 20,
+      "numRetries" : 3,
+      "numMaxDelayRetries" : 0,
+      "numNoDelayRetries" : 0,
+      "numMinDelayRetries" : 0,
+      "backoffFunction" : "linear"
+    },
+    "throttlePolicy" : {
+      "maxReceivesPerSecond" : 1
+    },
+    "requestPolicy" : {
+      "headerContentType" : "application/json"
+    }
+  })
+}
+
+resource "aws_ses_identity_notification_topic" "bounce" {
+  identity                 = aws_ses_domain_identity.auth.domain
+  notification_type        = "Bounce"
+  topic_arn                = aws_sns_topic.email_bounces.arn
+  include_original_headers = true
+}
+
 # Outputs
 output "ses_smtp_endpoint" {
   value = "email-smtp.${data.aws_region.current.name}.amazonaws.com"
