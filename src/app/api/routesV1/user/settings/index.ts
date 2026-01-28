@@ -47,6 +47,7 @@ export const userSettingsRouter = new Hono<EnvBindings>()
             displayFont: profiles.displayFont,
             displayFontSize: profiles.displayFontSize,
             analyticsTracking: profiles.analyticsTracking,
+            marketingEmails: profiles.marketingEmails,
             public: profiles.public,
             completedWalkthrough: profiles.completedWalkthrough,
           })

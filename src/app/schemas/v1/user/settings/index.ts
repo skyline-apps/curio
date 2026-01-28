@@ -22,6 +22,9 @@ export const SettingsSchema = z.object({
     .describe(
       "Send usage data and product analytics to help improve our service.",
     ),
+  marketingEmails: z
+    .boolean()
+    .describe("Whether you are subscribed to marketing emails."),
 });
 
 export const UpdateableSettingsSchema = SettingsSchema.strict().partial();

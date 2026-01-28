@@ -43,6 +43,7 @@ describe("/v1/user/settings", () => {
       const result = await response.json();
       expect(result).toEqual({
         analyticsTracking: true,
+        marketingEmails: true,
         colorScheme: ColorScheme.DARK,
         displayFont: DisplayFont.SANS,
         displayFontSize: DisplayFontSize.MD,
@@ -69,6 +70,23 @@ describe("/v1/user/settings", () => {
         where: eq(profiles.id, DEFAULT_TEST_PROFILE_ID),
       });
       expect(profile?.colorScheme).toBe(colorScheme);
+    });
+
+    it("should return 200 when successfully updating the user's marketing subscription", async () => {
+      const response = await postRequest(app, "v1/user/settings", {
+        marketingEmails: false,
+      });
+      expect(response.status).toBe(200);
+
+      const result = await response.json();
+      expect(result).toEqual({
+        marketingEmails: false,
+      });
+
+      const profile = await testDb.db.query.profiles.findFirst({
+        where: eq(profiles.id, DEFAULT_TEST_PROFILE_ID),
+      });
+      expect(profile?.marketingEmails).toBe(false);
     });
 
     it("should return 200 when successfully updating the user's public status", async () => {
