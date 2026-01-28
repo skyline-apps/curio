@@ -30,7 +30,7 @@ import {
 const authSchema = pgSchema("auth");
 
 // Incomplete table definition for auth.users, which is managed by Supabase.
-const authUsers = authSchema.table("users", {
+export const authUsers = authSchema.table("users", {
   id: uuid("id").primaryKey(),
   email: text("email").notNull().unique(),
 });
@@ -90,6 +90,7 @@ export const profiles = pgTable(
       .notNull()
       .default(false),
     newsletterEmail: text("newsletter_email").unique(),
+    emailBounced: boolean("email_bounced").notNull().default(false),
     isPremium: boolean("is_premium").notNull().default(false),
     premiumExpiresAt: timestamp("premium_expires_at", { withTimezone: true }),
     upgradeBannerLastShownAt: timestamp("upgrade_banner_last_shown_at", {

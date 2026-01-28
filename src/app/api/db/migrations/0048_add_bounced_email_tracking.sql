@@ -1,0 +1,1 @@
+ALTER TABLE "profiles" ADD COLUMN "email_bounced" boolean DEFAULT false NOT NULL;
