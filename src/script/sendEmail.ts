@@ -2,7 +2,8 @@ import { config } from 'dotenv';
 import path from 'path';
 
 // Load environment variables
-config({ path: path.resolve(__dirname, '../../.env') });
+config({ path: process.env.DOTENV_CONFIG_PATH });
+console.log('Loading .env from:', process.env.DOTENV_CONFIG_PATH);
 
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import { drizzle } from 'drizzle-orm/postgres-js';
@@ -50,6 +51,15 @@ async function main() {
       description: 'Dry run (do not send emails)',
       default: false,
     })
+    .option('batch-size', {
+      type: 'number',
+      description: 'Number of emails to send concurrently',
+      default: 10,
+    })
+    .option('to', {
+      type: 'string',
+      description: 'Specific email address to send to',
+    })
     .argv;
 
   if (!process.env.POSTGRES_URL) {
@@ -63,6 +73,15 @@ async function main() {
   try {
     console.log('Fetching users...');
     
+    const whereConditions = [
+      eq(profiles.emailBounced, false),
+      eq(profiles.marketingEmails, true),
+    ];
+
+    if (argv.to) {
+      whereConditions.push(eq(authUsers.email, (argv as any).to as string));
+    }
+
     const users = await db
       .select({
         email: authUsers.email,
@@ -70,50 +89,58 @@ async function main() {
       })
       .from(profiles)
       .innerJoin(authUsers, eq(profiles.userId, authUsers.id))
-      .where(and(eq(profiles.emailBounced, false), eq(profiles.marketingEmails, true)));
+      .where(and(...whereConditions));
 
     console.log(`Found ${users.length} active users.`);
 
     const htmlTemplate = readFileSync(argv.template, 'utf-8');
 
-    for (const user of users) {
-      if (argv.dryRun) {
-        console.log(`[Dry Run] Would send to: ${user.email}`);
-        continue;
-      }
+    const batchSize = argv.batchSize as number;
+    for (let i = 0; i < users.length; i += batchSize) {
+      const batch = users.slice(i, i + batchSize);
+      console.log(`Processing batch ${Math.floor(i / batchSize) + 1} (${batch.length} users)...`);
 
-      console.log(`Sending to: ${user.email}`);
+      await Promise.all(batch.map(async (user) => {
+        if (argv.dryRun) {
+          console.log(`[Dry Run] Would send to: ${user.email}`);
+          return;
+        }
 
-      const htmlBody = htmlTemplate.replace(/{{profileId}}/g, user.profileId);
+        console.log(`Sending to: ${user.email}`);
 
-      const command = new SendEmailCommand({
-        Source: argv.sender,
-        Destination: {
-          ToAddresses: [user.email],
-        },
-        Message: {
-          Subject: {
-            Data: argv.subject,
-            Charset: 'UTF-8',
+        const htmlBody = htmlTemplate.replace(/{{profileId}}/g, user.profileId);
+
+        const command = new SendEmailCommand({
+          Source: argv.sender,
+          Destination: {
+            ToAddresses: [user.email],
           },
-          Body: {
-            Html: {
-              Data: htmlBody,
+          Message: {
+            Subject: {
+              Data: argv.subject,
               Charset: 'UTF-8',
             },
+            Body: {
+              Html: {
+                Data: htmlBody,
+                Charset: 'UTF-8',
+              },
+            },
           },
-        },
-      });
+        });
 
-      try {
-        await sesClient.send(command);
-        console.log(`Successfully sent to ${user.email}`);
-      } catch (error) {
-        console.error(`Failed to send to ${user.email}:`, error);
-      }
+        try {
+          await sesClient.send(command);
+          console.log(`Successfully sent to ${user.email}`);
+        } catch (error) {
+          console.error(`Failed to send to ${user.email}:`, error);
+        }
+      }));
       
-      // Simple rate limiting to be safe (e.g., 100ms delay)
-      await new Promise(resolve => setTimeout(resolve, 100));
+      if (!argv.dryRun && i + batchSize < users.length) {
+        // Simple rate limiting between batches
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
     }
 
   } catch (error) {
