@@ -25,6 +25,7 @@ describe("SettingsContext", () => {
     public: false,
     analyticsTracking: false,
     completedWalkthrough: true,
+    marketingEmails: true,
   };
 
   const initialUser: GetUserResponse = {
