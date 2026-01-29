@@ -1,6 +1,5 @@
 import { eq } from "@app/api/db";
 import { profiles } from "@app/api/db/schema";
-import { APIResponse } from "@app/api/utils/api";
 import { EnvBindings } from "@app/api/utils/env";
 import {
   DEFAULT_TEST_PROFILE_ID,
@@ -31,8 +30,11 @@ describe("/v1/public/user/unsubscribe", () => {
     });
 
     expect(response.status).toBe(200);
-    const result = (await response.json()) as APIResponse;
-    expect(result).toEqual({ success: true });
+    const result = await response.json();
+    expect(result).toMatchObject({
+      message: "You have been successfully unsubscribed from marketing emails.",
+      success: true,
+    });
 
     const profile = await testDb.db.query.profiles.findFirst({
       where: eq(profiles.id, DEFAULT_TEST_PROFILE_ID),
@@ -47,7 +49,7 @@ describe("/v1/public/user/unsubscribe", () => {
     });
 
     expect(response.status).toBe(404);
-    const result = (await response.json()) as APIResponse;
+    const result = await response.json();
     expect(result).toEqual({ error: "Profile not found" });
   });
 
