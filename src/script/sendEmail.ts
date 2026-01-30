@@ -10,7 +10,7 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import { profiles, authUsers } from '@app/api/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { readFileSync } from 'fs';
+import { readFileSync, appendFileSync } from 'fs';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
@@ -129,11 +129,39 @@ async function main() {
           },
         });
 
-        try {
-          await sesClient.send(command);
-          console.log(`Successfully sent to ${user.email}`);
-        } catch (error) {
-          console.error(`Failed to send to ${user.email}:`, error);
+        let retries = 0;
+        const maxRetries = 5;
+        let sent = false;
+
+        while (!sent && retries < maxRetries) {
+          try {
+            await sesClient.send(command);
+            console.log(`Successfully sent to ${user.email}`);
+            sent = true;
+          } catch (e: unknown) {
+            const error = e as { name?: string; Code?: string; message?: string };
+            const isThrottling = 
+              error.name === 'Throttling' || 
+              error.Code === 'Throttling' || 
+              error.name === 'TooManyRequestsException' || 
+              error.Code === 'TooManyRequestsException';
+
+            if (isThrottling) {
+              retries++;
+              const backoff = Math.pow(2, retries) * 1000 + Math.random() * 500;
+              console.warn(`Throttling error for ${user.email}. Retrying in ${Math.round(backoff)}ms... (Attempt ${retries}/${maxRetries})`);
+              await new Promise(resolve => setTimeout(resolve, backoff));
+            } else {
+              console.error(`Failed to send to ${user.email}:`, error);
+              appendFileSync('failed_emails.log', `${new Date().toISOString()} - ${user.email} - ${error.message || 'Unknown error'}\n`);
+              break;
+            }
+          }
+        }
+
+        if (!sent && retries >= maxRetries) {
+          console.error(`Failed to send to ${user.email} after ${maxRetries} attempts due to throttling.`);
+          appendFileSync('failed_emails.log', `${new Date().toISOString()} - ${user.email} - Max retries exceeded (Throttling)\n`);
         }
       }));
       
