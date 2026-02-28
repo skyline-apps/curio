@@ -151,19 +151,21 @@ export async function handleRevenueCatEvent(
   }
   const profile = profileResults[0];
 
-  if (!event.expiration_at_ms) {
-    log.error("Expiration date not found for RevenueCat event", {
-      appUserId: event.app_user_id,
-    });
-    throw new SubscriptionError(`Expiration date not found for app user ID`);
-  }
-
   // Handle different event types
   switch (event.type) {
     case "INITIAL_PURCHASE":
     case "RENEWAL":
     case "UNCANCELLATION":
     case "PRODUCT_CHANGE": {
+      if (!event.expiration_at_ms) {
+        log.error("Expiration date not found for RevenueCat event", {
+          appUserId: event.app_user_id,
+        });
+        throw new SubscriptionError(
+          `Expiration date not found for app user ID`,
+        );
+      }
+
       const expirationDate = new Date(event.expiration_at_ms);
       await tx
         .update(profiles)
