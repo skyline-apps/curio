@@ -1,7 +1,6 @@
 import { ESLintUtils, TSESTree } from "@typescript-eslint/utils";
 
 export const apiMiddlewareRule = ESLintUtils.RuleCreator.withoutDocs({
-  name: "api-middleware",
   meta: {
     type: "problem",
     messages: {
@@ -14,11 +13,12 @@ export const apiMiddlewareRule = ESLintUtils.RuleCreator.withoutDocs({
     function checkRouteMethod(node: TSESTree.CallExpression): void {
       if (node.callee.type !== "MemberExpression") return;
 
-      // Skip ky HTTP client calls
+      // Skip ky and axios HTTP client calls
       if (
         node.callee.object &&
         node.callee.object.type === "Identifier" &&
-        node.callee.object.name === "ky"
+        (node.callee.object.name === "ky" ||
+          node.callee.object.name.includes("axios"))
       )
         return;
 
@@ -28,6 +28,31 @@ export const apiMiddlewareRule = ESLintUtils.RuleCreator.withoutDocs({
       const methodName = calleeProperty.name;
       if (!["get", "post", "put", "delete", "patch"].includes(methodName))
         return;
+
+      // Find the root object of the chain
+      let rootObject = node.callee.object;
+      while (
+        rootObject.type === "CallExpression" &&
+        rootObject.callee.type === "MemberExpression"
+      ) {
+        rootObject = rootObject.callee.object;
+      }
+
+      // Check if the root object looks like a router
+      let isRouter = false;
+      if (rootObject.type === "Identifier") {
+        const name = rootObject.name;
+        isRouter = name.endsWith("Router") || name === "app" || name === "api";
+      } else if (
+        rootObject.type === "NewExpression" &&
+        rootObject.callee.type === "Identifier"
+      ) {
+        isRouter = rootObject.callee.name === "Hono";
+      }
+
+      if (!isRouter) {
+        return;
+      }
 
       const args = node.arguments;
       if (args.length < 2) return;
@@ -78,7 +103,6 @@ export const apiMiddlewareRule = ESLintUtils.RuleCreator.withoutDocs({
 });
 
 export const responseParseRule = ESLintUtils.RuleCreator.withoutDocs({
-  name: "api-response-parse",
   meta: {
     type: "problem",
     messages: {
@@ -92,11 +116,12 @@ export const responseParseRule = ESLintUtils.RuleCreator.withoutDocs({
     function checkRouteMethod(node: TSESTree.CallExpression): void {
       if (node.callee.type !== "MemberExpression") return;
 
-      // Skip ky HTTP client calls
+      // Skip ky and axios HTTP client calls
       if (
         node.callee.object &&
         node.callee.object.type === "Identifier" &&
-        node.callee.object.name === "ky"
+        (node.callee.object.name === "ky" ||
+          node.callee.object.name.includes("axios"))
       )
         return;
 
@@ -106,6 +131,31 @@ export const responseParseRule = ESLintUtils.RuleCreator.withoutDocs({
       const methodName = calleeProperty.name;
       if (!["get", "post", "put", "delete", "patch"].includes(methodName))
         return;
+
+      // Find the root object of the chain
+      let rootObject = node.callee.object;
+      while (
+        rootObject.type === "CallExpression" &&
+        rootObject.callee.type === "MemberExpression"
+      ) {
+        rootObject = rootObject.callee.object;
+      }
+
+      // Check if the root object looks like a router
+      let isRouter = false;
+      if (rootObject.type === "Identifier") {
+        const name = rootObject.name;
+        isRouter = name.endsWith("Router") || name === "app" || name === "api";
+      } else if (
+        rootObject.type === "NewExpression" &&
+        rootObject.callee.type === "Identifier"
+      ) {
+        isRouter = rootObject.callee.name === "Hono";
+      }
+
+      if (!isRouter) {
+        return;
+      }
 
       const args = node.arguments;
       if (args.length < 2) return;
@@ -160,7 +210,6 @@ export const responseParseRule = ESLintUtils.RuleCreator.withoutDocs({
 });
 
 export const apiValidationRule = ESLintUtils.RuleCreator.withoutDocs({
-  name: "api-validation",
   meta: {
     type: "problem",
     messages: {
@@ -174,11 +223,12 @@ export const apiValidationRule = ESLintUtils.RuleCreator.withoutDocs({
     function checkRouteMethod(node: TSESTree.CallExpression): void {
       if (node.callee.type !== "MemberExpression") return;
 
-      // Skip ky HTTP client calls
+      // Skip ky and axios HTTP client calls
       if (
         node.callee.object &&
         node.callee.object.type === "Identifier" &&
-        node.callee.object.name === "ky"
+        (node.callee.object.name === "ky" ||
+          node.callee.object.name.includes("axios"))
       )
         return;
 
@@ -188,6 +238,31 @@ export const apiValidationRule = ESLintUtils.RuleCreator.withoutDocs({
       const methodName = calleeProperty.name;
       if (!["get", "post", "put", "delete", "patch"].includes(methodName))
         return;
+
+      // Find the root object of the chain
+      let rootObject = node.callee.object;
+      while (
+        rootObject.type === "CallExpression" &&
+        rootObject.callee.type === "MemberExpression"
+      ) {
+        rootObject = rootObject.callee.object;
+      }
+
+      // Check if the root object looks like a router
+      let isRouter = false;
+      if (rootObject.type === "Identifier") {
+        const name = rootObject.name;
+        isRouter = name.endsWith("Router") || name === "app" || name === "api";
+      } else if (
+        rootObject.type === "NewExpression" &&
+        rootObject.callee.type === "Identifier"
+      ) {
+        isRouter = rootObject.callee.name === "Hono";
+      }
+
+      if (!isRouter) {
+        return;
+      }
 
       const args = node.arguments;
       if (args.length < 2) return;
