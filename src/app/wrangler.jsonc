@@ -30,7 +30,17 @@
             "binding": "ITEMS_FETCHER_QUEUE"
           }
         ]
-      }
+      },
+      "r2_buckets": [
+        {
+          "binding": "ITEMS_BUCKET",
+          "bucket_name": "curio-items-staging"
+        },
+        {
+          "binding": "IMPORT_BUCKET",
+          "bucket_name": "curio-imports-staging"
+        }
+      ]
     },
     "prod": {
       "observability": {
@@ -47,7 +57,17 @@
             "binding": "ITEMS_FETCHER_QUEUE"
           }
         ]
-      }
+      },
+      "r2_buckets": [
+        {
+          "binding": "ITEMS_BUCKET",
+          "bucket_name": "curio-items-prod"
+        },
+        {
+          "binding": "IMPORT_BUCKET",
+          "bucket_name": "curio-imports-prod"
+        }
+      ]
     }
     // Uncomment the below to run import locally
     // },

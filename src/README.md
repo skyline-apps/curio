@@ -66,7 +66,7 @@ With the development environment running, navigate to `http://localhost:8000` to
 
 Use the `DASHBOARD_USERNAME` and `DASHBOARD_PASSWORD` environment variables to sign in.
 
-Saved Markdown content can be viewed here in the Supabase Storage page.
+Saved Markdown content can be viewed in the Cloudflare R2 dashboard.
 
 ### Database shell
 1. Run `docker exec -it db bash`.
@@ -91,11 +91,13 @@ Instead, to run logic for a specific consumer queue locally, set it as the `queu
   - Also generate a `SEARCH_MASTER_API_KEY` (at least 16 bytes) and `SEARCH_APPLICATION_API_KEY` (a UUID v4).
   - When setting up the domain in Cloudflare, make sure to use "Full (strict)" mode for SSL/TLS encryption.
 4. Run database migrations against the production database using `DOTENV_CONFIG_PATH=/path/to/.env.prod npm run db:migrate`. This is also set up to run automatically with the GitHub Actions build process.
-5. Configure the Supabase storage settings.
-  - Create a bucket `items`. Set it to be public with the allowed MIME type `text/markdown`.
-  - Also create an `imports` bucket. It should stay private.
-  - Create a new policy on the `items` bucket from scratch. Title it "Allow read access for everyone", allow the `SELECT` operation for all roles, and keep the default policy definition `bucket_id = 'items'`.
-  - Create a new policy on the `items` bucket. Title it "Allow authenticated to upload", allow the `INSERT` and `UPDATE` operations for the `authenticated` role, and keep the default policy definition.
+5. Set up Cloudflare R2 buckets for storage. From `src/app`, run:
+   ```bash
+   npx wrangler r2 bucket create curio-items-prod
+   npx wrangler r2 bucket create curio-imports-prod
+   ```
+   Repeat for staging if needed (`curio-items-staging`, `curio-imports-staging`).
+   These buckets are bound to the application via the `r2_buckets` setting in `wrangler.jsonc`.
 6. Populate the environment variables and secrets in GitHub so that the Actions build pipeline can deploy.
 7. Populate the environment variables and secrets in the deployed Cloudflare workers.
 8. From `src/app`, run `npx wrangler queues create <QUEUE>` to create message queues.

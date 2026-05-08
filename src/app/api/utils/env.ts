@@ -1,6 +1,6 @@
 import { TransactionDB } from "@app/api/db";
 import { type Logger } from "@app/api/utils/logger";
-import { Queue } from "@cloudflare/workers-types";
+import { Queue, R2Bucket } from "@cloudflare/workers-types";
 import { type Context } from "hono";
 import { z } from "zod";
 
@@ -29,6 +29,8 @@ export const EnvSchema = z.object({
 
 export type Env = z.infer<typeof EnvSchema> & {
   ITEMS_FETCHER_QUEUE: Queue;
+  ITEMS_BUCKET: R2Bucket;
+  IMPORT_BUCKET: R2Bucket;
 };
 
 export type EnvBindings = {

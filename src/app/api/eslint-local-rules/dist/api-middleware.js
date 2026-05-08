@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiValidationRule = exports.responseParseRule = exports.apiMiddlewareRule = void 0;
 const utils_1 = require("@typescript-eslint/utils");
 exports.apiMiddlewareRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
-    name: "api-middleware",
     meta: {
         type: "problem",
         messages: {
@@ -16,10 +15,11 @@ exports.apiMiddlewareRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
         function checkRouteMethod(node) {
             if (node.callee.type !== "MemberExpression")
                 return;
-            // Skip ky HTTP client calls
+            // Skip ky and axios HTTP client calls
             if (node.callee.object &&
                 node.callee.object.type === "Identifier" &&
-                node.callee.object.name === "ky")
+                (node.callee.object.name === "ky" ||
+                    node.callee.object.name.includes("axios")))
                 return;
             const calleeProperty = node.callee.property;
             if (calleeProperty.type !== "Identifier")
@@ -27,6 +27,25 @@ exports.apiMiddlewareRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
             const methodName = calleeProperty.name;
             if (!["get", "post", "put", "delete", "patch"].includes(methodName))
                 return;
+            // Find the root object of the chain
+            let rootObject = node.callee.object;
+            while (rootObject.type === "CallExpression" &&
+                rootObject.callee.type === "MemberExpression") {
+                rootObject = rootObject.callee.object;
+            }
+            // Check if the root object looks like a router
+            let isRouter = false;
+            if (rootObject.type === "Identifier") {
+                const name = rootObject.name;
+                isRouter = name.endsWith("Router") || name === "app" || name === "api";
+            }
+            else if (rootObject.type === "NewExpression" &&
+                rootObject.callee.type === "Identifier") {
+                isRouter = rootObject.callee.name === "Hono";
+            }
+            if (!isRouter) {
+                return;
+            }
             const args = node.arguments;
             if (args.length < 2)
                 return;
@@ -69,7 +88,6 @@ exports.apiMiddlewareRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
     },
 });
 exports.responseParseRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
-    name: "api-response-parse",
     meta: {
         type: "problem",
         messages: {
@@ -82,10 +100,11 @@ exports.responseParseRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
         function checkRouteMethod(node) {
             if (node.callee.type !== "MemberExpression")
                 return;
-            // Skip ky HTTP client calls
+            // Skip ky and axios HTTP client calls
             if (node.callee.object &&
                 node.callee.object.type === "Identifier" &&
-                node.callee.object.name === "ky")
+                (node.callee.object.name === "ky" ||
+                    node.callee.object.name.includes("axios")))
                 return;
             const calleeProperty = node.callee.property;
             if (calleeProperty.type !== "Identifier")
@@ -93,6 +112,25 @@ exports.responseParseRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
             const methodName = calleeProperty.name;
             if (!["get", "post", "put", "delete", "patch"].includes(methodName))
                 return;
+            // Find the root object of the chain
+            let rootObject = node.callee.object;
+            while (rootObject.type === "CallExpression" &&
+                rootObject.callee.type === "MemberExpression") {
+                rootObject = rootObject.callee.object;
+            }
+            // Check if the root object looks like a router
+            let isRouter = false;
+            if (rootObject.type === "Identifier") {
+                const name = rootObject.name;
+                isRouter = name.endsWith("Router") || name === "app" || name === "api";
+            }
+            else if (rootObject.type === "NewExpression" &&
+                rootObject.callee.type === "Identifier") {
+                isRouter = rootObject.callee.name === "Hono";
+            }
+            if (!isRouter) {
+                return;
+            }
             const args = node.arguments;
             if (args.length < 2)
                 return;
@@ -135,7 +173,6 @@ exports.responseParseRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
     },
 });
 exports.apiValidationRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
-    name: "api-validation",
     meta: {
         type: "problem",
         messages: {
@@ -149,10 +186,11 @@ exports.apiValidationRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
         function checkRouteMethod(node) {
             if (node.callee.type !== "MemberExpression")
                 return;
-            // Skip ky HTTP client calls
+            // Skip ky and axios HTTP client calls
             if (node.callee.object &&
                 node.callee.object.type === "Identifier" &&
-                node.callee.object.name === "ky")
+                (node.callee.object.name === "ky" ||
+                    node.callee.object.name.includes("axios")))
                 return;
             const calleeProperty = node.callee.property;
             if (calleeProperty.type !== "Identifier")
@@ -160,6 +198,25 @@ exports.apiValidationRule = utils_1.ESLintUtils.RuleCreator.withoutDocs({
             const methodName = calleeProperty.name;
             if (!["get", "post", "put", "delete", "patch"].includes(methodName))
                 return;
+            // Find the root object of the chain
+            let rootObject = node.callee.object;
+            while (rootObject.type === "CallExpression" &&
+                rootObject.callee.type === "MemberExpression") {
+                rootObject = rootObject.callee.object;
+            }
+            // Check if the root object looks like a router
+            let isRouter = false;
+            if (rootObject.type === "Identifier") {
+                const name = rootObject.name;
+                isRouter = name.endsWith("Router") || name === "app" || name === "api";
+            }
+            else if (rootObject.type === "NewExpression" &&
+                rootObject.callee.type === "Identifier") {
+                isRouter = rootObject.callee.name === "Hono";
+            }
+            if (!isRouter) {
+                return;
+            }
             const args = node.arguments;
             if (args.length < 2)
                 return;
