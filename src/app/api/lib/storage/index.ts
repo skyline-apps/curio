@@ -221,35 +221,31 @@ export class Storage {
 
     if (env.ITEMS_BUCKET) {
       const contentObj = await env.ITEMS_BUCKET.get(versionPath);
-      if (!contentObj) {
-        if (version) {
-          return this.getItemContent(env, slug, null);
-        }
-        throw new StorageError("Failed to download content from R2");
-      }
-
-      const summaryObj = await env.ITEMS_BUCKET.get(summaryPath);
-      let summaryText: string | null = summaryObj
-        ? await summaryObj.text()
-        : null;
-
-      if (!summaryText && version !== null) {
-        const fallbackSummaryObj = await env.ITEMS_BUCKET.get(
-          `${slug}/${SUMMARY_NAME}.md`,
-        );
-        summaryText = fallbackSummaryObj
-          ? await fallbackSummaryObj.text()
+      if (contentObj) {
+        const summaryObj = await env.ITEMS_BUCKET.get(summaryPath);
+        let summaryText: string | null = summaryObj
+          ? await summaryObj.text()
           : null;
+
+        if (!summaryText && version !== null) {
+          const fallbackSummaryObj = await env.ITEMS_BUCKET.get(
+            `${slug}/${SUMMARY_NAME}.md`,
+          );
+          summaryText = fallbackSummaryObj
+            ? await fallbackSummaryObj.text()
+            : null;
+        }
+
+        const metadata =
+          contentObj.customMetadata as unknown as VersionMetadata;
+
+        return {
+          version,
+          versionName: metadata.timestamp,
+          content: await contentObj.text(),
+          summary: summaryText,
+        };
       }
-
-      const metadata = contentObj.customMetadata as unknown as VersionMetadata;
-
-      return {
-        version,
-        versionName: metadata.timestamp,
-        content: await contentObj.text(),
-        summary: summaryText,
-      };
     }
 
     const storage = await this.getSupabaseClient(env);
@@ -296,18 +292,16 @@ export class Storage {
   ): Promise<VersionMetadata> {
     if (env.ITEMS_BUCKET) {
       const obj = await env.ITEMS_BUCKET.head(`${slug}/${DEFAULT_NAME}.md`);
-      if (!obj) {
-        throw new StorageError("Failed to get metadata from R2");
+      if (obj) {
+        const metadata = obj.customMetadata as unknown as VersionMetadata;
+        if (metadata.title) {
+          return {
+            ...metadata,
+            textDirection: metadata.textDirection || TextDirection.LTR,
+            textLanguage: metadata.textLanguage || "",
+          };
+        }
       }
-      const metadata = obj.customMetadata as unknown as VersionMetadata;
-      if (!metadata.title) {
-        throw new StorageError("Failed to verify metadata contents from R2");
-      }
-      return {
-        ...metadata,
-        textDirection: metadata.textDirection || TextDirection.LTR,
-        textLanguage: metadata.textLanguage || "",
-      };
     }
 
     const storage = await this.getSupabaseClient(env);
@@ -387,11 +381,10 @@ export class Storage {
   async readImportFile(env: StorageEnv, objectKey: string): Promise<Blob> {
     if (env.IMPORT_BUCKET) {
       const obj = await env.IMPORT_BUCKET.get(objectKey);
-      if (!obj) {
-        throw new StorageError("Failed to read file from R2");
+      if (obj) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (await obj.blob()) as any;
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (await obj.blob()) as any;
     }
 
     const storage = await this.getSupabaseClient(env);
