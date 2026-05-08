@@ -9,11 +9,13 @@
     "import:omnivore": "tsx importOmnivore.ts",
     "update": "tsx updateItemContent.ts",
     "version:bump": "tsx bumpVersion.ts",
-    "send:email": "tsx sendEmail.ts"
+    "send:email": "tsx sendEmail.ts",
+    "storage:migrate": "tsx migrateToR2.ts"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1045.0",
     "@aws-sdk/client-ses": "^3.975.0",
     "@supabase/supabase-js": "^2.49.1",
     "@types/yargs": "^17.0.33",
