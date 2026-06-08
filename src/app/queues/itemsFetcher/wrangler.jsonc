@@ -28,7 +28,17 @@
                         "max_batch_size": 1
                     }
                 ]
-            }
+            },
+            "r2_buckets": [
+                {
+                    "binding": "ITEMS_BUCKET",
+                    "bucket_name": "curio-items-staging"
+                },
+                {
+                    "binding": "IMPORT_BUCKET",
+                    "bucket_name": "curio-imports-staging"
+                }
+            ]
         },
         "prod": {
             "name": "curio-consumer-prod",
@@ -42,7 +52,17 @@
                         "max_batch_size": 1,
                     }
                 ]
-            }
+            },
+            "r2_buckets": [
+                {
+                    "binding": "ITEMS_BUCKET",
+                    "bucket_name": "curio-items-prod"
+                },
+                {
+                    "binding": "IMPORT_BUCKET",
+                    "bucket_name": "curio-imports-prod"
+                }
+            ]
         }
     },
 }
