@@ -4,7 +4,8 @@ import * as dotenv from "dotenv";
 import { resolve } from "path";
 
 // Load environment variables from the root .env file
-dotenv.config({ path: resolve(process.cwd(), "../../.env.staging") });
+const envFile = process.env.ENV_FILE || ".env.staging";
+dotenv.config({ path: resolve(process.cwd(), `../../${envFile}`) });
 
 console.log("Migration script starting...");
 
