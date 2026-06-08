@@ -7,6 +7,16 @@
     "nodejs_compat"
   ],
   "keep_vars": true,
+  "r2_buckets": [
+    {
+      "binding": "ITEMS_BUCKET",
+      "bucket_name": "curio-items-local"
+    },
+    {
+      "binding": "IMPORT_BUCKET",
+      "bucket_name": "curio-imports-local"
+    }
+  ],
   "assets": {
     "not_found_handling": "single-page-application"
   },
