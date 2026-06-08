@@ -37,6 +37,7 @@ services:
       - ./.env:/app/.dev.vars
       - ./.env.staging:/app/.env.staging
       - ./.env.prod:/app/.env.prod
+      - ./src/app/.wrangler/state:/app/.wrangler/state
     mem_limit: "6G"
     cpus: 4
     develop:

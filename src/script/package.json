@@ -10,7 +10,8 @@
     "update": "tsx updateItemContent.ts",
     "version:bump": "tsx bumpVersion.ts",
     "send:email": "tsx sendEmail.ts",
-    "storage:migrate": "tsx migrateToR2.ts"
+    "storage:migrate": "tsx migrateToR2.ts",
+    "storage:migrate:local": "tsx migrateLocalToR2.ts"
   },
   "author": "",
   "license": "MIT",
