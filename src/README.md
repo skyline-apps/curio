@@ -139,16 +139,31 @@ Instead, to run logic for a specific consumer queue locally, set it as the `queu
 2. Open the application in Android Studio by running `npx cap open android` from `src/app`.
 3. Build a signed APK using the Build > Generate Signed App Bundle option.
 4. Select "Android App Bundle" and follow the instructions. You should build a `release` app in the `src/app/android/app` folder.
-5. Follow the [launch checklist](https://play.google.com/console/about/guides/releasewithconfidence/) and upload the app bundle to the Play Console.
-6. In the Google Auth Platform Cloud Console, create a new app of type "Android", populating its package name from the `src/app/android/app/build.gradle` file and the SHA-1 fingerprint from the debug keystore by running `keytool -keystore ~/.android/debug.keystore -list -v` (see [here](https://support.google.com/cloud/answer/15549257?visit_id=638947171547368371-732663243&rd=1#installedapplications&android&zippy=%2Cnative-applications-android-ios-desktop-uwp-chrome-extensions-tv-and-limited-input%2Candroid)).
-7. In the Google Play Console, navigate to "Test and release" > "App integrity" > "App signing" and copy the SHA-1 fingerprint.
-8. In the Google Auth Platform Cloud Console, create a new app of type "Android", populating its package name from the `src/app/android/app/build.gradle` file and the SHA-1 fingerprint from the step above.
+
+First time setup:
+1. Follow the [launch checklist](https://play.google.com/console/about/guides/releasewithconfidence/) and upload the app bundle to the Play Console.
+2. In the Google Auth Platform Cloud Console, create a new app of type "Android", populating its package name from the `src/app/android/app/build.gradle` file and the SHA-1 fingerprint from the debug keystore by running `keytool -keystore ~/.android/debug.keystore -list -v` (see [here](https://support.google.com/cloud/answer/15549257?visit_id=638947171547368371-732663243&rd=1#installedapplications&android&zippy=%2Cnative-applications-android-ios-desktop-uwp-chrome-extensions-tv-and-limited-input%2Candroid)).
+3. In the Google Play Console, navigate to "Test and release" > "App integrity" > "App signing" and copy the SHA-1 fingerprint.
+4. In the Google Auth Platform Cloud Console, create a new app of type "Android", populating its package name from the `src/app/android/app/build.gradle` file and the SHA-1 fingerprint from the step above.
+
+New release:
+1. In the Google Play Console, create a new release and upload the `app-release.aab` from `src/app/android/app/release`.
+2. Follow the instructions to send the app for review.
 
 ### iOS app
 1. From `src/script`, run `npm run version:bump` to update the app version.
-2. Follow instructions [here](https://github.com/Cap-go/capacitor-social-login/blob/main/docs/setup_apple.md) to set up Apple sign in.
-3. For each Supabase auth deployment, enable Apple sign-in with the client ID from `PRODUCT_BUNDLE_IDENTIFIER` in `src/app/ios/App/App.xcodeproj/project.pbxproj`.
-4. Follow [these instructions](https://github.com/carsten-klaffke/send-intent?tab=readme-ov-file#ios) to allow the app to handle share intents.
+
+First time setup:
+1. Follow instructions [here](https://github.com/Cap-go/capacitor-social-login/blob/main/docs/setup_apple.md) to set up Apple sign in.
+2. For each Supabase auth deployment, enable Apple sign-in with the client ID from `PRODUCT_BUNDLE_IDENTIFIER` in `src/app/ios/App/App.xcodeproj/project.pbxproj`.
+3. Follow [these instructions](https://github.com/carsten-klaffke/send-intent?tab=readme-ov-file#ios) to allow the app to handle share intents.
+
+New release:
+1. Open the application in XCode by running `npx cap open ios` from `src/app`.
+2. Select "Any iOS Device (arm64)" from the top bar as the build target.
+3. In the menu, select Product > Archive.
+4. When the Organizer window opens, select archive and click "Distribute App". Choose "App Store Connect".
+
 
 ### Authentication
 1. Set up a Google Cloud project with Google Auth Platform configured for a web application. Copy in the generated client ID and client secret into Supabase's Google auth provider, then copy the Supabase auth callback URL into the "Auhorized redirect URIs" field.
