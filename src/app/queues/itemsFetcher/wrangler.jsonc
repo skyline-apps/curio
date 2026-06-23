@@ -17,7 +17,7 @@
     },
     "env": {
         "staging": {
-            "name": "curio-consumer-staging",
+            "name": "items-fetcher-worker-staging",
             "vars": {
                 "ENVIRONMENT": "staging"
             },
@@ -41,7 +41,7 @@
             ]
         },
         "prod": {
-            "name": "curio-consumer-prod",
+            "name": "items-fetcher-worker-prod",
             "vars": {
                 "ENVIRONMENT": "prod"
             },
