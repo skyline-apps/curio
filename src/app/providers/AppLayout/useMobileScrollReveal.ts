@@ -1,24 +1,25 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const FADE_DELAY_MS = 1000;
+const FADE_DELAY_MS = 3000;
 
 /**
- * On mobile, returns a `visible` boolean that becomes true briefly when the
- * user scrolls, then fades away after FADE_DELAY_MS of inactivity.
+ * On mobile, returns a `visible` boolean that is `true` when the user is idle
+ * and `false` while scrolling. After scrolling stops, waits FADE_DELAY_MS then
+ * fades back in.
  *
  * Always returns `true` on non-touch / desktop viewports.
  */
 export const useMobileScrollReveal = (): boolean => {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleScroll = useCallback(() => {
-    setVisible(true);
+    setVisible(false);
     if (timeoutRef.current !== null) {
       clearTimeout(timeoutRef.current);
     }
     timeoutRef.current = setTimeout(() => {
-      setVisible(false);
+      setVisible(true);
     }, FADE_DELAY_MS);
   }, []);
 

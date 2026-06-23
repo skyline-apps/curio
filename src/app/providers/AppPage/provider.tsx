@@ -1,5 +1,6 @@
 import Button from "@app/components/ui/Button";
 import { useAppLayout } from "@app/providers/AppLayout";
+import { useMobileScrollReveal } from "@app/providers/AppLayout/useMobileScrollReveal";
 import {
   SWIPE_THRESHOLD_DISTANCE,
   SWIPE_THRESHOLD_VELOCITY,
@@ -21,6 +22,7 @@ export const AppPageProvider: React.FC<{
   const [hasChildren, setHasChildren] = React.useState(false);
   const [showArticleFixedInfo, setShowArticleFixedInfo] = React.useState(false);
   const { pathname } = useLocation();
+  const scrollVisible = useMobileScrollReveal();
   const {
     appLayout: { leftSidebarOpen, rightSidebarOpen },
     updateAppLayout,
@@ -110,7 +112,10 @@ export const AppPageProvider: React.FC<{
             isIconOnly
             size="sm"
             variant="flat"
-            className="absolute top-2 right-3"
+            className={cn(
+              "absolute top-2 right-3 transition-opacity duration-500",
+              scrollVisible ? "opacity-100" : "opacity-0 md:opacity-100",
+            )}
             onPress={() => setShowArticleFixedInfo(true)}
             onMouseEnter={() => setShowArticleFixedInfo(true)}
           >
