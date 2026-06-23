@@ -1,6 +1,7 @@
 import Button from "@app/components/ui/Button";
 import Icon from "@app/components/ui/Icon";
 import { useAppLayout } from "@app/providers/AppLayout";
+import { useMobileScrollReveal } from "@app/providers/AppLayout/useMobileScrollReveal";
 import { useSidebarSwipe } from "@app/providers/AppLayout/useSidebarSwipe";
 import { cn } from "@app/utils/cn";
 import React from "react";
@@ -23,6 +24,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
   } = useAppLayout();
 
   const sidebarOpen = rightSidebarOpen;
+  const scrollVisible = useMobileScrollReveal();
 
   const bind = useSidebarSwipe({
     isOpen: sidebarOpen,
@@ -68,10 +70,12 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
         onPress={toggleSidebar}
         aria-label={rightSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
         className={cn(
-          "flex-none m-2 z-10 pointer-events-auto",
+          "flex-none m-2 z-10 pointer-events-auto transition-opacity duration-500",
           rightSidebarOpen
             ? ""
-            : "fixed right-0 bottom-[env(safe-area-inset-bottom)] lg:bottom-0 lg:relative lg:self-center",
+            : "fixed right-0 bottom-[env(safe-area-inset-bottom)] lg:bottom-0 lg:relative lg:self-center lg:opacity-100",
+          !rightSidebarOpen &&
+            (scrollVisible ? "opacity-100" : "opacity-0 lg:opacity-100"),
         )}
       >
         <Icon

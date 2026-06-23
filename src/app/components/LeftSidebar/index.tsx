@@ -1,6 +1,7 @@
 import Button from "@app/components/ui/Button";
 import Icon from "@app/components/ui/Icon";
 import { useAppLayout } from "@app/providers/AppLayout";
+import { useMobileScrollReveal } from "@app/providers/AppLayout/useMobileScrollReveal";
 import { useSidebarSwipe } from "@app/providers/AppLayout/useSidebarSwipe";
 import { cn } from "@app/utils/cn";
 import React from "react";
@@ -20,6 +21,7 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({
   hideContentWhenClosed = false,
 }) => {
   const { appLayout, updateAppLayout } = useAppLayout();
+  const scrollVisible = useMobileScrollReveal();
 
   const sidebarOpen = appLayout.leftSidebarOpen;
 
@@ -70,10 +72,12 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({
             onPress={toggleSidebar}
             aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
             className={cn(
-              "flex-none m-2 z-10",
+              "flex-none m-2 z-10 transition-opacity duration-500",
               sidebarOpen
                 ? ""
-                : "fixed left-0 bottom-[env(safe-area-inset-bottom)] md:bottom-0 md:relative",
+                : "fixed left-0 bottom-[env(safe-area-inset-bottom)] md:bottom-0 md:relative md:opacity-100",
+              !sidebarOpen &&
+                (scrollVisible ? "opacity-100" : "opacity-0 md:opacity-100"),
             )}
           >
             <Icon
