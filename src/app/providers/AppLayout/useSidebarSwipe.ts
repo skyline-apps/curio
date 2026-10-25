@@ -4,6 +4,11 @@ import type { ReactEventHandlers } from "react-use-gesture/dist/types";
 export const SWIPE_THRESHOLD_DISTANCE = 50; // Min distance in pixels for a swipe
 export const SWIPE_THRESHOLD_VELOCITY = 0.3; // Min velocity for a swipe
 
+export const isLeftThirdOfScreen = (clientX: number): boolean => {
+  if (typeof window === "undefined" || window.innerWidth <= 0) return true;
+  return clientX <= window.innerWidth / 3;
+};
+
 interface UseSidebarSwipeProps {
   isOpen: boolean;
   onOpen: () => void;
@@ -27,7 +32,14 @@ export const useSidebarSwipe = ({
   side,
 }: UseSidebarSwipeProps): (() => ReactEventHandlers) => {
   const bind = useDrag(
-    ({ axis, last, movement: [mx], velocity, direction: [dx] }) => {
+    ({
+      axis,
+      last,
+      movement: [mx],
+      velocity,
+      direction: [dx],
+      initial: [initialX],
+    }) => {
       // Ignore vertical scrolls
       if (axis === "y") return;
 
@@ -39,7 +51,12 @@ export const useSidebarSwipe = ({
           velocity > SWIPE_THRESHOLD_VELOCITY;
 
         if (side === "left") {
-          if (!isOpen && isSwipeRight && meetsThreshold) {
+          if (
+            !isOpen &&
+            isSwipeRight &&
+            meetsThreshold &&
+            isLeftThirdOfScreen(initialX)
+          ) {
             onOpen();
           } else if (isOpen && isSwipeLeft && meetsThreshold) {
             onClose();
