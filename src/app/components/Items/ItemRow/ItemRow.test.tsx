@@ -40,6 +40,7 @@ const mockMarkUnread = vi.fn();
 const mockDownloadArticleOffline = vi.fn();
 const mockRemoveArticleOffline = vi.fn();
 let mockIsSavedOffline = false;
+let mockIsUnavailableOffline = false;
 
 vi.mock("@app/components/Items/ItemActions/actions", () => ({
   useItemUpdate: () => ({
@@ -53,6 +54,8 @@ vi.mock("@app/components/Items/ItemActions/actions", () => ({
 vi.mock("@app/components/Items/useOfflineArticle", () => ({
   useOfflineArticle: () => ({
     isSavedOffline: mockIsSavedOffline,
+    isOnline: !mockIsUnavailableOffline,
+    isUnavailableOffline: mockIsUnavailableOffline,
     downloadArticleOffline: mockDownloadArticleOffline,
     removeArticleOffline: mockRemoveArticleOffline,
   }),
@@ -320,21 +323,26 @@ describe("ItemRow swipe interactions", () => {
     vi.useRealTimers();
   });
 
-  it("renders saved offline icon when isSavedOffline is true", () => {
-    mockIsSavedOffline = true;
+  it("grays out non-offline items when offline and unavailable", () => {
+    mockIsUnavailableOffline = true;
     renderItemRow();
-    expect(
-      screen.getByTestId("saved-offline-icon-test-item-slug"),
-    ).toBeInTheDocument();
-    mockIsSavedOffline = false;
+    const card = screen.getByTestId("item-row-card-test-item-slug");
+    expect(card).toHaveClass("opacity-40", "grayscale");
+    expect(card).toHaveAttribute("data-offline-disabled", "true");
+    mockIsUnavailableOffline = false;
   });
 
-  it("does not render saved offline icon when isSavedOffline is false", () => {
-    mockIsSavedOffline = false;
+  it("does not gray out items when available or online and does not render title icon", () => {
+    mockIsUnavailableOffline = false;
+    mockIsSavedOffline = true;
     renderItemRow();
+    const card = screen.getByTestId("item-row-card-test-item-slug");
+    expect(card).not.toHaveClass("grayscale");
+    expect(card).not.toHaveAttribute("data-offline-disabled");
     expect(
       screen.queryByTestId("saved-offline-icon-test-item-slug"),
     ).not.toBeInTheDocument();
+    mockIsSavedOffline = false;
   });
 
   it("triggers downloadArticleOffline when swiping with READ_OFFLINE and not saved", () => {

@@ -178,7 +178,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
           </div>
           {isEditable(item) ? (
             !readonly ? (
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <div className="flex gap-1">
                   <ItemActions
                     item={item}
@@ -187,10 +187,12 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
                   />
                   <PremiumActions item={item} />
                 </div>
-                <AdvancedActions
-                  item={item}
-                  onItemActionSuccess={onItemActionSuccess}
-                />
+                <div className="shrink-0">
+                  <AdvancedActions
+                    item={item}
+                    onItemActionSuccess={onItemActionSuccess}
+                  />
+                </div>
               </div>
             ) : null
           ) : user.id ? (

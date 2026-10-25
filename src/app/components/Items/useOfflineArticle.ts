@@ -10,10 +10,36 @@ import {
   isOfflineError,
 } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
-import { useQueryClient } from "@tanstack/react-query";
+import { onlineManager, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useSyncExternalStore } from "react";
 
 const log = createLogger("offline-article");
+
+export function useIsOnline(): boolean {
+  return useSyncExternalStore(
+    (onStoreChange) => {
+      const unsub = onlineManager.subscribe(onStoreChange);
+      if (typeof window !== "undefined") {
+        window.addEventListener("online", onStoreChange);
+        window.addEventListener("offline", onStoreChange);
+      }
+      return () => {
+        unsub();
+        if (typeof window !== "undefined") {
+          window.removeEventListener("online", onStoreChange);
+          window.removeEventListener("offline", onStoreChange);
+        }
+      };
+    },
+    () => {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        return false;
+      }
+      return onlineManager.isOnline();
+    },
+    () => true,
+  );
+}
 
 export const fetchItemContent = async (
   slug: string,
@@ -43,6 +69,8 @@ export const fetchItemContent = async (
 
 export interface UseOfflineArticleReturn {
   isSavedOffline: boolean;
+  isOnline: boolean;
+  isUnavailableOffline: boolean;
   downloadArticleOffline: (itemSlug?: string) => Promise<boolean>;
   removeArticleOffline: (itemSlug?: string) => void;
 }
@@ -50,6 +78,7 @@ export interface UseOfflineArticleReturn {
 export function useOfflineArticle(slug?: string): UseOfflineArticleReturn {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
+  const isOnline = useIsOnline();
 
   const isSavedOffline = useSyncExternalStore(
     (onStoreChange) => {
@@ -73,10 +102,19 @@ export function useOfflineArticle(slug?: string): UseOfflineArticleReturn {
     () => false,
   );
 
+  const isUnavailableOffline = !isOnline && !isSavedOffline;
+
   const downloadArticleOffline = useCallback(
     async (itemSlug?: string): Promise<boolean> => {
       const targetSlug = itemSlug || slug;
       if (!targetSlug) return false;
+
+      if (!isOnline) {
+        showToast("Cannot download article while offline.", {
+          type: "error",
+        });
+        return false;
+      }
 
       try {
         await queryClient.fetchQuery({
@@ -100,7 +138,7 @@ export function useOfflineArticle(slug?: string): UseOfflineArticleReturn {
         return false;
       }
     },
-    [queryClient, slug, showToast],
+    [queryClient, slug, showToast, isOnline],
   );
 
   const removeArticleOffline = useCallback(
@@ -118,6 +156,8 @@ export function useOfflineArticle(slug?: string): UseOfflineArticleReturn {
 
   return {
     isSavedOffline,
+    isOnline,
+    isUnavailableOffline,
     downloadArticleOffline,
     removeArticleOffline,
   };

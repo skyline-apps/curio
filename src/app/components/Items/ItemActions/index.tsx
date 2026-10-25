@@ -113,12 +113,14 @@ interface ItemActionsProps {
   className?: string;
   item?: Item;
   showExpanded?: boolean;
+  showOffline?: boolean;
   onItemActionSuccess?: () => void;
 }
 
 const ItemActions = ({
   item,
   showExpanded,
+  showOffline = !showExpanded,
   className,
   onItemActionSuccess,
 }: ItemActionsProps): React.ReactElement => {
@@ -158,28 +160,30 @@ const ItemActions = ({
         onActionSuccess={onItemActionSuccess}
         data-testid="item-action-archive"
       />
-      <ActionButton
-        action={async () => {
-          if (isSavedOffline) {
-            removeArticleOffline(item.slug);
-          } else {
-            await downloadArticleOffline(item.slug);
-          }
-        }}
-        defaultDisplay={{
-          text: "Read offline",
-          icon: <HiOutlineArrowDownTray />,
-        }}
-        activeDisplay={{
-          text: "Remove from offline",
-          icon: <HiArrowDownTray className="text-primary" />,
-        }}
-        isActive={isSavedOffline}
-        activeVariant="flat"
-        activeColor="primary"
-        activeClassName="text-primary"
-        data-testid="item-action-read-offline"
-      />
+      {showOffline && (
+        <ActionButton
+          action={async () => {
+            if (isSavedOffline) {
+              removeArticleOffline(item.slug);
+            } else {
+              await downloadArticleOffline(item.slug);
+            }
+          }}
+          defaultDisplay={{
+            text: "Read offline",
+            icon: <HiOutlineArrowDownTray />,
+          }}
+          activeDisplay={{
+            text: "Remove from offline",
+            icon: <HiArrowDownTray className="text-primary" />,
+          }}
+          isActive={isSavedOffline}
+          activeVariant="flat"
+          activeColor="primary"
+          activeClassName="text-primary"
+          data-testid="item-action-read-offline"
+        />
+      )}
       {showExpanded && (
         <>
           <ActionButton

@@ -5,7 +5,6 @@ import { type Item, type PublicItem } from "@app/providers/Items";
 import { TextDirection } from "@app/schemas/db";
 import { FALLBACK_HOSTNAME } from "@app/schemas/types";
 import { cn } from "@app/utils/cn";
-import { HiArrowDownCircle } from "react-icons/hi2";
 import { Link } from "react-router-dom";
 
 interface ItemCardProps {
@@ -19,17 +18,21 @@ const ItemCard: React.FC<ItemCardProps> = ({
   onPress,
   hideThumbnail,
 }: ItemCardProps) => {
-  const { isSavedOffline } = useOfflineArticle(item.slug);
+  const { isUnavailableOffline } = useOfflineArticle(item.slug);
 
   // Keep card dimensions in sync with ItemGrid/index.tsx
   return (
     <Card
+      data-testid={`item-card-${item.slug}`}
+      data-offline-disabled={isUnavailableOffline ? "true" : undefined}
       className={cn(
         "flex-row items-start justify-center sm:items-center sm:justify-start sm:flex-col shrink-0 w-full sm:w-72 p-2 h-28",
         hideThumbnail ? "sm:h-48" : "sm:h-96",
+        isUnavailableOffline &&
+          "opacity-40 grayscale pointer-events-none select-none",
       )}
-      isPressable
-      onPress={onPress}
+      isPressable={!isUnavailableOffline}
+      onPress={isUnavailableOffline ? undefined : onPress}
       dir={item.metadata.textDirection}
     >
       {!hideThumbnail && (
@@ -46,20 +49,15 @@ const ItemCard: React.FC<ItemCardProps> = ({
           <Link
             className="hover:underline truncate"
             to={`/item/${item.slug}`}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              if (isUnavailableOffline) {
+                e.preventDefault();
+              }
+              e.stopPropagation();
+            }}
           >
             <h2 className="overflow-hidden truncate">{item.metadata.title}</h2>
           </Link>
-          {isSavedOffline && (
-            <span
-              title="Saved offline"
-              aria-label="Saved offline"
-              data-testid={`saved-offline-icon-${item.slug}`}
-              className="inline-flex shrink-0 items-center text-secondary-500 dark:text-secondary-400"
-            >
-              <HiArrowDownCircle className="w-3.5 h-3.5" />
-            </span>
-          )}
         </div>
         {item.url === item.metadata.title ? (
           <Link

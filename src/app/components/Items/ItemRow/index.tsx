@@ -11,9 +11,10 @@ import { useSwipeSettings } from "@app/providers/Settings";
 import { useToast } from "@app/providers/Toast";
 import { ItemSource, ItemState } from "@app/schemas/db";
 import { FALLBACK_HOSTNAME } from "@app/schemas/types";
+import { cn } from "@app/utils/cn";
 import { SwipeAction } from "@app/utils/displayStorage";
 import React, { useContext, useRef, useState } from "react";
-import { HiArrowDownCircle, HiCheck, HiOutlineEnvelope } from "react-icons/hi2";
+import { HiCheck, HiOutlineEnvelope } from "react-icons/hi2";
 import { Link } from "react-router-dom";
 
 import {
@@ -46,8 +47,12 @@ const ItemRow: React.FC<ItemRowProps> = ({
     useItemUpdate();
   const { swipeSettings } = useSwipeSettings();
   const { showToast } = useToast();
-  const { isSavedOffline, downloadArticleOffline, removeArticleOffline } =
-    useOfflineArticle(item.slug);
+  const {
+    isSavedOffline,
+    isUnavailableOffline,
+    downloadArticleOffline,
+    removeArticleOffline,
+  } = useOfflineArticle(item.slug);
 
   const [translateX, setTranslateX] = useState<number>(0);
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -300,8 +305,13 @@ const ItemRow: React.FC<ItemRowProps> = ({
 
       {/* Foreground item card */}
       <div
-        className="w-full h-full group flex flex-row bg-background-400 pl-4 pr-1 py-1 rounded-sm hover:bg-background-300 data-[selected=true]:bg-background-300 data-[focus=true]:outline-focus data-[focus=true]:outline"
+        className={cn(
+          "w-full h-full group flex flex-row bg-background-400 pl-4 pr-1 py-1 rounded-sm hover:bg-background-300 data-[selected=true]:bg-background-300 data-[focus=true]:outline-focus data-[focus=true]:outline",
+          isUnavailableOffline &&
+            "opacity-40 grayscale pointer-events-none select-none",
+        )}
         data-testid={`item-row-card-${item.slug}`}
+        data-offline-disabled={isUnavailableOffline ? "true" : undefined}
         data-swipeable="true"
         style={{
           transform: `translateX(${translateX}px)`,
@@ -401,7 +411,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
                 to={`/item/${item.slug}`}
                 className="text-sm shrink-0 text-foreground hover:underline truncate"
                 onClick={(e) => {
-                  if (justSwiped.current) {
+                  if (justSwiped.current || isUnavailableOffline) {
                     e.preventDefault();
                     e.stopPropagation();
                     return;
@@ -418,16 +428,6 @@ const ItemRow: React.FC<ItemRowProps> = ({
                   <div className="font-bold">{item.metadata.title}</div>
                 )}
               </Link>
-              {isSavedOffline && (
-                <span
-                  title="Saved offline"
-                  aria-label="Saved offline"
-                  data-testid={`saved-offline-icon-${item.slug}`}
-                  className="inline-flex shrink-0 items-center text-secondary-500 dark:text-secondary-400"
-                >
-                  <HiArrowDownCircle className="w-3.5 h-3.5" />
-                </span>
-              )}
               <p className="text-xs text-secondary-700 hidden md:block">
                 {getHostname(item.url)}
               </p>

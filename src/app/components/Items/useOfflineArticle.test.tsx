@@ -199,4 +199,19 @@ describe("useOfflineArticle hook", () => {
       { type: "error" },
     );
   });
+
+  it("detects offline status and marks non-offline items as unavailable offline", async () => {
+    const { onlineManager } = await import("@tanstack/react-query");
+    onlineManager.setOnline(false);
+
+    const { result } = renderHook(() => useOfflineArticle("offline-slug"), {
+      wrapper,
+    });
+
+    expect(result.current.isOnline).toBe(false);
+    expect(result.current.isSavedOffline).toBe(false);
+    expect(result.current.isUnavailableOffline).toBe(true);
+
+    onlineManager.setOnline(true);
+  });
 });

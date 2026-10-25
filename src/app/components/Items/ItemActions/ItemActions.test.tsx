@@ -23,6 +23,8 @@ vi.mock("@app/components/Items/ItemActions/actions", () => ({
 vi.mock("@app/components/Items/useOfflineArticle", () => ({
   useOfflineArticle: () => ({
     isSavedOffline: mockIsSavedOffline,
+    isOnline: true,
+    isUnavailableOffline: false,
     downloadArticleOffline: mockDownloadArticleOffline,
     removeArticleOffline: mockRemoveArticleOffline,
   }),
@@ -134,10 +136,13 @@ describe("ItemActions component", () => {
     );
   });
 
-  it("renders delete and share buttons when showExpanded is true", () => {
+  it("renders delete and share buttons when showExpanded is true and omits read offline", () => {
     renderComponent(mockItem, true);
 
     expect(screen.getByTestId("item-action-delete")).toBeInTheDocument();
     expect(screen.getByTestId("item-action-share")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("item-action-read-offline"),
+    ).not.toBeInTheDocument();
   });
 });
