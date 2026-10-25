@@ -99,7 +99,6 @@ describe("ItemActions component", () => {
       "Remove from offline",
     );
     expect(removeOfflineButton).toHaveAttribute("data-active", "true");
-    expect(removeOfflineButton).toHaveClass("text-primary");
 
     await act(async () => {
       fireEvent.click(removeOfflineButton);

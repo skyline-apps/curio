@@ -7,9 +7,9 @@ import { cn } from "@app/utils/cn";
 import { useCallback, useContext } from "react";
 import {
   HiArchiveBox,
-  HiArrowDownTray,
+  HiArrowDownCircle,
   HiOutlineArchiveBox,
-  HiOutlineArrowDownTray,
+  HiOutlineArrowDownCircle,
   HiOutlineShare,
   HiOutlineStar,
   HiOutlineTrash,
@@ -171,16 +171,13 @@ const ItemActions = ({
           }}
           defaultDisplay={{
             text: "Read offline",
-            icon: <HiOutlineArrowDownTray />,
+            icon: <HiOutlineArrowDownCircle />,
           }}
           activeDisplay={{
             text: "Remove from offline",
-            icon: <HiArrowDownTray className="text-primary" />,
+            icon: <HiArrowDownCircle />,
           }}
           isActive={isSavedOffline}
-          activeVariant="flat"
-          activeColor="primary"
-          activeClassName="text-primary"
           data-testid="item-action-read-offline"
         />
       )}
