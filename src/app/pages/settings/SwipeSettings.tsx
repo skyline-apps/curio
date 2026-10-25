@@ -144,15 +144,20 @@ const SwipeSettings: React.FC = () => {
           aria-label="Swipe right"
           selectedKeys={[swipeSettings.swipeRightAction]}
           onChange={(e) => {
-            if (e.target.value) {
-              handleUpdate("swipeRightAction", e.target.value as SwipeAction);
+            const val = e.target.value as SwipeAction;
+            if (val && val !== swipeSettings.swipeRightAction) {
+              handleUpdate("swipeRightAction", val);
             }
           }}
           onSelectionChange={(keys) => {
             const selected = Array.from(keys)[0];
-            if (selected) {
+            if (selected && selected !== swipeSettings.swipeRightAction) {
               handleUpdate("swipeRightAction", String(selected) as SwipeAction);
             }
+          }}
+          disableAnimation
+          popoverProps={{
+            shouldBlockScroll: false,
           }}
           disallowEmptySelection
           className="max-w-xs"
@@ -174,15 +179,20 @@ const SwipeSettings: React.FC = () => {
           aria-label="Swipe left"
           selectedKeys={[swipeSettings.swipeLeftAction]}
           onChange={(e) => {
-            if (e.target.value) {
-              handleUpdate("swipeLeftAction", e.target.value as SwipeAction);
+            const val = e.target.value as SwipeAction;
+            if (val && val !== swipeSettings.swipeLeftAction) {
+              handleUpdate("swipeLeftAction", val);
             }
           }}
           onSelectionChange={(keys) => {
             const selected = Array.from(keys)[0];
-            if (selected) {
+            if (selected && selected !== swipeSettings.swipeLeftAction) {
               handleUpdate("swipeLeftAction", String(selected) as SwipeAction);
             }
+          }}
+          disableAnimation
+          popoverProps={{
+            shouldBlockScroll: false,
           }}
           disallowEmptySelection
           className="max-w-xs"
