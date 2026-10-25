@@ -1,6 +1,5 @@
 import { Select, SelectItem } from "@app/components/ui/Select";
 import { render } from "@app/utils/test";
-import React from "react";
 import { describe, expect, it } from "vitest";
 
 describe("Select component", () => {
