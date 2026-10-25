@@ -1,5 +1,4 @@
 import ItemRow from "@app/components/Items/ItemRow";
-import Button from "@app/components/ui/Button";
 import { FormSection } from "@app/components/ui/Form";
 import { Select, SelectItem } from "@app/components/ui/Select";
 import { type Item } from "@app/providers/Items";
@@ -7,13 +6,9 @@ import { useSwipeSettings } from "@app/providers/Settings";
 import { useToast } from "@app/providers/Toast";
 import { ItemSource, ItemState, TextDirection } from "@app/schemas/db";
 import { COLOR_PALETTE } from "@app/utils/colors";
-import { DEFAULT_SWIPE_SETTINGS, SwipeAction } from "@app/utils/displayStorage";
+import { SwipeAction } from "@app/utils/displayStorage";
 import React, { useState } from "react";
-import {
-  HiArrowPath,
-  HiArrowUturnLeft,
-  HiOutlineCheckCircle,
-} from "react-icons/hi2";
+import { HiOutlineCheckCircle } from "react-icons/hi2";
 
 const SWIPE_ACTION_OPTIONS = [
   {
@@ -80,16 +75,6 @@ const SwipeSettings: React.FC = () => {
     const action = value as SwipeAction;
     updateSwipeSettings({ [direction]: action });
     showToast("Swipe settings saved.", {
-      disappearing: true,
-      dismissable: true,
-    });
-  };
-
-  const handleResetDefaults = (): void => {
-    updateSwipeSettings(DEFAULT_SWIPE_SETTINGS);
-    setSampleItem(INITIAL_SAMPLE_ITEM);
-    setLastActionTriggered(null);
-    showToast("Reset swipe settings to defaults.", {
       disappearing: true,
       dismissable: true,
     });
@@ -220,8 +205,8 @@ const SwipeSettings: React.FC = () => {
             />
           </div>
 
-          <div className="flex flex-row items-center justify-between text-xs text-secondary">
-            {lastActionTriggered ? (
+          {lastActionTriggered && (
+            <div className="flex flex-row items-center text-xs text-secondary">
               <span
                 className="text-success font-medium flex items-center gap-1"
                 data-testid="swipe-preview-feedback"
@@ -229,34 +214,10 @@ const SwipeSettings: React.FC = () => {
                 <HiOutlineCheckCircle className="text-sm" /> Triggered:{" "}
                 {lastActionTriggered}
               </span>
-            ) : (
-              <span>Swipe the card above to test.</span>
-            )}
-            <Button
-              size="sm"
-              variant="flat"
-              startContent={<HiArrowPath />}
-              onPress={() => {
-                setSampleItem(INITIAL_SAMPLE_ITEM);
-                setLastActionTriggered(null);
-              }}
-            >
-              Reset sample
-            </Button>
-          </div>
+            </div>
+          )}
         </div>
       </FormSection>
-
-      <div className="flex justify-end pt-2">
-        <Button
-          variant="light"
-          size="sm"
-          startContent={<HiArrowUturnLeft />}
-          onPress={handleResetDefaults}
-        >
-          Reset swipe actions to defaults
-        </Button>
-      </div>
     </div>
   );
 };

@@ -1,11 +1,7 @@
 import SwipeSettings from "@app/pages/settings/SwipeSettings";
 import { SettingsProvider } from "@app/providers/Settings/provider";
 import { ToastProvider } from "@app/providers/Toast/provider";
-import {
-  DEFAULT_SWIPE_SETTINGS,
-  loadSwipeSettings,
-  SwipeAction,
-} from "@app/utils/displayStorage";
+import { loadSwipeSettings, SwipeAction } from "@app/utils/displayStorage";
 import { act, fireEvent, render, RenderResult, screen } from "@app/utils/test";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -70,7 +66,19 @@ describe("SwipeSettings component", () => {
     expect(settings.swipeLeftAction).toBe(SwipeAction.ARCHIVE);
   });
 
-  it("handles swiping in the interactive preview card and resets the sample", () => {
+  it("does not render removed swipe helper text or reset buttons", () => {
+    renderComponent();
+
+    expect(
+      screen.queryByText("Swipe the card above to test."),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Reset sample")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Reset swipe actions to defaults"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("handles swiping in the interactive preview card", () => {
     renderComponent();
 
     const card = screen.getByTestId("item-row-card-swipe-preview-item");
@@ -84,39 +92,8 @@ describe("SwipeSettings component", () => {
     });
 
     expect(screen.getByTestId("swipe-preview-feedback")).toBeInTheDocument();
-
-    // Click Reset sample button
-    const resetButton = screen.getByText("Reset sample");
-    act(() => {
-      fireEvent.click(resetButton);
-    });
-
-    expect(
-      screen.queryByTestId("swipe-preview-feedback"),
-    ).not.toBeInTheDocument();
-  });
-
-  it("resets swipe settings to defaults when reset button is clicked", () => {
-    const { container } = renderComponent();
-
-    // First change to custom
-    const selectElements = container.querySelectorAll("select");
-    act(() => {
-      fireEvent.change(selectElements[0], {
-        target: { value: SwipeAction.MARK_READ },
-      });
-    });
-    expect(loadSwipeSettings().swipeRightAction).toBe(SwipeAction.MARK_READ);
-
-    // Click Reset button
-    const resetDefaultsBtn = screen.getByText(
-      "Reset swipe actions to defaults",
+    expect(screen.getByTestId("swipe-preview-feedback")).toHaveTextContent(
+      "Triggered: Archived",
     );
-    act(() => {
-      fireEvent.click(resetDefaultsBtn);
-    });
-
-    const settings = loadSwipeSettings();
-    expect(settings).toEqual(DEFAULT_SWIPE_SETTINGS);
   });
 });
