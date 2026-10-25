@@ -77,6 +77,9 @@ const SwipeSettings: React.FC = () => {
     value: string,
   ): void => {
     const action = value as SwipeAction;
+    if (!Object.values(SwipeAction).includes(action)) {
+      return;
+    }
     updateSwipeSettings({ [direction]: action });
     showToast("Swipe settings saved.", {
       disappearing: true,
@@ -160,7 +163,7 @@ const SwipeSettings: React.FC = () => {
       >
         <Select
           aria-label="Swipe right"
-          selectedKeys={[swipeSettings.swipeRightAction]}
+          selectedKeys={new Set([swipeSettings.swipeRightAction])}
           onChange={(e) => {
             const val = e.target.value as SwipeAction;
             if (val && val !== swipeSettings.swipeRightAction) {
@@ -195,7 +198,7 @@ const SwipeSettings: React.FC = () => {
       >
         <Select
           aria-label="Swipe left"
-          selectedKeys={[swipeSettings.swipeLeftAction]}
+          selectedKeys={new Set([swipeSettings.swipeLeftAction])}
           onChange={(e) => {
             const val = e.target.value as SwipeAction;
             if (val && val !== swipeSettings.swipeLeftAction) {

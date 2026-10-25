@@ -38,14 +38,18 @@ import {
 const RequireAuth = ({
   children,
 }: React.PropsWithChildren): React.ReactNode => {
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user?.id) {
+    if (!isLoading && !user?.id) {
       navigate("/");
     }
-  }, [user?.id, navigate]);
+  }, [user?.id, isLoading, navigate]);
+
+  if (isLoading) {
+    return null;
+  }
 
   return user?.id ? <>{children}</> : null;
 };
