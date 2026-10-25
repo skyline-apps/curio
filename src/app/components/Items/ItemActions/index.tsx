@@ -1,3 +1,4 @@
+import { useOfflineArticle } from "@app/components/Items/useOfflineArticle";
 import Button from "@app/components/ui/Button";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { Item } from "@app/providers/Items";
@@ -6,7 +7,9 @@ import { cn } from "@app/utils/cn";
 import { useCallback, useContext } from "react";
 import {
   HiArchiveBox,
+  HiArrowDownTray,
   HiOutlineArchiveBox,
+  HiOutlineArrowDownTray,
   HiOutlineShare,
   HiOutlineStar,
   HiOutlineTrash,
@@ -28,6 +31,7 @@ interface ActionButtonProps<T> {
   isActive?: boolean;
   isLoading?: boolean;
   onActionSuccess?: () => void;
+  "data-testid"?: string;
 }
 const ActionButton = <T,>({
   action,
@@ -36,12 +40,15 @@ const ActionButton = <T,>({
   isActive,
   isLoading,
   onActionSuccess,
+  "data-testid": dataTestId,
 }: ActionButtonProps<T>): React.ReactNode => {
   const onPress = useCallback(async () => {
     await action().then(async () => {
       onActionSuccess?.();
     });
   }, [action, onActionSuccess]);
+
+  const display = isActive ? activeDisplay || defaultDisplay : defaultDisplay;
 
   return (
     <Button
@@ -50,11 +57,11 @@ const ActionButton = <T,>({
       size="sm"
       onPress={onPress}
       isLoading={isLoading}
-      tooltip={
-        isActive ? (activeDisplay || defaultDisplay).text : defaultDisplay.text
-      }
+      aria-label={display.text}
+      tooltip={display.text}
+      data-testid={dataTestId}
     >
-      {isActive ? (activeDisplay || defaultDisplay).icon : defaultDisplay.icon}
+      {display.icon}
     </Button>
   );
 };
@@ -74,6 +81,8 @@ const ItemActions = ({
 }: ItemActionsProps): React.ReactElement => {
   const { updateItemsState, updateItemsFavorite, shareItem } = useItemUpdate();
   const { clearSelectedItems } = useContext(CurrentItemContext);
+  const { isSavedOffline, downloadArticleOffline, removeArticleOffline } =
+    useOfflineArticle(item?.slug);
 
   if (!item) {
     return <></>;
@@ -88,6 +97,7 @@ const ItemActions = ({
         defaultDisplay={{ text: "Favorite", icon: <HiOutlineStar /> }}
         activeDisplay={{ text: "Unfavorite", icon: <HiStar /> }}
         isActive={item.metadata.isFavorite}
+        data-testid="item-action-favorite"
       />
       <ActionButton
         action={async () => {
@@ -103,6 +113,26 @@ const ItemActions = ({
         activeDisplay={{ text: "Unarchive", icon: <HiArchiveBox /> }}
         isActive={item.metadata.state === ItemState.ARCHIVED}
         onActionSuccess={onItemActionSuccess}
+        data-testid="item-action-archive"
+      />
+      <ActionButton
+        action={async () => {
+          if (isSavedOffline) {
+            removeArticleOffline(item.slug);
+          } else {
+            await downloadArticleOffline(item.slug);
+          }
+        }}
+        defaultDisplay={{
+          text: "Read offline",
+          icon: <HiOutlineArrowDownTray />,
+        }}
+        activeDisplay={{
+          text: "Remove from offline",
+          icon: <HiArrowDownTray />,
+        }}
+        isActive={isSavedOffline}
+        data-testid="item-action-read-offline"
       />
       {showExpanded && (
         <>
@@ -120,10 +150,12 @@ const ItemActions = ({
             activeDisplay={{ text: "Restore", icon: <HiTrash /> }}
             isActive={item.metadata.state === ItemState.DELETED}
             onActionSuccess={onItemActionSuccess}
+            data-testid="item-action-delete"
           />
           <ActionButton
             action={async () => shareItem(item)}
             defaultDisplay={{ text: "Share", icon: <HiOutlineShare /> }}
+            data-testid="item-action-share"
           />
         </>
       )}
