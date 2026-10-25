@@ -32,6 +32,38 @@ interface ActionButtonProps<T> {
   isLoading?: boolean;
   onActionSuccess?: () => void;
   "data-testid"?: string;
+  variant?:
+    | "solid"
+    | "bordered"
+    | "light"
+    | "flat"
+    | "faded"
+    | "shadow"
+    | "ghost";
+  activeVariant?:
+    | "solid"
+    | "bordered"
+    | "light"
+    | "flat"
+    | "faded"
+    | "shadow"
+    | "ghost";
+  color?:
+    | "default"
+    | "primary"
+    | "secondary"
+    | "success"
+    | "warning"
+    | "danger";
+  activeColor?:
+    | "default"
+    | "primary"
+    | "secondary"
+    | "success"
+    | "warning"
+    | "danger";
+  className?: string;
+  activeClassName?: string;
 }
 const ActionButton = <T,>({
   action,
@@ -41,6 +73,12 @@ const ActionButton = <T,>({
   isLoading,
   onActionSuccess,
   "data-testid": dataTestId,
+  variant = "faded",
+  activeVariant,
+  color,
+  activeColor,
+  className,
+  activeClassName,
 }: ActionButtonProps<T>): React.ReactNode => {
   const onPress = useCallback(async () => {
     await action().then(async () => {
@@ -49,17 +87,22 @@ const ActionButton = <T,>({
   }, [action, onActionSuccess]);
 
   const display = isActive ? activeDisplay || defaultDisplay : defaultDisplay;
+  const currentVariant = isActive && activeVariant ? activeVariant : variant;
+  const currentColor = isActive && activeColor ? activeColor : color;
 
   return (
     <Button
       isIconOnly
-      variant="faded"
+      variant={currentVariant}
+      color={currentColor}
       size="sm"
       onPress={onPress}
       isLoading={isLoading}
       aria-label={display.text}
       tooltip={display.text}
       data-testid={dataTestId}
+      data-active={isActive ? "true" : undefined}
+      className={cn(className, isActive && activeClassName)}
     >
       {display.icon}
     </Button>
@@ -129,9 +172,12 @@ const ItemActions = ({
         }}
         activeDisplay={{
           text: "Remove from offline",
-          icon: <HiArrowDownTray />,
+          icon: <HiArrowDownTray className="text-primary" />,
         }}
         isActive={isSavedOffline}
+        activeVariant="flat"
+        activeColor="primary"
+        activeClassName="text-primary"
         data-testid="item-action-read-offline"
       />
       {showExpanded && (

@@ -77,6 +77,7 @@ describe("ItemActions component", () => {
     const readOfflineButton = screen.getByTestId("item-action-read-offline");
     expect(readOfflineButton).toBeInTheDocument();
     expect(readOfflineButton).toHaveAttribute("aria-label", "Read offline");
+    expect(readOfflineButton).not.toHaveAttribute("data-active");
 
     await act(async () => {
       fireEvent.click(readOfflineButton);
@@ -95,6 +96,8 @@ describe("ItemActions component", () => {
       "aria-label",
       "Remove from offline",
     );
+    expect(removeOfflineButton).toHaveAttribute("data-active", "true");
+    expect(removeOfflineButton).toHaveClass("text-primary");
 
     await act(async () => {
       fireEvent.click(removeOfflineButton);
