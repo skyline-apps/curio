@@ -4,6 +4,7 @@ import {
   displayHeaderSizeClass,
   getDisplayFontClass,
 } from "@app/components/Article/displaySettings";
+import { useOfflineArticle } from "@app/components/Items/useOfflineArticle";
 import KeyboardShortcuts from "@app/components/KeyboardShortcuts";
 import { Progress } from "@app/components/ui/Progress";
 import { useAppLayout } from "@app/providers/AppLayout";
@@ -12,6 +13,7 @@ import { useSettings } from "@app/providers/Settings";
 import { DisplayFont, DisplayFontSize, TextDirection } from "@app/schemas/db";
 import { cn } from "@app/utils/cn";
 import React, { useContext, useEffect, useMemo } from "react";
+import { HiArrowDownCircle } from "react-icons/hi2";
 import { useParams } from "react-router-dom";
 
 const ItemPage: React.FC = () => {
@@ -25,6 +27,8 @@ const ItemPage: React.FC = () => {
     itemSummaryLoading,
   } = useContext(CurrentItemContext);
   const { slug } = useParams();
+  const normalizedSlug = typeof slug === "string" ? slug : slug?.[0];
+  const { isSavedOffline } = useOfflineArticle(normalizedSlug);
   const { settings } = useSettings();
   const { updateAppLayout } = useAppLayout();
   const { displayFont, displayFontSize } = settings || {};
@@ -91,12 +95,22 @@ const ItemPage: React.FC = () => {
         <hr className="border-secondary my-4" />
         <p
           className={cn(
-            "text-sm text-secondary italic py-4",
+            "text-sm text-secondary italic py-4 flex items-center flex-wrap gap-2",
             metadata?.textDirection === TextDirection.RTL && "text-right",
           )}
         >
           {metadata?.savedAt &&
             `Saved on ${new Date(metadata.savedAt).toLocaleString()}`}
+          {isSavedOffline && (
+            <span
+              className="inline-flex items-center gap-1 not-italic text-xs text-secondary-600 dark:text-secondary-400"
+              title="Saved offline"
+              data-testid="article-saved-offline-indicator"
+            >
+              <HiArrowDownCircle className="w-3.5 h-3.5 inline" />
+              <span>Saved offline</span>
+            </span>
+          )}
         </p>
       </div>
     );
@@ -105,6 +119,7 @@ const ItemPage: React.FC = () => {
     metadata?.title,
     metadata?.textDirection,
     metadata?.savedAt,
+    isSavedOffline,
     headerSizeClass,
     proseSizeClass,
     fontClass,

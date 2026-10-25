@@ -1,9 +1,11 @@
 import Thumbnail from "@app/components/Image/Thumbnail";
+import { useOfflineArticle } from "@app/components/Items/useOfflineArticle";
 import Card from "@app/components/ui/Card";
 import { type Item, type PublicItem } from "@app/providers/Items";
 import { TextDirection } from "@app/schemas/db";
 import { FALLBACK_HOSTNAME } from "@app/schemas/types";
 import { cn } from "@app/utils/cn";
+import { HiArrowDownCircle } from "react-icons/hi2";
 import { Link } from "react-router-dom";
 
 interface ItemCardProps {
@@ -17,6 +19,8 @@ const ItemCard: React.FC<ItemCardProps> = ({
   onPress,
   hideThumbnail,
 }: ItemCardProps) => {
+  const { isSavedOffline } = useOfflineArticle(item.slug);
+
   // Keep card dimensions in sync with ItemGrid/index.tsx
   return (
     <Card
@@ -38,13 +42,25 @@ const ItemCard: React.FC<ItemCardProps> = ({
         />
       )}
       <div className="flex flex-col items-start text-left w-full p-1 overflow-hidden">
-        <Link
-          className="hover:underline"
-          to={`/item/${item.slug}`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <h2 className="overflow-hidden truncate">{item.metadata.title}</h2>
-        </Link>
+        <div className="flex flex-row items-center gap-1 w-full overflow-hidden">
+          <Link
+            className="hover:underline truncate"
+            to={`/item/${item.slug}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="overflow-hidden truncate">{item.metadata.title}</h2>
+          </Link>
+          {isSavedOffline && (
+            <span
+              title="Saved offline"
+              aria-label="Saved offline"
+              data-testid={`saved-offline-icon-${item.slug}`}
+              className="inline-flex shrink-0 items-center text-secondary-500 dark:text-secondary-400"
+            >
+              <HiArrowDownCircle className="w-3.5 h-3.5" />
+            </span>
+          )}
+        </div>
         {item.url === item.metadata.title ? (
           <Link
             className="hover:underline"

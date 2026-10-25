@@ -8,6 +8,7 @@ export enum SwipeAction {
   DELETE = "delete",
   MARK_READ = "mark_read",
   FAVORITE = "favorite",
+  READ_OFFLINE = "read_offline",
   NONE = "none",
 }
 

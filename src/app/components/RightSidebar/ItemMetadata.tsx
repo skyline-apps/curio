@@ -4,6 +4,7 @@ import { useItemUpdate } from "@app/components/Items/ItemActions/actions";
 import AdvancedActions from "@app/components/Items/ItemActions/AdvancedActions";
 import OtherItemActions from "@app/components/Items/ItemActions/OtherItemActions";
 import PremiumActions from "@app/components/Items/ItemActions/PremiumActions";
+import { useOfflineArticle } from "@app/components/Items/useOfflineArticle";
 import Labels from "@app/components/Labels";
 import { useAppLayout } from "@app/providers/AppLayout";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
@@ -15,6 +16,7 @@ import { FALLBACK_HOSTNAME } from "@app/schemas/types";
 import type { Label } from "@app/schemas/v1/user/labels";
 import { cn } from "@app/utils/cn";
 import React, { useCallback, useContext } from "react";
+import { HiArrowDownCircle } from "react-icons/hi2";
 import { Link } from "react-router-dom";
 
 interface ItemMetadataProps {
@@ -98,6 +100,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
   const { labels, createLabel } = useSettings();
   const { addItemsLabel, removeItemsLabel } = useItemUpdate();
   const { navigateToRoot } = useAppLayout();
+  const { isSavedOffline } = useOfflineArticle(item?.slug);
 
   const onItemActionSuccess = useCallback(() => {
     navigateToRoot();
@@ -149,7 +152,7 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
           url={item.url}
         />
         <div className="flex flex-col gap-2 py-2">
-          <div className="flex flex-row gap-2 items-start">
+          <div className="flex flex-row gap-2 items-center flex-wrap">
             {metadata.author && (
               <p className="text-xs overflow-hidden truncate text-secondary-300 dark:text-secondary-600">
                 {metadata.author}
@@ -160,6 +163,17 @@ const ItemMetadata: React.FC<ItemMetadataProps> = ({
               <p className="text-xs text-secondary-300 dark:text-secondary-600">
                 {new Date(metadata.publishedAt).toLocaleDateString()}
               </p>
+            )}
+
+            {isSavedOffline && (
+              <span
+                className="flex items-center gap-1 text-xs text-secondary-600 dark:text-secondary-400 shrink-0"
+                title="Saved offline"
+                data-testid="item-sidebar-saved-offline"
+              >
+                <HiArrowDownCircle className="w-3.5 h-3.5" />
+                <span>Saved offline</span>
+              </span>
             )}
           </div>
           {isEditable(item) ? (

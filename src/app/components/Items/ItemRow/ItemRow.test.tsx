@@ -37,6 +37,9 @@ const mockUpdateItemsState = vi.fn();
 const mockUpdateItemsFavorite = vi.fn();
 const mockMarkRead = vi.fn();
 const mockMarkUnread = vi.fn();
+const mockDownloadArticleOffline = vi.fn();
+const mockRemoveArticleOffline = vi.fn();
+let mockIsSavedOffline = false;
 
 vi.mock("@app/components/Items/ItemActions/actions", () => ({
   useItemUpdate: () => ({
@@ -44,6 +47,14 @@ vi.mock("@app/components/Items/ItemActions/actions", () => ({
     updateItemsFavorite: mockUpdateItemsFavorite,
     markRead: mockMarkRead,
     markUnread: mockMarkUnread,
+  }),
+}));
+
+vi.mock("@app/components/Items/useOfflineArticle", () => ({
+  useOfflineArticle: () => ({
+    isSavedOffline: mockIsSavedOffline,
+    downloadArticleOffline: mockDownloadArticleOffline,
+    removeArticleOffline: mockRemoveArticleOffline,
   }),
 }));
 
@@ -307,5 +318,65 @@ describe("ItemRow swipe interactions", () => {
 
     expect(mockUpdateItemsState).not.toHaveBeenCalled();
     vi.useRealTimers();
+  });
+
+  it("renders saved offline icon when isSavedOffline is true", () => {
+    mockIsSavedOffline = true;
+    renderItemRow();
+    expect(
+      screen.getByTestId("saved-offline-icon-test-item-slug"),
+    ).toBeInTheDocument();
+    mockIsSavedOffline = false;
+  });
+
+  it("does not render saved offline icon when isSavedOffline is false", () => {
+    mockIsSavedOffline = false;
+    renderItemRow();
+    expect(
+      screen.queryByTestId("saved-offline-icon-test-item-slug"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("triggers downloadArticleOffline when swiping with READ_OFFLINE and not saved", () => {
+    mockIsSavedOffline = false;
+    mockDownloadArticleOffline.mockClear();
+
+    renderItemRow(mockItem, {
+      swipeLeftAction: SwipeAction.NONE,
+      swipeRightAction: SwipeAction.READ_OFFLINE,
+    });
+    const card = screen.getByTestId("item-row-card-test-item-slug");
+
+    act(() => {
+      fireEvent.touchStart(card, { touches: [{ clientX: 20, clientY: 20 }] });
+      fireEvent.touchMove(card, {
+        touches: [{ clientX: 20 + SWIPE_THRESHOLD + 10, clientY: 20 }],
+      });
+      fireEvent.touchEnd(card);
+    });
+
+    expect(mockDownloadArticleOffline).toHaveBeenCalledWith("test-item-slug");
+  });
+
+  it("triggers removeArticleOffline when swiping with READ_OFFLINE and already saved", () => {
+    mockIsSavedOffline = true;
+    mockRemoveArticleOffline.mockClear();
+
+    renderItemRow(mockItem, {
+      swipeLeftAction: SwipeAction.NONE,
+      swipeRightAction: SwipeAction.READ_OFFLINE,
+    });
+    const card = screen.getByTestId("item-row-card-test-item-slug");
+
+    act(() => {
+      fireEvent.touchStart(card, { touches: [{ clientX: 20, clientY: 20 }] });
+      fireEvent.touchMove(card, {
+        touches: [{ clientX: 20 + SWIPE_THRESHOLD + 10, clientY: 20 }],
+      });
+      fireEvent.touchEnd(card);
+    });
+
+    expect(mockRemoveArticleOffline).toHaveBeenCalledWith("test-item-slug");
+    mockIsSavedOffline = false;
   });
 });

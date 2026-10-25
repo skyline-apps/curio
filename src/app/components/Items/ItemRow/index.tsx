@@ -1,6 +1,7 @@
 import Favicon from "@app/components/Image/Favicon";
 import ItemActions from "@app/components/Items/ItemActions";
 import { useItemUpdate } from "@app/components/Items/ItemActions/actions";
+import { useOfflineArticle } from "@app/components/Items/useOfflineArticle";
 import Labels from "@app/components/Labels";
 import Markdown from "@app/components/Markdown";
 import Icon from "@app/components/ui/Icon";
@@ -12,7 +13,7 @@ import { ItemSource, ItemState } from "@app/schemas/db";
 import { FALLBACK_HOSTNAME } from "@app/schemas/types";
 import { SwipeAction } from "@app/utils/displayStorage";
 import React, { useContext, useRef, useState } from "react";
-import { HiCheck, HiOutlineEnvelope } from "react-icons/hi2";
+import { HiArrowDownCircle, HiCheck, HiOutlineEnvelope } from "react-icons/hi2";
 import { Link } from "react-router-dom";
 
 import {
@@ -45,6 +46,8 @@ const ItemRow: React.FC<ItemRowProps> = ({
     useItemUpdate();
   const { swipeSettings } = useSwipeSettings();
   const { showToast } = useToast();
+  const { isSavedOffline, downloadArticleOffline, removeArticleOffline } =
+    useOfflineArticle(item.slug);
 
   const [translateX, setTranslateX] = useState<number>(0);
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -70,10 +73,12 @@ const ItemRow: React.FC<ItemRowProps> = ({
   const rightActionDetails: SwipeActionDetails | null = getSwipeActionDetails(
     swipeSettings.swipeRightAction,
     item,
+    isSavedOffline,
   );
   const leftActionDetails: SwipeActionDetails | null = getSwipeActionDetails(
     swipeSettings.swipeLeftAction,
     item,
+    isSavedOffline,
   );
 
   const executeSwipeAction = async (action: SwipeAction): Promise<void> => {
@@ -122,6 +127,13 @@ const ItemRow: React.FC<ItemRowProps> = ({
             disappearing: true,
           },
         );
+        break;
+      case SwipeAction.READ_OFFLINE:
+        if (isSavedOffline) {
+          removeArticleOffline(item.slug);
+        } else {
+          await downloadArticleOffline(item.slug);
+        }
         break;
       case SwipeAction.NONE:
       default:
@@ -406,6 +418,16 @@ const ItemRow: React.FC<ItemRowProps> = ({
                   <div className="font-bold">{item.metadata.title}</div>
                 )}
               </Link>
+              {isSavedOffline && (
+                <span
+                  title="Saved offline"
+                  aria-label="Saved offline"
+                  data-testid={`saved-offline-icon-${item.slug}`}
+                  className="inline-flex shrink-0 items-center text-secondary-500 dark:text-secondary-400"
+                >
+                  <HiArrowDownCircle className="w-3.5 h-3.5" />
+                </span>
+              )}
               <p className="text-xs text-secondary-700 hidden md:block">
                 {getHostname(item.url)}
               </p>

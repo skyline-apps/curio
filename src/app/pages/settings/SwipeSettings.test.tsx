@@ -66,6 +66,30 @@ describe("SwipeSettings component", () => {
     expect(settings.swipeLeftAction).toBe(SwipeAction.ARCHIVE);
   });
 
+  it("allows selecting READ_OFFLINE and triggers it in the interactive preview", () => {
+    const { container } = renderComponent();
+
+    const selectElements = container.querySelectorAll("select");
+    act(() => {
+      fireEvent.change(selectElements[0], {
+        target: { value: SwipeAction.READ_OFFLINE },
+      });
+    });
+
+    const settings = loadSwipeSettings();
+    expect(settings.swipeRightAction).toBe(SwipeAction.READ_OFFLINE);
+
+    const card = screen.getByTestId("item-row-card-swipe-preview-item");
+    act(() => {
+      fireEvent.touchStart(card!, { touches: [{ clientX: 50, clientY: 50 }] });
+      fireEvent.touchMove(card!, { touches: [{ clientX: 160, clientY: 50 }] });
+      fireEvent.touchEnd(card!);
+    });
+
+    const feedback = screen.getByTestId("swipe-preview-feedback");
+    expect(feedback).toHaveTextContent("Triggered: Read offline");
+  });
+
   it("does not render removed swipe helper text or reset buttons", () => {
     renderComponent();
 
