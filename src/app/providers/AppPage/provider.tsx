@@ -2,6 +2,7 @@ import Button from "@app/components/ui/Button";
 import { useAppLayout } from "@app/providers/AppLayout";
 import { useMobileScrollReveal } from "@app/providers/AppLayout/useMobileScrollReveal";
 import {
+  isLeftThirdOfScreen,
   SWIPE_THRESHOLD_DISTANCE,
   SWIPE_THRESHOLD_VELOCITY,
 } from "@app/providers/AppLayout/useSidebarSwipe";
@@ -52,7 +53,15 @@ export const AppPageProvider: React.FC<{
   }, [containerRef]);
 
   const bind = useDrag(
-    ({ axis, last, movement: [mx], velocity, direction: [dx], event }) => {
+    ({
+      axis,
+      last,
+      movement: [mx],
+      velocity,
+      direction: [dx],
+      initial: [initialX],
+      event,
+    }) => {
       if (axis === "y") return;
       if (!last) return;
 
@@ -89,7 +98,7 @@ export const AppPageProvider: React.FC<{
       if (!meetsThreshold) return;
 
       if (isSwipeRight) {
-        if (!leftSidebarOpen) {
+        if (!leftSidebarOpen && isLeftThirdOfScreen(initialX)) {
           updateAppLayout({ leftSidebarOpen: true });
         } else if (rightSidebarOpen) {
           updateAppLayout({ rightSidebarOpen: false });
