@@ -34,6 +34,13 @@ const InfiniteList = <T,>({
     count: listData.length + 1, // Include an extra slot for the loading message
     getScrollElement: () => parentRef.current,
     estimateSize: () => 64,
+    getItemKey: (index) => {
+      const item = listData[index];
+      if (item && typeof item === "object" && "id" in item) {
+        return (item as { id: string }).id;
+      }
+      return index;
+    },
     overscan: 5,
     gap: 4,
   });
@@ -131,7 +138,7 @@ const InfiniteList = <T,>({
 
                   return (
                     <div
-                      key={virtualRow.index}
+                      key={virtualRow.key}
                       data-index={virtualRow.index}
                       ref={rowVirtualizer.measureElement}
                       className={

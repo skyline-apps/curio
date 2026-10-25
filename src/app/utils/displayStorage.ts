@@ -3,10 +3,63 @@ export interface AppLayoutSettings {
   rightSidebarOpen: boolean;
 }
 
+export enum SwipeAction {
+  ARCHIVE = "archive",
+  DELETE = "delete",
+  MARK_READ = "mark_read",
+  FAVORITE = "favorite",
+  NONE = "none",
+}
+
+export interface SwipeSettings {
+  swipeLeftAction: SwipeAction;
+  swipeRightAction: SwipeAction;
+}
+
+export const DEFAULT_SWIPE_SETTINGS: SwipeSettings = {
+  swipeLeftAction: SwipeAction.DELETE,
+  swipeRightAction: SwipeAction.ARCHIVE,
+};
+
 export const DEFAULT_LAYOUT: AppLayoutSettings = {
   leftSidebarOpen: true,
   rightSidebarOpen: false,
 };
+
+export function updateSwipeSettings(settings: Partial<SwipeSettings>): void {
+  const existingSettings = localStorage.getItem("curio_settings");
+  if (existingSettings) {
+    localStorage.setItem(
+      "curio_settings",
+      JSON.stringify({ ...JSON.parse(existingSettings), ...settings }),
+    );
+  } else {
+    localStorage.setItem("curio_settings", JSON.stringify(settings));
+  }
+}
+
+export function loadSwipeSettings(): SwipeSettings {
+  if (typeof window !== "undefined") {
+    const settings = localStorage.getItem("curio_settings");
+    if (!settings) {
+      return DEFAULT_SWIPE_SETTINGS;
+    }
+    const parsed = JSON.parse(settings);
+    return {
+      swipeLeftAction:
+        parsed.swipeLeftAction !== undefined &&
+        Object.values(SwipeAction).includes(parsed.swipeLeftAction)
+          ? parsed.swipeLeftAction
+          : DEFAULT_SWIPE_SETTINGS.swipeLeftAction,
+      swipeRightAction:
+        parsed.swipeRightAction !== undefined &&
+        Object.values(SwipeAction).includes(parsed.swipeRightAction)
+          ? parsed.swipeRightAction
+          : DEFAULT_SWIPE_SETTINGS.swipeRightAction,
+    };
+  }
+  return DEFAULT_SWIPE_SETTINGS;
+}
 
 export function updateLayoutSettings(settings: AppLayoutSettings): void {
   const existingSettings = localStorage.getItem("curio_settings");

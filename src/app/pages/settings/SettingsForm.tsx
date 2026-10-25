@@ -37,7 +37,7 @@ const SettingsForm: React.FC = () => {
         <AccordionItem
           key={SettingsSectionKey.Organization}
           title="Organization"
-          subtitle="Manage labels"
+          subtitle="Manage labels & swipe actions"
           aria-label="Organization"
         >
           <LabelSettings />

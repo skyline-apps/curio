@@ -1,5 +1,6 @@
 import Labels from "@app/components/Labels";
 import { FormSection } from "@app/components/ui/Form";
+import SwipeSettings from "@app/pages/settings/SwipeSettings";
 import { useSettings } from "@app/providers/Settings";
 import { createLogger } from "@app/utils/logger";
 import React from "react";
@@ -42,6 +43,7 @@ const LabelSettings: React.FC = () => {
           />
         )}
       </FormSection>
+      <SwipeSettings />
     </div>
   );
 };

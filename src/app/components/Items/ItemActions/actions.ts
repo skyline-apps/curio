@@ -1,6 +1,6 @@
 import { showConfirm } from "@app/components/ui/Modal/actions";
 import { BrowserMessageContext } from "@app/providers/BrowserMessage";
-import { useCache } from "@app/providers/Cache";
+import { releasePendingRemovedItemSlugs, useCache } from "@app/providers/Cache";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { type Item } from "@app/providers/Items";
 import { useToast } from "@app/providers/Toast";
@@ -80,16 +80,16 @@ export const useItemUpdate = (): UseItemUpdate => {
         }),
       }).then(handleAPIResponse<UpdateStateResponse>);
     },
-    onSuccess: () => {
+    onSuccess: async (_data, variables) => {
       if (!loadedItem) {
-        invalidateCache();
         clearSelectedItems();
-      } else {
-        invalidateCache();
       }
+      await invalidateCache();
+      releasePendingRemovedItemSlugs(variables.itemSlugs);
     },
-    onError: (error) => {
-      invalidateCache();
+    onError: (error, variables) => {
+      releasePendingRemovedItemSlugs(variables.itemSlugs);
+      void invalidateCache();
       log.error(error.message);
       showToast("Error updating item.");
     },

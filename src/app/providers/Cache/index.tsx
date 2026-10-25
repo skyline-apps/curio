@@ -13,7 +13,7 @@ export type HighlightUpdate = { id: string } & {
 };
 
 export type CacheContextType = {
-  invalidateCache: (slug?: string) => void;
+  invalidateCache: (slug?: string) => Promise<void>;
   optimisticUpdateItems: (items: ItemUpdate[]) => void;
   optimisticRemoveItems: (itemSlugs: string[]) => void;
   optimisticUpdateHighlights: (highlights: HighlightUpdate[]) => void;
@@ -21,7 +21,7 @@ export type CacheContextType = {
 };
 
 export const CacheContext = createContext<CacheContextType>({
-  invalidateCache: () => {},
+  invalidateCache: async () => {},
   optimisticUpdateItems: () => {},
   optimisticRemoveItems: () => {},
   optimisticUpdateHighlights: () => {},
@@ -29,3 +29,20 @@ export const CacheContext = createContext<CacheContextType>({
 });
 
 export const useCache = (): CacheContextType => useContext(CacheContext);
+
+export const pendingRemovedItemSlugs = new Set<string>();
+
+export function addPendingRemovedItemSlugs(slugs: string[]): void {
+  slugs.forEach((slug) => {
+    pendingRemovedItemSlugs.add(slug);
+    if (typeof window !== "undefined") {
+      window.setTimeout(() => {
+        pendingRemovedItemSlugs.delete(slug);
+      }, 5000);
+    }
+  });
+}
+
+export function releasePendingRemovedItemSlugs(slugs: string[]): void {
+  slugs.forEach((slug) => pendingRemovedItemSlugs.delete(slug));
+}

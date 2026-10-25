@@ -1,3 +1,4 @@
+import { pendingRemovedItemSlugs } from "@app/providers/Cache";
 import {
   type GetItemsRequest,
   type GetItemsResponse,
@@ -76,7 +77,9 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
       }
 
       return {
-        items: result.items,
+        items: result.items.filter(
+          (item) => !pendingRemovedItemSlugs.has(item.slug),
+        ),
         total: result.total,
         nextCursor: result.nextCursor,
         nextOffset: result.nextOffset,
@@ -130,7 +133,9 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
   }, []);
 
   const contextValue: ItemsContextType = {
-    items: data?.pages.flatMap((p) => p.items) || [],
+    items: (data?.pages.flatMap((p) => p.items) || []).filter(
+      (item) => !pendingRemovedItemSlugs.has(item.slug),
+    ),
     // Total count may be inaccurate when search query is used, so just sum items received.
     totalItems: currentOptions?.search
       ? data?.pages.flatMap((p) => p.items).length || 0
