@@ -18,10 +18,12 @@ import { InfiniteData, useQueryClient } from "@tanstack/react-query";
 import React, { useCallback } from "react";
 
 import {
+  addPendingRemovedItemSlugs,
   CacheContext,
   CacheContextType,
   HighlightUpdate,
   ItemUpdate,
+  pendingRemovedItemSlugs,
 } from "./";
 
 type CacheProviderProps = React.PropsWithChildren;
@@ -33,17 +35,19 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
   const { username } = useSettings();
 
   const invalidateCache = useCallback(
-    (slug?: string) => {
+    async (slug?: string): Promise<void> => {
       if (slug) {
-        queryClient.invalidateQueries({
+        await queryClient.invalidateQueries({
           queryKey: [ITEM_CONTENT_QUERY_KEY, slug],
         });
       } else {
-        queryClient.invalidateQueries({ queryKey: [ITEM_CONTENT_QUERY_KEY] });
+        await queryClient.invalidateQueries({
+          queryKey: [ITEM_CONTENT_QUERY_KEY],
+        });
       }
-      queryClient.invalidateQueries({ queryKey: [ITEMS_QUERY_KEY] });
+      await queryClient.invalidateQueries({ queryKey: [ITEMS_QUERY_KEY] });
       if (username) {
-        queryClient.invalidateQueries({
+        await queryClient.invalidateQueries({
           queryKey: [PROFILE_QUERY_KEY, username],
         });
       }
@@ -112,6 +116,9 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
 
   const optimisticRemoveItems = useCallback(
     (itemSlugs: string[]) => {
+      addPendingRemovedItemSlugs(itemSlugs);
+      void queryClient.cancelQueries({ queryKey: [ITEMS_QUERY_KEY] });
+
       queryClient.setQueriesData<InfiniteData<ItemsPage>>(
         { queryKey: [ITEMS_QUERY_KEY] },
         (oldData) => {
@@ -122,7 +129,7 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
             pages: oldData.pages.map((page) => ({
               ...page,
               items: page.items.filter(
-                (item) => !itemSlugs.includes(item.slug),
+                (item) => !pendingRemovedItemSlugs.has(item.slug),
               ),
             })),
           };

@@ -130,6 +130,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
   };
 
   const handleTouchStart = (clientX: number, clientY: number): void => {
+    if (justSwiped.current) return;
     touchStartX.current = clientX;
     touchStartY.current = clientY;
     currentTranslateX.current = 0;

@@ -39,18 +39,15 @@ describe("SwipeSettings component", () => {
   });
 
   it("allows selecting a new swipe right action", () => {
-    renderComponent();
+    const { container } = renderComponent();
 
-    // Find radio options for Swipe Right Action
-    const radioInputs = screen.getAllByRole("radio");
-    // Find the radio input for Favorite in swipe right
-    const favoriteRadios = radioInputs.filter(
-      (input) => (input as HTMLInputElement).value === SwipeAction.FAVORITE,
-    );
+    const selectElements = container.querySelectorAll("select");
+    expect(selectElements.length).toBeGreaterThanOrEqual(2);
 
-    expect(favoriteRadios.length).toBeGreaterThan(0);
     act(() => {
-      fireEvent.click(favoriteRadios[0]);
+      fireEvent.change(selectElements[0], {
+        target: { value: SwipeAction.FAVORITE },
+      });
     });
 
     const settings = loadSwipeSettings();
@@ -58,17 +55,15 @@ describe("SwipeSettings component", () => {
   });
 
   it("allows selecting a new swipe left action", () => {
-    renderComponent();
+    const { container } = renderComponent();
 
-    const radioInputs = screen.getAllByRole("radio");
-    const archiveRadios = radioInputs.filter(
-      (input) => (input as HTMLInputElement).value === SwipeAction.ARCHIVE,
-    );
+    const selectElements = container.querySelectorAll("select");
+    expect(selectElements.length).toBeGreaterThanOrEqual(2);
 
-    expect(archiveRadios.length).toBeGreaterThan(0);
-    // Click the second one (which corresponds to swipe left)
     act(() => {
-      fireEvent.click(archiveRadios[1]);
+      fireEvent.change(selectElements[1], {
+        target: { value: SwipeAction.ARCHIVE },
+      });
     });
 
     const settings = loadSwipeSettings();
@@ -102,15 +97,14 @@ describe("SwipeSettings component", () => {
   });
 
   it("resets swipe settings to defaults when reset button is clicked", () => {
-    renderComponent();
+    const { container } = renderComponent();
 
     // First change to custom
-    const radioInputs = screen.getAllByRole("radio");
-    const markReadRadios = radioInputs.filter(
-      (input) => (input as HTMLInputElement).value === SwipeAction.MARK_READ,
-    );
+    const selectElements = container.querySelectorAll("select");
     act(() => {
-      fireEvent.click(markReadRadios[0]);
+      fireEvent.change(selectElements[0], {
+        target: { value: SwipeAction.MARK_READ },
+      });
     });
     expect(loadSwipeSettings().swipeRightAction).toBe(SwipeAction.MARK_READ);
 

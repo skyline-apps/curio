@@ -1,7 +1,7 @@
 import ItemRow from "@app/components/Items/ItemRow";
 import Button from "@app/components/ui/Button";
 import { FormSection } from "@app/components/ui/Form";
-import { Radio, RadioGroup } from "@app/components/ui/Radio";
+import { Select, SelectItem } from "@app/components/ui/Select";
 import { type Item } from "@app/providers/Items";
 import { useSwipeSettings } from "@app/providers/Settings";
 import { useToast } from "@app/providers/Toast";
@@ -19,27 +19,22 @@ const SWIPE_ACTION_OPTIONS = [
   {
     value: SwipeAction.ARCHIVE,
     label: "Archive",
-    description: "Move item to archive or restore to active",
   },
   {
     value: SwipeAction.DELETE,
     label: "Delete",
-    description: "Move item to trash or restore to active",
   },
   {
     value: SwipeAction.MARK_READ,
     label: "Mark as read / unread",
-    description: "Toggle read status",
   },
   {
     value: SwipeAction.FAVORITE,
-    label: "Favorite / Unfavorite",
-    description: "Toggle starred status",
+    label: "Favorite / unfavorite",
   },
   {
     value: SwipeAction.NONE,
-    label: "None",
-    description: "Disable swipe gesture in this direction",
+    label: "None (disabled)",
   },
 ];
 
@@ -145,44 +140,60 @@ const SwipeSettings: React.FC = () => {
         title="Swipe right"
         description="Action performed when swiping an item card to the right."
       >
-        <RadioGroup
-          orientation="vertical"
-          value={swipeSettings.swipeRightAction}
-          onValueChange={(val) => handleUpdate("swipeRightAction", val)}
+        <Select
           aria-label="Swipe right"
+          selectedKeys={[swipeSettings.swipeRightAction]}
+          onChange={(e) => {
+            if (e.target.value) {
+              handleUpdate("swipeRightAction", e.target.value as SwipeAction);
+            }
+          }}
+          onSelectionChange={(keys) => {
+            const selected = Array.from(keys)[0];
+            if (selected) {
+              handleUpdate("swipeRightAction", String(selected) as SwipeAction);
+            }
+          }}
+          disallowEmptySelection
+          className="max-w-xs"
+          size="sm"
         >
           {SWIPE_ACTION_OPTIONS.map((opt) => (
-            <Radio
-              key={`right-${opt.value}`}
-              value={opt.value}
-              description={opt.description}
-            >
+            <SelectItem key={opt.value} textValue={opt.label}>
               {opt.label}
-            </Radio>
+            </SelectItem>
           ))}
-        </RadioGroup>
+        </Select>
       </FormSection>
 
       <FormSection
         title="Swipe left"
         description="Action performed when swiping an item card to the left."
       >
-        <RadioGroup
-          orientation="vertical"
-          value={swipeSettings.swipeLeftAction}
-          onValueChange={(val) => handleUpdate("swipeLeftAction", val)}
+        <Select
           aria-label="Swipe left"
+          selectedKeys={[swipeSettings.swipeLeftAction]}
+          onChange={(e) => {
+            if (e.target.value) {
+              handleUpdate("swipeLeftAction", e.target.value as SwipeAction);
+            }
+          }}
+          onSelectionChange={(keys) => {
+            const selected = Array.from(keys)[0];
+            if (selected) {
+              handleUpdate("swipeLeftAction", String(selected) as SwipeAction);
+            }
+          }}
+          disallowEmptySelection
+          className="max-w-xs"
+          size="sm"
         >
           {SWIPE_ACTION_OPTIONS.map((opt) => (
-            <Radio
-              key={`left-${opt.value}`}
-              value={opt.value}
-              description={opt.description}
-            >
+            <SelectItem key={opt.value} textValue={opt.label}>
               {opt.label}
-            </Radio>
+            </SelectItem>
           ))}
-        </RadioGroup>
+        </Select>
       </FormSection>
 
       <FormSection
