@@ -7,7 +7,13 @@ import type {
   UpdateSettingsResponse,
 } from "@app/schemas/v1/user/settings";
 import type { UpdateUsernameResponse } from "@app/schemas/v1/user/username";
-import { createContext, useContext } from "react";
+import {
+  DEFAULT_SWIPE_SETTINGS,
+  loadSwipeSettings,
+  type SwipeSettings,
+  updateSwipeSettings as saveSwipeSettings,
+} from "@app/utils/displayStorage";
+import { createContext, useContext, useEffect, useState } from "react";
 
 export type SettingsContextType = {
   username: string;
@@ -37,6 +43,8 @@ export type SettingsContextType = {
   isPremium: boolean;
   shouldShowUpgradeBanner: boolean;
   dismissUpgradeBanner: () => Promise<void>;
+  swipeSettings: SwipeSettings;
+  updateSwipeSettings: (settings: Partial<SwipeSettings>) => void;
 };
 
 export const SettingsContext = createContext<SettingsContextType>({
@@ -55,6 +63,48 @@ export const SettingsContext = createContext<SettingsContextType>({
   isPremium: false,
   shouldShowUpgradeBanner: false,
   dismissUpgradeBanner: async () => {},
+  swipeSettings: DEFAULT_SWIPE_SETTINGS,
+  updateSwipeSettings: () => {},
 });
 export const useSettings = (): SettingsContextType =>
   useContext(SettingsContext);
+
+export const useSwipeSettings = (): {
+  swipeSettings: SwipeSettings;
+  updateSwipeSettings: (settings: Partial<SwipeSettings>) => void;
+} => {
+  const context = useContext(SettingsContext);
+  const [localSettings, setLocalSettings] = useState<SwipeSettings>(
+    () => context?.swipeSettings || loadSwipeSettings(),
+  );
+
+  useEffect(() => {
+    if (context?.swipeSettings) {
+      setLocalSettings(context.swipeSettings);
+    }
+  }, [context?.swipeSettings]);
+
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent): void => {
+      if (e.key === "curio_settings") {
+        setLocalSettings(loadSwipeSettings());
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  const update = (settings: Partial<SwipeSettings>): void => {
+    if (context?.updateSwipeSettings) {
+      context.updateSwipeSettings(settings);
+    } else {
+      saveSwipeSettings(settings);
+      setLocalSettings(loadSwipeSettings());
+    }
+  };
+
+  return {
+    swipeSettings: context?.swipeSettings || localSettings,
+    updateSwipeSettings: update,
+  };
+};

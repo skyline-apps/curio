@@ -20,13 +20,16 @@ import { type UpdateUsernameResponse } from "@app/schemas/v1/user/username";
 import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import {
   initializeTheme,
+  loadSwipeSettings,
   setDarkTheme,
   setLightTheme,
   setSystemTheme,
+  type SwipeSettings,
+  updateSwipeSettings as saveSwipeSettings,
 } from "@app/utils/displayStorage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import posthog from "posthog-js";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import { SettingsContext } from ".";
 
@@ -118,6 +121,18 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     retry: 1,
     enabled: !!user.id,
   });
+
+  const [swipeSettings, setSwipeSettings] = useState<SwipeSettings>(() =>
+    loadSwipeSettings(),
+  );
+
+  const updateSwipeSettings = useCallback(
+    (newSettings: Partial<SwipeSettings>) => {
+      saveSwipeSettings(newSettings);
+      setSwipeSettings((prev) => ({ ...prev, ...newSettings }));
+    },
+    [],
+  );
 
   const loadImportJobs = useCallback(
     (reload: boolean = false) => {
@@ -450,6 +465,8 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         isPremium: !!isPremium,
         shouldShowUpgradeBanner,
         dismissUpgradeBanner,
+        swipeSettings,
+        updateSwipeSettings,
       }}
     >
       {children}
