@@ -42,8 +42,8 @@ export function getSwipeActionDetails(
         ) : (
           <HiOutlineArchiveBox className="text-xl shrink-0" />
         ),
-        bgColor: "bg-emerald-600",
-        textColor: "text-white",
+        bgColor: "bg-success",
+        textColor: "text-success-foreground",
       };
     case SwipeAction.DELETE:
       return {
@@ -54,8 +54,8 @@ export function getSwipeActionDetails(
         ) : (
           <HiOutlineTrash className="text-xl shrink-0" />
         ),
-        bgColor: "bg-rose-600",
-        textColor: "text-white",
+        bgColor: "bg-danger",
+        textColor: "text-danger-foreground",
       };
     case SwipeAction.MARK_READ:
       return {
@@ -66,8 +66,8 @@ export function getSwipeActionDetails(
         ) : (
           <HiCheck className="text-xl shrink-0" />
         ),
-        bgColor: "bg-blue-600",
-        textColor: "text-white",
+        bgColor: "bg-primary",
+        textColor: "text-primary-foreground",
       };
     case SwipeAction.FAVORITE:
       return {
@@ -78,8 +78,8 @@ export function getSwipeActionDetails(
         ) : (
           <HiOutlineStar className="text-xl shrink-0" />
         ),
-        bgColor: "bg-amber-500",
-        textColor: "text-white",
+        bgColor: "bg-warning",
+        textColor: "text-warning-foreground",
       };
     case SwipeAction.NONE:
     default:

@@ -8,13 +8,11 @@ import { Link, useLocation } from "react-router-dom";
 import AccountSettings from "./AccountSettings";
 import LabelSettings from "./LabelSettings";
 import SubscriptionSettings from "./SubscriptionSettings";
-import SwipeSettings from "./SwipeSettings";
 import UpdateUserSettings from "./UpdateUserSettings";
 
 enum SettingsSectionKey {
   Organization = "organization",
   Preferences = "preferences",
-  Gestures = "gestures",
   Account = "account",
   Subscription = "subscription",
 }
@@ -39,7 +37,7 @@ const SettingsForm: React.FC = () => {
         <AccordionItem
           key={SettingsSectionKey.Organization}
           title="Organization"
-          subtitle="Manage labels"
+          subtitle="Manage labels & swipe actions"
           aria-label="Organization"
         >
           <LabelSettings />
@@ -51,14 +49,6 @@ const SettingsForm: React.FC = () => {
           aria-label="Preferences"
         >
           <UpdateUserSettings />
-        </AccordionItem>
-        <AccordionItem
-          key={SettingsSectionKey.Gestures}
-          title="Swipe actions"
-          subtitle="Customize mobile swipe gestures"
-          aria-label="Swipe actions"
-        >
-          <SwipeSettings />
         </AccordionItem>
         <AccordionItem
           key={SettingsSectionKey.Account}

@@ -107,6 +107,8 @@ describe("ItemRow swipe interactions", () => {
     const rightBg = screen.getByTestId("swipe-action-right-bg");
     expect(rightBg).toBeInTheDocument();
     expect(rightBg).toHaveTextContent(/Archive/i);
+    expect(rightBg).toHaveClass("bg-success");
+    expect(rightBg).toHaveClass("text-success-foreground");
   });
 
   it("triggers archive when swiping right past threshold and released", async () => {
@@ -146,6 +148,8 @@ describe("ItemRow swipe interactions", () => {
     const leftBg = screen.getByTestId("swipe-action-left-bg");
     expect(leftBg).toBeInTheDocument();
     expect(leftBg).toHaveTextContent(/Delete/i);
+    expect(leftBg).toHaveClass("bg-danger");
+    expect(leftBg).toHaveClass("text-danger-foreground");
   });
 
   it("triggers delete when swiping left past threshold and released", () => {

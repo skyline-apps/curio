@@ -6,24 +6,25 @@ import { type Item } from "@app/providers/Items";
 import { useSwipeSettings } from "@app/providers/Settings";
 import { useToast } from "@app/providers/Toast";
 import { ItemSource, ItemState, TextDirection } from "@app/schemas/db";
+import { COLOR_PALETTE } from "@app/utils/colors";
 import { DEFAULT_SWIPE_SETTINGS, SwipeAction } from "@app/utils/displayStorage";
 import React, { useState } from "react";
 import {
   HiArrowPath,
   HiArrowUturnLeft,
-  HiOutlineHandThumbUp,
+  HiOutlineCheckCircle,
 } from "react-icons/hi2";
 
 const SWIPE_ACTION_OPTIONS = [
   {
     value: SwipeAction.ARCHIVE,
     label: "Archive",
-    description: "Move item to Archive or restore from Archive",
+    description: "Move item to archive or restore to active",
   },
   {
     value: SwipeAction.DELETE,
     label: "Delete",
-    description: "Move item to Trash or restore from Trash",
+    description: "Move item to trash or restore to active",
   },
   {
     value: SwipeAction.MARK_READ,
@@ -50,9 +51,9 @@ const INITIAL_SAMPLE_ITEM: Item = {
   createdAt: new Date().toISOString(),
   excerpt:
     "Swipe left or right on this card to preview your configured actions.",
-  labels: [{ id: "label-demo", name: "Preview", color: "#6366f1" }],
+  labels: [{ id: "label-demo", name: "Preview", color: COLOR_PALETTE[3] }],
   metadata: {
-    title: "Interactive Swipe Preview",
+    title: "Interactive swipe preview",
     description:
       "Swipe left or right on this card to preview your configured actions.",
     source: ItemSource.EMAIL,
@@ -141,57 +142,55 @@ const SwipeSettings: React.FC = () => {
   return (
     <div className="space-y-4" data-testid="swipe-settings-section">
       <FormSection
-        title="Swipe Right Action"
+        title="Swipe right"
         description="Action performed when swiping an item card to the right."
       >
         <RadioGroup
           orientation="vertical"
           value={swipeSettings.swipeRightAction}
           onValueChange={(val) => handleUpdate("swipeRightAction", val)}
-          aria-label="Swipe Right Action"
+          aria-label="Swipe right"
         >
           {SWIPE_ACTION_OPTIONS.map((opt) => (
-            <Radio key={`right-${opt.value}`} value={opt.value}>
-              <div className="flex flex-col">
-                <span className="font-medium text-sm">{opt.label}</span>
-                <span className="text-xs text-secondary">
-                  {opt.description}
-                </span>
-              </div>
+            <Radio
+              key={`right-${opt.value}`}
+              value={opt.value}
+              description={opt.description}
+            >
+              {opt.label}
             </Radio>
           ))}
         </RadioGroup>
       </FormSection>
 
       <FormSection
-        title="Swipe Left Action"
+        title="Swipe left"
         description="Action performed when swiping an item card to the left."
       >
         <RadioGroup
           orientation="vertical"
           value={swipeSettings.swipeLeftAction}
           onValueChange={(val) => handleUpdate("swipeLeftAction", val)}
-          aria-label="Swipe Left Action"
+          aria-label="Swipe left"
         >
           {SWIPE_ACTION_OPTIONS.map((opt) => (
-            <Radio key={`left-${opt.value}`} value={opt.value}>
-              <div className="flex flex-col">
-                <span className="font-medium text-sm">{opt.label}</span>
-                <span className="text-xs text-secondary">
-                  {opt.description}
-                </span>
-              </div>
+            <Radio
+              key={`left-${opt.value}`}
+              value={opt.value}
+              description={opt.description}
+            >
+              {opt.label}
             </Radio>
           ))}
         </RadioGroup>
       </FormSection>
 
       <FormSection
-        title="Test Gesture Preview"
-        description="Swipe the card below left or right to try out your configured gestures (works with touch and mouse drag)."
+        title="Gesture preview"
+        description="Swipe the card below left or right to try out your configured gestures."
       >
         <div className="w-full flex flex-col gap-3">
-          <div className="w-full border border-divider rounded-md p-2 bg-background-200">
+          <div className="w-full border border-divider rounded p-2 bg-background-300">
             <ItemRow
               item={sampleItem}
               index={0}
@@ -206,7 +205,7 @@ const SwipeSettings: React.FC = () => {
                 className="text-success font-medium flex items-center gap-1"
                 data-testid="swipe-preview-feedback"
               >
-                <HiOutlineHandThumbUp className="text-sm" /> Triggered:{" "}
+                <HiOutlineCheckCircle className="text-sm" /> Triggered:{" "}
                 {lastActionTriggered}
               </span>
             ) : (

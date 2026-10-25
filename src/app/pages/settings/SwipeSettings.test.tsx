@@ -32,10 +32,10 @@ describe("SwipeSettings component", () => {
   it("renders both swipe action configuration sections and the interactive preview", () => {
     renderComponent();
 
-    expect(screen.getByText("Swipe Right Action")).toBeInTheDocument();
-    expect(screen.getByText("Swipe Left Action")).toBeInTheDocument();
-    expect(screen.getByText("Test Gesture Preview")).toBeInTheDocument();
-    expect(screen.getByText("Interactive Swipe Preview")).toBeInTheDocument();
+    expect(screen.getByText("Swipe right")).toBeInTheDocument();
+    expect(screen.getByText("Swipe left")).toBeInTheDocument();
+    expect(screen.getByText("Gesture preview")).toBeInTheDocument();
+    expect(screen.getByText("Interactive swipe preview")).toBeInTheDocument();
   });
 
   it("allows selecting a new swipe right action", () => {

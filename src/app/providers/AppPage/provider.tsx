@@ -52,9 +52,24 @@ export const AppPageProvider: React.FC<{
   }, [containerRef]);
 
   const bind = useDrag(
-    ({ axis, last, movement: [mx], velocity, direction: [dx] }) => {
+    ({ axis, last, movement: [mx], velocity, direction: [dx], event }) => {
       if (axis === "y") return;
       if (!last) return;
+
+      const rawTarget = event?.target as Node | null;
+      const element =
+        rawTarget && "nodeType" in rawTarget
+          ? rawTarget.nodeType === Node.ELEMENT_NODE
+            ? (rawTarget as HTMLElement)
+            : rawTarget.parentElement
+          : null;
+
+      if (
+        element?.closest?.('[data-testid*="item-row"]') ||
+        element?.closest?.('[data-swipeable="true"]')
+      ) {
+        return;
+      }
 
       const selection = window.getSelection();
       if (

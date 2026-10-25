@@ -242,6 +242,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
       className="relative w-full h-16 rounded-sm overflow-hidden select-none"
       dir={item.metadata.textDirection}
       data-testid={`item-row-container-${item.slug}`}
+      data-swipeable="true"
     >
       {/* Background action layer */}
       {translateX > 0 && rightActionDetails && (
@@ -252,12 +253,12 @@ const ItemRow: React.FC<ItemRowProps> = ({
           <div
             className={`flex flex-row items-center gap-2 transition-transform duration-100 ${
               translateX >= SWIPE_THRESHOLD
-                ? "scale-110 font-bold"
-                : "scale-95 opacity-85"
+                ? "scale-105"
+                : "scale-95 opacity-80"
             }`}
           >
             {rightActionDetails.icon}
-            <span className="text-xs font-semibold tracking-wider uppercase">
+            <span className="text-sm font-medium">
               {rightActionDetails.label}
             </span>
           </div>
@@ -272,11 +273,11 @@ const ItemRow: React.FC<ItemRowProps> = ({
           <div
             className={`flex flex-row items-center gap-2 transition-transform duration-100 ${
               Math.abs(translateX) >= SWIPE_THRESHOLD
-                ? "scale-110 font-bold"
-                : "scale-95 opacity-85"
+                ? "scale-105"
+                : "scale-95 opacity-80"
             }`}
           >
-            <span className="text-xs font-semibold tracking-wider uppercase">
+            <span className="text-sm font-medium">
               {leftActionDetails.label}
             </span>
             {leftActionDetails.icon}
@@ -288,6 +289,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
       <div
         className="w-full h-full group flex flex-row bg-background-400 pl-4 pr-1 py-1 rounded-sm hover:bg-background-300 data-[selected=true]:bg-background-300 data-[focus=true]:outline-focus data-[focus=true]:outline"
         data-testid={`item-row-card-${item.slug}`}
+        data-swipeable="true"
         style={{
           transform: `translateX(${translateX}px)`,
           transition: isDragging ? "none" : "transform 200ms ease-out",
@@ -310,11 +312,20 @@ const ItemRow: React.FC<ItemRowProps> = ({
         }}
         onTouchMove={(e: React.TouchEvent) => {
           handleTouchMove(e.touches[0].clientX, e.touches[0].clientY);
+          if (gestureState.current === "swiping") {
+            e.stopPropagation();
+          }
         }}
-        onTouchEnd={() => {
+        onTouchEnd={(e: React.TouchEvent) => {
+          if (gestureState.current === "swiping") {
+            e.stopPropagation();
+          }
           handleTouchEnd();
         }}
-        onTouchCancel={() => {
+        onTouchCancel={(e: React.TouchEvent) => {
+          if (gestureState.current === "swiping") {
+            e.stopPropagation();
+          }
           handleTouchEnd();
         }}
         onPointerDown={
@@ -331,13 +342,19 @@ const ItemRow: React.FC<ItemRowProps> = ({
             ? (e: React.PointerEvent) => {
                 if (isPointerDown.current) {
                   handleTouchMove(e.clientX, e.clientY);
+                  if (gestureState.current === "swiping") {
+                    e.stopPropagation();
+                  }
                 }
               }
             : undefined
         }
         onPointerUp={
           enablePointerDrag
-            ? () => {
+            ? (e: React.PointerEvent) => {
+                if (gestureState.current === "swiping") {
+                  e.stopPropagation();
+                }
                 isPointerDown.current = false;
                 handleTouchEnd();
               }
