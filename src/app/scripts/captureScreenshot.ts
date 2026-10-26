@@ -91,6 +91,25 @@ async function main(): Promise<void> {
   console.log(`Navigating to ${targetUrl}...`);
   await page.goto(targetUrl, { waitUntil: "networkidle", timeout: 30000 });
 
+  // Dismiss walkthrough welcome modal if present
+  try {
+    const skipButton = page.getByRole("button", { name: "Skip intro" });
+    if (await skipButton.isVisible({ timeout: 1500 })) {
+      console.log("Dismissing walkthrough welcome modal...");
+      await skipButton.click();
+      await page.waitForTimeout(500);
+    }
+  } catch {
+    // Modal not present
+  }
+
+  // Clean up any lingering Joyride elements so screenshots are never obstructed
+  await page.evaluate(() => {
+    document
+      .querySelectorAll(".react-joyride__overlay, .react-joyride__tooltip")
+      .forEach((el) => el.remove());
+  });
+
   mkdirSync(dirname(output), { recursive: true });
   await page.screenshot({ path: output, fullPage });
   console.log(`Screenshot saved to ${output}`);

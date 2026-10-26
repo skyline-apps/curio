@@ -105,6 +105,20 @@ export async function login(page: Page): Promise<void> {
       if (!sessionRes.ok) {
         throw new Error("Failed to set backend session");
       }
+
+      // 4. Mark walkthrough completed so welcome modal does not block screenshots
+      try {
+        await fetch(`${appUrl}/api/v1/user/settings`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${data.access_token}`,
+          },
+          body: JSON.stringify({ completedWalkthrough: true }),
+        });
+      } catch {
+        // Ignored
+      }
     },
     { email, password, appUrl, supabaseUrl, anonKey },
   );

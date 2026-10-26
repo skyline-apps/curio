@@ -98,9 +98,9 @@ async function main(): Promise<void> {
     const sql = postgres(POSTGRES_URL, { max: 1 });
     const slug = createUsernameSlug(TEST_USER_EMAIL);
     await sql`
-      INSERT INTO profiles (user_id, username, is_enabled)
-      VALUES (${userId}, ${slug}, true)
-      ON CONFLICT (user_id) DO NOTHING;
+      INSERT INTO profiles (user_id, username, is_enabled, completed_walkthrough)
+      VALUES (${userId}, ${slug}, true, true)
+      ON CONFLICT (user_id) DO UPDATE SET completed_walkthrough = true;
     `;
     await sql.end();
     console.log("Ensured profile row exists for test user.");
