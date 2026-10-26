@@ -46,17 +46,94 @@ To generate and apply a new database migration:
 3. If the dev container is already running, apply it immediately without restarting by running `npm run dev:exec` and then `npm run db:migrate` (or restart `npm run dev:watch`).
 
 ### Mobile apps
-First, make sure you build the frontend with the production `.env` populated by running `npm run build` from `src/app`. Then run `npx cap sync` to set up mobile app files.
+Curio's mobile apps are built with Capacitor from the web frontend in `src/app`.
+
+#### 1. Compile web assets & sync (Required before any native build)
+Capacitor wraps the compiled static assets in `dist/client`. Whenever you modify frontend code, you must build the web app and sync before creating native binaries:
 
 ```bash
-$ npx cap run android
-$ npx cap run ios
+cd src/app
+
+# Build the web bundle (production by default)
+npm run build
+# Or build with staging configuration:
+npm run build -- --mode staging
+
+# Sync web bundle and Capacitor plugins to both platforms:
+npx cap sync
+# Or platform-specific sync:
+npx cap sync android
+npx cap sync ios
 ```
 
+#### 2. Building via CLI (Headless Scripting — No IDE Needed)
+Building does **not** require opening Android Studio or Xcode; both platforms can be built headlessly via CLI:
+
+##### Android (Linux, macOS, CI)
+- **Via Gradle CLI directly** (builds APKs and AAB bundles):
+  ```bash
+  cd src/app/android
+  ./gradlew assembleDebug      # Debug APK -> app/build/outputs/apk/debug/app-debug.apk
+  ./gradlew assembleRelease    # Unsigned Release APK -> app/build/outputs/apk/release/app-release-unsigned.apk
+  ./gradlew bundleRelease      # Release AAB bundle for Google Play Store -> app/build/outputs/bundle/release/app-release.aab
+  ```
+- **Via Capacitor CLI**:
+  ```bash
+  cd src/app
+  npx cap build android --androidreleasetype APK
+  npx cap build android --androidreleasetype AAB
+  ```
+- **Deploy and run directly on a connected device/emulator**:
+  ```bash
+  cd src/app
+  npx cap run android
+  # To target a specific emulator/device:
+  npx cap run android --target <device-id>
+  ```
+
+##### iOS (requires macOS with Xcode CLI tools)
+- **Via `xcodebuild` CLI directly**:
+  ```bash
+  cd src/app/ios/App
+  # Create an Xcode archive:
+  xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -archivePath build/App.xcarchive archive
+  # Export the IPA for distribution:
+  xcodebuild -exportArchive -archivePath build/App.xcarchive -exportPath build/ipa -exportOptionsPlist exportOptions.plist
+  ```
+- **Via Capacitor CLI**:
+  ```bash
+  cd src/app
+  npx cap build ios --scheme App --configuration Release
+  ```
+- **Deploy and run directly on a simulator/connected iOS device**:
+  ```bash
+  cd src/app
+  npx cap run ios
+  # To target a specific simulator:
+  npx cap run ios --target <simulator-uuid>
+  ```
+
+#### 3. Opening in IDEs (Alternative / Optional)
+If you prefer developing, configuring signing certificates, or debugging layouts inside the native IDEs:
+```bash
+cd src/app
+npx cap open android    # Opens src/app/android in Android Studio
+npx cap open ios        # Opens src/app/ios/App/App.xcworkspace in Xcode
+```
+
+#### 4. NPM Convenience Scripts
+From `src/app`, you can also use helper scripts:
+- `npm run cap:sync` — Syncs web build and plugins to native platforms
+- `npm run cap:build:android` — Runs `npm run build && cap sync android && cap build android`
+- `npm run cap:build:ios` — Runs `npm run build && cap sync ios && cap build ios`
+- `npm run cap:open:android` — Opens project in Android Studio
+- `npm run cap:open:ios` — Opens project in Xcode
+
+#### Staging configuration & deep links
 Follow [these instructions](https://capacitorjs.com/docs/guides/deep-links) to set up app deep links.
 
 To run the app against staging:
-1. Change the `.env` values to use staging values.
+1. Change `.env` values to use staging values (or build with `npm run build -- --mode staging`).
 2. Edit `AndroidManifest.xml`'s `android:host` to `staging.curi.ooo`.
 3. Edit `src/app/ios/App/send-to-curio/Info.plist`'s `CURIO_URL` to `https://staging.curi.ooo`.
 4. Edit `src/app/ios/App/App/Info.plist`'s `CURIO_URL` to `https://staging.curi.ooo`.
