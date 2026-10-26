@@ -16,6 +16,7 @@ import { UpdateStateResponse } from "@app/schemas/v1/items/state";
 import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import config from "@app/utils/config.json";
 import { createLogger } from "@app/utils/logger";
+import { executeOrQueueOfflineAction } from "@app/utils/offlineQueue";
 import { isNativePlatform } from "@app/utils/platform";
 import { Share } from "@capacitor/share";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
@@ -51,7 +52,7 @@ interface UseItemUpdate {
 }
 
 export const useItemUpdate = (): UseItemUpdate => {
-  const { invalidateCache, optimisticUpdateItems, optimisticRemoveItems } =
+  const { invalidateCache, optimisticUpdateItems, optimisticMoveItemState } =
     useCache();
   const { clearSelectedItems, loadedItem } = useContext(CurrentItemContext);
   const { saveItemContent } = useContext(BrowserMessageContext);
@@ -62,29 +63,45 @@ export const useItemUpdate = (): UseItemUpdate => {
     Error,
     { itemSlugs: string[]; state: ItemState }
   > = {
+    networkMode: "always",
     mutationFn: async ({ itemSlugs, state }) => {
-      const newItems = itemSlugs.map((slug) => ({
-        slug,
-        metadata: {
-          state,
-        },
-      }));
-      optimisticUpdateItems(newItems);
-      optimisticRemoveItems(itemSlugs);
+      optimisticMoveItemState(itemSlugs, state);
 
-      return await authenticatedFetch("/api/v1/items/state", {
-        method: "POST",
-        body: JSON.stringify({
-          slugs: itemSlugs.join(","),
-          state,
+      return await executeOrQueueOfflineAction({
+        action: {
+          type: "update_item_state",
+          endpoint: "/api/v1/items/state",
+          method: "POST",
+          body: {
+            slugs: itemSlugs.join(","),
+            state,
+          },
+          entityKey: `state:${itemSlugs.slice().sort().join(",")}`,
+        },
+        executeOnline: async () => {
+          return await authenticatedFetch("/api/v1/items/state", {
+            method: "POST",
+            body: JSON.stringify({
+              slugs: itemSlugs.join(","),
+              state,
+            }),
+          }).then(handleAPIResponse<UpdateStateResponse>);
+        },
+        fallbackOffline: () => ({
+          updated: itemSlugs.map((slug) => ({ slug })),
         }),
-      }).then(handleAPIResponse<UpdateStateResponse>);
+        onQueued: () => {
+          showToast("Saved offline. Will sync when reconnected.");
+        },
+      });
     },
     onSuccess: async (_data, variables) => {
       if (!loadedItem) {
         clearSelectedItems();
       }
-      await invalidateCache();
+      if (typeof navigator === "undefined" || navigator.onLine) {
+        await invalidateCache();
+      }
       releasePendingRemovedItemSlugs(variables.itemSlugs);
     },
     onError: (error, variables) => {
@@ -100,6 +117,7 @@ export const useItemUpdate = (): UseItemUpdate => {
     Error,
     { itemSlugs: string[]; favorite: boolean }
   > = {
+    networkMode: "always",
     mutationFn: async ({ itemSlugs, favorite }) => {
       const newItems = itemSlugs.map((slug) => ({
         slug,
@@ -109,16 +127,38 @@ export const useItemUpdate = (): UseItemUpdate => {
       }));
       optimisticUpdateItems(newItems);
 
-      return await authenticatedFetch("/api/v1/items/favorite", {
-        method: "POST",
-        body: JSON.stringify({
-          slugs: itemSlugs.join(","),
-          favorite,
+      return await executeOrQueueOfflineAction({
+        action: {
+          type: "update_item_favorite",
+          endpoint: "/api/v1/items/favorite",
+          method: "POST",
+          body: {
+            slugs: itemSlugs.join(","),
+            favorite,
+          },
+          entityKey: `favorite:${itemSlugs.slice().sort().join(",")}`,
+        },
+        executeOnline: async () => {
+          return await authenticatedFetch("/api/v1/items/favorite", {
+            method: "POST",
+            body: JSON.stringify({
+              slugs: itemSlugs.join(","),
+              favorite,
+            }),
+          }).then(handleAPIResponse<UpdateFavoriteResponse>);
+        },
+        fallbackOffline: () => ({
+          updated: itemSlugs.map((slug) => ({ slug, favorite })),
         }),
-      }).then(handleAPIResponse<UpdateFavoriteResponse>);
+        onQueued: () => {
+          showToast("Saved offline. Will sync when reconnected.");
+        },
+      });
     },
     onSuccess: () => {
-      invalidateCache();
+      if (typeof navigator === "undefined" || navigator.onLine) {
+        invalidateCache();
+      }
     },
     onError: (error) => {
       invalidateCache();
@@ -135,6 +175,7 @@ export const useItemUpdate = (): UseItemUpdate => {
       labelToAdd: ItemLabel;
     }
   > = {
+    networkMode: "always",
     mutationFn: async ({ items, labelToAdd }) => {
       const newItems = items.map((item) => ({
         ...item,
@@ -142,19 +183,43 @@ export const useItemUpdate = (): UseItemUpdate => {
       }));
       optimisticUpdateItems(newItems);
 
-      return await authenticatedFetch("/api/v1/items/labels", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const slugs = items.map((item) => item.slug).join(",");
+      return await executeOrQueueOfflineAction({
+        action: {
+          type: "add_item_label",
+          endpoint: "/api/v1/items/labels",
+          method: "POST",
+          body: {
+            slugs,
+            labelIds: [labelToAdd.id],
+          },
+          entityKey: `label:${slugs}:${labelToAdd.id}`,
         },
-        body: JSON.stringify({
-          slugs: items.map((item) => item.slug).join(","),
-          labelIds: [labelToAdd.id],
+        executeOnline: async () => {
+          return await authenticatedFetch("/api/v1/items/labels", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              slugs,
+              labelIds: [labelToAdd.id],
+            }),
+          }).then(handleAPIResponse<UpdateLabelsResponse>);
+        },
+        fallbackOffline: () => ({
+          updated: items.map((item) => ({ slug: item.slug })),
         }),
-      }).then(handleAPIResponse<UpdateLabelsResponse>);
+        onQueued: () => {
+          showToast("Saved offline. Will sync when reconnected.");
+        },
+      });
     },
     onSuccess: () => {
-      if (!loadedItem) {
+      if (
+        !loadedItem &&
+        (typeof navigator === "undefined" || navigator.onLine)
+      ) {
         invalidateCache();
       }
     },
@@ -173,6 +238,7 @@ export const useItemUpdate = (): UseItemUpdate => {
       labelToRemove: ItemLabel;
     }
   > = {
+    networkMode: "always",
     mutationFn: async ({ items, labelToRemove }) => {
       const newItems = items.map((item) => ({
         ...item,
@@ -182,19 +248,43 @@ export const useItemUpdate = (): UseItemUpdate => {
       }));
       optimisticUpdateItems(newItems);
 
-      return await authenticatedFetch("/api/v1/items/labels", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
+      const slugs = items.map((item) => item.slug).join(",");
+      return await executeOrQueueOfflineAction({
+        action: {
+          type: "remove_item_label",
+          endpoint: "/api/v1/items/labels",
+          method: "DELETE",
+          body: {
+            slugs,
+            labelIds: [labelToRemove.id],
+          },
+          entityKey: `label:${slugs}:${labelToRemove.id}`,
         },
-        body: JSON.stringify({
-          slugs: items.map((item) => item.slug).join(","),
-          labelIds: [labelToRemove.id],
+        executeOnline: async () => {
+          return await authenticatedFetch("/api/v1/items/labels", {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              slugs,
+              labelIds: [labelToRemove.id],
+            }),
+          }).then(handleAPIResponse<UpdateLabelsResponse>);
+        },
+        fallbackOffline: () => ({
+          updated: items.map((item) => ({ slug: item.slug })),
         }),
-      }).then(handleAPIResponse<UpdateLabelsResponse>);
+        onQueued: () => {
+          showToast("Saved offline. Will sync when reconnected.");
+        },
+      });
     },
     onSuccess: () => {
-      if (!loadedItem) {
+      if (
+        !loadedItem &&
+        (typeof navigator === "undefined" || navigator.onLine)
+      ) {
         invalidateCache();
       }
     },
@@ -210,6 +300,7 @@ export const useItemUpdate = (): UseItemUpdate => {
     Error,
     { item: Item }
   > = {
+    networkMode: "always",
     mutationFn: async ({ item }) => {
       optimisticUpdateItems([
         {
@@ -220,10 +311,30 @@ export const useItemUpdate = (): UseItemUpdate => {
           },
         },
       ]);
-      return await authenticatedFetch("/api/v1/items/read", {
-        method: "POST",
-        body: JSON.stringify({ slug: item.slug, readingProgress: 0 }),
-      }).then(handleAPIResponse<ReadItemResponse>);
+
+      return await executeOrQueueOfflineAction({
+        action: {
+          type: "mark_item_read",
+          endpoint: "/api/v1/items/read",
+          method: "POST",
+          body: { slug: item.slug, readingProgress: 0 },
+          entityKey: `read:${item.slug}`,
+        },
+        executeOnline: async () => {
+          return await authenticatedFetch("/api/v1/items/read", {
+            method: "POST",
+            body: JSON.stringify({ slug: item.slug, readingProgress: 0 }),
+          }).then(handleAPIResponse<ReadItemResponse>);
+        },
+        fallbackOffline: () => ({
+          slug: item.slug,
+          readingProgress: 0,
+          versionName: null,
+        }),
+        onQueued: () => {
+          showToast("Saved offline. Will sync when reconnected.");
+        },
+      });
     },
     onSuccess: () => {},
     onError: (error) => {
@@ -238,6 +349,7 @@ export const useItemUpdate = (): UseItemUpdate => {
     Error,
     { item: Item }
   > = {
+    networkMode: "always",
     mutationFn: async ({ item }) => {
       optimisticUpdateItems([
         {
@@ -245,10 +357,28 @@ export const useItemUpdate = (): UseItemUpdate => {
           metadata: { readingProgress: 0, lastReadAt: null },
         },
       ]);
-      return await authenticatedFetch("/api/v1/items/read", {
-        method: "DELETE",
-        body: JSON.stringify({ slug: item.slug }),
-      }).then(handleAPIResponse<MarkUnreadItemResponse>);
+
+      return await executeOrQueueOfflineAction({
+        action: {
+          type: "mark_item_unread",
+          endpoint: "/api/v1/items/read",
+          method: "DELETE",
+          body: { slug: item.slug },
+          entityKey: `read:${item.slug}`,
+        },
+        executeOnline: async () => {
+          return await authenticatedFetch("/api/v1/items/read", {
+            method: "DELETE",
+            body: JSON.stringify({ slug: item.slug }),
+          }).then(handleAPIResponse<MarkUnreadItemResponse>);
+        },
+        fallbackOffline: () => ({
+          slug: item.slug,
+        }),
+        onQueued: () => {
+          showToast("Saved offline. Will sync when reconnected.");
+        },
+      });
     },
     onSuccess: () => {},
     onError: (error) => {
