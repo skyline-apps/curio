@@ -32,6 +32,10 @@ jobs:
         working-directory: ./src/app
         run: npm run test
 
+      - name: Run build
+        working-directory: ./src/app
+        run: npm run build
+
   deploy-staging:
     needs: check-app
     name: Deploy app (staging)
