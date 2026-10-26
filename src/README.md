@@ -1,20 +1,33 @@
 # Curio development
 
 ## Set up local development
-First, set up environment variables and secrets.
-1. Copy `.env.template` to `.env` and populate values. Make sure to use the instructions [here](https://supabase.com/docs/guides/self-hosting/docker#generate-api-keys) to generate the `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY`.
-2. The `search` container's init script will create an application API key. Retrieve this value by using `curl`, then populate it for `SEARCH_APPLICATION_API_KEY` in `.env`:
-    ```bash
-    curl -s -X GET "http://localhost:7700/keys" \
-    -H "Authorization: Bearer ${SEARCH_MASTER_API_KEY}" \
-    -H "Content-Type: application/json"
-    ```
-  - Secrets are also stored in the database. You might encounter an issue with initializing them on a fresh start - try to run a search before you add an item.
+1. From the repository root, run:
+   ```bash
+   npm run env:setup
+   ```
+   This populates `.env` secrets, signs Supabase JWT keys with `JWT_SECRET`, and configures the default local test user (`testuser@curi.ooo` / `testpassword123`).
+2. Start the local stack with file watching:
+   ```bash
+   npm run dev:watch
+   # or one-time start:
+   npm run dev:up
+   ```
+   This boots all Docker containers namespaced with `curio-`, runs migrations, seeds the test user, and watches for code edits.
+   - App: `http://localhost:3000`
+   - Supabase Studio: `http://localhost:8000`
+   - Search: `http://localhost:7700`
 
-To start the local development environment:
-1. Run `docker compose up -d` to start containers in detached mode.
-2. Start file syncing with `docker compose watch`.
-3. Navigate to `http://localhost:3000` to view the application.
+### Multi-Instance Development (Worktrees)
+To develop on multiple branches or worktrees simultaneously:
+- Run `npm run dev:watch` inside any linked git worktree. It will automatically detect the worktree, assign a free port offset (e.g. `+100` -> App on `3100`, Kong on `8100`, Postgres on `5532`, Search on `7800`), namespace containers with `curio-<worktree>-*`, and persist the port assignment across restarts.
+- Use `npm run ports:assign <offset>` to manually set or reset port offsets.
+
+### Playwright Headless Auth & Screenshots
+From `src/app`:
+```bash
+npm run auth:login            # Authenticates test user headlessly and saves .playwright/auth-state.json
+npm run screenshot -- --path /home --output screenshots/home.png  # Captures full-page screenshot
+```
 
 ### Database migrations
 Create a new database migration by first editing `src/app/api/db/schema.ts`. Then from the `src/app` folder, run `npm run db:generate <MIGRATION_NAME>` and check in the generated files.
