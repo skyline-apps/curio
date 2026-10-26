@@ -20,6 +20,7 @@ import {
   Store,
   type UnifiedPackage,
 } from "@app/utils/purchases";
+import { Browser } from "@capacitor/browser";
 import React, { useCallback, useEffect, useState } from "react";
 
 const log = createLogger("SubscriptionSettings");
@@ -308,6 +309,14 @@ const SubscriptionSettings: React.FC = () => {
     }
   };
 
+  const handleOpenExternal =
+    (url: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+      if (isNativePlatform()) {
+        e.preventDefault();
+        Browser.open({ url });
+      }
+    };
+
   return (
     <div className="space-y-4">
       <FormSection title="Curio Premium">
@@ -390,6 +399,27 @@ const SubscriptionSettings: React.FC = () => {
           {purchaseError && (
             <div className="text-danger mt-4">{purchaseError}</div>
           )}
+          <div className="flex flex-wrap items-center gap-x-2 text-xs text-secondary pt-3 border-t border-divider mt-2">
+            <a
+              className="text-primary hover:underline cursor-pointer"
+              href="https://curi.ooo/terms"
+              onClick={handleOpenExternal("https://curi.ooo/terms")}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Terms of Use (EULA)
+            </a>
+            <span>•</span>
+            <a
+              className="text-primary hover:underline cursor-pointer"
+              href="https://curi.ooo/privacy"
+              onClick={handleOpenExternal("https://curi.ooo/privacy")}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Privacy Policy
+            </a>
+          </div>
         </div>
       </FormSection>
     </div>
