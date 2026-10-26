@@ -1,13 +1,13 @@
 import { useOfflineArticle } from "@app/components/Items/useOfflineArticle";
 import Button from "@app/components/ui/Button";
-import { Item } from "@app/providers/Items";
-import { ItemSource } from "@app/schemas/db";
 import {
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-} from "@heroui/dropdown";
+} from "@app/components/ui/Dropdown";
+import { Item } from "@app/providers/Items";
+import { ItemSource } from "@app/schemas/db";
 import React from "react";
 import { HiEllipsisVertical } from "react-icons/hi2";
 
@@ -28,7 +28,7 @@ export const AdvancedActions: React.FC<AdvancedActionsProps> = ({
 
   return (
     <Dropdown>
-      <DropdownTrigger asChild>
+      <DropdownTrigger>
         <Button isIconOnly size="sm" aria-label="More actions" variant="ghost">
           <HiEllipsisVertical className="h-5 w-5" />
         </Button>
