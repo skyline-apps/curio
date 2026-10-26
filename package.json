@@ -19,6 +19,7 @@
     "dev:logs": "node script/dev-logs.js",
     "ports:assign": "node script/assign-ports.js",
     "env:setup": "node script/setup-env.js",
+    "version:bump": "npm run version:bump --prefix src/app",
     "release:android": "npm run release:android --prefix src/app",
     "release:ios": "npm run release:ios --prefix src/app"
   }

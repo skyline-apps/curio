@@ -123,6 +123,7 @@ npx cap open ios        # Opens src/app/ios/App/App.xcworkspace in Xcode
 
 #### 4. NPM Convenience Scripts
 From `src/app` (or repository root), you can use helper scripts:
+- `npm run version:bump` — Interactively increments Android `versionCode` and iOS `CURRENT_PROJECT_VERSION`, and sets version name
 - `npm run release:android` — Full automated Android release: builds production web bundle, syncs Capacitor, compiles the `app-release.aab` bundle with Gradle, and copies it to `src/app/android/app/release/`
 - `npm run release:ios` — Full automated iOS release: builds production web bundle, syncs Capacitor, and creates the Xcode archive (`.xcarchive`) with `xcodebuild`
 - `npm run cap:sync` — Syncs web build and plugins to native platforms
@@ -237,10 +238,6 @@ Instead, to run logic for a specific consumer queue locally, set it as the `queu
 1. Publish the browser extensions and update the values in `src/app/utils/config.json`.
 
 ### Android app
-1. From `src/script`, run `npm run version:bump` to update the app version.
-2. Open the application in Android Studio by running `npx cap open android` from `src/app`.
-3. Build a signed APK using the Build > Generate Signed App Bundle option.
-4. Select "Android App Bundle" and follow the instructions. You should build a `release` app in the `src/app/android/app` folder.
 
 First time setup:
 1. Follow the [launch checklist](https://play.google.com/console/about/guides/releasewithconfidence/) and upload the app bundle to the Play Console.
@@ -249,14 +246,15 @@ First time setup:
 4. In the Google Auth Platform Cloud Console, create a new app of type "Android", populating its package name from the `src/app/android/app/build.gradle` file and the SHA-1 fingerprint from the step above.
 
 New release:
-1. Build the release App Bundle:
+1. Increment the app version:
+   Run `npm run version:bump` from repository root (or `src/app`). This interactively increments `versionCode` and prompts for the new `versionName`, updating `src/app/android/app/build.gradle` and the iOS project simultaneously.
+2. Build the release App Bundle:
    - **Automated CLI script**: Run `npm run release:android` from `src/app` (or repository root). This builds the production web assets, runs `npx cap sync android`, compiles the `bundleRelease` task via Gradle, and places `app-release.aab` into `src/app/android/app/release/`.
    - **Or via Android Studio**: Open with `npx cap open android`, then select Build > Generate Signed App Bundle > Android App Bundle.
-2. In the Google Play Console, create a new release and upload the `app-release.aab` from `src/app/android/app/release`.
-3. Follow the instructions to send the app for review.
+3. In the Google Play Console, create a new release and upload the `app-release.aab` from `src/app/android/app/release`.
+4. Follow the instructions to send the app for review.
 
 ### iOS app
-1. From `src/script`, run `npm run version:bump` to update the app version.
 
 First time setup:
 1. Follow instructions [here](https://github.com/Cap-go/capacitor-social-login/blob/main/docs/setup_apple.md) to set up Apple sign in.
@@ -264,10 +262,12 @@ First time setup:
 3. Follow [these instructions](https://github.com/carsten-klaffke/send-intent?tab=readme-ov-file#ios) to allow the app to handle share intents.
 
 New release:
-1. Build the release archive:
+1. Increment the app version:
+   Run `npm run version:bump` from repository root (or `src/app`) if not already bumped during the Android release step. This increments `CURRENT_PROJECT_VERSION` and sets `MARKETING_VERSION` in `src/app/ios/App/App.xcodeproj/project.pbxproj`.
+2. Build the release archive:
    - **Automated CLI script (macOS)**: Run `npm run release:ios` from `src/app` (or repository root). This builds the production web assets, runs `npx cap sync ios`, and creates the archive at `src/app/ios/App/build/App.xcarchive`.
    - **Or via Xcode**: Open with `npx cap open ios`, select "Any iOS Device (arm64)" as build target, and select Product > Archive.
-2. When the Organizer window opens (or via `open src/app/ios/App/build/App.xcarchive`), select the archive and click "Distribute App" -> "App Store Connect".
+3. When the Organizer window opens (or via `open src/app/ios/App/build/App.xcarchive`), select the archive and click "Distribute App" -> "App Store Connect".
 
 
 ### Authentication

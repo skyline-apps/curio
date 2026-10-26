@@ -18,6 +18,7 @@
     "cap:open:ios": "cap open ios",
     "cap:build:android": "npm run build && cap sync android && cap build android",
     "cap:build:ios": "npm run build && cap sync ios && cap build ios",
+    "version:bump": "tsx ../script/bumpVersion.ts",
     "release:android": "tsx scripts/buildReleaseAndroid.ts",
     "release:ios": "tsx scripts/buildReleaseIos.ts",
     "deploy:staging": "npm run build -- --mode staging && wrangler deploy -c wrangler.jsonc",
