@@ -2,7 +2,6 @@ import YarnDark from "@app/assets/yarn_dark.svg";
 import YarnLight from "@app/assets/yarn_light.svg";
 import EmailSignIn from "@app/components/Auth/EmailSignIn";
 import GoogleSignIn from "@app/components/Auth/GoogleSignIn";
-import PasswordSignIn from "@app/components/Auth/PasswordSignIn";
 import Footer from "@app/components/Landing/Footer";
 import Navbar from "@app/components/Navbar";
 import Spinner from "@app/components/ui/Spinner";
@@ -16,8 +15,6 @@ const LoginPage: React.FC<LoginPageProps> = ({}: LoginPageProps) => {
   const { user } = useUser();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [demoEmail, setDemoEmail] = React.useState<string | null>(null);
-  const [showPassword, setShowPassword] = React.useState<boolean>(false);
   if (user && user.id) {
     // Already signed in; redirect to home
     navigate("/home");
@@ -48,28 +45,7 @@ const LoginPage: React.FC<LoginPageProps> = ({}: LoginPageProps) => {
             </p>
             <GoogleSignIn nextUrl="/home" />
             <p className="text-secondary text-xs">or</p>
-            {showPassword || demoEmail ? (
-              <PasswordSignIn initialEmail={demoEmail || undefined} />
-            ) : (
-              <EmailSignIn
-                onDemoLogin={(email) => {
-                  setDemoEmail(email);
-                  setShowPassword(true);
-                }}
-              />
-            )}
-            <button
-              type="button"
-              onClick={() => {
-                setShowPassword(!showPassword);
-                if (showPassword) setDemoEmail(null);
-              }}
-              className="text-xs text-secondary hover:underline cursor-pointer mt-1"
-            >
-              {showPassword || demoEmail
-                ? "Sign in with email link"
-                : "Sign in with password"}
-            </button>
+            <EmailSignIn />
             {errorMessage && (
               <p className="text-danger text-sm text-center mt-2">
                 {errorMessage}

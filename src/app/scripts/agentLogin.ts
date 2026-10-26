@@ -2,9 +2,9 @@
 /**
  * Playwright login helper for agents driving the local Curio app.
  *
- * Logs in once with TEST_USER_EMAIL/TEST_USER_PASSWORD and writes a
- * Playwright storageState file to .playwright/auth-state.json. Other
- * scripts can then open an already-authenticated context directly:
+ * Logs in with TEST_USER_EMAIL/TEST_USER_PASSWORD via Supabase Auth
+ * and writes a Playwright storageState file to .playwright/auth-state.json.
+ * Other scripts can then open an already-authenticated context directly:
  *
  *   import { chromium } from "playwright";
  *   import { AUTH_STATE_PATH } from "./scripts/agentLogin";
@@ -15,7 +15,7 @@
  *   await page.goto(process.env.VITE_CURIO_URL);
  *
  * Usage (from src/app/):
- *   npx tsx --tsconfig tsconfig.api.json scripts/agentLogin.ts
+ *   npm run auth:login
  */
 import { existsSync, mkdirSync } from "fs";
 import { dirname, resolve } from "path";
@@ -45,38 +45,73 @@ export async function login(page: Page): Promise<void> {
   const appUrl = process.env.VITE_CURIO_URL || "http://localhost:3000";
   const email = process.env.TEST_USER_EMAIL || "testuser@curi.ooo";
   const password = process.env.TEST_USER_PASSWORD || "testpassword123";
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || "http://localhost:8000";
+  const anonKey = process.env.VITE_SUPABASE_ANON_KEY;
 
-  await page.goto(`${appUrl}/login`);
-
-  // Check if already authenticated and redirected
-  if (page.url().includes("/home")) {
-    return;
+  if (!anonKey) {
+    throw new Error(
+      "VITE_SUPABASE_ANON_KEY is not defined in environment variables",
+    );
   }
 
-  // If password input is not visible yet, click "Sign in with password"
-  const passwordToggle = page.getByText("Sign in with password", {
-    exact: false,
-  });
-  if ((await passwordToggle.count()) > 0) {
-    await passwordToggle.first().click();
-  }
+  // Navigate to app origin first so localStorage and cookies are scoped properly
+  await page.goto(appUrl);
 
-  // Fill email and password
-  await page.getByPlaceholder(/email/i).fill(email);
-  await page.getByPlaceholder(/password/i).fill(password);
-  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await page.evaluate(
+    async ({ email, password, appUrl, supabaseUrl, anonKey }) => {
+      // 1. Authenticate with Supabase Auth API
+      const res = await fetch(
+        `${supabaseUrl}/auth/v1/token?grant_type=password`,
+        {
+          method: "POST",
+          headers: {
+            apikey: anonKey,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        },
+      );
 
-  // Wait for redirect to /home
-  await page.waitForURL(/\/home/, { timeout: 30000 });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(
+          data.error_description || data.msg || "Authentication failed",
+        );
+      }
 
-  // Wait for Supabase auth token to land in localStorage
-  await page.waitForFunction(
-    () =>
-      Object.keys(window.localStorage).some((key) =>
-        key.includes("auth-token"),
-      ),
-    { timeout: 10000 },
+      // 2. Set Supabase auth token in localStorage
+      let projectRef = "localhost";
+      try {
+        const hostname = new URL(supabaseUrl).hostname;
+        projectRef = hostname.split(".")[0] || "localhost";
+      } catch {
+        // Ignored
+      }
+      const storageKey = `sb-${projectRef}-auth-token`;
+      window.localStorage.setItem(storageKey, JSON.stringify(data));
+
+      // 3. Set server-side session cookie via /api/auth/session
+      const sessionRes = await fetch(`${appUrl}/api/auth/session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          accessToken: data.access_token,
+          refreshToken: data.refresh_token,
+        }),
+      });
+
+      if (!sessionRes.ok) {
+        throw new Error("Failed to set backend session");
+      }
+    },
+    { email, password, appUrl, supabaseUrl, anonKey },
   );
+
+  // Navigate to /home to confirm the session is active
+  await page.goto(`${appUrl}/home`);
+  await page.waitForURL(/\/home/, { timeout: 30000 });
 }
 
 async function main(): Promise<void> {
