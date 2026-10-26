@@ -10,7 +10,6 @@ import type { UpdateUsernameResponse } from "@app/schemas/v1/user/username";
 import {
   DEFAULT_SWIPE_SETTINGS,
   loadSwipeSettings,
-  SWIPE_SETTINGS_STORAGE_KEY,
   type SwipeSettings,
   updateSwipeSettings as saveSwipeSettings,
 } from "@app/utils/displayStorage";
@@ -104,7 +103,7 @@ export const useSwipeSettings = (): {
     };
 
     const handleStorage = (e: StorageEvent): void => {
-      if (e.key === SWIPE_SETTINGS_STORAGE_KEY || e.key === "curio_settings") {
+      if (e.key === "curio_settings") {
         handleUpdate();
       }
     };

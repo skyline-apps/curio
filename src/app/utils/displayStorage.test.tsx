@@ -3,7 +3,7 @@ import {
   DEFAULT_SWIPE_SETTINGS,
   loadLayoutSettings,
   loadSwipeSettings,
-  SWIPE_SETTINGS_STORAGE_KEY,
+  SETTINGS_STORAGE_KEY,
   SwipeAction,
   updateLayoutSettings,
   updateSwipeSettings,
@@ -22,7 +22,7 @@ describe("displayStorage - Swipe Settings", () => {
     expect(settings.swipeRightAction).toBe(SwipeAction.ARCHIVE);
   });
 
-  it("saves and loads updated swipe settings", () => {
+  it("saves and loads updated swipe settings in curio_settings", () => {
     updateSwipeSettings({
       swipeLeftAction: SwipeAction.MARK_READ,
       swipeRightAction: SwipeAction.FAVORITE,
@@ -32,10 +32,12 @@ describe("displayStorage - Swipe Settings", () => {
     expect(settings.swipeLeftAction).toBe(SwipeAction.MARK_READ);
     expect(settings.swipeRightAction).toBe(SwipeAction.FAVORITE);
 
-    // Verify stored in dedicated key
-    const dedicated = localStorage.getItem(SWIPE_SETTINGS_STORAGE_KEY);
-    expect(dedicated).not.toBeNull();
-    expect(JSON.parse(dedicated!).swipeLeftAction).toBe(SwipeAction.MARK_READ);
+    // Verify stored in curio_settings
+    const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    expect(stored).not.toBeNull();
+    const parsed = JSON.parse(stored!);
+    expect(parsed.swipeLeftAction).toBe(SwipeAction.MARK_READ);
+    expect(parsed.swipeRightAction).toBe(SwipeAction.FAVORITE);
   });
 
   it("partially updates swipe settings without overwriting other keys", () => {
@@ -52,7 +54,7 @@ describe("displayStorage - Swipe Settings", () => {
 
   it("falls back to defaults for invalid action values", () => {
     localStorage.setItem(
-      SWIPE_SETTINGS_STORAGE_KEY,
+      SETTINGS_STORAGE_KEY,
       JSON.stringify({
         swipeLeftAction: "invalid_action_value",
       }),
@@ -64,38 +66,30 @@ describe("displayStorage - Swipe Settings", () => {
     );
   });
 
-  it("loads from legacy curio_settings when dedicated key is not yet present", () => {
-    localStorage.setItem(
-      "curio_settings",
-      JSON.stringify({
-        swipeLeftAction: SwipeAction.FAVORITE,
-        swipeRightAction: SwipeAction.READ_OFFLINE,
-      }),
-    );
-
-    const settings = loadSwipeSettings();
-    expect(settings.swipeLeftAction).toBe(SwipeAction.FAVORITE);
-    expect(settings.swipeRightAction).toBe(SwipeAction.READ_OFFLINE);
-  });
-
-  it("preserves swipe settings when layout settings are updated", () => {
+  it("merges swipe settings and layout settings cleanly in curio_settings", () => {
     updateSwipeSettings({
       swipeRightAction: SwipeAction.READ_OFFLINE,
     });
 
-    // Updating layout settings must not wipe or overwrite swipe settings
+    // Updating layout settings merges with existing swipe settings
     updateLayoutSettings({
       leftSidebarOpen: false,
-      rightSidebarOpen: false,
+      rightSidebarOpen: true,
     });
 
     expect(loadLayoutSettings().leftSidebarOpen).toBe(false);
+    expect(loadLayoutSettings().rightSidebarOpen).toBe(true);
     expect(loadSwipeSettings().swipeRightAction).toBe(SwipeAction.READ_OFFLINE);
+
+    // Verify both are present in the single curio_settings entry
+    const stored = JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY)!);
+    expect(stored.swipeRightAction).toBe(SwipeAction.READ_OFFLINE);
+    expect(stored.leftSidebarOpen).toBe(false);
+    expect(stored.rightSidebarOpen).toBe(true);
   });
 
   it("handles corrupted JSON gracefully without crashing", () => {
-    localStorage.setItem(SWIPE_SETTINGS_STORAGE_KEY, "not_valid_json{{{");
-    localStorage.setItem("curio_settings", "not_valid_json{{{");
+    localStorage.setItem(SETTINGS_STORAGE_KEY, "not_valid_json{{{");
 
     expect(loadSwipeSettings()).toEqual(DEFAULT_SWIPE_SETTINGS);
     expect(loadLayoutSettings()).toEqual(DEFAULT_LAYOUT);

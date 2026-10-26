@@ -31,32 +31,19 @@ export const DEFAULT_LAYOUT: AppLayoutSettings = {
   rightSidebarOpen: false,
 };
 
-export const SWIPE_SETTINGS_STORAGE_KEY = "curio_swipe_settings";
+export const SETTINGS_STORAGE_KEY = "curio_settings";
 
 export function updateSwipeSettings(settings: Partial<SwipeSettings>): void {
   if (typeof window === "undefined") {
     return;
   }
   try {
-    const current = loadSwipeSettings();
-    const updated = { ...current, ...settings };
-    localStorage.setItem(SWIPE_SETTINGS_STORAGE_KEY, JSON.stringify(updated));
-
-    // Also update legacy curio_settings for backwards compatibility
-    const existingLegacy = localStorage.getItem("curio_settings");
-    if (existingLegacy) {
-      try {
-        const parsedLegacy = JSON.parse(existingLegacy);
-        localStorage.setItem(
-          "curio_settings",
-          JSON.stringify({ ...parsedLegacy, ...settings }),
-        );
-      } catch {
-        localStorage.setItem("curio_settings", JSON.stringify(settings));
-      }
-    } else {
-      localStorage.setItem("curio_settings", JSON.stringify(settings));
-    }
+    const existing = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    const parsed = existing ? JSON.parse(existing) : {};
+    localStorage.setItem(
+      SETTINGS_STORAGE_KEY,
+      JSON.stringify({ ...parsed, ...settings }),
+    );
   } catch (error) {
     log.error("Failed to update swipe settings:", error);
   }
@@ -65,28 +52,9 @@ export function updateSwipeSettings(settings: Partial<SwipeSettings>): void {
 export function loadSwipeSettings(): SwipeSettings {
   if (typeof window !== "undefined") {
     try {
-      // Check dedicated storage key first
-      const stored = localStorage.getItem(SWIPE_SETTINGS_STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        return {
-          swipeLeftAction:
-            parsed.swipeLeftAction !== undefined &&
-            Object.values(SwipeAction).includes(parsed.swipeLeftAction)
-              ? parsed.swipeLeftAction
-              : DEFAULT_SWIPE_SETTINGS.swipeLeftAction,
-          swipeRightAction:
-            parsed.swipeRightAction !== undefined &&
-            Object.values(SwipeAction).includes(parsed.swipeRightAction)
-              ? parsed.swipeRightAction
-              : DEFAULT_SWIPE_SETTINGS.swipeRightAction,
-        };
-      }
-
-      // Check legacy curio_settings
-      const legacySettings = localStorage.getItem("curio_settings");
-      if (legacySettings) {
-        const parsed = JSON.parse(legacySettings);
+      const settings = localStorage.getItem(SETTINGS_STORAGE_KEY);
+      if (settings) {
+        const parsed = JSON.parse(settings);
         return {
           swipeLeftAction:
             parsed.swipeLeftAction !== undefined &&
@@ -112,15 +80,12 @@ export function updateLayoutSettings(settings: AppLayoutSettings): void {
     return;
   }
   try {
-    const existingSettings = localStorage.getItem("curio_settings");
-    if (existingSettings) {
-      localStorage.setItem(
-        "curio_settings",
-        JSON.stringify({ ...JSON.parse(existingSettings), ...settings }),
-      );
-    } else {
-      localStorage.setItem("curio_settings", JSON.stringify(settings));
-    }
+    const existingSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    const parsed = existingSettings ? JSON.parse(existingSettings) : {};
+    localStorage.setItem(
+      SETTINGS_STORAGE_KEY,
+      JSON.stringify({ ...parsed, ...settings }),
+    );
   } catch (error) {
     log.error("Failed to update layout settings:", error);
   }
@@ -129,7 +94,7 @@ export function updateLayoutSettings(settings: AppLayoutSettings): void {
 export function loadLayoutSettings(): AppLayoutSettings {
   if (typeof window !== "undefined") {
     try {
-      const settings = localStorage.getItem("curio_settings");
+      const settings = localStorage.getItem(SETTINGS_STORAGE_KEY);
       if (!settings) {
         return DEFAULT_LAYOUT;
       }
