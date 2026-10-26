@@ -12,6 +12,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { existsSync } from "fs";
 import { resolve } from "path";
+// eslint-disable-next-line no-restricted-imports
 import postgres from "postgres";
 
 for (const envPath of [
