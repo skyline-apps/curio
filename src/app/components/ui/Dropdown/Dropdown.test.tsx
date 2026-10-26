@@ -5,7 +5,6 @@ import {
   DropdownTrigger,
 } from "@app/components/ui/Dropdown";
 import { act, fireEvent, render, screen } from "@app/utils/test";
-import React from "react";
 import { describe, expect, it } from "vitest";
 
 describe("Dropdown component", () => {
