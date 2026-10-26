@@ -29,10 +29,18 @@ npm run auth:login            # Authenticates test user headlessly and saves .pl
 npm run screenshot -- --path /home --output screenshots/home.png  # Captures full-page screenshot
 ```
 
+### Useful Commands (from repository root)
+- `npm run dev:watch`: Starts the full local Docker Compose stack and watches for file edits
+- `npm run dev:up`: Starts the local Docker Compose stack in the background
+- `npm run dev:exec`: Shells into the running app container (`curio-app` or `curio-<worktree>-app`)
+- `npm run dev:logs`: Streams logs from stack containers
+- `npm run ports:assign <offset>`: Explicitly updates `.env` with a port offset (`0` for default, `100`, etc.)
+- `npm run env:setup`: Populates `.env` secrets and derives Supabase auth tokens
+
 ### Database migrations
 Create a new database migration by first editing `src/app/api/db/schema.ts`. Then from the `src/app` folder, run `npm run db:generate <MIGRATION_NAME>` and check in the generated files.
 
-Run the migration against your local development database by running `docker exec -it curio bash` and then `npm run db:migrate`.
+Run the migration against your local development database by running `npm run dev:exec` (or `docker exec -it curio-app bash`) and then `npm run db:migrate`.
 
 ### Mobile apps
 First, make sure you build the frontend with the production `.env` populated by running `npm run build` from `src/app`. Then run `npx cap sync` to set up mobile app files.
@@ -82,8 +90,7 @@ Use the `DASHBOARD_USERNAME` and `DASHBOARD_PASSWORD` environment variables to s
 Saved Markdown content can be viewed in the Cloudflare R2 dashboard.
 
 ### Database shell
-1. Run `docker exec -it db bash`.
-2. Then, run `psql -U postgres`.
+1. Run `docker exec -it curio-db psql -U postgres` (or `curio-<worktree>-db` when using a worktree).
 
 To clear the database, run
 1. `docker compose down -v`
