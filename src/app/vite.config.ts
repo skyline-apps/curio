@@ -1,12 +1,30 @@
+/* eslint-disable no-console */
 import { cloudflare } from "@cloudflare/vite-plugin";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import svgr from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 // https://vite.dev/config/
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, __dirname, "");
+
+  let port = 3000;
+  const curioUrl = env.VITE_CURIO_URL || process.env.VITE_CURIO_URL;
+  if (curioUrl) {
+    try {
+      const parsedUrl = new URL(curioUrl);
+      if (parsedUrl.port) {
+        port = parseInt(parsedUrl.port, 10);
+      }
+    } catch (e) {
+      console.error("Failed to parse VITE_CURIO_URL port:", e);
+    }
+  } else if (process.env.PORT || env.PORT) {
+    port = parseInt(process.env.PORT || env.PORT, 10);
+  }
+
   return {
     plugins: [
       svgr({
@@ -23,6 +41,8 @@ export default defineConfig(() => {
       },
     },
     server: {
+      port,
+      host: true,
       fs: {
         strict: true,
         allow: [

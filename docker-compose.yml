@@ -1,4 +1,4 @@
-name: curio
+name: ${COMPOSE_PROJECT_NAME:-curio}
 include:
   - ./docker/supabase.yml
 
@@ -7,7 +7,7 @@ services:
     build:
       context: ./
       dockerfile: ./docker/dev/Dockerfile
-    container_name: dev
+    container_name: ${COMPOSE_PROJECT_NAME:-curio}-dev
     volumes:
       - ./src/infra:/workspace
       - ./docker/volumes/search/init.sh:/data/search/init.sh
@@ -27,11 +27,23 @@ services:
     build:
       context: ./
       dockerfile: ./docker/curio-app/Dockerfile
-    container_name: curio
+    container_name: ${COMPOSE_PROJECT_NAME:-curio}-app
     network_mode: host
     working_dir: /app
+    depends_on:
+      db:
+        condition: service_healthy
     command: >
-      npm run dev
+      sh -c "node -e '
+        const net = require(\"net\");
+        const port = process.env.POSTGRES_PORT || 5432;
+        function check() {
+          const s = net.connect(port, \"127.0.0.1\");
+          s.on(\"connect\", () => { s.destroy(); process.exit(0); });
+          s.on(\"error\", () => { setTimeout(check, 1000); });
+        }
+        check();
+      ' && npm run db:migrate && npm run db:seed && npm run dev"
     volumes:
       - ./.env:/app/.env
       - ./.env:/app/.dev.vars
@@ -51,7 +63,7 @@ services:
           path: ./src/app/package.json
   search:
     image: getmeili/meilisearch:v1.12
-    container_name: search
+    container_name: ${COMPOSE_PROJECT_NAME:-curio}-search
     environment:
       MEILI_ENV: development
       SEARCH_EXTERNAL_ENDPOINT_URL: ${SEARCH_EXTERNAL_ENDPOINT_URL}
@@ -62,7 +74,7 @@ services:
       - /init.sh
       - start
     ports:
-      - 7700:7700
+      - "${SEARCH_PORT:-7700}:7700"
     volumes:
       - ./docker/volumes/search/data:/meili_data
       - ./docker/volumes/search/init.sh:/init.sh

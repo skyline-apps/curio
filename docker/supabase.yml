@@ -1,6 +1,6 @@
 services:
   studio:
-    container_name: supabase-studio
+    container_name: ${COMPOSE_PROJECT_NAME:-curio}-supabase-studio
     image: supabase/studio:20240729-ce42139
     restart: unless-stopped
     healthcheck:
@@ -39,22 +39,22 @@ services:
       # NEXT_ANALYTICS_BACKEND_PROVIDER: bigquery
 
   mail:
-    container_name: supabase-mail
+    container_name: ${COMPOSE_PROJECT_NAME:-curio}-supabase-mail
     image: inbucket/inbucket:3.0.3
     ports:
-      - '2500:2500' # SMTP
-      - '9000:9000' # web interface
-      - '1100:1100' # POP3
+      - '${INBUCKET_SMTP_PORT:-2500}:2500' # SMTP
+      - '${INBUCKET_WEB_PORT:-9000}:9000' # web interface
+      - '${INBUCKET_POP3_PORT:-1100}:1100' # POP3
 
   kong:
-    container_name: supabase-kong
+    container_name: ${COMPOSE_PROJECT_NAME:-curio}-supabase-kong
     image: kong:2.8.1
     restart: unless-stopped
     # https://unix.stackexchange.com/a/294837
     entrypoint: bash -c 'eval "echo \"$$(cat ~/temp.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start'
     ports:
-      - ${KONG_HTTP_PORT}:8000/tcp
-      - ${KONG_HTTPS_PORT}:8443/tcp
+      - ${KONG_HTTP_PORT:-8000}:8000/tcp
+      - ${KONG_HTTPS_PORT:-8443}:8443/tcp
     depends_on:
       analytics:
         condition: service_healthy
@@ -75,7 +75,7 @@ services:
       - ./volumes/api/kong.yml:/home/kong/temp.yml:ro
 
   auth:
-    container_name: supabase-auth
+    container_name: ${COMPOSE_PROJECT_NAME:-curio}-supabase-auth
     image: supabase/gotrue:v2.170.0
     depends_on:
       db:
@@ -136,7 +136,7 @@ services:
       GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}
 
   rest:
-    container_name: supabase-rest
+    container_name: ${COMPOSE_PROJECT_NAME:-curio}-supabase-rest
     image: postgrest/postgrest:v12.2.0
     depends_on:
       db:
@@ -157,7 +157,11 @@ services:
 
   realtime:
     # This container name looks inconsistent but is correct because realtime constructs tenant id by parsing the subdomain
-    container_name: realtime-dev.supabase-realtime
+    container_name: ${COMPOSE_PROJECT_NAME:-curio}-supabase-realtime
+    networks:
+      default:
+        aliases:
+          - realtime-dev.supabase-realtime
     image: supabase/realtime:v2.30.34
     depends_on:
       db:
@@ -201,7 +205,7 @@ services:
 
   # To use S3 backed storage: docker compose -f docker-compose.yml -f docker-compose.s3.yml up
   storage:
-    container_name: supabase-storage
+    container_name: ${COMPOSE_PROJECT_NAME:-curio}-supabase-storage
     image: supabase/storage-api:v1.18.1
     depends_on:
       db:
@@ -244,7 +248,7 @@ services:
       - ./volumes/storage:/var/lib/storage:z
 
   imgproxy:
-    container_name: supabase-imgproxy
+    container_name: ${COMPOSE_PROJECT_NAME:-curio}-supabase-imgproxy
     image: darthsim/imgproxy:v3.8.0
     healthcheck:
       test: [ "CMD", "imgproxy", "health" ]
@@ -260,7 +264,7 @@ services:
       - ./volumes/storage:/var/lib/storage:z
 
   meta:
-    container_name: supabase-meta
+    container_name: ${COMPOSE_PROJECT_NAME:-curio}-supabase-meta
     image: supabase/postgres-meta:v0.83.2
     depends_on:
       db:
@@ -278,7 +282,7 @@ services:
       PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD}
 
   functions:
-    container_name: supabase-edge-functions
+    container_name: ${COMPOSE_PROJECT_NAME:-curio}-supabase-edge-functions
     image: supabase/edge-runtime:v1.58.2
     restart: unless-stopped
     depends_on:
@@ -300,7 +304,7 @@ services:
       - /home/deno/functions/main
 
   analytics:
-    container_name: supabase-analytics
+    container_name: ${COMPOSE_PROJECT_NAME:-curio}-supabase-analytics
     image: supabase/logflare:1.4.0
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:4000/health" ]
@@ -339,10 +343,10 @@ services:
       # GOOGLE_PROJECT_ID: ${GOOGLE_PROJECT_ID}
       # GOOGLE_PROJECT_NUMBER: ${GOOGLE_PROJECT_NUMBER}
     ports:
-      - 4000:4000
+      - ${LOGFLARE_PORT:-4000}:4000
 
   db:
-    container_name: db
+    container_name: ${COMPOSE_PROJECT_NAME:-curio}-db
     image: supabase/postgres:15.1.1.78
     healthcheck:
       test: pg_isready -U postgres -h localhost
@@ -389,7 +393,7 @@ services:
       - db-config:/etc/postgresql-custom
 
   vector:
-    container_name: supabase-vector
+    container_name: ${COMPOSE_PROJECT_NAME:-curio}-supabase-vector
     image: timberio/vector:0.28.1-alpine
     healthcheck:
       test:
