@@ -105,10 +105,15 @@ export const ItemsProvider: React.FC<ItemsProviderProps> = ({
         }
         setCurrentOptions(options);
       }
+      const isOnline = typeof navigator === "undefined" || navigator.onLine;
       if (refresh) {
-        await refetch();
+        if (isOnline) {
+          await refetch();
+        }
       } else if (hasNextPage) {
-        await fetchNextPage();
+        if (isOnline) {
+          await fetchNextPage();
+        }
       }
     },
     [refetch, fetchNextPage, hasNextPage, currentOptions?.filters?.state],

@@ -1,11 +1,28 @@
 import { useItemUpdate } from "@app/components/Items/ItemActions/actions";
-import { type Item } from "@app/providers/Items";
+import { BrowserMessageProvider } from "@app/providers/BrowserMessage/provider";
+import { CacheProvider } from "@app/providers/Cache/provider";
+import { CurrentItemProvider } from "@app/providers/CurrentItem/provider";
+import {
+  type Item,
+  ITEMS_QUERY_KEY,
+  type ItemsPage,
+} from "@app/providers/Items";
+import { ItemsProvider } from "@app/providers/Items/provider";
+import { SettingsProvider } from "@app/providers/Settings/provider";
+import { ToastProvider } from "@app/providers/Toast/provider";
+import { UserProvider } from "@app/providers/User/provider";
 import { ItemSource, ItemState, TextDirection } from "@app/schemas/db";
 import { OfflineError } from "@app/utils/api";
 import { clearOfflineQueue, getOfflineQueue } from "@app/utils/offlineQueue";
 import { act, renderHook } from "@app/utils/test";
 import { AllProviders } from "@app/utils/test/component";
-import { onlineManager } from "@tanstack/react-query";
+import {
+  InfiniteData,
+  onlineManager,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockAuthenticatedFetch = vi.fn();
@@ -236,5 +253,90 @@ describe("useItemUpdate offline actions", () => {
     expect(queue).toHaveLength(2);
     expect(queue[1].type).toBe("remove_item_label");
     expect(queue[1].method).toBe("DELETE");
+  });
+
+  it("optimistically moves item to archive query cache when archiving offline", async () => {
+    Object.defineProperty(navigator, "onLine", {
+      value: false,
+      configurable: true,
+    });
+    onlineManager.setOnline(false);
+
+    const testClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+      },
+    });
+
+    const activeKey = [
+      ITEMS_QUERY_KEY,
+      JSON.stringify({ filters: { state: "active" } }),
+    ];
+    const archiveKey = [
+      ITEMS_QUERY_KEY,
+      JSON.stringify({ filters: { state: "archived" } }),
+    ];
+
+    testClient.setQueryData<InfiniteData<ItemsPage>>(activeKey, {
+      pageParams: [undefined],
+      pages: [
+        {
+          items: [mockItem],
+          total: 1,
+        },
+      ],
+    });
+
+    const customWrapper = ({
+      children,
+    }: {
+      children: React.ReactNode;
+    }): React.ReactElement => (
+      <QueryClientProvider client={testClient}>
+        <UserProvider>
+          <SettingsProvider>
+            <ToastProvider>
+              <ItemsProvider>
+                <CurrentItemProvider>
+                  <CacheProvider>
+                    <BrowserMessageProvider>{children}</BrowserMessageProvider>
+                  </CacheProvider>
+                </CurrentItemProvider>
+              </ItemsProvider>
+            </ToastProvider>
+          </SettingsProvider>
+        </UserProvider>
+      </QueryClientProvider>
+    );
+
+    const { result } = renderHook(() => useItemUpdate(), {
+      wrapper: customWrapper,
+    });
+
+    await act(async () => {
+      await result.current.updateItemsState(
+        ["article-slug"],
+        ItemState.ARCHIVED,
+      );
+    });
+
+    // Check that it was removed from active query
+    const activeData =
+      testClient.getQueryData<InfiniteData<ItemsPage>>(activeKey);
+    expect(activeData?.pages[0].items).toHaveLength(0);
+
+    // Check that it was added to archive query with ARCHIVED state
+    const archiveData =
+      testClient.getQueryData<InfiniteData<ItemsPage>>(archiveKey);
+    expect(archiveData?.pages[0].items).toHaveLength(1);
+    expect(archiveData?.pages[0].items[0].slug).toBe("article-slug");
+    expect(archiveData?.pages[0].items[0].metadata.state).toBe(
+      ItemState.ARCHIVED,
+    );
+
+    // Also verify queued offline action
+    const queue = await getOfflineQueue();
+    expect(queue).toHaveLength(1);
+    expect(queue[0].type).toBe("update_item_state");
   });
 });

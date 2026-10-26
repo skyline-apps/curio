@@ -52,7 +52,7 @@ interface UseItemUpdate {
 }
 
 export const useItemUpdate = (): UseItemUpdate => {
-  const { invalidateCache, optimisticUpdateItems, optimisticRemoveItems } =
+  const { invalidateCache, optimisticUpdateItems, optimisticMoveItemState } =
     useCache();
   const { clearSelectedItems, loadedItem } = useContext(CurrentItemContext);
   const { saveItemContent } = useContext(BrowserMessageContext);
@@ -65,14 +65,7 @@ export const useItemUpdate = (): UseItemUpdate => {
   > = {
     networkMode: "always",
     mutationFn: async ({ itemSlugs, state }) => {
-      const newItems = itemSlugs.map((slug) => ({
-        slug,
-        metadata: {
-          state,
-        },
-      }));
-      optimisticUpdateItems(newItems);
-      optimisticRemoveItems(itemSlugs);
+      optimisticMoveItemState(itemSlugs, state);
 
       return await executeOrQueueOfflineAction({
         action: {
