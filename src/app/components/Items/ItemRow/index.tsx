@@ -137,7 +137,11 @@ const ItemRow: React.FC<ItemRowProps> = ({
         if (isSavedOffline) {
           removeArticleOffline(item.slug);
         } else {
-          await downloadArticleOffline(item.slug);
+          try {
+            await downloadArticleOffline(item.slug);
+          } catch {
+            // Toast and logging handled in downloadArticleOffline
+          }
         }
         break;
       case SwipeAction.NONE:

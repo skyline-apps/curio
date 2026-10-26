@@ -81,9 +81,12 @@ const ActionButton = <T,>({
   activeClassName,
 }: ActionButtonProps<T>): React.ReactNode => {
   const onPress = useCallback(async () => {
-    await action().then(async () => {
+    try {
+      await action();
       onActionSuccess?.();
-    });
+    } catch {
+      // Errors are handled/displayed by the action itself
+    }
   }, [action, onActionSuccess]);
 
   const display = isActive ? activeDisplay || defaultDisplay : defaultDisplay;

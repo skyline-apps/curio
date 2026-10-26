@@ -166,19 +166,17 @@ describe("useOfflineArticle hook", () => {
       wrapper,
     });
 
-    let success = true;
     await act(async () => {
-      success = await result.current.downloadArticleOffline();
+      await expect(result.current.downloadArticleOffline()).rejects.toThrow();
     });
 
-    expect(success).toBe(false);
     expect(mockShowToast).toHaveBeenCalledWith(
       "Cannot download article while offline.",
       { type: "error" },
     );
   });
 
-  it("shows generic error toast when download fails with unexpected error", async () => {
+  it("shows error toast with message when download fails with unexpected error", async () => {
     const { authenticatedFetch } = await import("@app/utils/api");
     vi.mocked(authenticatedFetch).mockRejectedValueOnce(
       new Error("Server error 500"),
@@ -188,14 +186,61 @@ describe("useOfflineArticle hook", () => {
       wrapper,
     });
 
-    let success = true;
     await act(async () => {
-      success = await result.current.downloadArticleOffline();
+      await expect(result.current.downloadArticleOffline()).rejects.toThrow(
+        "Server error 500",
+      );
     });
 
-    expect(success).toBe(false);
+    expect(mockShowToast).toHaveBeenCalledWith("Server error 500", {
+      type: "error",
+    });
+  });
+
+  it("throws offline error when trying to download while offline", async () => {
+    const { onlineManager } = await import("@tanstack/react-query");
+    onlineManager.setOnline(false);
+
+    const { result } = renderHook(() => useOfflineArticle("offline-slug"), {
+      wrapper,
+    });
+
+    await act(async () => {
+      await expect(result.current.downloadArticleOffline()).rejects.toThrow(
+        "Cannot download article while offline.",
+      );
+    });
+
     expect(mockShowToast).toHaveBeenCalledWith(
-      "Failed to download article for offline reading.",
+      "Cannot download article while offline.",
+      { type: "error" },
+    );
+
+    onlineManager.setOnline(true);
+  });
+
+  it("throws error and shows toast when article content is empty", async () => {
+    const { authenticatedFetch } = await import("@app/utils/api");
+    vi.mocked(authenticatedFetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        ...mockItemData,
+        content: null,
+      }),
+    } as unknown as Response);
+
+    const { result } = renderHook(() => useOfflineArticle("offline-slug"), {
+      wrapper,
+    });
+
+    await act(async () => {
+      await expect(result.current.downloadArticleOffline()).rejects.toThrow(
+        "Article content is unavailable",
+      );
+    });
+
+    expect(mockShowToast).toHaveBeenCalledWith(
+      "Article content is unavailable",
       { type: "error" },
     );
   });

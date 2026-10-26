@@ -8,6 +8,7 @@ import {
   authenticatedFetch,
   handleAPIResponse,
   isOfflineError,
+  OfflineError,
 } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
 import { onlineManager, useQueryClient } from "@tanstack/react-query";
@@ -57,11 +58,13 @@ export const fetchItemContent = async (
     },
   ).then(handleAPIResponse<GetItemContentResponse>);
 
-  if (!result || "error" in result) {
+  if (!result || "error" in result || !result.content) {
     throw new Error(
       result && "error" in result && typeof result.error === "string"
         ? result.error
-        : "Failed to fetch item content",
+        : !result?.content
+          ? "Article content is unavailable"
+          : "Failed to fetch item content",
     );
   }
   return result;
@@ -113,7 +116,7 @@ export function useOfflineArticle(slug?: string): UseOfflineArticleReturn {
         showToast("Cannot download article while offline.", {
           type: "error",
         });
-        return false;
+        throw new OfflineError("Cannot download article while offline.");
       }
 
       try {
@@ -131,11 +134,16 @@ export function useOfflineArticle(slug?: string): UseOfflineArticleReturn {
             type: "error",
           });
         } else {
-          showToast("Failed to download article for offline reading.", {
-            type: "error",
-          });
+          showToast(
+            error instanceof Error && error.message
+              ? error.message
+              : "Failed to download article for offline reading.",
+            {
+              type: "error",
+            },
+          );
         }
-        return false;
+        throw error;
       }
     },
     [queryClient, slug, showToast, isOnline],

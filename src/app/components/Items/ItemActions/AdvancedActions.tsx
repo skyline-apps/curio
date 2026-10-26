@@ -49,14 +49,24 @@ export const AdvancedActions: React.FC<AdvancedActionsProps> = ({
         {isSavedOffline ? (
           <DropdownItem
             key="remove-offline"
-            onPress={() => removeArticleOffline(item.slug)}
+            onPress={() => {
+              removeArticleOffline(item.slug);
+              onItemActionSuccess?.();
+            }}
           >
             Remove from offline
           </DropdownItem>
         ) : (
           <DropdownItem
             key="read-offline"
-            onPress={() => void downloadArticleOffline(item.slug)}
+            onPress={async () => {
+              try {
+                await downloadArticleOffline(item.slug);
+                onItemActionSuccess?.();
+              } catch {
+                // Toast and logging handled in downloadArticleOffline
+              }
+            }}
           >
             Read offline
           </DropdownItem>
