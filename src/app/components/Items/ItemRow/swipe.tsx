@@ -4,6 +4,7 @@ import { SwipeAction } from "@app/utils/displayStorage";
 import React from "react";
 import {
   HiArchiveBox,
+  HiArrowDownTray,
   HiCheck,
   HiOutlineArchiveBox,
   HiOutlineEnvelope,
@@ -26,6 +27,7 @@ export interface SwipeActionDetails {
 export function getSwipeActionDetails(
   action: SwipeAction,
   item: Item,
+  isSavedOffline?: boolean,
 ): SwipeActionDetails | null {
   const isRead = item.metadata.lastReadAt !== null;
   const isArchived = item.metadata.state === ItemState.ARCHIVED;
@@ -80,6 +82,14 @@ export function getSwipeActionDetails(
         ),
         bgColor: "bg-warning",
         textColor: "text-warning-foreground",
+      };
+    case SwipeAction.READ_OFFLINE:
+      return {
+        action,
+        label: isSavedOffline ? "Remove offline" : "Read offline",
+        icon: <HiArrowDownTray className="text-xl shrink-0" />,
+        bgColor: "bg-secondary dark:bg-secondary-700",
+        textColor: "text-white",
       };
     case SwipeAction.NONE:
     default:

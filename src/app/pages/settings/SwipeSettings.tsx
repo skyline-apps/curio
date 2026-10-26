@@ -28,6 +28,10 @@ const SWIPE_ACTION_OPTIONS = [
     label: "Favorite / unfavorite",
   },
   {
+    value: SwipeAction.READ_OFFLINE,
+    label: "Read offline",
+  },
+  {
     value: SwipeAction.NONE,
     label: "None (disabled)",
   },
@@ -73,6 +77,9 @@ const SwipeSettings: React.FC = () => {
     value: string,
   ): void => {
     const action = value as SwipeAction;
+    if (!Object.values(SwipeAction).includes(action)) {
+      return;
+    }
     updateSwipeSettings({ [direction]: action });
     showToast("Swipe settings saved.", {
       disappearing: true,
@@ -82,35 +89,64 @@ const SwipeSettings: React.FC = () => {
 
   const handleSampleAction = (action: SwipeAction): void => {
     let actionName = "";
+    switch (action) {
+      case SwipeAction.ARCHIVE:
+        actionName =
+          sampleItem.metadata.state !== ItemState.ARCHIVED
+            ? "Archived"
+            : "Unarchived";
+        break;
+      case SwipeAction.DELETE:
+        actionName =
+          sampleItem.metadata.state !== ItemState.DELETED
+            ? "Deleted"
+            : "Restored";
+        break;
+      case SwipeAction.MARK_READ:
+        actionName =
+          sampleItem.metadata.lastReadAt === null
+            ? "Marked as read"
+            : "Marked as unread";
+        break;
+      case SwipeAction.FAVORITE:
+        actionName = !sampleItem.metadata.isFavorite
+          ? "Favorited"
+          : "Unfavorited";
+        break;
+      case SwipeAction.READ_OFFLINE:
+        actionName = "Read offline";
+        break;
+      case SwipeAction.NONE:
+      default:
+        actionName = "None";
+        break;
+    }
+
     setSampleItem((prev) => {
       const next = { ...prev, metadata: { ...prev.metadata } };
       switch (action) {
         case SwipeAction.ARCHIVE:
-          const willArchive = next.metadata.state !== ItemState.ARCHIVED;
-          next.metadata.state = willArchive
-            ? ItemState.ARCHIVED
-            : ItemState.ACTIVE;
-          actionName = willArchive ? "Archived" : "Unarchived";
+          next.metadata.state =
+            next.metadata.state !== ItemState.ARCHIVED
+              ? ItemState.ARCHIVED
+              : ItemState.ACTIVE;
           break;
         case SwipeAction.DELETE:
-          const willDelete = next.metadata.state !== ItemState.DELETED;
-          next.metadata.state = willDelete
-            ? ItemState.DELETED
-            : ItemState.ACTIVE;
-          actionName = willDelete ? "Deleted" : "Restored";
+          next.metadata.state =
+            next.metadata.state !== ItemState.DELETED
+              ? ItemState.DELETED
+              : ItemState.ACTIVE;
           break;
         case SwipeAction.MARK_READ:
-          const willRead = next.metadata.lastReadAt === null;
-          next.metadata.lastReadAt = willRead ? new Date().toISOString() : null;
-          actionName = willRead ? "Marked as read" : "Marked as unread";
+          next.metadata.lastReadAt =
+            next.metadata.lastReadAt === null ? new Date().toISOString() : null;
           break;
         case SwipeAction.FAVORITE:
           next.metadata.isFavorite = !next.metadata.isFavorite;
-          actionName = next.metadata.isFavorite ? "Favorited" : "Unfavorited";
           break;
+        case SwipeAction.READ_OFFLINE:
         case SwipeAction.NONE:
         default:
-          actionName = "None";
           break;
       }
       return next;
@@ -127,7 +163,7 @@ const SwipeSettings: React.FC = () => {
       >
         <Select
           aria-label="Swipe right"
-          selectedKeys={[swipeSettings.swipeRightAction]}
+          selectedKeys={new Set([swipeSettings.swipeRightAction])}
           onChange={(e) => {
             const val = e.target.value as SwipeAction;
             if (val && val !== swipeSettings.swipeRightAction) {
@@ -162,7 +198,7 @@ const SwipeSettings: React.FC = () => {
       >
         <Select
           aria-label="Swipe left"
-          selectedKeys={[swipeSettings.swipeLeftAction]}
+          selectedKeys={new Set([swipeSettings.swipeLeftAction])}
           onChange={(e) => {
             const val = e.target.value as SwipeAction;
             if (val && val !== swipeSettings.swipeLeftAction) {

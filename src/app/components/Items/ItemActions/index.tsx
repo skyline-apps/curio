@@ -1,3 +1,4 @@
+import { useOfflineArticle } from "@app/components/Items/useOfflineArticle";
 import Button from "@app/components/ui/Button";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { Item } from "@app/providers/Items";
@@ -6,7 +7,9 @@ import { cn } from "@app/utils/cn";
 import { useCallback, useContext } from "react";
 import {
   HiArchiveBox,
+  HiArrowDownCircle,
   HiOutlineArchiveBox,
+  HiOutlineArrowDownCircle,
   HiOutlineShare,
   HiOutlineStar,
   HiOutlineTrash,
@@ -28,6 +31,39 @@ interface ActionButtonProps<T> {
   isActive?: boolean;
   isLoading?: boolean;
   onActionSuccess?: () => void;
+  "data-testid"?: string;
+  variant?:
+    | "solid"
+    | "bordered"
+    | "light"
+    | "flat"
+    | "faded"
+    | "shadow"
+    | "ghost";
+  activeVariant?:
+    | "solid"
+    | "bordered"
+    | "light"
+    | "flat"
+    | "faded"
+    | "shadow"
+    | "ghost";
+  color?:
+    | "default"
+    | "primary"
+    | "secondary"
+    | "success"
+    | "warning"
+    | "danger";
+  activeColor?:
+    | "default"
+    | "primary"
+    | "secondary"
+    | "success"
+    | "warning"
+    | "danger";
+  className?: string;
+  activeClassName?: string;
 }
 const ActionButton = <T,>({
   action,
@@ -36,25 +72,42 @@ const ActionButton = <T,>({
   isActive,
   isLoading,
   onActionSuccess,
+  "data-testid": dataTestId,
+  variant = "faded",
+  activeVariant,
+  color,
+  activeColor,
+  className,
+  activeClassName,
 }: ActionButtonProps<T>): React.ReactNode => {
   const onPress = useCallback(async () => {
-    await action().then(async () => {
+    try {
+      await action();
       onActionSuccess?.();
-    });
+    } catch {
+      // Errors are handled/displayed by the action itself
+    }
   }, [action, onActionSuccess]);
+
+  const display = isActive ? activeDisplay || defaultDisplay : defaultDisplay;
+  const currentVariant = isActive && activeVariant ? activeVariant : variant;
+  const currentColor = isActive && activeColor ? activeColor : color;
 
   return (
     <Button
       isIconOnly
-      variant="faded"
+      variant={currentVariant}
+      color={currentColor}
       size="sm"
       onPress={onPress}
       isLoading={isLoading}
-      tooltip={
-        isActive ? (activeDisplay || defaultDisplay).text : defaultDisplay.text
-      }
+      aria-label={display.text}
+      tooltip={display.text}
+      data-testid={dataTestId}
+      data-active={isActive ? "true" : undefined}
+      className={cn(className, isActive && activeClassName)}
     >
-      {isActive ? (activeDisplay || defaultDisplay).icon : defaultDisplay.icon}
+      {display.icon}
     </Button>
   );
 };
@@ -63,17 +116,21 @@ interface ItemActionsProps {
   className?: string;
   item?: Item;
   showExpanded?: boolean;
+  showOffline?: boolean;
   onItemActionSuccess?: () => void;
 }
 
 const ItemActions = ({
   item,
   showExpanded,
+  showOffline = !showExpanded,
   className,
   onItemActionSuccess,
 }: ItemActionsProps): React.ReactElement => {
   const { updateItemsState, updateItemsFavorite, shareItem } = useItemUpdate();
   const { clearSelectedItems } = useContext(CurrentItemContext);
+  const { isSavedOffline, downloadArticleOffline, removeArticleOffline } =
+    useOfflineArticle(item?.slug);
 
   if (!item) {
     return <></>;
@@ -88,6 +145,7 @@ const ItemActions = ({
         defaultDisplay={{ text: "Favorite", icon: <HiOutlineStar /> }}
         activeDisplay={{ text: "Unfavorite", icon: <HiStar /> }}
         isActive={item.metadata.isFavorite}
+        data-testid="item-action-favorite"
       />
       <ActionButton
         action={async () => {
@@ -103,7 +161,29 @@ const ItemActions = ({
         activeDisplay={{ text: "Unarchive", icon: <HiArchiveBox /> }}
         isActive={item.metadata.state === ItemState.ARCHIVED}
         onActionSuccess={onItemActionSuccess}
+        data-testid="item-action-archive"
       />
+      {showOffline && (
+        <ActionButton
+          action={async () => {
+            if (isSavedOffline) {
+              removeArticleOffline(item.slug);
+            } else {
+              await downloadArticleOffline(item.slug);
+            }
+          }}
+          defaultDisplay={{
+            text: "Read offline",
+            icon: <HiOutlineArrowDownCircle />,
+          }}
+          activeDisplay={{
+            text: "Remove from offline",
+            icon: <HiArrowDownCircle />,
+          }}
+          isActive={isSavedOffline}
+          data-testid="item-action-read-offline"
+        />
+      )}
       {showExpanded && (
         <>
           <ActionButton
@@ -120,10 +200,12 @@ const ItemActions = ({
             activeDisplay={{ text: "Restore", icon: <HiTrash /> }}
             isActive={item.metadata.state === ItemState.DELETED}
             onActionSuccess={onItemActionSuccess}
+            data-testid="item-action-delete"
           />
           <ActionButton
             action={async () => shareItem(item)}
             defaultDisplay={{ text: "Share", icon: <HiOutlineShare /> }}
+            data-testid="item-action-share"
           />
         </>
       )}

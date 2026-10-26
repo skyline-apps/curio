@@ -1,16 +1,11 @@
+import { fetchItemContent } from "@app/components/Items/useOfflineArticle";
 import { useAppLayout } from "@app/providers/AppLayout";
 import { Item, ItemsContext, PublicItem } from "@app/providers/Items";
 import { useToast } from "@app/providers/Toast";
 import { ItemState } from "@app/schemas/db";
 import { type Highlight } from "@app/schemas/v1/items/highlights";
 import { PremiumItemSummaryResponse } from "@app/schemas/v1/premium/item/summary";
-import { GetItemContentResponse } from "@app/schemas/v1/public/items/content";
-import {
-  authenticatedFetch,
-  authenticatedStreamFetch,
-  handleAPIResponse,
-  isOfflineError,
-} from "@app/utils/api";
+import { authenticatedStreamFetch, isOfflineError } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
 import { useQuery } from "@tanstack/react-query";
 import React, {
@@ -168,30 +163,17 @@ export const CurrentItemProvider: React.FC<CurrentItemProviderProps> = ({
       queryKey: [ITEM_CONTENT_QUERY_KEY, itemLoadedSlug],
       queryFn: async (): Promise<ItemWithContent> => {
         if (!itemLoadedSlug) throw new Error("No item to fetch");
-        const searchParams = new URLSearchParams({
-          slug: itemLoadedSlug,
-        });
-        const result = await authenticatedFetch(
-          `/api/v1/public/items/content?${searchParams.toString()}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          },
-        ).then(handleAPIResponse<GetItemContentResponse>);
-        if (!result || "error" in result) {
-          log.error(
-            `Failed to fetch item content for ${itemLoadedSlug}`,
-            result?.error,
-          );
-          throw new Error(`Failed to fetch item content`);
+        try {
+          const result = await fetchItemContent(itemLoadedSlug);
+          if (result) {
+            setCurrentPreviewItem(null);
+            maybeOpenSidebar();
+          }
+          return result;
+        } catch (err) {
+          log.error(`Failed to fetch item content for ${itemLoadedSlug}`, err);
+          throw err;
         }
-        if (result) {
-          setCurrentPreviewItem(null);
-          maybeOpenSidebar();
-        }
-        return result;
       },
     });
 

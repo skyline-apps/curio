@@ -34,6 +34,22 @@ describe("SwipeSettings component", () => {
     expect(screen.getByText("Interactive swipe preview")).toBeInTheDocument();
   });
 
+  it("renders with saved swipe settings from localStorage", () => {
+    localStorage.setItem(
+      "curio_settings",
+      JSON.stringify({
+        swipeRightAction: SwipeAction.MARK_READ,
+        swipeLeftAction: SwipeAction.FAVORITE,
+      }),
+    );
+
+    const { container } = renderComponent();
+
+    const selectElements = container.querySelectorAll("select");
+    expect(selectElements[0].value).toBe(SwipeAction.MARK_READ);
+    expect(selectElements[1].value).toBe(SwipeAction.FAVORITE);
+  });
+
   it("allows selecting a new swipe right action", () => {
     const { container } = renderComponent();
 
@@ -66,6 +82,30 @@ describe("SwipeSettings component", () => {
     expect(settings.swipeLeftAction).toBe(SwipeAction.ARCHIVE);
   });
 
+  it("allows selecting READ_OFFLINE and triggers it in the interactive preview", () => {
+    const { container } = renderComponent();
+
+    const selectElements = container.querySelectorAll("select");
+    act(() => {
+      fireEvent.change(selectElements[0], {
+        target: { value: SwipeAction.READ_OFFLINE },
+      });
+    });
+
+    const settings = loadSwipeSettings();
+    expect(settings.swipeRightAction).toBe(SwipeAction.READ_OFFLINE);
+
+    const card = screen.getByTestId("item-row-card-swipe-preview-item");
+    act(() => {
+      fireEvent.touchStart(card!, { touches: [{ clientX: 50, clientY: 50 }] });
+      fireEvent.touchMove(card!, { touches: [{ clientX: 160, clientY: 50 }] });
+      fireEvent.touchEnd(card!);
+    });
+
+    const feedback = screen.getByTestId("swipe-preview-feedback");
+    expect(feedback).toHaveTextContent("Triggered: Read offline");
+  });
+
   it("does not render removed swipe helper text or reset buttons", () => {
     renderComponent();
 
@@ -95,5 +135,35 @@ describe("SwipeSettings component", () => {
     expect(screen.getByTestId("swipe-preview-feedback")).toHaveTextContent(
       "Triggered: Archived",
     );
+  });
+
+  it("persists saved swipe settings across page refresh / remount", () => {
+    // 1. Initial render
+    const { container, unmount } = renderComponent();
+    const selectElements = container.querySelectorAll("select");
+
+    // 2. User changes swipe settings
+    act(() => {
+      fireEvent.change(selectElements[0], {
+        target: { value: SwipeAction.READ_OFFLINE },
+      });
+      fireEvent.change(selectElements[1], {
+        target: { value: SwipeAction.NONE },
+      });
+    });
+
+    expect(loadSwipeSettings().swipeRightAction).toBe(SwipeAction.READ_OFFLINE);
+    expect(loadSwipeSettings().swipeLeftAction).toBe(SwipeAction.NONE);
+
+    // 3. User unmounts / refreshes page
+    unmount();
+
+    // 4. Component mounts again on refresh
+    const { container: refreshedContainer } = renderComponent();
+    const refreshedSelects = refreshedContainer.querySelectorAll("select");
+
+    expect(refreshedSelects[0].value).toBe(SwipeAction.READ_OFFLINE);
+    expect(refreshedSelects[1].value).toBe(SwipeAction.NONE);
+    expect(loadSwipeSettings().swipeRightAction).toBe(SwipeAction.READ_OFFLINE);
   });
 });

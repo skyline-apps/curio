@@ -13,7 +13,13 @@ import {
   type SwipeSettings,
   updateSwipeSettings as saveSwipeSettings,
 } from "@app/utils/displayStorage";
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 export type SettingsContextType = {
   username: string;
@@ -47,7 +53,7 @@ export type SettingsContextType = {
   updateSwipeSettings: (settings: Partial<SwipeSettings>) => void;
 };
 
-export const SettingsContext = createContext<SettingsContextType>({
+export const DEFAULT_SETTINGS_CONTEXT: SettingsContextType = {
   username: "",
   refreshProfile: () => Promise.resolve(),
   newsletterEmail: null,
@@ -65,46 +71,76 @@ export const SettingsContext = createContext<SettingsContextType>({
   dismissUpgradeBanner: async () => {},
   swipeSettings: DEFAULT_SWIPE_SETTINGS,
   updateSwipeSettings: () => {},
-});
+};
+
+export const SettingsContext = createContext<SettingsContextType>(
+  DEFAULT_SETTINGS_CONTEXT,
+);
 export const useSettings = (): SettingsContextType =>
   useContext(SettingsContext);
+
+export const SWIPE_SETTINGS_CHANGE_EVENT = "curio_swipe_settings_changed";
 
 export const useSwipeSettings = (): {
   swipeSettings: SwipeSettings;
   updateSwipeSettings: (settings: Partial<SwipeSettings>) => void;
 } => {
   const context = useContext(SettingsContext);
-  const [localSettings, setLocalSettings] = useState<SwipeSettings>(
-    () => context?.swipeSettings || loadSwipeSettings(),
+  const isInsideCustomProvider =
+    context !== null && context !== DEFAULT_SETTINGS_CONTEXT;
+
+  const [standaloneSettings, setStandaloneSettings] = useState<SwipeSettings>(
+    () => loadSwipeSettings(),
   );
 
   useEffect(() => {
-    if (context?.swipeSettings) {
-      setLocalSettings(context.swipeSettings);
+    if (isInsideCustomProvider) {
+      return;
     }
-  }, [context?.swipeSettings]);
 
-  useEffect(() => {
+    const handleUpdate = (): void => {
+      setStandaloneSettings(loadSwipeSettings());
+    };
+
     const handleStorage = (e: StorageEvent): void => {
       if (e.key === "curio_settings") {
-        setLocalSettings(loadSwipeSettings());
+        handleUpdate();
       }
     };
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
-  }, []);
 
-  const update = (settings: Partial<SwipeSettings>): void => {
-    if (context?.updateSwipeSettings) {
-      context.updateSwipeSettings(settings);
-    } else {
+    window.addEventListener(SWIPE_SETTINGS_CHANGE_EVENT, handleUpdate);
+    window.addEventListener("storage", handleStorage);
+    return () => {
+      window.removeEventListener(SWIPE_SETTINGS_CHANGE_EVENT, handleUpdate);
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, [isInsideCustomProvider]);
+
+  const standaloneUpdate = useCallback(
+    (settings: Partial<SwipeSettings>): void => {
       saveSwipeSettings(settings);
-      setLocalSettings(loadSwipeSettings());
-    }
-  };
+      setStandaloneSettings(loadSwipeSettings());
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent(SWIPE_SETTINGS_CHANGE_EVENT));
+      }
+    },
+    [],
+  );
+
+  if (isInsideCustomProvider) {
+    return {
+      swipeSettings: context.swipeSettings,
+      updateSwipeSettings: (settings: Partial<SwipeSettings>) => {
+        context.updateSwipeSettings(settings);
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent(SWIPE_SETTINGS_CHANGE_EVENT));
+        }
+      },
+    };
+  }
 
   return {
-    swipeSettings: context?.swipeSettings || localSettings,
-    updateSwipeSettings: update,
+    swipeSettings: standaloneSettings,
+    updateSwipeSettings: standaloneUpdate,
   };
 };

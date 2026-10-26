@@ -1,6 +1,7 @@
 import Favicon from "@app/components/Image/Favicon";
 import ItemActions from "@app/components/Items/ItemActions";
 import { useItemUpdate } from "@app/components/Items/ItemActions/actions";
+import { useOfflineArticle } from "@app/components/Items/useOfflineArticle";
 import Labels from "@app/components/Labels";
 import Markdown from "@app/components/Markdown";
 import Icon from "@app/components/ui/Icon";
@@ -10,6 +11,7 @@ import { useSwipeSettings } from "@app/providers/Settings";
 import { useToast } from "@app/providers/Toast";
 import { ItemSource, ItemState } from "@app/schemas/db";
 import { FALLBACK_HOSTNAME } from "@app/schemas/types";
+import { cn } from "@app/utils/cn";
 import { SwipeAction } from "@app/utils/displayStorage";
 import React, { useContext, useRef, useState } from "react";
 import { HiCheck, HiOutlineEnvelope } from "react-icons/hi2";
@@ -45,6 +47,12 @@ const ItemRow: React.FC<ItemRowProps> = ({
     useItemUpdate();
   const { swipeSettings } = useSwipeSettings();
   const { showToast } = useToast();
+  const {
+    isSavedOffline,
+    isUnavailableOffline,
+    downloadArticleOffline,
+    removeArticleOffline,
+  } = useOfflineArticle(item.slug);
 
   const [translateX, setTranslateX] = useState<number>(0);
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -70,10 +78,12 @@ const ItemRow: React.FC<ItemRowProps> = ({
   const rightActionDetails: SwipeActionDetails | null = getSwipeActionDetails(
     swipeSettings.swipeRightAction,
     item,
+    isSavedOffline,
   );
   const leftActionDetails: SwipeActionDetails | null = getSwipeActionDetails(
     swipeSettings.swipeLeftAction,
     item,
+    isSavedOffline,
   );
 
   const executeSwipeAction = async (action: SwipeAction): Promise<void> => {
@@ -122,6 +132,17 @@ const ItemRow: React.FC<ItemRowProps> = ({
             disappearing: true,
           },
         );
+        break;
+      case SwipeAction.READ_OFFLINE:
+        if (isSavedOffline) {
+          removeArticleOffline(item.slug);
+        } else {
+          try {
+            await downloadArticleOffline(item.slug);
+          } catch {
+            // Toast and logging handled in downloadArticleOffline
+          }
+        }
         break;
       case SwipeAction.NONE:
       default:
@@ -288,8 +309,13 @@ const ItemRow: React.FC<ItemRowProps> = ({
 
       {/* Foreground item card */}
       <div
-        className="w-full h-full group flex flex-row bg-background-400 pl-4 pr-1 py-1 rounded-sm hover:bg-background-300 data-[selected=true]:bg-background-300 data-[focus=true]:outline-focus data-[focus=true]:outline"
+        className={cn(
+          "w-full h-full group flex flex-row bg-background-400 pl-4 pr-1 py-1 rounded-sm hover:bg-background-300 data-[selected=true]:bg-background-300 data-[focus=true]:outline-focus data-[focus=true]:outline",
+          isUnavailableOffline &&
+            "opacity-40 grayscale pointer-events-none select-none",
+        )}
         data-testid={`item-row-card-${item.slug}`}
+        data-offline-disabled={isUnavailableOffline ? "true" : undefined}
         data-swipeable="true"
         style={{
           transform: `translateX(${translateX}px)`,
@@ -389,7 +415,7 @@ const ItemRow: React.FC<ItemRowProps> = ({
                 to={`/item/${item.slug}`}
                 className="text-sm shrink-0 text-foreground hover:underline truncate"
                 onClick={(e) => {
-                  if (justSwiped.current) {
+                  if (justSwiped.current || isUnavailableOffline) {
                     e.preventDefault();
                     e.stopPropagation();
                     return;

@@ -1,3 +1,4 @@
+import { useOfflineArticle } from "@app/components/Items/useOfflineArticle";
 import Button from "@app/components/ui/Button";
 import { Item } from "@app/providers/Items";
 import { ItemSource } from "@app/schemas/db";
@@ -22,6 +23,8 @@ export const AdvancedActions: React.FC<AdvancedActionsProps> = ({
   onItemActionSuccess,
 }) => {
   const { markUnread, markRead, refetchItem } = useItemUpdate();
+  const { isSavedOffline, downloadArticleOffline, removeArticleOffline } =
+    useOfflineArticle(item.slug);
 
   return (
     <Dropdown>
@@ -41,6 +44,31 @@ export const AdvancedActions: React.FC<AdvancedActionsProps> = ({
         ) : (
           <DropdownItem key="mark-read" onPress={() => markRead(item)}>
             Mark as read
+          </DropdownItem>
+        )}
+        {isSavedOffline ? (
+          <DropdownItem
+            key="remove-offline"
+            onPress={() => {
+              removeArticleOffline(item.slug);
+              onItemActionSuccess?.();
+            }}
+          >
+            Remove from offline
+          </DropdownItem>
+        ) : (
+          <DropdownItem
+            key="read-offline"
+            onPress={async () => {
+              try {
+                await downloadArticleOffline(item.slug);
+                onItemActionSuccess?.();
+              } catch {
+                // Toast and logging handled in downloadArticleOffline
+              }
+            }}
+          >
+            Read offline
           </DropdownItem>
         )}
         {item.metadata.source !== ItemSource.EMAIL ? (

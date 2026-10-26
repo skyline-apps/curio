@@ -1,3 +1,7 @@
+import { createLogger } from "@app/utils/logger";
+
+const log = createLogger("displayStorage");
+
 export interface AppLayoutSettings {
   leftSidebarOpen: boolean;
   rightSidebarOpen: boolean;
@@ -8,6 +12,7 @@ export enum SwipeAction {
   DELETE = "delete",
   MARK_READ = "mark_read",
   FAVORITE = "favorite",
+  READ_OFFLINE = "read_offline",
   NONE = "none",
 }
 
@@ -26,60 +31,77 @@ export const DEFAULT_LAYOUT: AppLayoutSettings = {
   rightSidebarOpen: false,
 };
 
+export const SETTINGS_STORAGE_KEY = "curio_settings";
+
 export function updateSwipeSettings(settings: Partial<SwipeSettings>): void {
-  const existingSettings = localStorage.getItem("curio_settings");
-  if (existingSettings) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    const existing = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    const parsed = existing ? JSON.parse(existing) : {};
     localStorage.setItem(
-      "curio_settings",
-      JSON.stringify({ ...JSON.parse(existingSettings), ...settings }),
+      SETTINGS_STORAGE_KEY,
+      JSON.stringify({ ...parsed, ...settings }),
     );
-  } else {
-    localStorage.setItem("curio_settings", JSON.stringify(settings));
+  } catch (error) {
+    log.error("Failed to update swipe settings:", error);
   }
 }
 
 export function loadSwipeSettings(): SwipeSettings {
   if (typeof window !== "undefined") {
-    const settings = localStorage.getItem("curio_settings");
-    if (!settings) {
-      return DEFAULT_SWIPE_SETTINGS;
+    try {
+      const settings = localStorage.getItem(SETTINGS_STORAGE_KEY);
+      if (settings) {
+        const parsed = JSON.parse(settings);
+        return {
+          swipeLeftAction:
+            parsed.swipeLeftAction !== undefined &&
+            Object.values(SwipeAction).includes(parsed.swipeLeftAction)
+              ? parsed.swipeLeftAction
+              : DEFAULT_SWIPE_SETTINGS.swipeLeftAction,
+          swipeRightAction:
+            parsed.swipeRightAction !== undefined &&
+            Object.values(SwipeAction).includes(parsed.swipeRightAction)
+              ? parsed.swipeRightAction
+              : DEFAULT_SWIPE_SETTINGS.swipeRightAction,
+        };
+      }
+    } catch (error) {
+      log.error("Failed to load swipe settings:", error);
     }
-    const parsed = JSON.parse(settings);
-    return {
-      swipeLeftAction:
-        parsed.swipeLeftAction !== undefined &&
-        Object.values(SwipeAction).includes(parsed.swipeLeftAction)
-          ? parsed.swipeLeftAction
-          : DEFAULT_SWIPE_SETTINGS.swipeLeftAction,
-      swipeRightAction:
-        parsed.swipeRightAction !== undefined &&
-        Object.values(SwipeAction).includes(parsed.swipeRightAction)
-          ? parsed.swipeRightAction
-          : DEFAULT_SWIPE_SETTINGS.swipeRightAction,
-    };
   }
   return DEFAULT_SWIPE_SETTINGS;
 }
 
 export function updateLayoutSettings(settings: AppLayoutSettings): void {
-  const existingSettings = localStorage.getItem("curio_settings");
-  if (existingSettings) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    const existingSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    const parsed = existingSettings ? JSON.parse(existingSettings) : {};
     localStorage.setItem(
-      "curio_settings",
-      JSON.stringify({ ...JSON.parse(existingSettings), ...settings }),
+      SETTINGS_STORAGE_KEY,
+      JSON.stringify({ ...parsed, ...settings }),
     );
-  } else {
-    localStorage.setItem("curio_settings", JSON.stringify(settings));
+  } catch (error) {
+    log.error("Failed to update layout settings:", error);
   }
 }
 
 export function loadLayoutSettings(): AppLayoutSettings {
   if (typeof window !== "undefined") {
-    const settings = localStorage.getItem("curio_settings");
-    if (!settings) {
-      return DEFAULT_LAYOUT;
+    try {
+      const settings = localStorage.getItem(SETTINGS_STORAGE_KEY);
+      if (!settings) {
+        return DEFAULT_LAYOUT;
+      }
+      return { ...DEFAULT_LAYOUT, ...JSON.parse(settings) };
+    } catch (error) {
+      log.error("Failed to load layout settings:", error);
     }
-    return { ...DEFAULT_LAYOUT, ...JSON.parse(settings) };
   }
   return DEFAULT_LAYOUT;
 }

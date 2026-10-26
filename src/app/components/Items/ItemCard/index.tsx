@@ -1,4 +1,5 @@
 import Thumbnail from "@app/components/Image/Thumbnail";
+import { useOfflineArticle } from "@app/components/Items/useOfflineArticle";
 import Card from "@app/components/ui/Card";
 import { type Item, type PublicItem } from "@app/providers/Items";
 import { TextDirection } from "@app/schemas/db";
@@ -17,15 +18,21 @@ const ItemCard: React.FC<ItemCardProps> = ({
   onPress,
   hideThumbnail,
 }: ItemCardProps) => {
+  const { isUnavailableOffline } = useOfflineArticle(item.slug);
+
   // Keep card dimensions in sync with ItemGrid/index.tsx
   return (
     <Card
+      data-testid={`item-card-${item.slug}`}
+      data-offline-disabled={isUnavailableOffline ? "true" : undefined}
       className={cn(
         "flex-row items-start justify-center sm:items-center sm:justify-start sm:flex-col shrink-0 w-full sm:w-72 p-2 h-28",
         hideThumbnail ? "sm:h-48" : "sm:h-96",
+        isUnavailableOffline &&
+          "opacity-40 grayscale pointer-events-none select-none",
       )}
-      isPressable
-      onPress={onPress}
+      isPressable={!isUnavailableOffline}
+      onPress={isUnavailableOffline ? undefined : onPress}
       dir={item.metadata.textDirection}
     >
       {!hideThumbnail && (
@@ -38,13 +45,20 @@ const ItemCard: React.FC<ItemCardProps> = ({
         />
       )}
       <div className="flex flex-col items-start text-left w-full p-1 overflow-hidden">
-        <Link
-          className="hover:underline"
-          to={`/item/${item.slug}`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <h2 className="overflow-hidden truncate">{item.metadata.title}</h2>
-        </Link>
+        <div className="flex flex-row items-center gap-1 w-full overflow-hidden">
+          <Link
+            className="hover:underline truncate"
+            to={`/item/${item.slug}`}
+            onClick={(e) => {
+              if (isUnavailableOffline) {
+                e.preventDefault();
+              }
+              e.stopPropagation();
+            }}
+          >
+            <h2 className="overflow-hidden truncate">{item.metadata.title}</h2>
+          </Link>
+        </div>
         {item.url === item.metadata.title ? (
           <Link
             className="hover:underline"

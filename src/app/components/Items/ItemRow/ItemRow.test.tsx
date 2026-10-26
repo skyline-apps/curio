@@ -37,6 +37,10 @@ const mockUpdateItemsState = vi.fn();
 const mockUpdateItemsFavorite = vi.fn();
 const mockMarkRead = vi.fn();
 const mockMarkUnread = vi.fn();
+const mockDownloadArticleOffline = vi.fn();
+const mockRemoveArticleOffline = vi.fn();
+let mockIsSavedOffline = false;
+let mockIsUnavailableOffline = false;
 
 vi.mock("@app/components/Items/ItemActions/actions", () => ({
   useItemUpdate: () => ({
@@ -44,6 +48,16 @@ vi.mock("@app/components/Items/ItemActions/actions", () => ({
     updateItemsFavorite: mockUpdateItemsFavorite,
     markRead: mockMarkRead,
     markUnread: mockMarkUnread,
+  }),
+}));
+
+vi.mock("@app/components/Items/useOfflineArticle", () => ({
+  useOfflineArticle: () => ({
+    isSavedOffline: mockIsSavedOffline,
+    isOnline: !mockIsUnavailableOffline,
+    isUnavailableOffline: mockIsUnavailableOffline,
+    downloadArticleOffline: mockDownloadArticleOffline,
+    removeArticleOffline: mockRemoveArticleOffline,
   }),
 }));
 
@@ -307,5 +321,70 @@ describe("ItemRow swipe interactions", () => {
 
     expect(mockUpdateItemsState).not.toHaveBeenCalled();
     vi.useRealTimers();
+  });
+
+  it("grays out non-offline items when offline and unavailable", () => {
+    mockIsUnavailableOffline = true;
+    renderItemRow();
+    const card = screen.getByTestId("item-row-card-test-item-slug");
+    expect(card).toHaveClass("opacity-40", "grayscale");
+    expect(card).toHaveAttribute("data-offline-disabled", "true");
+    mockIsUnavailableOffline = false;
+  });
+
+  it("does not gray out items when available or online and does not render title icon", () => {
+    mockIsUnavailableOffline = false;
+    mockIsSavedOffline = true;
+    renderItemRow();
+    const card = screen.getByTestId("item-row-card-test-item-slug");
+    expect(card).not.toHaveClass("grayscale");
+    expect(card).not.toHaveAttribute("data-offline-disabled");
+    expect(
+      screen.queryByTestId("saved-offline-icon-test-item-slug"),
+    ).not.toBeInTheDocument();
+    mockIsSavedOffline = false;
+  });
+
+  it("triggers downloadArticleOffline when swiping with READ_OFFLINE and not saved", () => {
+    mockIsSavedOffline = false;
+    mockDownloadArticleOffline.mockClear();
+
+    renderItemRow(mockItem, {
+      swipeLeftAction: SwipeAction.NONE,
+      swipeRightAction: SwipeAction.READ_OFFLINE,
+    });
+    const card = screen.getByTestId("item-row-card-test-item-slug");
+
+    act(() => {
+      fireEvent.touchStart(card, { touches: [{ clientX: 20, clientY: 20 }] });
+      fireEvent.touchMove(card, {
+        touches: [{ clientX: 20 + SWIPE_THRESHOLD + 10, clientY: 20 }],
+      });
+      fireEvent.touchEnd(card);
+    });
+
+    expect(mockDownloadArticleOffline).toHaveBeenCalledWith("test-item-slug");
+  });
+
+  it("triggers removeArticleOffline when swiping with READ_OFFLINE and already saved", () => {
+    mockIsSavedOffline = true;
+    mockRemoveArticleOffline.mockClear();
+
+    renderItemRow(mockItem, {
+      swipeLeftAction: SwipeAction.NONE,
+      swipeRightAction: SwipeAction.READ_OFFLINE,
+    });
+    const card = screen.getByTestId("item-row-card-test-item-slug");
+
+    act(() => {
+      fireEvent.touchStart(card, { touches: [{ clientX: 20, clientY: 20 }] });
+      fireEvent.touchMove(card, {
+        touches: [{ clientX: 20 + SWIPE_THRESHOLD + 10, clientY: 20 }],
+      });
+      fireEvent.touchEnd(card);
+    });
+
+    expect(mockRemoveArticleOffline).toHaveBeenCalledWith("test-item-slug");
+    mockIsSavedOffline = false;
   });
 });
