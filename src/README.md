@@ -122,7 +122,9 @@ npx cap open ios        # Opens src/app/ios/App/App.xcworkspace in Xcode
 ```
 
 #### 4. NPM Convenience Scripts
-From `src/app`, you can also use helper scripts:
+From `src/app` (or repository root), you can use helper scripts:
+- `npm run release:android` — Full automated Android release: builds production web bundle, syncs Capacitor, compiles the `app-release.aab` bundle with Gradle, and copies it to `src/app/android/app/release/`
+- `npm run release:ios` — Full automated iOS release: builds production web bundle, syncs Capacitor, and creates the Xcode archive (`.xcarchive`) with `xcodebuild`
 - `npm run cap:sync` — Syncs web build and plugins to native platforms
 - `npm run cap:build:android` — Runs `npm run build && cap sync android && cap build android`
 - `npm run cap:build:ios` — Runs `npm run build && cap sync ios && cap build ios`
@@ -247,8 +249,11 @@ First time setup:
 4. In the Google Auth Platform Cloud Console, create a new app of type "Android", populating its package name from the `src/app/android/app/build.gradle` file and the SHA-1 fingerprint from the step above.
 
 New release:
-1. In the Google Play Console, create a new release and upload the `app-release.aab` from `src/app/android/app/release`.
-2. Follow the instructions to send the app for review.
+1. Build the release App Bundle:
+   - **Automated CLI script**: Run `npm run release:android` from `src/app` (or repository root). This builds the production web assets, runs `npx cap sync android`, compiles the `bundleRelease` task via Gradle, and places `app-release.aab` into `src/app/android/app/release/`.
+   - **Or via Android Studio**: Open with `npx cap open android`, then select Build > Generate Signed App Bundle > Android App Bundle.
+2. In the Google Play Console, create a new release and upload the `app-release.aab` from `src/app/android/app/release`.
+3. Follow the instructions to send the app for review.
 
 ### iOS app
 1. From `src/script`, run `npm run version:bump` to update the app version.
@@ -259,10 +264,10 @@ First time setup:
 3. Follow [these instructions](https://github.com/carsten-klaffke/send-intent?tab=readme-ov-file#ios) to allow the app to handle share intents.
 
 New release:
-1. Open the application in XCode by running `npx cap open ios` from `src/app`.
-2. Select "Any iOS Device (arm64)" from the top bar as the build target.
-3. In the menu, select Product > Archive.
-4. When the Organizer window opens, select archive and click "Distribute App". Choose "App Store Connect".
+1. Build the release archive:
+   - **Automated CLI script (macOS)**: Run `npm run release:ios` from `src/app` (or repository root). This builds the production web assets, runs `npx cap sync ios`, and creates the archive at `src/app/ios/App/build/App.xcarchive`.
+   - **Or via Xcode**: Open with `npx cap open ios`, select "Any iOS Device (arm64)" as build target, and select Product > Archive.
+2. When the Organizer window opens (or via `open src/app/ios/App/build/App.xcarchive`), select the archive and click "Distribute App" -> "App Store Connect".
 
 
 ### Authentication
