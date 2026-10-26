@@ -38,9 +38,12 @@ npm run screenshot -- --path /home --output screenshots/home.png  # Captures ful
 - `npm run env:setup`: Populates `.env` secrets and derives Supabase auth tokens
 
 ### Database migrations
-Create a new database migration by first editing `src/app/api/db/schema.ts`. Then from the `src/app` folder, run `npm run db:generate <MIGRATION_NAME>` and check in the generated files.
+Migrations run **automatically** every time the dev stack boots up (`npm run dev:watch` or `npm run dev:up`), followed immediately by seeding the test user.
 
-Run the migration against your local development database by running `npm run dev:exec` (or `docker exec -it curio-app bash`) and then `npm run db:migrate`.
+To generate and apply a new database migration:
+1. Edit `src/app/api/db/schema.ts`.
+2. From the `src/app` directory, run `npm run db:generate <MIGRATION_NAME>` and check in the generated files.
+3. If the dev container is already running, apply it immediately without restarting by running `npm run dev:exec` and then `npm run db:migrate` (or restart `npm run dev:watch`).
 
 ### Mobile apps
 First, make sure you build the frontend with the production `.env` populated by running `npm run build` from `src/app`. Then run `npx cap sync` to set up mobile app files.
