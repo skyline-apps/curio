@@ -11,5 +11,13 @@
   "bugs": {
     "url": "https://github.com/kimberli/curio/issues"
   },
-  "homepage": "https://github.com/kimberli/curio#readme"
+  "homepage": "https://github.com/kimberli/curio#readme",
+  "scripts": {
+    "dev:up": "node script/dev-up.js",
+    "dev:watch": "node script/dev-watch.js",
+    "dev:exec": "node script/dev-exec.js",
+    "dev:logs": "node script/dev-logs.js",
+    "ports:assign": "node script/assign-ports.js",
+    "env:setup": "node script/setup-env.js"
+  }
 }

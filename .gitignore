@@ -1,9 +1,15 @@
 .env
 .env.prod
 .env.staging
+.dev.vars
+src/app/.dev.vars
 
 # dependencies
 node_modules
+.worktrees
+.playwright
+screenshots
+src/app/screenshots
 
 # testing
 /coverage
