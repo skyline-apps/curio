@@ -148,6 +148,44 @@ describe("ItemRow swipe interactions", () => {
     vi.useRealTimers();
   });
 
+  it("shows undo toast after swipe archive and clicking undo reverts state", async () => {
+    vi.useFakeTimers();
+    mockUpdateItemsState.mockResolvedValue({ updated: [] });
+
+    renderItemRow();
+    const card = screen.getByTestId("item-row-card-test-item-slug");
+
+    act(() => {
+      fireEvent.touchStart(card, { touches: [{ clientX: 50, clientY: 20 }] });
+      fireEvent.touchMove(card, {
+        touches: [{ clientX: 50 + SWIPE_THRESHOLD + 20, clientY: 20 }],
+      });
+      fireEvent.touchEnd(card);
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(200);
+    });
+
+    expect(mockUpdateItemsState).toHaveBeenCalledWith(
+      ["test-item-slug"],
+      ItemState.ARCHIVED,
+    );
+
+    const undoButton = screen.getByRole("button", { name: "Undo" });
+    expect(undoButton).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(undoButton);
+    });
+
+    expect(mockUpdateItemsState).toHaveBeenLastCalledWith(
+      ["test-item-slug"],
+      ItemState.ACTIVE,
+    );
+    vi.useRealTimers();
+  });
+
   it("reveals left-swipe background (Delete) when swiping left past threshold", () => {
     renderItemRow();
     const card = screen.getByTestId("item-row-card-test-item-slug");

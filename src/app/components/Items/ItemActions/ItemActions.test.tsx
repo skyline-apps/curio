@@ -135,6 +135,50 @@ describe("ItemActions component", () => {
     );
   });
 
+  it("shows undo toast on archive and clicking undo reverts state", async () => {
+    renderComponent(mockItem);
+
+    const archiveButton = screen.getByTestId("item-action-archive");
+    await act(async () => {
+      fireEvent.click(archiveButton);
+    });
+
+    expect(screen.getByText("Archived item")).toBeInTheDocument();
+    const undoButton = screen.getByRole("button", { name: "Undo" });
+    expect(undoButton).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(undoButton);
+    });
+
+    expect(mockUpdateItemsState).toHaveBeenLastCalledWith(
+      ["article-slug"],
+      ItemState.ACTIVE,
+    );
+  });
+
+  it("shows undo toast on favorite and clicking undo reverts favorite", async () => {
+    renderComponent(mockItem);
+
+    const favoriteButton = screen.getByTestId("item-action-favorite");
+    await act(async () => {
+      fireEvent.click(favoriteButton);
+    });
+
+    expect(screen.getByText("Added to favorites")).toBeInTheDocument();
+    const undoButton = screen.getByRole("button", { name: "Undo" });
+    expect(undoButton).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(undoButton);
+    });
+
+    expect(mockUpdateItemsFavorite).toHaveBeenLastCalledWith(
+      ["article-slug"],
+      false,
+    );
+  });
+
   it("renders delete and share buttons when showExpanded is true and omits read offline", () => {
     renderComponent(mockItem, true);
 
@@ -143,5 +187,27 @@ describe("ItemActions component", () => {
     expect(
       screen.queryByTestId("item-action-read-offline"),
     ).not.toBeInTheDocument();
+  });
+
+  it("shows undo toast on delete in expanded view and clicking undo restores state", async () => {
+    renderComponent(mockItem, true);
+
+    const deleteButton = screen.getByTestId("item-action-delete");
+    await act(async () => {
+      fireEvent.click(deleteButton);
+    });
+
+    expect(screen.getByText("Deleted item")).toBeInTheDocument();
+    const undoButton = screen.getByRole("button", { name: "Undo" });
+    expect(undoButton).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(undoButton);
+    });
+
+    expect(mockUpdateItemsState).toHaveBeenLastCalledWith(
+      ["article-slug"],
+      ItemState.ACTIVE,
+    );
   });
 });

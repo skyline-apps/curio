@@ -20,6 +20,7 @@ export type CacheContextType = {
   optimisticMoveItemState: (itemSlugs: string[], state: ItemState) => void;
   optimisticUpdateHighlights: (highlights: HighlightUpdate[]) => void;
   optimisticRemoveHighlights: (highlightIds: string[]) => void;
+  findItemInCache: (slug: string) => Item | undefined;
 };
 
 export const CacheContext = createContext<CacheContextType>({
@@ -29,6 +30,7 @@ export const CacheContext = createContext<CacheContextType>({
   optimisticMoveItemState: () => {},
   optimisticUpdateHighlights: () => {},
   optimisticRemoveHighlights: () => {},
+  findItemInCache: () => undefined,
 });
 
 export const useCache = (): CacheContextType => useContext(CacheContext);

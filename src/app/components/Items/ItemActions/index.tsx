@@ -2,6 +2,7 @@ import { useOfflineArticle } from "@app/components/Items/useOfflineArticle";
 import Button from "@app/components/ui/Button";
 import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { Item } from "@app/providers/Items";
+import { useToast } from "@app/providers/Toast";
 import { ItemState } from "@app/schemas/db";
 import { cn } from "@app/utils/cn";
 import { useCallback, useContext } from "react";
@@ -131,6 +132,7 @@ const ItemActions = ({
   const { clearSelectedItems } = useContext(CurrentItemContext);
   const { isSavedOffline, downloadArticleOffline, removeArticleOffline } =
     useOfflineArticle(item?.slug);
+  const { showToast } = useToast();
 
   if (!item) {
     return <></>;
@@ -139,9 +141,19 @@ const ItemActions = ({
   return (
     <div className={cn("flex flex-row gap-1", className)}>
       <ActionButton
-        action={async () =>
-          updateItemsFavorite([item.slug], !item.metadata.isFavorite)
-        }
+        action={async () => {
+          const isFav = !!item.metadata.isFavorite;
+          await updateItemsFavorite([item.slug], !isFav);
+          showToast(isFav ? "Removed from favorites" : "Added to favorites", {
+            disappearing: true,
+            action: {
+              label: "Undo",
+              onClick: async () => {
+                await updateItemsFavorite([item.slug], isFav);
+              },
+            },
+          });
+        }}
         defaultDisplay={{ text: "Favorite", icon: <HiOutlineStar /> }}
         activeDisplay={{ text: "Unfavorite", icon: <HiStar /> }}
         isActive={item.metadata.isFavorite}
@@ -150,12 +162,20 @@ const ItemActions = ({
       <ActionButton
         action={async () => {
           clearSelectedItems();
-          return updateItemsState(
-            [item.slug],
-            item.metadata.state === ItemState.ARCHIVED
-              ? ItemState.ACTIVE
-              : ItemState.ARCHIVED,
-          );
+          const isArchived = item.metadata.state === ItemState.ARCHIVED;
+          const nextState = isArchived ? ItemState.ACTIVE : ItemState.ARCHIVED;
+          const prevState = item.metadata.state;
+          const res = await updateItemsState([item.slug], nextState);
+          showToast(isArchived ? "Unarchived item" : "Archived item", {
+            disappearing: true,
+            action: {
+              label: "Undo",
+              onClick: async () => {
+                await updateItemsState([item.slug], prevState);
+              },
+            },
+          });
+          return res;
         }}
         defaultDisplay={{ text: "Archive", icon: <HiOutlineArchiveBox /> }}
         activeDisplay={{ text: "Unarchive", icon: <HiArchiveBox /> }}
@@ -189,12 +209,22 @@ const ItemActions = ({
           <ActionButton
             action={async () => {
               clearSelectedItems();
-              return updateItemsState(
-                [item.slug],
-                item.metadata.state === ItemState.DELETED
-                  ? ItemState.ACTIVE
-                  : ItemState.DELETED,
-              );
+              const isDeleted = item.metadata.state === ItemState.DELETED;
+              const nextState = isDeleted
+                ? ItemState.ACTIVE
+                : ItemState.DELETED;
+              const prevState = item.metadata.state;
+              const res = await updateItemsState([item.slug], nextState);
+              showToast(isDeleted ? "Restored item" : "Deleted item", {
+                disappearing: true,
+                action: {
+                  label: "Undo",
+                  onClick: async () => {
+                    await updateItemsState([item.slug], prevState);
+                  },
+                },
+              });
+              return res;
             }}
             defaultDisplay={{ text: "Delete", icon: <HiOutlineTrash /> }}
             activeDisplay={{ text: "Restore", icon: <HiTrash /> }}

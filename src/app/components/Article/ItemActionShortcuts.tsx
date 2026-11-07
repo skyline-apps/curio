@@ -7,6 +7,7 @@ import {
   ShortcutType,
   useKeyboardShortcuts,
 } from "@app/providers/KeyboardShortcuts";
+import { useToast } from "@app/providers/Toast";
 import { ItemState } from "@app/schemas/db";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +18,7 @@ export const ItemActionShortcuts = (): null => {
   const { loadedItem, isEditable } = useContext(CurrentItemContext);
 
   const { updateItemsState, updateItemsFavorite } = useItemUpdate();
+  const { showToast } = useToast();
 
   const navigate = useNavigate();
   const { containerRef } = useAppPage();
@@ -71,20 +73,44 @@ export const ItemActionShortcuts = (): null => {
     if (!loadedItem?.item || !isEditable(loadedItem.item)) {
       return false;
     }
-    const currentFavoriteState = loadedItem.item.metadata.isFavorite;
-    await updateItemsFavorite([loadedItem.item.slug], !currentFavoriteState);
+    const currentFavoriteState = !!loadedItem.item.metadata.isFavorite;
+    const slug = loadedItem.item.slug;
+    await updateItemsFavorite([slug], !currentFavoriteState);
+    showToast(
+      currentFavoriteState ? "Removed from favorites" : "Added to favorites",
+      {
+        disappearing: true,
+        action: {
+          label: "Undo",
+          onClick: async () => {
+            await updateItemsFavorite([slug], currentFavoriteState);
+          },
+        },
+      },
+    );
     return true;
   };
 
   const archiveCurrentItem = async (
     returnToInbox: boolean,
   ): Promise<boolean> => {
-    if (!loadedItem?.item) {
+    if (!loadedItem?.item || !isEditable(loadedItem.item)) {
       return false;
     }
+    const slug = loadedItem.item.slug;
+    const prevState = loadedItem.item.metadata.state;
     const nextItemSlug = getNextItemSlug();
-    return await updateItemsState([loadedItem.item.slug], ItemState.ARCHIVED)
+    return await updateItemsState([slug], ItemState.ARCHIVED)
       .then(() => {
+        showToast("Archived item", {
+          disappearing: true,
+          action: {
+            label: "Undo",
+            onClick: async () => {
+              await updateItemsState([slug], prevState);
+            },
+          },
+        });
         if (returnToInbox) {
           navigate("/inbox");
         } else if (nextItemSlug) {
@@ -100,12 +126,23 @@ export const ItemActionShortcuts = (): null => {
   const deleteCurrentItem = async (
     returnToInbox: boolean,
   ): Promise<boolean> => {
-    if (!loadedItem?.item) {
+    if (!loadedItem?.item || !isEditable(loadedItem.item)) {
       return false;
     }
+    const slug = loadedItem.item.slug;
+    const prevState = loadedItem.item.metadata.state;
     const nextItemSlug = getNextItemSlug();
-    return await updateItemsState([loadedItem.item.slug], ItemState.DELETED)
+    return await updateItemsState([slug], ItemState.DELETED)
       .then(() => {
+        showToast("Deleted item", {
+          disappearing: true,
+          action: {
+            label: "Undo",
+            onClick: async () => {
+              await updateItemsState([slug], prevState);
+            },
+          },
+        });
         if (returnToInbox) {
           navigate("/inbox");
         } else if (nextItemSlug) {
