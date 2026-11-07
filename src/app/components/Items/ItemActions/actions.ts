@@ -13,7 +13,12 @@ import {
 } from "@app/schemas/v1/items/read";
 import { SaveResponse } from "@app/schemas/v1/items/save";
 import { UpdateStateResponse } from "@app/schemas/v1/items/state";
-import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
+import {
+  authenticatedFetch,
+  handleAPIResponse,
+  isOfflineError,
+  OfflineError,
+} from "@app/utils/api";
 import config from "@app/utils/config.json";
 import { createLogger } from "@app/utils/logger";
 import { executeOrQueueOfflineAction } from "@app/utils/offlineQueue";
@@ -430,6 +435,9 @@ export const useItemUpdate = (): UseItemUpdate => {
     { itemSlugs: string[] }
   > = {
     mutationFn: async ({ itemSlugs }) => {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        throw new OfflineError("Cannot save items to library while offline.");
+      }
       await authenticatedFetch("/api/v1/items/save", {
         method: "POST",
         body: JSON.stringify({
@@ -447,7 +455,13 @@ export const useItemUpdate = (): UseItemUpdate => {
     onError: (error) => {
       invalidateCache();
       log.error("Error saving items:", error);
-      showToast("Error saving items.");
+      if (isOfflineError(error)) {
+        showToast("Cannot save items to library while offline.", {
+          type: "error",
+        });
+      } else {
+        showToast("Error saving items.");
+      }
     },
   };
 

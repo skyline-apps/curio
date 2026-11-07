@@ -15,7 +15,9 @@ export type OfflineActionType =
   | "remove_item_label"
   | "mark_item_read"
   | "mark_item_unread"
-  | "update_reading_progress";
+  | "update_reading_progress"
+  | "create_or_update_highlight"
+  | "delete_highlight";
 
 export interface QueuedOfflineAction {
   id: string;
