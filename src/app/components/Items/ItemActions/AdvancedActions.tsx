@@ -7,6 +7,7 @@ import {
   DropdownTrigger,
 } from "@app/components/ui/Dropdown";
 import { Item } from "@app/providers/Items";
+import { useToast } from "@app/providers/Toast";
 import { ItemSource } from "@app/schemas/db";
 import React from "react";
 import { HiEllipsisVertical } from "react-icons/hi2";
@@ -25,6 +26,7 @@ export const AdvancedActions: React.FC<AdvancedActionsProps> = ({
   const { markUnread, markRead, refetchItem } = useItemUpdate();
   const { isSavedOffline, downloadArticleOffline, removeArticleOffline } =
     useOfflineArticle(item.slug);
+  const { showToast } = useToast();
 
   return (
     <Dropdown>
@@ -37,12 +39,39 @@ export const AdvancedActions: React.FC<AdvancedActionsProps> = ({
         {!!item.metadata.lastReadAt ? (
           <DropdownItem
             key="mark-unread"
-            onPress={() => markUnread(item).then(() => onItemActionSuccess?.())}
+            onPress={async () => {
+              await markUnread(item);
+              showToast("Marked as unread", {
+                disappearing: true,
+                action: {
+                  label: "Undo",
+                  onClick: async () => {
+                    await markRead(item);
+                  },
+                },
+              });
+              onItemActionSuccess?.();
+            }}
           >
             Mark as unread
           </DropdownItem>
         ) : (
-          <DropdownItem key="mark-read" onPress={() => markRead(item)}>
+          <DropdownItem
+            key="mark-read"
+            onPress={async () => {
+              await markRead(item);
+              showToast("Marked as read", {
+                disappearing: true,
+                action: {
+                  label: "Undo",
+                  onClick: async () => {
+                    await markUnread(item);
+                  },
+                },
+              });
+              onItemActionSuccess?.();
+            }}
+          >
             Mark as read
           </DropdownItem>
         )}

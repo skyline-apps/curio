@@ -316,6 +316,28 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
     [queryClient],
   );
 
+  const findItemInCache = useCallback(
+    (slug: string): Item | undefined => {
+      const allQueries = queryClient.getQueriesData<InfiniteData<ItemsPage>>({
+        queryKey: [ITEMS_QUERY_KEY],
+      });
+
+      for (const [_, queryData] of allQueries) {
+        if (queryData?.pages) {
+          for (const page of queryData.pages) {
+            for (const item of page.items) {
+              if (item.slug === slug) {
+                return item;
+              }
+            }
+          }
+        }
+      }
+      return undefined;
+    },
+    [queryClient],
+  );
+
   const contextValue: CacheContextType = {
     invalidateCache,
     optimisticUpdateItems,
@@ -323,6 +345,7 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
     optimisticMoveItemState,
     optimisticUpdateHighlights,
     optimisticRemoveHighlights,
+    findItemInCache,
   };
 
   return (

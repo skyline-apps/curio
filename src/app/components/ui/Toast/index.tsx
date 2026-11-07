@@ -2,7 +2,7 @@ import Button from "@app/components/ui/Button";
 import Card from "@app/components/ui/Card";
 import Icon from "@app/components/ui/Icon";
 import { cn } from "@app/utils/cn";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { HiXMark } from "react-icons/hi2";
 
 const ANIMATION_DURATION = 300;
@@ -10,11 +10,18 @@ const DEFAULT_TOAST_DURATION = 3000;
 
 export type ToastType = "error";
 
+export interface ToastAction {
+  label: string;
+  onClick: () => void | Promise<void>;
+}
+
 interface ToastProps extends React.PropsWithChildren {
   className?: string;
   dismissable?: boolean;
   disappearing?: boolean;
   type?: ToastType;
+  duration?: number;
+  action?: ToastAction;
 }
 
 const Toast: React.FC<ToastProps> = ({
@@ -23,6 +30,8 @@ const Toast: React.FC<ToastProps> = ({
   dismissable = true,
   disappearing = true,
   type,
+  duration = DEFAULT_TOAST_DURATION,
+  action,
 }: ToastProps) => {
   const [visible, setVisible] = useState<boolean>(true);
   const [isExiting, setIsExiting] = useState<boolean>(false);
@@ -32,27 +41,37 @@ const Toast: React.FC<ToastProps> = ({
     setIsExiting(false);
   }, [children]);
 
-  const startSnackbarTimer = (): (() => void) => {
+  const startSnackbarTimer = useCallback((): (() => void) => {
     const timer = setTimeout(() => {
       setIsExiting(true);
       setTimeout(() => {
         setVisible(false);
       }, ANIMATION_DURATION);
-    }, DEFAULT_TOAST_DURATION);
+    }, duration);
 
     return () => clearTimeout(timer);
-  };
+  }, [duration]);
 
   useEffect(() => {
     if (disappearing && visible) {
       return startSnackbarTimer();
     }
-  }, [disappearing, visible]);
+  }, [disappearing, visible, startSnackbarTimer]);
+
+  const handleActionClick = async (): Promise<void> => {
+    if (!action) return;
+    try {
+      await action.onClick();
+    } finally {
+      setIsExiting(true);
+      setTimeout(() => setVisible(false), ANIMATION_DURATION);
+    }
+  };
 
   return (
     <Card
       className={cn(
-        "mx-2 flex flex-row items-center gap-2 text-sm fixed bottom-[env(safe-area-inset-bottom)] right-[env(safe-area-inset-right)] mb-4 mr-4 transition-opacity duration-300 py-2 px-4 z-50",
+        "mx-2 flex flex-row items-center gap-3 text-sm fixed bottom-[env(safe-area-inset-bottom)] right-[env(safe-area-inset-right)] mb-4 mr-4 transition-opacity duration-300 py-2 px-4 z-50",
         visible
           ? isExiting
             ? "animate-slide-out opacity-0"
@@ -62,7 +81,17 @@ const Toast: React.FC<ToastProps> = ({
         className,
       )}
     >
-      {children}
+      <div>{children}</div>
+      {action && (
+        <Button
+          size="sm"
+          variant="light"
+          className="font-semibold text-primary underline px-1 min-w-0 h-auto"
+          onPress={handleActionClick}
+        >
+          {action.label}
+        </Button>
+      )}
       {dismissable && (
         <Button
           size="sm"

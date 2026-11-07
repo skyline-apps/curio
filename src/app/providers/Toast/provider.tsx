@@ -45,6 +45,8 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
             dismissable={toast.options?.dismissable}
             disappearing={toast.options?.disappearing}
             type={toast.options?.type}
+            duration={toast.options?.duration}
+            action={toast.options?.action}
             className={toast.options?.className}
           >
             {toast.content}

@@ -97,31 +97,59 @@ const ItemRow: React.FC<ItemRowProps> = ({
     const isFavorite = !!item.metadata.isFavorite;
 
     switch (action) {
-      case SwipeAction.ARCHIVE:
-        await updateItemsState(
-          [item.slug],
-          isArchived ? ItemState.ACTIVE : ItemState.ARCHIVED,
-        );
+      case SwipeAction.ARCHIVE: {
+        const nextState = isArchived ? ItemState.ACTIVE : ItemState.ARCHIVED;
+        const prevState = item.metadata.state;
+        await updateItemsState([item.slug], nextState);
         showToast(isArchived ? "Unarchived item" : "Archived item", {
           disappearing: true,
+          action: {
+            label: "Undo",
+            onClick: async () => {
+              await updateItemsState([item.slug], prevState);
+            },
+          },
         });
         break;
-      case SwipeAction.DELETE:
-        await updateItemsState(
-          [item.slug],
-          isDeleted ? ItemState.ACTIVE : ItemState.DELETED,
-        );
+      }
+      case SwipeAction.DELETE: {
+        const nextState = isDeleted ? ItemState.ACTIVE : ItemState.DELETED;
+        const prevState = item.metadata.state;
+        await updateItemsState([item.slug], nextState);
         showToast(isDeleted ? "Restored item" : "Deleted item", {
           disappearing: true,
+          action: {
+            label: "Undo",
+            onClick: async () => {
+              await updateItemsState([item.slug], prevState);
+            },
+          },
         });
         break;
+      }
       case SwipeAction.MARK_READ:
         if (isRead) {
           await markUnread(item);
-          showToast("Marked as unread", { disappearing: true });
+          showToast("Marked as unread", {
+            disappearing: true,
+            action: {
+              label: "Undo",
+              onClick: async () => {
+                await markRead(item);
+              },
+            },
+          });
         } else {
           await markRead(item);
-          showToast("Marked as read", { disappearing: true });
+          showToast("Marked as read", {
+            disappearing: true,
+            action: {
+              label: "Undo",
+              onClick: async () => {
+                await markUnread(item);
+              },
+            },
+          });
         }
         break;
       case SwipeAction.FAVORITE:
@@ -130,6 +158,12 @@ const ItemRow: React.FC<ItemRowProps> = ({
           isFavorite ? "Removed from favorites" : "Added to favorites",
           {
             disappearing: true,
+            action: {
+              label: "Undo",
+              onClick: async () => {
+                await updateItemsFavorite([item.slug], isFavorite);
+              },
+            },
           },
         );
         break;

@@ -5,6 +5,7 @@ import {
   ShortcutType,
   useKeyboardShortcuts,
 } from "@app/providers/KeyboardShortcuts";
+import { useToast } from "@app/providers/Toast";
 import { ItemState } from "@app/schemas/db";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +22,7 @@ export const ItemNavigationShortcuts = (): null => {
   } = useContext(CurrentItemContext);
 
   const { updateItemsState, updateItemsFavorite } = useItemUpdate();
+  const { showToast } = useToast();
 
   const navigate = useNavigate();
 
@@ -75,10 +77,20 @@ export const ItemNavigationShortcuts = (): null => {
           : [];
 
     if (itemsToUpdate.length > 0) {
-      const currentFavoriteState = itemsToUpdate[0].metadata.isFavorite;
-      await updateItemsFavorite(
-        itemsToUpdate.map((item) => item.slug),
-        !currentFavoriteState,
+      const currentFavoriteState = !!itemsToUpdate[0].metadata.isFavorite;
+      const slugs = itemsToUpdate.map((item) => item.slug);
+      await updateItemsFavorite(slugs, !currentFavoriteState);
+      showToast(
+        currentFavoriteState ? "Removed from favorites" : "Added to favorites",
+        {
+          disappearing: true,
+          action: {
+            label: "Undo",
+            onClick: async () => {
+              await updateItemsFavorite(slugs, currentFavoriteState);
+            },
+          },
+        },
       );
     }
     return true;
@@ -97,9 +109,31 @@ export const ItemNavigationShortcuts = (): null => {
           : [];
 
     if (itemsToUpdate.length > 0) {
-      await updateItemsState(
-        itemsToUpdate.map((item) => item.slug),
-        ItemState.ARCHIVED,
+      const prevStates = itemsToUpdate.map((item) => ({
+        slug: item.slug,
+        state: item.metadata.state,
+      }));
+      const slugs = itemsToUpdate.map((item) => item.slug);
+      await updateItemsState(slugs, ItemState.ARCHIVED);
+      showToast(
+        slugs.length === 1 ? "Archived item" : `Archived ${slugs.length} items`,
+        {
+          disappearing: true,
+          action: {
+            label: "Undo",
+            onClick: async () => {
+              const stateGroups: Partial<Record<ItemState, string[]>> = {};
+              for (const { slug, state } of prevStates) {
+                stateGroups[state] = [...(stateGroups[state] || []), slug];
+              }
+              for (const [st, groupSlugs] of Object.entries(stateGroups)) {
+                if (groupSlugs && groupSlugs.length) {
+                  await updateItemsState(groupSlugs, st as ItemState);
+                }
+              }
+            },
+          },
+        },
       );
     }
     return true;
@@ -118,9 +152,31 @@ export const ItemNavigationShortcuts = (): null => {
           : [];
 
     if (itemsToUpdate.length > 0) {
-      await updateItemsState(
-        itemsToUpdate.map((item) => item.slug),
-        ItemState.DELETED,
+      const prevStates = itemsToUpdate.map((item) => ({
+        slug: item.slug,
+        state: item.metadata.state,
+      }));
+      const slugs = itemsToUpdate.map((item) => item.slug);
+      await updateItemsState(slugs, ItemState.DELETED);
+      showToast(
+        slugs.length === 1 ? "Deleted item" : `Deleted ${slugs.length} items`,
+        {
+          disappearing: true,
+          action: {
+            label: "Undo",
+            onClick: async () => {
+              const stateGroups: Partial<Record<ItemState, string[]>> = {};
+              for (const { slug, state } of prevStates) {
+                stateGroups[state] = [...(stateGroups[state] || []), slug];
+              }
+              for (const [st, groupSlugs] of Object.entries(stateGroups)) {
+                if (groupSlugs && groupSlugs.length) {
+                  await updateItemsState(groupSlugs, st as ItemState);
+                }
+              }
+            },
+          },
+        },
       );
     }
     return true;
