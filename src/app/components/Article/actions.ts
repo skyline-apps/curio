@@ -3,6 +3,7 @@ import { CurrentItemContext } from "@app/providers/CurrentItem";
 import { ReadItemResponse } from "@app/schemas/v1/items/read";
 import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
+import { executeOrQueueOfflineAction } from "@app/utils/offlineQueue";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { useContext } from "react";
 
@@ -21,14 +22,34 @@ export const useArticleUpdate = (): UseArticleUpdate => {
     Error,
     { slug: string; readingProgress: number }
   > = {
+    networkMode: "always",
     mutationFn: async ({ slug, readingProgress }) => {
-      return await authenticatedFetch("/api/v1/items/read", {
-        method: "POST",
-        body: JSON.stringify({
+      return await executeOrQueueOfflineAction({
+        action: {
+          type: "update_reading_progress",
+          endpoint: "/api/v1/items/read",
+          method: "POST",
+          body: {
+            slug,
+            readingProgress,
+          },
+          entityKey: `progress:${slug}`,
+        },
+        executeOnline: async () => {
+          return await authenticatedFetch("/api/v1/items/read", {
+            method: "POST",
+            body: JSON.stringify({
+              slug,
+              readingProgress,
+            }),
+          }).then(handleAPIResponse<ReadItemResponse>);
+        },
+        fallbackOffline: () => ({
           slug,
           readingProgress,
+          versionName: null,
         }),
-      }).then(handleAPIResponse<ReadItemResponse>);
+      });
     },
     onSuccess: () => {},
   };

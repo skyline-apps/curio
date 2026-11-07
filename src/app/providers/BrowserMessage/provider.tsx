@@ -264,6 +264,12 @@ export const BrowserMessageProvider: React.FC<BrowserMessageProviderProps> = ({
 
   const saveItemContent = useCallback(
     async (url: string | null, overrideOpenUrl?: string) => {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        showToast("Cannot save new items while offline.", { type: "error" });
+        setSavingError(<p>Cannot save new items while offline.</p>);
+        return;
+      }
+
       if (!url) {
         setSavingError(<p>Invalid URL</p>);
         return;

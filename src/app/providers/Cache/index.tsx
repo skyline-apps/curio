@@ -1,4 +1,5 @@
 import { type Item } from "@app/providers/Items";
+import { ItemState } from "@app/schemas/db";
 import { type Highlight } from "@app/schemas/v1/items/highlights";
 import { createContext, useContext } from "react";
 
@@ -16,6 +17,7 @@ export type CacheContextType = {
   invalidateCache: (slug?: string) => Promise<void>;
   optimisticUpdateItems: (items: ItemUpdate[]) => void;
   optimisticRemoveItems: (itemSlugs: string[]) => void;
+  optimisticMoveItemState: (itemSlugs: string[], state: ItemState) => void;
   optimisticUpdateHighlights: (highlights: HighlightUpdate[]) => void;
   optimisticRemoveHighlights: (highlightIds: string[]) => void;
 };
@@ -24,6 +26,7 @@ export const CacheContext = createContext<CacheContextType>({
   invalidateCache: async () => {},
   optimisticUpdateItems: () => {},
   optimisticRemoveItems: () => {},
+  optimisticMoveItemState: () => {},
   optimisticUpdateHighlights: () => {},
   optimisticRemoveHighlights: () => {},
 });

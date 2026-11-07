@@ -241,8 +241,13 @@ const ItemRow: React.FC<ItemRowProps> = ({
             currentTranslateX.current =
               Math.sign(finalTranslateX) * screenWidth;
             setTranslateX(currentTranslateX.current);
-            window.setTimeout(() => {
-              void executeSwipeAction(action);
+            window.setTimeout(async () => {
+              try {
+                await executeSwipeAction(action);
+              } finally {
+                currentTranslateX.current = 0;
+                setTranslateX(0);
+              }
             }, 150);
           } else {
             currentTranslateX.current = 0;

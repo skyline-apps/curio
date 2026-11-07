@@ -9,6 +9,7 @@ import {
 } from "@app/schemas/v1/items/highlights";
 import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
 import { createLogger } from "@app/utils/logger";
+import { executeOrQueueOfflineAction } from "@app/utils/offlineQueue";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { useContext, useState } from "react";
 
@@ -57,15 +58,48 @@ export const useHighlightUpdate = ({
     Error,
     { slug: string; highlight: NewHighlight | Highlight }
   > = {
+    networkMode: "always",
     mutationFn: async ({ slug, highlight }) => {
       setIsUpdating(true);
-      return await authenticatedFetch("/api/v1/items/highlights", {
-        method: "POST",
-        body: JSON.stringify({
-          slug,
-          highlights: [highlight],
+
+      const highlightId =
+        highlight.id ||
+        (typeof crypto !== "undefined" &&
+        typeof crypto.randomUUID === "function"
+          ? crypto.randomUUID()
+          : `${Date.now()}`);
+      const highlightWithId: Highlight = {
+        ...highlight,
+        id: highlightId,
+      };
+
+      return await executeOrQueueOfflineAction({
+        action: {
+          type: "create_or_update_highlight",
+          endpoint: "/api/v1/items/highlights",
+          method: "POST",
+          body: {
+            slug,
+            highlights: [highlightWithId],
+          },
+          entityKey: `highlight:${slug}:${highlightId}`,
+        },
+        executeOnline: async () => {
+          return await authenticatedFetch("/api/v1/items/highlights", {
+            method: "POST",
+            body: JSON.stringify({
+              slug,
+              highlights: [highlightWithId],
+            }),
+          }).then(handleAPIResponse<CreateOrUpdateHighlightResponse>);
+        },
+        fallbackOffline: () => ({
+          highlights: [highlightWithId],
         }),
-      }).then(handleAPIResponse<CreateOrUpdateHighlightResponse>);
+        onQueued: () => {
+          showToast("Saved offline. Will sync when reconnected.");
+        },
+      });
     },
     onSuccess: (data) => {
       optimisticUpdateHighlights(data.highlights);
@@ -87,7 +121,9 @@ export const useHighlightUpdate = ({
           },
         ]);
       } else {
-        invalidateCache(itemSlug);
+        if (typeof navigator === "undefined" || navigator.onLine) {
+          invalidateCache(itemSlug);
+        }
       }
     },
     onError: () => {
@@ -107,15 +143,37 @@ export const useHighlightUpdate = ({
     Error,
     { slug: string; highlightId: string }
   > = {
+    networkMode: "always",
     mutationFn: async ({ slug, highlightId }) => {
       setIsDeleting(true);
-      return await authenticatedFetch("/api/v1/items/highlights", {
-        method: "DELETE",
-        body: JSON.stringify({
-          slug,
-          highlightIds: [highlightId],
+
+      return await executeOrQueueOfflineAction({
+        action: {
+          type: "delete_highlight",
+          endpoint: "/api/v1/items/highlights",
+          method: "DELETE",
+          body: {
+            slug,
+            highlightIds: [highlightId],
+          },
+          entityKey: `highlight:${slug}:${highlightId}`,
+        },
+        executeOnline: async () => {
+          return await authenticatedFetch("/api/v1/items/highlights", {
+            method: "DELETE",
+            body: JSON.stringify({
+              slug,
+              highlightIds: [highlightId],
+            }),
+          }).then(handleAPIResponse<DeleteHighlightResponse>);
+        },
+        fallbackOffline: () => ({
+          deleted: [{ id: highlightId }],
         }),
-      }).then(handleAPIResponse<DeleteHighlightResponse>);
+        onQueued: () => {
+          showToast("Saved offline. Will sync when reconnected.");
+        },
+      });
     },
     onSuccess: (data) => {
       optimisticRemoveHighlights(data.deleted.map((d) => d.id));
@@ -131,7 +189,9 @@ export const useHighlightUpdate = ({
           },
         ]);
       } else {
-        invalidateCache(itemSlug);
+        if (typeof navigator === "undefined" || navigator.onLine) {
+          invalidateCache(itemSlug);
+        }
       }
     },
     onError: () => {

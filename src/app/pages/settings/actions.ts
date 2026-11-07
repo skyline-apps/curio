@@ -3,7 +3,11 @@ import {
   GetApiKeysResponse,
 } from "@app/schemas/v1/user/api-keys";
 import { RevokeApiKeyResponse } from "@app/schemas/v1/user/api-keys/revoke";
-import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
+import {
+  authenticatedFetch,
+  handleAPIResponse,
+  OfflineError,
+} from "@app/utils/api";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { useCallback } from "react";
 
@@ -53,6 +57,9 @@ export const useApiKeys = (): UseApiKeys => {
 
   const createApiKey = useCallback(
     async (name: string): Promise<CreateApiKeyResponse> => {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        throw new OfflineError("Cannot manage API keys while offline.");
+      }
       return await createApiKeyMutation.mutateAsync({ name });
     },
     [createApiKeyMutation],
@@ -60,6 +67,9 @@ export const useApiKeys = (): UseApiKeys => {
 
   const revokeApiKey = useCallback(
     async (id: string): Promise<RevokeApiKeyResponse> => {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        throw new OfflineError("Cannot manage API keys while offline.");
+      }
       return await revokeApiKeyMutation.mutateAsync({ id });
     },
     [revokeApiKeyMutation],
@@ -98,6 +108,9 @@ export const useDeleteAccount = (): UseDeleteAccount => {
   const deleteAccountMutation = useMutation(deleteAccountMutationOptions);
   return {
     deleteAccount: () => {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        throw new OfflineError("Cannot delete account while offline.");
+      }
       return deleteAccountMutation.mutateAsync();
     },
     isDeletingAccount: deleteAccountMutation.isPending,

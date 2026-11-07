@@ -60,7 +60,11 @@ const DeleteAccount: React.FC = () => {
                     navigate("/");
                   } catch (error) {
                     log.error("Failed to delete account", { error });
-                    showToast("Failed to delete account.", { type: "error" });
+                    const msg =
+                      error instanceof Error
+                        ? error.message
+                        : "Failed to delete account.";
+                    showToast(msg, { type: "error" });
                   }
                 }}
                 onCancel={() => setShowGoodbyeModal(false)}

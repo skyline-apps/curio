@@ -17,7 +17,11 @@ import type {
   UpdateSettingsResponse,
 } from "@app/schemas/v1/user/settings";
 import { type UpdateUsernameResponse } from "@app/schemas/v1/user/username";
-import { authenticatedFetch, handleAPIResponse } from "@app/utils/api";
+import {
+  authenticatedFetch,
+  handleAPIResponse,
+  isOfflineError,
+} from "@app/utils/api";
 import {
   initializeTheme,
   setDarkTheme,
@@ -299,12 +303,40 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   const changeUsername = async (
     username: string,
   ): Promise<UpdateUsernameResponse | void> => {
-    return changeUsernameMutation.mutateAsync(username);
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      showToast("Cannot change username while offline.", { type: "error" });
+      return;
+    }
+    try {
+      return await changeUsernameMutation.mutateAsync(username);
+    } catch (error) {
+      if (isOfflineError(error)) {
+        showToast("Cannot change username while offline.", { type: "error" });
+        return;
+      }
+      throw error;
+    }
   };
 
   const updateNewsletterEmail =
     async (): Promise<UpdateEmailResponse | void> => {
-      return updateNewsletterEmailMutation.mutateAsync();
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        showToast("Cannot update newsletter email while offline.", {
+          type: "error",
+        });
+        return;
+      }
+      try {
+        return await updateNewsletterEmailMutation.mutateAsync();
+      } catch (error) {
+        if (isOfflineError(error)) {
+          showToast("Cannot update newsletter email while offline.", {
+            type: "error",
+          });
+          return;
+        }
+        throw error;
+      }
     };
 
   const updateSettings = async (
@@ -314,13 +346,29 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     if (!currentSettings) {
       return;
     }
-    return updateSettingsMutation.mutateAsync({ field, value });
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      showToast("Cannot update settings while offline.", { type: "error" });
+      return;
+    }
+    try {
+      return await updateSettingsMutation.mutateAsync({ field, value });
+    } catch (error) {
+      if (isOfflineError(error)) {
+        showToast("Cannot update settings while offline.", { type: "error" });
+        return;
+      }
+      throw error;
+    }
   };
 
   const createLabel = async (label: {
     name: string;
     color?: string;
   }): Promise<Label | void> => {
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      showToast("Cannot manage labels while offline.", { type: "error" });
+      return;
+    }
     try {
       const newLabel = (await labelsMutation.mutateAsync({
         type: LabelAction.CREATE,
@@ -332,6 +380,10 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       showToast("Label created successfully", { disappearing: true });
       return newLabel.labels[0];
     } catch (error: unknown) {
+      if (isOfflineError(error)) {
+        showToast("Cannot manage labels while offline.", { type: "error" });
+        return;
+      }
       showToast(
         error instanceof Error ? error.message : "Failed to create label",
         { type: "error" },
@@ -344,6 +396,10 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     labelId: string,
     updates: { name?: string; color?: string },
   ): Promise<boolean> => {
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      showToast("Cannot manage labels while offline.", { type: "error" });
+      return false;
+    }
     try {
       await labelsMutation.mutateAsync({
         type: LabelAction.UPDATE,
@@ -353,13 +409,21 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         disappearing: true,
       });
       return true;
-    } catch (_error) {
+    } catch (error) {
+      if (isOfflineError(error)) {
+        showToast("Cannot manage labels while offline.", { type: "error" });
+        return false;
+      }
       showToast("Failed to update label", { type: "error" });
       return false;
     }
   };
 
   const deleteLabel = async (labelId: string): Promise<void> => {
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      showToast("Cannot manage labels while offline.", { type: "error" });
+      return;
+    }
     showConfirm(
       "Are you sure you want to delete this label? This action cannot be undone.",
       async () => {
@@ -374,7 +438,11 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
           });
 
           return true;
-        } catch (_error) {
+        } catch (error) {
+          if (isOfflineError(error)) {
+            showToast("Cannot manage labels while offline.", { type: "error" });
+            return false;
+          }
           showToast("Failed to delete label", {
             type: "error",
           });

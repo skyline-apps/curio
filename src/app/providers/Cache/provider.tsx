@@ -14,6 +14,7 @@ import {
   type ItemsPage,
 } from "@app/providers/Items";
 import { useSettings } from "@app/providers/Settings";
+import { ItemState } from "@app/schemas/db";
 import { InfiniteData, useQueryClient } from "@tanstack/react-query";
 import React, { useCallback } from "react";
 
@@ -139,6 +140,131 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
     [queryClient],
   );
 
+  const optimisticMoveItemState = useCallback(
+    (itemSlugs: string[], state: ItemState) => {
+      const targetSlugs = new Set(itemSlugs);
+
+      const foundItems: Item[] = [];
+      const allQueries = queryClient.getQueriesData<InfiniteData<ItemsPage>>({
+        queryKey: [ITEMS_QUERY_KEY],
+      });
+
+      for (const [_, queryData] of allQueries) {
+        if (queryData?.pages) {
+          for (const page of queryData.pages) {
+            for (const item of page.items) {
+              if (
+                targetSlugs.has(item.slug) &&
+                !foundItems.some((f) => f.slug === item.slug)
+              ) {
+                foundItems.push({
+                  ...item,
+                  metadata: {
+                    ...item.metadata,
+                    state,
+                  },
+                });
+              }
+            }
+          }
+        }
+      }
+
+      // Update item content cache
+      itemSlugs.forEach((slug) => {
+        queryClient.setQueriesData(
+          { queryKey: [ITEM_CONTENT_QUERY_KEY, slug] },
+          (oldData: ItemWithContent) => {
+            if (!oldData) return oldData;
+            return {
+              ...oldData,
+              item: {
+                ...oldData.item,
+                metadata: {
+                  ...oldData.item.metadata,
+                  state,
+                },
+              },
+            };
+          },
+        );
+      });
+
+      // Remove items from queries that do not match the new state
+      queryClient.setQueriesData<InfiniteData<ItemsPage>>(
+        {
+          predicate: (query) => {
+            const [key, optionsStr] = query.queryKey;
+            if (key !== ITEMS_QUERY_KEY) return false;
+            if (typeof optionsStr !== "string") return true;
+            try {
+              const parsed = JSON.parse(optionsStr);
+              return parsed?.filters?.state !== state;
+            } catch {
+              return true;
+            }
+          },
+        },
+        (oldData) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              items: page.items.filter((item) => !targetSlugs.has(item.slug)),
+            })),
+          };
+        },
+      );
+
+      // Add to destination state query if found
+      if (foundItems.length > 0) {
+        const destinationQueryKey = [
+          ITEMS_QUERY_KEY,
+          JSON.stringify({ filters: { state } }),
+        ];
+
+        queryClient.setQueryData<InfiniteData<ItemsPage>>(
+          destinationQueryKey,
+          (oldData) => {
+            if (!oldData) {
+              return {
+                pageParams: [undefined],
+                pages: [
+                  {
+                    items: foundItems,
+                    total: foundItems.length,
+                  },
+                ],
+              };
+            }
+            const existingSlugs = new Set(
+              oldData.pages.flatMap((p) => p.items.map((i) => i.slug)),
+            );
+            const itemsToAdd = foundItems.filter(
+              (i) => !existingSlugs.has(i.slug),
+            );
+            if (itemsToAdd.length === 0) return oldData;
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page, idx) =>
+                idx === 0
+                  ? {
+                      ...page,
+                      items: [...itemsToAdd, ...page.items],
+                      total:
+                        (page.total ?? page.items.length) + itemsToAdd.length,
+                    }
+                  : page,
+              ),
+            };
+          },
+        );
+      }
+    },
+    [queryClient],
+  );
+
   const optimisticUpdateHighlights = useCallback(
     (highlights: HighlightUpdate[]) => {
       queryClient.setQueriesData<InfiniteData<HighlightsPage>>(
@@ -194,6 +320,7 @@ export const CacheProvider: React.FC<CacheProviderProps> = ({
     invalidateCache,
     optimisticUpdateItems,
     optimisticRemoveItems,
+    optimisticMoveItemState,
     optimisticUpdateHighlights,
     optimisticRemoveHighlights,
   };

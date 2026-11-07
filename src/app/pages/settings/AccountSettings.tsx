@@ -86,7 +86,10 @@ const AccountSettings: React.FC = () => {
       }
     } catch (error) {
       log.error("Failed to create API key", { error });
-      setApiKeyError("Failed to create API key");
+      const msg =
+        error instanceof Error ? error.message : "Failed to create API key";
+      setApiKeyError(msg);
+      showToast(msg, { type: "error" });
     } finally {
       setSubmittingKey(false);
       setKeyName("");
@@ -104,7 +107,10 @@ const AccountSettings: React.FC = () => {
           setApiKeySuccess("API key revoked successfully");
         } catch (error) {
           log.error("Failed to revoke API key", { error });
-          setApiKeyError("Failed to revoke API key");
+          const msg =
+            error instanceof Error ? error.message : "Failed to revoke API key";
+          setApiKeyError(msg);
+          showToast(msg, { type: "error" });
         } finally {
           setSubmittingKey(false);
         }
@@ -122,7 +128,9 @@ const AccountSettings: React.FC = () => {
       setUsernameSuccess("Successfully updated username.");
     } catch (error) {
       log.error("Error updating username: ", error);
-      setUsernameError(`${error}`);
+      const msg = error instanceof Error ? error.message : `${error}`;
+      setUsernameError(msg);
+      showToast(msg, { type: "error" });
     } finally {
       setSubmittingUsername(false);
     }
